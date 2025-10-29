@@ -1,5 +1,6 @@
 "use client";
 
+import { usePathname } from "next/navigation";
 import {
   BookOpen,
   Users,
@@ -7,6 +8,13 @@ import {
   HelpCircle,
   Settings,
   ChevronDown,
+  BarChart3,
+  Target,
+  Lightbulb,
+  FileQuestion,
+  User,
+  LogOut,
+  LayoutDashboard,
 } from "lucide-react";
 
 import {
@@ -14,7 +22,6 @@ import {
   SidebarContent,
   SidebarFooter,
   SidebarGroup,
-  SidebarGroupContent,
   SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
@@ -26,106 +33,125 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Link from "next/link";
 
 // This is sample data.
 const data = {
+  user: {
+    name: "Admin User",
+    email: "admin@skillsoft.com",
+    avatar: "/avatars/admin.jpg",
+  },
+  teams: [
+    {
+      name: "SkillSoft",
+      logo: LayoutDashboard,
+      plan: "Enterprise",
+    },
+  ],
   navMain: [
-    // {
-    //   title: "Dashboard",
-    //   url: "/",
-    //   icon: Home,
-    // },
+    {
+      title: "Dashboard", 
+      url: "/",
+      icon: BarChart3,
+    },
     {
       title: "Competencies",
-      url: "/competencies",
-      icon: BookOpen,
+      url: "/competencies", 
+      icon: Target,
     },
     {
       title: "Behavioral Indicators",
       url: "/behavioral-indicators",
+      icon: Lightbulb,
+    },
+    {
+      title: "Assessment Questions", 
+      url: "/assessment-questions",
+      icon: FileQuestion,
+    },
+  ],
+  projects: [
+    {
+      name: "Leadership Skills",
+      url: "#",
       icon: Users,
     },
     {
-      title: "Assessment Questions",
-      url: "/assessment-questions",
+      name: "Technical Skills",
+      url: "#", 
+      icon: BookOpen,
+    },
+    {
+      name: "Communication",
+      url: "#",
       icon: ClipboardList,
-    },
-  ],
-  navSecondary: [
-    {
-      title: "Help",
-      url: "#",
-      icon: HelpCircle,
-    },
-    {
-      title: "Settings",
-      url: "#",
-      icon: Settings,
     },
   ],
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const pathname = usePathname();
+  const TeamLogo = data.teams[0].logo;
+  
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
-              <a href="/">
+              <Link href="/">
                 <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-                  <BookOpen className="size-4" />
+                  <TeamLogo className="size-4" />
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold">SkillSoft</span>
-                  <span className="truncate text-xs">
-                    Competency Management
-                  </span>
+                  <span className="truncate font-semibold">{data.teams[0].name}</span>
+                  <span className="truncate text-xs">{data.teams[0].plan}</span>
                 </div>
-              </a>
+              </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
+      
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Main Navigation</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {data.navMain.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild tooltip={item.title}>
-                    <Link href={item.url}>
-                      <item.icon />
-                      <span>{item.title}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
+          <SidebarGroupLabel>Platform</SidebarGroupLabel>
+          <SidebarMenu>
+            {data.navMain.map((item) => (
+              <SidebarMenuItem key={item.title}>
+                <SidebarMenuButton asChild isActive={pathname === item.url}>
+                  <Link href={item.url}>
+                    <item.icon />
+                    <span>{item.title}</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            ))}
+          </SidebarMenu>
         </SidebarGroup>
-        <SidebarGroup>
-          <SidebarGroupLabel>Help & Settings</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {data.navSecondary.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild tooltip={item.title}>
-                    <Link href={item.url}>
-                      <item.icon />
-                      <span>{item.title}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
+        
+        <SidebarGroup className="group-data-[collapsible=icon]:hidden">
+          <SidebarGroupLabel>Skill Categories</SidebarGroupLabel>
+          <SidebarMenu>
+            {data.projects.map((item) => (
+              <SidebarMenuItem key={item.name}>
+                <SidebarMenuButton asChild>
+                  <Link href={item.url}>
+                    <item.icon />
+                    <span>{item.name}</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            ))}
+          </SidebarMenu>
         </SidebarGroup>
       </SidebarContent>
+      
       <SidebarFooter>
         <SidebarMenu>
           <SidebarMenuItem>
@@ -135,16 +161,15 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   size="lg"
                   className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
                 >
-                  <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-                    <Settings className="size-4" />
-                  </div>
+                  <Avatar className="h-8 w-8 rounded-lg">
+                    <AvatarImage src={data.user.avatar} alt={data.user.name} />
+                    <AvatarFallback className="rounded-lg">
+                      {data.user.name.split(' ').map(n => n[0]).join('')}
+                    </AvatarFallback>
+                  </Avatar>
                   <div className="grid flex-1 text-left text-sm leading-tight">
-                    <span className="truncate font-semibold">
-                      Administrator
-                    </span>
-                    <span className="truncate text-xs">
-                      admin@skillsoft.com
-                    </span>
+                    <span className="truncate font-semibold">{data.user.name}</span>
+                    <span className="truncate text-xs">{data.user.email}</span>
                   </div>
                   <ChevronDown className="ml-auto size-4" />
                 </SidebarMenuButton>
@@ -156,15 +181,21 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 sideOffset={4}
               >
                 <DropdownMenuItem>
+                  <User />
+                  Account
+                </DropdownMenuItem>
+                <DropdownMenuItem>
                   <Settings />
-                  Account Settings
+                  Settings
                 </DropdownMenuItem>
                 <DropdownMenuItem>
                   <HelpCircle />
-                  Help & Support
+                  Support
                 </DropdownMenuItem>
+                <DropdownMenuSeparator />
                 <DropdownMenuItem>
-                  <span>Sign out</span>
+                  <LogOut />
+                  Log out
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

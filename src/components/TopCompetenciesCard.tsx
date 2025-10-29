@@ -1,8 +1,10 @@
 "use client";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { List } from "lucide-react";
+import React from "react";
+import { Badge } from "@/components/ui/badge";
 import { Competency } from "@/app/interfaces/domain-interfaces";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import Link from "next/link";
+import { competencyCategoryToIcon, levelToColor } from "@/app/utils";
 
 interface TopCompetenciesCardProps {
   competencies: Competency[];
@@ -14,31 +16,43 @@ export default function TopCompetenciesCard({ competencies }: TopCompetenciesCar
     .slice(0, 5);
 
   return (
-    <Card className="hover:shadow-lg transition-all duration-200">
-      <CardHeader className="pb-2 sm:pb-3">
-        <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
-          <List className="w-4 h-4 sm:w-5 sm:h-5" aria-hidden="true" />
-          Top Competencies
-          <span className="sr-only">List of top {topCompetencies.length} competencies by number of indicators</span>
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-3 sm:space-y-4">
-          {topCompetencies.map((competency) => (
-            <div key={competency.id} className="flex justify-between items-center group">
-              <Link 
-                href={`/competencies/${competency.id}`} 
-                className="text-sm sm:text-base font-medium text-primary hover:underline flex-1 min-w-0 mr-4"
+    <div className="space-y-6">
+      {topCompetencies.map((competency, index) => (
+        <div key={competency.id} className="flex items-center space-x-4">
+          <Avatar className="h-9 w-9">
+            <AvatarFallback className="text-sm bg-primary/10 text-primary">
+              {React.cloneElement(competencyCategoryToIcon(competency.category), {
+                className: "h-4 w-4",
+              })}
+            </AvatarFallback>
+          </Avatar>
+          <div className="space-y-1 flex-1 min-w-0">
+            <Link 
+              href={`/competencies/${competency.id}`}
+              className="text-sm font-medium leading-none hover:underline block truncate"
+            >
+              {competency.name}
+            </Link>
+            <div className="flex items-center gap-2">
+              <Badge 
+                variant="secondary" 
+                className={`text-xs ${levelToColor(competency.level)}`}
               >
-                <span className="block truncate">{competency.name}</span>
-              </Link>
-              <div className="text-sm text-muted-foreground whitespace-nowrap">
+                {competency.level}
+              </Badge>
+              <span className="text-xs text-muted-foreground">
                 {competency.behavioralIndicators?.length || 0} indicators
-              </div>
+              </span>
             </div>
-          ))}
+            <p className="text-xs text-muted-foreground">
+              {competency.category.replace('_', ' ')}
+            </p>
+          </div>
+          <div className="text-right">
+            <div className="text-sm font-medium">#{index + 1}</div>
+          </div>
         </div>
-      </CardContent>
-    </Card>
+      ))}
+    </div>
   );
 }

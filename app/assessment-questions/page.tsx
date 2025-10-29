@@ -82,7 +82,6 @@ const AssessmentStats: React.FC<{ questions: AssessmentQuestion[] }> = ({
 };
 
 // Main component
-import { useHeader } from "@/context/HeaderContext";
 
 // Define the shape of the data we'll be using
 interface EnrichedQuestion extends AssessmentQuestion {
@@ -90,14 +89,7 @@ interface EnrichedQuestion extends AssessmentQuestion {
   indicatorName: string;
 }
 
-export default function AssessmentQuestionsPage() {
-  const { setTitle, setSubtitle, setEntityName } = useHeader();
-
-  useEffect(() => {
-    setTitle("Assessment Questions");
-    setSubtitle("Manage and organize all assessment questions");
-    setEntityName("Question");
-  }, [setTitle, setSubtitle, setEntityName]);	const [questions, setQuestions] = useState<AssessmentQuestion[]>([]);
+export default function AssessmentQuestionsPage() {	const [questions, setQuestions] = useState<AssessmentQuestion[]>([]);
 	const [loading, setLoading] = useState<boolean>(true);
 	const [sorting, setSorting] = useState<SortingState>([]);
 	const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);

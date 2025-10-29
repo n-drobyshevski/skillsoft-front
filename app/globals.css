@@ -3,6 +3,9 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* Container queries support */
+@variant container (container-type: inline-size);
+
 @theme inline {
 	--color-background: var(--background);
 	--color-foreground: var(--foreground);
@@ -155,11 +158,178 @@
 	}
 }
 
+/* Mobile enhancements */
+@layer utilities {
+
+	/* Mobile touch targets */
+	.touch-target {
+		min-height: 2.75rem;
+		min-width: 2.75rem;
+	}
+
+	/* Enhanced mobile touch targets for buttons */
+	.touch-target-lg {
+		min-height: 3rem;
+		min-width: 3rem;
+	}
+
+	/* Mobile-friendly focus styles */
+	.focus-mobile:focus-visible {
+		outline: 2px solid var(--ring);
+		outline-offset: 2px;
+	}
+
+	/* Improved mobile card padding */
+	.card-mobile-padding {
+		padding: 1rem;
+	}
+
+	@media (min-width: 640px) {
+		.card-mobile-padding {
+			padding: 1.5rem;
+		}
+	}
+
+	/* Mobile card spacing */
+	.card-mobile-spacing>*+* {
+		margin-top: 0.75rem;
+	}
+
+	@media (min-width: 640px) {
+		.card-mobile-spacing>*+* {
+			margin-top: 1rem;
+		}
+	}
+
+	/* Mobile text scaling */
+	@media (max-width: 640px) {
+		.text-responsive {
+			font-size: 0.875rem;
+			line-height: 1.25rem;
+		}
+
+		.text-responsive-lg {
+			font-size: 1rem;
+			line-height: 1.5rem;
+		}
+
+		.text-responsive-xl {
+			font-size: 1.125rem;
+			line-height: 1.75rem;
+		}
+
+		/* Improve button spacing on mobile */
+		.btn-mobile-spacing>*+* {
+			margin-top: 0.5rem;
+		}
+
+		/* Better mobile grid gaps */
+		.grid-mobile-gap {
+			gap: 0.75rem;
+		}
+
+		/* Mobile table improvements */
+		.table-mobile-scroll {
+			overflow-x: auto;
+		}
+	}
+
+	/* Container query utilities */
+	.container-responsive {
+		container-type: inline-size;
+	}
+
+	/* Prevent horizontal overflow on mobile */
+	.no-mobile-overflow {
+		overflow-x: hidden;
+		max-width: 100vw;
+	}
+
+	/* Mobile container max-width prevention */
+	.mobile-container {
+		max-width: 100vw;
+		overflow-x: hidden;
+	}
+
+	/* Header overflow prevention */
+	.header-mobile-safe {
+		max-width: 100vw;
+		overflow-x: hidden;
+		word-wrap: break-word;
+		overflow-wrap: break-word;
+	}
+
+	/* Line clamp utilities for mobile */
+	.line-clamp-2 {
+		display: -webkit-box;
+		-webkit-line-clamp: 2;
+		line-clamp: 2;
+		-webkit-box-orient: vertical;
+		overflow: hidden;
+	}
+
+	.line-clamp-3 {
+		display: -webkit-box;
+		-webkit-line-clamp: 3;
+		line-clamp: 3;
+		-webkit-box-orient: vertical;
+		overflow: hidden;
+	}
+
+	/* Mobile-optimized buttons */
+	.btn-mobile-primary {
+		height: 3rem;
+		padding-left: 1rem;
+		padding-right: 1rem;
+		font-size: 0.875rem;
+		font-weight: 500;
+	}
+
+	.btn-mobile-secondary {
+		height: 2.5rem;
+		padding-left: 0.75rem;
+		padding-right: 0.75rem;
+		font-size: 0.875rem;
+	}
+
+	/* Responsive grid breakpoints for container queries */
+	@container (min-width: 768px) {
+		.grid-container-md {
+			grid-template-columns: repeat(2, 1fr);
+		}
+	}
+
+	@container (min-width: 1024px) {
+		.grid-container-lg {
+			grid-template-columns: repeat(3, 1fr);
+		}
+	}
+}
+
 @layer base {
 	* {
-		@apply border-border outline-ring/50;
+		border-color: var(--border);
+		outline-color: oklch(from var(--ring) l c h / 0.5);
 	}
+
+	html {
+		/* Prevent horizontal scrolling at root level */
+		overflow-x: hidden;
+		max-width: 100vw;
+	}
+
 	body {
-		@apply bg-background text-foreground;
+		background-color: var(--background);
+		color: var(--foreground);
+		margin: 0;
+		font-family:
+			"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+		font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+		line-height: 1.6;
+		-webkit-font-smoothing: antialiased;
+		-moz-osx-font-smoothing: grayscale;
+		/* Prevent horizontal scrolling on mobile */
+		overflow-x: hidden;
+		max-width: 100vw;
 	}
 }
