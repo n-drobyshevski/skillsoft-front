@@ -13,4 +13,5 @@ export const indicatorSchema = z.object({
   counterExamples: z.string().optional(),
   isActive: z.boolean(),
   approvalStatus: z.enum(Object.values(ApprovalStatus) as [string, ...string[]]),
+  orderIndex: z.number().optional(),
 });

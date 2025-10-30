@@ -18,9 +18,10 @@ interface CompetencyInput {
 interface IndicatorInput {
     title: string;
     description?: string;
-    competencyId?: string;
-    level?: string;
-    weight?: number;
+    competencyId: string;
+    level: string;
+    weight: number;
+    orderIndex: number;
     [key: string]: unknown;
 }
 

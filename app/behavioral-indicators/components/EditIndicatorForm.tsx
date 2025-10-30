@@ -52,6 +52,7 @@ export function EditIndicatorForm({ indicator }: { indicator: BehavioralIndicato
       counterExamples: indicator.counterExamples || "",
       isActive: indicator.isActive,
       approvalStatus: indicator.approvalStatus,
+      orderIndex: indicator.orderIndex,
     },
   });
 
@@ -163,15 +164,19 @@ export function EditIndicatorForm({ indicator }: { indicator: BehavioralIndicato
                 </FormItem>
               )}
             />
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             <FormField
               control={form.control}
-              name="weight"
+              name="orderIndex"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Weight</FormLabel>
+                  <FormLabel>Order Index</FormLabel>
                   <FormControl>
-                    <Input type="number" step="0.1" placeholder="e.g., 1.5" {...field} 
-                      onChange={event => field.onChange(parseFloat(event.target.value))}
+                    <Input type="number" placeholder="e.g., 1" {...field} 
+                      onChange={event => field.onChange(parseInt(event.target.value))}
                     />
                   </FormControl>
                   <FormMessage />
