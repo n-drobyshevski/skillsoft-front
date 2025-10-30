@@ -53,6 +53,7 @@ export function IndicatorForm({ indicator, competencyId, onUpdatePreview }: { in
       counterExamples: indicator?.counterExamples || "",
       isActive: indicator?.isActive || true,
       approvalStatus: indicator?.approvalStatus || ApprovalStatus.DRAFT,
+      orderIndex: indicator?.orderIndex || 0,
     },
   });
 
@@ -189,6 +190,21 @@ export function IndicatorForm({ indicator, competencyId, onUpdatePreview }: { in
                   <FormControl>
                     <Input type="number" step="0.1" placeholder="e.g., 0.5" {...field} 
                       onChange={event => field.onChange(parseFloat(event.target.value))}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="orderIndex"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Order Index</FormLabel>
+                  <FormControl>
+                    <Input type="number" placeholder="e.g., 1" {...field} 
+                      onChange={event => field.onChange(parseInt(event.target.value))}
                     />
                   </FormControl>
                   <FormMessage />
