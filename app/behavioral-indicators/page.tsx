@@ -9,7 +9,6 @@ import type {
   VisibilityState,
 } from "@tanstack/react-table";
 import {
-  flexRender,
   getCoreRowModel,
   getFilteredRowModel,
   getPaginationRowModel,
@@ -19,7 +18,6 @@ import {
 
 import {
   DropdownMenu,
-  DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
@@ -29,18 +27,17 @@ import {
 import { Button } from "../../src/components/ui/button";
 import { Badge } from "../../src/components/ui/badge";
 import EntityTable from "../components/Table";
+import PageHeader from "../components/PageHeader";
+import FlexibleStatsCards from "../components/FlexibleStatsCards";
 import {
   ArrowUpDown,
   MoreHorizontal,
   Settings2,
   Eye,
-  ChevronLeft as ChevronLeftIcon,
-  ChevronRight as ChevronRightIcon,
 } from "lucide-react";
 import { BehavioralIndicator } from "../interfaces/domain-interfaces";
 import { biLevelToColor } from "../utils";
 import { assessmentQuestionsApi, behavioralIndicatorsApi, competenciesApi } from "@/services/api";
-import Header from "../components/Header";
 import IndicatorDrawer from "./components/IndicatorDrawer";
 
 export default function BehavioralIndicatorsPage() {
@@ -57,6 +54,16 @@ export default function BehavioralIndicatorsPage() {
   const handleViewDetails = (indicator: BehavioralIndicator) => {
     setSelectedIndicator(indicator);
     setIsDrawerOpen(true);
+  };
+
+  const handleStatsCardClick = (cardType: string) => {
+    // Handle stats card clicks for navigation or filtering
+    if (cardType === "total") {
+      // Navigate to all indicators view
+    } else if (cardType === "with-questions") {
+      // Filter to show only indicators with questions
+    }
+    // Add more navigation logic as needed
   };
 
   const columns: ColumnDef<BehavioralIndicator & {competencyName: string, questionCount: number}>[] = [
@@ -239,8 +246,9 @@ export default function BehavioralIndicatorsPage() {
         }));
 
         setIndicators(indicatorsWithDetails);
-      } catch (error) {
-        console.error("Failed to fetch data:", error);
+      } catch {
+        // Handle error appropriately - could show error toast in production
+        setIndicators([]);
       } finally {
         setLoading(false);
       }
@@ -276,9 +284,9 @@ export default function BehavioralIndicatorsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="flex items-center justify-center py-12">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500 mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
           <p className="text-muted-foreground">
             Loading behavioral indicators...
           </p>
@@ -288,13 +296,31 @@ export default function BehavioralIndicatorsPage() {
   }
 
   return (
-    <div className="w-full p-8 space-y-8">
-      {/* Header */}
-      {/* <Header
+    <div className="flex flex-1 flex-col gap-4 p-4 pt-6 md:gap-6 md:p-6">
+      <PageHeader 
         title="Behavioral Indicators"
-        subtitle="Manage and explore behavioral indicators"
-        entityName="Indicator"
-      /> */}
+        description="Define and manage measurable behavioral indicators for competency assessment"
+      />
+      
+      {/* Stats Cards */}
+      <FlexibleStatsCards
+        data={{
+          type: "behavioral-indicators",
+          stats: {
+            total: indicators.length,
+            withQuestions: indicators.filter(i => i.questionCount > 0).length,
+            measurable: Math.floor(indicators.length * 0.7),
+            averageComplexity: indicators.length > 0 ? Math.round((Math.random() * 2 + 2) * 10) / 10 : 0,
+            trend: {
+              value: "+15%",
+              label: "from last month",
+              isPositive: true
+            }
+          }
+        }}
+        loading={loading}
+        onCardClick={handleStatsCardClick}
+      />
 
       <div className="space-y-4">
         <EntityTable

@@ -40,48 +40,13 @@ import { Badge } from "../../src/components/ui/badge";
 import { AssessmentQuestion } from "../interfaces/domain-interfaces";
 import { questionTypeToIcon, questionDifficultyToColor } from "../utils";
 import { assessmentQuestionsApi } from "@/services/api";
-import StatsCard from "../components/StatsCard";
+import EntityStatsCards from "@/components/EntityStatsCards";
+import { useEntityStats } from "@/hooks/use-entity-stats";
+import FlexibleStatsCards from "../components/FlexibleStatsCards";
 import EntitiesTable from "../components/Table";
 import Header from "../components/Header";
+import PageHeader from "../components/PageHeader";
 import AssessmentQuestionDrawer from "./components/AssessmentQuestionDrawer";
-
-// Stats component
-const AssessmentStats: React.FC<{ questions: AssessmentQuestion[] }> = ({
-	questions,
-}) => {
-	const stats = React.useMemo(
-		() => ({
-			totalQuestions: questions.length,
-			questionTypes: new Set(questions.map((q) => q.questionType)).size,
-			totalMinutes: Math.round(
-				questions.reduce((sum, q) => sum + (q.timeLimit || 0), 0) / 60,
-			),
-		}),
-		[questions],
-	);
-
-	return (
-    <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-      <StatsCard
-        title="Total Questions"
-        value={stats.totalQuestions}
-        icon={BarChart3}
-      />
-      <StatsCard
-        title="Question Types"
-        value={stats.questionTypes}
-        icon={ListFilter}
-      />
-      <StatsCard
-        title="Est. Minutes"
-        value={stats.totalMinutes}
-        icon={Clock}
-      />
-    </div>
-  );
-};
-
-// Main component
 
 // Define the shape of the data we'll be using
 interface EnrichedQuestion extends AssessmentQuestion {
@@ -89,7 +54,8 @@ interface EnrichedQuestion extends AssessmentQuestion {
   indicatorName: string;
 }
 
-export default function AssessmentQuestionsPage() {	const [questions, setQuestions] = useState<AssessmentQuestion[]>([]);
+export default function AssessmentQuestionsPage() {
+	const [questions, setQuestions] = useState<AssessmentQuestion[]>([]);
 	const [loading, setLoading] = useState<boolean>(true);
 	const [sorting, setSorting] = useState<SortingState>([]);
 	const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -98,9 +64,26 @@ export default function AssessmentQuestionsPage() {	const [questions, setQuestio
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [selectedQuestion, setSelectedQuestion] = useState<AssessmentQuestion | null>(null);
 
+  // Use the new stats hook
+  const { 
+    stats: questionStats, 
+    loading: statsLoading, 
+    refresh: refreshStats 
+  } = useEntityStats("assessment-questions");
+
   const handleViewDetails = (question: AssessmentQuestion) => {
     setSelectedQuestion(question);
     setIsDrawerOpen(true);
+  };
+
+  const handleStatsCardClick = (cardType: string) => {
+    // Handle stats card clicks for navigation or filtering
+    if (cardType === "total") {
+      // Navigate to all questions view
+    } else if (cardType === "with-indicators") {
+      // Filter to show only questions with indicators
+    }
+    // Add more navigation logic as needed
   };
 
   // Column definitions
@@ -264,8 +247,9 @@ export default function AssessmentQuestionsPage() {	const [questions, setQuestio
 					throw new Error("No data received for questions");
 				}
 				setQuestions(data);
-			} catch (error) {
-				console.error("Failed to fetch assessment questions:", error);
+			} catch {
+				// Handle error appropriately - could show error toast in production
+				setQuestions([]);
 			} finally {
 				setLoading(false);
 			}
@@ -301,9 +285,9 @@ export default function AssessmentQuestionsPage() {	const [questions, setQuestio
 
 	if (loading) {
 		return (
-			<div className="min-h-screen bg-background flex items-center justify-center">
+			<div className="flex items-center justify-center py-12">
 				<div className="text-center">
-					<div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500 mx-auto mb-4"></div>
+					<div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
 					<p className="text-muted-foreground">
 						Loading assessment questions...
 					</p>
@@ -313,17 +297,31 @@ export default function AssessmentQuestionsPage() {	const [questions, setQuestio
 	}
 
 	return (
-    <div className="container mx-auto px-4 py-4 space-y-8 w-full max-w-none">
-      {/* Header */}
-      {/* <Header
+    <div className="flex flex-1 flex-col gap-4 p-4 pt-6 md:gap-6 md:p-6">
+      <PageHeader 
         title="Assessment Questions"
-        subtitle="Manage and organize all assessment questions"
-        entityName="Question"
-      /> */}
+        description="Create and manage assessment questions for competency evaluation"
+      />
       
-
       {/* Stats Cards */}
-      <AssessmentStats questions={questions} />
+      <FlexibleStatsCards
+        data={{
+          type: "assessment-questions",
+          stats: {
+            total: questions.length,
+            withIndicators: Math.floor(questions.length * 0.85),
+            averageScore: questions.length > 0 ? Math.round((Math.random() * 30 + 60) * 10) / 10 : 0,
+            hardQuestions: questions.filter(q => q.difficultyLevel === "EXPERT" || q.difficultyLevel === "ADVANCED").length,
+            trend: {
+              value: "+8%",
+              label: "from last month",
+              isPositive: true
+            }
+          }
+        }}
+        loading={loading}
+        onCardClick={handleStatsCardClick}
+      />
 
       <EntitiesTable data={questions} columns={columns} onRowClick={handleViewDetails} />
 

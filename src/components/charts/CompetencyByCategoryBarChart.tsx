@@ -1,83 +1,141 @@
 "use client";
-import { useEffect, useState } from "react";
-import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip, Legend, Cell } from "recharts";
+import { Bar, BarChart, CartesianGrid, XAxis, YAxis, Cell } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { BrainCircuit } from "lucide-react";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface CompetencyByCategoryBarChartProps {
   data: { name: string; value: number }[];
 }
 
-export default function CompetencyByCategoryBarChart({ data }: CompetencyByCategoryBarChartProps) {
-  const [chartColors, setChartColors] = useState<string[]>([]);
+const chartConfig = {
+  value: {
+    label: "Competencies",
+    color: "var(--primary)",
+  },
+} satisfies ChartConfig;
 
-  useEffect(() => {
-    const root = getComputedStyle(document.documentElement);
-    const colors = [
-      root.getPropertyValue('--chart-1').trim(),
-      root.getPropertyValue('--chart-2').trim(),
-      root.getPropertyValue('--chart-3').trim(),
-      root.getPropertyValue('--chart-4').trim(),
-      root.getPropertyValue('--chart-5').trim(),
-    ];
-    setChartColors(colors);
-  }, []);
+export default function CompetencyByCategoryBarChart({ data }: CompetencyByCategoryBarChartProps) {
+  const isMobile = useIsMobile();
+  
+  // Format category names for better display
+  const formatCategoryName = (name: string) => {
+    return name
+      .replace(/_/g, ' ') // Replace underscores with spaces
+      .split(' ')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(' ');
+  };
+
+  // Format data with better category names
+  const formattedData = data.map(item => ({
+    ...item,
+    name: formatCategoryName(item.name),
+    originalName: item.name // Keep original for reference
+  }));
+  
+  // Use more reliable color definitions with proper fallbacks
+  const chartColors = [
+    "#8b5cf6", // Purple-500
+    "#f59e0b", // Amber-500  
+    "#10b981", // Emerald-500
+    "#ef4444", // Red-500
+    "#3b82f6", // Blue-500
+  ];
+  
+  const chartBorderColors = [
+    "#7c3aed", // Purple-600
+    "#d97706", // Amber-600
+    "#059669", // Emerald-600
+    "#dc2626", // Red-600
+    "#2563eb", // Blue-600
+  ];
+
+  // Mobile-responsive axis configuration with smart label handling
+  const getAxisConfig = () => {
+    if (isMobile) {
+      return {
+        xAxis: {
+          fontSize: 11,
+          angle: -45,
+          textAnchor: 'end' as const,
+          height: 80,
+          dy: 10,
+          dx: -5,
+        },
+        yAxis: {
+          fontSize: 11,
+          width: 35,
+        },
+        margin: { top: 20, right: 15, left: 15, bottom: 60 }
+      };
+    }
+    
+    // Desktop: Use angled labels to prevent overlap with long category names
+    return {
+      xAxis: {
+        fontSize: 12,
+        angle: -30, // Slight angle for better readability
+        textAnchor: 'end' as const,
+        height: 70, // Increased height for angled labels
+        dy: 10,
+        dx: -2,
+      },
+      yAxis: {
+        fontSize: 12,
+        width: 40,
+      },
+      margin: { top: 20, right: 20, left: 20, bottom: 50 } // Increased bottom margin
+    };
+  };
+
+  const axisConfig = getAxisConfig();
 
   return (
-    <Card className="min-h-[300px] md:min-h-[400px]">
-      <CardHeader className="space-y-0 pb-2">
-        <div className="flex items-center gap-2">
-          <BrainCircuit className="h-4 w-4 md:h-5 md:w-5" />
-          <CardTitle className="text-base md:text-lg">Competencies by Category</CardTitle>
-        </div>
-      </CardHeader>
-      <CardContent>
-        <div className="h-[250px] md:h-[350px]">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={data} margin={{ top: 20, right: 20, left: 20, bottom: 20 }}>
-              <XAxis
-                dataKey="name"
-                stroke="#888888"
-                fontSize={10}
-                tickLine={false}
-                axisLine={false}
-                interval={0}
-                tick={{ transform: 'translate(0, 8)' }}
-                height={50}
-              />
-              <YAxis
-                stroke="#888888"
-                fontSize={10}
-                tickLine={false}
-                axisLine={false}
-                tickFormatter={(value) => `${value}`}
-                width={30}
-              />
-              <Tooltip
-                cursor={{ fill: "hsl(var(--muted))" }}
-                content={({ active, payload, label }) => {
-                  if (active && payload && payload.length) {
-                    return (
-                      <div className="p-2 md:p-3 bg-background border rounded-lg shadow-lg">
-                        <p className="text-xs md:text-sm font-medium truncate max-w-[200px]">{label}</p>
-                        <p className="text-[10px] md:text-xs text-muted-foreground mt-0.5">
-                          {`Competencies: ${payload[0].value}`}
-                        </p>
-                      </div>
-                    );
-                  }
-                  return null;
-                }}
-              />
-              <Bar dataKey="value" radius={[4, 4, 0, 0]}>
-                {data.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={chartColors[index % chartColors.length]} />
-                ))}
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-      </CardContent>
-    </Card>
+    
+        <ChartContainer
+          config={chartConfig}
+          className="aspect-auto h-[250px] md:h-[350px] w-full mt-4 md:mt-8 md:mb-2 mb-0"
+        >
+          <BarChart data={formattedData} margin={axisConfig.margin}>
+            <CartesianGrid vertical={false} />
+            <XAxis
+              dataKey="name"
+              tickLine={false}
+              axisLine={false}
+              interval={0}
+              tick={{ 
+                fontSize: axisConfig.xAxis.fontSize,
+                textAnchor: axisConfig.xAxis.textAnchor,
+                transform: `translate(${axisConfig.xAxis.dx}, ${axisConfig.xAxis.dy})`,
+              }}
+              height={axisConfig.xAxis.height}
+              angle={axisConfig.xAxis.angle}
+            />
+            <YAxis
+              tickLine={false}
+              axisLine={false}
+              tickFormatter={(value) => `${value}`}
+              width={axisConfig.yAxis.width}
+              tick={{ fontSize: axisConfig.yAxis.fontSize }}
+            />
+            <ChartTooltip
+              cursor={{ fill: "oklch(var(--muted) / 0.3)" }}
+              content={<ChartTooltipContent />}
+            />
+            <Bar dataKey="value" radius={[4, 4, 0, 0]}>
+              {data.map((entry, index) => (
+                <Cell 
+                  key={`cell-${index}`} 
+                  fill={chartColors[index % chartColors.length]}
+                  fillOpacity={0.7}
+                  stroke={chartBorderColors[index % chartBorderColors.length]}
+                  strokeWidth={1}
+                />
+              ))}
+            </Bar>
+          </BarChart>
+        </ChartContainer>
   );
 }

@@ -1,6 +1,7 @@
 import "./globals.css";
 
 import * as React from "react";
+import { ThemeProvider } from "next-themes";
 import { Metadata } from "next";
 
 import { LayoutProvider } from "@/components/layout-provider";

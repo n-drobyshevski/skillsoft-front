@@ -39,16 +39,7 @@ const activities = [
     competency: "Strategic Leadership", 
     time: "2 days ago",
     type: "edit"
-  },
-  { 
-    id: 5, 
-    user: "Michael Brown", 
-    email: "michael@example.com",
-    action: "created", 
-    competency: "Data Analysis", 
-    time: "3 days ago",
-    type: "create"
-  },
+  }
 ];
 
 const getActionColor = (type: string) => {
@@ -62,7 +53,7 @@ const getActionColor = (type: string) => {
 
 export default function RecentActivityCard() {
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 max-w-xl">
       {activities.map((activity) => (
         <div key={activity.id} className="flex items-center space-x-4">
           <Avatar className="h-9 w-9">

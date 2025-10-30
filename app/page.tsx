@@ -10,24 +10,14 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { 
-	Activity, 
 	ArrowUpDown, 
-	MoreHorizontal,
-	TrendingUp,
-	Users,
-	BarChart3,
-	BookOpen,
-	ClipboardList,
-	Calendar,
-	Star,
-	Target,
-	Zap,
-	CreditCard,
-	DollarSign
+	MoreHorizontal
 } from "lucide-react";
 import { competenciesApi } from "@/services/api";
 import { Competency, DashboardStats } from "./interfaces/domain-interfaces";
 import DashboardStatsCards from "./components/DasboardStatsCards";
+import ResponsiveStatsCards from "./components/ResponsiveStatsCards";
+import FlexibleStatsCards from "./components/FlexibleStatsCards";
 import ErrorCard from "./components/ErrorCard";
 import CompetencyByCategoryBarChart from "@/components/charts/CompetencyByCategoryBarChart";
 import CompetencyByLevelBarChart from "@/components/charts/CompetencyByLevelBarChart";
@@ -39,6 +29,7 @@ import EntityTable from "./components/Table";
 import { ColumnDef } from "@tanstack/react-table";
 import Link from "next/link";
 import TopCompetenciesCard from "@/components/TopCompetenciesCard";
+import PageHeader from "./components/PageHeader";
 
 // Main Dashboard Component
 export default function Page() {
@@ -149,114 +140,26 @@ export default function Page() {
 		<div className="@container/main flex flex-1 flex-col gap-2 mobile-container">
 			<div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6 no-mobile-overflow">
 				{/* Page Header */}
-				<div className="flex flex-col gap-4 px-4 lg:px-6 mobile-container">
-					<div className="space-y-1">
-						<h2 className="text-2xl font-semibold tracking-tight">Dashboard</h2>
-						<p className="text-sm text-muted-foreground">
-							Here's what's happening with your competency management today.
-						</p>
-					</div>
-				</div>
+				<PageHeader 
+					title="Dashboard"
+					description="Here&apos;s what&apos;s happening with your competency management today."
+				/>
 
 				{/* Overview Cards */}
-				<div className="*:bg-gradient-to-t *:from-primary/5 *:to-card *:shadow-xs dark:*:bg-card grid grid-cols-2 gap-3 px-4 lg:px-6 sm:gap-4 @xl/main:grid-cols-2 @3xl/main:grid-cols-4">
-					{stats && (
-						<>
-							<Card className="@container/card">
-								<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-									<CardDescription className="text-xs sm:text-sm font-medium">
-										Total Competencies
-									</CardDescription>
-									<BookOpen className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
-								</CardHeader>
-								<CardContent className="space-y-1">
-									<CardTitle className="text-lg sm:text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
-										{stats.totalCompetencies}
-									</CardTitle>
-									<div className="flex items-center gap-1 text-xs text-muted-foreground">
-										<Badge variant="outline" className="text-emerald-600 border-emerald-200 bg-emerald-50 dark:text-emerald-400 dark:border-emerald-800 dark:bg-emerald-950">
-											<TrendingUp className="mr-1 h-2 w-2 sm:h-3 sm:w-3" />
-											<span className="text-xs">+20.1%</span>
-										</Badge>
-										<span className="hidden sm:inline">from last month</span>
-										<span className="sm:hidden">last month</span>
-									</div>
-								</CardContent>
-							</Card>
-							
-							<Card className="@container/card">
-								<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-									<CardDescription className="text-xs sm:text-sm font-medium">
-										Behavioral Indicators
-									</CardDescription>
-									<Users className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
-								</CardHeader>
-								<CardContent className="space-y-1">
-									<CardTitle className="text-lg sm:text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
-										{stats.totalBehavioralIndicators}
-									</CardTitle>
-									<div className="flex items-center gap-1 text-xs text-muted-foreground">
-										<Badge variant="outline" className="text-emerald-600 border-emerald-200 bg-emerald-50 dark:text-emerald-400 dark:border-emerald-800 dark:bg-emerald-950">
-											<TrendingUp className="mr-1 h-2 w-2 sm:h-3 sm:w-3" />
-											<span className="text-xs">+180.1%</span>
-										</Badge>
-										<span className="hidden sm:inline">from last month</span>
-										<span className="sm:hidden">last month</span>
-									</div>
-								</CardContent>
-							</Card>
-							
-							<Card className="@container/card">
-								<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-									<CardDescription className="text-xs sm:text-sm font-medium">
-										Assessment Questions
-									</CardDescription>
-									<ClipboardList className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
-								</CardHeader>
-								<CardContent className="space-y-1">
-									<CardTitle className="text-lg sm:text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
-										{stats.totalAssessmentQuestions}
-									</CardTitle>
-									<div className="flex items-center gap-1 text-xs text-muted-foreground">
-										<Badge variant="outline" className="text-emerald-600 border-emerald-200 bg-emerald-50 dark:text-emerald-400 dark:border-emerald-800 dark:bg-emerald-950">
-											<TrendingUp className="mr-1 h-2 w-2 sm:h-3 sm:w-3" />
-											<span className="text-xs">+19%</span>
-										</Badge>
-										<span className="hidden sm:inline">from last month</span>
-										<span className="sm:hidden">last month</span>
-									</div>
-								</CardContent>
-							</Card>
-							
-							<Card className="@container/card">
-								<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-									<CardDescription className="text-xs sm:text-sm font-medium">
-										Active Now
-									</CardDescription>
-									<Activity className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
-								</CardHeader>
-								<CardContent className="space-y-1">
-									<CardTitle className="text-lg sm:text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
-										+573
-									</CardTitle>
-									<div className="flex items-center gap-1 text-xs text-muted-foreground">
-										<Badge variant="outline" className="text-emerald-600 border-emerald-200 bg-emerald-50 dark:text-emerald-400 dark:border-emerald-800 dark:bg-emerald-950">
-											<TrendingUp className="mr-1 h-2 w-2 sm:h-3 sm:w-3" />
-											<span className="text-xs">+201</span>
-										</Badge>
-										<span className="hidden sm:inline">since last hour</span>
-										<span className="sm:hidden">last hour</span>
-									</div>
-								</CardContent>
-							</Card>
-						</>
-					)}
-				</div>
+				{stats && (
+					<FlexibleStatsCards
+						data={{
+							type: "dashboard",
+							stats: stats
+						}}
+						loading={false}
+					/>
+				)}
 
 				{/* Main Dashboard Grid */}
-				<div className="@container/main-grid grid grid-mobile-gap gap-4 px-4 lg:px-6 grid-cols-1 @lg/main-grid:grid-cols-2 @3xl/main-grid:grid-cols-7">
+				<div className="@container/main-grid flex flex-wrap gap-4 px-4 lg:px-6">
 					{/* Chart Section */}
-					<Card className="@container/chart col-span-full @3xl/main-grid:col-span-4 card-mobile-padding">
+					<Card className="@container/chart flex-1 min-w-[500px] max-w-none card-mobile-padding">
 						<CardHeader>
 							<CardTitle className="text-responsive-lg">Competency Overview</CardTitle>
 							<CardDescription className="text-responsive">
@@ -273,7 +176,7 @@ export default function Page() {
 					</Card>
 
 					{/* Recent Activity */}
-					<Card className="@container/activity col-span-full @3xl/main-grid:col-span-3 card-mobile-padding">
+					<Card className="@container/activity flex-1 min-w-[400px] lg:max-w-[400px] card-mobile-padding">
 						<CardHeader>
 							<CardTitle className="text-responsive-lg">Recent Activity</CardTitle>
 							<CardDescription className="text-responsive">
@@ -287,9 +190,9 @@ export default function Page() {
 				</div>
 
 				{/* Secondary Grid */}
-				<div className="@container/secondary-grid grid grid-mobile-gap gap-4 px-4 lg:px-6 grid-cols-1 @lg/secondary-grid:grid-cols-2 @3xl/secondary-grid:grid-cols-7">
+				<div className="@container/secondary-grid flex flex-wrap gap-4 px-4 lg:px-6">
 					{/* Data Table */}
-					<Card className="@container/table col-span-full @3xl/secondary-grid:col-span-4 card-mobile-padding">
+					<Card className="@container/table flex-1 min-w-[600px] max-w-none card-mobile-padding">
 						<CardHeader>
 							<CardTitle className="text-responsive-lg">Competencies</CardTitle>
 							<CardDescription className="text-responsive">
@@ -302,7 +205,7 @@ export default function Page() {
 					</Card>
 
 					{/* Side Content */}
-					<div className="@container/sidebar col-span-full @3xl/secondary-grid:col-span-3 space-y-4">
+					<div className="@container/sidebar flex-1 min-w-[350px] max-w-[450px] space-y-4">
 						{/* Quick Actions */}
 						<Card className="@container/quick-actions card-mobile-padding">
 							<CardHeader>

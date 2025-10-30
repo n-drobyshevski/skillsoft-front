@@ -1,27 +1,91 @@
 "use client";
-import { useEffect, useState } from "react";
-import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip, Legend, Cell } from "recharts";
+import { Bar, BarChart, CartesianGrid, XAxis, YAxis, Cell } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { Layers } from "lucide-react";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface CompetencyByLevelBarChartProps {
   data: { name: string; value: number }[];
 }
 
-export default function CompetencyByLevelBarChart({ data }: CompetencyByLevelBarChartProps) {
-  const [chartColors, setChartColors] = useState<string[]>([]);
+const chartConfig = {
+  value: {
+    label: "Competencies",
+    color: "var(--primary)",
+  },
+} satisfies ChartConfig;
 
-  useEffect(() => {
-    const root = getComputedStyle(document.documentElement);
-    const colors = [
-      root.getPropertyValue('--chart-1').trim(),
-      root.getPropertyValue('--chart-2').trim(),
-      root.getPropertyValue('--chart-3').trim(),
-      root.getPropertyValue('--chart-4').trim(),
-      root.getPropertyValue('--chart-5').trim(),
-    ];
-    setChartColors(colors);
-  }, []);
+export default function CompetencyByLevelBarChart({ data }: CompetencyByLevelBarChartProps) {
+  const isMobile = useIsMobile();
+  
+  // Format level names for better display
+  const formatLevelName = (name: string) => {
+    return name.charAt(0).toUpperCase() + name.slice(1).toLowerCase();
+  };
+
+  // Format data with better level names
+  const formattedData = data.map(item => ({
+    ...item,
+    name: formatLevelName(item.name),
+    originalName: item.name // Keep original for reference
+  }));
+  
+  const chartColors = [
+    "oklch(var(--chart-1) / 0.7)",
+    "oklch(var(--chart-2) / 0.7)",
+    "oklch(var(--chart-3) / 0.7)",
+    "oklch(var(--chart-4) / 0.7)",
+    "oklch(var(--chart-5) / 0.7)",
+  ];
+  
+  const chartBorderColors = [
+    "oklch(var(--chart-1) / 0.9)",
+    "oklch(var(--chart-2) / 0.9)",
+    "oklch(var(--chart-3) / 0.9)",
+    "oklch(var(--chart-4) / 0.9)",
+    "oklch(var(--chart-5) / 0.9)",
+  ];
+
+  // Mobile-responsive axis configuration with smart label handling
+  const getAxisConfig = () => {
+    if (isMobile) {
+      return {
+        xAxis: {
+          fontSize: 11,
+          angle: -45,
+          textAnchor: 'end' as const,
+          height: 80,
+          dy: 10,
+          dx: -5,
+        },
+        yAxis: {
+          fontSize: 11,
+          width: 35,
+        },
+        margin: { top: 20, right: 15, left: 15, bottom: 60 }
+      };
+    }
+    
+    // Desktop: Use slight angle for longer level names (DEVELOPING, PROFICIENT, etc.)
+    return {
+      xAxis: {
+        fontSize: 12,
+        angle: -20, // Gentler angle for level names
+        textAnchor: 'end' as const,
+        height: 60,
+        dy: 8,
+        dx: -2,
+      },
+      yAxis: {
+        fontSize: 12,
+        width: 40,
+      },
+      margin: { top: 20, right: 20, left: 20, bottom: 40 }
+    };
+  };
+
+  const axisConfig = getAxisConfig();
 
   return (
     <Card className="min-h-[300px] md:min-h-[400px]">
@@ -32,51 +96,48 @@ export default function CompetencyByLevelBarChart({ data }: CompetencyByLevelBar
         </div>
       </CardHeader>
       <CardContent>
-        <div className="h-[250px] md:h-[350px]">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={data} margin={{ top: 20, right: 20, left: 20, bottom: 20 }}>
-              <XAxis
-                dataKey="name"
-                stroke="#888888"
-                fontSize={10}
-                tickLine={false}
-                axisLine={false}
-                interval={0}
-                tick={{ transform: 'translate(0, 8)' }}
-                height={50}
-              />
-              <YAxis
-                stroke="#888888"
-                fontSize={10}
-                tickLine={false}
-                axisLine={false}
-                tickFormatter={(value) => `${value}`}
-                width={30}
-              />
-              <Tooltip
-                cursor={{ fill: "hsl(var(--muted))" }}
-                content={({ active, payload, label }) => {
-                  if (active && payload && payload.length) {
-                    return (
-                      <div className="p-2 md:p-3 bg-background border rounded-lg shadow-lg">
-                        <p className="text-xs md:text-sm font-medium truncate max-w-[200px]">{label}</p>
-                        <p className="text-[10px] md:text-xs text-muted-foreground mt-0.5">
-                          {`Competencies: ${payload[0].value}`}
-                        </p>
-                      </div>
-                    );
-                  }
-                  return null;
-                }}
-              />
-              <Bar dataKey="value" radius={[4, 4, 0, 0]}>
-                {data.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={chartColors[index % chartColors.length]} />
-                ))}
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
+        <ChartContainer
+          config={chartConfig}
+          className="aspect-auto h-[250px] md:h-[350px] w-full"
+        >
+          <BarChart data={formattedData} margin={axisConfig.margin}>
+            <CartesianGrid vertical={false} />
+            <XAxis
+              dataKey="name"
+              tickLine={false}
+              axisLine={false}
+              interval={0}
+              tick={{ 
+                fontSize: axisConfig.xAxis.fontSize,
+                textAnchor: axisConfig.xAxis.textAnchor,
+                transform: `translate(${axisConfig.xAxis.dx}, ${axisConfig.xAxis.dy})`,
+              }}
+              height={axisConfig.xAxis.height}
+              angle={axisConfig.xAxis.angle}
+            />
+            <YAxis
+              tickLine={false}
+              axisLine={false}
+              tickFormatter={(value) => `${value}`}
+              width={axisConfig.yAxis.width}
+              tick={{ fontSize: axisConfig.yAxis.fontSize }}
+            />
+            <ChartTooltip
+              cursor={{ fill: "oklch(var(--muted) / 0.3)" }}
+              content={<ChartTooltipContent />}
+            />
+            <Bar dataKey="value" radius={[4, 4, 0, 0]}>
+              {formattedData.map((entry, index) => (
+                <Cell 
+                  key={`cell-${index}`} 
+                  fill={chartColors[index % chartColors.length]}
+                  stroke={chartBorderColors[index % chartBorderColors.length]}
+                  strokeWidth={1}
+                />
+              ))}
+            </Bar>
+          </BarChart>
+        </ChartContainer>
       </CardContent>
     </Card>
   );

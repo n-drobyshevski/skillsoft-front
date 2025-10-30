@@ -42,10 +42,28 @@ export function SiteHeader({ title = "Dashboard", breadcrumbs }: SiteHeaderProps
   
   // Generate breadcrumbs based on pathname if not provided
   const defaultBreadcrumbs = pathname === "/" ? [] : 
-    pathname.split("/").filter(Boolean).map((segment, index, array) => ({
-      label: segment.charAt(0).toUpperCase() + segment.slice(1).replace(/-/g, " "),
-      href: "/" + array.slice(0, index + 1).join("/")
-    }));
+    pathname.split("/").filter(Boolean).map((segment, index, array) => {
+      // Handle special cases for better UX
+      let label = segment;
+      if (segment === "behavioral-indicators") {
+        label = "Behavioral Indicators";
+      } else if (segment === "assessment-questions") {
+        label = "Assessment Questions";
+      } else if (segment.includes("-")) {
+        // Convert kebab-case to Title Case
+        label = segment.split("-").map(word => 
+          word.charAt(0).toUpperCase() + word.slice(1)
+        ).join(" ");
+      } else {
+        // Regular title case
+        label = segment.charAt(0).toUpperCase() + segment.slice(1);
+      }
+      
+      return {
+        label,
+        href: "/" + array.slice(0, index + 1).join("/")
+      };
+    });
 
   const displayBreadcrumbs = breadcrumbs || defaultBreadcrumbs;
   
@@ -54,7 +72,23 @@ export function SiteHeader({ title = "Dashboard", breadcrumbs }: SiteHeaderProps
     if (pathname === "/") return "Dashboard";
     const segments = pathname.split("/").filter(Boolean);
     const lastSegment = segments[segments.length - 1];
-    return lastSegment.charAt(0).toUpperCase() + lastSegment.slice(1).replace(/-/g, " ");
+    
+    // Handle special cases for better UX
+    if (lastSegment === "behavioral-indicators") {
+      return "Behavioral Indicators";
+    } else if (lastSegment === "assessment-questions") {
+      return "Assessment Questions";
+    } else if (lastSegment === "competencies") {
+      return "Competencies";
+    } else if (lastSegment.includes("-")) {
+      // Convert kebab-case to Title Case
+      return lastSegment.split("-").map(word => 
+        word.charAt(0).toUpperCase() + word.slice(1)
+      ).join(" ");
+    } else {
+      // Regular title case
+      return lastSegment.charAt(0).toUpperCase() + lastSegment.slice(1);
+    }
   };
   
   const pageTitle = title || getPageTitle();
@@ -178,18 +212,6 @@ export function SiteHeader({ title = "Dashboard", breadcrumbs }: SiteHeaderProps
             <Button variant="ghost" size="icon" className="h-8 w-8 focus-mobile">
               <Bell className="h-4 w-4" />
               <span className="sr-only">Notifications</span>
-            </Button>
-
-            {/* GitHub Link */}
-            <Button variant="ghost" asChild size="sm" className="hidden @xl/header:flex h-8 px-3 focus-mobile">
-              <Link
-                href="https://github.com/shadcn-ui/ui"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <Github className="h-4 w-4 @2xl/header:mr-2" />
-                <span className="hidden @2xl/header:inline">GitHub</span>
-              </Link>
             </Button>
 
             {/* Theme Toggle */}

@@ -1,19 +1,19 @@
 import type React from "react";
-import {
-	PieChart,
-	Pie,
-	Cell,
-	ResponsiveContainer,
-	Legend,
-	Tooltip,
-} from "recharts";
+import { PieChart, Pie, Cell, Legend } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
+import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "../ui/chart";
 import type { BehavioralIndicator } from "../../../app/interfaces/domain-interfaces";
 import { BarChart3 } from "lucide-react";
 
 interface WeightDistributionPieProps {
 	indicators: BehavioralIndicator[];
 }
+
+const chartConfig = {
+	weight: {
+		label: "Weight Distribution",
+	},
+} satisfies ChartConfig;
 
 const WeightDistributionPie: React.FC<WeightDistributionPieProps> = ({
 	indicators,
@@ -33,13 +33,21 @@ const WeightDistributionPie: React.FC<WeightDistributionPieProps> = ({
 		};
 	});
 
-	// Colors for different weights
-	const COLORS = [
-		"rgb(132 204 22)", // lime-500
-		"rgb(34 197 94)", // green-500
-		"rgb(16 185 129)", // emerald-500
-		"rgb(6 182 212)", // cyan-500
-		"rgb(59 130 246)", // blue-500
+	// Use shadcn-ui chart colors with lighter opacity and borders
+	const chartColors = [
+		"oklch(var(--chart-1) / 0.7)",
+		"oklch(var(--chart-2) / 0.7)",
+		"oklch(var(--chart-3) / 0.7)",
+		"oklch(var(--chart-4) / 0.7)",
+		"oklch(var(--chart-5) / 0.7)",
+	];
+	
+	const chartBorderColors = [
+		"oklch(var(--chart-1) / 0.9)",
+		"oklch(var(--chart-2) / 0.9)",
+		"oklch(var(--chart-3) / 0.9)",
+		"oklch(var(--chart-4) / 0.9)",
+		"oklch(var(--chart-5) / 0.9)",
 	];
 
 	return (
@@ -51,71 +59,74 @@ const WeightDistributionPie: React.FC<WeightDistributionPieProps> = ({
 				</CardTitle>
 			</CardHeader>
 			<CardContent>
-				<div className="h-[300px]">
-					<ResponsiveContainer width="100%" height="100%">
-						<PieChart>
-							<Pie
-								data={data}
-								cx="50%"
-								cy="50%"
-								innerRadius={70}
-								outerRadius={90}
-								paddingAngle={2}
-								dataKey="value"
-								nameKey="name"
-								label={false}
-							>
-								{data.map((entry, index) => (
-									<Cell
-										key={`cell-${index}`}
-										fill={COLORS[index % COLORS.length]}
-										className="stroke-background hover:opacity-80 transition-opacity"
-									/>
-								))}
-							</Pie>
-							<Tooltip
-								content={({ active, payload }) => {
-									if (active && payload && payload.length) {
-										const data = payload[0].payload;
-										return (
-											<div className="p-3 bg-background border rounded-lg shadow-lg max-w-[300px]">
-												<p className="text-sm font-medium mb-1">{data.name}</p>
-												{data.description && (
-													<p className="text-xs text-muted-foreground mb-2">
-														{data.description}
-													</p>
-												)}
-												<div className="text-xs space-y-1">
-													<p className="font-medium">
-														Contribution: {data.displayValue}
-													</p>
-													<p className="text-muted-foreground">
-														Weight: {data.weight}
-													</p>
-												</div>
+				<ChartContainer
+					config={chartConfig}
+					className="aspect-square h-[300px] w-full"
+				>
+					<PieChart>
+						<Pie
+							data={data}
+							cx="50%"
+							cy="50%"
+							innerRadius={70}
+							outerRadius={90}
+							paddingAngle={2}
+							dataKey="value"
+							nameKey="name"
+							label={false}
+						>
+							{data.map((entry, index) => (
+								<Cell
+									key={`cell-${index}`}
+									fill={chartColors[index % chartColors.length]}
+									stroke={chartBorderColors[index % chartBorderColors.length]}
+									strokeWidth={1}
+									className="hover:opacity-80 transition-opacity"
+								/>
+							))}
+						</Pie>
+						<ChartTooltip
+							content={({ active, payload }) => {
+								if (active && payload && payload.length) {
+									const data = payload[0].payload;
+									return (
+										<div className="p-3 bg-background border rounded-lg shadow-lg max-w-[300px]">
+											<p className="text-sm font-medium mb-1">{data.name}</p>
+											{data.description && (
+												<p className="text-xs text-muted-foreground mb-2">
+													{data.description}
+												</p>
+											)}
+											<div className="text-xs space-y-1">
+												<p className="font-medium">
+													Contribution: {data.displayValue}
+												</p>
+												<p className="text-muted-foreground">
+													Weight: {data.weight}
+												</p>
 											</div>
-										);
-									}
-									return null;
-								}}
-							/>
-							<Legend
-								layout="vertical"
-								align="right"
-								verticalAlign="middle"
-								formatter={(value: string, entry: any) => {
-									const data = entry.payload;
-									return `${data.name} (${data.displayValue})`;
-								}}
-								wrapperStyle={{
-									paddingLeft: "20px",
-									maxHeight: "240px",
-									overflowY: "auto",
-								}}
-							/>
-						</PieChart>
-					</ResponsiveContainer>
-				</div>
+										</div>
+									);
+								}
+								return null;
+							}}
+						/>
+						<Legend
+							layout="vertical"
+							align="right"
+							verticalAlign="middle"
+							formatter={(value: string, entry: any) => {
+								const data = entry.payload;
+								return `${data.name} (${data.displayValue})`;
+							}}
+							wrapperStyle={{
+								paddingLeft: "20px",
+								maxHeight: "240px",
+								overflowY: "auto",
+							}}
+						/>
+					</PieChart>
+				</ChartContainer>
 			</CardContent>
 		</Card>
 	);
