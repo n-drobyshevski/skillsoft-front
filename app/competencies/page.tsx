@@ -314,7 +314,16 @@ export default function CompetenciesPage() {
       <PageHeader 
         title="Competencies"
         description="Manage and track competency definitions and assessments"
-      />
+      >
+        <div className="flex items-center gap-2">
+          <Link href="/competencies/new">
+            <Button variant="outline">
+              <Plus className="mr-2 h-4 w-4" />
+              Create Competency
+            </Button>
+          </Link>
+        </div>
+      </PageHeader> 
       
       {/* Stats Cards */}
       <FlexibleStatsCards

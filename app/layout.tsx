@@ -5,6 +5,7 @@ import { ThemeProvider } from "next-themes";
 import { Metadata } from "next";
 
 import { LayoutProvider } from "@/components/layout-provider";
+import { Toaster } from "@/components/ui/sonner";
 
 export const metadata: Metadata = {
 	title: "SkillSoft - Competency Management",
@@ -21,7 +22,10 @@ export default function RootLayout({
 				<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 			</head>
 			<body className="mobile-container">
-				<LayoutProvider>{children}</LayoutProvider>
+				<LayoutProvider>
+                    {children}
+                    <Toaster richColors />
+                </LayoutProvider>
 			</body>
 		</html>
 	);

@@ -34,6 +34,7 @@ import {
   MoreHorizontal,
   Settings2,
   Eye,
+  Plus,
 } from "lucide-react";
 import { BehavioralIndicator } from "../interfaces/domain-interfaces";
 import { biLevelToColor } from "../utils";
@@ -300,8 +301,16 @@ export default function BehavioralIndicatorsPage() {
       <PageHeader 
         title="Behavioral Indicators"
         description="Define and manage measurable behavioral indicators for competency assessment"
-      />
-      
+      >
+      <div className="flex items-center gap-2">
+          <Link href="/competencies/new">
+            <Button variant="outline">
+              <Plus className="mr-2 h-4 w-4" />
+              Create Indicator
+            </Button>
+          </Link>
+        </div>
+        </PageHeader>
       {/* Stats Cards */}
       <FlexibleStatsCards
         data={{

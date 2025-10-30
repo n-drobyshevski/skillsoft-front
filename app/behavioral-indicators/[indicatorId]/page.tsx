@@ -25,6 +25,7 @@ import {
 	Lightbulb,
 	X,
 	Pencil,
+	Plus,
 } from "lucide-react";
 import type {
 	BehavioralIndicator,
@@ -290,13 +291,19 @@ export default function Page({ params }: IndicatorDetailPageProps) {
 					</div>
 
 					{/* Assessment Questions */}
-          {assessmentQuestions.length > 0 && (
+          {assessmentQuestions.length > 0 ? (
             <Card>
-              <CardHeader>
+              <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle className="flex items-center gap-2">
                   <HelpCircle className="w-5 h-5" />
                   Assessment Questions ({assessmentQuestions.length})
                 </CardTitle>
+                <Button asChild size="sm">
+                  <Link href={`/assessment-questions/new?competencyId=${indicator.competencyId}&behavioralIndicatorId=${indicator.id}`}>
+                      <Plus className="mr-2 h-4 w-4" />
+                      Add Question
+                  </Link>
+                </Button>
               </CardHeader>
               <CardContent className="space-y-4">
                 {assessmentQuestions
@@ -333,6 +340,26 @@ export default function Page({ params }: IndicatorDetailPageProps) {
                       </CardContent>
                     </Card>
                   ))}
+              </CardContent>
+            </Card>
+          ) : (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <HelpCircle className="w-5 h-5" />
+                  Assessment Questions
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-center py-8">
+                  <p className="text-muted-foreground mb-4">No assessment questions found for this indicator.</p>
+                  <Button asChild>
+                    <Link href={`/assessment-questions/new?competencyId=${indicator.competencyId}&behavioralIndicatorId=${indicator.id}`}>
+                        <Plus className="mr-2 h-4 w-4" />
+                        Add Question
+                    </Link>
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           )}

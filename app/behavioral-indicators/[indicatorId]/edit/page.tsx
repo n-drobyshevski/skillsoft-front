@@ -1,23 +1,52 @@
-import { behavioralIndicatorsApi } from "@/services/api";
-import { EditIndicatorForm } from "../../components/EditIndicatorForm";
-import { notFound } from "next/navigation";
-import IndicatorPreview from "../../components/IndicatorPreview";
+'use client';
 
-export default async function EditIndicatorPage({ params }: { params: { indicatorId: string } }) {
-  const indicator = await behavioralIndicatorsApi.getIndicatorById((await params).indicatorId);
+import { behavioralIndicatorsApi } from "@/services/api";
+import { IndicatorForm } from "../../components/IndicatorForm";
+import { notFound, useParams } from "next/navigation";
+import IndicatorPreview from "../../components/IndicatorPreview";
+import { BehavioralIndicator } from "../../../interfaces/domain-interfaces";
+import { useEffect, useState } from "react";
+import { EditIndicatorPageSkeleton } from "../../components/EditIndicatorPageSkeleton";
+
+export default function EditIndicatorPage() {
+  const params = useParams();
+  const indicatorId = params.indicatorId as string;
+
+  const [indicator, setIndicator] = useState<BehavioralIndicator | null>(null);
+  const [previewIndicator, setPreviewIndicator] = useState<BehavioralIndicator | null>(null);
+
+  useEffect(() => {
+    async function fetchIndicator() {
+      const fetchedIndicator = await behavioralIndicatorsApi.getIndicatorById(indicatorId);
+      if (!fetchedIndicator) {
+        notFound();
+      }
+      setIndicator(fetchedIndicator);
+      setPreviewIndicator(fetchedIndicator);
+    }
+    if (indicatorId) {
+      fetchIndicator();
+    }
+  }, [indicatorId]);
+
+  const handleUpdatePreview = (data: Partial<BehavioralIndicator>) => {
+    if (previewIndicator) {
+      setPreviewIndicator({ ...previewIndicator, ...data });
+    }
+  };
 
   if (!indicator) {
-    notFound();
+    return <EditIndicatorPageSkeleton />;
   }
 
   return (
     <div className="container mx-auto p-4">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2">
-          <EditIndicatorForm indicator={indicator} />
+          <IndicatorForm indicator={indicator} onUpdatePreview={handleUpdatePreview} />
         </div>
         <div className="hidden lg:block">
-          <IndicatorPreview indicator={indicator} />
+          {previewIndicator && <IndicatorPreview indicator={previewIndicator} />}
         </div>
       </div>
     </div>

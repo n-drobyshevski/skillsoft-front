@@ -54,15 +54,15 @@ const competencyCategoryToIcon = (category: string) => {
 
 const approvalStatusToColor = (status: string): string => {
   const colorMap = new Map([
-    ['DRAFT', 'status-draft'],
-    ['PENDING_REVIEW', 'status-pending-review'],
-    ['APPROVED', 'status-approved'],
-    ['REJECTED', 'status-rejected'],
-    ['ARCHIVED', 'status-archived'],
-    ['UNDER_REVISION', 'status-under-revision'],
+    ['DRAFT', 'border-yellow-500/30 text-yellow-500 bg-yellow-500/8 dark:text-yellow-300'],
+    ['PENDING_REVIEW', 'border-yellow-500/30 text-yellow-500 bg-yellow-500/8 dark:text-yellow-300'],
+    ['APPROVED', 'border-emerald-500/30 text-emerald-600 bg-emerald-500/8 dark:text-emerald-300'],
+    ['REJECTED', 'border-red-500/30 text-red-400 bg-red-500/8 dark:text-red-300'],
+    ['ARCHIVED', 'border-gray-500/30 text-gray-400 bg-gray-500/8 dark:text-gray-300'],
+    ['UNDER_REVISION', 'border-blue-500/30 text-blue-600 bg-blue-500/8 dark:text-blue-300'],
   ]);
   
-  return colorMap.get(status) || 'status-draft';
+  return colorMap.get(status) || 'border-gray-500/30 text-gray-400 bg-gray-500/8 dark:text-gray-300';
 };
 
 const competencyProficiencyLevelToColor = (level: ProficiencyLevel): string => {
@@ -115,11 +115,11 @@ const questionTypeToIcon = (category: string) => {
   return React.createElement(IconComponent, { className: "h-4 w-4" });
 };
 
-const questionDifficultyToColor = (difficulty: string): string => {
+const questionDifficultyToColor = (difficulty: DifficultyLevel): string => {
   const colorMap = new Map([
-    ['BEGINNER', COMMON_COLORS.PROFICIENT], // Green for beginner
-    ['INTERMEDIATE', COMMON_COLORS.DEVELOPING], // Amber for intermediate
-    ['ADVANCED', COMMON_COLORS.NOVICE], // Red for advanced
+    [DifficultyLevel.EASY, COMMON_COLORS.PROFICIENT], // Green for easy
+    [DifficultyLevel.MEDIUM, COMMON_COLORS.DEVELOPING], // Amber for medium
+    [DifficultyLevel.HARD, COMMON_COLORS.NOVICE], // Red for hard
   ]);
   
   return colorMap.get(difficulty) || COMMON_COLORS.PROFICIENT;
