@@ -1,5 +1,4 @@
-"use client";
-import React, { useState, useEffect } from "react";
+import React from "react";
 import {
 	Card,
 	CardContent,
@@ -31,61 +30,53 @@ import Link from "next/link";
 import TopCompetenciesCard from "@/components/TopCompetenciesCard";
 import PageHeader from "./components/PageHeader";
 
-// Main Dashboard Component
-export default function Page() {
-	const [competencies, setCompetencies] = useState<Competency[]>([]);
-	const [stats, setStats] = useState<DashboardStats | null>(null);
-	const [loading, setLoading] = useState<boolean>(true);
-	const [error, setError] = useState<string | null>(null);
-
-	// Fetch competencies and stats
-	const fetchData = async () => {
-		try {
-			setLoading(true);
-			const competenciesData: Array<Competency> | null = await competenciesApi.getAllCompetencies();
-			
-			if (!Array.isArray(competenciesData)) {
-				throw new Error('Invalid response from server: data is not an array');
-			}
-			
-			setCompetencies(competenciesData);
-
-			// Calculate stats
-			const stats: DashboardStats = {
-				totalCompetencies: competenciesData.length,
-				totalBehavioralIndicators: competenciesData.reduce(
-					(sum: number, comp: Competency) => sum + (comp.behavioralIndicators?.length || 0),
-					0,
-				),
-				totalAssessmentQuestions: competenciesData.length * 8, // Estimate
-				competenciesByCategory: {},
-				competenciesByLevel: {},
-				averageIndicatorsPerCompetency: 0,
-			};
-
-			// Calculate distributions
-			competenciesData.forEach((comp: Competency) => {
-				stats.competenciesByCategory[comp.category] =
-					(stats.competenciesByCategory[comp.category] || 0) + 1;
-				stats.competenciesByLevel[comp.level] =
-					(stats.competenciesByLevel[comp.level] || 0) + 1;
-			});
-
-			stats.averageIndicatorsPerCompetency =
-				stats.totalBehavioralIndicators / stats.totalCompetencies;
-			setStats(stats);
-		} catch (error) {
-			console.error("Failed to fetch data:", error);
-			setError("Failed to load competencies. Please try again.");
-		} finally {
-			setLoading(false);
+async function getDashboardData() {
+	try {
+		const competenciesData: Array<Competency> | null = await competenciesApi.getAllCompetencies();
+		
+		if (!Array.isArray(competenciesData)) {
+			// In a real app, you might want to log this error to a service
+			console.error('Invalid response from server: data is not an array');
+			return { competencies: [], stats: null, error: "Failed to load competencies. Invalid data format." };
 		}
-	};
+		
+		// Calculate stats
+		const stats: DashboardStats = {
+			totalCompetencies: competenciesData.length,
+			totalBehavioralIndicators: competenciesData.reduce(
+				(sum: number, comp: Competency) => sum + (comp.behavioralIndicators?.length || 0),
+				0,
+			),
+			totalAssessmentQuestions: competenciesData.length * 8, // Estimate
+			competenciesByCategory: {},
+			competenciesByLevel: {},
+			averageIndicatorsPerCompetency: 0,
+		};
 
-	useEffect(() => {
-		fetchData();
-	}, []);
+		// Calculate distributions
+		competenciesData.forEach((comp: Competency) => {
+			stats.competenciesByCategory[comp.category] =
+				(stats.competenciesByCategory[comp.category] || 0) + 1;
+			stats.competenciesByLevel[comp.level] =
+				(stats.competenciesByLevel[comp.level] || 0) + 1;
+		});
 
+		stats.averageIndicatorsPerCompetency =
+			stats.totalBehavioralIndicators > 0 && stats.totalCompetencies > 0
+				? stats.totalBehavioralIndicators / stats.totalCompetencies
+				: 0;
+
+		return { competencies: competenciesData, stats, error: null };
+	} catch (error) {
+		console.error("Failed to fetch data:", error);
+		return { competencies: [], stats: null, error: "Failed to load competencies. Please try again." };
+	}
+}
+
+// Main Dashboard Component
+export default async function Page() {
+	const { competencies, stats, error } = await getDashboardData();
+	
 	const competencyColumns: ColumnDef<Competency>[] = [
 		{
 			accessorKey: "name",
@@ -133,7 +124,7 @@ export default function Page() {
 	];
 
 	if (error) {
-		return <ErrorCard error={error} callback={fetchData} />;
+		return <ErrorCard error={error} />;
 	}
 
 	return (
