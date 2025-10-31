@@ -2,9 +2,11 @@ import { cache } from 'react';
 import { revalidateCompetencyTags, revalidateIndicatorTags, revalidateQuestionTags } from '@/app/actions';
 import { AssessmentQuestion, BehavioralIndicator, Competency } from '../../app/interfaces/domain-interfaces';
 
-// const API_BASE_URL = "http://outstanding-presence.railway.internal:8080/api";
-// const API_BASE_URL = "https://backend-production-263e.up.railway.app/api";
-const API_BASE_URL = "https://" + process.env.NEXT_PUBLIC_API_URL + "/api";
+const getApiBaseUrl = () => {
+    // Use the server-side URL when on the server, otherwise use the public one.
+    const baseUrl = "https://" +  process.env.NEXT_PUBLIC_API_URL + "/api";
+    return baseUrl || "http://localhost:8080"; // Fallback for local development
+};
 
 // Input types for API operations
 interface CompetencyInput {
@@ -77,7 +79,7 @@ async function fetchApi<T>(
 ): Promise<T> {
     const { tags = [], revalidate, cache = 'force-cache', ...fetchOptions } = options;
     // Note: Removed console.log for production security
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+    const response = await fetch(`${getApiBaseUrl()}/api${endpoint}`, {
         ...fetchOptions,
         headers: {
             'Content-Type': 'application/json',

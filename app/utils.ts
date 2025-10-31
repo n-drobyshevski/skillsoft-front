@@ -16,7 +16,7 @@ import {
   Binary,
   MessageSquare
 } from "lucide-react";
-import { ProficiencyLevel } from "./enums/domain_enums";
+import { ProficiencyLevel, DifficultyLevel } from "./enums/domain_enums";
 
 // Common color constants to avoid duplication
 const COMMON_COLORS = {
