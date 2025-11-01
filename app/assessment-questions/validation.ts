@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { DifficultyLevel } from '../../app/enums/domain_enums';
+import { DifficultyLevel } from '@/enums/domain_enums';
 
 const questionTypes = [
   'MULTIPLE_CHOICE',

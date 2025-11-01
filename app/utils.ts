@@ -53,28 +53,39 @@ const competencyCategoryToIcon = (category: string) => {
 };
 
 const approvalStatusToColor = (status: string): string => {
-  const colorMap = new Map([
-    ['DRAFT', 'border-yellow-500/30 text-yellow-500 bg-yellow-500/8 dark:text-yellow-300'],
-    ['PENDING_REVIEW', 'border-yellow-500/30 text-yellow-500 bg-yellow-500/8 dark:text-yellow-300'],
-    ['APPROVED', 'border-emerald-500/30 text-emerald-600 bg-emerald-500/8 dark:text-emerald-300'],
-    ['REJECTED', 'border-red-500/30 text-red-400 bg-red-500/8 dark:text-red-300'],
-    ['ARCHIVED', 'border-gray-500/30 text-gray-400 bg-gray-500/8 dark:text-gray-300'],
-    ['UNDER_REVISION', 'border-blue-500/30 text-blue-600 bg-blue-500/8 dark:text-blue-300'],
-  ]);
-  
-  return colorMap.get(status) || 'border-gray-500/30 text-gray-400 bg-gray-500/8 dark:text-gray-300';
+  switch (status) {
+    case 'DRAFT':
+      return 'border-yellow-500/30 text-yellow-500 bg-yellow-500/8 dark:text-yellow-300';
+    case 'PENDING_REVIEW':
+      return 'border-yellow-500/30 text-yellow-500 bg-yellow-500/8 dark:text-yellow-300';
+    case 'APPROVED':
+      return 'border-emerald-500/30 text-emerald-600 bg-emerald-500/8 dark:text-emerald-300';
+    case 'REJECTED':
+      return 'border-red-500/30 text-red-400 bg-red-500/8 dark:text-red-300';
+    case 'ARCHIVED':
+      return 'border-gray-500/30 text-gray-400 bg-gray-500/8 dark:text-gray-300';
+    case 'UNDER_REVISION':
+      return 'border-blue-500/30 text-blue-600 bg-blue-500/8 dark:text-blue-300';
+    default:
+      return 'border-gray-500/30 text-gray-400 bg-gray-500/8 dark:text-gray-300';
+  }
 };
 
 const competencyProficiencyLevelToColor = (level: ProficiencyLevel): string => {
-  const colorMap = new Map([
-    [ProficiencyLevel.NOVICE, COMMON_COLORS.NOVICE],
-    [ProficiencyLevel.DEVELOPING, COMMON_COLORS.DEVELOPING],
-    [ProficiencyLevel.PROFICIENT, COMMON_COLORS.PROFICIENT],
-    [ProficiencyLevel.ADVANCED, COMMON_COLORS.ADVANCED],
-    [ProficiencyLevel.EXPERT, COMMON_COLORS.EXPERT],
-  ]);
-  
-  return colorMap.get(level) || COMMON_COLORS.NOVICE;
+  switch (level) {
+    case ProficiencyLevel.NOVICE:
+      return COMMON_COLORS.NOVICE;
+    case ProficiencyLevel.DEVELOPING:
+      return COMMON_COLORS.DEVELOPING;
+    case ProficiencyLevel.PROFICIENT:
+      return COMMON_COLORS.PROFICIENT;
+    case ProficiencyLevel.ADVANCED:
+      return COMMON_COLORS.ADVANCED;
+    case ProficiencyLevel.EXPERT:
+      return COMMON_COLORS.EXPERT;
+    default:
+      return COMMON_COLORS.NOVICE;
+  }
 };
 
 const levelToNumber = (level: string): number => {
@@ -90,15 +101,20 @@ const levelToNumber = (level: string): number => {
 };
 
 const levelToColor = (level: string): string => {
-  const colorMap = new Map([
-    ['NOVICE', LEVEL_COLORS_DARK.NOVICE],
-    ['DEVELOPING', LEVEL_COLORS_DARK.DEVELOPING],
-    ['PROFICIENT', LEVEL_COLORS_DARK.PROFICIENT],
-    ['ADVANCED', LEVEL_COLORS_DARK.ADVANCED],
-    ['EXPERT', LEVEL_COLORS_DARK.EXPERT],
-  ]);
-  
-  return colorMap.get(level) || LEVEL_COLORS_DARK.NOVICE;
+  switch (level) {
+    case 'NOVICE':
+      return LEVEL_COLORS_DARK.NOVICE;
+    case 'DEVELOPING':
+      return LEVEL_COLORS_DARK.DEVELOPING;
+    case 'PROFICIENT':
+      return LEVEL_COLORS_DARK.PROFICIENT;
+    case 'ADVANCED':
+      return LEVEL_COLORS_DARK.ADVANCED;
+    case 'EXPERT':
+      return LEVEL_COLORS_DARK.EXPERT;
+    default:
+      return LEVEL_COLORS_DARK.NOVICE;
+  }
 };
 
 
@@ -116,25 +132,35 @@ const questionTypeToIcon = (category: string) => {
 };
 
 const questionDifficultyToColor = (difficulty: DifficultyLevel): string => {
-  const colorMap = new Map([
-    [DifficultyLevel.EASY, COMMON_COLORS.PROFICIENT], // Green for easy
-    [DifficultyLevel.MEDIUM, COMMON_COLORS.DEVELOPING], // Amber for medium
-    [DifficultyLevel.HARD, COMMON_COLORS.NOVICE], // Red for hard
-  ]);
-  
-  return colorMap.get(difficulty) || COMMON_COLORS.PROFICIENT;
+  switch (difficulty) {
+    case DifficultyLevel.BASIC:
+      return COMMON_COLORS.PROFICIENT; // Green for easy
+    case DifficultyLevel.INTERMEDIATE:
+      return COMMON_COLORS.DEVELOPING; // Amber for medium
+    case DifficultyLevel.ADVANCED:
+      return COMMON_COLORS.NOVICE; // Red for hard
+    case DifficultyLevel.EXPERT:
+        return COMMON_COLORS.EXPERT;
+    default:
+      return COMMON_COLORS.PROFICIENT;
+  }
 };
 
 // Helper functions
 const biLevelToColor = (level: string): string => {
-	const colorMap = new Map([
-		['NOVICE', COMMON_COLORS.NOVICE],
-		['DEVELOPING', COMMON_COLORS.DEVELOPING],
-		['PROFICIENT', COMMON_COLORS.PROFICIENT],
-		['ADVANCED', COMMON_COLORS.ADVANCED],
-		['EXPERT', COMMON_COLORS.EXPERT],
-	]);
-	
-	return colorMap.get(level) || COMMON_COLORS.NOVICE;
+	switch (level) {
+		case 'NOVICE':
+			return COMMON_COLORS.NOVICE;
+		case 'DEVELOPING':
+			return COMMON_COLORS.DEVELOPING;
+		case 'PROFICIENT':
+			return COMMON_COLORS.PROFICIENT;
+		case 'ADVANCED':
+			return COMMON_COLORS.ADVANCED;
+		case 'EXPERT':
+			return COMMON_COLORS.EXPERT;
+		default:
+			return COMMON_COLORS.NOVICE;
+	}
 };
 export { competencyCategoryToIcon, competencyProficiencyLevelToColor, levelToNumber, levelToColor, questionTypeToIcon, questionDifficultyToColor, biLevelToColor, approvalStatusToColor };

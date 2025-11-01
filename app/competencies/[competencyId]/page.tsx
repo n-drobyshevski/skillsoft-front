@@ -1,9 +1,5 @@
-"use client";
-
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { useState, useEffect, use } from "react";
-
 import { competenciesApi, assessmentQuestionsApi } from "@/services/api";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -17,6 +13,11 @@ import {
 	Plus,
     Info,
 } from "lucide-react";
+import { Suspense } from 'react';
+
+import QuestionsList from './components/QuestionsList';
+
+import QuestionsListSkeleton from './components/QuestionsListSkeleton';
 import type {
 	BehavioralIndicator,
 	Competency,
@@ -25,63 +26,37 @@ import type {
 import { levelToColor, approvalStatusToColor, questionDifficultyToColor } from "../../utils";
 
 interface CompetencyDetailPageProps {
-	params: Promise<{ competencyId: string }>;
+	params: { competencyId: string };
 }
 
-export default function CompetencyDetailPage({
-	params,
-}: CompetencyDetailPageProps) {
-	const { competencyId } = use(params);
-	const [competency, setCompetency] = useState<Competency | null>(null);
-	const [questions, setQuestions] = useState<AssessmentQuestion[]>([]);
-	const [loading, setLoading] = useState(true);
-	const [questionsLoading, setQuestionsLoading] = useState(false);
+async function getCompetencyData(competencyId: string) {
+	const competency = await competenciesApi.getCompetencyById(competencyId);
+	if (!competency) {
+		return { competency: null, questions: [] };
+	}
 
-	useEffect(() => {
-		async function fetchCompetency() {
-			try {
-				const data = await competenciesApi.getCompetencyById(competencyId);
-				setCompetency(data);
-				
-				if (data?.behavioralIndicators && data.behavioralIndicators.length > 0) {
-					setQuestionsLoading(true);
-					try {
-						const allQuestions: AssessmentQuestion[] = [];
-						
-						for (const indicator of data.behavioralIndicators) {
-							const indicatorQuestions = await assessmentQuestionsApi.getIndicatorQuestions(
-								competencyId, 
-								indicator.id
-							);
-							if (indicatorQuestions) {
-								allQuestions.push(...indicatorQuestions);
-							}
-						}
-						
-						setQuestions(allQuestions);
-					} catch {
-						setQuestions([]);
-					} finally {
-						setQuestionsLoading(false);
-					}
-				}
-			} catch {
-				// Handle error silently or show user-friendly error message
-			} finally {
-				setLoading(false);
+	const questions: AssessmentQuestion[] = [];
+	if (competency.behavioralIndicators && competency.behavioralIndicators.length > 0) {
+		for (const indicator of competency.behavioralIndicators) {
+			const indicatorQuestions = await assessmentQuestionsApi.getIndicatorQuestions(
+				competencyId, 
+				indicator.id
+			);
+			if (indicatorQuestions) {
+				questions.push(...indicatorQuestions);
 			}
 		}
-
-		fetchCompetency();
-	}, [competencyId]);
-
-	if (loading) {
-		return (
-			<div className="min-h-screen bg-background flex items-center justify-center">
-				<div className="animate-pulse text-muted-foreground">Loading...</div>
-			</div>
-		);
 	}
+
+	return { competency, questions };
+}
+
+export default async function CompetencyDetailPage({
+	params,
+}: CompetencyDetailPageProps) {
+		const { competencyId } = await params;
+	const { competency, questions } = await getCompetencyData(competencyId);
+
 
 	if (!competency) {
 		notFound();
@@ -215,205 +190,264 @@ export default function CompetencyDetailPage({
                                 )}
                             </TabsContent>
 
-                            <TabsContent value="questions" className="p-4 sm:p-6 space-y-4 sm:space-y-6 m-0 focus-visible:outline-none">
-                                {questionsLoading ? (
-                                    <div className="text-center py-8 sm:py-12">
-                                        <div className="animate-pulse">
-                                            <div className="mx-auto w-12 h-12 sm:w-16 sm:h-16 bg-muted rounded-full flex items-center justify-center mb-3 sm:mb-4">
-                                                <FilePen className="h-6 w-6 sm:h-8 sm:w-8 text-muted-foreground" />
-                                            </div>
-                                            <p className="text-sm text-muted-foreground">Loading questions...</p>
-                                        </div>
-                                    </div>
-                                ) : questions.length > 0 ? (
-                                    <div className="space-y-3 sm:space-y-4">
-                                        <div className="text-center mb-4 sm:mb-6">
-                                            <h3 className="text-base sm:text-lg font-medium text-foreground mb-2">
-                                                Assessment Questions ({questions.length})
-                                            </h3>
-                                            <p className="text-sm text-muted-foreground">
-                                                Questions for evaluating behavioral indicators
-                                            </p>
-                                        </div>
-                                        <div className="space-y-3 sm:space-y-4">
-                                            {questions.map((question) => (
-                                                <QuestionCard key={question.id} question={question} />
-                                            ))}
-                                        </div>
-                                    </div>
-                                ) : (
-                                    <div className="text-center py-8 sm:py-12">
-                                        <div className="mx-auto w-12 h-12 sm:w-16 sm:h-16 bg-muted rounded-full flex items-center justify-center mb-3 sm:mb-4">
-                                            <FilePen className="h-6 w-6 sm:h-8 sm:w-8 text-muted-foreground" />
-                                        </div>
-                                        <h3 className="text-base sm:text-lg font-medium text-foreground mb-2">
-                                            No Assessment Questions
-                                        </h3>
-                                        <p className="text-sm sm:text-base text-muted-foreground max-w-md mx-auto mb-4 sm:mb-6 px-4 leading-relaxed">
-                                            This competency doesn&apos;t have any assessment questions yet.
-                                            Questions help evaluate behavioral indicators.
-                                        </p>
-                                        <Button variant="outline" asChild className="touch-target">
-                                            <Link href="/assessment-questions">
-                                                <FilePen className="h-4 w-4 mr-2" />
-                                                Browse Questions
-                                            </Link>
-                                        </Button>
-                                    </div>
-                                )}
-                            </TabsContent>
-                        </Tabs>
-                    </Card>
+                            
+
+                            
+
+                            
+
+							<TabsContent value="questions" className="p-4 sm:p-6 space-y-4 sm:space-y-6 m-0 focus-visible:outline-none">
+
+								<Suspense fallback={<QuestionsListSkeleton />}>
+
+									{questions.length > 0 ? (
+
+										<QuestionsList questions={questions} />
+
+									) : (
+
+										<div className="text-center py-8 sm:py-12">
+
+											<div className="mx-auto w-12 h-12 sm:w-16 sm:h-16 bg-muted rounded-full flex items-center justify-center mb-3 sm:mb-4">
+
+												<FilePen className="h-6 w-6 sm:h-8 sm:w-8 text-muted-foreground" />
+
+											</div>
+
+											<h3 className="text-base sm:text-lg font-medium text-foreground mb-2">
+
+												No Assessment Questions
+
+											</h3>
+
+											<p className="text-sm sm:text-base text-muted-foreground max-w-md mx-auto mb-4 sm:mb-6 px-4 leading-relaxed">
+
+												This competency doesn&apos;t have any assessment questions yet.
+
+												Questions help evaluate behavioral indicators.
+
+											</p>
+
+											<Button variant="outline" asChild className="touch-target">
+
+												<Link href="/assessment-questions">
+
+													<FilePen className="h-4 w-4 mr-2" />
+
+													Browse Questions
+
+												</Link>
+
+											</Button>
+
+										</div>
+
+									)}
+
+								</Suspense>
+
+							</TabsContent>
+
+						</Tabs>
+
+					</Card>
+
 				</div>
+
+
 
 				{/* Details Card */}
+
 				<div className="space-y-6">
+
 					<Card>
+
 						<CardHeader>
+
 							<CardTitle className="flex items-center gap-2">
+
 								<Info className="w-5 h-5" />
+
 								Details
+
 							</CardTitle>
+
 						</CardHeader>
+
 						<CardContent className="grid gap-4 sm:grid-cols-2">
+
 							<div className="grid gap-1">
+
 								<div className="font-semibold text-muted-foreground">Category</div>
+
 								<div>{competency.category}</div>
+
 							</div>
+
 							<div className="grid gap-1">
+
 								<div className="font-semibold text-muted-foreground">Level</div>
+
 								<Badge variant="outline" className={levelToColor(competency.level)}>{competency.level}</Badge>
+
 							</div>
+
 							<div className="grid gap-1">
+
 								<div className="font-semibold text-muted-foreground">Approval Status</div>
+
 								<Badge variant="outline" className={approvalStatusToColor(competency.approvalStatus)}>{competency.approvalStatus.replace("_", " ")}</Badge>
+
 							</div>
+
 							<div className="grid gap-1">
+
 								<div className="font-semibold text-muted-foreground">Status</div>
+
 								<Badge variant={competency.isActive ? "default" : "secondary"}>
+
 									{competency.isActive ? "Active" : "Inactive"}
+
 								</Badge>
+
 							</div>
-                            <div className="grid gap-1">
+
+							<div className="grid gap-1">
+
 								<div className="font-semibold text-muted-foreground">Version</div>
+
 								<div>v{competency.version}</div>
+
 							</div>
+
 						</CardContent>
+
 					</Card>
+
 				</div>
+
 			</div>
+
 		</div>
+
 	);
+
 }
+
+
 
 function IndicatorCard({
+
 	indicator,
+
 }: {
+
 	indicator: BehavioralIndicator;
+
 }) {
+
 	return (
+
 		<Card className="bg-card shadow-sm border border-border hover:shadow-md transition-all duration-200 hover:border-border/80">
+
 			<CardHeader className="pb-3 sm:pb-4">
+
 				<div className="flex flex-col space-y-3 lg:flex-row lg:items-start lg:justify-between lg:space-y-0">
+
 					<div className="flex-1 min-w-0">
+
 						<CardTitle className="text-base sm:text-lg font-semibold text-foreground mb-2 line-clamp-2 leading-tight">
+
 							{indicator.title}
+
 						</CardTitle>
+
 						<p className="text-sm sm:text-base text-muted-foreground leading-relaxed line-clamp-3 sm:line-clamp-none">
+
 							{indicator.description}
+
 						</p>
+
 					</div>
+
 					<div className="flex flex-row gap-2 lg:flex-col lg:items-end shrink-0">
+
 						<Badge variant="outline" className="text-xs whitespace-nowrap">
+
 							Weight: {indicator.weight}
+
 						</Badge>
+
 						<Badge variant="secondary" className="text-xs whitespace-nowrap">
+
 							{indicator.observabilityLevel}
+
 						</Badge>
+
 					</div>
+
 				</div>
+
 			</CardHeader>
+
+
 
 			<CardContent className="pt-0">
+
 				<div className="border-t border-border pt-3 sm:pt-4">
+
 					<div className="flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-3">
+
 						<Button 
+
 							variant="outline" 
+
 							size="sm" 
+
 							asChild 
+
 							className="flex-1 sm:flex-none touch-target transition-colors"
+
 						>
+
 							<Link href={`/behavioral-indicators/${indicator.id}`}>
+
 								View Details
+
 							</Link>
+
 						</Button>
+
 						<Button 
+
 							variant="outline" 
+
 							size="sm" 
+
 							asChild 
+
 							className="flex-1 sm:flex-none touch-target transition-colors"
+
 						>
+
 							<Link href={`/behavioral-indicators/${indicator.id}/edit`}>
+
 								<Edit className="h-4 w-4 mr-2" />
+
 								Edit
+
 							</Link>
+
 						</Button>
+
 					</div>
+
 				</div>
+
 			</CardContent>
-		</Card>
-	);
-}
 
-function QuestionCard({
-	question,
-}: {
-	question: AssessmentQuestion;
-}) {
-	return (
-		<Card className="bg-card shadow-sm border border-border hover:shadow-md transition-all duration-200 hover:border-border/80">
-			<CardHeader className="pb-3 sm:pb-4">
-				<div className="flex flex-col space-y-3 lg:flex-row lg:items-start lg:justify-between lg:space-y-0">
-					<div className="flex-1 min-w-0">
-						<CardTitle className="text-base sm:text-lg font-semibold text-foreground mb-2 line-clamp-2 leading-tight">
-							{question.questionText}
-						</CardTitle>
-						<div className="flex flex-wrap gap-2 mt-2">
-							<Badge variant="outline" className="text-xs">
-								{question.questionType}
-							</Badge>
-							<Badge variant="secondary" className="text-xs">
-								{question.difficultyLevel}
-							</Badge>
-							{question.timeLimit && (
-								<Badge variant="outline" className="text-xs">
-									{question.timeLimit}s
-							</Badge>
-							)}
-						</div>
-					</div>
-				</div>
-			</CardHeader>
-
-			{question.answerOptions && question.answerOptions.length > 0 && (
-				<CardContent className="pt-0">
-					<div className="border-t border-border pt-3 sm:pt-4">
-						<p className="text-sm text-muted-foreground mb-2">Answer options:</p>
-						<div className="space-y-1">
-							{question.answerOptions.slice(0, 3).map((option, index) => (
-								<div key={index} className="text-sm text-foreground bg-muted/50 rounded px-2 py-1">
-									{option.text || option.label}
-								</div>
-							))}
-							{question.answerOptions.length > 3 && (
-								<p className="text-xs text-muted-foreground mt-2">
-									+{question.answerOptions.length - 3} more options
-								</p>
-							)}
-						</div>
-					</div>
-				</CardContent>
-			)}
 		</Card>
+
 	);
+
 }

@@ -25,7 +25,7 @@ import {
 } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { ProficiencyLevel, ApprovalStatus } from '../../enums/domain_enums';
-import { behavioralIndicatorsApi } from '@/services/api';
+import { updateIndicatorAction } from '@/app/actions';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -59,13 +59,17 @@ export function EditIndicatorForm({ indicator }: { indicator: BehavioralIndicato
   async function onSubmit(data: IndicatorFormValues) {
     setIsLoading(true);
     setError(null);
-    try {
-      await behavioralIndicatorsApi.updateIndicator(indicator.competencyId, indicator.id, data);
+
+    const result = await updateIndicatorAction(indicator.id, data);
+
+    setIsLoading(false);
+    if (result.success) {
+      // On success, navigate away or refresh
       router.push(`/behavioral-indicators/${indicator.id}`);
-    } catch (e: any) {
-      setError(e.message || 'An error occurred.');
-    } finally {
-      setIsLoading(false);
+      // Optionally, you can use router.refresh() if staying on the same page
+    } else {
+      // On failure, display the error message from the server action
+      setError(result.message);
     }
   }
 
@@ -160,10 +164,6 @@ export function EditIndicatorForm({ indicator }: { indicator: BehavioralIndicato
                       ))}
                     </SelectContent>
                   </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
                   <FormMessage />
                 </FormItem>
               )}

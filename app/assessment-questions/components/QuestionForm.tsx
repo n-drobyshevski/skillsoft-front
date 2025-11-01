@@ -55,11 +55,15 @@ export function QuestionForm({ question, competencyId, behavioralIndicatorId, on
       questionText: question?.questionText || '',
       questionType: question?.questionType || 'SINGLE_CHOICE',
       scoringRubric: question?.scoringRubric || '',
-      difficultyLevel: question?.difficultyLevel || DifficultyLevel.EASY,
-      isActive: question?.isActive || true,
-      orderIndex: question?.orderIndex || 0,
-      timeLimit: question?.timeLimit || 60,
-      answerOptions: question?.answerOptions || [],
+      difficultyLevel: question?.difficultyLevel || DifficultyLevel.BASIC,
+      isActive: question?.isActive ?? true,
+      orderIndex: question?.orderIndex ?? 0,
+      timeLimit: question?.timeLimit ?? 60,
+      answerOptions: question?.answerOptions?.map(opt => ({
+          text: opt.text || '',
+          score: opt.score ?? 0,
+          correct: opt.correct ?? false,
+      })) || [],
     },
   });
 
@@ -67,6 +71,8 @@ export function QuestionForm({ question, competencyId, behavioralIndicatorId, on
     control: form.control,
     name: "answerOptions",
   });
+
+  const questionType = form.watch('questionType');
 
   async function onSubmit(data: QuestionFormValues) {
     setIsLoading(true);
@@ -76,7 +82,7 @@ export function QuestionForm({ question, competencyId, behavioralIndicatorId, on
         toast.success("Question updated successfully!");
         router.push(`/assessment-questions/${question.id}`);
       } else {
-        await assessmentQuestionsApi.createQuestion(data, competencyId, behavioralIndicatorId);
+        await assessmentQuestionsApi.createQuestion(competencyId, behavioralIndicatorId, data);
         toast.success("Question created successfully!");
         router.push(`/behavioral-indicators/${behavioralIndicatorId}`);
       }
@@ -90,6 +96,116 @@ export function QuestionForm({ question, competencyId, behavioralIndicatorId, on
   const handlePreviewClick = () => {
     if (onUpdatePreview) {
       onUpdatePreview(form.getValues());
+    }
+  };
+
+  const renderAnswerOptions = () => {
+    switch (questionType) {
+      case 'MULTIPLE_CHOICE':
+      case 'SINGLE_CHOICE':
+        return (
+          <Card>
+            <CardHeader>
+              <CardTitle>Answer Options</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {fields.map((field, index) => (
+                <div key={field.id} className="flex items-end space-x-4 p-4 border rounded-lg bg-muted/50">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 flex-grow">
+                    <FormField
+                      control={form.control}
+                      name={`answerOptions.${index}.text`}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Option {index + 1} Text</FormLabel>
+                          <FormControl>
+                            <Input {...field} placeholder="e.g., Prioritize tasks" />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name={`answerOptions.${index}.score`}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Score</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="number"
+                              {...field}
+                              placeholder="e.g., 10"
+                              onChange={event => field.onChange(event.target.value === '' ? null : Number(event.target.value))}
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name={`answerOptions.${index}.correct`}
+                      render={({ field }) => (
+                        <FormItem className="flex flex-col items-start space-y-2 pt-2">
+                          <FormLabel>Correct?</FormLabel>
+                          <FormControl>
+                            <Switch checked={field.value} onCheckedChange={field.onChange} />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  <Button type="button" variant="ghost" size="icon" onClick={() => remove(index)} className="hover:bg-destructive/80 hover:text-destructive-foreground">
+                    <TrashIcon className="h-4 w-4" />
+                  </Button>
+                </div>
+              ))}
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="mt-4"
+                onClick={() => append({ text: "", score: 0, correct: false })}
+              >
+                Add Answer Option
+              </Button>
+            </CardContent>
+          </Card>
+        );
+      case 'TRUE_FALSE':
+        // Replace with a more specific UI for True/False questions
+        return (
+            <Card>
+                <CardHeader>
+                    <CardTitle>Answer</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <FormField
+                        control={form.control}
+                        name="answerOptions.0.correct"
+                        render={({ field }) => (
+                            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                                <FormLabel>Is the correct answer &quot;True&quot;?</FormLabel>
+                                <FormControl>
+                                    <Switch
+                                        checked={field.value}
+                                        onCheckedChange={(value) => {
+                                            field.onChange(value);
+                                            // You might want to manage the 'answerOptions' array here
+                                            // to ensure it has the correct structure for True/False.
+                                        }}
+                                    />
+                                </FormControl>
+                            </FormItem>
+                        )}
+                    />
+                </CardContent>
+            </Card>
+        );
+      case 'LIKERT_SCALE':
+        // A specific UI for Likert scale, maybe with a configurable number of points
+        return <Card><CardHeader><CardTitle>Likert Scale Options</CardTitle></CardHeader><CardContent><p>Likert scale UI to be implemented.</p></CardContent></Card>;
+      default:
+        return null;
     }
   };
 
@@ -212,67 +328,7 @@ export function QuestionForm({ question, competencyId, behavioralIndicatorId, on
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Answer Options</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {fields.map((field, index) => (
-              <div key={field.id} className="flex items-end space-x-4 p-4 border rounded-lg bg-muted/50">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 flex-grow">
-                    <FormField
-                      control={form.control}
-                      name={`answerOptions.${index}.text`}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Option {index + 1} Text</FormLabel>
-                          <FormControl>
-                            <Input {...field} placeholder="e.g., Prioritize tasks" />
-                          </FormControl>
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name={`answerOptions.${index}.score`}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Score</FormLabel>
-                          <FormControl>
-                            <Input type="number" {...field} placeholder="e.g., 10" />
-                          </FormControl>
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name={`answerOptions.${index}.correct`}
-                      render={({ field }) => (
-                        <FormItem className="flex flex-col items-start space-y-2 pt-2">
-                          <FormLabel>Correct?</FormLabel>
-                          <FormControl>
-                            <Switch checked={field.value} onCheckedChange={field.onChange} />
-                          </FormControl>
-                        </FormItem>
-                      )}
-                    />
-                </div>
-                <Button type="button" variant="ghost" size="icon" onClick={() => remove(index)} className="hover:bg-destructive/80 hover:text-destructive-foreground">
-                  <TrashIcon className="h-4 w-4" />
-                </Button>
-              </div>
-            ))}
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              className="mt-4"
-              onClick={() => append({ text: "", score: 0, correct: false })}
-            >
-              Add Answer Option
-            </Button>
-          </CardContent>
-        </Card>
+        {renderAnswerOptions()}
 
         <Card>
             <CardContent className="pt-6">

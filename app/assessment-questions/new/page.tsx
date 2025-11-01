@@ -1,7 +1,7 @@
 'use client';
 
 import { QuestionForm } from '../components/QuestionForm';
-import { PageHeader } from '@/app/components/PageHeader';
+import  PageHeader  from '../../../app/components/PageHeader';
 import { useSearchParams } from 'next/navigation';
 import { Suspense } from 'react';
 

@@ -61,11 +61,23 @@ export function IndicatorForm({ indicator, competencyId, onUpdatePreview }: { in
     setIsLoading(true);
     try {
       if (isEditMode) {
-        await behavioralIndicatorsApi.updateIndicator(indicator.competencyId, indicator.id, data);
+        const apiData = {
+          ...data,
+          level: data.observabilityLevel,
+          competencyId: indicator.competencyId,
+          orderIndex: data.orderIndex ?? 0,
+        };
+        await behavioralIndicatorsApi.updateIndicator(indicator.competencyId, indicator.id, apiData);
         toast.success("Indicator updated successfully!");
         router.push(`/behavioral-indicators/${indicator.id}`);
       } else if (competencyId) {
-        const newIndicator = await behavioralIndicatorsApi.createIndicator(competencyId, data);
+        const apiData = {
+          ...data,
+          level: data.observabilityLevel,
+          competencyId: competencyId,
+          orderIndex: data.orderIndex ?? 0,
+        };
+        const newIndicator = await behavioralIndicatorsApi.createIndicator(competencyId, apiData);
         toast.success("Indicator created successfully!");
         router.push(`/competencies/${competencyId}`);
       }

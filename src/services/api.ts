@@ -1,11 +1,11 @@
 import { cache } from 'react';
-import { revalidateCompetencyTags, revalidateIndicatorTags, revalidateQuestionTags } from '@/app/actions';
+import { revalidateCompetencyTags, revalidateQuestionTags } from '@/app/actions';
+
 import { AssessmentQuestion, BehavioralIndicator, Competency } from '../../app/interfaces/domain-interfaces';
 
 const getApiBaseUrl = () => {
-    // Use the server-side URL when on the server, otherwise use the public one.
-    const baseUrl = "https://" +  process.env.NEXT_PUBLIC_API_URL + "/api";
-    return baseUrl || "http://localhost:8080"; // Fallback for local development
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+    return apiUrl ? `https://${apiUrl}/api` : "http://localhost:8080/api";
 };
 
 // Input types for API operations
@@ -69,7 +69,7 @@ async function handleResponse<T>(response: Response): Promise<T> {
 }
 
 // API fetch wrapper with caching and revalidation
-async function fetchApi<T>(
+export async function fetchApi<T>(
     endpoint: string,
     options: RequestInit & {
         tags?: string[];
@@ -79,7 +79,7 @@ async function fetchApi<T>(
 ): Promise<T> {
     const { tags = [], revalidate, cache = 'force-cache', ...fetchOptions } = options;
     // Note: Removed console.log for production security
-    const response = await fetch(`${getApiBaseUrl()}/api${endpoint}`, {
+    const response = await fetch(`${getApiBaseUrl()}${endpoint}`, {
         ...fetchOptions,
         headers: {
             'Content-Type': 'application/json',
@@ -177,7 +177,6 @@ export const behavioralIndicatorsApi = {
       body: JSON.stringify(data),
       cache: "no-store",
     });
-    await revalidateIndicatorTags(competencyId);
     return result;
   },
 
@@ -194,7 +193,6 @@ export const behavioralIndicatorsApi = {
         cache: "no-store",
       }
     );
-    await revalidateIndicatorTags(competencyId, indicatorId);
     return result;
   },
 
@@ -203,7 +201,6 @@ export const behavioralIndicatorsApi = {
       method: "DELETE",
       cache: "no-store",
     });
-    await revalidateIndicatorTags(competencyId, indicatorId);
   },
 };
 
