@@ -69,3 +69,20 @@ export async function revalidateQuestionTags(questionId: string, competencyId?: 
     console.error('Error revalidating question paths:', error);
   }
 }
+
+export async function updateIndicatorQuestionsAction(indicatorId: string, questionIds: string[]) {
+  try {
+    await fetchApi(`/behavioral-indicators/${indicatorId}/questions`, {
+      method: 'PUT',
+      body: JSON.stringify({ questionIds }),
+      cache: 'no-store',
+    });
+
+    revalidatePath(`/behavioral-indicators/${indicatorId}`);
+
+    return { success: true, message: 'Indicator questions updated successfully.' };
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred.';
+    return { success: false, message: `Failed to update indicator questions: ${errorMessage}` };
+  }
+}

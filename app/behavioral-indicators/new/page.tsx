@@ -11,20 +11,22 @@ function NewIndicatorPageContent() {
 
   if (!competencyId) {
     return (
-      <div className="container mx-auto py-8">
+      <div className="container mx-auto max-w-4xl px-4 py-6 sm:px-6 lg:px-8">
         <PageHeader
           title="Error"
           crumbs={[{ href: '/competencies', name: 'Competencies' }, { name: 'New Indicator' }]}
         />
-        <div className="mt-8">
-          <p>Competency ID is missing. Please go back to a competency and try again.</p>
+        <div className="mt-6 sm:mt-8 rounded-lg border border-destructive/20 bg-destructive/5 p-4 sm:p-6">
+          <p className="text-sm text-muted-foreground">
+            Competency ID is missing. Please go back to a competency and try again.
+          </p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto py-8">
+    <div className="container mx-auto max-w-4xl px-4 py-6 sm:px-6 lg:px-8">
       <PageHeader
         title="Create New Behavioral Indicator"
         crumbs={[
@@ -33,7 +35,7 @@ function NewIndicatorPageContent() {
           { name: 'New Indicator' },
         ]}
       />
-      <div className="mt-8">
+      <div className="mt-6 sm:mt-8">
         <IndicatorForm competencyId={competencyId} />
       </div>
     </div>

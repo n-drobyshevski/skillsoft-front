@@ -34,7 +34,7 @@ import { toast } from "sonner";
 
 type CompetencyFormValues = z.infer<typeof competencySchema>;
 
-export function CompetencyForm({ competency, onUpdatePreview }: { competency?: Competency, onUpdatePreview?: (data: any) => void }) {
+export function CompetencyForm({ competency, onUpdatePreview }: { competency?: Competency, onUpdatePreview?: (data: CompetencyFormValues) => void }) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const isEditMode = !!competency;
@@ -63,8 +63,9 @@ export function CompetencyForm({ competency, onUpdatePreview }: { competency?: C
         toast.success("Competency created successfully!");
         router.push(`/competencies/${newCompetency.id}`);
       }
-    } catch (e: any) {
-      toast.error(e.message || 'An error occurred.');
+    } catch (e: unknown) {
+      const errorMessage = e instanceof Error ? e.message : 'An error occurred.';
+      toast.error(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -121,9 +122,9 @@ export function CompetencyForm({ competency, onUpdatePreview }: { competency?: C
         <Card>
           <CardHeader>
             <CardTitle>Details</CardTitle>
-            <CardDescription>Categorize and define the competency's properties.</CardDescription>
+            <CardDescription>Categorize and define the competency&apos;s properties.</CardDescription>
           </CardHeader>
-          <CardContent className="grid md:grid-cols-2 gap-6">
+          <CardContent className="grid gap-6 sm:grid-cols-2">
             <FormField
               control={form.control}
               name="category"
@@ -176,11 +177,11 @@ export function CompetencyForm({ competency, onUpdatePreview }: { competency?: C
               control={form.control}
               name="approvalStatus"
               render={({ field }) => (
-                <FormItem>
+                <FormItem className="sm:col-span-2">
                   <FormLabel>Approval Status</FormLabel>
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
-                      <SelectTrigger>
+                      <SelectTrigger className="sm:max-w-sm">
                         <SelectValue placeholder="Select a status" />
                       </SelectTrigger>
                     </FormControl>
@@ -221,16 +222,16 @@ export function CompetencyForm({ competency, onUpdatePreview }: { competency?: C
           </CardContent>
         </Card>
 
-        <div className="flex justify-end space-x-4 pt-4">
+        <div className="flex flex-col gap-3 pt-4 sm:flex-row sm:justify-end sm:space-x-4">
           {onUpdatePreview && (
-            <Button type="button" variant="secondary" onClick={handlePreviewClick} disabled={isLoading}>
+            <Button type="button" variant="secondary" onClick={handlePreviewClick} disabled={isLoading} className="w-full sm:w-auto">
               Update Preview
             </Button>
           )}
-          <Button type="button" variant="outline" onClick={() => router.back()} disabled={isLoading}>
+          <Button type="button" variant="outline" onClick={() => router.back()} disabled={isLoading} className="w-full sm:w-auto">
             Cancel
           </Button>
-          <Button type="submit" disabled={isLoading}>
+          <Button type="submit" disabled={isLoading} className="w-full sm:w-auto">
             {isLoading ? (isEditMode ? 'Saving...' : 'Creating...') : (isEditMode ? 'Save Changes' : 'Create Competency')}
           </Button>
         </div>

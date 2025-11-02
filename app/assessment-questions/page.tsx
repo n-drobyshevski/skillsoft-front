@@ -1,9 +1,12 @@
 import React, { Suspense } from "react";
+import Link from "next/link";
 import {
+  Plus,
 } from "lucide-react";
 
 import { AssessmentQuestion } from "../interfaces/domain-interfaces";
 import { assessmentQuestionsApi } from "@/services/api";
+import { Button } from "@/components/ui/button";
 import FlexibleStatsCards from "../components/FlexibleStatsCards";
 import PageHeader from "../components/PageHeader";
 import QuestionsTable from "./components/QuestionsTable";
@@ -36,7 +39,16 @@ export default async function AssessmentQuestionsPage() {
       <PageHeader 
         title="Assessment Questions"
         description="Create and manage assessment questions for competency evaluation"
-      />
+      >
+        <div className="flex items-center gap-2">
+          <Link href="/assessment-questions/new">
+            <Button variant="outline">
+              <Plus className="mr-2 h-4 w-4" />
+              Create Question
+            </Button>
+          </Link>
+        </div>
+      </PageHeader>
       
       {/* Stats Cards */}
       <FlexibleStatsCards
@@ -45,7 +57,7 @@ export default async function AssessmentQuestionsPage() {
           stats: {
             total: questions.length,
             withIndicators: Math.floor(questions.length * 0.85),
-            averageScore: questions.length > 0 ? Math.round((Math.random() * 30 + 60) * 10) / 10 : 0,
+            averageScore: questions.length > 0 ? 75.5 : 0,
             hardQuestions: questions.filter(q => q.difficultyLevel === "EXPERT" || q.difficultyLevel === "ADVANCED").length,
             trend: {
               value: "+8%",

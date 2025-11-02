@@ -16,6 +16,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import {
   Select,
   SelectContent,
@@ -27,7 +28,7 @@ import { Switch } from '@/components/ui/switch';
 import { DifficultyLevel } from '../../enums/domain_enums';
 import { assessmentQuestionsApi } from '@/services/api';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { TrashIcon } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from "sonner";
@@ -44,7 +45,12 @@ const questionTypes = [
   'SITUATIONAL_JUDGMENT',
 ] as const;
 
-export function QuestionForm({ question, competencyId, behavioralIndicatorId, onUpdatePreview }: { question?: AssessmentQuestion, competencyId: string, behavioralIndicatorId: string, onUpdatePreview?: (data: any) => void }) {
+export function QuestionForm({ question, competencyId, behavioralIndicatorId, onUpdatePreview }: { 
+  question?: AssessmentQuestion; 
+  competencyId: string; 
+  behavioralIndicatorId: string; 
+  onUpdatePreview?: (data: QuestionFormValues) => void; 
+}) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const isEditMode = !!question;
@@ -73,6 +79,22 @@ export function QuestionForm({ question, competencyId, behavioralIndicatorId, on
   });
 
   const questionType = form.watch('questionType');
+  const likertPoints = 5;
+
+  useEffect(() => {
+    if (questionType === 'LIKERT_SCALE') {
+      const currentLength = fields.length;
+      if (likertPoints > currentLength) {
+        for (let i = currentLength; i < likertPoints; i++) {
+          append({ text: (i + 1).toString(), value: i + 1, score: i + 1 });
+        }
+      } else if (likertPoints < currentLength) {
+        for (let i = currentLength - 1; i >= likertPoints; i--) {
+          remove(i);
+        }
+      }
+    }
+  }, [questionType, append, remove, fields.length]);
 
   async function onSubmit(data: QuestionFormValues) {
     setIsLoading(true);
@@ -86,8 +108,9 @@ export function QuestionForm({ question, competencyId, behavioralIndicatorId, on
         toast.success("Question created successfully!");
         router.push(`/behavioral-indicators/${behavioralIndicatorId}`);
       }
-    } catch (e: any) {
-      toast.error(e.message || "An error occurred.");
+    } catch (e: unknown) {
+      const errorMessage = e instanceof Error ? e.message : "An error occurred.";
+      toast.error(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -101,7 +124,6 @@ export function QuestionForm({ question, competencyId, behavioralIndicatorId, on
 
   const renderAnswerOptions = () => {
     switch (questionType) {
-      case 'MULTIPLE_CHOICE':
       case 'SINGLE_CHOICE':
         return (
           <Card>
@@ -110,31 +132,31 @@ export function QuestionForm({ question, competencyId, behavioralIndicatorId, on
             </CardHeader>
             <CardContent className="space-y-4">
               {fields.map((field, index) => (
-                <div key={field.id} className="flex items-end space-x-4 p-4 border rounded-lg bg-muted/50">
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 flex-grow">
-                    <FormField
-                      control={form.control}
-                      name={`answerOptions.${index}.text`}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Option {index + 1} Text</FormLabel>
-                          <FormControl>
-                            <Input {...field} placeholder="e.g., Prioritize tasks" />
-                          </FormControl>
-                        </FormItem>
-                      )}
-                    />
+                <div key={field.id} className="space-y-3 p-3 border rounded-lg bg-muted/50 sm:space-y-0 sm:flex sm:items-end sm:space-x-2">
+                  <FormField
+                    control={form.control}
+                    name={`answerOptions.${index}.text`}
+                    render={({ field }) => (
+                      <FormItem className="grow">
+                        <FormLabel>Option {index + 1} Text</FormLabel>
+                        <FormControl>
+                          <Input {...field} placeholder="e.g., Prioritize tasks" />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                  <div className="flex items-end space-x-2 sm:space-x-2">
                     <FormField
                       control={form.control}
                       name={`answerOptions.${index}.score`}
                       render={({ field }) => (
-                        <FormItem>
+                        <FormItem className="w-20 sm:w-24">
                           <FormLabel>Score</FormLabel>
                           <FormControl>
                             <Input
                               type="number"
                               {...field}
-                              placeholder="e.g., 10"
+                              placeholder="10"
                               onChange={event => field.onChange(event.target.value === '' ? null : Number(event.target.value))}
                             />
                           </FormControl>
@@ -145,26 +167,107 @@ export function QuestionForm({ question, competencyId, behavioralIndicatorId, on
                       control={form.control}
                       name={`answerOptions.${index}.correct`}
                       render={({ field }) => (
-                        <FormItem className="flex flex-col items-start space-y-2 pt-2">
-                          <FormLabel>Correct?</FormLabel>
+                        <FormItem className="flex flex-col items-center min-w-[60px]">
+                          <FormLabel className="text-xs">Correct?</FormLabel>
                           <FormControl>
                             <Switch checked={field.value} onCheckedChange={field.onChange} />
                           </FormControl>
                         </FormItem>
                       )}
                     />
+                    <Button 
+                      type="button" 
+                      variant="ghost" 
+                      size="icon" 
+                      onClick={() => remove(index)} 
+                      className="hover:bg-destructive/80 hover:text-destructive-foreground h-9 w-9 shrink-0"
+                    >
+                      <TrashIcon className="h-4 w-4" />
+                    </Button>
                   </div>
-                  <Button type="button" variant="ghost" size="icon" onClick={() => remove(index)} className="hover:bg-destructive/80 hover:text-destructive-foreground">
-                    <TrashIcon className="h-4 w-4" />
-                  </Button>
                 </div>
               ))}
               <Button
                 type="button"
                 variant="outline"
                 size="sm"
-                className="mt-4"
-                onClick={() => append({ text: "", score: 0, correct: false })}
+                className="mt-4 w-full sm:w-auto"
+                onClick={() => append({ text: "", score: fields.length + 1, correct: false })}
+              >
+                Add Answer Option
+              </Button>
+            </CardContent>
+          </Card>
+        );
+      case 'SITUATIONAL_JUDGMENT':
+        return (
+          <Card>
+            <CardHeader>
+              <CardTitle>Answer Options</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {fields.map((field, index) => (
+                <div key={field.id} className="space-y-3 p-3 border rounded-lg bg-muted/50 sm:space-y-0 sm:flex sm:items-end sm:space-x-2">
+                  <FormField
+                    control={form.control}
+                    name={`answerOptions.${index}.text`}
+                    render={({ field }) => (
+                      <FormItem className="grow">
+                        <FormLabel>Option {index + 1} Text</FormLabel>
+                        <FormControl>
+                          <Textarea {...field} placeholder="e.g., Describe the action you would take." className="min-h-20" />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                  <div className="flex items-end space-x-2 sm:space-x-2">
+                    <FormField
+                      control={form.control}
+                      name={`answerOptions.${index}.score`}
+                      render={({ field }) => (
+                        <FormItem className="w-20 sm:w-24">
+                          <FormLabel>Score</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="number"
+                              {...field}
+                              placeholder="10"
+                              onChange={event => field.onChange(event.target.value === '' ? null : Number(event.target.value))}
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name={`answerOptions.${index}.correct`}
+                      render={({ field }) => (
+                        <FormItem className="flex flex-col items-center min-w-[60px]">
+                          <FormLabel className="text-xs">Correct?</FormLabel>
+                          <FormControl>
+                            <Switch checked={field.value} onCheckedChange={field.onChange} />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                    <Button 
+                      type="button" 
+                      variant="ghost" 
+                      size="icon" 
+                      onClick={() => remove(index)} 
+                      className="hover:bg-destructive/80 hover:text-destructive-foreground h-9 w-9 shrink-0"
+                    >
+                      <TrashIcon className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              ))}
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="mt-4 w-full sm:w-auto"
+                onClick={() => append({ text: "", score: fields.length + 1, correct: false })}
               >
                 Add Answer Option
               </Button>
@@ -202,8 +305,47 @@ export function QuestionForm({ question, competencyId, behavioralIndicatorId, on
             </Card>
         );
       case 'LIKERT_SCALE':
-        // A specific UI for Likert scale, maybe with a configurable number of points
-        return <Card><CardHeader><CardTitle>Likert Scale Options</CardTitle></CardHeader><CardContent><p>Likert scale UI to be implemented.</p></CardContent></Card>;
+        return (
+          <Card>
+            <CardHeader>
+              <CardTitle>Likert Scale Options</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {fields.map((field, index) => (
+                <div key={field.id} className="space-y-3 sm:space-y-0 sm:flex sm:items-end sm:space-x-4">
+                    <FormField
+                      control={form.control}
+                      name={`answerOptions.${index}.text`}
+                      render={({ field }) => (
+                        <FormItem className="grow">
+                          <FormLabel>Label for Point {index + 1}</FormLabel>
+                          <FormControl>
+                            <Input {...field} />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name={`answerOptions.${index}.score`}
+                      render={({ field }) => (
+                        <FormItem className="w-20 sm:w-24">
+                          <FormLabel>Score</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="number"
+                              {...field}
+                              onChange={event => field.onChange(event.target.value === '' ? null : Number(event.target.value))}
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+        );
       default:
         return null;
     }
@@ -224,7 +366,7 @@ export function QuestionForm({ question, competencyId, behavioralIndicatorId, on
                 <FormItem>
                   <FormLabel>Question Text</FormLabel>
                   <FormControl>
-                    <Input placeholder="e.g., How do you handle tight deadlines?" {...field} />
+                    <Textarea placeholder="e.g., How do you handle tight deadlines?" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -261,15 +403,15 @@ export function QuestionForm({ question, competencyId, behavioralIndicatorId, on
           <CardHeader>
             <CardTitle>Details</CardTitle>
           </CardHeader>
-          <CardContent className="grid md:grid-cols-2 gap-6">
+          <CardContent className="grid gap-6 sm:grid-cols-2">
             <FormField
               control={form.control}
               name="scoringRubric"
               render={({ field }) => (
-                <FormItem>
+                <FormItem className="sm:col-span-2">
                   <FormLabel>Scoring Rubric</FormLabel>
                   <FormControl>
-                    <Input placeholder="e.g., Based on clarity and feasibility" {...field} />
+                    <Textarea placeholder="e.g., Based on clarity and feasibility" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -306,7 +448,11 @@ export function QuestionForm({ question, competencyId, behavioralIndicatorId, on
                 <FormItem>
                   <FormLabel>Order Index</FormLabel>
                   <FormControl>
-                    <Input type="number" {...field} />
+                    <Input 
+                      type="number" 
+                      {...field}
+                      onChange={event => field.onChange(event.target.value === '' ? 0 : Number(event.target.value))}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -316,10 +462,14 @@ export function QuestionForm({ question, competencyId, behavioralIndicatorId, on
               control={form.control}
               name="timeLimit"
               render={({ field }) => (
-                <FormItem>
+                <FormItem className="sm:col-start-2">
                   <FormLabel>Time Limit (seconds)</FormLabel>
                   <FormControl>
-                    <Input type="number" {...field} />
+                    <Input 
+                      type="number" 
+                      {...field}
+                      onChange={event => field.onChange(event.target.value === '' ? 60 : Number(event.target.value))}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -355,16 +505,16 @@ export function QuestionForm({ question, competencyId, behavioralIndicatorId, on
             </CardContent>
         </Card>
 
-        <div className="flex justify-end space-x-4 pt-4">
+        <div className="flex flex-col gap-3 pt-4 sm:flex-row sm:justify-end sm:space-x-4">
           {onUpdatePreview && (
-            <Button type="button" variant="secondary" onClick={handlePreviewClick} disabled={isLoading}>
+            <Button type="button" variant="secondary" onClick={handlePreviewClick} disabled={isLoading} className="w-full sm:w-auto">
               Update Preview
             </Button>
           )}
-          <Button type="button" variant="outline" onClick={() => router.back()} disabled={isLoading}>
+          <Button type="button" variant="outline" onClick={() => router.back()} disabled={isLoading} className="w-full sm:w-auto">
             Cancel
           </Button>
-          <Button type="submit" disabled={isLoading}>
+          <Button type="submit" disabled={isLoading} className="w-full sm:w-auto">
             {isLoading ? (isEditMode ? 'Saving...' : 'Creating...') : (isEditMode ? 'Save Changes' : 'Create Question')}
           </Button>
         </div>

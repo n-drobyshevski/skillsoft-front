@@ -144,7 +144,7 @@ export function IndicatorForm({ indicator, competencyId, onUpdatePreview }: { in
             <CardTitle>Classification</CardTitle>
             <CardDescription>Help categorize and define the indicator's properties.</CardDescription>
           </CardHeader>
-          <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <FormField
               control={form.control}
               name="observabilityLevel"
@@ -212,7 +212,7 @@ export function IndicatorForm({ indicator, competencyId, onUpdatePreview }: { in
               control={form.control}
               name="orderIndex"
               render={({ field }) => (
-                <FormItem>
+                <FormItem className="sm:col-start-1 lg:col-start-auto">
                   <FormLabel>Order Index</FormLabel>
                   <FormControl>
                     <Input type="number" placeholder="e.g., 1" {...field} 
@@ -265,7 +265,7 @@ export function IndicatorForm({ indicator, competencyId, onUpdatePreview }: { in
           <CardHeader>
             <CardTitle>Status</CardTitle>
           </CardHeader>
-          <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
+          <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-2 items-start">
             <FormField
               control={form.control}
               name="approvalStatus"
@@ -314,16 +314,16 @@ export function IndicatorForm({ indicator, competencyId, onUpdatePreview }: { in
           </CardContent>
         </Card>
 
-        <div className="flex justify-end space-x-2 pt-2">
+        <div className="flex flex-col gap-3 pt-4 sm:flex-row sm:justify-end sm:space-x-2">
           {onUpdatePreview && (
-            <Button type="button" variant="secondary" onClick={handlePreviewClick} disabled={isLoading}>
+            <Button type="button" variant="secondary" onClick={handlePreviewClick} disabled={isLoading} className="w-full sm:w-auto">
               Update Preview
             </Button>
           )}
-          <Button type="button" variant="outline" onClick={() => router.back()} disabled={isLoading}>
+          <Button type="button" variant="outline" onClick={() => router.back()} disabled={isLoading} className="w-full sm:w-auto">
             Cancel
           </Button>
-          <Button type="submit" disabled={isLoading}>
+          <Button type="submit" disabled={isLoading} className="w-full sm:w-auto">
             {isLoading ? (isEditMode ? 'Saving...' : 'Creating...') : (isEditMode ? 'Save Changes' : 'Create Indicator')}
           </Button>
         </div>

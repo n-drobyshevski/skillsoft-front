@@ -124,6 +124,7 @@ const questionTypeToIcon = (category: string) => {
     ['SITUATIONAL_JUDGMENT', Gavel],
     ['LIKERT_SCALE', ChartColumn],
     ['OPEN_ENDED', Pencil],
+    ['OPEN_TEXT', Pencil],
     ['TRUE_FALSE', BadgeQuestionMark],
   ]);
   
@@ -133,6 +134,8 @@ const questionTypeToIcon = (category: string) => {
 
 const questionDifficultyToColor = (difficulty: DifficultyLevel): string => {
   switch (difficulty) {
+    case DifficultyLevel.FOUNDATIONAL:
+      return COMMON_COLORS.PROFICIENT; // Green for easy
     case DifficultyLevel.BASIC:
       return COMMON_COLORS.PROFICIENT; // Green for easy
     case DifficultyLevel.INTERMEDIATE:
@@ -163,4 +166,25 @@ const biLevelToColor = (level: string): string => {
 			return COMMON_COLORS.NOVICE;
 	}
 };
-export { competencyCategoryToIcon, competencyProficiencyLevelToColor, levelToNumber, levelToColor, questionTypeToIcon, questionDifficultyToColor, biLevelToColor, approvalStatusToColor };
+const questionTypeToColor = (type: string): string => {
+  switch (type) {
+    case 'MULTIPLE_CHOICE':
+      return 'border-blue-500/30 text-blue-700 bg-blue-50/90 dark:bg-blue-950/90 dark:text-blue-200 dark:border-blue-400/30';
+    case 'SINGLE_CHOICE':
+      return 'border-indigo-500/30 text-indigo-700 bg-indigo-50/90 dark:bg-indigo-950/90 dark:text-indigo-200 dark:border-indigo-400/30';
+    case 'TRUE_FALSE':
+      return 'border-violet-500/30 text-violet-700 bg-violet-50/90 dark:bg-violet-950/90 dark:text-violet-200 dark:border-violet-400/30';
+    case 'OPEN_TEXT':
+      return 'border-orange-500/30 text-orange-700 bg-orange-50/90 dark:bg-orange-950/90 dark:text-orange-200 dark:border-orange-400/30';
+    case 'SCENARIO_BASED':
+      return 'border-purple-500/30 text-purple-700 bg-purple-50/90 dark:bg-purple-950/90 dark:text-purple-200 dark:border-purple-400/30';
+    case 'LIKERT_SCALE':
+      return 'border-teal-500/30 text-teal-700 bg-teal-50/90 dark:bg-teal-950/90 dark:text-teal-200 dark:border-teal-400/30';
+    case 'SITUATIONAL_JUDGMENT':
+      return 'border-pink-500/30 text-pink-700 bg-pink-50/90 dark:bg-pink-950/90 dark:text-pink-200 dark:border-pink-400/30';
+    default:
+      return 'border-border text-muted-foreground bg-muted/50';
+  }
+};
+
+export { competencyCategoryToIcon, competencyProficiencyLevelToColor, levelToNumber, levelToColor, questionTypeToIcon, questionDifficultyToColor, questionTypeToColor, biLevelToColor, approvalStatusToColor };

@@ -8,6 +8,12 @@ const getApiBaseUrl = () => {
     return apiUrl ? `https://${apiUrl}/api` : "http://localhost:8080/api";
 };
 
+// List of API endpoints that return arrays
+const QUESTIONS_ENDPOINT = '/questions';
+const COMPETENCIES_ENDPOINT = '/competencies';
+const BEHAVIORAL_INDICATORS_ENDPOINT = '/behavioral-indicators';
+const LIST_ENDPOINTS = [QUESTIONS_ENDPOINT, COMPETENCIES_ENDPOINT, BEHAVIORAL_INDICATORS_ENDPOINT];
+
 // Input types for API operations
 interface CompetencyInput {
     name: string;
@@ -30,11 +36,19 @@ interface IndicatorInput {
 interface QuestionInput {
     questionText: string;
     questionType: string;
-    difficulty?: string;
-    behavioralIndicatorId?: string;
-    options?: string[];
-    correctAnswer?: string;
-    [key: string]: unknown;
+    answerOptions?: Array<{
+        text?: string;
+        label?: string;
+        value?: number;
+        score?: number;
+        correct?: boolean;
+        explanation?: string;
+    }>;
+    scoringRubric: string;
+    timeLimit?: number;
+    difficultyLevel: string;
+    isActive: boolean;
+    orderIndex: number;
 }
 
 
@@ -78,28 +92,51 @@ export async function fetchApi<T>(
     } = {}
 ): Promise<T> {
     const { tags = [], revalidate, cache = 'force-cache', ...fetchOptions } = options;
-    // Note: Removed console.log for production security
-    const response = await fetch(`${getApiBaseUrl()}${endpoint}`, {
-        ...fetchOptions,
-        headers: {
-            'Content-Type': 'application/json',
-            ...fetchOptions.headers,
-        },
-        next: {
-            tags,
-            revalidate,
-        },
-        cache,
-        mode: 'cors',
-        credentials: 'include',
-    });
+    
+    try {
+        // Note: Removed console.log for production security
+        const response = await fetch(`${getApiBaseUrl()}${endpoint}`, {
+            ...fetchOptions,
+            headers: {
+                'Content-Type': 'application/json',
+                ...fetchOptions.headers,
+            },
+            next: {
+                tags,
+                revalidate,
+            },
+            cache,
+            mode: 'cors',
+            credentials: 'include',
+        });
 
-    return handleResponse<T>(response);
+        return handleResponse<T>(response);
+    } catch (error) {
+        // Handle connection errors gracefully during build time
+        if (error instanceof Error) {
+            // Handle CORS errors
+            if (error.message.includes('CORS') || error.message.includes('NetworkError') || error.message.includes('Failed to fetch')) {
+                const corsError: ApiError = new Error(`CORS error when accessing ${getApiBaseUrl()}${endpoint}. Check backend CORS configuration.`);
+                corsError.code = 'CORS_ERROR';
+                throw corsError;
+            }
+            
+            // Handle connection errors during build
+            if (error.message.includes('ECONNREFUSED') || error.message.includes('fetch failed')) {
+                // Return empty array for list endpoints, null for single item endpoints
+                if (LIST_ENDPOINTS.some(path => endpoint.includes(path))) {
+                    return [] as T;
+                }
+                return null as T;
+            }
+        }
+        throw error;
+    }
 }
 
 // Cached competencies fetcher
 const getCompetenciesCached = cache(async () : Promise<Competency[] | null> => {
-    return fetchApi('/competencies', {
+    return fetchApi(COMPETENCIES_ENDPOINT, {
         tags: ['competencies'],
         revalidate: 60, // Revalidate every minute
     });
@@ -116,7 +153,7 @@ export const competenciesApi = {
     },
 
     createCompetency: async (data: CompetencyInput): Promise<Competency> => {
-        const result = await fetchApi<Competency>('/competencies', {
+        const result = await fetchApi<Competency>(COMPETENCIES_ENDPOINT, {
             method: 'POST',
             body: JSON.stringify(data),
             cache: 'no-store',
@@ -172,12 +209,11 @@ export const behavioralIndicatorsApi = {
   },
 
   createIndicator: async (competencyId: string, data: IndicatorInput): Promise<BehavioralIndicator> => {
-    const result = await fetchApi<BehavioralIndicator>(`/behavioral-indicators`, {
+    return fetchApi<BehavioralIndicator>(`/behavioral-indicators`, {
       method: "POST",
       body: JSON.stringify(data),
       cache: "no-store",
     });
-    return result;
   },
 
   updateIndicator: async (
@@ -185,7 +221,7 @@ export const behavioralIndicatorsApi = {
     indicatorId: string,
     data: IndicatorInput
   ): Promise<BehavioralIndicator> => {
-    const result = await fetchApi<BehavioralIndicator>(
+    return fetchApi<BehavioralIndicator>(
       `/behavioral-indicators/${indicatorId}`,
       {
         method: "PUT",
@@ -193,13 +229,20 @@ export const behavioralIndicatorsApi = {
         cache: "no-store",
       }
     );
-    return result;
   },
 
   deleteIndicator: async (competencyId: string, indicatorId: string) => {
     await fetchApi(`/behavioral-indicators/${indicatorId}`, {
       method: "DELETE",
       cache: "no-store",
+    });
+  },
+
+  updateIndicatorQuestions: async (indicatorId: string, questionIds: string[]) => {
+    return fetchApi(`/behavioral-indicators/${indicatorId}/questions`, {
+      method: 'PUT',
+      body: JSON.stringify({ questionIds }),
+      cache: 'no-store',
     });
   },
 };
@@ -245,11 +288,70 @@ export const assessmentQuestionsApi = {
     behavioralIndicatorId: string,
     data: QuestionInput
   ): Promise<AssessmentQuestion> => {
+    // Map frontend enum values to backend enum values
+    const mapQuestionType = (frontendType: string): string => {
+      switch (frontendType) {
+        case 'SINGLE_CHOICE':
+        case 'MULTIPLE_CHOICE':
+        case 'TRUE_FALSE':
+          return 'MULTIPLE_CHOICE';
+        case 'OPEN_ENDED':
+          return 'OPEN_TEXT';
+        case 'SCENARIO_BASED':
+          return 'SITUATIONAL_JUDGMENT';
+        case 'LIKERT_SCALE':
+          return 'LIKERT_SCALE';
+        case 'SITUATIONAL_JUDGMENT':
+          return 'SITUATIONAL_JUDGMENT';
+        default:
+          return 'MULTIPLE_CHOICE';
+      }
+    };
+
+    const mapDifficultyLevel = (frontendLevel: string): string => {
+      switch (frontendLevel) {
+        case 'BASIC':
+        case 'FOUNDATIONAL':
+          return 'FOUNDATIONAL';
+        case 'INTERMEDIATE':
+          return 'INTERMEDIATE';
+        case 'ADVANCED':
+          return 'ADVANCED';
+        case 'EXPERT':
+          return 'EXPERT';
+        default:
+          return 'FOUNDATIONAL';
+      }
+    };
+
+    // Create a clean payload that exactly matches the backend DTO
+    const payload = {
+      id: null, // Backend will generate this
+      behavioralIndicatorId: null, // Sent as query param, not in body
+      questionText: String(data.questionText || ''),
+      questionType: mapQuestionType(String(data.questionType || 'SINGLE_CHOICE')),
+      answerOptions: Array.isArray(data.answerOptions) ? data.answerOptions.map(option => {
+        const cleanOption: Record<string, unknown> = {};
+        if (option.text !== undefined) cleanOption.text = String(option.text);
+        if (option.label !== undefined) cleanOption.label = String(option.label);
+        if (option.value !== undefined) cleanOption.value = Number(option.value);
+        if (option.score !== undefined) cleanOption.score = Number(option.score);
+        if (option.correct !== undefined) cleanOption.correct = Boolean(option.correct);
+        if (option.explanation !== undefined) cleanOption.explanation = String(option.explanation);
+        return cleanOption;
+      }) : [],
+      scoringRubric: String(data.scoringRubric || ''),
+      timeLimit: data.timeLimit ? Number(data.timeLimit) : null,
+      difficultyLevel: mapDifficultyLevel(String(data.difficultyLevel || 'BASIC')),
+      isActive: Boolean(data.isActive ?? true),
+      orderIndex: Number(data.orderIndex || 0)
+    };
+    
     const result = await fetchApi<AssessmentQuestion>(
-      `/questions`,
+      `/questions?behavioralIndicatorId=${encodeURIComponent(behavioralIndicatorId)}`,
       {
         method: "POST",
-        body: JSON.stringify(data),
+        body: JSON.stringify(payload),
         cache: "no-store",
       }
     );

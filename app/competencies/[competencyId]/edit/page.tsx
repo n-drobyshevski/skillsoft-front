@@ -7,6 +7,7 @@ import CompetencyPreview from "../../components/CompetencyPreview";
 import { Competency } from "../../../interfaces/domain-interfaces";
 import { useEffect, useState } from "react";
 import { EditCompetencyPageSkeleton } from "../../components/EditCompetencyPageSkeleton";
+import PageHeader from "@/components/PageHeader";
 
 export default function EditCompetencyPage() {
   const params = useParams();
@@ -40,6 +41,10 @@ export default function EditCompetencyPage() {
 
   return (
     <div className="container mx-auto p-4">
+      <PageHeader
+              className="flex flex-1 flex-col gap-4 py-2 pt-4 md:gap-6 md:p-4 !pl-0"
+                  title="Edit Competency"
+              />
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2">
           <CompetencyForm competency={competency} onUpdatePreview={handleUpdatePreview} />

@@ -45,8 +45,9 @@ export default function QuestionPreview({ question }: { question: AssessmentQues
             <h3 className="text-lg font-medium">Answer Options</h3>
             <ul className="mt-2 space-y-2">
               {question.answerOptions.map((option, index) => (
-                <li key={index} className="text-sm text-muted-foreground">
-                  - {option.text}
+                <li key={index} className="flex items-center justify-between text-sm text-muted-foreground">
+                  <span>{index + 1}. {option.text}</span>
+                  <Badge variant="secondary">Score: {option.score}</Badge>
                 </li>
               ))}
             </ul>

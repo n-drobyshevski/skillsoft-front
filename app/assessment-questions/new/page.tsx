@@ -1,42 +1,70 @@
 'use client';
 
 import { QuestionForm } from '../components/QuestionForm';
+import IndicatorSelector from '../components/IndicatorSelector';
 import  PageHeader  from '../../../app/components/PageHeader';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { Suspense } from 'react';
 
 function NewQuestionPageContent() {
   const searchParams = useSearchParams();
-  const competencyId = searchParams.get('competencyId');
-  const behavioralIndicatorId = searchParams.get('behavioralIndicatorId');
+  const router = useRouter();
+  const competencyIdParam = searchParams.get('competencyId');
+  const behavioralIndicatorIdParam = searchParams.get('behavioralIndicatorId');
+  const indicatorIdParam = searchParams.get('indicatorId'); // Alternative parameter name
+  
+  // Use behavioralIndicatorId first, then fall back to indicatorId
+  const finalIndicatorId = behavioralIndicatorIdParam || indicatorIdParam;
+  
+  // Derive state directly from URL parameters
+  const selectedCompetencyId = competencyIdParam;
+  const selectedIndicatorId = finalIndicatorId;
+  const showSelector = !competencyIdParam || !finalIndicatorId;
 
-  if (!competencyId || !behavioralIndicatorId) {
+  const handleIndicatorSelected = (competencyId: string, indicatorId: string) => {
+    // Update URL with selected IDs for proper navigation
+    const newUrl = new URL(window.location.href);
+    newUrl.searchParams.set('competencyId', competencyId);
+    newUrl.searchParams.set('behavioralIndicatorId', indicatorId);
+    router.replace(newUrl.pathname + newUrl.search);
+  };
+
+  if (showSelector) {
     return (
-      <div className="container mx-auto py-8">
+      <div className="container mx-auto max-w-full px-4 py-6 sm:px-6 lg:px-8">
         <PageHeader
-          title="Error"
-          crumbs={[{ href: '/competencies', name: 'Competencies' }, { name: 'New Question' }]}
+          title="Create New Assessment Question"
+          description="First, select the behavioral indicator for your question"
+          
         />
-        <div className="mt-8">
-          <p>Competency ID or Behavioral Indicator ID is missing. Please go back and try again.</p>
+        <div className="mt-6 sm:mt-8">
+          <IndicatorSelector 
+            preselectedIndicatorId={finalIndicatorId || undefined}
+            onIndicatorSelected={handleIndicatorSelected}
+          />
         </div>
       </div>
     );
   }
 
+  // At this point, we have both IDs from URL parameters
+  if (!selectedCompetencyId || !selectedIndicatorId) {
+    return <div>Error: Missing required parameters</div>;
+  }
+
   return (
-    <div className="container mx-auto py-8">
+    <div className="container mx-auto max-w-full px-4 py-6 sm:px-6 lg:px-8">
       <PageHeader
         title="Create New Assessment Question"
         crumbs={[
           { href: '/competencies', name: 'Competencies' },
-          { href: `/competencies/${competencyId}`, name: 'Competency' },
-          { href: `/behavioral-indicators/${behavioralIndicatorId}`, name: 'Indicator' },
+          { href: `/competencies/${selectedCompetencyId}`, name: 'Competency' },
+          { href: `/behavioral-indicators/${selectedIndicatorId}`, name: 'Indicator' },
           { name: 'New Question' },
         ]}
       />
-      <div className="mt-8">
-        <QuestionForm competencyId={competencyId} behavioralIndicatorId={behavioralIndicatorId} />
+      <div className="mt-6 sm:mt-8">
+        <QuestionForm competencyId={selectedCompetencyId} behavioralIndicatorId={selectedIndicatorId} />
       </div>
     </div>
   );

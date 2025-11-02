@@ -21,5 +21,7 @@ export default async function EditQuestionPage({ params }: { params: { questionI
   const { questionId } = await params;
   const { question, competencyId } = await getQuestionData(questionId);
 
-  return <EditQuestionForm question={question} competencyId={competencyId} />;
+  return (
+    <EditQuestionForm question={question} competencyId={competencyId} />
+  );
 }

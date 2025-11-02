@@ -48,6 +48,8 @@ export interface AssessmentQuestion {
   difficultyLevel: DifficultyLevel;
   isActive: boolean;
   orderIndex: number;
+  createdAt: string;
+  lastModified: string;
 }
 
 export interface Competency {
