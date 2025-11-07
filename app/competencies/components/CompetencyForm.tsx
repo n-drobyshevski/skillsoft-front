@@ -34,7 +34,15 @@ import { toast } from "sonner";
 
 type CompetencyFormValues = z.infer<typeof competencySchema>;
 
-export function CompetencyForm({ competency, onUpdatePreview }: { competency?: Competency, onUpdatePreview?: (data: CompetencyFormValues) => void }) {
+export function CompetencyForm({ 
+  competency, 
+  onUpdatePreview,
+  onCompetencyCreated 
+}: { 
+  competency?: Competency, 
+  onUpdatePreview?: (data: CompetencyFormValues) => void,
+  onCompetencyCreated?: (competency: Competency) => void
+}) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const isEditMode = !!competency;
@@ -61,7 +69,14 @@ export function CompetencyForm({ competency, onUpdatePreview }: { competency?: C
       } else {
         const newCompetency = await competenciesApi.createCompetency(data);
         toast.success("Competency created successfully!");
-        router.push(`/competencies/${newCompetency.id}`);
+        
+        // Call the callback if provided (for new competency page)
+        if (onCompetencyCreated) {
+          onCompetencyCreated(newCompetency);
+        } else {
+          // Default behavior - navigate to the competency page
+          router.push(`/competencies/${newCompetency.id}`);
+        }
       }
     } catch (e: unknown) {
       const errorMessage = e instanceof Error ? e.message : 'An error occurred.';
@@ -93,7 +108,14 @@ export function CompetencyForm({ competency, onUpdatePreview }: { competency?: C
                 <FormItem>
                   <FormLabel>Name</FormLabel>
                   <FormControl>
-                    <Input placeholder="Competency name" {...field} />
+                    <Input 
+                      placeholder="Competency name" 
+                      {...field}
+                      onBlur={() => {
+                        field.onBlur();
+                        handlePreviewClick();
+                      }}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -110,6 +132,10 @@ export function CompetencyForm({ competency, onUpdatePreview }: { competency?: C
                       placeholder="A brief description of the competency"
                       className="resize-none"
                       {...field}
+                      onBlur={() => {
+                        field.onBlur();
+                        handlePreviewClick();
+                      }}
                     />
                   </FormControl>
                   <FormMessage />
@@ -131,7 +157,13 @@ export function CompetencyForm({ competency, onUpdatePreview }: { competency?: C
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Category</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <Select 
+                    onValueChange={(value) => {
+                      field.onChange(value);
+                      handlePreviewClick();
+                    }} 
+                    defaultValue={field.value}
+                  >
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Select a category" />
@@ -154,8 +186,14 @@ export function CompetencyForm({ competency, onUpdatePreview }: { competency?: C
               name="level"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Proficiency Level</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <FormLabel>Level</FormLabel>
+                  <Select 
+                    onValueChange={(value) => {
+                      field.onChange(value);
+                      handlePreviewClick();
+                    }} 
+                    defaultValue={field.value}
+                  >
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Select a level" />
@@ -179,7 +217,13 @@ export function CompetencyForm({ competency, onUpdatePreview }: { competency?: C
               render={({ field }) => (
                 <FormItem className="sm:col-span-2">
                   <FormLabel>Approval Status</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <Select 
+                    onValueChange={(value) => {
+                      field.onChange(value);
+                      handlePreviewClick();
+                    }} 
+                    defaultValue={field.value}
+                  >
                     <FormControl>
                       <SelectTrigger className="sm:max-w-sm">
                         <SelectValue placeholder="Select a status" />
@@ -213,7 +257,10 @@ export function CompetencyForm({ competency, onUpdatePreview }: { competency?: C
                     <FormControl>
                         <Switch
                         checked={field.value}
-                        onCheckedChange={field.onChange}
+                        onCheckedChange={(checked) => {
+                          field.onChange(checked);
+                          handlePreviewClick();
+                        }}
                         />
                     </FormControl>
                     </FormItem>

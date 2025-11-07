@@ -136,8 +136,6 @@ const questionDifficultyToColor = (difficulty: DifficultyLevel): string => {
   switch (difficulty) {
     case DifficultyLevel.FOUNDATIONAL:
       return COMMON_COLORS.PROFICIENT; // Green for easy
-    case DifficultyLevel.BASIC:
-      return COMMON_COLORS.PROFICIENT; // Green for easy
     case DifficultyLevel.INTERMEDIATE:
       return COMMON_COLORS.DEVELOPING; // Amber for medium
     case DifficultyLevel.ADVANCED:

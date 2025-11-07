@@ -20,6 +20,7 @@ import type {
   BehavioralIndicator,
   AssessmentQuestion,
 } from "../../../interfaces/domain-interfaces";
+import { DifficultyLevel } from "../../../enums/domain_enums";
 import AssessmentQuestionDrawer from "../../../assessment-questions/components/AssessmentQuestionDrawer";
 
 interface IndicatorPageProps {
@@ -187,13 +188,15 @@ export default function IndicatorPage({ indicator, assessmentQuestions }: Indica
                           <Badge
                             variant="outline"
                             className={
-                              question.difficultyLevel === "BASIC"
+                              question.difficultyLevel === DifficultyLevel.FOUNDATIONAL
                                 ? "border-emerald-500/30 text-emerald-600 bg-emerald-500/8"
-                                : question.difficultyLevel === "INTERMEDIATE"
+                                : question.difficultyLevel === DifficultyLevel.INTERMEDIATE
                                 ? "border-yellow-500/30 text-yellow-600 bg-yellow-500/8"
-                                : question.difficultyLevel === "ADVANCED"
+                                : question.difficultyLevel === DifficultyLevel.ADVANCED
                                 ? "border-orange-500/30 text-orange-600 bg-orange-500/8"
-                                : "border-red-500/30 text-red-600 bg-red-500/8"
+                                : question.difficultyLevel === DifficultyLevel.SPECIALIZED
+                                ? "border-red-500/30 text-red-600 bg-red-500/8"
+                                : "border-blue-500/30 text-blue-600 bg-blue-500/8"
                             }
                           >
                             {question.difficultyLevel}

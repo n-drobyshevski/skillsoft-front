@@ -8,6 +8,19 @@ import { Competency } from "../../../interfaces/domain-interfaces";
 import { useEffect, useState } from "react";
 import { EditCompetencyPageSkeleton } from "../../components/EditCompetencyPageSkeleton";
 import PageHeader from "@/components/PageHeader";
+import { CompetencyCategory, ApprovalStatus, ProficiencyLevel } from "../../../enums/domain_enums";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { CompetencyIndicatorsManager } from "../../components/CompetencyIndicatorsManager";
+
+
+type CompetencyFormData = {
+  name: string;
+  category: string; // It's a string here, not CompetencyCategory
+  level: string;
+  isActive: boolean;
+  approvalStatus: string;
+  description?: string;
+};
 
 export default function EditCompetencyPage() {
   const params = useParams();
@@ -29,10 +42,17 @@ export default function EditCompetencyPage() {
     }
   }, [competencyId]);
 
-  const handleUpdatePreview = (data: Partial<Competency>) => {
-    if (previewCompetency) {
-      setPreviewCompetency({ ...previewCompetency, ...data });
-    }
+  const handleUpdatePreview = (data: CompetencyFormData) => {
+       setPreviewCompetency(prev => ({
+      ...prev,
+      ...data,
+      // Explicitly cast the properties that have mismatched types.
+      category: data.category as CompetencyCategory, 
+      level: data.level as ProficiencyLevel,
+      // Assuming approvalStatus also needs casting
+      approvalStatus: data.approvalStatus as ApprovalStatus,
+    } as Competency));
+    
   };
 
   if (!competency) {
@@ -42,17 +62,28 @@ export default function EditCompetencyPage() {
   return (
     <div className="container mx-auto p-4">
       <PageHeader
-              className="flex flex-1 flex-col gap-4 py-2 pt-4 md:gap-6 md:p-4 !pl-0"
-                  title="Edit Competency"
-              />
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2">
-          <CompetencyForm competency={competency} onUpdatePreview={handleUpdatePreview} />
-        </div>
-        <div className="hidden lg:block">
-          {previewCompetency && <CompetencyPreview competency={previewCompetency} />}
-        </div>
-      </div>
+        className="pl-0! py-4"
+        title={`Edit Competency: ${competency.name}`}
+      />
+      <Tabs defaultValue="details" className="mt-4">
+        <TabsList>
+          <TabsTrigger value="details">Details</TabsTrigger>
+          <TabsTrigger value="indicators">Behavioral Indicators</TabsTrigger>
+        </TabsList>
+        <TabsContent value="details">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-4">
+            <div className="lg:col-span-2">
+              <CompetencyForm competency={competency} onUpdatePreview={handleUpdatePreview} />
+            </div>
+            <div className="hidden lg:block">
+              {previewCompetency && <CompetencyPreview competency={previewCompetency} />}
+            </div>
+          </div>
+        </TabsContent>
+        <TabsContent value="indicators">
+          <CompetencyIndicatorsManager competency={competency} />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

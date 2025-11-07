@@ -179,6 +179,29 @@ export const competenciesApi = {
         });
         await revalidateCompetencyTags(competencyId);
     },
+
+    attachIndicator: async (competencyId: string, indicatorId: string): Promise<void> => {
+        await fetchApi(`/competencies/${competencyId}/bi/${indicatorId}`, {
+            method: 'POST',
+            cache: 'no-store',
+        });
+        await revalidateCompetencyTags(competencyId);
+    },
+
+    detachIndicator: async (competencyId: string, indicatorId: string): Promise<void> => {
+        await fetchApi(`/competencies/${competencyId}/bi/${indicatorId}`, {
+            method: 'DELETE',
+            cache: 'no-store',
+        });
+        await revalidateCompetencyTags(competencyId);
+    },
+
+    getAvailableIndicators: async (competencyId: string): Promise<BehavioralIndicator[]> => {
+        return fetchApi(`/competencies/${competencyId}/available-bi`, {
+            tags: [`available-indicators-${competencyId}`],
+            revalidate: 60,
+        });
+    },
 };
 
 // Cached behavioral indicators fetcher
@@ -288,48 +311,12 @@ export const assessmentQuestionsApi = {
     behavioralIndicatorId: string,
     data: QuestionInput
   ): Promise<AssessmentQuestion> => {
-    // Map frontend enum values to backend enum values
-    const mapQuestionType = (frontendType: string): string => {
-      switch (frontendType) {
-        case 'SINGLE_CHOICE':
-        case 'MULTIPLE_CHOICE':
-        case 'TRUE_FALSE':
-          return 'MULTIPLE_CHOICE';
-        case 'OPEN_ENDED':
-          return 'OPEN_TEXT';
-        case 'SCENARIO_BASED':
-          return 'SITUATIONAL_JUDGMENT';
-        case 'LIKERT_SCALE':
-          return 'LIKERT_SCALE';
-        case 'SITUATIONAL_JUDGMENT':
-          return 'SITUATIONAL_JUDGMENT';
-        default:
-          return 'MULTIPLE_CHOICE';
-      }
-    };
-
-    const mapDifficultyLevel = (frontendLevel: string): string => {
-      switch (frontendLevel) {
-        case 'BASIC':
-        case 'FOUNDATIONAL':
-          return 'FOUNDATIONAL';
-        case 'INTERMEDIATE':
-          return 'INTERMEDIATE';
-        case 'ADVANCED':
-          return 'ADVANCED';
-        case 'EXPERT':
-          return 'EXPERT';
-        default:
-          return 'FOUNDATIONAL';
-      }
-    };
-
     // Create a clean payload that exactly matches the backend DTO
     const payload = {
       id: null, // Backend will generate this
       behavioralIndicatorId: null, // Sent as query param, not in body
       questionText: String(data.questionText || ''),
-      questionType: mapQuestionType(String(data.questionType || 'SINGLE_CHOICE')),
+      questionType: String(data.questionType || 'MULTIPLE_CHOICE'),
       answerOptions: Array.isArray(data.answerOptions) ? data.answerOptions.map(option => {
         const cleanOption: Record<string, unknown> = {};
         if (option.text !== undefined) cleanOption.text = String(option.text);
@@ -342,7 +329,7 @@ export const assessmentQuestionsApi = {
       }) : [],
       scoringRubric: String(data.scoringRubric || ''),
       timeLimit: data.timeLimit ? Number(data.timeLimit) : null,
-      difficultyLevel: mapDifficultyLevel(String(data.difficultyLevel || 'BASIC')),
+      difficultyLevel: String(data.difficultyLevel || 'FOUNDATIONAL'),
       isActive: Boolean(data.isActive ?? true),
       orderIndex: Number(data.orderIndex || 0)
     };

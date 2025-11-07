@@ -24,17 +24,16 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
-import { ProficiencyLevel, ApprovalStatus } from '../../enums/domain_enums';
+import { ProficiencyLevel, ApprovalStatus, IndicatorMeasurementType } from '../../enums/domain_enums';
 import { behavioralIndicatorsApi } from '@/services/api';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 
 type IndicatorFormValues = z.infer<typeof indicatorSchema>;
-
-const measurementTypes = ['QUALITY', 'QUANTITY', 'FREQUENCY', 'BINARY'] as const;
+const measurementTypes = Object.values(IndicatorMeasurementType);
 
 export function IndicatorForm({ indicator, competencyId, onUpdatePreview }: { indicator?: BehavioralIndicator, competencyId?: string, onUpdatePreview?: (data: any) => void }) {
   const router = useRouter();
@@ -47,7 +46,7 @@ export function IndicatorForm({ indicator, competencyId, onUpdatePreview }: { in
       title: indicator?.title || '',
       description: indicator?.description || "",
       observabilityLevel: indicator?.observabilityLevel || ProficiencyLevel.NOVICE,
-      measurementType: indicator?.measurementType || 'BINARY',
+      measurementType: indicator?.measurementType || IndicatorMeasurementType.QUALITY,
       weight: indicator?.weight || 1,
       examples: indicator?.examples || "",
       counterExamples: indicator?.counterExamples || "",
@@ -98,6 +97,12 @@ export function IndicatorForm({ indicator, competencyId, onUpdatePreview }: { in
     }
   };
 
+  const handleFieldBlur = useCallback(() => {
+    if (onUpdatePreview) {
+      onUpdatePreview(form.getValues());
+    }
+  }, [onUpdatePreview, form]);
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -114,7 +119,14 @@ export function IndicatorForm({ indicator, competencyId, onUpdatePreview }: { in
                 <FormItem>
                   <FormLabel>Title</FormLabel>
                   <FormControl>
-                    <Input placeholder="e.g., Proactive Communication" {...field} />
+                    <Input 
+                      placeholder="e.g., Proactive Communication" 
+                      {...field} 
+                      onBlur={() => {
+                        field.onBlur();
+                        handleFieldBlur();
+                      }}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -130,6 +142,10 @@ export function IndicatorForm({ indicator, competencyId, onUpdatePreview }: { in
                     <Textarea
                       placeholder="Describe the indicator's purpose and what it measures."
                       {...field}
+                      onBlur={() => {
+                        field.onBlur();
+                        handleFieldBlur();
+                      }}
                     />
                   </FormControl>
                   <FormMessage />
@@ -151,7 +167,13 @@ export function IndicatorForm({ indicator, competencyId, onUpdatePreview }: { in
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Observability Level</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <Select 
+                    onValueChange={(value) => {
+                      field.onChange(value);
+                      handleFieldBlur();
+                    }} 
+                    defaultValue={field.value}
+                  >
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Select a level" />
@@ -175,7 +197,13 @@ export function IndicatorForm({ indicator, competencyId, onUpdatePreview }: { in
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Measurement Type</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <Select 
+                    onValueChange={(value) => {
+                      field.onChange(value);
+                      handleFieldBlur();
+                    }} 
+                    defaultValue={field.value}
+                  >
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Select a type" />
@@ -200,8 +228,16 @@ export function IndicatorForm({ indicator, competencyId, onUpdatePreview }: { in
                 <FormItem>
                   <FormLabel>Weight</FormLabel>
                   <FormControl>
-                    <Input type="number" step="0.1" placeholder="e.g., 0.5" {...field} 
+                    <Input 
+                      type="number" 
+                      step="0.1" 
+                      placeholder="e.g., 0.5" 
+                      {...field} 
                       onChange={event => field.onChange(parseFloat(event.target.value))}
+                      onBlur={() => {
+                        field.onBlur();
+                        handleFieldBlur();
+                      }}
                     />
                   </FormControl>
                   <FormMessage />
@@ -215,8 +251,15 @@ export function IndicatorForm({ indicator, competencyId, onUpdatePreview }: { in
                 <FormItem className="sm:col-start-1 lg:col-start-auto">
                   <FormLabel>Order Index</FormLabel>
                   <FormControl>
-                    <Input type="number" placeholder="e.g., 1" {...field} 
+                    <Input 
+                      type="number" 
+                      placeholder="e.g., 1" 
+                      {...field} 
                       onChange={event => field.onChange(parseInt(event.target.value))}
+                      onBlur={() => {
+                        field.onBlur();
+                        handleFieldBlur();
+                      }}
                     />
                   </FormControl>
                   <FormMessage />
@@ -239,7 +282,15 @@ export function IndicatorForm({ indicator, competencyId, onUpdatePreview }: { in
                 <FormItem>
                   <FormLabel>Positive Examples</FormLabel>
                   <FormControl>
-                    <Textarea placeholder="List behaviors that demonstrate this indicator." {...field} rows={3} />
+                    <Textarea 
+                      placeholder="List behaviors that demonstrate this indicator." 
+                      {...field} 
+                      rows={3} 
+                      onBlur={() => {
+                        field.onBlur();
+                        handleFieldBlur();
+                      }}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -252,7 +303,15 @@ export function IndicatorForm({ indicator, competencyId, onUpdatePreview }: { in
                 <FormItem>
                   <FormLabel>Counter Examples</FormLabel>
                   <FormControl>
-                    <Textarea placeholder="List behaviors that contradict this indicator." {...field} rows={3} />
+                    <Textarea 
+                      placeholder="List behaviors that contradict this indicator." 
+                      {...field} 
+                      rows={3} 
+                      onBlur={() => {
+                        field.onBlur();
+                        handleFieldBlur();
+                      }}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -272,7 +331,13 @@ export function IndicatorForm({ indicator, competencyId, onUpdatePreview }: { in
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Approval Status</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <Select 
+                    onValueChange={(value) => {
+                      field.onChange(value);
+                      handleFieldBlur();
+                    }} 
+                    defaultValue={field.value}
+                  >
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Select a status" />
@@ -301,7 +366,10 @@ export function IndicatorForm({ indicator, competencyId, onUpdatePreview }: { in
                       <Switch
                         id="isActive"
                         checked={field.value}
-                        onCheckedChange={field.onChange}
+                        onCheckedChange={(checked) => {
+                          field.onChange(checked);
+                          handleFieldBlur();
+                        }}
                       />
                       <label htmlFor="isActive" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
                         This indicator is currently active

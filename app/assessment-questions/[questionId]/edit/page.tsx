@@ -1,6 +1,5 @@
 import { assessmentQuestionsApi, behavioralIndicatorsApi } from "@/services/api";
 import { notFound } from "next/navigation";
-import { AssessmentQuestion } from "../../../interfaces/domain-interfaces";
 import EditQuestionForm from "./components/EditQuestionForm";
 
 async function getQuestionData(questionId: string) {

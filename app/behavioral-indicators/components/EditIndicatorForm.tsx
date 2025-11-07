@@ -33,7 +33,8 @@ import { Textarea } from "@/components/ui/textarea";
 
 type IndicatorFormValues = z.infer<typeof indicatorSchema>;
 
-const measurementTypes = ['QUALITY', 'QUANTITY', 'FREQUENCY', 'BINARY'] as const;
+
+import { IndicatorMeasurementType } from '../../enums/domain_enums';
 
 export function EditIndicatorForm({ indicator }: { indicator: BehavioralIndicator }) {
   const router = useRouter();
@@ -157,7 +158,7 @@ export function EditIndicatorForm({ indicator }: { indicator: BehavioralIndicato
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {measurementTypes.map((type) => (
+                      {Object.values(IndicatorMeasurementType).map((type) => (
                         <SelectItem key={type} value={type}>
                           {type.replace(/_/g, ' ')}
                         </SelectItem>

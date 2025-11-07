@@ -1,7 +1,7 @@
 import { z } from 'zod';
-import { ProficiencyLevel, ApprovalStatus } from '../../app/enums/domain_enums';
+import { ProficiencyLevel, ApprovalStatus, IndicatorMeasurementType } from '../../app/enums/domain_enums';
 
-const measurementTypes = ['QUALITY', 'QUANTITY', 'FREQUENCY', 'BINARY'] as const;
+const measurementTypes = Object.values(IndicatorMeasurementType);
 
 export const indicatorSchema = z.object({
   title: z.string().min(3, 'Title must be at least 3 characters'),

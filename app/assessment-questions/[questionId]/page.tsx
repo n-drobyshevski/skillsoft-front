@@ -22,8 +22,7 @@ interface QuestionDetailPageProps {
 }
 
 async function getQuestionData(questionId: string) {
-	const question = await assessmentQuestionsApi.getQuestionById(questionId);
-	return question;
+	return await assessmentQuestionsApi.getQuestionById(questionId);
 }
 
 

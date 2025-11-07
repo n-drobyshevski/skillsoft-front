@@ -69,7 +69,7 @@ export default async function BehavioralIndicatorsPage() {
         description="Define and manage measurable behavioral indicators for competency assessment"
       >
       <div className="flex items-center gap-2">
-          <Link href="/competencies">
+          <Link href="/behavioral-indicators/new">
             <Button variant="outline">
               <Plus className="mr-2 h-4 w-4" />
               Create Indicator

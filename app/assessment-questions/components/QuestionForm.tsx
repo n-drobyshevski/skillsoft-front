@@ -28,22 +28,16 @@ import { Switch } from '@/components/ui/switch';
 import { DifficultyLevel } from '../../enums/domain_enums';
 import { assessmentQuestionsApi } from '@/services/api';
 import { useRouter } from 'next/navigation';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { TrashIcon } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from "sonner";
 
 type QuestionFormValues = z.infer<typeof questionSchema>;
 
-const questionTypes = [
-  'MULTIPLE_CHOICE',
-  'SINGLE_CHOICE',
-  'TRUE_FALSE',
-  'OPEN_ENDED',
-  'SCENARIO_BASED',
-  'LIKERT_SCALE',
-  'SITUATIONAL_JUDGMENT',
-] as const;
+import { QuestionType } from '../../enums/domain_enums';
+
+const questionTypes = Object.values(QuestionType);
 
 export function QuestionForm({ question, competencyId, behavioralIndicatorId, onUpdatePreview }: { 
   question?: AssessmentQuestion; 
@@ -59,9 +53,9 @@ export function QuestionForm({ question, competencyId, behavioralIndicatorId, on
     resolver: zodResolver(questionSchema),
     defaultValues: {
       questionText: question?.questionText || '',
-      questionType: question?.questionType || 'SINGLE_CHOICE',
+      questionType: question?.questionType || QuestionType.MULTIPLE_CHOICE,
       scoringRubric: question?.scoringRubric || '',
-      difficultyLevel: question?.difficultyLevel || DifficultyLevel.BASIC,
+      difficultyLevel: question?.difficultyLevel || DifficultyLevel.FOUNDATIONAL,
       isActive: question?.isActive ?? true,
       orderIndex: question?.orderIndex ?? 0,
       timeLimit: question?.timeLimit ?? 60,
@@ -79,8 +73,10 @@ export function QuestionForm({ question, competencyId, behavioralIndicatorId, on
   });
 
   const questionType = form.watch('questionType');
+  const difficultyLevel = form.watch('difficultyLevel');
   const likertPoints = 5;
 
+  // Handle answer options for Likert Scale
   useEffect(() => {
     if (questionType === 'LIKERT_SCALE') {
       const currentLength = fields.length;
@@ -94,7 +90,18 @@ export function QuestionForm({ question, competencyId, behavioralIndicatorId, on
         }
       }
     }
-  }, [questionType, append, remove, fields.length]);
+  }, [questionType, append, remove, fields.length, likertPoints]);
+
+  // Separate effect for preview updates to avoid infinite loops
+  useEffect(() => {
+    if (onUpdatePreview) {
+      const timer = setTimeout(() => {
+        onUpdatePreview(form.getValues());
+      }, 0);
+      return () => clearTimeout(timer);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [questionType, difficultyLevel, onUpdatePreview]);
 
   async function onSubmit(data: QuestionFormValues) {
     setIsLoading(true);
@@ -122,9 +129,16 @@ export function QuestionForm({ question, competencyId, behavioralIndicatorId, on
     }
   };
 
+  const handleFieldBlur = useCallback(() => {
+    if (onUpdatePreview) {
+      onUpdatePreview(form.getValues());
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [onUpdatePreview]);
+
   const renderAnswerOptions = () => {
     switch (questionType) {
-      case 'SINGLE_CHOICE':
+      case 'MULTIPLE_CHOICE':
         return (
           <Card>
             <CardHeader>
@@ -140,7 +154,14 @@ export function QuestionForm({ question, competencyId, behavioralIndicatorId, on
                       <FormItem className="grow">
                         <FormLabel>Option {index + 1} Text</FormLabel>
                         <FormControl>
-                          <Input {...field} placeholder="e.g., Prioritize tasks" />
+                          <Input 
+                            {...field} 
+                            placeholder="e.g., Prioritize tasks"
+                            onBlur={() => {
+                              field.onBlur();
+                              handleFieldBlur();
+                            }}
+                          />
                         </FormControl>
                       </FormItem>
                     )}
@@ -158,6 +179,10 @@ export function QuestionForm({ question, competencyId, behavioralIndicatorId, on
                               {...field}
                               placeholder="10"
                               onChange={event => field.onChange(event.target.value === '' ? null : Number(event.target.value))}
+                              onBlur={() => {
+                                field.onBlur();
+                                handleFieldBlur();
+                              }}
                             />
                           </FormControl>
                         </FormItem>
@@ -170,7 +195,13 @@ export function QuestionForm({ question, competencyId, behavioralIndicatorId, on
                         <FormItem className="flex flex-col items-center min-w-[60px]">
                           <FormLabel className="text-xs">Correct?</FormLabel>
                           <FormControl>
-                            <Switch checked={field.value} onCheckedChange={field.onChange} />
+                            <Switch 
+                              checked={field.value} 
+                              onCheckedChange={(checked) => {
+                                field.onChange(checked);
+                                handleFieldBlur();
+                              }}
+                            />
                           </FormControl>
                         </FormItem>
                       )}
@@ -215,7 +246,15 @@ export function QuestionForm({ question, competencyId, behavioralIndicatorId, on
                       <FormItem className="grow">
                         <FormLabel>Option {index + 1} Text</FormLabel>
                         <FormControl>
-                          <Textarea {...field} placeholder="e.g., Describe the action you would take." className="min-h-20" />
+                          <Textarea 
+                            {...field} 
+                            placeholder="e.g., Describe the action you would take." 
+                            className="min-h-20"
+                            onBlur={() => {
+                              field.onBlur();
+                              handleFieldBlur();
+                            }}
+                          />
                         </FormControl>
                       </FormItem>
                     )}
@@ -233,6 +272,10 @@ export function QuestionForm({ question, competencyId, behavioralIndicatorId, on
                               {...field}
                               placeholder="10"
                               onChange={event => field.onChange(event.target.value === '' ? null : Number(event.target.value))}
+                              onBlur={() => {
+                                field.onBlur();
+                                handleFieldBlur();
+                              }}
                             />
                           </FormControl>
                         </FormItem>
@@ -245,7 +288,13 @@ export function QuestionForm({ question, competencyId, behavioralIndicatorId, on
                         <FormItem className="flex flex-col items-center min-w-[60px]">
                           <FormLabel className="text-xs">Correct?</FormLabel>
                           <FormControl>
-                            <Switch checked={field.value} onCheckedChange={field.onChange} />
+                            <Switch 
+                              checked={field.value} 
+                              onCheckedChange={(checked) => {
+                                field.onChange(checked);
+                                handleFieldBlur();
+                              }}
+                            />
                           </FormControl>
                         </FormItem>
                       )}
@@ -274,36 +323,6 @@ export function QuestionForm({ question, competencyId, behavioralIndicatorId, on
             </CardContent>
           </Card>
         );
-      case 'TRUE_FALSE':
-        // Replace with a more specific UI for True/False questions
-        return (
-            <Card>
-                <CardHeader>
-                    <CardTitle>Answer</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <FormField
-                        control={form.control}
-                        name="answerOptions.0.correct"
-                        render={({ field }) => (
-                            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                                <FormLabel>Is the correct answer &quot;True&quot;?</FormLabel>
-                                <FormControl>
-                                    <Switch
-                                        checked={field.value}
-                                        onCheckedChange={(value) => {
-                                            field.onChange(value);
-                                            // You might want to manage the 'answerOptions' array here
-                                            // to ensure it has the correct structure for True/False.
-                                        }}
-                                    />
-                                </FormControl>
-                            </FormItem>
-                        )}
-                    />
-                </CardContent>
-            </Card>
-        );
       case 'LIKERT_SCALE':
         return (
           <Card>
@@ -320,7 +339,13 @@ export function QuestionForm({ question, competencyId, behavioralIndicatorId, on
                         <FormItem className="grow">
                           <FormLabel>Label for Point {index + 1}</FormLabel>
                           <FormControl>
-                            <Input {...field} />
+                            <Input 
+                              {...field}
+                              onBlur={() => {
+                                field.onBlur();
+                                handleFieldBlur();
+                              }}
+                            />
                           </FormControl>
                         </FormItem>
                       )}
@@ -336,6 +361,10 @@ export function QuestionForm({ question, competencyId, behavioralIndicatorId, on
                               type="number"
                               {...field}
                               onChange={event => field.onChange(event.target.value === '' ? null : Number(event.target.value))}
+                              onBlur={() => {
+                                field.onBlur();
+                                handleFieldBlur();
+                              }}
                             />
                           </FormControl>
                         </FormItem>
@@ -366,7 +395,14 @@ export function QuestionForm({ question, competencyId, behavioralIndicatorId, on
                 <FormItem>
                   <FormLabel>Question Text</FormLabel>
                   <FormControl>
-                    <Textarea placeholder="e.g., How do you handle tight deadlines?" {...field} />
+                    <Textarea 
+                      placeholder="e.g., How do you handle tight deadlines?" 
+                      {...field} 
+                      onBlur={() => {
+                        field.onBlur();
+                        handleFieldBlur();
+                      }}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -378,7 +414,10 @@ export function QuestionForm({ question, competencyId, behavioralIndicatorId, on
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Question Type</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <Select 
+                    onValueChange={field.onChange} 
+                    defaultValue={field.value}
+                  >
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Select a question type" />
@@ -411,7 +450,14 @@ export function QuestionForm({ question, competencyId, behavioralIndicatorId, on
                 <FormItem className="sm:col-span-2">
                   <FormLabel>Scoring Rubric</FormLabel>
                   <FormControl>
-                    <Textarea placeholder="e.g., Based on clarity and feasibility" {...field} />
+                    <Textarea 
+                      placeholder="e.g., Based on clarity and feasibility" 
+                      {...field}
+                      onBlur={() => {
+                        field.onBlur();
+                        handleFieldBlur();
+                      }}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -423,7 +469,10 @@ export function QuestionForm({ question, competencyId, behavioralIndicatorId, on
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Difficulty Level</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <Select 
+                    onValueChange={field.onChange} 
+                    defaultValue={field.value}
+                  >
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Select a difficulty level" />
@@ -469,6 +518,10 @@ export function QuestionForm({ question, competencyId, behavioralIndicatorId, on
                       type="number" 
                       {...field}
                       onChange={event => field.onChange(event.target.value === '' ? 60 : Number(event.target.value))}
+                      onBlur={() => {
+                        field.onBlur();
+                        handleFieldBlur();
+                      }}
                     />
                   </FormControl>
                   <FormMessage />
@@ -496,7 +549,10 @@ export function QuestionForm({ question, competencyId, behavioralIndicatorId, on
                     <FormControl>
                         <Switch
                         checked={field.value}
-                        onCheckedChange={field.onChange}
+                        onCheckedChange={(checked) => {
+                          field.onChange(checked);
+                          handleFieldBlur();
+                        }}
                         />
                     </FormControl>
                     </FormItem>

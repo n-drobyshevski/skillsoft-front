@@ -45,9 +45,8 @@ export default function EditIndicatorPage() {
   return (
     <div className="container mx-auto p-4">
         <PageHeader
-        className="!pl-0 py-4"
-            title="Edit Behavioral Indicator"
-            
+        className="pl-0! py-4"
+            title={`Edit Behavioral Indicator: ${indicator.title}`}
         />
       <Tabs defaultValue="details" className="mt-4">
         <TabsList>
