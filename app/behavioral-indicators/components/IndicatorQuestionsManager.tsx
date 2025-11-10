@@ -11,15 +11,11 @@ import {
   Plus, 
   ArrowUpDown, 
   CheckCircle2, 
-  Circle, 
-  Loader2,
   AlertCircle,
   Eye,
   Settings2,
-  ArrowRight,
-  Move,
-  Users,
-  Pencil
+  Pencil,
+  Users
 } from 'lucide-react';
 
 // Enhanced UI Components
@@ -84,13 +80,13 @@ const DEFAULT_COLOR = 'border-border text-muted-foreground bg-muted/50';
 const getDifficultyColor = (level: string) => {
   switch (level.toLowerCase()) {
     case 'foundational':
-      return questionDifficultyToColor(DifficultyLevel.FOUNDATIONAL);
+      return questionDifficultyToColor('FOUNDATIONAL' as DifficultyLevel);
     case 'intermediate':
-      return questionDifficultyToColor(DifficultyLevel.INTERMEDIATE);
+      return questionDifficultyToColor('INTERMEDIATE' as DifficultyLevel);
     case 'advanced':
-      return questionDifficultyToColor(DifficultyLevel.ADVANCED);
+      return questionDifficultyToColor('ADVANCED' as DifficultyLevel);
     case 'expert':
-      return questionDifficultyToColor(DifficultyLevel.EXPERT);
+      return questionDifficultyToColor('EXPERT' as DifficultyLevel);
     default:
       return DEFAULT_COLOR;
   }
@@ -162,7 +158,7 @@ const StatsCards = ({ stats }: { stats: QuestionStats }) => (
             <p className="text-sm font-medium text-muted-foreground">Unassigned</p>
             <p className="text-2xl font-bold text-amber-600 dark:text-amber-400">{stats.unassigned}</p>
           </div>
-          <Circle className="h-8 w-8 text-amber-600 dark:text-amber-400" />
+                    <Users className="h-8 w-8 text-blue-600 dark:text-blue-400" />
         </div>
       </CardContent>
     </Card>
@@ -188,12 +184,10 @@ const StatsCards = ({ stats }: { stats: QuestionStats }) => (
 // Current Indicator Question Row Component
 const CurrentQuestionRow = React.memo(({ 
   question, 
-  onView,
-  onRemove
+  onView
 }: {
   question: AssessmentQuestion;
   onView: (question: AssessmentQuestion) => void;
-  onRemove: (questionId: string) => void;
 }) => {
   return (
     <TableRow 
@@ -228,15 +222,6 @@ const CurrentQuestionRow = React.memo(({
       </TableCell>
       <TableCell onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center gap-2">
-          <Button 
-            variant="outline" 
-            size="sm"
-            onClick={() => onRemove(question.id)}
-            className="text-destructive hover:text-destructive hover:bg-destructive/10 border-destructive/20 opacity-70 group-hover:opacity-100 transition-opacity"
-          >
-            <Move className="h-4 w-4" />
-            <span className="hidden sm:inline ml-1">Remove</span>
-          </Button>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="sm" className="opacity-70 group-hover:opacity-100 transition-opacity">
@@ -266,103 +251,6 @@ const CurrentQuestionRow = React.memo(({
 
 CurrentQuestionRow.displayName = 'CurrentQuestionRow';
 
-// Other Questions Row Component  
-const OtherQuestionRow = React.memo(({ 
-  question, 
-  onView,
-  onTransfer,
-  isTransferring
-}: {
-  question: AssessmentQuestion;
-  onView: (question: AssessmentQuestion) => void;
-  onTransfer: (questionId: string) => void;
-  isTransferring: boolean;
-}) => {
-  return (
-    <TableRow 
-      className="hover:bg-accent/30 transition-colors cursor-pointer group"
-      onClick={() => onView(question)}
-    >
-      <TableCell className="max-w-md">
-        <div className="space-y-2">
-          <p className="font-medium text-sm leading-relaxed line-clamp-2">
-            {question.questionText}
-          </p>
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            <span>ID: {question.id.slice(0, 8)}...</span>
-            {question.behavioralIndicatorId && (
-              <>
-                <span>•</span>
-                <span className="text-amber-600 dark:text-amber-400">
-                  Currently assigned to another indicator
-                </span>
-              </>
-            )}
-            {!question.behavioralIndicatorId && (
-              <>
-                <span>•</span>
-                <span className="text-emerald-600 dark:text-emerald-400">
-                  Unassigned
-                </span>
-              </>
-            )}
-          </div>
-        </div>
-      </TableCell>
-      <TableCell>
-        <Badge variant="outline" className={getTypeColor(question.questionType)}>
-          {question.questionType.replace('_', ' ')}
-        </Badge>
-      </TableCell>
-      <TableCell>
-        <Badge variant="outline" className={getDifficultyColor(question.difficultyLevel)}>
-          {question.difficultyLevel}
-        </Badge>
-      </TableCell>
-      <TableCell onClick={(e) => e.stopPropagation()}>
-        <div className="flex items-center gap-2">
-          <Button 
-            variant="outline" 
-            size="sm"
-            onClick={() => onTransfer(question.id)}
-            disabled={isTransferring}
-          >
-            {isTransferring ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <ArrowRight className="h-4 w-4" />
-            )}
-            <span className="hidden sm:inline ml-1">Transfer</span>
-          </Button>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm" className="opacity-70 group-hover:opacity-100 transition-opacity">
-                <Settings2 className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuLabel>Actions</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => onView(question)}>
-                <Eye className="w-4 h-4 mr-2" />
-                View Details
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link href={`/assessment-questions/${question.id}`}>
-                  <Pencil className="w-4 h-4 mr-2" />
-                  Edit Question
-                </Link>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      </TableCell>
-    </TableRow>
-  );
-});
-
-OtherQuestionRow.displayName = 'OtherQuestionRow';
-
 // Main Component
 export function IndicatorQuestionsManager({ 
   indicator 
@@ -382,18 +270,11 @@ export function IndicatorQuestionsManager({
     difficulty: 'all',
     search: ''
   });
-  const [otherFilters, setOtherFilters] = useState<FilterConfig>({
-    type: 'all', 
-    difficulty: 'all',
-    search: ''
-  });
   const [sortConfig, setSortConfig] = useState<SortConfig>({ key: 'questionText', direction: 'desc' });
   
   // Drawer state for viewing question details
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [selectedQuestion, setSelectedQuestion] = useState<AssessmentQuestion | null>(null);
-  
-  const [transferringQuestionId, setTransferringQuestionId] = useState<string | null>(null);
 
   // Data fetching with enhanced error handling
   const fetchQuestions = useCallback(async () => {
@@ -428,13 +309,6 @@ export function IndicatorQuestionsManager({
   useEffect(() => {
     fetchQuestions();
   }, [fetchQuestions]);
-
-  // Get questions for the "Other Questions" tab
-  const otherQuestions = useMemo(() => {
-    return allQuestions.filter(q => 
-      !currentIndicatorQuestions.some(current => current.id === q.id)
-    );
-  }, [allQuestions, currentIndicatorQuestions]);
 
   // Enhanced filtering and sorting with useMemo for performance
   const filteredCurrentQuestions = useMemo(() => {
@@ -472,41 +346,6 @@ export function IndicatorQuestionsManager({
     return filtered;
   }, [currentIndicatorQuestions, currentFilters, sortConfig]);
 
-  const filteredOtherQuestions = useMemo(() => {
-    const filtered = otherQuestions.filter(question => {
-      // Search filter
-      if (otherFilters.search && !question.questionText.toLowerCase().includes(otherFilters.search.toLowerCase())) {
-        return false;
-      }
-      
-      // Type filter
-      if (otherFilters.type !== 'all' && question.questionType !== otherFilters.type) {
-        return false;
-      }
-      
-      // Difficulty filter
-      if (otherFilters.difficulty !== 'all' && question.difficultyLevel !== otherFilters.difficulty) {
-        return false;
-      }
-      
-      return true;
-    });
-
-    // Sorting
-    filtered.sort((a, b) => {
-      const aValue = a[sortConfig.key];
-      const bValue = b[sortConfig.key];
-      
-      if (aValue === null || aValue === undefined) return 1;
-      if (bValue === null || bValue === undefined) return -1;
-      
-      const comparison = aValue < bValue ? -1 : aValue > bValue ? 1 : 0;
-      return sortConfig.direction === 'asc' ? comparison : -comparison;
-    });
-
-    return filtered;
-  }, [otherQuestions, otherFilters, sortConfig]);
-
   // Statistics calculation
   const stats = useMemo((): QuestionStats => {
     const byType: Record<string, number> = {};
@@ -519,12 +358,12 @@ export function IndicatorQuestionsManager({
 
     return {
       currentIndicator: currentIndicatorQuestions.length,
-      otherIndicators: otherQuestions.filter(q => q.behavioralIndicatorId).length,
-      unassigned: otherQuestions.filter(q => !q.behavioralIndicatorId).length,
+      otherIndicators: 0,
+      unassigned: 0,
       byType,
       byDifficulty
     };
-  }, [allQuestions, currentIndicatorQuestions, otherQuestions]);
+  }, [allQuestions, currentIndicatorQuestions]);
 
   // Enhanced interaction handlers
   const handleSort = useCallback((key: keyof AssessmentQuestion) => {
@@ -533,88 +372,6 @@ export function IndicatorQuestionsManager({
       direction: current.key === key && current.direction === 'asc' ? 'desc' : 'asc'
     }));
   }, []);
-
-  // Transfer question to current indicator
-  const handleTransferQuestion = useCallback(async (questionId: string) => {
-    // Prevent transfer in preview mode
-    if (indicator.id === PREVIEW_INDICATOR_ID) {
-      toast.error('Please save your indicator first to attach questions.');
-      return;
-    }
-
-    try {
-      setTransferringQuestionId(questionId);
-      
-      const question = allQuestions.find(q => q.id === questionId);
-      if (!question) {
-        throw new Error('Question not found');
-      }
-
-      const payload = {
-        ...question,
-        behavioralIndicatorId: indicator.id,
-        questionType: question.questionType,
-        difficultyLevel: question.difficultyLevel
-      };
-
-      // Update the question to assign it to current indicator
-      await assessmentQuestionsApi.updateQuestion(
-        questionId,
-        payload,
-        indicator.competencyId,
-        indicator.id
-      );
-      
-      toast.success('Question transferred successfully!');
-      
-      // Refresh the data to reflect changes
-      await fetchQuestions();
-      
-    } catch {
-      toast.error('Failed to transfer question. Please try again.');
-    } finally {
-      setTransferringQuestionId(null);
-    }
-  }, [allQuestions, indicator.id, indicator.competencyId, fetchQuestions]);
-
-  // Remove question from current indicator
-  const handleRemoveQuestion = useCallback(async (questionId: string) => {
-    // Prevent removal in preview mode
-    if (indicator.id === PREVIEW_INDICATOR_ID) {
-      toast.error('Please save your indicator first to manage questions.');
-      return;
-    }
-
-    try {
-      const question = currentIndicatorQuestions.find(q => q.id === questionId);
-      if (!question) {
-        throw new Error('Question not found');
-      }
-
-      const payload = {
-        ...question,
-        behavioralIndicatorId: null,
-        questionType: question.questionType,
-        difficultyLevel: question.difficultyLevel
-      };
-
-      // Update the question to remove indicator assignment
-      await assessmentQuestionsApi.updateQuestion(
-        questionId,
-        payload,
-        indicator.competencyId,
-        indicator.id
-      );
-      
-      toast.success('Question removed from indicator!');
-      
-      // Refresh the data to reflect changes
-      await fetchQuestions();
-      
-    } catch {
-      toast.error('Failed to remove question. Please try again.');
-    }
-  }, [currentIndicatorQuestions, indicator.competencyId, indicator.id, fetchQuestions]);
 
   // Handle opening question details drawer
   const handleViewQuestion = useCallback((question: AssessmentQuestion) => {
@@ -685,20 +442,12 @@ export function IndicatorQuestionsManager({
 
       {/* Tabbed Interface */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-2">
+        <TabsList className="grid w-full grid-cols-1">
           <TabsTrigger value="current" className="relative">
             Indicator Questions
             {currentIndicatorQuestions.length > 0 && (
               <Badge variant="secondary" className="ml-2 text-xs">
                 {currentIndicatorQuestions.length}
-              </Badge>
-            )}
-          </TabsTrigger>
-          <TabsTrigger value="other" className="relative">
-            Other Questions
-            {otherQuestions.length > 0 && (
-              <Badge variant="secondary" className="ml-2 text-xs">
-                {otherQuestions.length}
               </Badge>
             )}
           </TabsTrigger>
@@ -830,7 +579,7 @@ export function IndicatorQuestionsManager({
                         size="sm"
                         onClick={() => setActiveTab('other')}
                       >
-                        <ArrowRight className="w-4 h-4 mr-2" />
+                        <Eye className="w-4 h-4 mr-2" />
                         Transfer Questions
                       </Button>
                     </div>
@@ -857,131 +606,6 @@ export function IndicatorQuestionsManager({
                         key={question.id}
                         question={question}
                         onView={handleViewQuestion}
-                        onRemove={handleRemoveQuestion}
-                      />
-                    ))}
-                  </TableBody>
-                </Table>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        {/* Other Questions Tab */}
-        <TabsContent value="other" className="space-y-4">
-          {/* Filters and Search for Other Tab */}
-          <Card>
-            <CardHeader className="pb-4">
-              <CardTitle className="text-lg">Filter Available Questions</CardTitle>
-              <CardDescription>
-                Filter questions from other indicators and unassigned questions
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex flex-col md:flex-row gap-4">
-                <div className="flex-1">
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      placeholder="Search questions..."
-                      value={otherFilters.search}
-                      onChange={(e) => setOtherFilters(prev => ({ ...prev, search: e.target.value }))}
-                      className="pl-10"
-                    />
-                  </div>
-                </div>
-                
-                <div className="flex gap-2">
-                  <Select value={otherFilters.type} onValueChange={(value) => 
-                    setOtherFilters(prev => ({ ...prev, type: value }))
-                  }>
-                    <SelectTrigger className="w-40">
-                      <SelectValue placeholder="Type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Types</SelectItem>
-                      {uniqueTypes.map(type => (
-                        <SelectItem key={type} value={type}>
-                          {type.replace('_', ' ')}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-
-                  <Select value={otherFilters.difficulty} onValueChange={(value) => 
-                    setOtherFilters(prev => ({ ...prev, difficulty: value }))
-                  }>
-                    <SelectTrigger className="w-40">
-                      <SelectValue placeholder="Difficulty" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Levels</SelectItem>
-                      {uniqueDifficulties.map(level => (
-                        <SelectItem key={level} value={level}>
-                          {level}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Other Questions Table */}
-          <Card>
-            <CardHeader className="pb-4">
-              <div className="flex justify-between items-center">
-                <div>
-                  <CardTitle className="text-lg">
-                    Available Questions ({filteredOtherQuestions.length})
-                  </CardTitle>
-                  <CardDescription>
-                    Questions from other indicators that can be transferred
-                  </CardDescription>
-                </div>
-              </div>
-            </CardHeader>
-            
-            <CardContent className="p-0">
-              {isLoading ? (
-                <div className="p-6">
-                  <TableSkeleton />
-                </div>
-              ) : filteredOtherQuestions.length === 0 ? (
-                <div className="p-6 text-center text-muted-foreground">
-                  <Users className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                  <h3 className="font-semibold mb-2">No questions available</h3>
-                  <p className="text-sm">
-                    {otherFilters.search || otherFilters.type !== 'all' || otherFilters.difficulty !== 'all'
-                      ? 'Try adjusting your filters.'
-                      : 'All questions are either assigned to this indicator or do not exist yet.'
-                    }
-                  </p>
-                </div>
-              ) : (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>
-                        <Button variant="ghost" onClick={() => handleSort('questionText')} className="h-auto p-0 font-semibold">
-                          Question Text
-                          <ArrowUpDown className="ml-2 h-4 w-4" />
-                        </Button>
-                      </TableHead>
-                      <TableHead>Type</TableHead>
-                      <TableHead>Difficulty</TableHead>
-                      <TableHead className="w-32">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredOtherQuestions.map(question => (
-                      <OtherQuestionRow
-                        key={question.id}
-                        question={question}
-                        onView={handleViewQuestion}
-                        onTransfer={handleTransferQuestion}
-                        isTransferring={transferringQuestionId === question.id}
                       />
                     ))}
                   </TableBody>
