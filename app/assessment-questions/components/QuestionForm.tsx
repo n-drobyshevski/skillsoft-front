@@ -57,7 +57,7 @@ export function QuestionForm({ question, competencyId, behavioralIndicatorId, on
       scoringRubric: question?.scoringRubric || '',
       difficultyLevel: question?.difficultyLevel || DifficultyLevel.FOUNDATIONAL,
       isActive: question?.isActive ?? true,
-      orderIndex: question?.orderIndex ?? 0,
+      orderIndex: question?.orderIndex ?? 1,
       timeLimit: question?.timeLimit ?? 60,
       answerOptions: question?.answerOptions?.map(opt => ({
           text: opt.text || '',
@@ -111,9 +111,9 @@ export function QuestionForm({ question, competencyId, behavioralIndicatorId, on
         toast.success("Question updated successfully!");
         router.push(`/assessment-questions/${question.id}`);
       } else {
-        await assessmentQuestionsApi.createQuestion(competencyId, behavioralIndicatorId, data);
+        const newQuestion = await assessmentQuestionsApi.createQuestion(competencyId, behavioralIndicatorId, data);
         toast.success("Question created successfully!");
-        router.push(`/behavioral-indicators/${behavioralIndicatorId}`);
+        router.push(`/assessment-questions/${newQuestion.id}`);
       }
     } catch (e: unknown) {
       const errorMessage = e instanceof Error ? e.message : "An error occurred.";

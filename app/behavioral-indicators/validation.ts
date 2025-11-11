@@ -13,5 +13,5 @@ export const indicatorSchema = z.object({
   counterExamples: z.string().optional(),
   isActive: z.boolean(),
   approvalStatus: z.enum(Object.values(ApprovalStatus) as [string, ...string[]]),
-  orderIndex: z.number().optional(),
-});
+  orderIndex: z.number().min(1, 'Order index must be positive').max(20, 'Order index must be 20 or less'),
+}).strict(); // Prevent extra fields from being included

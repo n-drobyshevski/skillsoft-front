@@ -126,10 +126,10 @@ export function CompetencyForm({
               name="description"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Description</FormLabel>
+                  <FormLabel>Description *</FormLabel>
                   <FormControl>
                     <Textarea
-                      placeholder="A brief description of the competency"
+                      placeholder="A detailed description of the competency (minimum 10 characters)"
                       className="resize-none"
                       {...field}
                       onBlur={() => {

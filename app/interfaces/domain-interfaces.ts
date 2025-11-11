@@ -52,7 +52,7 @@ export interface AssessmentQuestion {
 export interface Competency {
   id: string;
   name: string;
-  description?: string;
+  description: string;
   category: CompetencyCategory;
   level: ProficiencyLevel;
   standardCodes?: StandardCodes;

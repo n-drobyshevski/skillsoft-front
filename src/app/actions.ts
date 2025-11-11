@@ -1,21 +1,31 @@
 'use server'
 
-import { revalidatePath } from 'next/cache';
+import { revalidatePath, revalidateTag } from 'next/cache';
 
 export async function revalidateCompetencyTags(competencyId?: string) {
   try {
+    // Invalidate paths
     revalidatePath('/competencies');
     revalidatePath('/');
     if (competencyId) {
       revalidatePath(`/competencies/${competencyId}`);
     }
-  } catch (error) {
-    console.error('Error revalidating competency paths:', error);
+    
+    // Invalidate cache tags used by fetchApi
+    revalidateTag('competencies', 'max');
+    if (competencyId) {
+      revalidateTag(`competency-${competencyId}`, 'max');
+    }
+  } catch {
+    // Error revalidating competency paths - silently fail in production
   }
 }
 
 
 import { fetchApi } from '@/services/api';
+
+// Constants
+const UNKNOWN_ERROR_MESSAGE = 'An unknown error occurred.';
 
 // This is a simplified type for the form data.
 // For a real app, this might be shared or generated from the Zod schema.
@@ -48,7 +58,7 @@ export async function updateIndicatorAction(indicatorId: string, data: Indicator
     return { success: true, message: 'Indicator updated successfully.' };
   } catch (error) {
     // Return a serializable error object for the client to handle
-    const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred.';
+    const errorMessage = error instanceof Error ? error.message : UNKNOWN_ERROR_MESSAGE;
     return { success: false, message: `Failed to update indicator: ${errorMessage}` };
   }
 }
@@ -65,8 +75,8 @@ export async function revalidateQuestionTags(questionId: string, competencyId?: 
     if (behavioralIndicatorId) {
       revalidatePath(`/behavioral-indicators/${behavioralIndicatorId}`);
     }
-  } catch (error) {
-    console.error('Error revalidating question paths:', error);
+  } catch {
+    // Error revalidating question paths - silently fail in production
   }
 }
 
@@ -82,7 +92,71 @@ export async function updateIndicatorQuestionsAction(indicatorId: string, questi
 
     return { success: true, message: 'Indicator questions updated successfully.' };
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred.';
+    const errorMessage = error instanceof Error ? error.message : UNKNOWN_ERROR_MESSAGE;
     return { success: false, message: `Failed to update indicator questions: ${errorMessage}` };
+  }
+}
+
+export async function deleteCompetency(competencyId: string) {
+  try {
+    await fetchApi(`/competencies/${competencyId}`, {
+      method: 'DELETE',
+      cache: 'no-store',
+    });
+
+    // Comprehensive cache invalidation
+    revalidatePath('/competencies');
+    revalidatePath(`/competencies/${competencyId}`);
+    revalidatePath('/'); // Dashboard page
+    
+    // Invalidate fetchApi cache tags
+    revalidateTag('competencies', 'max');
+    revalidateTag(`competency-${competencyId}`, 'max');
+
+    return { success: true };
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : UNKNOWN_ERROR_MESSAGE;
+    throw new Error(`Failed to delete competency: ${errorMessage}`);
+  }
+}
+
+export async function deleteIndicator(indicatorId: string, competencyId?: string) {
+  try {
+    await fetchApi(`/behavioral-indicators/${indicatorId}`, {
+      method: 'DELETE',
+      cache: 'no-store',
+    });
+
+    revalidatePath('/behavioral-indicators');
+    if (competencyId) {
+      revalidatePath(`/competencies/${competencyId}`);
+    }
+
+    return { success: true };
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : UNKNOWN_ERROR_MESSAGE;
+    throw new Error(`Failed to delete indicator: ${errorMessage}`);
+  }
+}
+
+export async function deleteAssessmentQuestion(questionId: string, competencyId?: string, indicatorId?: string) {
+  try {
+    await fetchApi(`/questions/${questionId}`, {
+      method: 'DELETE',
+      cache: 'no-store',
+    });
+
+    revalidatePath('/assessment-questions');
+    if (competencyId) {
+      revalidatePath(`/competencies/${competencyId}`);
+    }
+    if (indicatorId) {
+      revalidatePath(`/behavioral-indicators/${indicatorId}`);
+    }
+
+    return { success: true };
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : UNKNOWN_ERROR_MESSAGE;
+    throw new Error(`Failed to delete question: ${errorMessage}`);
   }
 }

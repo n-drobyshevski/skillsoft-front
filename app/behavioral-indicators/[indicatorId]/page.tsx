@@ -1,11 +1,12 @@
-import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { behavioralIndicatorsApi, assessmentQuestionsApi } from "@/services/api";
 import type {
 	BehavioralIndicator,
 	AssessmentQuestion,
 } from "../../interfaces/domain-interfaces";
-import IndicatorPage from "./components/IndicatorPage";
+import IndicatorDetailContent from "./components/IndicatorDetailContent";
+import IndicatorDetailClient from "./components/IndicatorDetailClient";
+import { EntityDetailLayout } from "../../components/EntityDetailLayout";
 import Loading from "./loading";
 
 interface IndicatorDetailPageProps {
@@ -27,18 +28,18 @@ async function getIndicatorData(indicatorId: string) {
 }
 
 export default async function Page({ params }: IndicatorDetailPageProps) {
-		const { indicatorId } = await params;
+	const { indicatorId } = await params;
 	const { indicator, assessmentQuestions } = await getIndicatorData(indicatorId);
-
 
 	if (!indicator) {
 		notFound();
 	}
 
 	return (
-				<Suspense fallback={<Loading />}>
-
-		<IndicatorPage indicator={indicator} assessmentQuestions={assessmentQuestions} />
-				</Suspense>
+		<EntityDetailLayout>
+			<IndicatorDetailClient indicator={indicator}>
+				<IndicatorDetailContent indicator={indicator} assessmentQuestions={assessmentQuestions} />
+			</IndicatorDetailClient>
+		</EntityDetailLayout>
 	);
 }

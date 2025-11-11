@@ -16,5 +16,5 @@ export const questionSchema = z.object({
   timeLimit: z.number().optional(),
   difficultyLevel: z.nativeEnum(DifficultyLevel),
   isActive: z.boolean(),
-  orderIndex: z.number(),
-});
+  orderIndex: z.number().min(1, "Order index must be positive").max(50, "Maximum 50 questions per indicator"),
+}).strict(); // Prevent extra fields from being included

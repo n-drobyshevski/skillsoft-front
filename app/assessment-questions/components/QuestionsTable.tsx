@@ -28,6 +28,7 @@ import { AssessmentQuestion } from "@/app/interfaces/domain-interfaces";
 import { questionTypeToIcon, questionDifficultyToColor } from "@/app/utils";
 import EntitiesTable from "@/app/components/Table";
 import AssessmentQuestionDrawer from "./AssessmentQuestionDrawer";
+import { IndicatorHoverCard } from "../../components/IndicatorHoverCard";
 
 interface QuestionsTableProps {
     questions: AssessmentQuestion[];
@@ -64,12 +65,18 @@ export default function QuestionsTable({ questions }: QuestionsTableProps) {
               <div className="flex flex-col max-w-lg overflow-hidden text-ellipsis">
                 <div className="font-medium ">{row.getValue("questionText")}</div>
                 <div className="text-sm text-muted-foreground">
-                  <Link
-                    href={`/behavioral-indicators/${question.behavioralIndicatorId}`}
-                    className="text-primary hover:underline"
-                  >
-                    {question.behavioralIndicatorId}
-                  </Link>
+                  {question.behavioralIndicatorId ? (
+                    <IndicatorHoverCard indicatorId={question.behavioralIndicatorId}>
+                      <Link
+                        href={`/behavioral-indicators/${question.behavioralIndicatorId}`}
+                        className="text-primary hover:underline"
+                      >
+                        View Indicator
+                      </Link>
+                    </IndicatorHoverCard>
+                  ) : (
+                    <span className="text-muted-foreground">No indicator assigned</span>
+                  )}
                 </div>
               </div>
             );

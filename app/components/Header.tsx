@@ -14,10 +14,12 @@ import { SidebarTrigger } from "@/components/ui/sidebar";
 
 import { useHeader } from "@/context/HeaderContext";
 import { useBreadcrumbs } from "@/lib/breadcrumbs";
+import { useBreadcrumbContext } from "@/src/context/BreadcrumbContext";
 
 export default function Header() {
   const { title, subtitle, entityName } = useHeader();
-  const { breadcrumbs } = useBreadcrumbs();
+  const { customBreadcrumbs } = useBreadcrumbContext();
+  const { breadcrumbs } = useBreadcrumbs(customBreadcrumbs);
   return (
     <header className="@container/page-header sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background px-4 @md/page-header:static @md/page-header:h-auto @md/page-header:border-0 @md/page-header:bg-transparent @md/page-header:px-6 py-3 @md/page-header:py-4 mb-4 w-full">
       {/* Mobile sidebar trigger */}

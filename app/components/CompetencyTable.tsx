@@ -4,9 +4,11 @@ import React from 'react';
 import { ColumnDef } from '@tanstack/react-table';
 import { Competency } from '../interfaces/domain-interfaces';
 import { Button } from '@/components/ui/button';
-import { ArrowUpDown } from 'lucide-react';
+import { ArrowUpDown, Target, TrendingUp, CheckCircle2, Clock } from 'lucide-react';
 import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
+import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card';
+import { Separator } from '@/components/ui/separator';
 import EntityTable from './Table';
 
 interface CompetencyTableProps {
@@ -27,11 +29,124 @@ const CompetencyTable: React.FC<CompetencyTableProps> = ({ competencies }) => {
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       ),
-      cell: ({ row }) => (
-        <Link href={`/competencies/${row.original.id}`} className="font-medium text-primary hover:underline">
-          {row.getValue('name')}
-        </Link>
-      ),
+      cell: ({ row }) => {
+        const competency = row.original;
+        const indicatorCount = competency.behavioralIndicators?.length || 0;
+        const formatDate = (dateString: string) => {
+          return new Date(dateString).toLocaleDateString('en-US', {
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric'
+          });
+        };
+
+        return (
+          <HoverCard openDelay={300} closeDelay={100}>
+            <HoverCardTrigger asChild>
+              <Link 
+                href={`/competencies/${competency.id}`} 
+                className="font-medium text-primary hover:underline cursor-pointer"
+              >
+                {competency.name}
+              </Link>
+            </HoverCardTrigger>
+            <HoverCardContent className="w-80" align="start">
+              <div className="space-y-3">
+                {/* Header */}
+                <div className="space-y-1">
+                  <h4 className="text-sm font-semibold leading-none">
+                    {competency.name}
+                  </h4>
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <Badge 
+                      variant={competency.isActive ? 'default' : 'secondary'}
+                      className="h-5 text-xs"
+                    >
+                      {competency.isActive ? 'Active' : 'Inactive'}
+                    </Badge>
+                    <span>•</span>
+                    <span>Version {competency.version}</span>
+                  </div>
+                </div>
+
+                <Separator />
+
+                {/* Description */}
+                {competency.description && (
+                  <div className="space-y-1">
+                    <p className="text-xs text-muted-foreground leading-relaxed">
+                      {competency.description.length > 120 
+                        ? `${competency.description.substring(0, 120)}...` 
+                        : competency.description
+                      }
+                    </p>
+                  </div>
+                )}
+
+                {/* Details Grid */}
+                <div className="grid grid-cols-2 gap-3 text-xs">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-1.5">
+                      <Target className="h-3.5 w-3.5 text-muted-foreground" />
+                      <span className="text-muted-foreground">Category</span>
+                    </div>
+                    <p className="font-medium">{competency.category}</p>
+                  </div>
+
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-1.5">
+                      <TrendingUp className="h-3.5 w-3.5 text-muted-foreground" />
+                      <span className="text-muted-foreground">Level</span>
+                    </div>
+                    <p className="font-medium">{competency.level}</p>
+                  </div>
+
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-1.5">
+                      <CheckCircle2 className="h-3.5 w-3.5 text-muted-foreground" />
+                      <span className="text-muted-foreground">Indicators</span>
+                    </div>
+                    <p className="font-medium">
+                      {indicatorCount} indicator{indicatorCount !== 1 ? 's' : ''}
+                    </p>
+                  </div>
+
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-1.5">
+                      <Clock className="h-3.5 w-3.5 text-muted-foreground" />
+                      <span className="text-muted-foreground">Updated</span>
+                    </div>
+                    <p className="font-medium">{formatDate(competency.lastModified)}</p>
+                  </div>
+                </div>
+
+                {/* Standard Codes */}
+                {competency.standardCodes && Object.keys(competency.standardCodes).length > 0 && (
+                  <>
+                    <Separator />
+                    <div className="space-y-2">
+                      <p className="text-xs font-medium text-muted-foreground">Standard Codes</p>
+                      <div className="flex flex-wrap gap-1">
+                        {Object.entries(competency.standardCodes).map(([key, mapping]) => (
+                          mapping && (
+                            <Badge 
+                              key={key} 
+                              variant="outline" 
+                              className="h-5 text-xs"
+                            >
+                              {key}: {mapping.code}
+                            </Badge>
+                          )
+                        ))}
+                      </div>
+                    </div>
+                  </>
+                )}
+              </div>
+            </HoverCardContent>
+          </HoverCard>
+        );
+      },
     },
     {
       accessorKey: 'category',

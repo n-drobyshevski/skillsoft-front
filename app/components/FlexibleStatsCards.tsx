@@ -104,7 +104,7 @@ export default function FlexibleStatsCards({ data, loading = false, onCardClick 
     }
     
     return (
-      <div className="flex flex-wrap gap-3 px-4 lg:px-6 sm:gap-4">
+      <div className="flex flex-wrap gap-3 pr-4 lg:pr-6 sm:gap-4">
         {[1, 2, 3, 4].map((i) => (
           <Card key={i} className="@container/card flex-1 min-w-[280px] max-w-[350px] animate-pulse">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -316,11 +316,11 @@ export default function FlexibleStatsCards({ data, loading = false, onCardClick 
 
   // Desktop layout: Detailed cards
   return (
-    <div className="flex flex-wrap gap-3 px-4 lg:px-6 sm:gap-4">
+    <div className="flex flex-wrap gap-3 sm:gap-4">
       {cardConfigs.map((config) => (
         <Card 
           key={config.key}
-          className={`@container/card flex-1 min-w-[280px] max-w-[350px] ${
+          className={`@container/card flex-1 min-w-[280px] ${
             onCardClick ? 'cursor-pointer hover:shadow-lg transition-shadow' : ''
           }`}
           onClick={onCardClick ? () => onCardClick(config.key) : undefined}

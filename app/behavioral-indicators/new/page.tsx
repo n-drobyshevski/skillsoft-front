@@ -56,7 +56,7 @@ function NewIndicatorPageContent() {
       weight: data.weight || 1,
       isActive: data.isActive,
       approvalStatus: ApprovalStatus.DRAFT,
-      orderIndex: 0,
+      orderIndex: 1,
       competencyId: competencyId,
     };
     setPreviewIndicator(preview);
@@ -81,7 +81,7 @@ function NewIndicatorPageContent() {
       weight: 1,
       isActive: true,
       approvalStatus: ApprovalStatus.DRAFT,
-      orderIndex: 0,
+      orderIndex: 1,
       competencyId: competencyId,
     } as BehavioralIndicator;
   };

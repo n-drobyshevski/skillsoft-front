@@ -29,8 +29,8 @@ import {
   Search,
   Bell
 } from "lucide-react";
-import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useBreadcrumbContext } from "@/src/context/BreadcrumbContext";
 
 interface SiteHeaderProps {
   title?: string;
@@ -39,21 +39,34 @@ interface SiteHeaderProps {
 
 export function SiteHeader({ title = "Dashboard", breadcrumbs }: SiteHeaderProps) {
   const pathname = usePathname();
+  const { customBreadcrumbs } = useBreadcrumbContext();
   
   // Generate breadcrumbs based on pathname if not provided
   const defaultBreadcrumbs = pathname === "/" ? [] : 
     pathname.split("/").filter(Boolean).map((segment, index, array) => {
+      // Check for custom breadcrumb title first
+      const customTitle = customBreadcrumbs[segment as keyof typeof customBreadcrumbs];
+      if (customTitle) {
+        return {
+          label: customTitle,
+          href: "/" + array.slice(0, index + 1).join("/")
+        };
+      }
+      
       // Handle special cases for better UX
       let label = segment;
       if (segment === "behavioral-indicators") {
         label = "Behavioral Indicators";
       } else if (segment === "assessment-questions") {
         label = "Assessment Questions";
-      } else if (segment.includes("-")) {
-        // Convert kebab-case to Title Case
+      } else if (segment.includes("-") && segment.length < 20) {
+        // Convert kebab-case to Title Case for non-ID segments
         label = segment.split("-").map(word => 
           word.charAt(0).toUpperCase() + word.slice(1)
         ).join(" ");
+      } else if (/^[a-f0-9-]+$/i.test(segment) && segment.length > 10) {
+        // This looks like an entity ID, use generic label
+        label = "Details";
       } else {
         // Regular title case
         label = segment.charAt(0).toUpperCase() + segment.slice(1);

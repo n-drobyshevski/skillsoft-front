@@ -52,7 +52,7 @@ export function IndicatorForm({ indicator, competencyId, onUpdatePreview }: { in
       counterExamples: indicator?.counterExamples || "",
       isActive: indicator?.isActive || true,
       approvalStatus: indicator?.approvalStatus || ApprovalStatus.DRAFT,
-      orderIndex: indicator?.orderIndex || 0,
+      orderIndex: indicator?.orderIndex || 1,
     },
   });
 
@@ -62,9 +62,8 @@ export function IndicatorForm({ indicator, competencyId, onUpdatePreview }: { in
       if (isEditMode) {
         const apiData = {
           ...data,
-          level: data.observabilityLevel,
           competencyId: indicator.competencyId,
-          orderIndex: data.orderIndex ?? 0,
+          orderIndex: data.orderIndex ?? 1,
         };
         await behavioralIndicatorsApi.updateIndicator(indicator.competencyId, indicator.id, apiData);
         toast.success("Indicator updated successfully!");
@@ -72,13 +71,12 @@ export function IndicatorForm({ indicator, competencyId, onUpdatePreview }: { in
       } else if (competencyId) {
         const apiData = {
           ...data,
-          level: data.observabilityLevel,
           competencyId: competencyId,
-          orderIndex: data.orderIndex ?? 0,
+          orderIndex: data.orderIndex ?? 1,
         };
         const newIndicator = await behavioralIndicatorsApi.createIndicator(competencyId, apiData);
         toast.success("Indicator created successfully!");
-        router.push(`/competencies/${competencyId}`);
+        router.push(`/behavioral-indicators/${newIndicator.id}`);
       }
     } catch (e: any) {
       if (e.status === 409) {

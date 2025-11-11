@@ -15,18 +15,16 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import EntityTable from "@/app/components/Table";
-import PageHeader from "@/app/components/PageHeader";
-import FlexibleStatsCards from "@/app/components/FlexibleStatsCards";
 import {
   ArrowUpDown,
   MoreHorizontal,
   Settings2,
   Eye,
-  Plus,
 } from "lucide-react";
 import { BehavioralIndicator } from "@/app/interfaces/domain-interfaces";
 import { biLevelToColor } from "@/app/utils";
 import IndicatorDrawer from "./IndicatorDrawer";
+import { CompetencyHoverCard } from "../[indicatorId]/components/CompetencyHoverCard";
 
 interface EnrichedIndicator extends BehavioralIndicator {
   competencyName: string;
@@ -87,12 +85,14 @@ export default function IndicatorsTable({ indicators }: IndicatorsTableProps) {
       ),
       cell: ({ row }) => (
         <div className="flex items-center gap-2">
-          <Link
-            href={`/competencies/${row.original.competencyId}`}
-            className="text-primary hover:underline"
-          >
-            {row.original.competencyName}
-          </Link>
+          <CompetencyHoverCard competencyId={row.original.competencyId}>
+            <Link
+              href={`/competencies/${row.original.competencyId}`}
+              className="text-primary hover:underline"
+            >
+              {row.original.competencyName}
+            </Link>
+          </CompetencyHoverCard>
         </div>
       ),
       sortingFn: (a, b) =>

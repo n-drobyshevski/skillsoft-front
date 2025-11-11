@@ -6,22 +6,12 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { 
-	ArrowUpDown, 
-	MoreHorizontal
-} from "lucide-react";
 import { competenciesApi } from "@/services/api";
 import { Competency, DashboardStats } from "./interfaces/domain-interfaces";
-import DashboardStatsCards from "./components/DasboardStatsCards";
-import ResponsiveStatsCards from "./components/ResponsiveStatsCards";
 import FlexibleStatsCards from "./components/FlexibleStatsCards";
 import ErrorCard from "./components/ErrorCard";
 import CompetencyByCategoryBarChart from "@/components/charts/CompetencyByCategoryBarChart";
-import CompetencyByLevelBarChart from "@/components/charts/CompetencyByLevelBarChart";
 import AverageIndicatorsGauge from "@/components/charts/AverageIndicatorsGauge";
-import WeightDistributionPie from "@/components/charts/WeightDistributionPie";
 import RecentActivityCard from "@/components/RecentActivityCard";
 import QuickActionsCard from "@/components/QuickActionsCard";
 import CompetencyTable from "./components/CompetencyTable";
@@ -33,7 +23,7 @@ async function getDashboardData() {
 		
 		if (!Array.isArray(competenciesData)) {
 			// In a real app, you might want to log this error to a service
-			console.error('Invalid response from server: data is not an array');
+			// Invalid response from server: data is not an array
 			return { competencies: [], stats: null, error: "Failed to load competencies. Invalid data format." };
 		}
 		
@@ -64,8 +54,8 @@ async function getDashboardData() {
 				: 0;
 
 		return { competencies: competenciesData, stats, error: null };
-	} catch (error) {
-		console.error("Failed to fetch data:", error);
+	} catch {
+		// Failed to fetch data - error handled
 		return { competencies: [], stats: null, error: "Failed to load competencies. Please try again." };
 	}
 }
@@ -79,103 +69,102 @@ export default async function Page() {
 	}
 
 	return (
-		<div className="@container/main flex flex-1 flex-col gap-2 mobile-container">
-			<div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6 no-mobile-overflow">
-				{/* Page Header */}
-				<PageHeader 
-					title="Dashboard"
-					description="Here's what's happening with your competency management today."
+		<div className="flex flex-1 flex-col gap-4 p-4 pt-6 md:gap-6 md:p-6">
+			{/* Page Header */}
+			<PageHeader 
+				title="Dashboard"
+				description="Here's what's happening with your competency management today."
+			/>
+
+			{/* Overview Cards */}
+			{stats && (
+				<FlexibleStatsCards
+				
+					data={{
+						type: "dashboard",
+						stats: stats
+					}}
+					loading={false}
 				/>
+			)}
 
-				{/* Overview Cards */}
-				{stats && (
-					<FlexibleStatsCards
-						data={{
-							type: "dashboard",
-							stats: stats
-						}}
-						loading={false}
-					/>
-				)}
+			{/* Main Dashboard Grid */}
+			<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+				{/* Chart Section */}
+				<Card className="lg:col-span-2">
+					<CardHeader>
+						<CardTitle>Competency Overview</CardTitle>
+						<CardDescription>
+							Showing distribution of competencies across different categories
+						</CardDescription>
+					</CardHeader>
+					<CardContent className="pl-2">
+						{stats && (
+							<CompetencyByCategoryBarChart
+								data={Object.entries(stats.competenciesByCategory).map(([name, value]) => ({ name, value }))}
+							/>
+						)}
+					</CardContent>
+				</Card>
 
-				{/* Main Dashboard Grid */}
-				<div className="@container/main-grid flex flex-wrap gap-4 px-4 lg:px-6">
-					{/* Chart Section */}
-					<Card className="@container/chart flex-1 min-w-[500px] max-w-none card-mobile-padding">
+				{/* Recent Activity */}
+				<Card>
+					<CardHeader>
+						<CardTitle>Recent Activity</CardTitle>
+						<CardDescription>
+							Latest updates and changes in your competency framework
+						</CardDescription>
+					</CardHeader>
+					<CardContent>
+						<RecentActivityCard />
+					</CardContent>
+				</Card>
+			</div>
+
+			{/* Secondary Grid */}
+			<div className="grid gap-4 md:grid-cols-3">
+				{/* Data Table */}
+				<Card className="md:col-span-2">
+					<CardHeader>
+						<CardTitle>Competencies</CardTitle>
+						<CardDescription>
+							Manage your competency framework here.
+						</CardDescription>
+					</CardHeader>
+					<CardContent>
+						<CompetencyTable competencies={competencies} />
+					</CardContent>
+				</Card>
+
+				{/* Side Content */}
+				<div className="space-y-4">
+					{/* Quick Actions */}
+					<Card>
 						<CardHeader>
-							<CardTitle className="text-responsive-lg">Competency Overview</CardTitle>
-							<CardDescription className="text-responsive">
-								Showing distribution of competencies across different categories
-							</CardDescription>
-						</CardHeader>
-						<CardContent className="pl-2">
-							{stats && (
-								<CompetencyByCategoryBarChart
-									data={Object.entries(stats.competenciesByCategory).map(([name, value]) => ({ name, value }))}
-								/>
-							)}
-						</CardContent>
-					</Card>
-
-					{/* Recent Activity */}
-					<Card className="@container/activity flex-1 min-w-[400px] lg:max-w-[400px] card-mobile-padding">
-						<CardHeader>
-							<CardTitle className="text-responsive-lg">Recent Activity</CardTitle>
-							<CardDescription className="text-responsive">
-								Latest updates and changes in your competency framework
+							<CardTitle>Quick Actions</CardTitle>
+							<CardDescription>
+								Frequently used actions and shortcuts.
 							</CardDescription>
 						</CardHeader>
 						<CardContent>
-							<RecentActivityCard />
-						</CardContent>
-					</Card>
-				</div>
-
-				{/* Secondary Grid */}
-				<div className="@container/secondary-grid flex flex-wrap gap-4 px-4 lg:px-6">
-					{/* Data Table */}
-					<Card className="@container/table flex-1 min-w-[600px] max-w-none card-mobile-padding">
-						<CardHeader>
-							<CardTitle className="text-responsive-lg">Competencies</CardTitle>
-							<CardDescription className="text-responsive">
-								Manage your competency framework here.
-							</CardDescription>
-						</CardHeader>
-						<CardContent className="overflow-x-auto">
-							<CompetencyTable competencies={competencies} />
+							<QuickActionsCard />
 						</CardContent>
 					</Card>
 
-					{/* Side Content */}
-					<div className="@container/sidebar flex-1 min-w-[350px] max-w-[450px] space-y-4">
-						{/* Quick Actions */}
-						<Card className="@container/quick-actions card-mobile-padding">
+					{/* Performance Metrics */}
+					{stats && (
+						<Card>
 							<CardHeader>
-								<CardTitle className="text-responsive-lg">Quick Actions</CardTitle>
-								<CardDescription className="text-responsive">
-									Frequently used actions and shortcuts.
+								<CardTitle>Performance</CardTitle>
+								<CardDescription>
+									Average indicators per competency
 								</CardDescription>
 							</CardHeader>
 							<CardContent>
-								<QuickActionsCard />
+								<AverageIndicatorsGauge value={stats.averageIndicatorsPerCompetency} />
 							</CardContent>
 						</Card>
-
-						{/* Performance Metrics */}
-						{stats && (
-							<Card className="@container/performance card-mobile-padding">
-								<CardHeader>
-									<CardTitle className="text-responsive-lg">Performance</CardTitle>
-									<CardDescription className="text-responsive">
-										Average indicators per competency
-									</CardDescription>
-								</CardHeader>
-								<CardContent>
-									<AverageIndicatorsGauge value={stats.averageIndicatorsPerCompetency} />
-								</CardContent>
-							</Card>
-						)}
-					</div>
+					)}
 				</div>
 			</div>
 		</div>

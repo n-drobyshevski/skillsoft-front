@@ -2,23 +2,16 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { DeleteConfirmationDialog } from "@/app/components/DeleteConfirmationDialog";
-import { behavioralIndicatorsApi } from "@/services/api";
-import { toast } from 'sonner';
 import {
   FileText,
   HelpCircle,
   Info,
-  ArrowLeft,
   Lightbulb,
   X,
-  Pencil,
   Plus,
-  Trash2,
 } from "lucide-react";
 import type {
   BehavioralIndicator,
@@ -28,113 +21,16 @@ import { DifficultyLevel } from "../../../enums/domain_enums";
 import AssessmentQuestionDrawer from "../../../assessment-questions/components/AssessmentQuestionDrawer";
 import { CompetencyHoverCard } from "./CompetencyHoverCard";
 
-interface IndicatorPageProps {
+interface IndicatorDetailContentProps {
   indicator: BehavioralIndicator;
   assessmentQuestions: AssessmentQuestion[];
 }
 
-const approvalStatusToColor = (status: string): string => {
-    const colors: { [key: string]: string } = {
-        DRAFT: "border-gray-500/30 text-gray-400 bg-gray-500/8 dark:text-gray-300",
-        PENDING_REVIEW: "border-yellow-500/30 text-yellow-500 bg-yellow-500/8 dark:text-yellow-300",
-        APPROVED: "border-emerald-500/30 text-emerald-600 bg-emerald-500/8 dark:text-emerald-300",
-        REJECTED: "border-red-500/30 text-red-400 bg-red-500/8 dark:text-red-300",
-        ARCHIVED: "border-gray-500/30 text-gray-400 bg-gray-500/8 dark:text-gray-300",
-        UNDER_REVISION: "border-blue-500/30 text-blue-600 bg-blue-500/8 dark:text-blue-300",
-    };
-    return colors[status] || colors["DRAFT"];
-};
-
-const levelToColor = (level: string): string => {
-    const colors: { [key: string]: string } = {
-        NOVICE: "border-red-500/30 text-red-400 bg-red-500/8 dark:text-red-300",
-        DEVELOPING:
-            "border-orange-500/30 text-orange-500 bg-orange-500/8 dark:text-orange-300",
-        PROFICIENT:
-            "border-yellow-500/30 text-yellow-600 bg-yellow-500/8 dark:text-yellow-300",
-        ADVANCED:
-            "border-emerald-500/30 text-emerald-600 bg-emerald-500/8 dark:text-emerald-300",
-        EXPERT:
-            "border-blue-500/30 text-blue-600 bg-blue-500/8 dark:text-blue-300",
-    };
-    return colors[level] || colors["NOVICE"];
-};
-
-const formatProficiencyLevel = (level: string) => {
-    return level.charAt(0) + level.slice(1).toLowerCase().replace("_", " ");
-};
-
-export default function IndicatorPage({ indicator, assessmentQuestions }: IndicatorPageProps) {
-  const router = useRouter();
+export default function IndicatorDetailContent({ indicator, assessmentQuestions }: IndicatorDetailContentProps) {
   const [selectedQuestion, setSelectedQuestion] = useState<AssessmentQuestion | null>(null);
-  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
-
-  const handleDelete = async () => {
-    setIsDeleting(true);
-    try {
-      await behavioralIndicatorsApi.deleteIndicator(indicator.competencyId, indicator.id);
-      toast.success('Behavioral indicator deleted successfully');
-      router.push('/behavioral-indicators');
-    } catch {
-      toast.error('Failed to delete indicator. Please try again.');
-    } finally {
-      setIsDeleting(false);
-      setShowDeleteDialog(false);
-    }
-  };
 
   return (
-    <div className="container mx-auto px-6 py-8">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-8">
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" onClick={() => router.back()}>
-            <ArrowLeft className="w-4 h-4" />
-            <span className="sr-only">Go back</span>
-          </Button>
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight">
-              {indicator.title}
-            </h1>
-            <div className="flex items-center gap-2 mt-2">
-              <Badge
-                variant="outline"
-                className={levelToColor(indicator.observabilityLevel)}
-              >
-                {formatProficiencyLevel(indicator.observabilityLevel)}
-              </Badge>
-              <Badge variant={indicator.isActive ? "default" : "secondary"}>
-                {indicator.isActive ? "Active" : "Inactive"}
-              </Badge>
-              <Badge
-                variant="outline"
-                className={approvalStatusToColor(indicator.approvalStatus)}
-              >
-                {indicator.approvalStatus.replace("_", " ")}
-              </Badge>
-            </div>
-          </div>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setShowDeleteDialog(true)}
-            className="text-destructive hover:text-destructive hover:bg-destructive/10"
-          >
-            <Trash2 className="mr-2 h-4 w-4" />
-            Delete
-          </Button>
-          <Link href={`/behavioral-indicators/${indicator.id}/edit`} passHref>
-            <Button>
-              <Pencil className="mr-2 h-4 w-4" />
-              Edit
-            </Button>
-          </Link>
-        </div>
-      </div>
-
+    <>
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 space-y-6">
           {/* Description Card */}
@@ -289,13 +185,13 @@ export default function IndicatorPage({ indicator, assessmentQuestions }: Indica
               </div>
               <div className="grid gap-1">
                 <div className="font-semibold text-muted-foreground">Observability Level</div>
-                <Badge variant="outline" className={levelToColor(indicator.observabilityLevel)}>
-                  {formatProficiencyLevel(indicator.observabilityLevel)}
+                <Badge variant="outline">
+                  {indicator.observabilityLevel}
                 </Badge>
               </div>
               <div className="grid gap-1">
                 <div className="font-semibold text-muted-foreground">Approval Status</div>
-                <Badge variant="outline" className={approvalStatusToColor(indicator.approvalStatus)}>
+                <Badge variant="outline">
                   {indicator.approvalStatus.replace("_", " ")}
                 </Badge>
               </div>
@@ -318,6 +214,7 @@ export default function IndicatorPage({ indicator, assessmentQuestions }: Indica
           </Card>
         </div>
       </div>
+
       {selectedQuestion && (
         <AssessmentQuestionDrawer
           open={!!selectedQuestion}
@@ -329,17 +226,6 @@ export default function IndicatorPage({ indicator, assessmentQuestions }: Indica
           question={selectedQuestion}
         />
       )}
-      
-      <DeleteConfirmationDialog
-        open={showDeleteDialog}
-        onOpenChange={setShowDeleteDialog}
-        onConfirm={handleDelete}
-        title="Delete Behavioral Indicator"
-        description="Are you sure you want to delete this behavioral indicator? This will also delete all associated assessment questions."
-        entityName={indicator.title}
-        isDeleting={isDeleting}
-        confirmButtonText="Delete Indicator"
-      />
-    </div>
+    </>
   );
 }

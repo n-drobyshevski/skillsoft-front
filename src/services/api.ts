@@ -18,19 +18,25 @@ const LIST_ENDPOINTS = [QUESTIONS_ENDPOINT, COMPETENCIES_ENDPOINT, BEHAVIORAL_IN
 interface CompetencyInput {
     name: string;
     description?: string;
-    category?: string;
-    level?: string;
-    [key: string]: unknown;
+    category: string;
+    level: string;
+    isActive: boolean;
+    approvalStatus: string;
+    standardCodes?: Record<string, unknown>;
 }
 
 interface IndicatorInput {
     title: string;
     description?: string;
     competencyId: string;
-    level: string;
     weight: number;
     orderIndex: number;
-    [key: string]: unknown;
+    observabilityLevel: string;
+    measurementType: string;
+    examples?: string;
+    counterExamples?: string;
+    isActive: boolean;
+    approvalStatus: string;
 }
 
 interface QuestionInput {
@@ -54,9 +60,23 @@ interface QuestionInput {
 
 // const API_BASE_URL = "https://localhost:8080/api";
 // Types for API responses and errors
-export interface ApiError extends Error {
+export class ApiError extends Error {
     status?: number;
     code?: string;
+    
+    constructor(message: string = 'An unknown error occurred', status?: number, code?: string) {
+        // Ensure message is a string and not undefined/null
+        const errorMessage = typeof message === 'string' ? message : String(message || 'An unknown error occurred');
+        super(errorMessage);
+        this.name = 'ApiError';
+        this.status = status;
+        this.code = code;
+        
+        // Maintains proper stack trace for where our error was thrown (only available on V8)
+        if (Error.captureStackTrace) {
+            Error.captureStackTrace(this, ApiError);
+        }
+    }
 }
 
 interface ErrorResponse {
@@ -67,19 +87,46 @@ interface ErrorResponse {
 // Helper function to handle responses with proper error typing
 async function handleResponse<T>(response: Response): Promise<T> {
     if (!response.ok) {
-        const error: ApiError = new Error('API request failed for url: ' + response.url);
-        error.status = response.status;
+        let errorMessage = `HTTP ${response.status} error for ${response.url}`;
+        let errorCode: string | undefined;
         
         try {
-            const errorData = await response.json() as ErrorResponse;
-            error.message = errorData.message || `HTTP error! status: ${response.status}`;
-            error.code = errorData.code;
+            const contentType = response.headers.get('Content-Type');
+            if (contentType?.includes('application/json')) {
+                const errorData = await response.json() as ErrorResponse;
+                errorMessage = errorData.message || errorMessage;
+                errorCode = errorData.code;
+            } else {
+                // Handle non-JSON error responses
+                const textResponse = await response.text();
+                if (textResponse.trim()) {
+                    errorMessage = textResponse.substring(0, 200); // Limit error message length
+                }
+            }
         } catch {
-            error.message = `HTTP error! status: ${response.status}`;
+            // If we can't parse the error response, use a generic message
+            errorMessage = `HTTP ${response.status} error - Unable to parse response`;
         }
-        throw error;
+        
+        throw new ApiError(errorMessage, response.status, errorCode);
     }
-    return response.json() as Promise<T>;
+    
+    // Check if response has content before trying to parse JSON
+    const contentLength = response.headers.get('Content-Length');
+    const contentType = response.headers.get('Content-Type');
+    
+    // No content (204 No Content, empty body, or non-JSON content)
+    if (response.status === 204 || 
+        contentLength === '0' || 
+        (!contentType || !contentType.includes('application/json'))) {
+        return null as T; // Return null for empty responses
+    }
+    
+    try {
+        return response.json() as Promise<T>;
+    } catch (error) {
+        throw new ApiError(`Failed to parse JSON response: ${error instanceof Error ? error.message : 'Unknown error'}`, response.status);
+    }
 }
 
 // API fetch wrapper with caching and revalidation
@@ -116,9 +163,7 @@ export async function fetchApi<T>(
         if (error instanceof Error) {
             // Handle CORS errors
             if (error.message.includes('CORS') || error.message.includes('NetworkError') || error.message.includes('Failed to fetch')) {
-                const corsError: ApiError = new Error(`CORS error when accessing ${getApiBaseUrl()}${endpoint}. Check backend CORS configuration.`);
-                corsError.code = 'CORS_ERROR';
-                throw corsError;
+                throw new ApiError(`CORS error when accessing ${getApiBaseUrl()}${endpoint}. Check backend CORS configuration.`, undefined, 'CORS_ERROR');
             }
             
             // Handle connection errors during build
@@ -146,10 +191,19 @@ export const competenciesApi = {
     getAllCompetencies: getCompetenciesCached,
 
     getCompetencyById: async (competencyId: string) : Promise<Competency | null> => {
-        return fetchApi(`/competencies/${competencyId}`, {
-            tags: [`competency-${competencyId}`],
-            revalidate: 60,
-        });
+        try {
+            return await fetchApi<Competency>(`/competencies/${competencyId}`, {
+                tags: [`competency-${competencyId}`],
+                revalidate: 60,
+            });
+        } catch (error) {
+            // If it's a 404, return null instead of throwing
+            if (error instanceof ApiError && error.status === 404) {
+                return null;
+            }
+            // Re-throw other errors
+            throw error;
+        }
     },
 
     createCompetency: async (data: CompetencyInput): Promise<Competency> => {
@@ -177,7 +231,7 @@ export const competenciesApi = {
             method: 'DELETE',
             cache: 'no-store',
         });
-        await revalidateCompetencyTags(competencyId);
+        // Note: Cache revalidation is handled in the server action
     },
 
     attachIndicator: async (competencyId: string, indicatorId: string): Promise<void> => {
@@ -225,10 +279,19 @@ export const behavioralIndicatorsApi = {
   getAllIndicators: getAllIndicatorsCached,
 
   getIndicatorById: async (indicatorId: string) : Promise<BehavioralIndicator | null> => {
-    return fetchApi(`/behavioral-indicators/${indicatorId}`, {
-      tags: [`indicator-${indicatorId}`],
-      revalidate: 60,
-    });
+    try {
+      return await fetchApi<BehavioralIndicator>(`/behavioral-indicators/${indicatorId}`, {
+        tags: [`indicator-${indicatorId}`],
+        revalidate: 60,
+      });
+    } catch (error) {
+      // If it's a 404, return null instead of throwing
+      if (error instanceof ApiError && error.status === 404) {
+        return null;
+      }
+      // Re-throw other errors
+      throw error;
+    }
   },
 
   createIndicator: async (competencyId: string, data: IndicatorInput): Promise<BehavioralIndicator> => {
@@ -297,13 +360,22 @@ export const assessmentQuestionsApi = {
   getQuestionById: async (
     questionId: string
   ) : Promise<AssessmentQuestion | null> => {
-    return fetchApi(
-      `/questions/${questionId}`,
-      {
-        tags: [`question-${questionId}`],
-        revalidate: 60,
+    try {
+      return await fetchApi<AssessmentQuestion>(
+        `/questions/${questionId}`,
+        {
+          tags: [`question-${questionId}`],
+          revalidate: 60,
+        }
+      );
+    } catch (error) {
+      // If it's a 404, return null instead of throwing
+      if (error instanceof ApiError && error.status === 404) {
+        return null;
       }
-    );
+      // Re-throw other errors
+      throw error;
+    }
   },
 
   createQuestion: async (
