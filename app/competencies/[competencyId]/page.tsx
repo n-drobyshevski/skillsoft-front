@@ -1,742 +1,411 @@
-"use client";
-
-import React, { useState, useEffect, use } from "react";
-import { useParams, useRouter } from "next/navigation";
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-} from "../../../src/components/ui/card";
-import WeightDistributionPie from "@/components/charts/WeightDistributionPie";
-import { Badge } from "../../../src/components/ui/badge";
-import { Button } from "../../../src/components/ui/button";
-import {
-	Tabs,
-	TabsContent,
-	TabsList,
-	TabsTrigger,
-} from "../../../src/components/ui/tabs";
-import { Skeleton } from "../../../src/components/ui/skeleton";
-import {
-	Collapsible,
-	CollapsibleContent,
-	CollapsibleTrigger,
-} from "../../../src/components/ui/collapsible";
-import {
-	FileText,
-	BarChart3,
-	HelpCircle,
-	Clock,
-	Calendar,
-	CheckCircle,
-	Tag,
-	Zap,
-	Info,
-	ChevronDown,
-	ArrowLeft,
-	AlertTriangle,
-	Lightbulb,
-	X,
-	Eye,
-	Target,
-	Pencil,
-} from "lucide-react";
 import Link from "next/link";
-import type {
- BehavioralIndicator,
- AssessmentQuestion,
- Competency,
-} from "../../interfaces/domain-interfaces";
+import { notFound } from "next/navigation";
 import { competenciesApi, assessmentQuestionsApi } from "@/services/api";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+	Edit,
+	FilePen,
+	Target,
+	Plus,
+    Info,
+    BarChart3,
+} from "lucide-react";
+import { Suspense } from 'react';
+
+import QuestionsList from './components/QuestionsList';
+import { EntityDetailLayout } from '../../components/EntityDetailLayout';
+import CompetencyDetailClient from './components/CompetencyDetailClient';
+
+import QuestionsListSkeleton from './components/QuestionsListSkeleton';
+import type {
+	BehavioralIndicator,
+	AssessmentQuestion,
+} from "../../interfaces/domain-interfaces";
+import { ProficiencyLevel } from "../../enums/domain_enums";
+import { levelToColor, approvalStatusToColor } from "../../utils";
+
 interface CompetencyDetailPageProps {
 	params: { competencyId: string };
 }
 
-export default function Page({ params }: CompetencyDetailPageProps) {
-	const router = useRouter();
-  const { competencyId } = useParams();
+async function getCompetencyData(competencyId: string) {
+	const competency = await competenciesApi.getCompetencyById(competencyId);
+	if (!competency) {
+		return { competency: null, questions: [] };
+	}
 
-	const [competency, setCompetency] = useState<Competency | null>(null);
-	const [assessmentQuestions, setAssessmentQuestions] = useState<
-		AssessmentQuestion[]
-	>([]);
-	const [loading, setLoading] = useState(true);
-	const [error, setError] = useState<string | null>(null);
-	const [activeTab, setActiveTab] = useState<
-		"overview" | "indicators" | "assessment"
-	>("overview");
-	const [expandedIndicators, setExpandedIndicators] = useState<Set<string>>(
-		new Set(),
-	);
-
-	useEffect(() => {
-		if (!competencyId) {
-			setError("No competency ID provided");
-			setLoading(false);
-			return;
-		}
-
-		const fetchCompetencyData = async () => {
-			try {
-				setLoading(true);
-
-				// Fetch competency details
-				const competencyData: Competency | null =
-					await competenciesApi.getCompetencyById(competencyId as string);
-				if (!competencyData) {
-					setError("Competency not found");
-					setLoading(false);
-					return;
-				}
-				setCompetency(competencyData);
-
-				// Fetch assessment questions for all behavioral indicators
-				// if (competency.behavioralIndicators?.length > 0) {
-				//   const questionsPromises = competency.behavioralIndicators.map(async (indicator: BehavioralIndicator) => {
-				//     try {
-				//       const response = await competenciesApi.getIndicatorQuestions(competencyId, indicator.id);
-				//   throw new Error(`Failed to fetch competency: ${competencyResponse.status}`);
-				// }
-				// const competencyData = await competencyResponse.json();
-				// setCompetency(competencyData);
-
-				// Fetch assessment questions for all behavioral indicators
-				if (competencyData.behavioralIndicators && competencyData.behavioralIndicators.length > 0) {
-					const questionsPromises = competencyData.behavioralIndicators.map(
-						async (indicator: BehavioralIndicator) => {
-							try {
-								const questions = await assessmentQuestionsApi.getIndicatorQuestions(
-									competencyId as string,
-									indicator.id,
-								);
-								return questions || [];
-							} catch (error) {
-								console.warn(
-									`Failed to fetch questions for indicator ${indicator.id}:`,
-									error,
-								);
-								return [];
-							}
-						},
-					);
-
-					const questionsArrays = await Promise.all(questionsPromises);
-					const allQuestions = questionsArrays.flat().filter(Boolean);
-					setAssessmentQuestions(allQuestions);
-				}
-			} catch (error) {
-				console.error("Error fetching competency data:", error);
-				setError(
-					error instanceof Error
-						? error.message
-						: "Failed to load competency data",
-				);
-			} finally {
-				setLoading(false);
+	const questions: AssessmentQuestion[] = [];
+	if (competency.behavioralIndicators && competency.behavioralIndicators.length > 0) {
+		for (const indicator of competency.behavioralIndicators) {
+			const indicatorQuestions = await assessmentQuestionsApi.getIndicatorQuestions(
+				competencyId, 
+				indicator.id
+			);
+			if (indicatorQuestions) {
+				questions.push(...indicatorQuestions);
 			}
-		};
-
-		fetchCompetencyData();
-	}, [competencyId]);
-
-	const toggleIndicatorExpansion = (indicatorId: string) => {
-		const newExpanded = new Set(expandedIndicators);
-		if (newExpanded.has(indicatorId)) {
-			newExpanded.delete(indicatorId);
-		} else {
-			newExpanded.add(indicatorId);
 		}
-		setExpandedIndicators(newExpanded);
-	};
-
-	const formatProficiencyLevel = (level: string) => {
-		return level.charAt(0) + level.slice(1).toLowerCase().replace("_", " ");
-	};
-
-	const levelToColor = (level: string): string => {
-		const colors: { [key: string]: string } = {
-			NOVICE: "border-red-500/30 text-red-400 bg-red-500/8 dark:text-red-300",
-			DEVELOPING:
-				"border-orange-500/30 text-orange-500 bg-orange-500/8 dark:text-orange-300",
-			PROFICIENT:
-				"border-yellow-500/30 text-yellow-600 bg-yellow-500/8 dark:text-yellow-300",
-			ADVANCED:
-				"border-emerald-500/30 text-emerald-600 bg-emerald-500/8 dark:text-emerald-300",
-			EXPERT:
-				"border-blue-500/30 text-blue-600 bg-blue-500/8 dark:text-blue-300",
-		};
-		return colors[level] || colors["NOVICE"];
-	};
-
-	if (loading) {
-		return (
-			<div className="container mx-auto px-6 py-8 space-y-6">
-				<div className="flex items-center gap-4 mb-6">
-					<Skeleton className="h-10 w-10" />
-					<div className="space-y-2">
-						<Skeleton className="h-8 w-64" />
-						<Skeleton className="h-4 w-48" />
-					</div>
-				</div>
-
-				<div className="space-y-4">
-					<Skeleton className="h-12 w-full" />
-					<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-						{Array.from({ length: 4 }).map((_, i) => (
-							<Card key={i}>
-								<CardHeader>
-									<Skeleton className="h-6 w-32" />
-								</CardHeader>
-								<CardContent className="space-y-2">
-									<Skeleton className="h-4 w-full" />
-									<Skeleton className="h-4 w-3/4" />
-									<Skeleton className="h-4 w-1/2" />
-								</CardContent>
-							</Card>
-						))}
-					</div>
-				</div>
-			</div>
-		);
 	}
 
-	if (error) {
-		return (
-			<div className="container mx-auto px-6 py-8 flex items-center justify-center min-h-[60vh]">
-				<Card className="max-w-md w-full border-destructive/50">
-					<CardContent className="p-8 text-center">
-						<AlertTriangle className="w-16 h-16 text-destructive mx-auto mb-4" />
-						<CardTitle className="text-destructive mb-2">{error}</CardTitle>
-						<CardDescription className="mb-6">{error}</CardDescription>
-						<Button
-							onClick={() => router.push("/")}
-							variant="destructive"
-							className="w-full"
-						>
-							<ArrowLeft className="w-4 h-4 mr-2" />
-							Go Back
-						</Button>
-					</CardContent>
-				</Card>
-			</div>
-		);
-	}
+	return { competency, questions };
+}
+
+export default async function CompetencyDetailPage({
+	params,
+}: CompetencyDetailPageProps) {
+	const { competencyId } = await params;
+	const { competency, questions } = await getCompetencyData(competencyId);
 
 	if (!competency) {
-		return (
-			<div className="container mx-auto px-6 py-8 flex items-center justify-center min-h-[60vh]">
-				<Card className="max-w-md w-full">
-					<CardContent className="p-12 text-center">
-						<FileText className="w-20 h-20 text-muted-foreground mx-auto mb-6" />
-						<CardTitle className="mb-3">Competency Not Found</CardTitle>
-						<CardDescription className="mb-6">
-							The requested competency could not be found.
-						</CardDescription>
-						<Button onClick={() => router.push("/")} className="w-full">
-							<ArrowLeft className="w-4 h-4 mr-2" />
-							Go Back
-						</Button>
-					</CardContent>
-				</Card>
-			</div>
-		);
+		notFound();
 	}
 
 	return (
-		<div className="container mx-auto px-6 py-8">
-			{/* Header */}
-			{/* <div className="flex items-center justify-between mb-8">
-				<div className="flex items-center gap-4">
-					<Button variant="ghost" size="icon" onClick={() => router.push("/")}>
-						<ArrowLeft className="w-4 h-4" />
-						<span className="sr-only">Go back</span>
-					</Button>
-					<div>
-						<h1 className="text-3xl font-bold tracking-tight">
-							{competency.name}
-						</h1>
-						<div className="flex items-center gap-2 mt-2">
-							<Badge
-								variant="outline"
-								className={levelToColor(competency.level)}
-							>
-								{formatProficiencyLevel(competency.level)}
-							</Badge>
-							<Badge variant={competency.isActive ? "default" : "secondary"}>
-								{competency.isActive ? "Active" : "Inactive"}
-							</Badge>
-							<Badge variant="outline">
-								<Tag className="w-3 h-3 mr-1" />
-								{competency.category.replace("_", " ")}
-							</Badge>
+		<EntityDetailLayout>
+			<CompetencyDetailClient competency={competency}>
+				<div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+				<div className="lg:col-span-2 space-y-6">
+                    <Card className="border-none shadow-sm bg-muted/30">
+                        <CardHeader className="pb-4">
+                            <CardTitle className="text-base font-medium flex items-center gap-2.5">
+                                <div className="p-1.5 rounded-lg bg-emerald-100 dark:bg-emerald-900/30">
+                                    <FilePen className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                                </div>
+                                Description
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent className="pt-0">
+                            <p className="text-sm text-muted-foreground leading-relaxed">
+                                {competency.description ||
+                                    "No description available for this competency."}
+                            </p>
+                        </CardContent>
+                    </Card>
+					<Card className="overflow-hidden">
+                        <Tabs defaultValue="indicators" className="w-full">
+                            <TabsList className="grid w-full grid-cols-2">
+                                <TabsTrigger value="indicators">
+                                    <span className="hidden sm:inline">
+                                        Behavioral Indicators {competency.behavioralIndicators?.length ? `(${competency.behavioralIndicators.length})` : ''}
+                                    </span>
+                                    <span className="sm:hidden">
+                                        Indicators {competency.behavioralIndicators?.length ? `(${competency.behavioralIndicators.length})` : ''}
+                                    </span>
+                                </TabsTrigger>
+                                <TabsTrigger value="questions">
+                                    <span className="hidden sm:inline">
+                                        Assessment Questions {questions.length > 0 && `(${questions.length})`}
+                                    </span>
+                                    <span className="sm:hidden">
+                                        Questions {questions.length > 0 && `(${questions.length})`}
+                                    </span>
+                                </TabsTrigger>
+                            </TabsList>
+
+                            <TabsContent value="indicators" className="p-6 space-y-4">
+                                {competency.behavioralIndicators &&
+                                competency.behavioralIndicators.length > 0 ? (
+                                    <>
+                                        {/* Header with count and add button */}
+                                        <div className="flex items-center justify-between mb-4 pb-3 border-b border-border/50">
+                                            <div className="flex items-center gap-2">
+                                                <h4 className="text-sm font-medium text-muted-foreground">
+                                                    Behavioral Indicators
+                                                </h4>
+                                                <Badge variant="secondary" className="text-xs">
+                                                    {competency.behavioralIndicators.length}
+                                                </Badge>
+                                            </div>
+                                            <Button asChild variant="outline" size="sm">
+                                                <Link href={`/behavioral-indicators/new?competencyId=${competency.id}`}>
+                                                    <Plus className="mr-2 h-4 w-4" />
+                                                    Add Indicator
+                                                </Link>
+                                            </Button>
+                                        </div>
+                                        
+                                        {/* Indicators list */}
+                                        <div className="space-y-2">	
+                                            {competency.behavioralIndicators.map((indicator) => (
+                                                <IndicatorCard key={indicator.id} indicator={indicator} />
+                                            ))}
+                                        </div>
+                                    </>
+                                ) : (
+                                    <div className="text-center py-8 sm:py-12">
+                                        <div className="mx-auto w-12 h-12 sm:w-16 sm:h-16 bg-muted rounded-full flex items-center justify-center mb-3 sm:mb-4">
+                                            <Target className="h-6 w-6 sm:h-8 sm:w-8 text-muted-foreground" />
+                                        </div>
+                                        <h3 className="text-base sm:text-lg font-medium text-foreground mb-2">
+                                            No Behavioral Indicators
+                                        </h3>
+                                        <p className="text-sm sm:text-base text-muted-foreground max-w-md mx-auto mb-4 sm:mb-6 px-4 leading-relaxed">
+                                            This competency doesn&apos;t have any behavioral indicators yet.
+                                            Add some to start defining what success looks like.
+                                        </p>
+                                        <Button variant="outline" asChild className="touch-target">
+                                            <Link href={`/behavioral-indicators/new?competencyId=${competency.id}`}>
+                                                <Target className="h-4 w-4 mr-2" />
+                                                Add Indicator
+                                            </Link>
+                                        </Button>
+                                    </div>
+                                )}
+                            </TabsContent>
+
+							<TabsContent value="questions" className="p-6 space-y-4">
+								<Suspense fallback={<QuestionsListSkeleton />}>
+									{questions.length > 0 ? (
+										<QuestionsList questions={questions} />
+									) : (
+										<div className="text-center py-8 sm:py-12">
+											<div className="mx-auto w-12 h-12 sm:w-16 sm:h-16 bg-muted rounded-full flex items-center justify-center mb-3 sm:mb-4">
+												<FilePen className="h-6 w-6 sm:h-8 sm:w-8 text-muted-foreground" />
+											</div>
+											<h3 className="text-base sm:text-lg font-medium text-foreground mb-2">
+												No Assessment Questions
+											</h3>
+											<p className="text-sm sm:text-base text-muted-foreground max-w-md mx-auto mb-4 sm:mb-6 px-4 leading-relaxed">
+												This competency doesn&apos;t have any assessment questions yet.
+												Questions help evaluate behavioral indicators.
+											</p>
+											<Button variant="outline" asChild className="touch-target">
+												<Link href="/assessment-questions">
+													<FilePen className="h-4 w-4 mr-2" />
+													Browse Questions
+												</Link>
+											</Button>
+										</div>
+									)}
+								</Suspense>
+							</TabsContent>
+						</Tabs>
+					</Card>
+				</div>
+
+				{/* Details Card */}
+				<div className="space-y-6">
+					<Card className="border-none shadow-sm bg-muted/30">
+						<CardHeader className="pb-4">
+							<CardTitle className="text-base font-medium flex items-center gap-2.5 text-foreground">
+								<div className="p-1.5 rounded-lg bg-blue-100 dark:bg-blue-900/30">
+									<Info className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
+								</div>
+								Details
+							</CardTitle>
+						</CardHeader>
+						<CardContent className="pt-0 space-y-4">
+							{/* Category */}
+							<div className="flex items-center justify-between py-2 border-b border-border/50 last:border-0">
+								<span className="text-sm text-muted-foreground font-medium">Category</span>
+								<span className="text-sm font-medium text-foreground">{competency.category}</span>
+							</div>
+							
+							{/* Level */}
+							<div className="flex items-center justify-between py-2 border-b border-border/50 last:border-0">
+								<span className="text-sm text-muted-foreground font-medium">Proficiency Level</span>
+								<Badge 
+									variant="secondary" 
+									className={`${levelToColor(competency.level)} font-medium text-xs px-2.5 py-1`}
+								>
+									{competency.level}
+								</Badge>
+							</div>
+							
+							{/* Approval Status */}
+							<div className="flex items-center justify-between py-2 border-b border-border/50 last:border-0">
+								<span className="text-sm text-muted-foreground font-medium">Approval Status</span>
+								<Badge 
+									variant="secondary" 
+									className={`${approvalStatusToColor(competency.approvalStatus)} font-medium text-xs px-2.5 py-1`}
+								>
+									{competency.approvalStatus.replace("_", " ")}
+								</Badge>
+							</div>
+							
+							{/* Status */}
+							<div className="flex items-center justify-between py-2 border-b border-border/50 last:border-0">
+								<span className="text-sm text-muted-foreground font-medium">Status</span>
+								<Badge 
+									variant={competency.isActive ? "default" : "secondary"}
+									className="font-medium text-xs px-2.5 py-1"
+								>
+									<div className={`w-1.5 h-1.5 rounded-full mr-1.5 ${competency.isActive ? 'bg-green-500' : 'bg-gray-400'}`} />
+									{competency.isActive ? "Active" : "Inactive"}
+								</Badge>
+							</div>
+							
+							{/* Version */}
+							<div className="flex items-center justify-between py-2">
+								<span className="text-sm text-muted-foreground font-medium">Version</span>
+								<span className="font-mono font-medium text-foreground bg-muted px-2 py-0.5 rounded text-xs">
+									v{competency.version}
+								</span>
+							</div>
+						</CardContent>
+					</Card>
+
+					{/* Weight Distribution Chart - Only show if there are indicators */}
+					{competency.behavioralIndicators && competency.behavioralIndicators.length > 0 && (
+						<Card className="border-none shadow-sm bg-muted/30">
+							<CardHeader className="pb-3">
+								<CardTitle className="text-base font-medium flex items-center gap-2.5 text-foreground">
+									<div className="p-1.5 rounded-lg bg-purple-100 dark:bg-purple-900/30">
+										<BarChart3 className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" />
+									</div>
+									Weight Distribution
+								</CardTitle>
+							</CardHeader>
+							<CardContent className="pt-0">
+								<div className="space-y-3.5">
+									{competency.behavioralIndicators.map((indicator, index) => {
+										const totalWeight = competency.behavioralIndicators?.reduce((sum, i) => sum + i.weight, 0) || 1;
+										const percentage = (indicator.weight / totalWeight) * 100;
+										
+										// Generate distinct colors for each indicator
+										const hue = (index * 360 / competency.behavioralIndicators!.length) % 360;
+										const color = `hsl(${hue}, 65%, 55%)`;
+										
+										return (
+											<div key={indicator.id} className="space-y-2.5 group">
+												<div className="flex justify-between items-start gap-3">
+													<div className="flex items-center gap-2.5 flex-1 min-w-0">
+														<div 
+															className="w-2.5 h-2.5 rounded-full shrink-0 ring-1 ring-background/50"
+															style={{ backgroundColor: color }}
+														/>
+														<div className="flex-1 min-w-0">
+															<div className="text-sm font-medium truncate group-hover:text-foreground transition-colors leading-tight">
+																{indicator.title}
+															</div>
+															<div className="text-xs text-muted-foreground mt-0.5 font-medium">
+																Weight: {indicator.weight}
+															</div>
+														</div>
+													</div>
+													<Badge variant="secondary" className="text-xs whitespace-nowrap font-medium px-2 py-1 bg-muted">
+														{percentage.toFixed(1)}%
+													</Badge>
+												</div>
+												<div className="w-full bg-muted/60 rounded-full h-2 overflow-hidden group-hover:bg-muted transition-colors">
+													<div
+														className="h-full rounded-full transition-all duration-700 ease-out hover:brightness-110"
+														style={{
+															width: `${Math.max(percentage, 3)}%`,
+															backgroundColor: color,
+															boxShadow: `0 0 6px ${color}20`,
+														}}
+													/>
+												</div>
+											</div>
+										);
+									})}
+									
+									{/* Summary */}
+									<div className="pt-3 mt-4 border-t border-border/60">
+										<div className="flex justify-between text-xs text-muted-foreground font-medium">
+											<span>Total indicators: {competency.behavioralIndicators.length}</span>
+											<span>Total weight: {(competency.behavioralIndicators.reduce((sum, i) => sum + i.weight, 0)).toFixed(3)}</span>
+										</div>
+									</div>
+								</div>
+							</CardContent>
+						</Card>
+					)}
+				</div>
+			</div>
+			</CompetencyDetailClient>
+		</EntityDetailLayout>
+	);
+}
+
+
+
+function IndicatorCard({
+	indicator,
+}: {
+	indicator: BehavioralIndicator;
+}) {
+	return (
+		<Card className="group relative bg-background/50 border-border/50 hover:bg-background hover:border-primary/40 hover:shadow-sm transition-all duration-200 overflow-hidden">
+			<CardContent className="p-0">
+				{/* Main content area */}
+				<div className="flex items-center gap-3 p-4 min-h-[60px]">
+					{/* Status indicator dot */}
+					<div className="flex items-center gap-3 flex-1 min-w-0">
+						<div className="w-2 h-8 bg-primary/20 group-hover:bg-primary/60 rounded-full transition-colors duration-200 shrink-0" />
+						
+						{/* Content */}
+						<div className="flex-1 min-w-0 space-y-1">
+							{/* Title and level on same line */}
+							<div className="flex items-center gap-2 mb-1">
+								<h3 className="text-sm font-medium text-foreground line-clamp-1 group-hover:text-primary transition-colors">
+									{indicator.title}
+								</h3>
+								<Badge 
+									variant="secondary"
+									className={`text-xs px-1.5 py-0.5 font-medium shrink-0 ${
+										indicator.observabilityLevel === ProficiencyLevel.EXPERT ? 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300' : 
+										indicator.observabilityLevel === ProficiencyLevel.ADVANCED ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300' :
+										indicator.observabilityLevel === ProficiencyLevel.PROFICIENT ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300' : 
+										'bg-gray-100 dark:bg-gray-900/30 text-gray-700 dark:text-gray-300'
+									}`}
+								>
+									{indicator.observabilityLevel}
+								</Badge>
+							</div>
+							
+							{/* Description if exists */}
+							{indicator.description && (
+								<p className="text-xs text-muted-foreground line-clamp-1 leading-relaxed">
+									{indicator.description}
+								</p>
+							)}
+						</div>
+						
+						{/* Weight and actions on the right */}
+						<div className="flex items-center gap-2 shrink-0">
+							{/* Weight badge */}
+							<div className="text-xs font-mono text-muted-foreground bg-muted px-2 py-1 rounded-md">
+								{indicator.weight}
+							</div>
+							
+							{/* Action buttons - only visible on hover */}
+							<div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+								<Button 
+									variant="ghost" 
+									size="sm" 
+									asChild 
+									className="h-6 w-6 p-0 hover:bg-primary/10 hover:text-primary"
+								>
+									<Link href={`/behavioral-indicators/${indicator.id}`} title="View Details">
+										<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+											<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+											<circle cx="12" cy="12" r="3"/>
+										</svg>
+									</Link>
+								</Button>
+								<Button 
+									variant="ghost" 
+									size="sm" 
+									asChild 
+									className="h-6 w-6 p-0 hover:bg-primary/10 hover:text-primary"
+								>
+									<Link href={`/behavioral-indicators/${indicator.id}/edit`} title="Edit">
+										<Edit className="h-3 w-3" />
+									</Link>
+								</Button>
+							</div>
 						</div>
 					</div>
 				</div>
-			</div> */}
-
-			{/* Tabs */}
-			<Tabs
-				value={activeTab}
-				onValueChange={(value) => setActiveTab(value as typeof activeTab)}
-				className="w-full"
-			>
-				<TabsList className="grid w-full grid-cols-3">
-					<TabsTrigger value="overview" className="flex items-center gap-2">
-						<FileText className="w-4 h-4" />
-						Overview
-					</TabsTrigger>
-					<TabsTrigger value="indicators" className="flex items-center gap-2">
-						<BarChart3 className="w-4 h-4" />
-						Indicators ({competency.behavioralIndicators?.length || 0})
-					</TabsTrigger>
-					<TabsTrigger value="assessment" className="flex items-center gap-2">
-						<HelpCircle className="w-4 h-4" />
-						Questions ({assessmentQuestions.length})
-					</TabsTrigger>
-				</TabsList>
-
-				<TabsContent value="overview" className="mt-6 space-y-6">
-					{/* Description Card */}
-					<Card>
-						<CardHeader>
-							<CardTitle className="flex items-center gap-2">
-								<FileText className="w-5 h-5" />
-								Description
-							</CardTitle>
-						</CardHeader>
-						<CardContent>
-							<p className="text-muted-foreground leading-relaxed">
-								{competency.description ||
-									"No description available for this competency."}
-							</p>
-						</CardContent>
-					</Card>
-
-					{/* Standard Codes Card */}
-					{competency.standardCodes &&
-						Object.keys(competency.standardCodes).length > 0 && (
-							<Card>
-								<CardHeader>
-									<CardTitle className="flex items-center gap-2">
-										<Tag className="w-5 h-5" />
-										Standard Codes
-									</CardTitle>
-								</CardHeader>
-								<CardContent>
-									<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-										{Object.entries(competency.standardCodes).map(
-											([standard, mapping]) =>
-												mapping && (
-													<Card
-														key={standard}
-														className="border-muted hover:border-muted-foreground/20 transition-colors"
-													>
-														<CardContent className="p-4">
-															<div className="flex items-center justify-between mb-3">
-																<h3 className="font-semibold">{standard}</h3>
-																<Badge
-																	variant="outline"
-																	className={
-																		mapping.confidence === "VERIFIED"
-																			? "border-emerald-500/30 text-emerald-600 bg-emerald-500/8"
-																			: mapping.confidence === "HIGH"
-																				? "border-blue-500/30 text-blue-600 bg-blue-500/8"
-																				: mapping.confidence === "MODERATE"
-																					? "border-yellow-500/30 text-yellow-600 bg-yellow-500/8"
-																					: "border-muted text-muted-foreground"
-																	}
-																>
-																	{mapping.confidence}
-																</Badge>
-															</div>
-															<p className="text-sm text-muted-foreground mb-2 font-mono">
-																{mapping.code}
-															</p>
-															<p className="text-sm text-muted-foreground">
-																{mapping.name}
-															</p>
-														</CardContent>
-													</Card>
-												),
-										)}
-									</div>
-								</CardContent>
-							</Card>
-						)}
-
-					{/* Metadata Card */}
-					<Card>
-						<CardHeader>
-							<CardTitle className="flex items-center gap-2">
-								<Info className="w-5 h-5" />
-								Metadata
-							</CardTitle>
-						</CardHeader>
-						<CardContent>
-							<dl className="grid grid-cols-1 md:grid-cols-2 gap-6">
-								<div className="flex items-center gap-3">
-									<Clock className="w-5 h-5 text-muted-foreground" />
-									<div>
-										<dt className="text-sm font-medium text-muted-foreground">
-											Created
-										</dt>
-										<dd className="text-sm font-medium">
-											{new Date(competency.createdAt).toLocaleDateString()}
-										</dd>
-									</div>
-								</div>
-								<div className="flex items-center gap-3">
-									<Calendar className="w-5 h-5 text-muted-foreground" />
-									<div>
-										<dt className="text-sm font-medium text-muted-foreground">
-											Last Modified
-										</dt>
-										<dd className="text-sm font-medium">
-											{new Date(competency.lastModified).toLocaleDateString()}
-										</dd>
-									</div>
-								</div>
-								<div className="flex items-center gap-3">
-									<CheckCircle className="w-5 h-5 text-muted-foreground" />
-									<div>
-										<dt className="text-sm font-medium text-muted-foreground">
-											Status
-										</dt>
-										<dd className="text-sm font-medium">
-											<Badge
-												variant={competency.isActive ? "default" : "secondary"}
-											>
-												{competency.isActive ? "Active" : "Inactive"}
-											</Badge>
-										</dd>
-									</div>
-								</div>
-								<div className="flex items-center gap-3">
-									<Tag className="w-5 h-5 text-muted-foreground" />
-									<div>
-										<dt className="text-sm font-medium text-muted-foreground">
-											Version
-										</dt>
-										<dd className="text-sm font-medium">
-											{competency.version}
-										</dd>
-									</div>
-								</div>
-							</dl>
-						</CardContent>
-					</Card>
-				</TabsContent>
-
-				<TabsContent value="indicators" className="mt-6 space-y-6">
-					{competency.behavioralIndicators &&
-					competency.behavioralIndicators.length > 0 ? (
-						<>
-							<WeightDistributionPie
-								indicators={competency.behavioralIndicators}
-							/>
-							<div className="space-y-6">
-								{competency.behavioralIndicators
-									.sort((a, b) => a.orderIndex - b.orderIndex)
-									.map((indicator) => (
-										<Collapsible
-											key={indicator.id}
-											open={expandedIndicators.has(indicator.id)}
-											onOpenChange={() =>
-												toggleIndicatorExpansion(indicator.id)
-											}
-										>
-											<Card>
-												<CollapsibleTrigger className="w-full p-6 hover:bg-accent/50 transition-colors text-left">
-													<div className="flex items-start justify-between">
-														<div className="flex-1">
-															<div className="flex items-center space-x-3 mb-3">
-																<h3 className="text-lg font-semibold">
-																	{indicator.title}
-																</h3>
-																<Badge
-																	variant="outline"
-																	className={levelToColor(
-																		indicator.observabilityLevel,
-																	)}
-																>
-																	{formatProficiencyLevel(
-																		indicator.observabilityLevel,
-																	)}
-																</Badge>
-															</div>
-															{indicator.description && (
-																<p className="text-muted-foreground text-sm leading-relaxed">
-																	{indicator.description}
-																</p>
-															)}
-															<div className="flex items-center gap-4 mt-3 text-xs text-muted-foreground">
-																<span className="flex items-center gap-1">
-																	<Zap className="w-3 h-3" />
-																	Weight: {indicator.weight}
-																</span>
-																<span className="flex items-center gap-1">
-																	<BarChart3 className="w-3 h-3" />
-																	{indicator.measurementType.replace("_", " ")}
-																</span>
-																<Badge
-																	variant={
-																		indicator.isActive ? "default" : "secondary"
-																	}
-																	className="text-xs"
-																>
-																	{indicator.isActive ? "Active" : "Inactive"}
-																</Badge>
-															</div>
-														</div>
-														<ChevronDown
-															className={`w-5 h-5 text-muted-foreground transition-transform duration-200 ${
-																expandedIndicators.has(indicator.id)
-																	? "rotate-180"
-																	: "rotate-0"
-															}`}
-														/>
-													</div>
-												</CollapsibleTrigger>
-
-												                <CollapsibleContent>
-																					<div className="border-t px-6 pb-6 pt-4">
-																						<div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-																							{indicator.examples && (
-																								<div>
-																									<h4 className="font-semibold mb-3 flex items-center gap-2">
-																										<Lightbulb className="w-4 h-4 text-emerald-500" />
-																										Examples
-																									</h4>
-																									<Card className="bg-emerald-500/5 border-emerald-500/20">
-																										<CardContent className="p-4">
-																											<p className="text-sm text-emerald-700 dark:text-emerald-300 leading-relaxed">
-																												{indicator.examples}
-																											</p>
-																										</CardContent>
-																									</Card>
-																								</div>
-																							)}
-												
-																							{indicator.counterExamples && (
-																								<div>
-																									<h4 className="font-semibold mb-3 flex items-center gap-2">
-																										<X className="w-4 h-4 text-red-500" />
-																										Counter Examples
-																									</h4>
-																									<Card className="bg-red-500/5 border-red-500/20">
-																										<CardContent className="p-4">
-																											<p className="text-sm text-red-700 dark:text-red-300 leading-relaxed">
-																												{indicator.counterExamples}
-																											</p>
-																										</CardContent>
-																									</Card>
-																								</div>
-																							)}
-																						</div>
-												
-																						{/* Assessment Questions for this indicator */}
-																						{assessmentQuestions.filter(
-																							(q) => q.behavioralIndicatorId === indicator.id,
-																						).length > 0 && (
-																							<div className="mt-8">
-																								<h4 className="font-semibold mb-4 flex items-center gap-2">
-																									<HelpCircle className="w-4 h-4" />
-																									Assessment Questions (
-																									{
-																										assessmentQuestions.filter(
-																											(q) =>
-																												q.behavioralIndicatorId ===
-																												indicator.id,
-																										).length
-																									}
-																									)
-																								</h4>
-																								<div className="space-y-3">
-																									{assessmentQuestions
-																										.filter(
-																											(q) =>
-																												q.behavioralIndicatorId ===
-																												indicator.id,
-																										)
-																										.sort((a, b) => a.orderIndex - b.orderIndex)
-																										.map((question) => (
-																											<Card
-																												key={question.id}
-																												className="border-muted"
-																											>
-																												<CardContent className="p-4">
-																													<div className="flex items-start justify-between mb-3">
-																														<p className="text-sm flex-1 leading-relaxed">
-																															{question.questionText}
-																														</p>
-																														<Badge
-																															variant="outline"
-																															className={
-																																question.difficultyLevel ===
-																																"BASIC"
-																																	? "border-emerald-500/30 text-emerald-600 bg-emerald-500/8"
-																																	: question.difficultyLevel ===
-																																			"INTERMEDIATE"
-																																		? "border-yellow-500/30 text-yellow-600 bg-yellow-500/8"
-																																		: question.difficultyLevel ===
-																																				"ADVANCED"
-																																			? "border-orange-500/30 text-orange-600 bg-orange-500/8"
-																																			: "border-red-500/30 text-red-600 bg-red-500/8"
-																															}
-																														>
-																															{question.difficultyLevel}
-																														</Badge>
-																													</div>
-																													<div className="text-xs text-muted-foreground font-medium">
-																														{question.questionType.replace(
-																															"_",
-																															" ",
-																														)}
-																													</div>
-																												</CardContent>
-																											</Card>
-																										))}
-																								</div>
-																							</div>
-																						)}
-												                                        <div className="mt-4 flex justify-end">
-												                                            <Link href={`/behavioral-indicators/${indicator.id}`} passHref>
-												                                                <Button variant="outline">
-												                                                    <Eye className="mr-2 h-4 w-4" />
-												                                                    View Details
-												                                                </Button>
-												                                            </Link>
-												                                        </div>
-																					</div>
-																				</CollapsibleContent>											</Card>
-										</Collapsible>
-									))}
-							</div>
-						</>
-					) : (
-						<Card>
-							<CardContent className="p-12 text-center">
-								<Target className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-								<CardTitle className="mb-2">No Behavioral Indicators</CardTitle>
-								<CardDescription>
-									This competency doesn't have any behavioral indicators defined
-									yet.
-								</CardDescription>
-							</CardContent>
-						</Card>
-					)}
-				</TabsContent>
-
-				<TabsContent value="assessment" className="mt-6 space-y-6">
-					{assessmentQuestions.length > 0 ? (
-						<div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-							{assessmentQuestions
-								.sort((a, b) => a.orderIndex - b.orderIndex)
-								.map((question) => {
-									const indicator = competency.behavioralIndicators?.find(
-										(i) => i.id === question.behavioralIndicatorId,
-									);
-									return (
-										<Card key={question.id}>
-											<CardHeader>
-												<div className="flex items-start justify-between">
-													<Badge
-														variant="outline"
-														className={
-															question.difficultyLevel === "BASIC"
-																? "border-emerald-500/30 text-emerald-600 bg-emerald-500/8"
-																: question.difficultyLevel === "INTERMEDIATE"
-																	? "border-yellow-500/30 text-yellow-600 bg-yellow-500/8"
-																	: question.difficultyLevel === "ADVANCED"
-																		? "border-orange-500/30 text-orange-600 bg-orange-500/8"
-																		: "border-red-500/30 text-red-600 bg-red-500/8"
-														}
-													>
-														{question.difficultyLevel}
-													</Badge>
-												</div>
-												<CardTitle className="text-lg leading-relaxed">
-													{question.questionText}
-												</CardTitle>
-												{indicator && (
-													<CardDescription className="flex items-center gap-2">
-														<Info className="w-4 h-4" />
-														{indicator.title}
-													</CardDescription>
-												)}
-											</CardHeader>
-											<CardContent>
-												<div className="text-sm text-muted-foreground mb-6 flex items-center gap-2">
-													<HelpCircle className="w-4 h-4" />
-													{question.questionType.replace("_", " ")}
-												</div>
-
-												{question.answerOptions &&
-													question.answerOptions.length > 0 && (
-														<div>
-															<h4 className="text-sm font-semibold mb-3 flex items-center gap-2">
-																<CheckCircle className="w-4 h-4" />
-																Answer Options:
-															</h4>
-															<div className="space-y-2">
-																{question.answerOptions
-																	.slice(0, 3)
-																	.map((option, idx) => (
-																		<div
-																			key={idx}
-																			className={`text-sm p-3 rounded-lg border ${
-																				option.correct
-																					? "bg-emerald-500/5 border-emerald-500/20 text-emerald-700 dark:text-emerald-300"
-																					: option.score && option.score >= 4
-																						? "bg-blue-500/5 border-blue-500/20 text-blue-700 dark:text-blue-300"
-																						: "bg-muted border-muted text-muted-foreground"
-																			}`}
-																		>
-																			<div className="flex items-center justify-between">
-																				<span className="flex items-center gap-2">
-																					{option.correct && (
-																						<CheckCircle className="w-4 h-4 text-emerald-500" />
-																					)}
-																					{option.text || option.label}
-																				</span>
-																				{option.score && (
-																					<span className="text-xs opacity-75 font-medium">
-																						({option.score}pt)
-																					</span>
-																				)}
-																			</div>
-																		</div>
-																	))}
-																{question.answerOptions.length > 3 && (
-																	<div className="text-xs text-muted-foreground text-center py-2 font-medium">
-																		+{question.answerOptions.length - 3} more
-																		options
-																	</div>
-																)}
-															</div>
-														</div>
-													)}
-											</CardContent>
-										</Card>
-									);
-								})}
-						</div>
-					) : (
-						<Card>
-							<CardContent className="p-12 text-center">
-								<HelpCircle className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-								<CardTitle className="mb-2">No Assessment Questions</CardTitle>
-								<CardDescription>
-									No assessment questions have been created for this
-									competency's behavioral indicators yet.
-								</CardDescription>
-							</CardContent>
-						</Card>
-					)}
-				</TabsContent>
-			</Tabs>
-		</div>
+				
+				{/* Hover effect overlay */}
+				<div className="absolute inset-0 bg-linear-to-r from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none" />
+			</CardContent>
+		</Card>
 	);
 }

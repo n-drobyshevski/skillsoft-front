@@ -1,5 +1,4 @@
-"use client";
-import React, { useState, useEffect } from "react";
+import React from "react";
 import {
 	Card,
 	CardContent,
@@ -7,175 +6,165 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Activity, ArrowUpDown, MoreHorizontal } from "lucide-react";
 import { competenciesApi } from "@/services/api";
 import { Competency, DashboardStats } from "./interfaces/domain-interfaces";
-import Header from "./components/Header";
-import DashboardStatsCards from "./components/DasboardStatsCards";
+import FlexibleStatsCards from "./components/FlexibleStatsCards";
 import ErrorCard from "./components/ErrorCard";
 import CompetencyByCategoryBarChart from "@/components/charts/CompetencyByCategoryBarChart";
-import CompetencyByLevelBarChart from "@/components/charts/CompetencyByLevelBarChart";
 import AverageIndicatorsGauge from "@/components/charts/AverageIndicatorsGauge";
 import RecentActivityCard from "@/components/RecentActivityCard";
 import QuickActionsCard from "@/components/QuickActionsCard";
-import EntityTable from "./components/Table";
-import { ColumnDef } from "@tanstack/react-table";
-import Link from "next/link";
-import { Badge } from "@/components/ui/badge";
-import TopCompetenciesCard from "@/components/TopCompetenciesCard";
-import { useHeader } from "@/context/HeaderContext";
+import CompetencyTable from "./components/CompetencyTable";
+import PageHeader from "./components/PageHeader";
+
+async function getDashboardData() {
+	try {
+		const competenciesData: Array<Competency> | null = await competenciesApi.getAllCompetencies();
+		
+		if (!Array.isArray(competenciesData)) {
+			// In a real app, you might want to log this error to a service
+			// Invalid response from server: data is not an array
+			return { competencies: [], stats: null, error: "Failed to load competencies. Invalid data format." };
+		}
+		
+		// Calculate stats
+		const stats: DashboardStats = {
+			totalCompetencies: competenciesData.length,
+			totalBehavioralIndicators: competenciesData.reduce(
+				(sum: number, comp: Competency) => sum + (comp.behavioralIndicators?.length || 0),
+				0,
+			),
+			totalAssessmentQuestions: competenciesData.length * 8, // Estimate
+			competenciesByCategory: {},
+			competenciesByLevel: {},
+			averageIndicatorsPerCompetency: 0,
+		};
+
+		// Calculate distributions
+		competenciesData.forEach((comp: Competency) => {
+			stats.competenciesByCategory[comp.category] =
+				(stats.competenciesByCategory[comp.category] || 0) + 1;
+			stats.competenciesByLevel[comp.level] =
+				(stats.competenciesByLevel[comp.level] || 0) + 1;
+		});
+
+		stats.averageIndicatorsPerCompetency =
+			stats.totalBehavioralIndicators > 0 && stats.totalCompetencies > 0
+				? stats.totalBehavioralIndicators / stats.totalCompetencies
+				: 0;
+
+		return { competencies: competenciesData, stats, error: null };
+	} catch {
+		// Failed to fetch data - error handled
+		return { competencies: [], stats: null, error: "Failed to load competencies. Please try again." };
+	}
+}
 
 // Main Dashboard Component
-export default function Page() {
-	const { setTitle, setSubtitle, setEntityName } = useHeader();
-	
-	  useEffect(() => {
-		setTitle("Dashboard");
-		setSubtitle("Overview of competencies and statistics");
-		setEntityName("Competency");
-	  }, [setTitle, setSubtitle, setEntityName]);
-	const [competencies, setCompetencies] = useState<Competency[]>([]);
-	const [stats, setStats] = useState<DashboardStats | null>(null);
-	const [loading, setLoading] = useState<boolean>(true);
-	const [error, setError] = useState<string | null>(null);
-
-	// Fetch competencies and stats
-	const fetchData = async () => {
-		try {
-			setLoading(true);
-			const competenciesData: Array<Competency> | null = await competenciesApi.getAllCompetencies();
-			
-			if (!Array.isArray(competenciesData)) {
-				throw new Error('Invalid response from server: data is not an array');
-			}
-			
-			setCompetencies(competenciesData);
-
-			// Calculate stats
-			const stats: DashboardStats = {
-				totalCompetencies: competenciesData.length,
-				totalBehavioralIndicators: competenciesData.reduce(
-					(sum: number, comp: Competency) => sum + (comp.behavioralIndicators?.length || 0),
-					0,
-				),
-				totalAssessmentQuestions: competenciesData.length * 8, // Estimate
-				competenciesByCategory: {},
-				competenciesByLevel: {},
-				averageIndicatorsPerCompetency: 0,
-			};
-
-			// Calculate distributions
-			competenciesData.forEach((comp: Competency) => {
-				stats.competenciesByCategory[comp.category] =
-					(stats.competenciesByCategory[comp.category] || 0) + 1;
-				stats.competenciesByLevel[comp.level] =
-					(stats.competenciesByLevel[comp.level] || 0) + 1;
-			});
-
-			stats.averageIndicatorsPerCompetency =
-				stats.totalBehavioralIndicators / stats.totalCompetencies;
-			setStats(stats);
-		} catch (error) {
-			console.error("Failed to fetch data:", error);
-			setError("Failed to load competencies. Please try again.");
-		} finally {
-			setLoading(false);
-		}
-	};
-
-	useEffect(() => {
-		fetchData();
-	}, []);
-
-	const competencyColumns: ColumnDef<Competency>[] = [
-		{
-			accessorKey: "name",
-			header: ({ column }) => (
-				<Button
-					variant="link"
-					onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-					className="-ml-4 text-muted-foreground"
-				>
-					Name
-					<ArrowUpDown className="ml-2 h-4 w-4" />
-				</Button>
-			),
-			cell: ({ row }) => (
-				<Link href={`/competencies/${row.original.id}`} className="font-medium text-primary hover:underline">
-					{row.getValue("name")}
-				</Link>
-			),
-		},
-		{
-			accessorKey: "category",
-			header: "Category",
-		},
-		{
-			accessorKey: "level",
-			header: "Level",
-		},
-		{
-			accessorKey: "behavioralIndicators",
-			header: "Indicators",
-			cell: ({ row }) => row.original.behavioralIndicators?.length || 0,
-		},
-		{
-			accessorKey: "isActive",
-			header: "Status",
-			cell: ({ row }) => {
-				const isActive = row.getValue("isActive") as boolean;
-				return (
-					<Badge variant={isActive ? "default" : "secondary"}>
-						{isActive ? "Active" : "Inactive"}
-					</Badge>
-				);
-			},
-		},
-	];
+export default async function Page() {
+	const { competencies, stats, error } = await getDashboardData();
 
 	if (error) {
-		return <ErrorCard error={error} callback={fetchData} />;
+		return <ErrorCard error={error} />;
 	}
 
 	return (
-		<div className="container mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-6 sm:space-y-8">
+		<div className="flex flex-1 flex-col gap-4 p-4 pt-6 md:gap-6 md:p-6">
+			{/* Page Header */}
+			<PageHeader 
+				title="Dashboard"
+				description="Here's what's happening with your competency management today."
+			/>
 
-			{stats && <DashboardStatsCards stats={stats} />}
+			{/* Overview Cards */}
+			{stats && (
+				<FlexibleStatsCards
+				
+					data={{
+						type: "dashboard",
+						stats: stats
+					}}
+					loading={false}
+				/>
+			)}
 
-			<div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
-				<div className="lg:col-span-2 space-y-4 sm:space-y-6 lg:space-y-8">
-					<div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 lg:gap-8">
+			{/* Main Dashboard Grid */}
+			<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+				{/* Chart Section */}
+				<Card className="lg:col-span-2">
+					<CardHeader>
+						<CardTitle>Competency Overview</CardTitle>
+						<CardDescription>
+							Showing distribution of competencies across different categories
+						</CardDescription>
+					</CardHeader>
+					<CardContent className="pl-2">
 						{stats && (
 							<CompetencyByCategoryBarChart
 								data={Object.entries(stats.competenciesByCategory).map(([name, value]) => ({ name, value }))}
 							/>
 						)}
-						{stats && (
-							<CompetencyByLevelBarChart
-								data={Object.entries(stats.competenciesByLevel).map(([name, value]) => ({ name, value }))}
-							/>
-						)}
-					</div>
+					</CardContent>
+				</Card>
+
+				{/* Recent Activity */}
+				<Card>
+					<CardHeader>
+						<CardTitle>Recent Activity</CardTitle>
+						<CardDescription>
+							Latest updates and changes in your competency framework
+						</CardDescription>
+					</CardHeader>
+					<CardContent>
+						<RecentActivityCard />
+					</CardContent>
+				</Card>
+			</div>
+
+			{/* Secondary Grid */}
+			<div className="grid gap-4 md:grid-cols-3">
+				{/* Data Table */}
+				<Card className="md:col-span-2">
+					<CardHeader>
+						<CardTitle>Competencies</CardTitle>
+						<CardDescription>
+							Manage your competency framework here.
+						</CardDescription>
+					</CardHeader>
+					<CardContent>
+						<CompetencyTable competencies={competencies} />
+					</CardContent>
+				</Card>
+
+				{/* Side Content */}
+				<div className="space-y-4">
+					{/* Quick Actions */}
 					<Card>
 						<CardHeader>
-							<CardTitle className="flex items-center gap-2">
-								<Activity className="h-5 w-5" />
-								Competencies Overview
-							</CardTitle>
+							<CardTitle>Quick Actions</CardTitle>
 							<CardDescription>
-								Browse, search, and manage all competencies in your system
+								Frequently used actions and shortcuts.
 							</CardDescription>
 						</CardHeader>
 						<CardContent>
-							<EntityTable columns={competencyColumns} data={competencies} />
+							<QuickActionsCard />
 						</CardContent>
 					</Card>
-				</div>
-				<div className="space-y-8">
-					<QuickActionsCard />
-					{stats && <AverageIndicatorsGauge value={stats.averageIndicatorsPerCompetency} />}
-					<TopCompetenciesCard competencies={competencies} />
+
+					{/* Performance Metrics */}
+					{stats && (
+						<Card>
+							<CardHeader>
+								<CardTitle>Performance</CardTitle>
+								<CardDescription>
+									Average indicators per competency
+								</CardDescription>
+							</CardHeader>
+							<CardContent>
+								<AverageIndicatorsGauge value={stats.averageIndicatorsPerCompetency} />
+							</CardContent>
+						</Card>
+					)}
 				</div>
 			</div>
 		</div>

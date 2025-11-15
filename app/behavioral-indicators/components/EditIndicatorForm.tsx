@@ -25,7 +25,7 @@ import {
 } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { ProficiencyLevel, ApprovalStatus } from '../../enums/domain_enums';
-import { behavioralIndicatorsApi } from '@/services/api';
+import { updateIndicatorAction } from '@/app/actions';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -33,7 +33,8 @@ import { Textarea } from "@/components/ui/textarea";
 
 type IndicatorFormValues = z.infer<typeof indicatorSchema>;
 
-const measurementTypes = ['QUALITY', 'QUANTITY', 'FREQUENCY', 'BINARY'] as const;
+
+import { IndicatorMeasurementType } from '../../enums/domain_enums';
 
 export function EditIndicatorForm({ indicator }: { indicator: BehavioralIndicator }) {
   const router = useRouter();
@@ -52,19 +53,24 @@ export function EditIndicatorForm({ indicator }: { indicator: BehavioralIndicato
       counterExamples: indicator.counterExamples || "",
       isActive: indicator.isActive,
       approvalStatus: indicator.approvalStatus,
+      orderIndex: indicator.orderIndex,
     },
   });
 
   async function onSubmit(data: IndicatorFormValues) {
     setIsLoading(true);
     setError(null);
-    try {
-      await behavioralIndicatorsApi.updateIndicator(indicator.competencyId, indicator.id, data);
+
+    const result = await updateIndicatorAction(indicator.id, data);
+
+    setIsLoading(false);
+    if (result.success) {
+      // On success, navigate away or refresh
       router.push(`/behavioral-indicators/${indicator.id}`);
-    } catch (e: any) {
-      setError(e.message || 'An error occurred.');
-    } finally {
-      setIsLoading(false);
+      // Optionally, you can use router.refresh() if staying on the same page
+    } else {
+      // On failure, display the error message from the server action
+      setError(result.message);
     }
   }
 
@@ -152,7 +158,7 @@ export function EditIndicatorForm({ indicator }: { indicator: BehavioralIndicato
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {measurementTypes.map((type) => (
+                      {Object.values(IndicatorMeasurementType).map((type) => (
                         <SelectItem key={type} value={type}>
                           {type.replace(/_/g, ' ')}
                         </SelectItem>
@@ -165,13 +171,13 @@ export function EditIndicatorForm({ indicator }: { indicator: BehavioralIndicato
             />
             <FormField
               control={form.control}
-              name="weight"
+              name="orderIndex"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Weight</FormLabel>
+                  <FormLabel>Order Index</FormLabel>
                   <FormControl>
-                    <Input type="number" step="0.1" placeholder="e.g., 1.5" {...field} 
-                      onChange={event => field.onChange(parseFloat(event.target.value))}
+                    <Input type="number" placeholder="e.g., 1" {...field} 
+                      onChange={event => field.onChange(parseInt(event.target.value))}
                     />
                   </FormControl>
                   <FormMessage />

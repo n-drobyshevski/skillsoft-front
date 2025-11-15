@@ -1,7 +1,8 @@
 "use client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ChartConfig, ChartContainer } from "@/components/ui/chart";
 import { BarChart3 } from "lucide-react";
-import { LineChart, Line, ResponsiveContainer } from "recharts";
+import { LineChart, Line } from "recharts";
 
 interface AverageIndicatorsGaugeProps {
   value: number;
@@ -18,6 +19,13 @@ const data = [
   { value: 5.3 },
 ];
 
+const chartConfig = {
+  value: {
+    label: "Average Indicators",
+    color: "var(--primary)",
+  },
+} satisfies ChartConfig;
+
 export default function AverageIndicatorsGauge({ value }: AverageIndicatorsGaugeProps) {
   return (
     <Card>
@@ -31,20 +39,21 @@ export default function AverageIndicatorsGauge({ value }: AverageIndicatorsGauge
       <CardContent className="pt-2">
         <div className="flex items-baseline gap-2 sm:gap-3">
             <div className="text-3xl sm:text-4xl font-bold tracking-tight">{value.toFixed(1)}</div>
-            <div className="h-[40px] w-[100px] sm:w-[120px]">
-                <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={data}>
-                    <Line 
-                      type="monotone" 
-                      dataKey="value" 
-                      stroke="hsl(var(--primary))" 
-                      strokeWidth={2} 
-                      dot={false} 
-                      aria-label="Trend of average indicators"
-                    />
-                </LineChart>
-                </ResponsiveContainer>
-            </div>
+            <ChartContainer
+              config={chartConfig}
+              className="h-[40px] w-[100px] sm:w-[120px]"
+            >
+              <LineChart data={data}>
+                <Line 
+                  type="monotone" 
+                  dataKey="value" 
+                  stroke="oklch(var(--chart-1) / 0.8)" 
+                  strokeWidth={2} 
+                  dot={false} 
+                  aria-label="Trend of average indicators"
+                />
+              </LineChart>
+            </ChartContainer>
         </div>
         <p className="text-xs text-muted-foreground">+2.1% from last month</p>
       </CardContent>

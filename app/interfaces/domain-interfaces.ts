@@ -1,5 +1,4 @@
-import { ApprovalStatus, CompetencyCategory, DifficultyLevel, ProficiencyLevel  } from "../enums/domain_enums";
-import { IndicatorMeasurementType, QuestionType } from "../types/competency";
+import { ApprovalStatus, CompetencyCategory, DifficultyLevel, ProficiencyLevel, IndicatorMeasurementType, QuestionType  } from "../enums/domain_enums";
 
 
 export interface StandardCodeMapping {
@@ -53,7 +52,7 @@ export interface AssessmentQuestion {
 export interface Competency {
   id: string;
   name: string;
-  description?: string;
+  description: string;
   category: CompetencyCategory;
   level: ProficiencyLevel;
   standardCodes?: StandardCodes;

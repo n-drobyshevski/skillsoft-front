@@ -20,11 +20,8 @@ export default function StatsCard({
 }) {
   return (
     <Card className={cn(
-      "relative overflow-hidden group transition-all duration-200 h-full",
-      "hover:shadow-lg active:scale-[0.98]",
-      "before:absolute before:inset-0 before:-translate-x-full hover:before:translate-x-0",
-      "before:bg-linear-to-r before:from-transparent before:via-white/10 before:to-transparent",
-      "before:transition-transform before:duration-500"
+      "relative transition-all duration-200 h-full",
+      "hover:shadow-lg active:scale-[0.98]"
     )}>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 p-3 md:p-6 pb-2 md:pb-3">
         <CardTitle className="text-[13px] md:text-sm lg:text-base font-medium line-clamp-2">

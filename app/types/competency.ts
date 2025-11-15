@@ -25,18 +25,26 @@ export type ApprovalStatus =
 	| "UNDER_REVISION";
 
 export type IndicatorMeasurementType =
-	| "QUALITY"
-	| "QUANTITY"
 	| "FREQUENCY"
-	| "BINARY";
+	| "QUALITY"
+	| "IMPACT"
+	| "CONSISTENCY"
+	| "IMPROVEMENT";
 
 export type QuestionType =
-	| "MULTIPLE_CHOICE"
-	| "SINGLE_CHOICE"
-	| "TRUE_FALSE"
-	| "OPEN_ENDED"
-	| "SCENARIO_BASED"
 	| "LIKERT_SCALE"
-	| "SITUATIONAL_JUDGMENT";
+	| "SITUATIONAL_JUDGMENT"
+	| "BEHAVIORAL_EXAMPLE"
+	| "MULTIPLE_CHOICE"
+	| "CAPABILITY_ASSESSMENT"
+	| "SELF_REFLECTION"
+	| "PEER_FEEDBACK"
+	| "FREQUENCY_SCALE"
+	| "OPEN_TEXT";
 
-export type DifficultyLevel = "BASIC" | "INTERMEDIATE" | "ADVANCED" | "EXPERT";
+export type DifficultyLevel = 
+	| "FOUNDATIONAL" 
+	| "INTERMEDIATE" 
+	| "ADVANCED" 
+	| "EXPERT"
+	| "SPECIALIZED";

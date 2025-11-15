@@ -5,6 +5,7 @@ import { useForm, useFieldArray } from 'react-hook-form';
 import { z } from 'zod';
 import { questionSchema } from '../validation';
 import { AssessmentQuestion } from '../../interfaces/domain-interfaces';
+import { QuestionType } from '../../enums/domain_enums'; 
 import { Button } from '@/components/ui/button';
 import {
   Form,
@@ -33,15 +34,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 type QuestionFormValues = z.infer<typeof questionSchema>;
 
-const questionTypes = [
-  'MULTIPLE_CHOICE',
-  'SINGLE_CHOICE',
-  'TRUE_FALSE',
-  'OPEN_ENDED',
-  'SCENARIO_BASED',
-  'LIKERT_SCALE',
-  'SITUATIONAL_JUDGMENT',
-] as const;
+
 
 export function EditQuestionForm({ question, competencyId }: { question: AssessmentQuestion, competencyId: string }) {
   const router = useRouter();
@@ -114,7 +107,7 @@ export function EditQuestionForm({ question, competencyId }: { question: Assessm
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {questionTypes.map((type) => (
+                      {Object.values(QuestionType).map((type) => (
                         <SelectItem key={type} value={type}>
                           {type.replace(/_/g, ' ')}
                         </SelectItem>

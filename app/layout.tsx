@@ -5,6 +5,7 @@ import { ThemeProvider } from "next-themes";
 import { Metadata } from "next";
 
 import { LayoutProvider } from "@/components/layout-provider";
+import { Toaster } from "@/components/ui/sonner";
 
 export const metadata: Metadata = {
 	title: "SkillSoft - Competency Management",
@@ -16,10 +17,15 @@ export default function RootLayout({
 	children: React.ReactNode;
 }>) {
 	return (
-		<html lang="en" suppressHydrationWarning>
-			<head />
-			<body>
-				<LayoutProvider>{children}</LayoutProvider>
+		<html lang="en" suppressHydrationWarning className="mobile-container">
+			<head>
+				<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+			</head>
+			<body className="mobile-container">
+				<LayoutProvider>
+                    {children}
+                    <Toaster richColors />
+                </LayoutProvider>
 			</body>
 		</html>
 	);

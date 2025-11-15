@@ -1,24 +1,92 @@
-import { behavioralIndicatorsApi } from "@/services/api";
-import { EditIndicatorForm } from "../../components/EditIndicatorForm";
-import { notFound } from "next/navigation";
-import IndicatorPreview from "../../components/IndicatorPreview";
+'use client';
 
-export default async function EditIndicatorPage({ params }: { params: { indicatorId: string } }) {
-  const indicator = await behavioralIndicatorsApi.getIndicatorById((await params).indicatorId);
+import { behavioralIndicatorsApi } from "@/services/api";
+import { IndicatorForm } from "../../components/IndicatorForm";
+import { notFound, useParams } from "next/navigation";
+import IndicatorPreview from "../../components/IndicatorPreview";
+import { BehavioralIndicator } from "../../../interfaces/domain-interfaces";
+import { useEffect, useState } from "react";
+import { EditIndicatorPageSkeleton } from "../../components/EditIndicatorPageSkeleton";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { IndicatorQuestionsManager } from "../../components/IndicatorQuestionsManager";
+import PageHeader from "../../../components/PageHeader";
+import { indicatorSchema } from "../../validation";
+import { z } from 'zod';
+
+type IndicatorFormValues = z.infer<typeof indicatorSchema>;
+
+export default function EditIndicatorPage() {
+  const params = useParams();
+  const indicatorId = params.indicatorId as string;
+
+  const [indicator, setIndicator] = useState<BehavioralIndicator | null>(null);
+  const [previewIndicator, setPreviewIndicator] = useState<BehavioralIndicator | null>(null);
+
+  useEffect(() => {
+    async function fetchIndicator() {
+      const fetchedIndicator = await behavioralIndicatorsApi.getIndicatorById(indicatorId);
+      if (!fetchedIndicator) {
+        notFound();
+      }
+      setIndicator(fetchedIndicator);
+      setPreviewIndicator(fetchedIndicator);
+    }
+    if (indicatorId) {
+      fetchIndicator();
+    }
+  }, [indicatorId]);
+
+  const handleUpdatePreview = (data: IndicatorFormValues) => {
+    if (previewIndicator) {
+      setPreviewIndicator({ ...previewIndicator, ...data });
+    }
+  };
 
   if (!indicator) {
-    notFound();
+    return <EditIndicatorPageSkeleton />;
   }
 
   return (
-    <div className="container mx-auto p-4">
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2">
-          <EditIndicatorForm indicator={indicator} />
+    <div className="min-h-screen bg-muted/30">
+      <div className="border-b border-border/40 bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
+        <div className="container mx-auto px-4">
+          <PageHeader
+            className="py-4 border-0"
+            title={`Edit Behavioral Indicator`}
+          />
         </div>
-        <div className="hidden lg:block">
-          <IndicatorPreview indicator={indicator} />
-        </div>
+      </div>
+      
+      <div className="container mx-auto px-4 py-6">
+        <Tabs defaultValue="details" className="space-y-6">
+          <div className="flex items-center space-x-1 rounded-lg bg-muted p-1">
+            <TabsList className="bg-transparent">
+              <TabsTrigger value="details" className="data-[state=active]:bg-background data-[state=active]:shadow-sm">
+                Details
+              </TabsTrigger>
+              <TabsTrigger value="questions" className="data-[state=active]:bg-background data-[state=active]:shadow-sm">
+                Questions
+              </TabsTrigger>
+            </TabsList>
+          </div>
+          
+          <TabsContent value="details" className="space-y-0">
+            <div className="grid grid-cols-1 xl:grid-cols-5 gap-6">
+              <div className="xl:col-span-3">
+                <IndicatorForm indicator={indicator} onUpdatePreview={handleUpdatePreview} />
+              </div>
+              <div className="xl:col-span-2">
+                <div className="sticky top-6">
+                  {previewIndicator && <IndicatorPreview indicator={previewIndicator} />}
+                </div>
+              </div>
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="questions" className="space-y-0">
+            <IndicatorQuestionsManager indicator={indicator} />
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );

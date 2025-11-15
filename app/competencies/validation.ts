@@ -3,9 +3,9 @@ import { CompetencyCategory, ProficiencyLevel, ApprovalStatus } from '../enums/d
 
 export const competencySchema = z.object({
   name: z.string().min(3, 'Name must be at least 3 characters'),
-  description: z.string().optional(),
+  description: z.string().min(10, 'Description must be at least 10 characters'),
   category: z.enum(Object.values(CompetencyCategory) as [string, ...string[]]),
   level: z.enum(Object.values(ProficiencyLevel) as [string, ...string[]]),
   isActive: z.boolean(),
   approvalStatus: z.enum(Object.values(ApprovalStatus) as [string, ...string[]]),
-});
+}).strict(); // Prevent extra fields from being included

@@ -1,19 +1,9 @@
 import { z } from 'zod';
-import { DifficultyLevel } from '../../app/enums/domain_enums';
-
-const questionTypes = [
-  'MULTIPLE_CHOICE',
-  'SINGLE_CHOICE',
-  'TRUE_FALSE',
-  'OPEN_ENDED',
-  'SCENARIO_BASED',
-  'LIKERT_SCALE',
-  'SITUATIONAL_JUDGMENT',
-] as const;
+import { DifficultyLevel, QuestionType } from '@/enums/domain_enums';
 
 export const questionSchema = z.object({
   questionText: z.string().min(10, 'Question text must be at least 10 characters'),
-  questionType: z.enum(questionTypes),
+  questionType: z.nativeEnum(QuestionType),
   answerOptions: z.array(z.object({
     text: z.string().optional(),
     label: z.string().optional(),
@@ -24,7 +14,7 @@ export const questionSchema = z.object({
   })).optional(),
   scoringRubric: z.string(),
   timeLimit: z.number().optional(),
-  difficultyLevel: z.enum(Object.values(DifficultyLevel) as [string, ...string[]]),
+  difficultyLevel: z.nativeEnum(DifficultyLevel),
   isActive: z.boolean(),
-  orderIndex: z.number(),
-});
+  orderIndex: z.number().min(1, "Order index must be positive").max(50, "Maximum 50 questions per indicator"),
+}).strict(); // Prevent extra fields from being included
