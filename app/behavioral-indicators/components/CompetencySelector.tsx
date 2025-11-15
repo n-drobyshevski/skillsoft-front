@@ -203,7 +203,7 @@ export default function CompetencySelector({
             <label htmlFor="search" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
               Search Competencies
             </label>
-            <div className="relative">
+            <div className="relative" suppressHydrationWarning>
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
                 id="search"

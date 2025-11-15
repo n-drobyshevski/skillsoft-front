@@ -7,6 +7,7 @@ import { BarChart3 } from "lucide-react";
 
 interface WeightDistributionPieProps {
 	indicators: BehavioralIndicator[];
+	compact?: boolean;
 }
 
 const chartConfig = {
@@ -17,6 +18,7 @@ const chartConfig = {
 
 const WeightDistributionPie: React.FC<WeightDistributionPieProps> = ({
 	indicators,
+	compact = false,
 }) => {
 	// Calculate total weight for percentage calculation
 	const totalWeight = indicators.reduce((sum, i) => sum + i.weight, 0);
@@ -52,24 +54,24 @@ const WeightDistributionPie: React.FC<WeightDistributionPieProps> = ({
 
 	return (
 		<Card>
-			<CardHeader>
-				<CardTitle className="flex items-center gap-2">
+			<CardHeader className={compact ? "pb-3" : ""}>
+				<CardTitle className={`flex items-center gap-2 ${compact ? "text-base" : ""}`}>
 					<BarChart3 className="w-5 h-5" />
-					Indicators Weight Distribution (%)
+					{compact ? "Weight Distribution" : "Indicators Weight Distribution (%)"}
 				</CardTitle>
 			</CardHeader>
-			<CardContent>
+			<CardContent className={compact ? "pt-0" : ""}>
 				<ChartContainer
 					config={chartConfig}
-					className="aspect-square h-[300px] w-full"
+					className={compact ? "aspect-square h-[200px] w-full" : "aspect-square h-[300px] w-full"}
 				>
 					<PieChart>
 						<Pie
 							data={data}
 							cx="50%"
 							cy="50%"
-							innerRadius={70}
-							outerRadius={90}
+							innerRadius={compact ? 50 : 70}
+							outerRadius={compact ? 70 : 90}
 							paddingAngle={2}
 							dataKey="value"
 							nameKey="name"
@@ -117,12 +119,15 @@ const WeightDistributionPie: React.FC<WeightDistributionPieProps> = ({
 							verticalAlign="middle"
 							formatter={(value: string, entry: any) => {
 								const data = entry.payload;
-								return `${data.name} (${data.displayValue})`;
+								return compact 
+									? `${data.name.length > 15 ? data.name.substring(0, 15) + '...' : data.name} (${data.displayValue})`
+									: `${data.name} (${data.displayValue})`;
 							}}
 							wrapperStyle={{
-								paddingLeft: "20px",
-								maxHeight: "240px",
+								paddingLeft: compact ? "10px" : "20px",
+								maxHeight: compact ? "160px" : "240px",
 								overflowY: "auto",
+								fontSize: compact ? "12px" : "14px",
 							}}
 						/>
 					</PieChart>

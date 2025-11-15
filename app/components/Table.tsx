@@ -145,7 +145,7 @@ export default function EntitiesTable<TData, TValue>({
       <div className="flex flex-col gap-3 @md/table:flex-row @md/table:items-center @md/table:justify-between">
         <div className="flex flex-col gap-3 @sm/table:flex-row @sm/table:items-center flex-1">
           {/* Global Search Input with Column Settings */}
-          <div className="flex items-center gap-2 flex-grow justify-between">
+          <div className="flex items-center gap-2 flex-grow justify-between" suppressHydrationWarning>
             <div className="relative flex-grow max-w-lg ">
               <Search className="absolute left-3 top-1/2 h-4 max-w-2xl -translate-y-1/2 text-muted-foreground" />
               <Input

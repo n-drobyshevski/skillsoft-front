@@ -6,11 +6,9 @@ import { z } from 'zod';
 import { competencySchema } from '../validation';
 import { Competency } from '../../interfaces/domain-interfaces';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -93,196 +91,225 @@ export function CompetencyForm({
   };
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>Basic Information</CardTitle>
-            <CardDescription>Provide the name and description for this competency.</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Name</FormLabel>
-                  <FormControl>
-                    <Input 
-                      placeholder="Competency name" 
-                      {...field}
-                      onBlur={() => {
-                        field.onBlur();
-                        handlePreviewClick();
-                      }}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Description *</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder="A detailed description of the competency (minimum 10 characters)"
-                      className="resize-none"
-                      {...field}
-                      onBlur={() => {
-                        field.onBlur();
-                        handlePreviewClick();
-                      }}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </CardContent>
-        </Card>
+    <div className="space-y-6">
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          {/* Basic Information Section */}
+          <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
+            <div className="p-4 pb-3">
+              <h3 className="text-lg font-semibold leading-none tracking-tight">Basic Information</h3>
+              <p className="text-sm text-muted-foreground mt-1">Provide the name and description for this competency</p>
+            </div>
+            <div className="px-4 pb-4 space-y-4">
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-sm font-medium">Name <span className="text-red-500">*</span></FormLabel>
+                    <FormControl>
+                      <Input 
+                        placeholder="e.g., Strategic Leadership" 
+                        className="h-9"
+                        {...field}
+                        onBlur={() => {
+                          field.onBlur();
+                          handlePreviewClick();
+                        }}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-sm font-medium">Description <span className="text-red-500">*</span></FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder="A detailed description of the competency"
+                        className="min-h-20 resize-none"
+                        {...field}
+                        onBlur={() => {
+                          field.onBlur();
+                          handlePreviewClick();
+                        }}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+          </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Details</CardTitle>
-            <CardDescription>Categorize and define the competency&apos;s properties.</CardDescription>
-          </CardHeader>
-          <CardContent className="grid gap-6 sm:grid-cols-2">
-            <FormField
-              control={form.control}
-              name="category"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Category</FormLabel>
-                  <Select 
-                    onValueChange={(value) => {
-                      field.onChange(value);
-                      handlePreviewClick();
-                    }} 
-                    defaultValue={field.value}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select a category" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {Object.values(CompetencyCategory).map((category) => (
-                        <SelectItem key={category} value={category}>
-                          {category}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="level"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Level</FormLabel>
-                  <Select 
-                    onValueChange={(value) => {
-                      field.onChange(value);
-                      handlePreviewClick();
-                    }} 
-                    defaultValue={field.value}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select a level" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {Object.values(ProficiencyLevel).map((level) => (
-                        <SelectItem key={level} value={level}>
-                          {level}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="approvalStatus"
-              render={({ field }) => (
-                <FormItem className="sm:col-span-2">
-                  <FormLabel>Approval Status</FormLabel>
-                  <Select 
-                    onValueChange={(value) => {
-                      field.onChange(value);
-                      handlePreviewClick();
-                    }} 
-                    defaultValue={field.value}
-                  >
-                    <FormControl>
-                      <SelectTrigger className="sm:max-w-sm">
-                        <SelectValue placeholder="Select a status" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {Object.values(ApprovalStatus).map((status) => (
-                        <SelectItem key={status} value={status}>
-                          {status}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </CardContent>
-          <CardContent>
-            <FormField
+          {/* Classification Section */}
+          <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
+            <div className="p-4 pb-3">
+              <h3 className="text-lg font-semibold leading-none tracking-tight">Classification</h3>
+              <p className="text-sm text-muted-foreground mt-1">Categorize and define the competency&apos;s properties</p>
+            </div>
+            <div className="px-4 pb-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="category"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-sm font-medium">Category</FormLabel>
+                    <Select 
+                      onValueChange={(value) => {
+                        field.onChange(value);
+                        handlePreviewClick();
+                      }} 
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger className="h-9">
+                          <SelectValue placeholder="Select category" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {Object.values(CompetencyCategory).map((category) => (
+                          <SelectItem key={category} value={category}>
+                            {category}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="level"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-sm font-medium">Level</FormLabel>
+                    <Select 
+                      onValueChange={(value) => {
+                        field.onChange(value);
+                        handlePreviewClick();
+                      }} 
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger className="h-9">
+                          <SelectValue placeholder="Select level" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {Object.values(ProficiencyLevel).map((level) => (
+                          <SelectItem key={level} value={level}>
+                            {level}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+          </div>
+
+          {/* Status Section */}
+          <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
+            <div className="p-4 pb-3">
+              <h3 className="text-lg font-semibold leading-none tracking-tight">Status</h3>
+            </div>
+            <div className="px-4 pb-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="approvalStatus"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-sm font-medium">Approval Status</FormLabel>
+                    <Select 
+                      onValueChange={(value) => {
+                        field.onChange(value);
+                        handlePreviewClick();
+                      }} 
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger className="h-9">
+                          <SelectValue placeholder="Select status" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {Object.values(ApprovalStatus).map((status) => (
+                          <SelectItem key={status} value={status}>
+                            {status.replace(/_/g, ' ')}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
                 control={form.control}
                 name="isActive"
                 render={({ field }) => (
-                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                    <div className="space-y-0.5">
-                        <FormLabel className="text-base">Active Status</FormLabel>
-                        <FormDescription>
-                        Set whether this competency is currently active and available.
-                        </FormDescription>
-                    </div>
-                    <FormControl>
+                  <FormItem className="flex flex-col justify-end">
+                    <FormLabel className="text-sm font-medium">Active</FormLabel>
+                    <div className="flex items-center space-x-2 h-9">
+                      <FormControl>
                         <Switch
-                        checked={field.value}
-                        onCheckedChange={(checked) => {
-                          field.onChange(checked);
-                          handlePreviewClick();
-                        }}
+                          checked={field.value}
+                          onCheckedChange={(checked) => {
+                            field.onChange(checked);
+                            handlePreviewClick();
+                          }}
                         />
-                    </FormControl>
-                    </FormItem>
+                      </FormControl>
+                      <span className="text-sm text-muted-foreground">
+                        {field.value ? 'Active' : 'Inactive'}
+                      </span>
+                    </div>
+                  </FormItem>
                 )}
-                />
-          </CardContent>
-        </Card>
+              />
+            </div>
+          </div>
 
-        <div className="flex flex-col gap-3 pt-4 sm:flex-row sm:justify-end sm:space-x-4">
-          {onUpdatePreview && (
-            <Button type="button" variant="secondary" onClick={handlePreviewClick} disabled={isLoading} className="w-full sm:w-auto">
-              Update Preview
+          {/* Action Buttons */}
+          <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3">
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={() => router.back()} 
+              disabled={isLoading}
+              className="h-9"
+            >
+              Cancel
             </Button>
-          )}
-          <Button type="button" variant="outline" onClick={() => router.back()} disabled={isLoading} className="w-full sm:w-auto">
-            Cancel
-          </Button>
-          <Button type="submit" disabled={isLoading} className="w-full sm:w-auto">
-            {isLoading ? (isEditMode ? 'Saving...' : 'Creating...') : (isEditMode ? 'Save Changes' : 'Create Competency')}
-          </Button>
-        </div>
-      </form>
-    </Form>
+            {onUpdatePreview && (
+              <Button 
+                type="button" 
+                variant="secondary" 
+                onClick={handlePreviewClick} 
+                disabled={isLoading}
+                className="h-9"
+              >
+                Update Preview
+              </Button>
+            )}
+            <Button 
+              type="submit" 
+              disabled={isLoading}
+              className="h-9"
+            >
+              {isLoading ? (isEditMode ? 'Saving...' : 'Creating...') : (isEditMode ? 'Save Changes' : 'Create Competency')}
+            </Button>
+          </div>
+        </form>
+      </Form>
+    </div>
   );
 }

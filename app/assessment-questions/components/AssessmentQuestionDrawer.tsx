@@ -7,20 +7,17 @@ import { Badge } from "@/components/ui/badge";
 import {
   Sheet,
   SheetContent,
-  SheetHeader,
   SheetTitle,
   SheetDescription,
-  SheetFooter,
 } from "@/components/ui/sheet";
 import { AssessmentQuestion, BehavioralIndicator, Competency } from "../../interfaces/domain-interfaces";
-import { competenciesApi, behavioralIndicatorsApi, assessmentQuestionsApi } from "@/services/api";
+import { competenciesApi, behavioralIndicatorsApi } from "@/services/api";
 import { questionDifficultyToColor } from "../../utils";
 import { CompetencyHoverCard } from "../../behavioral-indicators/[indicatorId]/components/CompetencyHoverCard";
 import { IndicatorHoverCard } from "../../components/IndicatorHoverCard";
 import { DeleteConfirmationDialog } from "../../components/DeleteConfirmationDialog";
 import { deleteAssessmentQuestion } from "@/src/app/actions";
 import { toast } from "sonner";
-import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Eye, Settings2, ExternalLink, Loader2, Trash2 } from "lucide-react";
@@ -63,8 +60,6 @@ export default function AssessmentQuestionDrawer({
     }
   };
 
-  const buttonSizeClass = `${isMobile ? "h-12 text-base" : "h-10"} min-h-11`;
-
   // Load competency and indicator context when needed
   useEffect(() => {
     if (!open || !question) return;
@@ -100,102 +95,114 @@ export default function AssessmentQuestionDrawer({
         className={`${
           isMobile 
             ? "w-full max-w-full sm:max-w-full" 
-            : "sm:max-w-2xl"
+            : "sm:max-w-xl"
         } p-0 flex flex-col`}
         style={{
           WebkitOverflowScrolling: 'touch',
         }}
       >
-        <SheetHeader className={`${isMobile ? "p-4 pb-2" : "p-6 pb-2"}`}>
-          <SheetTitle className={`${isMobile ? "text-xl" : "text-2xl"} font-bold leading-tight wrap-break-word flex-1 pr-2`}>
-            {question.questionText}
-          </SheetTitle>
-          <SheetDescription className={`${isMobile ? "text-sm" : "text-base"} leading-relaxed`}>
-            Details for the assessment question.
-          </SheetDescription>
-          
-          {/* Context Information */}
-          {(competency || currentIndicator || isLoadingContext) && (
-            <div className="border border-border rounded-lg p-4 mt-4 space-y-3 bg-muted/20">
-              
-              {isLoadingContext ? (
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  Loading context...
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {competency && (
-                    <div className="text-sm">
-                      <span className="font-medium text-foreground">Competency:</span>
-                      <div className="mt-1">
+        {/* WCAG 2.1 Compliant Header with Proper SheetTitle */}
+        <div className={`${isMobile ? "p-3" : "p-4"} border-b bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60`}>
+          <div className="space-y-2.5">
+            <SheetTitle className={`${isMobile ? "text-lg" : "text-xl"} font-semibold leading-normal line-clamp-2`}>
+              {question.questionText}
+            </SheetTitle>
+            <SheetDescription className="text-sm text-muted-foreground leading-normal">
+              Assessment Question Details
+            </SheetDescription>
+            
+            {/* Accessible Badge Layout */}
+            <div className="flex items-center gap-2 flex-wrap">
+              <Badge 
+                variant={question.isActive ? "default" : "secondary"} 
+                className="h-7 text-sm px-2 min-h-7 leading-normal"
+                role="status"
+                aria-label={`Status: ${question.isActive ? "Active" : "Inactive"}`}
+              >
+                {question.isActive ? "Active" : "Inactive"}
+              </Badge>
+              <Badge
+                variant="outline"
+                className={`${questionDifficultyToColor(question.difficultyLevel)} h-7 text-sm px-2 min-h-7 leading-normal`}
+                role="status"
+                aria-label={`Difficulty Level: ${question.difficultyLevel}`}
+              >
+                {question.difficultyLevel}
+              </Badge>
+              <Badge 
+                variant="secondary" 
+                className="h-7 text-sm px-2 min-h-7 leading-normal"
+                role="status"
+                aria-label={`Question Type: ${question.questionType.split("_").map((word) => word.charAt(0) + word.slice(1).toLowerCase()).join(" ")}`}
+              >
+                {question.questionType
+                  .split("_")
+                  .map((word) => word.charAt(0) + word.slice(1).toLowerCase())
+                  .join(" ")}
+              </Badge>
+            </div>
+
+            {/* Accessible Context Information */}
+            {(competency || currentIndicator || isLoadingContext) && (
+              <div className="rounded-md border bg-muted/30 p-3 space-y-2 text-sm">
+                {isLoadingContext ? (
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Loading context...
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {competency && (
+                      <div className="flex items-center justify-between">
+                        <span className="text-muted-foreground">Competency:</span>
                         <CompetencyHoverCard competencyId={competency.id}>
                           <Link 
                             href={`/competencies/${competency.id}`}
-                            className="text-primary hover:text-primary/80 hover:underline font-medium inline-flex items-center gap-1"
+                            className="text-primary hover:text-primary/80 font-medium inline-flex items-center gap-1.5 min-h-11 p-1"
+                            aria-label={`View competency: ${competency.name}`}
                           >
-                            {competency.name}
+                            {competency.name.length > 25 ? `${competency.name.substring(0, 25)}...` : competency.name}
                             <ExternalLink className="h-3 w-3" />
                           </Link>
                         </CompetencyHoverCard>
                       </div>
-                    </div>
-                  )}
-                  
-                  {currentIndicator && (
-                    <div className="text-sm">
-                      <span className="font-medium text-foreground">Behavioral Indicator:</span>
-                      <div className="mt-1">
+                    )}
+                    
+                    {currentIndicator && (
+                      <div className="flex items-center justify-between">
+                        <span className="text-muted-foreground">Indicator:</span>
                         <IndicatorHoverCard indicatorId={currentIndicator.id}>
                           <Link 
                             href={`/behavioral-indicators/${currentIndicator.id}`}
-                            className="text-primary hover:text-primary/80 hover:underline font-medium inline-flex items-center gap-1"
+                            className="text-primary hover:text-primary/80 font-medium inline-flex items-center gap-1.5 min-h-11 p-1"
+                            aria-label={`View indicator: ${currentIndicator.title}`}
                           >
-                            {currentIndicator.title}
+                            {currentIndicator.title.length > 25 ? `${currentIndicator.title.substring(0, 25)}...` : currentIndicator.title}
                             <ExternalLink className="h-3 w-3" />
                           </Link>
                         </IndicatorHoverCard>
                       </div>
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-          )}
-          
-          <div className="flex items-center justify-start gap-3 pt-4 flex-wrap">
-            <Badge variant={question.isActive ? "default" : "secondary"} className="min-h-8">
-              {question.isActive ? "Active" : "Inactive"}
-            </Badge>
-            <Badge
-              variant="outline"
-              className={`${questionDifficultyToColor(question.difficultyLevel)} min-h-8`}
-            >
-              {question.difficultyLevel}
-            </Badge>
-            <div className="text-sm font-medium text-muted-foreground">
-              {question.questionType
-                .split("_")
-                .map((word) => word.charAt(0) + word.slice(1).toLowerCase())
-                .join(" ")}
-            </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
-        </SheetHeader>
-        <Separator />
+        </div>
+
+        {/* Accessible Content Section */}
         <div className="flex-1 overflow-y-auto">
-          <div className={`${isMobile ? "p-4" : "p-6"} space-y-6`}>
+          <div className={`${isMobile ? "p-3" : "p-4"} space-y-4`}>
             {question.answerOptions && question.answerOptions.length > 0 && (
-              <div>
-                <h3 className={`${isMobile ? "text-base" : "text-lg"} font-semibold mb-4`}>
-                  Answer Options
-                </h3>
-                <div className="space-y-3">
+              <div className="space-y-2.5">
+                <h3 className="text-sm font-medium leading-normal">Answer Options</h3>
+                <div className="space-y-2">
                   {question.answerOptions.map((option, index) => (
                     <div 
                       key={index} 
-                      className={`${isMobile ? "text-sm" : "text-sm"} leading-relaxed p-3 border rounded-lg bg-card flex gap-3`}
+                      className="text-sm p-3 border rounded-md bg-card/50 flex gap-2 leading-relaxed"
                     >
-                      <span className="font-semibold text-primary min-w-4">{String.fromCharCode(65 + index)}.</span>
+                      <span className="font-medium text-primary min-w-4">{String.fromCharCode(65 + index)}.</span>
                       <span className="text-foreground">{option.text}</span>
                     </div>
                   ))}
@@ -203,48 +210,54 @@ export default function AssessmentQuestionDrawer({
               </div>
             )}
             
-            <div>
-              <h3 className={`${isMobile ? "text-base" : "text-lg"} font-semibold mb-4`}>
-                Scoring Rubric
-              </h3>
-              <div className="border rounded-lg bg-card p-4">
-                <p className={`${isMobile ? "text-sm" : "text-sm"} text-foreground leading-relaxed`}>
+            <div className="space-y-2.5">
+              <h3 className="text-sm font-medium leading-normal">Scoring Rubric</h3>
+              <div className="rounded-md border bg-card/50 p-3">
+                <p className="text-sm text-foreground leading-relaxed">
                   {question.scoringRubric}
                 </p>
               </div>
             </div>
           </div>
         </div>
-        <SheetFooter className={`${isMobile ? "p-4" : "p-6"} bg-muted/40 border-t mt-auto`}>
-          <div className={`flex ${isMobile ? "flex-col gap-3" : "flex-row gap-2"} w-full`}>
+
+        {/* Accessible Footer with Proper Touch Targets */}
+        <div className={`${isMobile ? "p-3" : "p-4"} border-t bg-muted/30`}>
+          <div className={`flex ${isMobile ? "flex-col gap-2.5" : "gap-2.5"} w-full`}>
             <Button 
               variant="outline"
+              size="sm"
               onClick={() => setShowDeleteDialog(true)}
-              className={`${buttonSizeClass} text-destructive hover:text-destructive hover:bg-destructive/10 border-destructive/20 hover:border-destructive/30`}
+              className="text-destructive hover:text-destructive hover:bg-destructive/10 border-destructive/20 hover:border-destructive/30 min-h-11 text-sm"
+              aria-label="Delete assessment question"
             >
-              <Trash2 className="mr-2 h-4 w-4" />
+              <Trash2 className="mr-1.5 h-4 w-4" />
               Delete
             </Button>
             <Link href={`/assessment-questions/${question.id}`} passHref className="flex-1">
               <Button 
                 variant="outline" 
-                className={`w-full ${buttonSizeClass}`}
+                size="sm"
+                className="w-full min-h-11 text-sm"
+                aria-label="View assessment question details"
               >
-                <Eye className="mr-2 h-4 w-4" />
-                Go to Page
+                <Eye className="mr-1.5 h-4 w-4" />
+                View
               </Button>
             </Link>
             <Link href={`/assessment-questions/${question.id}/edit`} passHref className="flex-1">
               <Button 
                 variant="default" 
-                className={`w-full ${buttonSizeClass}`}
+                size="sm"
+                className="w-full min-h-11 text-sm"
+                aria-label="Edit assessment question"
               >
-                <Settings2 className="mr-2 h-4 w-4" />
-                Edit Question
+                <Settings2 className="mr-1.5 h-4 w-4" />
+                Edit
               </Button>
             </Link>
           </div>
-        </SheetFooter>
+        </div>
       </SheetContent>
 
       <DeleteConfirmationDialog

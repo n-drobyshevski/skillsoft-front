@@ -6,14 +6,11 @@ import { Button } from "@/components/ui/button";
 import {
   Sheet,
   SheetContent,
-  SheetHeader,
   SheetTitle,
   SheetDescription,
-  SheetFooter,
 } from "@/components/ui/sheet";
 import { Competency } from "../../interfaces/domain-interfaces";
 import { approvalStatusToColor, competencyProficiencyLevelToColor } from "../../utils";
-import { Separator } from "@/components/ui/separator";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Eye, Settings2, ExternalLink, Trash2 } from "lucide-react";
@@ -51,118 +48,152 @@ export default function CompetencyDrawer({
     }
   };
 
-  const buttonSizeClass = `${isMobile ? "h-12 text-base" : "h-10"} min-h-11`;
-
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent 
         className={`${
           isMobile 
             ? "w-full max-w-full sm:max-w-full" 
-            : "sm:max-w-2xl"
+            : "sm:max-w-xl"
         } p-0 flex flex-col`}
         style={{
           WebkitOverflowScrolling: 'touch',
         }}
       >
-        <SheetHeader className={`${isMobile ? "p-4 pb-2" : "p-6 pb-2"}`}>
-          <SheetTitle className={`${isMobile ? "text-xl" : "text-2xl"} font-bold leading-tight wrap-break-word`}>
-            {competency.name}
-          </SheetTitle>
-          <SheetDescription className={`${isMobile ? "text-sm" : "text-base"} leading-relaxed`}>
-            Details for the competency.
-          </SheetDescription>
-          <div className={`flex items-center justify-start gap-3 pt-4 flex-wrap`}>
-            <Badge variant={competency.isActive ? "default" : "secondary"} className="min-h-8">
-              {competency.isActive ? "Active" : "Inactive"}
-            </Badge>
-            <Badge
-              variant="outline"
-              className={`${approvalStatusToColor(competency.approvalStatus)} min-h-8`}
-            >
-              {competency.approvalStatus}
-            </Badge>
-            <Badge
-              variant="outline"
-              className={`${competencyProficiencyLevelToColor(competency.level)} min-h-8`}
-            >
-              {competency.level}
-            </Badge>
-          </div>
-        </SheetHeader>
-        <Separator />
-        <div className={`flex-1 overflow-y-auto ${isMobile ? "p-4" : "p-6"} space-y-6`}>
-          <div>
-            <h3 className={`${isMobile ? "text-base" : "text-lg"} font-semibold mb-4`}>Description</h3>
-            <div className="border rounded-lg bg-card p-4">
-              <p className={`${isMobile ? "text-sm" : "text-sm"} text-foreground leading-relaxed`}>
-                {competency.description}
-              </p>
+        {/* WCAG 2.1 Compliant Header with Proper SheetTitle */}
+        <div className={`${isMobile ? "p-3" : "p-4"} border-b bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60`}>
+          <div className="space-y-2.5">
+            <SheetTitle className={`${isMobile ? "text-lg" : "text-xl"} font-semibold leading-normal line-clamp-2`}>
+              {competency.name}
+            </SheetTitle>
+            <SheetDescription className="text-sm text-muted-foreground leading-normal">
+              Competency Details
+            </SheetDescription>
+            
+            {/* Accessible Badge Layout */}
+            <div className="flex items-center gap-2 flex-wrap">
+              <Badge 
+                variant={competency.isActive ? "default" : "secondary"} 
+                className="h-7 text-sm px-2 min-h-7 leading-normal"
+                role="status"
+                aria-label={`Status: ${competency.isActive ? "Active" : "Inactive"}`}
+              >
+                {competency.isActive ? "Active" : "Inactive"}
+              </Badge>
+              <Badge
+                variant="outline"
+                className={`${approvalStatusToColor(competency.approvalStatus)} h-7 text-sm px-2 min-h-7 leading-normal`}
+                role="status"
+                aria-label={`Approval Status: ${competency.approvalStatus}`}
+              >
+                {competency.approvalStatus}
+              </Badge>
+              <Badge
+                variant="outline"
+                className={`${competencyProficiencyLevelToColor(competency.level)} h-7 text-sm px-2 min-h-7 leading-normal`}
+                role="status"
+                aria-label={`Proficiency Level: ${competency.level}`}
+              >
+                {competency.level}
+              </Badge>
             </div>
           </div>
-          {competency.behavioralIndicators && competency.behavioralIndicators.length > 0 && (
-            <div>
-              <h3 className={`${isMobile ? "text-base" : "text-lg"} font-semibold mb-4`}>Behavioral Indicators</h3>
-              <Accordion type="single" collapsible className="w-full">
-                {competency.behavioralIndicators.map((indicator) => (
-                  <AccordionItem value={indicator.id} key={indicator.id}>
-                    <AccordionTrigger className={`${isMobile ? "text-sm" : "text-base"} text-left hover:no-underline`}>
-                      <IndicatorHoverCard indicatorId={indicator.id}>
-                        <span className="hover:text-primary transition-colors">
-                          {indicator.title}
-                        </span>
-                      </IndicatorHoverCard>
-                    </AccordionTrigger>
-                    <AccordionContent className={`${isMobile ? "text-sm" : "text-sm"} leading-relaxed`}>
-                      <div className="space-y-2">
-                        <p>{indicator.description}</p>
-                        <div className="flex items-center gap-2 pt-2">
-                          <Link 
-                            href={`/behavioral-indicators/${indicator.id}`}
-                            className="text-primary hover:text-primary/80 hover:underline text-xs flex items-center gap-1"
-                          >
-                            View Details
-                            <ExternalLink className="h-3 w-3" />
-                          </Link>
-                        </div>
-                      </div>
-                    </AccordionContent>
-                  </AccordionItem>
-                ))}
-              </Accordion>
-            </div>
-          )}
         </div>
-        <SheetFooter className={`${isMobile ? "p-4" : "p-6"} bg-muted/40 border-t mt-auto`}>
-          <div className={`flex ${isMobile ? "flex-col gap-3" : "flex-row gap-2"} w-full`}>
+
+        {/* Accessible Content Section */}
+        <div className="flex-1 overflow-y-auto">
+          <div className={`${isMobile ? "p-3" : "p-4"} space-y-4`}>
+            <div className="space-y-2.5">
+              <h3 className="text-sm font-medium leading-normal">Description</h3>
+              <div className="rounded-md border bg-card/50 p-3">
+                <p className="text-sm leading-relaxed text-foreground">
+                  {competency.description}
+                </p>
+              </div>
+            </div>
+
+            {competency.behavioralIndicators && competency.behavioralIndicators.length > 0 && (
+              <div className="space-y-2.5">
+                <h3 className="text-sm font-medium leading-normal">Behavioral Indicators ({competency.behavioralIndicators.length})</h3>
+                <Accordion type="single" collapsible className="w-full space-y-2">
+                  {competency.behavioralIndicators.map((indicator) => (
+                    <AccordionItem 
+                      value={indicator.id} 
+                      key={indicator.id}
+                      className="border rounded-md bg-card/30"
+                    >
+                      <AccordionTrigger className="text-sm text-left hover:no-underline px-3 py-3 min-h-11">
+                        <IndicatorHoverCard indicatorId={indicator.id}>
+                          <span className="hover:text-primary transition-colors line-clamp-1 leading-normal">
+                            {indicator.title}
+                          </span>
+                        </IndicatorHoverCard>
+                      </AccordionTrigger>
+                      <AccordionContent className="px-3 pb-3">
+                        <div className="space-y-2.5 text-sm">
+                          <p className="leading-relaxed text-muted-foreground">{indicator.description}</p>
+                          <div className="flex items-center justify-between pt-1">
+                            <div className="flex gap-1.5">
+                              <Badge variant="outline" className="h-6 text-sm px-2">
+                                Weight: {indicator.weight.toFixed(2)}
+                              </Badge>
+                            </div>
+                            <Link 
+                              href={`/behavioral-indicators/${indicator.id}`}
+                              className="text-primary hover:text-primary/80 hover:underline text-sm flex items-center gap-1.5 min-h-11 p-1"
+                              aria-label={`View details for ${indicator.title}`}
+                            >
+                              View Details
+                              <ExternalLink className="h-3 w-3" />
+                            </Link>
+                          </div>
+                        </div>
+                      </AccordionContent>
+                    </AccordionItem>
+                  ))}
+                </Accordion>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Accessible Footer with Proper Touch Targets */}
+        <div className={`${isMobile ? "p-3" : "p-4"} border-t bg-muted/30`}>
+          <div className={`flex ${isMobile ? "flex-col gap-2.5" : "gap-2.5"} w-full`}>
             <Button 
               variant="outline"
+              size="sm"
               onClick={() => setShowDeleteDialog(true)}
-              className={`${buttonSizeClass} text-destructive hover:text-destructive hover:bg-destructive/10 border-destructive/20 hover:border-destructive/30`}
+              className="text-destructive hover:text-destructive hover:bg-destructive/10 border-destructive/20 hover:border-destructive/30 min-h-11 text-sm"
+              aria-label="Delete competency"
             >
-              <Trash2 className="mr-2 h-4 w-4" />
+              <Trash2 className="mr-1.5 h-4 w-4" />
               Delete
             </Button>
             <Link href={`/competencies/${competency.id}`} passHref className="flex-1">
               <Button 
                 variant="outline" 
-                className={`w-full ${buttonSizeClass}`}
+                size="sm"
+                className="w-full min-h-11 text-sm"
+                aria-label="View competency details"
               >
-                <Eye className="mr-2 h-4 w-4" />
-                Go to Page
+                <Eye className="mr-1.5 h-4 w-4" />
+                View
               </Button>
             </Link>
             <Link href={`/competencies/${competency.id}/edit`} passHref className="flex-1">
               <Button 
                 variant="default" 
-                className={`w-full ${buttonSizeClass}`}
+                size="sm"
+                className="w-full min-h-11 text-sm"
+                aria-label="Edit competency"
               >
-                <Settings2 className="mr-2 h-4 w-4" />
-                Edit Competency
+                <Settings2 className="mr-1.5 h-4 w-4" />
+                Edit
               </Button>
             </Link>
           </div>
-        </SheetFooter>
+        </div>
       </SheetContent>
 
       <DeleteConfirmationDialog

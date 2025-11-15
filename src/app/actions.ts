@@ -2,13 +2,25 @@
 
 import { revalidatePath, revalidateTag } from 'next/cache';
 
+interface ApiError extends Error {
+  status?: number;
+}
+
+// Constants
+const UNKNOWN_ERROR_MESSAGE = 'An unknown error occurred.';
+
+// Cache revalidation paths
+const COMPETENCIES_PATH = '/competencies';
+const BEHAVIORAL_INDICATORS_PATH = '/behavioral-indicators';
+const HOME_PATH = '/';
+
 export async function revalidateCompetencyTags(competencyId?: string) {
   try {
     // Invalidate paths
-    revalidatePath('/competencies');
-    revalidatePath('/');
+    revalidatePath(COMPETENCIES_PATH);
+    revalidatePath(HOME_PATH);
     if (competencyId) {
-      revalidatePath(`/competencies/${competencyId}`);
+      revalidatePath(`${COMPETENCIES_PATH}/${competencyId}`);
     }
     
     // Invalidate cache tags used by fetchApi
@@ -23,9 +35,6 @@ export async function revalidateCompetencyTags(competencyId?: string) {
 
 
 import { fetchApi } from '@/services/api';
-
-// Constants
-const UNKNOWN_ERROR_MESSAGE = 'An unknown error occurred.';
 
 // This is a simplified type for the form data.
 // For a real app, this might be shared or generated from the Zod schema.
@@ -52,14 +61,41 @@ export async function updateIndicatorAction(indicatorId: string, data: Indicator
     });
 
     // Revalidation happens on the server, in the same step
-    revalidatePath('/behavioral-indicators');
-    revalidatePath(`/behavioral-indicators/${indicatorId}`);
+    revalidatePath(BEHAVIORAL_INDICATORS_PATH);
+    revalidatePath(`${BEHAVIORAL_INDICATORS_PATH}/${indicatorId}`);
 
     return { success: true, message: 'Indicator updated successfully.' };
   } catch (error) {
     // Return a serializable error object for the client to handle
     const errorMessage = error instanceof Error ? error.message : UNKNOWN_ERROR_MESSAGE;
     return { success: false, message: `Failed to update indicator: ${errorMessage}` };
+  }
+}
+
+export async function createIndicatorAction(competencyId: string, data: IndicatorFormData) {
+  try {
+    // Create the indicator
+    const newIndicator = await fetchApi<{ id: string }>(`/behavioral-indicators`, {
+      method: 'POST', 
+      body: JSON.stringify({ ...data, competencyId }),
+      cache: 'no-store',
+    });
+
+    // Comprehensive cache revalidation for indicator creation
+    revalidatePath(BEHAVIORAL_INDICATORS_PATH); // All indicators page
+    revalidatePath(COMPETENCIES_PATH); // All competencies page  
+    revalidatePath(`${COMPETENCIES_PATH}/${competencyId}`); // Specific competency page
+    revalidatePath(`${COMPETENCIES_PATH}/${competencyId}/edit`); // Competency edit page
+    revalidatePath(`${BEHAVIORAL_INDICATORS_PATH}/${newIndicator.id}`); // New indicator page
+
+    return { 
+      success: true, 
+      message: 'Indicator created successfully.',
+      data: newIndicator 
+    };
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : UNKNOWN_ERROR_MESSAGE;
+    return { success: false, message: `Failed to create indicator: ${errorMessage}` };
   }
 }
 
@@ -99,19 +135,21 @@ export async function updateIndicatorQuestionsAction(indicatorId: string, questi
 
 export async function deleteCompetency(competencyId: string) {
   try {
+    // First, perform the delete operation (returns null for successful DELETE)
     await fetchApi(`/competencies/${competencyId}`, {
       method: 'DELETE',
       cache: 'no-store',
     });
 
-    // Comprehensive cache invalidation
-    revalidatePath('/competencies');
-    revalidatePath(`/competencies/${competencyId}`);
-    revalidatePath('/'); // Dashboard page
-    
-    // Invalidate fetchApi cache tags
-    revalidateTag('competencies', 'max');
-    revalidateTag(`competency-${competencyId}`, 'max');
+    // Try to revalidate paths, but don't let revalidation errors fail the delete
+    try {
+      revalidatePath('/competencies');
+      revalidatePath(`/competencies/${competencyId}`);
+      revalidatePath('/'); // Dashboard page
+    } catch {
+      // Revalidation failed but the delete was successful - this is acceptable
+      // We won't throw here since the main operation (deletion) succeeded
+    }
 
     return { success: true };
   } catch (error) {
@@ -122,36 +160,63 @@ export async function deleteCompetency(competencyId: string) {
 
 export async function deleteIndicator(indicatorId: string, competencyId?: string) {
   try {
+    // Perform the delete operation (returns null for successful DELETE)
     await fetchApi(`/behavioral-indicators/${indicatorId}`, {
       method: 'DELETE',
       cache: 'no-store',
     });
 
-    revalidatePath('/behavioral-indicators');
-    if (competencyId) {
-      revalidatePath(`/competencies/${competencyId}`);
+    // Try to revalidate paths, but don't let revalidation errors fail the delete
+    try {
+      revalidatePath('/behavioral-indicators');
+      if (competencyId) {
+        revalidatePath(`/competencies/${competencyId}`);
+      }
+    } catch {
+      // Revalidation failed but the delete was successful - this is acceptable
     }
 
     return { success: true };
-  } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : UNKNOWN_ERROR_MESSAGE;
-    throw new Error(`Failed to delete indicator: ${errorMessage}`);
+  } catch (error: unknown) {
+    // Preserve the original error with its status code for better error handling
+    const apiError = error as { status?: number; message?: string };
+    if (apiError.status === 404) {
+      // Create a new error that preserves the 404 status for client handling
+      const notFoundError: ApiError = Object.assign(
+        new Error('Behavioral indicator not found'), 
+        { status: 404 }
+      );
+      throw notFoundError;
+    }
+    
+    const errorMessage = apiError.message || UNKNOWN_ERROR_MESSAGE;
+    const deleteError: ApiError = Object.assign(
+      new Error(`Failed to delete indicator: ${errorMessage}`), 
+      { status: apiError.status }
+    );
+    throw deleteError;
   }
 }
 
 export async function deleteAssessmentQuestion(questionId: string, competencyId?: string, indicatorId?: string) {
   try {
+    // Perform the delete operation (returns null for successful DELETE)
     await fetchApi(`/questions/${questionId}`, {
       method: 'DELETE',
       cache: 'no-store',
     });
 
-    revalidatePath('/assessment-questions');
-    if (competencyId) {
-      revalidatePath(`/competencies/${competencyId}`);
-    }
-    if (indicatorId) {
-      revalidatePath(`/behavioral-indicators/${indicatorId}`);
+    // Try to revalidate paths, but don't let revalidation errors fail the delete
+    try {
+      revalidatePath('/assessment-questions');
+      if (competencyId) {
+        revalidatePath(`/competencies/${competencyId}`);
+      }
+      if (indicatorId) {
+        revalidatePath(`/behavioral-indicators/${indicatorId}`);
+      }
+    } catch {
+      // Revalidation failed but the delete was successful - this is acceptable
     }
 
     return { success: true };

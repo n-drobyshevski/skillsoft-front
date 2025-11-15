@@ -10,6 +10,10 @@ import { EditIndicatorPageSkeleton } from "../../components/EditIndicatorPageSke
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { IndicatorQuestionsManager } from "../../components/IndicatorQuestionsManager";
 import PageHeader from "../../../components/PageHeader";
+import { indicatorSchema } from "../../validation";
+import { z } from 'zod';
+
+type IndicatorFormValues = z.infer<typeof indicatorSchema>;
 
 export default function EditIndicatorPage() {
   const params = useParams();
@@ -32,7 +36,7 @@ export default function EditIndicatorPage() {
     }
   }, [indicatorId]);
 
-  const handleUpdatePreview = (data: Partial<BehavioralIndicator>) => {
+  const handleUpdatePreview = (data: IndicatorFormValues) => {
     if (previewIndicator) {
       setPreviewIndicator({ ...previewIndicator, ...data });
     }
@@ -43,30 +47,47 @@ export default function EditIndicatorPage() {
   }
 
   return (
-    <div className="container mx-auto p-4">
-        <PageHeader
-        className="pl-0! py-4"
-            title={`Edit Behavioral Indicator: ${indicator.title}`}
-        />
-      <Tabs defaultValue="details" className="mt-4">
-        <TabsList>
-          <TabsTrigger value="details">Details</TabsTrigger>
-          <TabsTrigger value="questions">Questions</TabsTrigger>
-        </TabsList>
-        <TabsContent value="details">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-4">
-            <div className="lg:col-span-2">
-              <IndicatorForm indicator={indicator} onUpdatePreview={handleUpdatePreview} />
-            </div>
-            <div className="hidden lg:block">
-              {previewIndicator && <IndicatorPreview indicator={previewIndicator} />}
-            </div>
+    <div className="min-h-screen bg-muted/30">
+      <div className="border-b border-border/40 bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
+        <div className="container mx-auto px-4">
+          <PageHeader
+            className="py-4 border-0"
+            title={`Edit Behavioral Indicator`}
+          />
+        </div>
+      </div>
+      
+      <div className="container mx-auto px-4 py-6">
+        <Tabs defaultValue="details" className="space-y-6">
+          <div className="flex items-center space-x-1 rounded-lg bg-muted p-1">
+            <TabsList className="bg-transparent">
+              <TabsTrigger value="details" className="data-[state=active]:bg-background data-[state=active]:shadow-sm">
+                Details
+              </TabsTrigger>
+              <TabsTrigger value="questions" className="data-[state=active]:bg-background data-[state=active]:shadow-sm">
+                Questions
+              </TabsTrigger>
+            </TabsList>
           </div>
-        </TabsContent>
-        <TabsContent value="questions">
-          <IndicatorQuestionsManager indicator={indicator} />
-        </TabsContent>
-      </Tabs>
+          
+          <TabsContent value="details" className="space-y-0">
+            <div className="grid grid-cols-1 xl:grid-cols-5 gap-6">
+              <div className="xl:col-span-3">
+                <IndicatorForm indicator={indicator} onUpdatePreview={handleUpdatePreview} />
+              </div>
+              <div className="xl:col-span-2">
+                <div className="sticky top-6">
+                  {previewIndicator && <IndicatorPreview indicator={previewIndicator} />}
+                </div>
+              </div>
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="questions" className="space-y-0">
+            <IndicatorQuestionsManager indicator={indicator} />
+          </TabsContent>
+        </Tabs>
+      </div>
     </div>
   );
 }

@@ -34,22 +34,31 @@ export default function EditQuestionForm({ question, competencyId }: EditQuestio
   }, [previewQuestion]);
 
   return (
-    <div className="container mx-auto p-4">
-       <PageHeader
-        className="flex flex-1 flex-col gap-4 py-6 pt-4 md:gap-6 md:p-4 pl-0!"
+    <div className="min-h-screen bg-muted/30">
+      <div className="border-b border-border/40 bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
+        <div className="container mx-auto px-4">
+          <PageHeader
+            className="py-4 border-0"
             title="Edit Assessment Question"
-        />
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2">
-          <QuestionForm
-            question={question}
-            competencyId={competencyId}
-            behavioralIndicatorId={question.behavioralIndicatorId}
-            onUpdatePreview={handleUpdatePreview}
           />
         </div>
-        <div className="hidden lg:block">
-          <QuestionPreview question={previewQuestion} />
+      </div>
+      
+      <div className="container mx-auto px-4 py-6">
+        <div className="grid grid-cols-1 xl:grid-cols-5 gap-6">
+          <div className="xl:col-span-3">
+            <QuestionForm
+              question={question}
+              competencyId={competencyId}
+              behavioralIndicatorId={question.behavioralIndicatorId}
+              onUpdatePreview={handleUpdatePreview}
+            />
+          </div>
+          <div className="xl:col-span-2">
+            <div className="sticky top-6">
+              <QuestionPreview question={previewQuestion} />
+            </div>
+          </div>
         </div>
       </div>
     </div>

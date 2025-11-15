@@ -76,8 +76,14 @@ export default function IndicatorPage({ indicator, assessmentQuestions }: Indica
       await behavioralIndicatorsApi.deleteIndicator(indicator.competencyId, indicator.id);
       toast.success('Behavioral indicator deleted successfully');
       router.push('/behavioral-indicators');
-    } catch {
-      toast.error('Failed to delete indicator. Please try again.');
+    } catch (error: any) {
+      if (error.status === 404) {
+        // Handle case where the indicator was already deleted
+        toast.warning('This behavioral indicator was already deleted.');
+        router.push('/behavioral-indicators');
+      } else {
+        toast.error('Failed to delete indicator. Please try again.');
+      }
     } finally {
       setIsDeleting(false);
       setShowDeleteDialog(false);

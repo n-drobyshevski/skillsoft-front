@@ -60,30 +60,47 @@ export default function EditCompetencyPage() {
   }
 
   return (
-    <div className="container mx-auto p-4">
-      <PageHeader
-        className="pl-0! py-4"
-        title={`Edit Competency: ${competency.name}`}
-      />
-      <Tabs defaultValue="details" className="mt-4">
-        <TabsList>
-          <TabsTrigger value="details">Details</TabsTrigger>
-          <TabsTrigger value="indicators">Behavioral Indicators</TabsTrigger>
-        </TabsList>
-        <TabsContent value="details">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-4">
-            <div className="lg:col-span-2">
-              <CompetencyForm competency={competency} onUpdatePreview={handleUpdatePreview} />
-            </div>
-            <div className="hidden lg:block">
-              {previewCompetency && <CompetencyPreview competency={previewCompetency} />}
-            </div>
+    <div className="min-h-screen bg-muted/30">
+      <div className="border-b border-border/40 bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
+        <div className="container mx-auto px-4">
+          <PageHeader
+            className="py-4 border-0"
+            title="Edit Competency"
+          />
+        </div>
+      </div>
+      
+      <div className="container mx-auto px-4 py-6">
+        <Tabs defaultValue="details" className="space-y-6">
+          <div className="flex items-center space-x-1 rounded-lg bg-muted p-1">
+            <TabsList className="bg-transparent">
+              <TabsTrigger value="details" className="data-[state=active]:bg-background data-[state=active]:shadow-sm">
+                Details
+              </TabsTrigger>
+              <TabsTrigger value="indicators" className="data-[state=active]:bg-background data-[state=active]:shadow-sm">
+                Behavioral Indicators
+              </TabsTrigger>
+            </TabsList>
           </div>
-        </TabsContent>
-        <TabsContent value="indicators">
-          <CompetencyIndicatorsManager competency={competency} />
-        </TabsContent>
-      </Tabs>
+          
+          <TabsContent value="details" className="space-y-0">
+            <div className="grid grid-cols-1 xl:grid-cols-5 gap-6">
+              <div className="xl:col-span-3">
+                <CompetencyForm competency={competency} onUpdatePreview={handleUpdatePreview} />
+              </div>
+              <div className="xl:col-span-2">
+                <div className="sticky top-6">
+                  {previewCompetency && <CompetencyPreview competency={previewCompetency} />}
+                </div>
+              </div>
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="indicators" className="space-y-0">
+            <CompetencyIndicatorsManager competency={competency} />
+          </TabsContent>
+        </Tabs>
+      </div>
     </div>
   );
 }

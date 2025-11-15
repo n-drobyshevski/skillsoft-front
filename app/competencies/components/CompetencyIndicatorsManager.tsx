@@ -14,7 +14,9 @@ import {
   Settings2,
   Users,
   Pencil,
-  Target
+  Target,
+  PieChart,
+  Edit3
 } from 'lucide-react';
 
 // Enhanced UI Components
@@ -47,7 +49,9 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Progress } from '@/components/ui/progress';
 import IndicatorDrawer from '@/app/behavioral-indicators/components/IndicatorDrawer';
+import { WeightAdjustmentModal } from '@/app/behavioral-indicators/components/WeightAdjustmentModal';
 import Link from 'next/link';
 
 // Constants
@@ -271,6 +275,9 @@ export function CompetencyIndicatorsManager({
   // Drawer and dialog state
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [selectedIndicator, setSelectedIndicator] = useState<BehavioralIndicator | null>(null);
+  
+  // Weight adjustment state
+  const [weightModalOpen, setWeightModalOpen] = useState(false);
 
   // Data fetching with enhanced error handling
   const fetchIndicators = useCallback(async () => {
@@ -422,6 +429,97 @@ export function CompetencyIndicatorsManager({
         {!isLoading && <StatsCards stats={stats} />}
       </Suspense>
 
+      {/* Weight Distribution */}
+      {!isLoading && currentCompetencyIndicators.length > 0 && (
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="flex items-center gap-2">
+                  <PieChart className="h-5 w-5" />
+                  Weight Distribution
+                </CardTitle>
+                <CardDescription>
+                  Distribution of weights across behavioral indicators
+                </CardDescription>
+              </div>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => setWeightModalOpen(true)}
+                className="flex items-center gap-2"
+              >
+                <Edit3 className="h-4 w-4" />
+                Adjust Weights
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {currentCompetencyIndicators.map((indicator, index) => {
+                const weight = indicator.weight || 0;
+                const weightPercent = weight * 100; // Convert decimal to percentage
+                // Generate color based on index for consistent coloring
+                const hue = (index * 137.508) % 360; // Golden angle approximation
+                const color = `hsl(${hue}, 70%, 50%)`;
+                
+                return (
+                  <div 
+                    key={indicator.id}
+                    className="group relative p-3 rounded-lg border hover:bg-accent/50 transition-colors"
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-3">
+                        <div 
+                          className="w-3 h-3 rounded-full shrink-0"
+                          style={{ backgroundColor: color }}
+                        />
+                        <div className="min-w-0 flex-1">
+                          <p className="font-medium text-sm truncate">
+                            {indicator.title}
+                          </p>
+                          <p className="text-xs text-muted-foreground truncate">
+                            {indicator.observabilityLevel}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Badge variant="secondary" className="text-xs">
+                          {weightPercent.toFixed(1)}%
+                        </Badge>
+                      </div>
+                    </div>
+                    <div className="relative">
+                      <Progress 
+                        value={weightPercent} 
+                        className="h-2"
+                        style={{
+                          '--progress-background': color,
+                        } as React.CSSProperties}
+                      />
+                    </div>
+                  </div>
+                );
+              })}
+              
+              {/* Summary */}
+              <div className="pt-4 border-t">
+                <div className="flex justify-between items-center text-sm">
+                  <span className="text-muted-foreground">Total Weight:</span>
+                  <Badge variant={
+                    Math.abs((currentCompetencyIndicators.reduce((sum, ind) => sum + (ind.weight || 0), 0) * 100) - 100) < 0.01 
+                      ? "default" 
+                      : "destructive"
+                  }>
+                    {(currentCompetencyIndicators.reduce((sum, ind) => sum + (ind.weight || 0), 0) * 100).toFixed(1)}%
+                  </Badge>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Tabbed Interface */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
         <TabsList className="grid w-full grid-cols-1">
@@ -569,6 +667,30 @@ export function CompetencyIndicatorsManager({
           open={drawerOpen}
           onOpenChange={setDrawerOpen}
           indicator={selectedIndicator}
+        />
+      )}
+      
+      {/* Weight Adjustment Modal */}
+      {currentCompetencyIndicators.length > 0 && (
+        <WeightAdjustmentModal
+          isOpen={weightModalOpen}
+          onClose={() => setWeightModalOpen(false)}
+          onWeightsUpdated={() => {
+            // This will only be called when onWeightDistributionComplete is not provided
+            fetchIndicators();
+          }}
+          competencyId={competency.id}
+          newIndicatorWeight={0} // Not needed for this use case
+          onWeightDistributionComplete={(adjustedWeights) => {
+            // Update local state with new weights immediately
+            setCurrentCompetencyIndicators(prev => 
+              prev.map(indicator => {
+                const adjustedWeight = adjustedWeights.find(w => w.id === indicator.id);
+                return adjustedWeight ? { ...indicator, weight: adjustedWeight.weight } : indicator;
+              })
+            );
+            setWeightModalOpen(false);
+          }}
         />
       )}
     </div>

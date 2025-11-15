@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { EntityDetailHeader } from '../../../components/EntityDetailHeader';
-import { deleteCompetency } from '@/app/actions';
+import { deleteCompetency } from '@/src/app/actions';
 import { levelToColor, approvalStatusToColor } from '../../../utils';
 import type { Competency } from '../../../interfaces/domain-interfaces';
 
@@ -17,18 +17,20 @@ export default function CompetencyDetailClient({ competency, children }: Compete
 
   const handleDeleteCompetency = async () => {
     try {
-      await deleteCompetency(competency.id);
-      toast.success('Competency deleted successfully');
-      router.push('/competencies');
+      const result = await deleteCompetency(competency.id);
+      if (result && result.success) {
+        toast.success('Competency deleted successfully');
+        // Use replace instead of push to avoid back navigation to deleted page
+        router.replace('/competencies');
+      }
     } catch (error) {
       // Handle specific 404 case
       if (error instanceof Error && error.message.includes('404')) {
         toast.error('Competency not found. It may have already been deleted.');
-        router.push('/competencies');
+        router.replace('/competencies');
       } else {
         toast.error('Failed to delete competency. Please try again.');
       }
-      throw error; // Re-throw to let the component handle the error state
     }
   };
 
