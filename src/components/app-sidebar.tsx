@@ -45,7 +45,6 @@ const data = {
   user: {
     name: "Admin User",
     email: "admin@skillsoft.com",
-    avatar: "/avatars/admin.jpg",
   },
   teams: [
     {
@@ -189,7 +188,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   >
                   
                   <Avatar className="h-8 w-8 rounded-lg">
-                    <AvatarImage src={data.user.avatar} alt={data.user.name} />
+                    {/* <AvatarImage src={data.user.avatar} alt={data.user.name} /> */}
                     <AvatarFallback className="rounded-lg">
                       {data.user.name
                         .split(" ")

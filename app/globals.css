@@ -1,3 +1,274 @@
+/* ===== MODERN MINIMALISTIC DESIGN ENHANCEMENTS ===== */
+
+/* Smooth scrolling for modern feel */
+html {
+	scroll-behavior: smooth;
+}
+
+/* Modern glassmorphism effects */
+.glass {
+	background: rgba(255, 255, 255, 0.1);
+	backdrop-filter: blur(10px);
+	border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Subtle animations for modern UI */
+@keyframes float {
+
+	0%,
+	100% {
+		transform: translateY(0px);
+	}
+
+	50% {
+		transform: translateY(-10px);
+	}
+}
+
+@keyframes pulse-glow {
+
+	0%,
+	100% {
+		box-shadow: 0 0 5px rgba(var(--primary), 0.5);
+	}
+
+	50% {
+		box-shadow: 0 0 20px rgba(var(--primary), 0.8);
+	}
+}
+
+@keyframes gradient-shift {
+	0% {
+		background-position: 0% 50%;
+	}
+
+	50% {
+		background-position: 100% 50%;
+	}
+
+	100% {
+		background-position: 0% 50%;
+	}
+}
+
+@keyframes fade-in-up {
+	from {
+		opacity: 0;
+		transform: translateY(30px);
+	}
+
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+@keyframes scale-in {
+	from {
+		opacity: 0;
+		transform: scale(0.9);
+	}
+
+	to {
+		opacity: 1;
+		transform: scale(1);
+	}
+}
+
+/* Modern utility classes */
+.animate-float {
+	animation: float 6s ease-in-out infinite;
+}
+
+.animate-pulse-glow {
+	animation: pulse-glow 2s ease-in-out infinite;
+}
+
+.animate-gradient {
+	background: linear-gradient(45deg, var(--primary), var(--primary)/0.8, var(--primary));
+	background-size: 200% 200%;
+	animation: gradient-shift 3s ease infinite;
+}
+
+.animate-fade-in-up {
+	animation: fade-in-up 0.8s ease-out;
+}
+
+.animate-scale-in {
+	animation: scale-in 0.5s ease-out;
+}
+
+/* Hover effects for modern UI */
+.hover-lift {
+	transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.hover-lift:hover {
+	transform: translateY(-8px);
+	box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+}
+
+.hover-glow {
+	transition: box-shadow 0.3s ease;
+}
+
+.hover-glow:hover {
+	box-shadow: 0 0 30px rgba(var(--primary), 0.3);
+}
+
+/* Text gradients for modern typography */
+.text-gradient-primary {
+	background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary))/0.8);
+	-webkit-background-clip: text;
+	background-clip: text;
+	-webkit-text-fill-color: transparent;
+}
+
+.text-gradient-subtle {
+	background: linear-gradient(135deg, hsl(var(--foreground)), hsl(var(--foreground))/0.7);
+	-webkit-background-clip: text;
+	background-clip: text;
+	-webkit-text-fill-color: transparent;
+}
+
+/* Modern grid background */
+.bg-grid-modern {
+	background-image:
+		linear-gradient(hsl(var(--border)) 1px, transparent 1px),
+		linear-gradient(90deg, hsl(var(--border)) 1px, transparent 1px);
+	background-size: 20px 20px;
+	opacity: 0.5;
+}
+
+/* Backdrop blur utilities */
+.backdrop-blur-minimal {
+	backdrop-filter: blur(8px);
+}
+
+.backdrop-blur-modern {
+	backdrop-filter: blur(16px) saturate(180%);
+}
+
+/* Border gradient effects */
+.border-gradient {
+	border: 1px solid transparent;
+	background: linear-gradient(var(--background), var(--background)) padding-box,
+		linear-gradient(135deg, hsl(var(--primary))/0.5, hsl(var(--primary))/0.1) border-box;
+}
+
+/* Modern shadow utilities */
+.shadow-modern {
+	box-shadow:
+		0 0 0 1px rgba(0, 0, 0, 0.03),
+		0 2px 4px rgba(0, 0, 0, 0.05),
+		0 12px 24px rgba(0, 0, 0, 0.05);
+}
+
+.shadow-modern-lg {
+	box-shadow:
+		0 0 0 1px rgba(0, 0, 0, 0.03),
+		0 8px 16px rgba(0, 0, 0, 0.06),
+		0 20px 40px rgba(0, 0, 0, 0.06);
+}
+
+/* Responsive spacing utilities */
+.space-modern>*+* {
+	margin-top: clamp(1rem, 3vw, 2rem);
+}
+
+.gap-modern {
+	gap: clamp(1rem, 3vw, 2rem);
+}
+
+/* Modern button styles */
+.btn-modern {
+	position: relative;
+	overflow: hidden;
+	transition: all 0.3s ease;
+}
+
+.btn-modern::before {
+	content: '';
+	position: absolute;
+	top: 0;
+	left: -100%;
+	width: 100%;
+	height: 100%;
+	background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+	transition: left 0.5s ease;
+}
+
+.btn-modern:hover::before {
+	left: 100%;
+}
+
+/* Intersection Observer animations */
+.animate-on-scroll {
+	opacity: 0;
+	transform: translateY(30px);
+	transition: opacity 0.8s ease, transform 0.8s ease;
+}
+
+.animate-on-scroll.is-visible {
+	opacity: 1;
+	transform: translateY(0);
+}
+
+/* Modern card designs */
+.card-modern {
+	background: rgba(255, 255, 255, 0.05);
+	backdrop-filter: blur(10px);
+	border: 1px solid rgba(255, 255, 255, 0.1);
+	border-radius: 16px;
+	transition: all 0.3s ease;
+}
+
+.card-modern:hover {
+	background: rgba(255, 255, 255, 0.08);
+	border-color: rgba(255, 255, 255, 0.2);
+	transform: translateY(-4px);
+}
+
+/* Minimalist loading states */
+.loading-modern {
+	position: relative;
+	overflow: hidden;
+}
+
+.loading-modern::after {
+	content: '';
+	position: absolute;
+	top: 0;
+	left: -100%;
+	width: 100%;
+	height: 100%;
+	background: linear-gradient(90deg, transparent, hsl(var(--primary))/0.1, transparent);
+	animation: loading-shimmer 1.5s infinite;
+}
+
+@keyframes loading-shimmer {
+	0% {
+		left: -100%;
+	}
+
+	100% {
+		left: 100%;
+	}
+}
+
+/* Modern focus styles */
+.focus-modern:focus {
+	outline: none;
+	box-shadow: 0 0 0 3px hsl(var(--primary))/0.3;
+}
+
+.focus-modern:focus-visible {
+	outline: none;
+	box-shadow: 0 0 0 3px hsl(var(--primary))/0.3;
+}
+
+/* ===== EXISTING STYLES CONTINUE ===== */
+
 @import "tailwindcss";
 @import "tw-animate-css";
 @import '@clerk/themes/shadcn.css';
@@ -747,5 +1018,121 @@
 			font-size: 0.875rem;
 			line-height: 1.6;
 		}
+	}
+}
+
+/* ===== MOBILE-FIRST ENHANCEMENTS ===== */
+
+/* Touch-friendly interactions */
+.touch-manipulation {
+	touch-action: manipulation;
+	-webkit-tap-highlight-color: transparent;
+}
+
+/* Improve button touch targets on mobile */
+@media (max-width: 768px) {
+
+	button,
+	[role="button"],
+	.touch-target {
+		min-height: 44px;
+		min-width: 44px;
+	}
+
+	/* Improve link touch targets */
+	a {
+		min-height: 44px;
+		display: inline-flex;
+		align-items: center;
+	}
+
+	/* Enhance form elements */
+	input,
+	textarea,
+	select {
+		min-height: 48px;
+		font-size: 16px;
+		/* Prevents zoom on iOS */
+	}
+}
+
+/* Optimize scrolling on mobile */
+* {
+	-webkit-overflow-scrolling: touch;
+}
+
+/* Better focus visibility on mobile */
+@media (max-width: 768px) {
+	:focus-visible {
+		outline: 3px solid var(--ring);
+		outline-offset: 2px;
+	}
+}
+
+/* Responsive typography with viewport units and fallbacks */
+.responsive-heading {
+	font-size: clamp(1.875rem, 5vw + 1rem, 5rem);
+	line-height: 1.1;
+}
+
+.responsive-subheading {
+	font-size: clamp(1.5rem, 4vw + 0.5rem, 3rem);
+	line-height: 1.2;
+}
+
+.responsive-body {
+	font-size: clamp(1rem, 2.5vw + 0.5rem, 1.25rem);
+	line-height: 1.6;
+}
+
+/* Mobile container improvements */
+.mobile-container {
+	-webkit-text-size-adjust: 100%;
+	text-size-adjust: 100%;
+}
+
+/* Safe area handling for notched devices */
+.safe-area-top {
+	padding-top: env(safe-area-inset-top);
+}
+
+.safe-area-bottom {
+	padding-bottom: env(safe-area-inset-bottom);
+}
+
+.safe-area-left {
+	padding-left: env(safe-area-inset-left);
+}
+
+.safe-area-right {
+	padding-right: env(safe-area-inset-right);
+}
+
+/* Optimize images for mobile */
+img {
+	max-width: 100%;
+	height: auto;
+	-webkit-user-select: none;
+	user-select: none;
+}
+
+/* Better mobile spacing utilities */
+@media (max-width: 640px) {
+	.mobile-px {
+		padding-left: 1rem;
+		padding-right: 1rem;
+	}
+
+	.mobile-py {
+		padding-top: 1rem;
+		padding-bottom: 1rem;
+	}
+
+	.mobile-gap {
+		gap: 0.75rem;
+	}
+
+	.mobile-space>*+* {
+		margin-top: 1rem;
 	}
 }

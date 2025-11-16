@@ -1,165 +1,201 @@
-import { auth } from "@clerk/nextjs/server";
+
 import { redirect } from "next/navigation";
 import { Metadata } from "next";
-import { BarChart3, Users, Target, TrendingUp } from "lucide-react";
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from "@/components/ui/card";
+import { competenciesApi } from "@/services/api";
+import { Competency, DashboardStats } from "../interfaces/domain-interfaces";
+import FlexibleStatsCards from "../components/FlexibleStatsCards";
+import ErrorCard from "../components/ErrorCard";
+import CompetencyByCategoryBarChart from "@/components/charts/CompetencyByCategoryBarChart";
+import AverageIndicatorsGauge from "@/components/charts/AverageIndicatorsGauge";
+import RecentActivityCard from "@/components/RecentActivityCard";
+import QuickActionsCard from "@/components/QuickActionsCard";
+import CompetencyTable from "../components/CompetencyTable";
+import PageHeader from "../components/PageHeader";
+import { ClientOnly } from "@/components/ClientOnly";
+import { auth } from "@clerk/nextjs/server";
 
 export const metadata: Metadata = {
   title: "Dashboard - SkillSoft",
   description: "Your SkillSoft dashboard - manage competencies, track progress, and develop skills.",
 };
 
+async function getDashboardData() {
+	try {
+		const competenciesData: Array<Competency> | null = await competenciesApi.getAllCompetencies();
+		
+		if (!Array.isArray(competenciesData)) {
+			// In a real app, you might want to log this error to a service
+			// Invalid response from server: data is not an array
+			return { competencies: [], stats: null, error: "Failed to load competencies. Invalid data format." };
+		}
+		
+		// Calculate stats
+		const stats: DashboardStats = {
+			totalCompetencies: competenciesData.length,
+			totalBehavioralIndicators: competenciesData.reduce(
+				(sum: number, comp: Competency) => sum + (comp.behavioralIndicators?.length || 0),
+				0,
+			),
+			totalAssessmentQuestions: competenciesData.length * 8, // Estimate
+			competenciesByCategory: {},
+			competenciesByLevel: {},
+			averageIndicatorsPerCompetency: 0,
+		};
+
+		// Calculate distributions
+		competenciesData.forEach((comp: Competency) => {
+			stats.competenciesByCategory[comp.category] =
+				(stats.competenciesByCategory[comp.category] || 0) + 1;
+			stats.competenciesByLevel[comp.level] =
+				(stats.competenciesByLevel[comp.level] || 0) + 1;
+		});
+
+		stats.averageIndicatorsPerCompetency =
+			stats.totalBehavioralIndicators > 0 && stats.totalCompetencies > 0
+				? stats.totalBehavioralIndicators / stats.totalCompetencies
+				: 0;
+
+		return { competencies: competenciesData, stats, error: null };
+	} catch {
+		// Failed to fetch data - error handled
+		return { competencies: [], stats: null, error: "Failed to load competencies. Please try again." };
+	}
+}
+
+// Main Dashboard Component
 export default async function DashboardPage() {
-  const { userId } = await auth();
   
-  if (!userId) {
-    redirect("/sign-in");
-  }
 
-  return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b border-border bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
-        <div className="container flex h-14 items-center">
-          <div className="flex items-center space-x-4">
-            <h1 className="font-semibold">SkillSoft Dashboard</h1>
-          </div>
-        </div>
-      </header>
+	const { competencies, stats, error } = await getDashboardData();
 
-      {/* Main Content */}
-      <main className="container py-6">
-        <div className="space-y-6">
-          {/* Welcome Section */}
-          <div className="space-y-2">
-            <h2 className="text-2xl font-bold text-foreground">
-              Welcome back!
-            </h2>
-            <p className="text-muted-foreground">
-              Here's an overview of your competency management platform.
-            </p>
-          </div>
+	if (error) {
+		return <ErrorCard error={error} />;
+	}
 
-          {/* Stats Cards */}
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            <div className="rounded-lg border border-border bg-card p-6">
-              <div className="flex items-center space-x-2">
-                <Target className="h-4 w-4 text-primary" />
-                <span className="text-sm font-medium text-muted-foreground">
-                  Competencies
-                </span>
-              </div>
-              <div className="mt-2">
-                <div className="text-2xl font-bold">24</div>
-                <p className="text-xs text-muted-foreground">
-                  Active competencies
-                </p>
-              </div>
-            </div>
+	return (
+		<div className="flex flex-1 flex-col gap-4 p-4 pt-6 md:gap-6 md:p-6">
+			{/* Page Header */}
+			<PageHeader 
+				title="Dashboard"
+				description="Here's what's happening with your competency management today."
+			/>
 
-            <div className="rounded-lg border border-border bg-card p-6">
-              <div className="flex items-center space-x-2">
-                <BarChart3 className="h-4 w-4 text-primary" />
-                <span className="text-sm font-medium text-muted-foreground">
-                  Indicators
-                </span>
-              </div>
-              <div className="mt-2">
-                <div className="text-2xl font-bold">156</div>
-                <p className="text-xs text-muted-foreground">
-                  Behavioral indicators
-                </p>
-              </div>
-            </div>
+			{/* Overview Cards */}
+			{stats && (
+				<FlexibleStatsCards
+				
+					data={{
+						type: "dashboard",
+						stats: stats
+					}}
+					loading={false}
+				/>
+			)}
 
-            <div className="rounded-lg border border-border bg-card p-6">
-              <div className="flex items-center space-x-2">
-                <Users className="h-4 w-4 text-primary" />
-                <span className="text-sm font-medium text-muted-foreground">
-                  Questions
-                </span>
-              </div>
-              <div className="mt-2">
-                <div className="text-2xl font-bold">89</div>
-                <p className="text-xs text-muted-foreground">
-                  Assessment questions
-                </p>
-              </div>
-            </div>
+			{/* Main Dashboard Grid */}
+			<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+				{/* Chart Section */}
+				<Card className="lg:col-span-2">
+					<CardHeader>
+						<CardTitle>Competency Overview</CardTitle>
+						<CardDescription>
+							Showing distribution of competencies across different categories
+						</CardDescription>
+					</CardHeader>
+					<CardContent className="pl-2">
+						{stats && (
+							<ClientOnly fallback={
+								<div className="h-[300px] flex items-center justify-center text-muted-foreground">
+									Loading chart...
+								</div>
+							}>
+								<CompetencyByCategoryBarChart
+									data={Object.entries(stats.competenciesByCategory).map(([name, value]) => ({ name, value }))}
+								/>
+							</ClientOnly>
+						)}
+					</CardContent>
+				</Card>
 
-            <div className="rounded-lg border border-border bg-card p-6">
-              <div className="flex items-center space-x-2">
-                <TrendingUp className="h-4 w-4 text-primary" />
-                <span className="text-sm font-medium text-muted-foreground">
-                  Progress
-                </span>
-              </div>
-              <div className="mt-2">
-                <div className="text-2xl font-bold">78%</div>
-                <p className="text-xs text-muted-foreground">
-                  Overall completion
-                </p>
-              </div>
-            </div>
-          </div>
+				{/* Recent Activity */}
+				<Card>
+					<CardHeader>
+						<CardTitle>Recent Activity</CardTitle>
+						<CardDescription>
+							Latest updates and changes in your competency framework
+						</CardDescription>
+					</CardHeader>
+					<CardContent>
+						<RecentActivityCard />
+					</CardContent>
+				</Card>
+			</div>
 
-          {/* Quick Actions */}
-          <div className="rounded-lg border border-border bg-card p-6">
-            <h3 className="text-lg font-semibold mb-4">Quick Actions</h3>
-            <div className="grid gap-4 md:grid-cols-3">
-              <a 
-                href="/competencies" 
-                className="group rounded-lg border border-border p-4 hover:bg-accent transition-colors"
-              >
-                <div className="flex items-center space-x-3">
-                  <Target className="h-5 w-5 text-primary" />
-                  <div>
-                    <h4 className="font-medium group-hover:text-primary transition-colors">
-                      Manage Competencies
-                    </h4>
-                    <p className="text-sm text-muted-foreground">
-                      Create and edit competencies
-                    </p>
-                  </div>
-                </div>
-              </a>
+			{/* Secondary Grid */}
+			<div className="grid gap-4 md:grid-cols-3">
+				{/* Data Table */}
+				<Card className="md:col-span-2">
+					<CardHeader>
+						<CardTitle>Competencies</CardTitle>
+						<CardDescription>
+							Manage your competency framework here.
+						</CardDescription>
+					</CardHeader>
+					<CardContent>
+						<ClientOnly fallback={
+							<div className="h-[200px] flex items-center justify-center text-muted-foreground">
+								Loading table...
+							</div>
+						}>
+							<CompetencyTable competencies={competencies} />
+						</ClientOnly>
+					</CardContent>
+				</Card>
 
-              <a 
-                href="/behavioral-indicators" 
-                className="group rounded-lg border border-border p-4 hover:bg-accent transition-colors"
-              >
-                <div className="flex items-center space-x-3">
-                  <BarChart3 className="h-5 w-5 text-primary" />
-                  <div>
-                    <h4 className="font-medium group-hover:text-primary transition-colors">
-                      Behavioral Indicators
-                    </h4>
-                    <p className="text-sm text-muted-foreground">
-                      Define behavior metrics
-                    </p>
-                  </div>
-                </div>
-              </a>
+				{/* Side Content */}
+				<div className="space-y-4">
+					{/* Quick Actions */}
+					<Card>
+						<CardHeader>
+							<CardTitle>Quick Actions</CardTitle>
+							<CardDescription>
+								Frequently used actions and shortcuts.
+							</CardDescription>
+						</CardHeader>
+						<CardContent>
+							<QuickActionsCard />
+						</CardContent>
+					</Card>
 
-              <a 
-                href="/assessment-questions" 
-                className="group rounded-lg border border-border p-4 hover:bg-accent transition-colors"
-              >
-                <div className="flex items-center space-x-3">
-                  <Users className="h-5 w-5 text-primary" />
-                  <div>
-                    <h4 className="font-medium group-hover:text-primary transition-colors">
-                      Assessment Questions
-                    </h4>
-                    <p className="text-sm text-muted-foreground">
-                      Create evaluation criteria
-                    </p>
-                  </div>
-                </div>
-              </a>
-            </div>
-          </div>
-        </div>
-      </main>
-    </div>
-  );
+					{/* Performance Metrics */}
+					{stats && (
+						<Card>
+							<CardHeader>
+								<CardTitle>Performance</CardTitle>
+								<CardDescription>
+									Average indicators per competency
+								</CardDescription>
+							</CardHeader>
+						<CardContent>
+							<ClientOnly fallback={
+								<div className="h-[150px] flex items-center justify-center text-muted-foreground">
+									Loading gauge...
+								</div>
+							}>
+								<AverageIndicatorsGauge value={stats.averageIndicatorsPerCompetency} />
+							</ClientOnly>
+						</CardContent>
+						</Card>
+					)}
+				</div>
+			</div>
+		</div>
+	);
 }
