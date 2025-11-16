@@ -38,6 +38,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Link from "next/link";
+import { ClientOnly } from "@/components/ClientOnly";
 
 // This is sample data.
 const data = {
@@ -55,13 +56,13 @@ const data = {
   ],
   navMain: [
     {
-      title: "Dashboard", 
+      title: "Dashboard",
       url: "/",
       icon: BarChart3,
     },
     {
       title: "Competencies",
-      url: "/competencies", 
+      url: "/competencies",
       icon: Target,
     },
     {
@@ -70,7 +71,7 @@ const data = {
       icon: Lightbulb,
     },
     {
-      title: "Assessment Questions", 
+      title: "Assessment Questions",
       url: "/assessment-questions",
       icon: FileQuestion,
     },
@@ -83,7 +84,7 @@ const data = {
     },
     {
       name: "Technical Skills",
-      url: "#", 
+      url: "#",
       icon: BookOpen,
     },
     {
@@ -97,7 +98,7 @@ const data = {
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname();
   const TeamLogo = data.teams[0].logo;
-  
+
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
@@ -109,7 +110,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   <TeamLogo className="size-4" />
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold">{data.teams[0].name}</span>
+                  <span className="truncate font-semibold">
+                    {data.teams[0].name}
+                  </span>
                   <span className="truncate text-xs">{data.teams[0].plan}</span>
                 </div>
               </Link>
@@ -117,7 +120,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
-      
+
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel>Platform</SidebarGroupLabel>
@@ -134,7 +137,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             ))}
           </SidebarMenu>
         </SidebarGroup>
-        
+
         <SidebarGroup className="group-data-[collapsible=icon]:hidden">
           <SidebarGroupLabel>Skill Categories</SidebarGroupLabel>
           <SidebarMenu>
@@ -151,24 +154,53 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           </SidebarMenu>
         </SidebarGroup>
       </SidebarContent>
-      
+
       <SidebarFooter>
         <SidebarMenu>
           <SidebarMenuItem>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <SidebarMenuButton
-                  size="lg"
-                  className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
-                >
+            <ClientOnly fallback={
+              <SidebarMenuButton
+                size="lg"
+                className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground opacity-75"
+              >
+                <Avatar className="h-8 w-8 rounded-lg">
+                  <AvatarFallback className="rounded-lg">
+                    {data.user.name
+                      .split(" ")
+                      .map((n) => n[0])
+                      .join("")}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="grid flex-1 text-left text-sm leading-tight">
+                  <span className="truncate font-semibold">
+                    {data.user.name}
+                  </span>
+                  <span className="truncate text-xs">
+                    {data.user.email}
+                  </span>
+                </div>
+              </SidebarMenuButton>
+            }>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <SidebarMenuButton
+                    size="lg"
+                    className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+                  >
+                  
                   <Avatar className="h-8 w-8 rounded-lg">
                     <AvatarImage src={data.user.avatar} alt={data.user.name} />
                     <AvatarFallback className="rounded-lg">
-                      {data.user.name.split(' ').map(n => n[0]).join('')}
+                      {data.user.name
+                        .split(" ")
+                        .map((n) => n[0])
+                        .join("")}
                     </AvatarFallback>
                   </Avatar>
                   <div className="grid flex-1 text-left text-sm leading-tight">
-                    <span className="truncate font-semibold">{data.user.name}</span>
+                    <span className="truncate font-semibold">
+                      {data.user.name}
+                    </span>
                     <span className="truncate text-xs">{data.user.email}</span>
                   </div>
                   <ChevronDown className="ml-auto size-4" />
@@ -199,6 +231,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
+            </ClientOnly>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarFooter>

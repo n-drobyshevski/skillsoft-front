@@ -1,0 +1,232 @@
+"use client";
+
+import React, { useState } from "react";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { SignIn, SignUp } from "@clerk/nextjs";
+import { LogIn, UserPlus } from "lucide-react";
+
+interface AuthModalsProps {
+  size?: "sm" | "default" | "lg";
+  showLabels?: boolean;
+  className?: string;
+}
+
+export function AuthModals({ size = "default", showLabels = false, className = "" }: AuthModalsProps) {
+  const [signInOpen, setSignInOpen] = useState(false);
+  const [signUpOpen, setSignUpOpen] = useState(false);
+
+  const buttonSize = size === "sm" ? "sm" : size === "lg" ? "lg" : "default";
+  const iconSize = size === "sm" ? "h-4 w-4" : "h-4 w-4";
+
+  // Clean, minimal appearance following modern design principles
+  const appearance = {
+    elements: {
+      // Container styling - minimal and clean
+      rootBox: "shadow-none border-0 bg-transparent",
+      card: "bg-background border border-border shadow-lg rounded-lg",
+      
+      // Typography - simple and readable
+      headerTitle: "text-foreground text-xl font-semibold",
+      headerSubtitle: "text-muted-foreground text-sm",
+      
+      // Form elements - clean and functional
+      formButtonPrimary: 
+        "bg-primary text-primary-foreground hover:bg-primary/90 transition-colors duration-200 text-sm font-medium py-2.5 px-4 rounded-md border-0",
+      
+      formButtonSecondary: 
+        "bg-secondary text-secondary-foreground hover:bg-secondary/80 transition-colors duration-200 text-sm font-medium py-2.5 px-4 rounded-md border border-border",
+      
+      // Social buttons - consistent with form styling
+      socialButtonsBlockButton: 
+        "bg-background border border-border hover:bg-accent hover:text-accent-foreground transition-colors duration-200 text-sm font-medium py-2.5 px-4 rounded-md",
+      socialButtonsBlockButtonText: "text-foreground font-medium",
+      
+      // Input fields - clean and accessible
+      formFieldInput: 
+        "bg-background border border-border rounded-md px-3 py-2.5 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors duration-200",
+      formFieldLabel: "text-foreground text-sm font-medium",
+      
+      // Divider - subtle and clean
+      dividerLine: "bg-border",
+      dividerText: "text-muted-foreground text-xs font-medium px-2 bg-background",
+      
+      // Links and actions
+      footerActionLink: 
+        "text-primary hover:text-primary/80 text-sm font-medium underline-offset-4 hover:underline transition-colors duration-200",
+      footerActionText: "text-muted-foreground text-sm",
+      
+      // Error states
+      alertText: "text-destructive text-sm",
+      
+      // Form structure
+      form: "space-y-4",
+      formFieldRow: "space-y-1.5",
+    },
+    variables: {
+      // Simple color system
+      colorPrimary: "hsl(var(--primary))",
+      colorBackground: "hsl(var(--background))",
+      colorInputBackground: "hsl(var(--background))",
+      colorInputText: "hsl(var(--foreground))",
+      colorText: "hsl(var(--foreground))",
+      colorTextSecondary: "hsl(var(--muted-foreground))",
+      colorTextOnPrimaryBackground: "hsl(var(--primary-foreground))",
+      colorDanger: "hsl(var(--destructive))",
+      
+      // Typography
+      fontFamily: "inherit",
+      fontSize: "0.875rem",
+      
+      // Layout
+      borderRadius: "0.375rem",
+      spacingUnit: "1rem",
+    },
+    layout: {
+      socialButtonsVariant: "blockButton" as const,
+      socialButtonsPlacement: "top" as const,
+    },
+  };
+
+  return (
+    <div className={`flex items-center gap-2 ${className}`}>
+      {/* Sign In Modal */}
+      <Dialog open={signInOpen} onOpenChange={setSignInOpen}>
+        <DialogTrigger asChild>
+          <Button 
+            variant="ghost" 
+            size={buttonSize}
+            className="group gap-2 hover:bg-accent/80 hover:text-accent-foreground transition-all duration-300 ease-out transform hover:scale-105 active:scale-95 rounded-lg font-medium relative overflow-hidden"
+          >
+            <LogIn className={`${iconSize} transition-transform duration-300 group-hover:rotate-3`} />
+            {showLabels && <span className="hidden sm:inline font-semibold">Sign In</span>}
+            <span className="sr-only">Sign in to your account</span>
+            
+            {/* Subtle glow effect on hover */}
+            <div className="absolute inset-0 rounded-lg bg-linear-to-r from-primary/0 via-primary/5 to-primary/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+          </Button>
+        </DialogTrigger>
+        <DialogContent className="sm:max-w-[440px] p-0 gap-0 border-0 bg-transparent shadow-none overflow-hidden">
+          {/* Glassmorphism background */}
+          <div className="absolute inset-0 bg-gradient-to-br from-background/95 via-background/90 to-background/95 backdrop-blur-xl" />
+          
+          <div className="relative bg-background/80 backdrop-blur-2xl rounded-2xl border border-border/20 shadow-2xl overflow-hidden auth-modal-content">
+            {/* Animated gradient border */}
+            <div className="absolute inset-0 rounded-2xl bg-linear-to-r from-primary/20 via-transparent to-primary/20 opacity-60 animate-pulse" />
+            
+            {/* Header with enhanced design */}
+            <DialogHeader className="relative p-8 pb-4 text-center">
+              <div className="flex flex-col items-center gap-4 mb-4">
+                <div className="relative">
+                  <div className="h-16 w-16 rounded-2xl bg-linear-to-br from-primary/20 to-primary/10 flex items-center justify-center backdrop-blur-sm border border-primary/20 shadow-lg auth-icon-float">
+                    <Shield className="h-8 w-8 text-primary animate-pulse" />
+                  </div>
+                  <div className="absolute -top-1 -right-1 h-6 w-6 rounded-full bg-linear-to-br from-emerald-400 to-emerald-600 flex items-center justify-center shadow-lg">
+                    <Sparkles className="h-3 w-3 text-white" />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <DialogTitle className="text-2xl font-bold bg-linear-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+                    Welcome back
+                  </DialogTitle>
+                  <DialogDescription className="text-sm text-muted-foreground max-w-sm leading-relaxed">
+                    Continue your learning journey with SkillSoft. Access your dashboard, track progress, and manage competencies.
+                  </DialogDescription>
+                </div>
+              </div>
+            </DialogHeader>
+
+            {/* Enhanced form container */}
+            <div className="relative p-8 pt-2">
+              <SignIn 
+                appearance={appearance}
+                routing="hash"
+                signUpUrl="#"
+              />
+              
+              {/* Subtle decorative elements */}
+              <div className="absolute top-0 left-8 right-8 h-px bg-linear-to-r from-transparent via-border/50 to-transparent" />
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Sign Up Modal */}
+      <Dialog open={signUpOpen} onOpenChange={setSignUpOpen}>
+        <DialogTrigger asChild>
+          <Button 
+            size={buttonSize}
+            className="group gap-2 bg-linear-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary/80 shadow-lg hover:shadow-xl transition-all duration-300 ease-out transform hover:scale-105 active:scale-95 rounded-lg font-semibold relative overflow-hidden"
+          >
+            <UserPlus className={`${iconSize} transition-transform duration-300 group-hover:rotate-3`} />
+            {showLabels && <span className="hidden sm:inline font-semibold">Get Started</span>}
+            <span className="sr-only">Create a new account</span>
+            
+            {/* Shimmer effect on hover */}
+            <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-linear-to-r from-transparent via-white/20 to-transparent" />
+          </Button>
+        </DialogTrigger>
+        <DialogContent className="sm:max-w-[440px] p-0 gap-0 border-0 bg-transparent shadow-none overflow-hidden">
+          {/* Glassmorphism background */}
+          <div className="absolute inset-0 bg-gradient-to-br from-background/95 via-background/90 to-background/95 backdrop-blur-xl" />
+          
+          <div className="relative bg-background/80 backdrop-blur-2xl rounded-2xl border border-border/20 shadow-2xl overflow-hidden auth-modal-content">
+            {/* Animated gradient border */}
+            <div className="absolute inset-0 rounded-2xl bg-linear-to-r from-primary/20 via-transparent to-primary/20 opacity-60 animate-pulse" />
+            
+            {/* Header with enhanced design */}
+            <DialogHeader className="relative p-8 pb-4 text-center">
+              <div className="flex flex-col items-center gap-4 mb-4">
+                <div className="relative">
+                  <div className="h-16 w-16 rounded-2xl bg-linear-to-br from-primary/20 to-primary/10 flex items-center justify-center backdrop-blur-sm border border-primary/20 shadow-lg auth-icon-float">
+                    <Zap className="h-8 w-8 text-primary animate-pulse" />
+                  </div>
+                  <div className="absolute -top-1 -right-1 h-6 w-6 rounded-full bg-linear-to-br from-violet-400 to-violet-600 flex items-center justify-center shadow-lg">
+                    <UserPlus className="h-3 w-3 text-white" />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <DialogTitle className="text-2xl font-bold bg-linear-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+                    Join SkillSoft
+                  </DialogTitle>
+                  <DialogDescription className="text-sm text-muted-foreground max-w-sm leading-relaxed">
+                    Start your professional growth journey. Track skills, build competencies, and unlock your potential.
+                  </DialogDescription>
+                </div>
+              </div>
+            </DialogHeader>
+
+            {/* Enhanced form container */}
+            <div className="relative p-8 pt-2">
+              <SignUp 
+                appearance={appearance}
+                routing="hash"
+                signInUrl="#"
+              />
+              
+              {/* Subtle decorative elements */}
+              <div className="absolute top-0 left-8 right-8 h-px bg-linear-to-r from-transparent via-border/50 to-transparent" />
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
+
+// Compact version for mobile/space-constrained layouts
+export function CompactAuthModals() {
+  return <AuthModals size="sm" showLabels={false} className="shrink-0" />;
+}
+
+// Full version with labels for desktop
+export function FullAuthModals() {
+  return <AuthModals size="default" showLabels={true} className="hidden md:flex" />;
+}

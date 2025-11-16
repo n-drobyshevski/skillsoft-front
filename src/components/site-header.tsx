@@ -5,14 +5,6 @@ import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { ModeToggle } from "@/components/mode-toggle";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {
   Breadcrumb,
   BreadcrumbItem,
   BreadcrumbLink,
@@ -21,16 +13,14 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { 
-  User, 
-  Settings, 
-  HelpCircle, 
-  LogOut, 
-  Github,
   Search,
   Bell
 } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useBreadcrumbContext } from "@/src/context/BreadcrumbContext";
+import { SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
+import { CompactAuthModals, FullAuthModals } from "@/components/auth-modals";
+import { ClientOnly } from "@/components/ClientOnly";
 
 interface SiteHeaderProps {
   title?: string;
@@ -122,57 +112,28 @@ export function SiteHeader({ title = "Dashboard", breadcrumbs }: SiteHeaderProps
               <span className="sr-only">Notifications</span>
             </Button>
 
-            {/* Mobile Menu */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="relative h-9 w-9 rounded-full touch-target focus-mobile">
-                  <Avatar className="h-7 w-7">
-                    <AvatarImage src="/avatars/admin.jpg" alt="Admin User" />
-                    <AvatarFallback className="text-xs">AU</AvatarFallback>
-                  </Avatar>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56" align="end" forceMount>
-                <div className="flex items-center justify-start gap-2 p-2">
-                  <div className="flex flex-col space-y-1 leading-none">
-                    <p className="font-medium text-sm">Admin User</p>
-                    <p className="w-[200px] truncate text-xs text-muted-foreground">
-                      admin@skillsoft.com
-                    </p>
-                  </div>
-                </div>
-                <DropdownMenuSeparator />
-                
-                {/* Mobile-specific items */}
-                <DropdownMenuItem className="text-sm @md/header:hidden">
-                  <Search className="mr-2 h-4 w-4" />
-                  <span>Search</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem className="text-sm @md/header:hidden">
-                  <Github className="mr-2 h-4 w-4" />
-                  <span>GitHub</span>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator className="@md/header:hidden" />
-                
-                <DropdownMenuItem className="text-sm touch-target">
-                  <User className="mr-2 h-4 w-4" />
-                  <span>Profile</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem className="text-sm touch-target">
-                  <Settings className="mr-2 h-4 w-4" />
-                  <span>Settings</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem className="text-sm touch-target">
-                  <HelpCircle className="mr-2 h-4 w-4" />
-                  <span>Support</span>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem className="text-sm touch-target">
-                  <LogOut className="mr-2 h-4 w-4" />
-                  <span>Log out</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            {/* Authentication for Mobile */}
+            <ClientOnly>
+              <SignedOut>
+                <CompactAuthModals />
+              </SignedOut>
+
+              <SignedIn>
+                {/* Mobile User Menu with Clerk */}
+                <UserButton 
+                  appearance={{
+                    elements: {
+                      avatarBox: "h-9 w-9",
+                      userButtonPopoverCard: "shadow-lg",
+                      userButtonPopoverActionButton: "hover:bg-accent touch-target",
+                    },
+                  }}
+                  showName={false}
+                  userProfileMode="modal"
+                  afterSignOutUrl="/"
+                />
+              </SignedIn>
+            </ClientOnly>
           </div>
         </div>
 
@@ -228,49 +189,34 @@ export function SiteHeader({ title = "Dashboard", breadcrumbs }: SiteHeaderProps
             </Button>
 
             {/* Theme Toggle */}
-            <div className="flex items-center">
-              <ModeToggle />
-            </div>
+            <ClientOnly>
+              <div className="flex items-center">
+                <ModeToggle />
+              </div>
+            </ClientOnly>
 
-            {/* Desktop User Menu */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="relative h-8 w-8 rounded-full ml-1 focus-mobile">
-                  <Avatar className="h-8 w-8">
-                    <AvatarImage src="/avatars/admin.jpg" alt="Admin User" />
-                    <AvatarFallback className="text-xs">AU</AvatarFallback>
-                  </Avatar>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56" align="end" forceMount>
-                <div className="flex items-center justify-start gap-2 p-2">
-                  <div className="flex flex-col space-y-1 leading-none">
-                    <p className="font-medium text-sm">Admin User</p>
-                    <p className="w-[200px] truncate text-xs text-muted-foreground">
-                      admin@skillsoft.com
-                    </p>
-                  </div>
-                </div>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem className="text-sm">
-                  <User className="mr-2 h-4 w-4" />
-                  <span>Profile</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem className="text-sm">
-                  <Settings className="mr-2 h-4 w-4" />
-                  <span>Settings</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem className="text-sm">
-                  <HelpCircle className="mr-2 h-4 w-4" />
-                  <span>Support</span>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem className="text-sm">
-                  <LogOut className="mr-2 h-4 w-4" />
-                  <span>Log out</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            {/* Authentication */}
+            <ClientOnly>
+              <SignedOut>
+                <FullAuthModals />
+              </SignedOut>
+
+              <SignedIn>
+                {/* Desktop User Menu with Clerk */}
+                <UserButton 
+                  appearance={{
+                    elements: {
+                      avatarBox: "h-8 w-8",
+                      userButtonPopoverCard: "shadow-lg",
+                      userButtonPopoverActionButton: "hover:bg-accent",
+                    },
+                  }}
+                  showName={false}
+                  userProfileMode="modal"
+                  afterSignOutUrl="/"
+                />
+              </SignedIn>
+            </ClientOnly>
           </div>
         </div>
       </div>

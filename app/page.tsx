@@ -16,6 +16,7 @@ import RecentActivityCard from "@/components/RecentActivityCard";
 import QuickActionsCard from "@/components/QuickActionsCard";
 import CompetencyTable from "./components/CompetencyTable";
 import PageHeader from "./components/PageHeader";
+import { ClientOnly } from "@/components/ClientOnly";
 
 async function getDashboardData() {
 	try {
@@ -100,9 +101,15 @@ export default async function Page() {
 					</CardHeader>
 					<CardContent className="pl-2">
 						{stats && (
-							<CompetencyByCategoryBarChart
-								data={Object.entries(stats.competenciesByCategory).map(([name, value]) => ({ name, value }))}
-							/>
+							<ClientOnly fallback={
+								<div className="h-[300px] flex items-center justify-center text-muted-foreground">
+									Loading chart...
+								</div>
+							}>
+								<CompetencyByCategoryBarChart
+									data={Object.entries(stats.competenciesByCategory).map(([name, value]) => ({ name, value }))}
+								/>
+							</ClientOnly>
 						)}
 					</CardContent>
 				</Card>
@@ -132,7 +139,13 @@ export default async function Page() {
 						</CardDescription>
 					</CardHeader>
 					<CardContent>
-						<CompetencyTable competencies={competencies} />
+						<ClientOnly fallback={
+							<div className="h-[200px] flex items-center justify-center text-muted-foreground">
+								Loading table...
+							</div>
+						}>
+							<CompetencyTable competencies={competencies} />
+						</ClientOnly>
 					</CardContent>
 				</Card>
 
@@ -160,9 +173,15 @@ export default async function Page() {
 									Average indicators per competency
 								</CardDescription>
 							</CardHeader>
-							<CardContent>
+						<CardContent>
+							<ClientOnly fallback={
+								<div className="h-[150px] flex items-center justify-center text-muted-foreground">
+									Loading gauge...
+								</div>
+							}>
 								<AverageIndicatorsGauge value={stats.averageIndicatorsPerCompetency} />
-							</CardContent>
+							</ClientOnly>
+						</CardContent>
 						</Card>
 					)}
 				</div>
