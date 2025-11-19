@@ -1,24 +1,11 @@
 'use client';
 
-import { useUser } from "@clerk/nextjs";
-import { useRouter } from "next/navigation";
-import { useEffect } from "react";
-
 /**
- * Client component that handles authentication redirects
- * This runs only on the client side after hydration
+ * Auth handler component - currently disabled to allow authenticated users
+ * to stay on the landing page. Users can manually navigate using the Dashboard button.
  */
 export function AuthHandlerClient() {
-  const { user, isLoaded } = useUser();
-  const router = useRouter();
-
-  useEffect(() => {
-    // If user is authenticated, redirect to dashboard
-    if (isLoaded && user) {
-      router.push("/dashboard");
-    }
-  }, [user, isLoaded, router]);
-
-  // This component doesn't render anything visible
+  // Automatic redirect disabled - users can manually navigate to dashboard
+  // via the Dashboard button in the header
   return null;
 }

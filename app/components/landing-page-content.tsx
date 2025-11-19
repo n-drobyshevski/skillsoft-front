@@ -1,4 +1,3 @@
-import { SignInButton, SignUpButton } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -15,6 +14,7 @@ import {
   Star,
   Globe
 } from "lucide-react";
+import { DashboardAccessButtons } from "./dashboard-access-buttons";
 
 /**
  * Modern minimalistic server-rendered landing page content
@@ -45,25 +45,7 @@ export function LandingPageContent() {
               <span className="text-lg font-semibold tracking-tight text-foreground">SkillSoft</span>
             </div>
             
-            <nav className="hidden md:flex items-center gap-8">
-              <a href="#features" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">Features</a>
-              <a href="#pricing" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">Pricing</a>
-              <a href="#about" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">About</a>
-            </nav>
-            
-            <div className="flex items-center gap-3">
-              <SignInButton>
-                <Button variant="ghost" size="sm" className="hidden sm:flex">
-                  Sign In
-                </Button>
-              </SignInButton>
-              <SignUpButton>
-                <Button size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm">
-                  Get Started
-                  <ArrowRight className="ml-2 w-3 h-3" />
-                </Button>
-              </SignUpButton>
-            </div>
+            <DashboardAccessButtons />
           </div>
         </div>
       </header>
@@ -107,15 +89,10 @@ export function LandingPageContent() {
                 </p>
               </div>
 
-              <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-                <SignUpButton>
-                  <Button size="lg" className="btn-modern bg-primary text-primary-foreground hover:bg-primary/90 shadow-modern-lg hover:shadow-xl transition-all duration-300 group animate-scale-in">
-                    Start Free Trial
-                    <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                  </Button>
-                </SignUpButton>
-                <Button size="lg" variant="outline" className="border-2 hover:bg-accent/50 hover-lift backdrop-blur-minimal animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
-                  Watch Demo
+              <div className="flex justify-center lg:justify-start">
+                <Button size="lg" className="btn-modern bg-primary text-primary-foreground hover:bg-primary/90 shadow-modern-lg hover:shadow-xl transition-all duration-300 group animate-scale-in">
+                  Start Free Trial
+                  <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
                 </Button>
               </div>
 
@@ -364,12 +341,10 @@ export function LandingPageContent() {
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
-              <SignUpButton>
-                <Button size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg hover:shadow-xl transition-all duration-300 group">
-                  Start Free Trial
-                  <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                </Button>
-              </SignUpButton>
+              <Button size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg hover:shadow-xl transition-all duration-300 group">
+                Start Free Trial
+                <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              </Button>
               <Button size="lg" variant="outline" className="border-2">
                 Schedule Demo
               </Button>

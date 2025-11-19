@@ -1,6 +1,7 @@
 "use client";
 
 import { useAuth } from "@clerk/nextjs";
+import { usePathname } from "next/navigation";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import { SiteHeader } from "@/components/site-header";
@@ -10,6 +11,11 @@ import { BreadcrumbProvider } from "@/src/context/BreadcrumbContext";
 
 export function LayoutProvider({ children }: { children: React.ReactNode }) {
   const { isSignedIn } = useAuth();
+  const pathname = usePathname();
+  
+  // Landing page should not have sidebar, even for authenticated users
+  const isLandingPage = pathname === '/';
+  const shouldShowSidebar = isSignedIn && !isLandingPage;
 
   return (
     <ThemeProvider
@@ -20,8 +26,8 @@ export function LayoutProvider({ children }: { children: React.ReactNode }) {
     >
       <HeaderProvider>
         <BreadcrumbProvider>
-          {isSignedIn ? (
-            // Authenticated users get the full dashboard layout with sidebar
+          {shouldShowSidebar ? (
+            // Authenticated users on non-landing pages get the full dashboard layout with sidebar
             <SidebarProvider 
               defaultOpen={false}
               style={{
@@ -42,7 +48,7 @@ export function LayoutProvider({ children }: { children: React.ReactNode }) {
               </SidebarInset>
             </SidebarProvider>
           ) : (
-            // Unauthenticated users get a clean layout for the landing page
+            // Landing page OR unauthenticated users get a clean layout
             <div className="min-h-screen bg-background">
               {children}
             </div>
