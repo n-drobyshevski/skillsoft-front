@@ -19,6 +19,16 @@ const getBackendUrl = () => {
   return 'http://localhost:8080/api';
 };
 
+/**
+ * Map Clerk organization role to our application role
+ */
+function mapOrgRole(orgRole: string | undefined | null): 'ADMIN' | 'EDITOR' | 'USER' {
+  if (!orgRole) return 'USER';
+  if (orgRole === 'org:admin') return 'ADMIN';
+  if (orgRole === 'org:editor') return 'EDITOR';
+  return 'USER';
+}
+
 interface ClerkUserForSync {
   clerkId: string;
   email: string | null;
@@ -51,7 +61,8 @@ interface BackendSyncResult {
 export async function POST() {
   try {
     // Verify the user is authenticated
-    const { userId } = await auth();
+    const authResult = await auth();
+    const { userId, orgRole } = authResult;
     
     if (!userId) {
       return NextResponse.json(
@@ -76,6 +87,10 @@ export async function POST() {
         { status: 403 }
       );
     }
+
+    // Determine the role to use for backend authentication
+    // Priority: Organization role > metadata role > default ADMIN (for sync operations)
+    const backendRole = mapOrgRole(orgRole) || (userRole as 'ADMIN' | 'EDITOR' | 'USER') || 'ADMIN';
 
     // Fetch all users from Clerk with pagination
     const allUsers: ClerkUserForSync[] = [];
@@ -224,6 +239,8 @@ export async function POST() {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'X-User-Id': userId,
+        'X-User-Role': backendRole,
       },
       body: JSON.stringify(allUsers),
     });
