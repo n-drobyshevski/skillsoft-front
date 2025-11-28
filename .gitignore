@@ -127,3 +127,6 @@ public/workbox-*.js
 
 # Application specific
 # Add any project-specific files or directories here
+
+# clerk configuration (can include secrets)
+/.clerk/

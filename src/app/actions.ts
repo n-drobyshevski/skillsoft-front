@@ -12,6 +12,7 @@ const UNKNOWN_ERROR_MESSAGE = 'An unknown error occurred.';
 // Cache revalidation paths
 const COMPETENCIES_PATH = '/competencies';
 const BEHAVIORAL_INDICATORS_PATH = '/behavioral-indicators';
+const USERS_PATH = '/users';
 const HOME_PATH = '/';
 
 export async function revalidateCompetencyTags(competencyId?: string) {
@@ -113,6 +114,26 @@ export async function revalidateQuestionTags(questionId: string, competencyId?: 
     }
   } catch {
     // Error revalidating question paths - silently fail in production
+  }
+}
+
+export async function revalidateUserTags(userId?: string) {
+  try {
+    // Invalidate paths
+    revalidatePath(USERS_PATH);
+    revalidatePath(HOME_PATH);
+    if (userId) {
+      revalidatePath(`${USERS_PATH}/${userId}`);
+    }
+    
+    // Invalidate cache tags used by fetchApi
+    revalidateTag('users', 'max');
+    revalidateTag('users-stats', 'max');
+    if (userId) {
+      revalidateTag(`user-${userId}`, 'max');
+    }
+  } catch {
+    // Error revalidating user paths - silently fail in production
   }
 }
 
