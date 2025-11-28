@@ -87,42 +87,47 @@ html {
 /* Emerald glow - Personal View */
 @keyframes lens-glow-emerald {
 	0% {
-		box-shadow: 
+		box-shadow:
 			0 0 0 0px rgba(16, 185, 129, 0),
 			0 0 0px rgba(16, 185, 129, 0),
 			0 0 0px rgba(16, 185, 129, 0),
 			inset 0 0 0px rgba(16, 185, 129, 0);
 	}
+
 	15% {
-		box-shadow: 
+		box-shadow:
 			0 0 0 2px rgba(16, 185, 129, 0.3),
 			0 0 15px rgba(16, 185, 129, 0.25),
 			0 0 30px rgba(16, 185, 129, 0.15),
 			inset 0 0 15px rgba(16, 185, 129, 0.03);
 	}
+
 	40% {
-		box-shadow: 
+		box-shadow:
 			0 0 0 3px rgba(16, 185, 129, 0.5),
 			0 0 25px rgba(16, 185, 129, 0.4),
 			0 0 50px rgba(16, 185, 129, 0.25),
 			inset 0 0 25px rgba(16, 185, 129, 0.08);
 	}
+
 	60% {
-		box-shadow: 
+		box-shadow:
 			0 0 0 3px rgba(16, 185, 129, 0.45),
 			0 0 22px rgba(16, 185, 129, 0.35),
 			0 0 45px rgba(16, 185, 129, 0.2),
 			inset 0 0 22px rgba(16, 185, 129, 0.06);
 	}
+
 	85% {
-		box-shadow: 
+		box-shadow:
 			0 0 0 1px rgba(16, 185, 129, 0.15),
 			0 0 10px rgba(16, 185, 129, 0.1),
 			0 0 20px rgba(16, 185, 129, 0.05),
 			inset 0 0 10px rgba(16, 185, 129, 0.02);
 	}
+
 	100% {
-		box-shadow: 
+		box-shadow:
 			0 0 0 0px rgba(16, 185, 129, 0),
 			0 0 0px rgba(16, 185, 129, 0),
 			0 0 0px rgba(16, 185, 129, 0),
@@ -133,42 +138,47 @@ html {
 /* Blue glow - Content/Editor View */
 @keyframes lens-glow-blue {
 	0% {
-		box-shadow: 
+		box-shadow:
 			0 0 0 0px rgba(59, 130, 246, 0),
 			0 0 0px rgba(59, 130, 246, 0),
 			0 0 0px rgba(59, 130, 246, 0),
 			inset 0 0 0px rgba(59, 130, 246, 0);
 	}
+
 	15% {
-		box-shadow: 
+		box-shadow:
 			0 0 0 2px rgba(59, 130, 246, 0.3),
 			0 0 15px rgba(59, 130, 246, 0.25),
 			0 0 30px rgba(59, 130, 246, 0.15),
 			inset 0 0 15px rgba(59, 130, 246, 0.03);
 	}
+
 	40% {
-		box-shadow: 
+		box-shadow:
 			0 0 0 3px rgba(59, 130, 246, 0.5),
 			0 0 25px rgba(59, 130, 246, 0.4),
 			0 0 50px rgba(59, 130, 246, 0.25),
 			inset 0 0 25px rgba(59, 130, 246, 0.08);
 	}
+
 	60% {
-		box-shadow: 
+		box-shadow:
 			0 0 0 3px rgba(59, 130, 246, 0.45),
 			0 0 22px rgba(59, 130, 246, 0.35),
 			0 0 45px rgba(59, 130, 246, 0.2),
 			inset 0 0 22px rgba(59, 130, 246, 0.06);
 	}
+
 	85% {
-		box-shadow: 
+		box-shadow:
 			0 0 0 1px rgba(59, 130, 246, 0.15),
 			0 0 10px rgba(59, 130, 246, 0.1),
 			0 0 20px rgba(59, 130, 246, 0.05),
 			inset 0 0 10px rgba(59, 130, 246, 0.02);
 	}
+
 	100% {
-		box-shadow: 
+		box-shadow:
 			0 0 0 0px rgba(59, 130, 246, 0),
 			0 0 0px rgba(59, 130, 246, 0),
 			0 0 0px rgba(59, 130, 246, 0),
@@ -179,42 +189,47 @@ html {
 /* Violet glow - Admin View */
 @keyframes lens-glow-violet {
 	0% {
-		box-shadow: 
+		box-shadow:
 			0 0 0 0px rgba(139, 92, 246, 0),
 			0 0 0px rgba(139, 92, 246, 0),
 			0 0 0px rgba(139, 92, 246, 0),
 			inset 0 0 0px rgba(139, 92, 246, 0);
 	}
+
 	15% {
-		box-shadow: 
+		box-shadow:
 			0 0 0 2px rgba(139, 92, 246, 0.3),
 			0 0 15px rgba(139, 92, 246, 0.25),
 			0 0 30px rgba(139, 92, 246, 0.15),
 			inset 0 0 15px rgba(139, 92, 246, 0.03);
 	}
+
 	40% {
-		box-shadow: 
+		box-shadow:
 			0 0 0 3px rgba(139, 92, 246, 0.5),
 			0 0 25px rgba(139, 92, 246, 0.4),
 			0 0 50px rgba(139, 92, 246, 0.25),
 			inset 0 0 25px rgba(139, 92, 246, 0.08);
 	}
+
 	60% {
-		box-shadow: 
+		box-shadow:
 			0 0 0 3px rgba(139, 92, 246, 0.45),
 			0 0 22px rgba(139, 92, 246, 0.35),
 			0 0 45px rgba(139, 92, 246, 0.2),
 			inset 0 0 22px rgba(139, 92, 246, 0.06);
 	}
+
 	85% {
-		box-shadow: 
+		box-shadow:
 			0 0 0 1px rgba(139, 92, 246, 0.15),
 			0 0 10px rgba(139, 92, 246, 0.1),
 			0 0 20px rgba(139, 92, 246, 0.05),
 			inset 0 0 10px rgba(139, 92, 246, 0.02);
 	}
+
 	100% {
-		box-shadow: 
+		box-shadow:
 			0 0 0 0px rgba(139, 92, 246, 0),
 			0 0 0px rgba(139, 92, 246, 0),
 			0 0 0px rgba(139, 92, 246, 0),
@@ -271,10 +286,13 @@ html {
 }
 
 @keyframes lens-flash-fade {
-	0%, 40% {
+
+	0%,
+	40% {
 		opacity: 1;
 		/* Keep the border visible */
 	}
+
 	100% {
 		border-left-color: transparent !important;
 	}
