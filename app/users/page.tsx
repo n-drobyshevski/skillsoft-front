@@ -18,9 +18,9 @@ import {
 } from "lucide-react";
 import { usersApi } from "@/services/api";
 import PageHeader from "../components/PageHeader";
-import UsersTable from "./components/UsersTable";
 import TableSkeleton from "../components/TableSkeleton";
 import { SyncUsersButton } from "./components/SyncUsersButton";
+import UsersTableWrapper from "./components/UsersTableWrapper";
 
 async function getUsersData() {
   try {
@@ -168,10 +168,8 @@ export default async function UsersPage() {
         </div>
       )}
 
-      {/* Users Table */}
-      <Suspense fallback={<TableSkeleton />}>
-        <UsersTable users={users} />
-      </Suspense>
+      {/* Users Table - wrapped in client component to avoid hydration mismatch */}
+      <UsersTableWrapper users={users} />
     </div>
   );
 }

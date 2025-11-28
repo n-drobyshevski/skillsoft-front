@@ -1,5 +1,6 @@
 import { cache } from 'react';
 import { revalidateCompetencyTags, revalidateQuestionTags, revalidateUserTags } from '@/app/actions';
+import { getAuthHeaders } from './roleApi';
 
 import { AssessmentQuestion, BehavioralIndicator, Competency } from '../../app/interfaces/domain-interfaces';
 import { User, UserCreateInput, UserUpdateInput, UserRole } from '../../app/interfaces/user-interfaces';
@@ -124,16 +125,21 @@ export async function fetchApi<T>(
         tags?: string[];
         revalidate?: false | 0 | number;
         cache?: RequestCache;
+        authHeaders?: Record<string, string>;
     } = {}
 ): Promise<T> {
-    const { tags = [], revalidate, cache = 'force-cache', ...fetchOptions } = options;
+    const { tags = [], revalidate, cache = 'force-cache', authHeaders = {}, ...fetchOptions } = options;
     
     try {
-        // Note: Removed console.log for production security
+        // Auth headers can be passed in for RBAC (includes X-User-Id and X-User-Role)
+        // For server components, use getAuthHeaders() from roleApi.ts
+        // For client components, use useAuth() hook from Clerk
+        
         const response = await fetch(`${getApiBaseUrl()}${endpoint}`, {
             ...fetchOptions,
             headers: {
                 'Content-Type': 'application/json',
+                ...authHeaders,
                 ...fetchOptions.headers,
             },
             next: {
@@ -425,13 +431,16 @@ export const assessmentQuestionsApi = {
 
 // ==========================================
 // USERS API - Clerk.js Integration
+// Requires ADMIN role for all endpoints
 // ==========================================
 
-// Cached users fetcher
+// Cached users fetcher with auth headers
 const getAllUsersCached = cache(async (): Promise<User[] | null> => {
+  const authHeaders = await getAuthHeaders();
   return fetchApi(USERS_ENDPOINT, {
     tags: ['users'],
     revalidate: 60,
+    authHeaders,
   });
 });
 
@@ -439,83 +448,103 @@ export const usersApi = {
   getAllUsers: getAllUsersCached,
 
   getUserById: async (userId: string): Promise<User | null> => {
+    const authHeaders = await getAuthHeaders();
     return fetchApi(`${USERS_ENDPOINT}/${userId}`, {
       tags: [`user-${userId}`],
       revalidate: 60,
+      authHeaders,
     });
   },
 
   getUserByClerkId: async (clerkId: string): Promise<User | null> => {
+    const authHeaders = await getAuthHeaders();
     return fetchApi(`${USERS_ENDPOINT}/clerk/${clerkId}`, {
       tags: [`user-clerk-${clerkId}`],
       revalidate: 60,
+      authHeaders,
     });
   },
 
   createUser: async (data: UserCreateInput): Promise<User> => {
+    const authHeaders = await getAuthHeaders();
     const result = await fetchApi<User>(USERS_ENDPOINT, {
       method: 'POST',
       body: JSON.stringify(data),
       cache: 'no-store',
+      authHeaders,
     });
     await revalidateUserTags();
     return result;
   },
 
   updateUser: async (userId: string, data: UserUpdateInput): Promise<User> => {
+    const authHeaders = await getAuthHeaders();
     const result = await fetchApi<User>(`${USERS_ENDPOINT}/${userId}`, {
       method: 'PUT',
       body: JSON.stringify(data),
       cache: 'no-store',
+      authHeaders,
     });
     await revalidateUserTags(userId);
     return result;
   },
 
   updateUserRole: async (userId: string, role: UserRole): Promise<User> => {
+    const authHeaders = await getAuthHeaders();
     const result = await fetchApi<User>(`${USERS_ENDPOINT}/${userId}/role`, {
       method: 'PATCH',
       body: JSON.stringify({ role }),
       cache: 'no-store',
+      authHeaders,
     });
     await revalidateUserTags(userId);
     return result;
   },
 
   deactivateUser: async (userId: string): Promise<void> => {
+    const authHeaders = await getAuthHeaders();
     await fetchApi(`${USERS_ENDPOINT}/${userId}/deactivate`, {
       method: 'PATCH',
       cache: 'no-store',
+      authHeaders,
     });
     await revalidateUserTags(userId);
   },
 
   activateUser: async (userId: string): Promise<void> => {
+    const authHeaders = await getAuthHeaders();
     await fetchApi(`${USERS_ENDPOINT}/${userId}/activate`, {
       method: 'PATCH',
       cache: 'no-store',
+      authHeaders,
     });
     await revalidateUserTags(userId);
   },
 
   deleteUser: async (userId: string): Promise<void> => {
+    const authHeaders = await getAuthHeaders();
     await fetchApi(`${USERS_ENDPOINT}/${userId}`, {
       method: 'DELETE',
       cache: 'no-store',
+      authHeaders,
     });
     await revalidateUserTags(userId);
   },
 
   searchUsers: async (query: string): Promise<User[]> => {
+    const authHeaders = await getAuthHeaders();
     return fetchApi(`${USERS_ENDPOINT}/search?query=${encodeURIComponent(query)}`, {
       cache: 'no-store',
+      authHeaders,
     });
   },
 
   getUsersByRole: async (role: UserRole): Promise<User[]> => {
+    const authHeaders = await getAuthHeaders();
     return fetchApi(`${USERS_ENDPOINT}/role/${role}`, {
       tags: [`users-role-${role}`],
       revalidate: 60,
+      authHeaders,
     });
   },
 
@@ -524,9 +553,11 @@ export const usersApi = {
     activeUsers: number;
     byRole: Record<string, number>;
   }> => {
+    const authHeaders = await getAuthHeaders();
     return fetchApi(`${USERS_ENDPOINT}/stats`, {
       tags: ['users-stats'],
       revalidate: 60,
+      authHeaders,
     });
   },
 
