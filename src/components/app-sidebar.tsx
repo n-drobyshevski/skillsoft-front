@@ -1,6 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
+import { useUser } from "@clerk/nextjs";
 import {
   BookOpen,
   Users,
@@ -16,6 +17,7 @@ import {
   User,
   LogOut,
   LayoutDashboard,
+  UserCircle,
 } from "lucide-react";
 
 import {
@@ -37,7 +39,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Link from "next/link";
 import { ClientOnly } from "@/components/ClientOnly";
 
@@ -102,7 +104,16 @@ const data = {
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname();
+  const { user: clerkUser, isLoaded } = useUser();
   const TeamLogo = data.teams[0].logo;
+
+  // Get user display info from Clerk
+  const userName = clerkUser?.fullName || clerkUser?.username || data.user.name;
+  const userEmail = clerkUser?.primaryEmailAddress?.emailAddress || clerkUser?.username || data.user.email;
+  const userInitials = clerkUser?.fullName
+    ? clerkUser.fullName.split(" ").map((n) => n[0]).join("")
+    : clerkUser?.username?.substring(0, 2).toUpperCase() || "AU";
+  const userImageUrl = clerkUser?.imageUrl;
 
   return (
     <Sidebar collapsible="icon" {...props}>
@@ -170,18 +181,15 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               >
                 <Avatar className="h-8 w-8 rounded-lg">
                   <AvatarFallback className="rounded-lg">
-                    {data.user.name
-                      .split(" ")
-                      .map((n) => n[0])
-                      .join("")}
+                    {userInitials}
                   </AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-semibold">
-                    {data.user.name}
+                    {userName}
                   </span>
                   <span className="truncate text-xs">
-                    {data.user.email}
+                    {userEmail}
                   </span>
                 </div>
               </SidebarMenuButton>
@@ -194,19 +202,16 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   >
                   
                   <Avatar className="h-8 w-8 rounded-lg">
-                    {/* <AvatarImage src={data.user.avatar} alt={data.user.name} /> */}
+                    {userImageUrl && <AvatarImage src={userImageUrl} alt={userName} />}
                     <AvatarFallback className="rounded-lg">
-                      {data.user.name
-                        .split(" ")
-                        .map((n) => n[0])
-                        .join("")}
+                      {userInitials}
                     </AvatarFallback>
                   </Avatar>
                   <div className="grid flex-1 text-left text-sm leading-tight">
                     <span className="truncate font-semibold">
-                      {data.user.name}
+                      {userName}
                     </span>
-                    <span className="truncate text-xs">{data.user.email}</span>
+                    <span className="truncate text-xs">{userEmail}</span>
                   </div>
                   <ChevronDown className="ml-auto size-4" />
                 </SidebarMenuButton>
@@ -217,6 +222,14 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 align="end"
                 sideOffset={4}
               >
+                {clerkUser && (
+                  <DropdownMenuItem asChild>
+                    <Link href={`/users/${clerkUser.id}`} className="flex items-center gap-2 cursor-pointer">
+                      <UserCircle className="h-4 w-4" />
+                      My Profile
+                    </Link>
+                  </DropdownMenuItem>
+                )}
                 <DropdownMenuItem>
                   <User />
                   Account

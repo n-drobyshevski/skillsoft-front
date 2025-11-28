@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import Link from "next/link";
 
 // Create a stable timestamp that won't cause React Compiler issues
 const getStableNow = () => {
@@ -337,11 +338,17 @@ export default function UserDrawer({
 
           {/* Footer Actions */}
           <div className="p-4 border-t bg-muted/30 space-y-2">
-            <Button className="w-full h-9" size="sm">
-              <Edit className="h-3.5 w-3.5 mr-2" />
-              Edit Profile
+            <Button className="w-full h-9" size="sm" asChild>
+              <Link href={`/users/${user.id}`}>
+                <ExternalLink className="h-3.5 w-3.5 mr-2" />
+                View Full Profile
+              </Link>
             </Button>
             <div className="flex gap-2">
+              <Button variant="outline" size="sm" className="flex-1 h-8">
+                <Edit className="h-3.5 w-3.5 mr-1.5" />
+                Edit
+              </Button>
               {user.isActive && !user.banned ? (
                 <Button variant="outline" size="sm" className="flex-1 h-8 text-orange-600 hover:text-orange-600 hover:bg-orange-50">
                   <UserX className="h-3.5 w-3.5 mr-1.5" />
@@ -353,10 +360,6 @@ export default function UserDrawer({
                   Activate
                 </Button>
               )}
-              <Button variant="outline" size="sm" className="flex-1 h-8">
-                <ExternalLink className="h-3.5 w-3.5 mr-1.5" />
-                Clerk
-              </Button>
             </div>
           </div>
         </SheetContent>

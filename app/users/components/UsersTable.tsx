@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
+import Link from "next/link";
 import {
   type ColumnDef,
   type ColumnFiltersState,
@@ -51,6 +52,7 @@ import {
 import {
   ArrowUpDown,
   Eye,
+  ExternalLink,
   MoreHorizontal,
   Mail,
   Shield,
@@ -392,7 +394,13 @@ export default function UsersTable({ users }: UsersTableProps) {
                 handleViewDetails(user);
               }}>
                 <Eye className="mr-2 h-4 w-4" />
-                View Profile
+                Quick View
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link href={`/users/${user.id}`} className="flex items-center cursor-pointer">
+                  <ExternalLink className="mr-2 h-4 w-4" />
+                  View Profile
+                </Link>
               </DropdownMenuItem>
               <DropdownMenuItem onClick={(e) => e.stopPropagation()}>
                 <UserCog className="mr-2 h-4 w-4" />
