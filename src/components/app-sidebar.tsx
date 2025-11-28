@@ -2,6 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import { useUser } from "@clerk/nextjs";
+import { useEffect, useState, useRef } from "react";
 import {
   BookOpen,
   Users,
@@ -31,6 +32,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarRail,
+  SidebarSeparator,
 } from "@/components/ui/sidebar";
 import {
   DropdownMenu,
@@ -42,6 +44,30 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Link from "next/link";
 import { ClientOnly } from "@/components/ClientOnly";
+import { LensSwitcher } from "@/components/lens-switcher";
+import { useLens } from "@/context/LensContext";
+import { UserRole } from "../../app/interfaces/user-interfaces";
+import { cn } from "@/lib/utils";
+
+// Lens glow animation classes for ring/glow highlight on lens switch
+const LENS_GLOW_CLASSES = {
+  user: "animate-lens-glow-emerald",
+  editor: "animate-lens-glow-blue",
+  admin: "animate-lens-glow-violet",
+} as const;
+
+// Type-safe getter for lens glow animation class
+function getLensGlowClass(lens: keyof typeof LENS_GLOW_CLASSES): string {
+  switch (lens) {
+    case "admin":
+      return LENS_GLOW_CLASSES.admin;
+    case "editor":
+      return LENS_GLOW_CLASSES.editor;
+    case "user":
+    default:
+      return LENS_GLOW_CLASSES.user;
+  }
+}
 
 // This is sample data.
 const data = {
@@ -104,8 +130,66 @@ const data = {
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname();
-  const { user: clerkUser, isLoaded } = useUser();
+  const { user: clerkUser } = useUser();
+  const { isRouteVisible, setUserRole, activeLens } = useLens();
   const TeamLogo = data.teams[0].logo;
+  
+  // Track lens changes for temporary flash highlight
+  const [showFlash, setShowFlash] = useState(false);
+  const isInitialRenderRef = useRef(true);
+  
+  // Track lens changes for nav item animation
+  const [isLensChanging, setIsLensChanging] = useState(false);
+  const prevLensRef = useRef(activeLens);
+  
+  // Check if we're in Personal view (user lens)
+  const isPersonalView = activeLens === "user";
+
+  // Show flash and animate items when lens changes
+  useEffect(() => {
+    // Skip the initial render to avoid flash on page load
+    if (isInitialRenderRef.current) {
+      isInitialRenderRef.current = false;
+      prevLensRef.current = activeLens;
+      return;
+    }
+    
+    // Only animate if lens actually changed
+    if (prevLensRef.current !== activeLens) {
+      // Show the flash
+      setShowFlash(true);
+      // Trigger nav items animation
+      setIsLensChanging(true);
+      
+      // Hide glow after animation completes (2s = 2000ms)
+      const flashTimer = setTimeout(() => {
+        setShowFlash(false);
+      }, 2000);
+      
+      // Reset nav animation state after animation completes 
+      // (50ms stagger per item * ~10 items + 300ms animation = ~1000ms)
+      const animTimer = setTimeout(() => {
+        setIsLensChanging(false);
+      }, 1000);
+      
+      prevLensRef.current = activeLens;
+      
+      return () => {
+        clearTimeout(flashTimer);
+        clearTimeout(animTimer);
+      };
+    }
+  }, [activeLens]);
+
+  // Sync user role from Clerk to lens context
+  useEffect(() => {
+    if (clerkUser?.publicMetadata?.role) {
+      const role = clerkUser.publicMetadata.role as string;
+      if (role === "ADMIN") setUserRole(UserRole.ADMIN);
+      else if (role === "EDITOR") setUserRole(UserRole.EDITOR);
+      else setUserRole(UserRole.USER);
+    }
+  }, [clerkUser, setUserRole]);
 
   // Get user display info from Clerk
   const userName = clerkUser?.fullName || clerkUser?.username || data.user.name;
@@ -115,8 +199,21 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     : clerkUser?.username?.substring(0, 2).toUpperCase() || "AU";
   const userImageUrl = clerkUser?.imageUrl;
 
+  // Filter navigation items based on active lens
+  const visibleNavItems = data.navMain.filter((item) => isRouteVisible(item.url));
+  
+  // Get lens-specific glow animation class
+  const lensGlowClass = getLensGlowClass(activeLens);
+
   return (
-    <Sidebar collapsible="icon" {...props}>
+    <Sidebar 
+      collapsible="icon" 
+      className={cn(
+        // Apply glow animation class when flash is active
+        showFlash && lensGlowClass
+      )}
+      {...props}
+    >
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
@@ -138,40 +235,125 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarHeader>
 
       <SidebarContent>
-        <SidebarGroup>
-          <SidebarGroupLabel>Platform</SidebarGroupLabel>
-          <SidebarMenu>
-            {data.navMain.map((item) => (
-              <SidebarMenuItem key={item.title}>
-                <SidebarMenuButton asChild isActive={pathname === item.url}>
-                  <Link href={item.url}>
-                    <item.icon />
-                    <span>{item.title}</span>
+        {isPersonalView ? (
+          /* Personal View - Only My Profile */
+          <SidebarGroup>
+            <SidebarGroupLabel
+              className={cn(
+                "transition-all duration-300",
+                isLensChanging && "animate-in fade-in-0 slide-in-from-left-2 duration-200"
+              )}
+            >
+              Personal
+            </SidebarGroupLabel>
+            <SidebarMenu>
+              <SidebarMenuItem
+                className={cn(
+                  "transition-all duration-300",
+                  isLensChanging && "animate-in fade-in-0 slide-in-from-left-3 duration-300"
+                )}
+              >
+                <SidebarMenuButton asChild isActive={pathname.startsWith("/users/")}>
+                  <Link href={clerkUser ? `/users/${clerkUser.id}` : "/dashboard"}>
+                    <UserCircle />
+                    <span>My Profile</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
-            ))}
-          </SidebarMenu>
-        </SidebarGroup>
+            </SidebarMenu>
+          </SidebarGroup>
+        ) : (
+          /* Content/Admin View - Full Navigation */
+          <>
+            <SidebarGroup>
+              <SidebarGroupLabel
+                className={cn(
+                  "transition-all duration-300",
+                  isLensChanging && "animate-in fade-in-0 slide-in-from-left-2 duration-200"
+                )}
+              >
+                Platform
+              </SidebarGroupLabel>
+              <SidebarMenu>
+                {visibleNavItems.map((item, index) => (
+                  <SidebarMenuItem 
+                    key={item.title}
+                    className={cn(
+                      "transition-all duration-300",
+                      isLensChanging && "animate-in fade-in-0 slide-in-from-left-3"
+                    )}
+                    style={isLensChanging ? { 
+                      animationDelay: `${index * 50}ms`,
+                      animationDuration: "300ms",
+                      animationFillMode: "both"
+                    } : undefined}
+                  >
+                    <SidebarMenuButton asChild isActive={pathname === item.url}>
+                      <Link href={item.url}>
+                        <item.icon />
+                        <span>{item.title}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            </SidebarGroup>
 
-        <SidebarGroup className="group-data-[collapsible=icon]:hidden">
-          <SidebarGroupLabel>Skill Categories</SidebarGroupLabel>
-          <SidebarMenu>
-            {data.projects.map((item) => (
-              <SidebarMenuItem key={item.name}>
-                <SidebarMenuButton asChild>
-                  <Link href={item.url}>
-                    <item.icon />
-                    <span>{item.name}</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            ))}
-          </SidebarMenu>
-        </SidebarGroup>
+            <SidebarGroup className="group-data-[collapsible=icon]:hidden">
+              <SidebarGroupLabel
+                className={cn(
+                  "transition-all duration-300",
+                  isLensChanging && "animate-in fade-in-0 slide-in-from-left-2"
+                )}
+                style={isLensChanging ? { 
+                  animationDelay: `${visibleNavItems.length * 50 + 50}ms`,
+                  animationDuration: "200ms",
+                  animationFillMode: "both"
+                } : undefined}
+              >
+                Skill Categories
+              </SidebarGroupLabel>
+              <SidebarMenu>
+                {data.projects.map((item, index) => (
+                  <SidebarMenuItem 
+                    key={item.name}
+                    className={cn(
+                      "transition-all duration-300",
+                      isLensChanging && "animate-in fade-in-0 slide-in-from-left-3"
+                    )}
+                    style={isLensChanging ? { 
+                      animationDelay: `${(visibleNavItems.length + index + 1) * 50 + 50}ms`,
+                      animationDuration: "300ms",
+                      animationFillMode: "both"
+                    } : undefined}
+                  >
+                    <SidebarMenuButton asChild>
+                      <Link href={item.url}>
+                        <item.icon />
+                        <span>{item.name}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            </SidebarGroup>
+          </>
+        )}
       </SidebarContent>
 
       <SidebarFooter>
+        {/* Lens Switcher - Role-based view selector */}
+        <SidebarMenu>
+          <SidebarMenuItem >
+            <ClientOnly fallback={null}>
+              <LensSwitcher />
+            </ClientOnly>
+          </SidebarMenuItem>
+        </SidebarMenu>
+        
+        <SidebarSeparator className="mx-0" />
+        
+        {/* User Profile Menu */}
         <SidebarMenu>
           <SidebarMenuItem>
             <ClientOnly fallback={

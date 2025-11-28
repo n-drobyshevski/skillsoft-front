@@ -75,6 +75,171 @@ html {
 	}
 }
 
+/* Lens switch flash animation - border flash on lens change */
+/* Uses transition with delay for flash-then-fade effect */
+
+/* 
+ * Lens glow ring animations for sidebar highlight
+ * Uses multi-step keyframes for ultra-smooth fade-in and fade-out
+ * Inspired by best practices: https://easings.net/ and Material Design motion
+ */
+
+/* Emerald glow - Personal View */
+@keyframes lens-glow-emerald {
+	0% {
+		box-shadow: 
+			0 0 0 0px rgba(16, 185, 129, 0),
+			0 0 0px rgba(16, 185, 129, 0),
+			0 0 0px rgba(16, 185, 129, 0),
+			inset 0 0 0px rgba(16, 185, 129, 0);
+	}
+	15% {
+		box-shadow: 
+			0 0 0 2px rgba(16, 185, 129, 0.3),
+			0 0 15px rgba(16, 185, 129, 0.25),
+			0 0 30px rgba(16, 185, 129, 0.15),
+			inset 0 0 15px rgba(16, 185, 129, 0.03);
+	}
+	40% {
+		box-shadow: 
+			0 0 0 3px rgba(16, 185, 129, 0.5),
+			0 0 25px rgba(16, 185, 129, 0.4),
+			0 0 50px rgba(16, 185, 129, 0.25),
+			inset 0 0 25px rgba(16, 185, 129, 0.08);
+	}
+	60% {
+		box-shadow: 
+			0 0 0 3px rgba(16, 185, 129, 0.45),
+			0 0 22px rgba(16, 185, 129, 0.35),
+			0 0 45px rgba(16, 185, 129, 0.2),
+			inset 0 0 22px rgba(16, 185, 129, 0.06);
+	}
+	85% {
+		box-shadow: 
+			0 0 0 1px rgba(16, 185, 129, 0.15),
+			0 0 10px rgba(16, 185, 129, 0.1),
+			0 0 20px rgba(16, 185, 129, 0.05),
+			inset 0 0 10px rgba(16, 185, 129, 0.02);
+	}
+	100% {
+		box-shadow: 
+			0 0 0 0px rgba(16, 185, 129, 0),
+			0 0 0px rgba(16, 185, 129, 0),
+			0 0 0px rgba(16, 185, 129, 0),
+			inset 0 0 0px rgba(16, 185, 129, 0);
+	}
+}
+
+/* Blue glow - Content/Editor View */
+@keyframes lens-glow-blue {
+	0% {
+		box-shadow: 
+			0 0 0 0px rgba(59, 130, 246, 0),
+			0 0 0px rgba(59, 130, 246, 0),
+			0 0 0px rgba(59, 130, 246, 0),
+			inset 0 0 0px rgba(59, 130, 246, 0);
+	}
+	15% {
+		box-shadow: 
+			0 0 0 2px rgba(59, 130, 246, 0.3),
+			0 0 15px rgba(59, 130, 246, 0.25),
+			0 0 30px rgba(59, 130, 246, 0.15),
+			inset 0 0 15px rgba(59, 130, 246, 0.03);
+	}
+	40% {
+		box-shadow: 
+			0 0 0 3px rgba(59, 130, 246, 0.5),
+			0 0 25px rgba(59, 130, 246, 0.4),
+			0 0 50px rgba(59, 130, 246, 0.25),
+			inset 0 0 25px rgba(59, 130, 246, 0.08);
+	}
+	60% {
+		box-shadow: 
+			0 0 0 3px rgba(59, 130, 246, 0.45),
+			0 0 22px rgba(59, 130, 246, 0.35),
+			0 0 45px rgba(59, 130, 246, 0.2),
+			inset 0 0 22px rgba(59, 130, 246, 0.06);
+	}
+	85% {
+		box-shadow: 
+			0 0 0 1px rgba(59, 130, 246, 0.15),
+			0 0 10px rgba(59, 130, 246, 0.1),
+			0 0 20px rgba(59, 130, 246, 0.05),
+			inset 0 0 10px rgba(59, 130, 246, 0.02);
+	}
+	100% {
+		box-shadow: 
+			0 0 0 0px rgba(59, 130, 246, 0),
+			0 0 0px rgba(59, 130, 246, 0),
+			0 0 0px rgba(59, 130, 246, 0),
+			inset 0 0 0px rgba(59, 130, 246, 0);
+	}
+}
+
+/* Violet glow - Admin View */
+@keyframes lens-glow-violet {
+	0% {
+		box-shadow: 
+			0 0 0 0px rgba(139, 92, 246, 0),
+			0 0 0px rgba(139, 92, 246, 0),
+			0 0 0px rgba(139, 92, 246, 0),
+			inset 0 0 0px rgba(139, 92, 246, 0);
+	}
+	15% {
+		box-shadow: 
+			0 0 0 2px rgba(139, 92, 246, 0.3),
+			0 0 15px rgba(139, 92, 246, 0.25),
+			0 0 30px rgba(139, 92, 246, 0.15),
+			inset 0 0 15px rgba(139, 92, 246, 0.03);
+	}
+	40% {
+		box-shadow: 
+			0 0 0 3px rgba(139, 92, 246, 0.5),
+			0 0 25px rgba(139, 92, 246, 0.4),
+			0 0 50px rgba(139, 92, 246, 0.25),
+			inset 0 0 25px rgba(139, 92, 246, 0.08);
+	}
+	60% {
+		box-shadow: 
+			0 0 0 3px rgba(139, 92, 246, 0.45),
+			0 0 22px rgba(139, 92, 246, 0.35),
+			0 0 45px rgba(139, 92, 246, 0.2),
+			inset 0 0 22px rgba(139, 92, 246, 0.06);
+	}
+	85% {
+		box-shadow: 
+			0 0 0 1px rgba(139, 92, 246, 0.15),
+			0 0 10px rgba(139, 92, 246, 0.1),
+			0 0 20px rgba(139, 92, 246, 0.05),
+			inset 0 0 10px rgba(139, 92, 246, 0.02);
+	}
+	100% {
+		box-shadow: 
+			0 0 0 0px rgba(139, 92, 246, 0),
+			0 0 0px rgba(139, 92, 246, 0),
+			0 0 0px rgba(139, 92, 246, 0),
+			inset 0 0 0px rgba(139, 92, 246, 0);
+	}
+}
+
+/* 
+ * Animation utility classes for lens glow
+ * Uses cubic-bezier easeOutQuart for buttery smooth feel
+ * Duration: 2s for gentle, non-abrupt animation
+ * fill-mode: both ensures smooth start and end
+ */
+.animate-lens-glow-emerald {
+	animation: lens-glow-emerald 2s cubic-bezier(0.25, 1, 0.5, 1) both;
+}
+
+.animate-lens-glow-blue {
+	animation: lens-glow-blue 2s cubic-bezier(0.25, 1, 0.5, 1) both;
+}
+
+.animate-lens-glow-violet {
+	animation: lens-glow-violet 2s cubic-bezier(0.25, 1, 0.5, 1) both;
+}
+
 /* Modern utility classes */
 .animate-float {
 	animation: float 6s ease-in-out infinite;
@@ -96,6 +261,23 @@ html {
 
 .animate-scale-in {
 	animation: scale-in 0.5s ease-out;
+}
+
+.animate-lens-flash {
+	/* Initial state shows the border color */
+	border-left-color: inherit !important;
+	/* After animation completes, fade to transparent */
+	animation: lens-flash-fade 1s ease-out forwards;
+}
+
+@keyframes lens-flash-fade {
+	0%, 40% {
+		opacity: 1;
+		/* Keep the border visible */
+	}
+	100% {
+		border-left-color: transparent !important;
+	}
 }
 
 /* Hover effects for modern UI */
