@@ -4,6 +4,7 @@ import { usePathname } from "next/navigation";
 import {
   BookOpen,
   Users,
+  UsersRound,
   ClipboardList,
   HelpCircle,
   Settings,
@@ -36,7 +37,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import Link from "next/link";
 import { ClientOnly } from "@/components/ClientOnly";
 
@@ -56,7 +57,7 @@ const data = {
   navMain: [
     {
       title: "Dashboard",
-      url: "/",
+      url: "/dashboard",
       icon: BarChart3,
     },
     {
@@ -73,6 +74,11 @@ const data = {
       title: "Assessment Questions",
       url: "/assessment-questions",
       icon: FileQuestion,
+    },
+    {
+      title: "Users",
+      url: "/users",
+      icon: UsersRound,
     },
   ],
   projects: [

@@ -62,6 +62,10 @@ const nextConfig: NextConfig = {
 					{
 						key: "Permissions-Policy",
 						value: "camera=(), microphone=(), geolocation=()"
+					},
+					{
+						key: "Content-Security-Policy",
+						value: "worker-src 'self' blob:;"
 					}
 				],
 			},

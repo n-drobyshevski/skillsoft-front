@@ -1,7 +1,8 @@
 import { cache } from 'react';
-import { revalidateCompetencyTags, revalidateQuestionTags } from '@/app/actions';
+import { revalidateCompetencyTags, revalidateQuestionTags, revalidateUserTags } from '@/app/actions';
 
 import { AssessmentQuestion, BehavioralIndicator, Competency } from '../../app/interfaces/domain-interfaces';
+import { User, UserCreateInput, UserUpdateInput, UserRole } from '../../app/interfaces/user-interfaces';
 
 const getApiBaseUrl = () => {
     const apiUrl = process.env.NEXT_PUBLIC_API_URL;
@@ -12,7 +13,8 @@ const getApiBaseUrl = () => {
 const QUESTIONS_ENDPOINT = '/questions';
 const COMPETENCIES_ENDPOINT = '/competencies';
 const BEHAVIORAL_INDICATORS_ENDPOINT = '/behavioral-indicators';
-const LIST_ENDPOINTS = [QUESTIONS_ENDPOINT, COMPETENCIES_ENDPOINT, BEHAVIORAL_INDICATORS_ENDPOINT];
+const USERS_ENDPOINT = '/users';
+const LIST_ENDPOINTS = [QUESTIONS_ENDPOINT, COMPETENCIES_ENDPOINT, BEHAVIORAL_INDICATORS_ENDPOINT, USERS_ENDPOINT];
 
 // Input types for API operations
 interface CompetencyInput {
@@ -418,5 +420,143 @@ export const assessmentQuestionsApi = {
       competencyId,
       behavioralIndicatorId,
     );
+  },
+};
+
+// ==========================================
+// USERS API - Clerk.js Integration
+// ==========================================
+
+// Cached users fetcher
+const getAllUsersCached = cache(async (): Promise<User[] | null> => {
+  return fetchApi(USERS_ENDPOINT, {
+    tags: ['users'],
+    revalidate: 60,
+  });
+});
+
+export const usersApi = {
+  getAllUsers: getAllUsersCached,
+
+  getUserById: async (userId: string): Promise<User | null> => {
+    return fetchApi(`${USERS_ENDPOINT}/${userId}`, {
+      tags: [`user-${userId}`],
+      revalidate: 60,
+    });
+  },
+
+  getUserByClerkId: async (clerkId: string): Promise<User | null> => {
+    return fetchApi(`${USERS_ENDPOINT}/clerk/${clerkId}`, {
+      tags: [`user-clerk-${clerkId}`],
+      revalidate: 60,
+    });
+  },
+
+  createUser: async (data: UserCreateInput): Promise<User> => {
+    const result = await fetchApi<User>(USERS_ENDPOINT, {
+      method: 'POST',
+      body: JSON.stringify(data),
+      cache: 'no-store',
+    });
+    await revalidateUserTags();
+    return result;
+  },
+
+  updateUser: async (userId: string, data: UserUpdateInput): Promise<User> => {
+    const result = await fetchApi<User>(`${USERS_ENDPOINT}/${userId}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+      cache: 'no-store',
+    });
+    await revalidateUserTags(userId);
+    return result;
+  },
+
+  updateUserRole: async (userId: string, role: UserRole): Promise<User> => {
+    const result = await fetchApi<User>(`${USERS_ENDPOINT}/${userId}/role`, {
+      method: 'PATCH',
+      body: JSON.stringify({ role }),
+      cache: 'no-store',
+    });
+    await revalidateUserTags(userId);
+    return result;
+  },
+
+  deactivateUser: async (userId: string): Promise<void> => {
+    await fetchApi(`${USERS_ENDPOINT}/${userId}/deactivate`, {
+      method: 'PATCH',
+      cache: 'no-store',
+    });
+    await revalidateUserTags(userId);
+  },
+
+  activateUser: async (userId: string): Promise<void> => {
+    await fetchApi(`${USERS_ENDPOINT}/${userId}/activate`, {
+      method: 'PATCH',
+      cache: 'no-store',
+    });
+    await revalidateUserTags(userId);
+  },
+
+  deleteUser: async (userId: string): Promise<void> => {
+    await fetchApi(`${USERS_ENDPOINT}/${userId}`, {
+      method: 'DELETE',
+      cache: 'no-store',
+    });
+    await revalidateUserTags(userId);
+  },
+
+  searchUsers: async (query: string): Promise<User[]> => {
+    return fetchApi(`${USERS_ENDPOINT}/search?query=${encodeURIComponent(query)}`, {
+      cache: 'no-store',
+    });
+  },
+
+  getUsersByRole: async (role: UserRole): Promise<User[]> => {
+    return fetchApi(`${USERS_ENDPOINT}/role/${role}`, {
+      tags: [`users-role-${role}`],
+      revalidate: 60,
+    });
+  },
+
+  getUserStats: async (): Promise<{
+    totalUsers: number;
+    activeUsers: number;
+    byRole: Record<string, number>;
+  }> => {
+    return fetchApi(`${USERS_ENDPOINT}/stats`, {
+      tags: ['users-stats'],
+      revalidate: 60,
+    });
+  },
+
+  /**
+   * Manually sync all users from Clerk to the backend.
+   * This calls the /api/users/sync endpoint which fetches users from Clerk
+   * and syncs them to the Spring Boot backend.
+   */
+  syncAllFromClerk: async (): Promise<{
+    success: boolean;
+    message?: string;
+    created?: number;
+    updated?: number;
+    failed?: number;
+    total?: number;
+    error?: string;
+    errors?: string[];
+  }> => {
+    const response = await fetch('/api/users/sync', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.error || `Sync failed: ${response.status}`);
+    }
+    
+    return response.json();
   },
 };

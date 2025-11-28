@@ -8,6 +8,7 @@ import {
   Activity, 
   TrendingUp,
   Users,
+  UsersRound,
   BookOpen,
   ClipboardList,
   Target,
@@ -17,7 +18,10 @@ import {
   Star,
   Award,
   Zap,
-  BarChart3
+  BarChart3,
+  UserCheck,
+  Shield,
+  Clock
 } from "lucide-react";
 import MobileStatsCard from "./MobileStatsCard";
 
@@ -55,6 +59,16 @@ interface AssessmentQuestionStats extends BaseEntityStats {
   hardQuestions?: number;
 }
 
+// Users stats interface
+interface UsersStats extends BaseEntityStats {
+  byRole?: {
+    admin: number;
+    editor: number;
+    user: number;
+  };
+  recentlyActive?: number;
+}
+
 // Dashboard stats (for backward compatibility)
 interface DashboardStats {
   totalCompetencies: number;
@@ -69,7 +83,8 @@ type EntityStatsData =
   | { type: "dashboard"; stats: DashboardStats }
   | { type: "competencies"; stats: CompetencyStats }
   | { type: "behavioral-indicators"; stats: BehavioralIndicatorStats }
-  | { type: "assessment-questions"; stats: AssessmentQuestionStats };
+  | { type: "assessment-questions"; stats: AssessmentQuestionStats }
+  | { type: "users"; stats: UsersStats };
 
 interface FlexibleStatsCardsProps {
   data: EntityStatsData;
@@ -281,6 +296,46 @@ export default function FlexibleStatsCards({ data, loading = false, onCardClick 
             icon: Zap,
             trend: { value: "+7", label: FROM_LAST_MONTH, isPositive: false },
             description: "High difficulty"
+          }
+        ];
+
+      case "users":
+        return [
+          {
+            key: "total",
+            title: "Total Users",
+            mobileTitle: "Total",
+            value: data.stats.total,
+            icon: UsersRound,
+            trend: data.stats.trend,
+            description: "All users"
+          },
+          {
+            key: "active",
+            title: "Active Users",
+            mobileTitle: "Active",
+            value: data.stats.active || 0,
+            icon: UserCheck,
+            trend: { value: "+8%", label: FROM_LAST_MONTH, isPositive: true },
+            description: "Currently active"
+          },
+          {
+            key: "admins",
+            title: "Administrators",
+            mobileTitle: "Admins",
+            value: data.stats.byRole?.admin || 0,
+            icon: Shield,
+            trend: { value: "0", label: "stable", isPositive: true },
+            description: "Admin users"
+          },
+          {
+            key: "recently-active",
+            title: "Recently Active",
+            mobileTitle: "Recent",
+            value: data.stats.recentlyActive || 0,
+            icon: Clock,
+            trend: { value: "+12%", label: FROM_LAST_MONTH, isPositive: true },
+            description: "Last 30 days"
           }
         ];
 

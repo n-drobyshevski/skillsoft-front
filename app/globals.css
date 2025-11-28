@@ -306,21 +306,27 @@ html {
 
 /* Skeleton loading improvements */
 .skeleton {
-	background: linear-gradient(
-		90deg,
-		hsl(var(--muted)) 25%,
-		hsl(var(--muted))/0.8 50%,
-		hsl(var(--muted)) 75%
-	);
+	background: linear-gradient(90deg,
+			hsl(var(--muted)) 25%,
+			hsl(var(--muted))/0.8 50%,
+			hsl(var(--muted)) 75%);
 	background-size: 200% 100%;
 	animation: loading-shimmer 1.5s infinite;
 }
 
 /* Navigation loading indicator */
 @keyframes nav-loading {
-	0% { transform: translateX(-100%); }
-	50% { transform: translateX(100%); }
-	100% { transform: translateX(100%); }
+	0% {
+		transform: translateX(-100%);
+	}
+
+	50% {
+		transform: translateX(100%);
+	}
+
+	100% {
+		transform: translateX(100%);
+	}
 }
 
 .nav-loading::after {
@@ -330,12 +336,10 @@ html {
 	left: 0;
 	right: 0;
 	height: 2px;
-	background: linear-gradient(
-		90deg,
-		transparent,
-		hsl(var(--primary)),
-		transparent
-	);
+	background: linear-gradient(90deg,
+			transparent,
+			hsl(var(--primary)),
+			transparent);
 	animation: nav-loading 1s ease-in-out infinite;
 }
 
