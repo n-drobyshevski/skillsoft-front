@@ -52,3 +52,15 @@ export enum DifficultyLevel {
   EXPERT = 'EXPERT',
   SPECIALIZED = 'SPECIALIZED',
 }
+
+// ============================================
+// TEST SESSION ENUMS
+// ============================================
+
+export enum SessionStatus {
+  NOT_STARTED = 'NOT_STARTED',
+  IN_PROGRESS = 'IN_PROGRESS',
+  COMPLETED = 'COMPLETED',
+  ABANDONED = 'ABANDONED',
+  TIMED_OUT = 'TIMED_OUT'
+}

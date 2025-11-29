@@ -76,6 +76,40 @@ export async function getAuthHeaders(): Promise<Record<string, string>> {
 }
 
 /**
+ * Get the current user's role from Clerk session.
+ * Useful for server components that need to conditionally render based on role.
+ * 
+ * @returns The user's role or 'USER' as default
+ */
+export async function getCurrentUserRole(): Promise<UserRole> {
+  try {
+    const authResult = await auth();
+    const { userId, sessionClaims, orgRole } = authResult;
+    
+    if (!userId) {
+      return 'USER';
+    }
+    
+    const metadataRole = sessionClaims?.metadata?.role as UserRole | undefined;
+    const mappedRole = mapOrgRole(orgRole as string | undefined);
+    
+    return mappedRole ?? metadataRole ?? 'USER';
+  } catch {
+    return 'USER';
+  }
+}
+
+/**
+ * Check if current user has admin or editor role (can create/edit content).
+ * 
+ * @returns True if user is ADMIN or EDITOR
+ */
+export async function canCreateContent(): Promise<boolean> {
+  const role = await getCurrentUserRole();
+  return role === 'ADMIN' || role === 'EDITOR';
+}
+
+/**
  * Enhanced API fetch that includes role headers.
  * Use this for server-side API calls that need RBAC.
  * 

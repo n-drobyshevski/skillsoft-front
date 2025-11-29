@@ -246,3 +246,45 @@ export async function deleteAssessmentQuestion(questionId: string, competencyId?
     throw new Error(`Failed to delete question: ${errorMessage}`);
   }
 }
+
+// Cache revalidation for Test Templates
+const TESTS_PATH = '/tests';
+
+export async function revalidateTestTemplateTags(templateId?: string) {
+  try {
+    // Invalidate paths
+    revalidatePath(TESTS_PATH);
+    revalidatePath(HOME_PATH);
+    if (templateId) {
+      revalidatePath(`${TESTS_PATH}/${templateId}`);
+      revalidatePath(`${TESTS_PATH}/${templateId}/edit`);
+    }
+    
+    // Invalidate cache tags used by fetchApi
+    revalidateTag('test-templates', 'max');
+    revalidateTag('test-templates-active', 'max');
+    if (templateId) {
+      revalidateTag(`test-template-${templateId}`, 'max');
+    }
+  } catch {
+    // Error revalidating test template paths - silently fail in production
+  }
+}
+
+export async function deleteTestTemplate(templateId: string) {
+  try {
+    // Perform the delete operation
+    await fetchApi(`/v1/tests/templates/${templateId}`, {
+      method: 'DELETE',
+      cache: 'no-store',
+    });
+
+    // Revalidate test template paths
+    await revalidateTestTemplateTags(templateId);
+
+    return { success: true };
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : UNKNOWN_ERROR_MESSAGE;
+    throw new Error(`Failed to delete test template: ${errorMessage}`);
+  }
+}

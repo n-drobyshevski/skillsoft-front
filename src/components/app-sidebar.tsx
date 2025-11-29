@@ -8,6 +8,7 @@ import {
   Users,
   UsersRound,
   ClipboardList,
+  ClipboardCheck,
   HelpCircle,
   Settings,
   ChevronDown,
@@ -87,6 +88,11 @@ const data = {
       title: "Dashboard",
       url: "/dashboard",
       icon: BarChart3,
+    },
+    {
+      title: "Шаблоны тестов",
+      url: "/test-templates",
+      icon: ClipboardCheck,
     },
     {
       title: "Competencies",

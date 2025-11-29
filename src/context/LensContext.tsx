@@ -42,6 +42,7 @@ export interface LensConfig {
 
 // Common routes shared across multiple lenses
 const ROUTE_DASHBOARD = "/dashboard";
+const ROUTE_TESTS = "/test-templates";
 const ROUTE_COMPETENCIES = "/competencies";
 const ROUTE_INDICATORS = "/behavioral-indicators";
 const ROUTE_QUESTIONS = "/assessment-questions";
@@ -54,6 +55,7 @@ const FEATURE_VIEW_QUESTIONS = "view-questions";
 // Base routes for user and editor (admin gets additional routes)
 const BASE_ROUTES = [
   ROUTE_DASHBOARD,
+  ROUTE_TESTS,
   ROUTE_COMPETENCIES,
   ROUTE_INDICATORS,
   ROUTE_QUESTIONS,
@@ -80,9 +82,10 @@ export const LENS_CONFIGS: Record<LensType, LensConfig> = {
     borderColor: "border-emerald-200/60 dark:border-emerald-800/60",
     visibleRoutes: [
       ROUTE_DASHBOARD,
+      ROUTE_TESTS,
     ],
     dashboardWidgets: ["my-progress", "recent-activity"],
-    features: ["view-profile"],
+    features: ["view-profile", "take-tests"],
   },
   editor: {
     id: "editor",

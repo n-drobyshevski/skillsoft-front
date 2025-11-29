@@ -1756,30 +1756,15 @@ CREATE TABLE assessment_competencies (
 ```bash
 # Feature development
 git checkout -b feature/add-assessment-module
-# ... make changes ...// filepath: d:\projects\diplom\skillsoft\frontend-app\DOCUMENTATION.md
-# Skillsoft Application Documentation
-
-> **Comprehensive Technical and Domain Documentation**  
-> Version: 1.0.0 | Last Updated: 2025
-
----
-
-## Table of Contents
-
-1. [Technical Architecture Overview](#1-technical-architecture-overview)
-2. [Domain Model & Entity Hierarchy](#2-domain-model--entity-hierarchy)
-3. [API Specification](#3-api-specification)
-4. [Frontend Architecture](#4-frontend-architecture)
-5. [Backend Architecture](#5-backend-architecture)
-6. [Infrastructure & Deployment](#6-infrastructure--deployment)
-7. [Purpose & Business Context](#7-purpose--business-context)
-8. [Development Workflows](#8-development-workflows)
-9. [Security & Authentication](#9-security--authentication)
-10. [Testing Strategy](#10-testing-strategy)
+# ... make changes ...
+git add .
+git commit -m "feat: add assessment module"
+git push origin feature/add-assessment-module
+```
 
 ---
 
-## 1. Technical Architecture Overview
+## 9. Security & Authentication
 
 ### 1.1 Full-Stack Architecture
 

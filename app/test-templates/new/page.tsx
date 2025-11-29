@@ -1,0 +1,48 @@
+import React from "react";
+import { auth } from "@clerk/nextjs/server";
+import { redirect } from "next/navigation";
+import { canCreateContent } from "@/services/roleApi";
+import { competenciesApi } from "@/services/api";
+import PageHeader from "@/app/components/PageHeader";
+import NewTestForm from "./components/NewTestForm";
+
+export default async function NewTestPage() {
+  // Check authentication and authorization
+  const { userId } = await auth();
+  
+  if (!userId) {
+    redirect("/sign-in");
+  }
+
+  const canCreate = await canCreateContent();
+  
+  if (!canCreate) {
+    redirect("/test-templates");
+  }
+
+  // Fetch competencies for the form
+  let competencies: Array<{ id: string; name: string; category: string }> = [];
+  
+  try {
+    const allCompetencies = await competenciesApi.getAllCompetencies();
+    if (Array.isArray(allCompetencies)) {
+      competencies = allCompetencies
+        .filter(c => c.isActive)
+        .map(c => ({ id: c.id, name: c.name, category: c.category }));
+    }
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error("Failed to fetch competencies:", error);
+  }
+
+  return (
+    <div className="flex flex-1 flex-col gap-4 p-4 pt-6 md:gap-6 md:p-6">
+      <PageHeader
+        title="Создание теста"
+        description="Создайте новый шаблон теста для оценки компетенций"
+      />
+
+      <NewTestForm competencies={competencies} />
+    </div>
+  );
+}

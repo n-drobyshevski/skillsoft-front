@@ -591,3 +591,368 @@ export const usersApi = {
     return response.json();
   },
 };
+
+// ============================================
+// TEST TEMPLATES API
+// ============================================
+
+import {
+  TestTemplate,
+  TestTemplateSummary,
+  CreateTestTemplateRequest,
+  UpdateTestTemplateRequest,
+  TestSession,
+  TestSessionSummary,
+  StartTestSessionRequest,
+  TestAnswer,
+  SubmitAnswerRequest,
+  TestResult,
+  CurrentQuestionResponse,
+  UserStatistics,
+  TemplateStatistics,
+} from '../../app/interfaces/domain-interfaces';
+
+const TESTS_BASE = '/v1/tests';
+
+export const testTemplatesApi = {
+  /**
+   * Get all test templates with pagination
+   */
+  getAllTemplates: async (page = 0, size = 20): Promise<{
+    content: TestTemplateSummary[];
+    totalElements: number;
+    totalPages: number;
+  }> => {
+    const authHeaders = await getAuthHeaders();
+    return fetchApi(`${TESTS_BASE}/templates?page=${page}&size=${size}`, {
+      tags: ['test-templates'],
+      revalidate: 60,
+      authHeaders,
+    });
+  },
+
+  /**
+   * Get only active test templates
+   */
+  getActiveTemplates: async (): Promise<TestTemplateSummary[]> => {
+    const authHeaders = await getAuthHeaders();
+    return fetchApi(`${TESTS_BASE}/templates/active`, {
+      tags: ['test-templates-active'],
+      revalidate: 60,
+      authHeaders,
+    });
+  },
+
+  /**
+   * Get a single test template by ID
+   */
+  getTemplateById: async (id: string): Promise<TestTemplate | null> => {
+    const authHeaders = await getAuthHeaders();
+    return fetchApi(`${TESTS_BASE}/templates/${id}`, {
+      tags: [`test-template-${id}`],
+      revalidate: 60,
+      authHeaders,
+    });
+  },
+
+  /**
+   * Create a new test template
+   */
+  createTemplate: async (data: CreateTestTemplateRequest): Promise<TestTemplate> => {
+    const authHeaders = await getAuthHeaders();
+    return fetchApi(`${TESTS_BASE}/templates`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+      cache: 'no-store',
+      authHeaders,
+    });
+  },
+
+  /**
+   * Update an existing test template
+   */
+  updateTemplate: async (id: string, data: UpdateTestTemplateRequest): Promise<TestTemplate> => {
+    const authHeaders = await getAuthHeaders();
+    return fetchApi(`${TESTS_BASE}/templates/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+      cache: 'no-store',
+      authHeaders,
+    });
+  },
+
+  /**
+   * Search templates by name
+   */
+  searchByName: async (name: string): Promise<TestTemplateSummary[]> => {
+    const authHeaders = await getAuthHeaders();
+    return fetchApi(`${TESTS_BASE}/templates/search?name=${encodeURIComponent(name)}`, {
+      tags: ['test-templates-search'],
+      revalidate: 30,
+      authHeaders,
+    });
+  },
+
+  /**
+   * Get templates by competency
+   */
+  getByCompetency: async (competencyId: string): Promise<TestTemplateSummary[]> => {
+    const authHeaders = await getAuthHeaders();
+    return fetchApi(`${TESTS_BASE}/templates/by-competency/${competencyId}`, {
+      tags: [`test-templates-competency-${competencyId}`],
+      revalidate: 60,
+      authHeaders,
+    });
+  },
+
+  /**
+   * Get template statistics (admin only)
+   */
+  getStatistics: async (): Promise<{
+    totalTemplates: number;
+    activeTemplates: number;
+    inactiveTemplates: number;
+  }> => {
+    const authHeaders = await getAuthHeaders();
+    return fetchApi(`${TESTS_BASE}/templates/statistics`, {
+      tags: ['test-templates-stats'],
+      revalidate: 60,
+      authHeaders,
+    });
+  },
+
+  /**
+   * Delete a test template
+   */
+  deleteTemplate: async (id: string): Promise<void> => {
+    const authHeaders = await getAuthHeaders();
+    await fetchApi(`${TESTS_BASE}/templates/${id}`, {
+      method: 'DELETE',
+      cache: 'no-store',
+      authHeaders,
+    });
+  },
+};
+
+// ============================================
+// TEST SESSIONS API
+// ============================================
+
+export const testSessionsApi = {
+  /**
+   * Start a new test session
+   */
+  startSession: async (request: StartTestSessionRequest): Promise<TestSession> => {
+    const authHeaders = await getAuthHeaders();
+    return fetchApi(`${TESTS_BASE}/sessions`, {
+      method: 'POST',
+      body: JSON.stringify(request),
+      cache: 'no-store',
+      authHeaders,
+    });
+  },
+
+  /**
+   * Get a session by ID
+   */
+  getSessionById: async (sessionId: string): Promise<TestSession | null> => {
+    const authHeaders = await getAuthHeaders();
+    return fetchApi(`${TESTS_BASE}/sessions/${sessionId}`, {
+      tags: [`test-session-${sessionId}`],
+      cache: 'no-store',
+      authHeaders,
+    });
+  },
+
+  /**
+   * Get all sessions for a user
+   */
+  getUserSessions: async (clerkUserId: string, page = 0, size = 20): Promise<{
+    content: TestSessionSummary[];
+    totalElements: number;
+    totalPages: number;
+  }> => {
+    const authHeaders = await getAuthHeaders();
+    return fetchApi(`${TESTS_BASE}/sessions/user/${clerkUserId}?page=${page}&size=${size}`, {
+      tags: [`user-sessions-${clerkUserId}`],
+      cache: 'no-store',
+      authHeaders,
+    });
+  },
+
+  /**
+   * Check for in-progress session
+   */
+  getInProgressSession: async (clerkUserId: string, templateId: string): Promise<TestSession | null> => {
+    const authHeaders = await getAuthHeaders();
+    return fetchApi(`${TESTS_BASE}/sessions/user/${clerkUserId}/in-progress?templateId=${templateId}`, {
+      cache: 'no-store',
+      authHeaders,
+    });
+  },
+
+  /**
+   * Get current question for a session
+   */
+  getCurrentQuestion: async (sessionId: string): Promise<CurrentQuestionResponse | null> => {
+    const authHeaders = await getAuthHeaders();
+    return fetchApi(`${TESTS_BASE}/sessions/${sessionId}/current-question`, {
+      cache: 'no-store',
+      authHeaders,
+    });
+  },
+
+  /**
+   * Submit an answer
+   */
+  submitAnswer: async (sessionId: string, request: SubmitAnswerRequest): Promise<TestAnswer> => {
+    const authHeaders = await getAuthHeaders();
+    return fetchApi(`${TESTS_BASE}/sessions/${sessionId}/answers`, {
+      method: 'POST',
+      body: JSON.stringify(request),
+      cache: 'no-store',
+      authHeaders,
+    });
+  },
+
+  /**
+   * Navigate to a specific question
+   */
+  navigateToQuestion: async (sessionId: string, questionIndex: number): Promise<TestSession> => {
+    const authHeaders = await getAuthHeaders();
+    return fetchApi(`${TESTS_BASE}/sessions/${sessionId}/navigate?questionIndex=${questionIndex}`, {
+      method: 'POST',
+      cache: 'no-store',
+      authHeaders,
+    });
+  },
+
+  /**
+   * Update remaining time
+   */
+  updateTime: async (sessionId: string, timeRemainingSeconds: number): Promise<TestSession> => {
+    const authHeaders = await getAuthHeaders();
+    return fetchApi(`${TESTS_BASE}/sessions/${sessionId}/time?timeRemainingSeconds=${timeRemainingSeconds}`, {
+      method: 'PUT',
+      cache: 'no-store',
+      authHeaders,
+    });
+  },
+
+  /**
+   * Complete a session
+   */
+  completeSession: async (sessionId: string): Promise<TestResult> => {
+    const authHeaders = await getAuthHeaders();
+    return fetchApi(`${TESTS_BASE}/sessions/${sessionId}/complete`, {
+      method: 'POST',
+      cache: 'no-store',
+      authHeaders,
+    });
+  },
+
+  /**
+   * Abandon a session
+   */
+  abandonSession: async (sessionId: string): Promise<TestSession> => {
+    const authHeaders = await getAuthHeaders();
+    return fetchApi(`${TESTS_BASE}/sessions/${sessionId}/abandon`, {
+      method: 'POST',
+      cache: 'no-store',
+      authHeaders,
+    });
+  },
+
+  /**
+   * Get session answers
+   */
+  getSessionAnswers: async (sessionId: string): Promise<TestAnswer[]> => {
+    const authHeaders = await getAuthHeaders();
+    return fetchApi(`${TESTS_BASE}/sessions/${sessionId}/answers`, {
+      cache: 'no-store',
+      authHeaders,
+    });
+  },
+};
+
+// ============================================
+// TEST RESULTS API
+// ============================================
+
+export const testResultsApi = {
+  /**
+   * Get result by ID
+   */
+  getResultById: async (resultId: string): Promise<TestResult | null> => {
+    const authHeaders = await getAuthHeaders();
+    return fetchApi(`${TESTS_BASE}/results/${resultId}`, {
+      tags: [`test-result-${resultId}`],
+      cache: 'no-store',
+      authHeaders,
+    });
+  },
+
+  /**
+   * Get result by session ID
+   */
+  getResultBySession: async (sessionId: string): Promise<TestResult | null> => {
+    const authHeaders = await getAuthHeaders();
+    return fetchApi(`${TESTS_BASE}/results/session/${sessionId}`, {
+      tags: [`test-result-session-${sessionId}`],
+      cache: 'no-store',
+      authHeaders,
+    });
+  },
+
+  /**
+   * Get all results for a user
+   */
+  getUserResults: async (clerkUserId: string, page = 0, size = 20): Promise<{
+    content: TestResult[];
+    totalElements: number;
+    totalPages: number;
+  }> => {
+    const authHeaders = await getAuthHeaders();
+    return fetchApi(`${TESTS_BASE}/results/user/${clerkUserId}?page=${page}&size=${size}`, {
+      tags: [`user-results-${clerkUserId}`],
+      cache: 'no-store',
+      authHeaders,
+    });
+  },
+
+  /**
+   * Get user statistics
+   */
+  getUserStatistics: async (clerkUserId: string): Promise<UserStatistics> => {
+    const authHeaders = await getAuthHeaders();
+    return fetchApi(`${TESTS_BASE}/results/user/${clerkUserId}/statistics`, {
+      tags: [`user-statistics-${clerkUserId}`],
+      revalidate: 60,
+      authHeaders,
+    });
+  },
+
+  /**
+   * Get passed results for a user
+   */
+  getUserPassedResults: async (clerkUserId: string): Promise<TestResult[]> => {
+    const authHeaders = await getAuthHeaders();
+    return fetchApi(`${TESTS_BASE}/results/user/${clerkUserId}/passed`, {
+      tags: [`user-passed-${clerkUserId}`],
+      cache: 'no-store',
+      authHeaders,
+    });
+  },
+
+  /**
+   * Get template statistics (admin only)
+   */
+  getTemplateStatistics: async (templateId: string): Promise<TemplateStatistics> => {
+    const authHeaders = await getAuthHeaders();
+    return fetchApi(`${TESTS_BASE}/results/template/${templateId}/statistics`, {
+      tags: [`template-statistics-${templateId}`],
+      revalidate: 60,
+      authHeaders,
+    });
+  },
+};
