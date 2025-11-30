@@ -127,17 +127,38 @@ const CompetencyTable: React.FC<CompetencyTableProps> = ({ competencies }) => {
                     <div className="space-y-2">
                       <p className="text-xs font-medium text-muted-foreground">Standard Codes</p>
                       <div className="flex flex-wrap gap-1">
-                        {Object.entries(competency.standardCodes).map(([key, mapping]) => (
-                          mapping && (
+                        {Object.entries(competency.standardCodes).map(([key, mapping]) => {
+                          if (!mapping) return null;
+                          // Handle different mapping types
+                          let displayValue: string;
+                          if (typeof mapping === 'string') {
+                            // BigFiveCategory is a string
+                            displayValue = mapping;
+                          } else if (typeof mapping === 'object') {
+                            // Object types: OnetReference, EscoReference, or legacy StandardCodeMapping
+                            const obj = mapping as unknown as Record<string, unknown>;
+                            if ('code' in obj && typeof obj.code === 'string') {
+                              displayValue = obj.code;
+                            } else if ('uri' in obj) {
+                              displayValue = (obj.label as string) || (obj.uri as string);
+                            } else if ('name' in obj && typeof obj.name === 'string') {
+                              displayValue = obj.name;
+                            } else {
+                              displayValue = JSON.stringify(mapping);
+                            }
+                          } else {
+                            displayValue = String(mapping);
+                          }
+                          return (
                             <Badge 
                               key={key} 
                               variant="outline" 
                               className="h-5 text-xs"
                             >
-                              {key}: {mapping.code}
+                              {key}: {displayValue}
                             </Badge>
-                          )
-                        ))}
+                          );
+                        })}
                       </div>
                     </div>
                   </>

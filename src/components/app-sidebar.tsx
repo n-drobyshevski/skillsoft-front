@@ -5,9 +5,7 @@ import { useUser } from "@clerk/nextjs";
 import { useEffect, useState, useRef } from "react";
 import {
   BookOpen,
-  Users,
   UsersRound,
-  ClipboardList,
   ClipboardCheck,
   HelpCircle,
   Settings,
@@ -70,7 +68,7 @@ function getLensGlowClass(lens: keyof typeof LENS_GLOW_CLASSES): string {
   }
 }
 
-// This is sample data.
+// This is the navigation data with new route structure
 const data = {
   user: {
     name: "Admin User",
@@ -83,6 +81,7 @@ const data = {
       plan: "Enterprise",
     },
   ],
+  // Main navigation - organized by section
   navMain: [
     {
       title: "Dashboard",
@@ -94,42 +93,39 @@ const data = {
       url: "/test-templates",
       icon: ClipboardCheck,
     },
+  ],
+  // HR Library routes (content management)
+  navHRLibrary: [
     {
       title: "Competencies",
-      url: "/competencies",
+      url: "/hr/competencies",
       icon: Target,
     },
     {
       title: "Behavioral Indicators",
-      url: "/behavioral-indicators",
+      url: "/hr/behavioral-indicators",
       icon: Lightbulb,
     },
     {
       title: "Assessment Questions",
-      url: "/assessment-questions",
+      url: "/hr/assessment-questions",
       icon: FileQuestion,
     },
+  ],
+  // Admin routes
+  navAdmin: [
     {
       title: "Users",
-      url: "/users",
+      url: "/admin/users",
       icon: UsersRound,
     },
   ],
-  projects: [
+  // Tools (available for editors and admins)
+  navTools: [
     {
-      name: "Leadership Skills",
-      url: "#",
-      icon: Users,
-    },
-    {
-      name: "Technical Skills",
-      url: "#",
+      title: "Skill Mapper",
+      url: "/skill-mapper",
       icon: BookOpen,
-    },
-    {
-      name: "Communication",
-      url: "#",
-      icon: ClipboardList,
     },
   ],
 };
@@ -207,6 +203,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
   // Filter navigation items based on active lens
   const visibleNavItems = data.navMain.filter((item) => isRouteVisible(item.url));
+  const visibleHRItems = data.navHRLibrary.filter((item) => isRouteVisible(item.url));
+  const visibleAdminItems = data.navAdmin.filter((item) => isRouteVisible(item.url));
+  const visibleToolItems = data.navTools.filter((item) => isRouteVisible(item.url));
   
   // Get lens-specific glow animation class
   const lensGlowClass = getLensGlowClass(activeLens);
@@ -242,7 +241,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
       <SidebarContent>
         {isPersonalView ? (
-          /* Personal View - Only My Profile */
+          /* Personal View - Only My Profile and Tests */
           <SidebarGroup>
             <SidebarGroupLabel
               className={cn(
@@ -259,10 +258,36 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   isLensChanging && "animate-in fade-in-0 slide-in-from-left-3 duration-300"
                 )}
               >
-                <SidebarMenuButton asChild isActive={pathname.startsWith("/users/")}>
-                  <Link href={clerkUser ? `/users/${clerkUser.id}` : "/dashboard"}>
+                <SidebarMenuButton asChild isActive={pathname === "/dashboard"}>
+                  <Link href="/dashboard">
+                    <BarChart3 />
+                    <span>Dashboard</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem
+                className={cn(
+                  "transition-all duration-300",
+                  isLensChanging && "animate-in fade-in-0 slide-in-from-left-3 duration-300"
+                )}
+              >
+                <SidebarMenuButton asChild isActive={pathname.startsWith("/test-templates")}>
+                  <Link href="/test-templates">
+                    <ClipboardCheck />
+                    <span>Мои тесты</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem
+                className={cn(
+                  "transition-all duration-300",
+                  isLensChanging && "animate-in fade-in-0 slide-in-from-left-3 duration-300"
+                )}
+              >
+                <SidebarMenuButton asChild isActive={pathname.startsWith("/admin/users/")}>
+                  <Link href={clerkUser ? `/admin/users/${clerkUser.id}` : "/dashboard"}>
                     <UserCircle />
-                    <span>My Profile</span>
+                    <span>Мой профиль</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -271,6 +296,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         ) : (
           /* Content/Admin View - Full Navigation */
           <>
+            {/* Main Platform Routes */}
             <SidebarGroup>
               <SidebarGroupLabel
                 className={cn(
@@ -294,7 +320,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                       animationFillMode: "both"
                     } : undefined}
                   >
-                    <SidebarMenuButton asChild isActive={pathname === item.url}>
+                    <SidebarMenuButton asChild isActive={pathname === item.url || pathname.startsWith(item.url + "/")}>
                       <Link href={item.url}>
                         <item.icon />
                         <span>{item.title}</span>
@@ -305,44 +331,111 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               </SidebarMenu>
             </SidebarGroup>
 
-            <SidebarGroup className="group-data-[collapsible=icon]:hidden">
-              <SidebarGroupLabel
-                className={cn(
-                  "transition-all duration-300",
-                  isLensChanging && "animate-in fade-in-0 slide-in-from-left-2"
-                )}
-                style={isLensChanging ? { 
-                  animationDelay: `${visibleNavItems.length * 50 + 50}ms`,
-                  animationDuration: "200ms",
-                  animationFillMode: "both"
-                } : undefined}
-              >
-                Skill Categories
-              </SidebarGroupLabel>
-              <SidebarMenu>
-                {data.projects.map((item, index) => (
-                  <SidebarMenuItem 
-                    key={item.name}
-                    className={cn(
-                      "transition-all duration-300",
-                      isLensChanging && "animate-in fade-in-0 slide-in-from-left-3"
-                    )}
-                    style={isLensChanging ? { 
-                      animationDelay: `${(visibleNavItems.length + index + 1) * 50 + 50}ms`,
-                      animationDuration: "300ms",
-                      animationFillMode: "both"
-                    } : undefined}
-                  >
-                    <SidebarMenuButton asChild>
-                      <Link href={item.url}>
-                        <item.icon />
-                        <span>{item.name}</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))}
-              </SidebarMenu>
-            </SidebarGroup>
+            {/* HR Library Section */}
+            {visibleHRItems.length > 0 && (
+              <SidebarGroup>
+                <SidebarGroupLabel
+                  className={cn(
+                    "transition-all duration-300",
+                    isLensChanging && "animate-in fade-in-0 slide-in-from-left-2"
+                  )}
+                  style={isLensChanging ? { 
+                    animationDelay: `${visibleNavItems.length * 50 + 50}ms`,
+                    animationDuration: "200ms",
+                    animationFillMode: "both"
+                  } : undefined}
+                >
+                  HR Library
+                </SidebarGroupLabel>
+                <SidebarMenu>
+                  {visibleHRItems.map((item, index) => (
+                    <SidebarMenuItem 
+                      key={item.title}
+                      className={cn(
+                        "transition-all duration-300",
+                        isLensChanging && "animate-in fade-in-0 slide-in-from-left-3"
+                      )}
+                      style={isLensChanging ? { 
+                        animationDelay: `${(visibleNavItems.length + index + 1) * 50 + 50}ms`,
+                        animationDuration: "300ms",
+                        animationFillMode: "both"
+                      } : undefined}
+                    >
+                      <SidebarMenuButton asChild isActive={pathname === item.url || pathname.startsWith(item.url + "/")}>
+                        <Link href={item.url}>
+                          <item.icon />
+                          <span>{item.title}</span>
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  ))}
+                </SidebarMenu>
+              </SidebarGroup>
+            )}
+
+            {/* Tools Section */}
+            {visibleToolItems.length > 0 && (
+              <SidebarGroup>
+                <SidebarGroupLabel
+                  className={cn(
+                    "transition-all duration-300",
+                    isLensChanging && "animate-in fade-in-0 slide-in-from-left-2"
+                  )}
+                >
+                  Tools
+                </SidebarGroupLabel>
+                <SidebarMenu>
+                  {visibleToolItems.map((item) => (
+                    <SidebarMenuItem 
+                      key={item.title}
+                      className={cn(
+                        "transition-all duration-300",
+                        isLensChanging && "animate-in fade-in-0 slide-in-from-left-3"
+                      )}
+                    >
+                      <SidebarMenuButton asChild isActive={pathname === item.url || pathname.startsWith(item.url + "/")}>
+                        <Link href={item.url}>
+                          <item.icon />
+                          <span>{item.title}</span>
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  ))}
+                </SidebarMenu>
+              </SidebarGroup>
+            )}
+
+            {/* Admin Section */}
+            {visibleAdminItems.length > 0 && (
+              <SidebarGroup>
+                <SidebarGroupLabel
+                  className={cn(
+                    "transition-all duration-300",
+                    isLensChanging && "animate-in fade-in-0 slide-in-from-left-2"
+                  )}
+                >
+                  Administration
+                </SidebarGroupLabel>
+                <SidebarMenu>
+                  {visibleAdminItems.map((item) => (
+                    <SidebarMenuItem 
+                      key={item.title}
+                      className={cn(
+                        "transition-all duration-300",
+                        isLensChanging && "animate-in fade-in-0 slide-in-from-left-3"
+                      )}
+                    >
+                      <SidebarMenuButton asChild isActive={pathname === item.url || pathname.startsWith(item.url + "/")}>
+                        <Link href={item.url}>
+                          <item.icon />
+                          <span>{item.title}</span>
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  ))}
+                </SidebarMenu>
+              </SidebarGroup>
+            )}
           </>
         )}
       </SidebarContent>
@@ -412,7 +505,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               >
                 {clerkUser && (
                   <DropdownMenuItem asChild>
-                    <Link href={`/users/${clerkUser.id}`} className="flex items-center gap-2 cursor-pointer">
+                    <Link href={`/admin/users/${clerkUser.id}`} className="flex items-center gap-2 cursor-pointer">
                       <UserCircle className="h-4 w-4" />
                       My Profile
                     </Link>

@@ -1,83 +1,8 @@
-import React, { Suspense } from "react";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import {
-  Competency,
-} from "../interfaces/domain-interfaces";
-import {
-  Plus,
-} from "lucide-react";
-import { competenciesApi } from "@/services/api";
-import FlexibleStatsCards from "../components/FlexibleStatsCards";
-import PageHeader from "../components/PageHeader";
-import CompetenciesTable from "./components/CompetenciesTable";
-import TableSkeleton from "../components/TableSkeleton";
+import { redirect } from "next/navigation";
 
-async function getCompetenciesData() {
-  try {
-    const competencies = await competenciesApi.getAllCompetencies();
-    if (!Array.isArray(competencies)) {
-      return { competencies: [], error: "Invalid data format from server." };
-    }
-    return { competencies, error: null };
-  } catch (error) {
-    console.error("Failed to fetch competencies:", error);
-    return { competencies: [], error: "Failed to load competencies." };
-  }
-}
-
-// Main component
-export default async function CompetenciesPage() {
-  const { competencies, error } = await getCompetenciesData();
-
-  const handleStatsCardClick = (cardType: string) => {
-    // Handle stats card clicks for navigation or filtering
-    // This function will need to be moved to a client component if it needs to be interactive.
-    // For now, it's a placeholder on the server.
-  };
-
-  return (
-    <div className="flex flex-1 flex-col gap-4 p-4 pt-6 md:gap-6 md:p-6">
-      <PageHeader 
-        title="Competencies"
-        description="Manage and track competency definitions and assessments"
-      >
-        <div className="flex items-center gap-2">
-          <Link href="/competencies/new">
-            <Button variant="outline">
-              <Plus className="mr-2 h-4 w-4" />
-              Create Competency
-            </Button>
-          </Link>
-        </div>
-      </PageHeader> 
-      
-      {/* Stats Cards */}
-      <FlexibleStatsCards
-        data={{
-          type: "competencies",
-          stats: {
-            total: competencies.length,
-            withAssessments: competencies.filter(c => c.behavioralIndicators && c.behavioralIndicators.length > 0).length,
-            averageWeight: competencies.length > 0 ? Math.round(Math.random() * 30 + 20) : 0,
-            byLevel: {
-              advanced: competencies.filter(c => c.level === "ADVANCED").length,
-              expert: competencies.filter(c => c.level === "EXPERT").length
-            },
-            trend: {
-              value: "+12%",
-              label: "from last month",
-              isPositive: true
-            }
-          }
-        }}
-        loading={!competencies} // Show loading skeleton if data is not yet available
-        // onCardClick={handleStatsCardClick} // This would need to be in a client component
-      />
-
-      <Suspense fallback={<TableSkeleton />}>
-        <CompetenciesTable competencies={competencies} />
-      </Suspense>
-    </div>
-  );
+/**
+ * Redirect from old /competencies route to new /hr/competencies
+ */
+export default function CompetenciesRedirect() {
+  redirect("/hr/competencies");
 }

@@ -1,13 +1,12 @@
 import "./globals.css";
 
 import * as React from "react";
-import { ThemeProvider } from "next-themes";
 import { Metadata, Viewport } from "next";
-import {
-  ClerkProvider} from '@clerk/nextjs'
+import { ClerkProvider } from '@clerk/nextjs';
 import { LayoutProvider } from "@/components/layout-provider";
 import { Toaster } from "@/components/ui/sonner";
 import { shadcn } from '@clerk/themes';
+
 export const metadata: Metadata = {
 	title: "SkillSoft - Competency Management",
 	description: "A platform for managing skills and competencies.",
@@ -29,23 +28,30 @@ export const viewport: Viewport = {
 	],
 };
 
+/**
+ * Root Layout
+ * 
+ * Provides ClerkProvider for authentication and ThemeProvider via LayoutProvider.
+ * Route-specific layouts handle sidebar/header:
+ * - (auth)/ - Minimal layout for sign-in/sign-up
+ * - (workspace)/ - Full dashboard layout with sidebar
+ */
 export default function RootLayout({
 	children,
 }: Readonly<{
 	children: React.ReactNode;
 }>) {
-	// Get the publishable key
 	const publishableKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
 	
 	const appearance = {
-		theme: shadcn,
+		baseTheme: shadcn,
 		layout: {
 			socialButtonsVariant: "blockButton" as const,
 			socialButtonsPlacement: "top" as const,
 		}
 	};
 
-	// Always return the HTML structure, but conditionally wrap with ClerkProvider
+	// Always return the HTML structure, conditionally wrap with ClerkProvider
 	if (publishableKey && publishableKey.trim() !== '') {
 		return (
 			<ClerkProvider appearance={appearance}>
@@ -61,10 +67,7 @@ export default function RootLayout({
 		);
 	}
 
-	// Fallback without ClerkProvider
-	if (process.env.NODE_ENV === 'development') {
-		console.warn("Clerk publishable key is not set. Skipping ClerkProvider.");
-	}
+	// Fallback without ClerkProvider (for development without Clerk keys)
 	return (
 		<html lang="en" suppressHydrationWarning className="mobile-container">
 			<body className="mobile-container" suppressHydrationWarning>

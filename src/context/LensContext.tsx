@@ -40,32 +40,35 @@ export interface LensConfig {
   features: string[];
 }
 
-// Common routes shared across multiple lenses
+// Common routes - note: route groups (auth), (workspace) are not part of URL path
 const ROUTE_DASHBOARD = "/dashboard";
 const ROUTE_TESTS = "/test-templates";
-const ROUTE_COMPETENCIES = "/competencies";
-const ROUTE_INDICATORS = "/behavioral-indicators";
-const ROUTE_QUESTIONS = "/assessment-questions";
+// HR Library routes (under (workspace)/hr/ in file system, but /hr/ in URL)
+const ROUTE_HR_COMPETENCIES = "/hr/competencies";
+const ROUTE_HR_INDICATORS = "/hr/behavioral-indicators";
+const ROUTE_HR_QUESTIONS = "/hr/assessment-questions";
+// Admin routes (under (workspace)/admin/ in file system, but /admin/ in URL)
+const ROUTE_ADMIN_USERS = "/admin/users";
+// Tools
+const ROUTE_SKILL_MAPPER = "/skill-mapper";
 
 // Common features shared across multiple lenses
 const FEATURE_VIEW_COMPETENCIES = "view-competencies";
 const FEATURE_VIEW_INDICATORS = "view-indicators";
 const FEATURE_VIEW_QUESTIONS = "view-questions";
 
-// Base routes for user and editor (admin gets additional routes)
-const BASE_ROUTES = [
-  ROUTE_DASHBOARD,
-  ROUTE_TESTS,
-  ROUTE_COMPETENCIES,
-  ROUTE_INDICATORS,
-  ROUTE_QUESTIONS,
-];
-
 // Base view features (all lenses have these)
 const BASE_VIEW_FEATURES = [
   FEATURE_VIEW_COMPETENCIES,
   FEATURE_VIEW_INDICATORS,
   FEATURE_VIEW_QUESTIONS,
+];
+
+// HR routes (editor and admin lenses)
+const HR_ROUTES: string[] = [
+  ROUTE_HR_COMPETENCIES,
+  ROUTE_HR_INDICATORS,
+  ROUTE_HR_QUESTIONS,
 ];
 
 /**
@@ -95,7 +98,12 @@ export const LENS_CONFIGS: Record<LensType, LensConfig> = {
     color: "text-blue-600 dark:text-blue-400",
     bgColor: "bg-blue-50 dark:bg-blue-950/40",
     borderColor: "border-blue-200/60 dark:border-blue-800/60",
-    visibleRoutes: [...BASE_ROUTES],
+    visibleRoutes: [
+      ROUTE_DASHBOARD,
+      ROUTE_TESTS,
+      ...HR_ROUTES,
+      ROUTE_SKILL_MAPPER,
+    ],
     dashboardWidgets: [
       "overview",
       "content-stats",
@@ -121,8 +129,11 @@ export const LENS_CONFIGS: Record<LensType, LensConfig> = {
     bgColor: "bg-violet-50 dark:bg-violet-950/40",
     borderColor: "border-violet-200/60 dark:border-violet-800/60",
     visibleRoutes: [
-      ...BASE_ROUTES,
-      "/users",
+      ROUTE_DASHBOARD,
+      ROUTE_TESTS,
+      ...HR_ROUTES,
+      ROUTE_SKILL_MAPPER,
+      ROUTE_ADMIN_USERS,
     ],
     dashboardWidgets: [
       "overview",
