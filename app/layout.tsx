@@ -3,7 +3,7 @@ import "./globals.css";
 import * as React from "react";
 import { Metadata, Viewport } from "next";
 import { ClerkProvider } from '@clerk/nextjs';
-import { LayoutProvider } from "@/components/layout-provider";
+import { LayoutProvider } from "@/components/layout/layout-provider";
 import { Toaster } from "@/components/ui/sonner";
 import { shadcn } from '@clerk/themes';
 

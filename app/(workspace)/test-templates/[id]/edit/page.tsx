@@ -3,7 +3,7 @@ import { auth } from "@clerk/nextjs/server";
 import { redirect, notFound } from "next/navigation";
 import { canCreateContent } from "@/services/roleApi";
 import { competenciesApi, testTemplatesApi } from "@/services/api";
-import EditTestForm from "./components/EditTestForm";
+import EditTestForm from "./_components/EditTestForm";
 
 interface EditTestPageProps {
   params: Promise<{ id: string }>;

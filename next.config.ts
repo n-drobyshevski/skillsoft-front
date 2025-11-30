@@ -6,10 +6,20 @@ const nextConfig: NextConfig = {
 		root: __dirname,
 	},
 	experimental: {
-		// Enable optimized imports for better path resolution
-		optimizePackageImports: ["@/components", "@/lib", "@/services", "@/context"],
-		// Enable server source maps for better debugging
+		// Enable optimized imports for better tree-shaking and path resolution
+		optimizePackageImports: [
+			"@/components", 
+			"@/lib", 
+			"@/services", 
+			"@/context",
+			"lucide-react",
+			"@clerk/nextjs",
+			"recharts",
+		],
+		// Enable server source maps for better debugging (disable in production)
 		serverSourceMaps: false,
+		// Enable View Transitions API for smooth page transitions (Next.js 16)
+		viewTransition: true,
 	},
 	// Enable static optimization
 	output: undefined, // Allow both static and server rendering

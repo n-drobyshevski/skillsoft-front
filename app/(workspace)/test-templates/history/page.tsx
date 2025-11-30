@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { testResultsApi, testSessionsApi } from "@/services/api";
 import { TestResult, TestSessionSummary } from "@/app/interfaces/domain-interfaces";
 import { SessionStatus } from "@/app/enums/domain_enums";
-import PageHeader from "@/app/components/PageHeader";
+import PageHeader from "@/components/common/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";

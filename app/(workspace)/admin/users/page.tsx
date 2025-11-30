@@ -27,10 +27,10 @@ import {
   AlertTriangle,
 } from "lucide-react";
 import { usersApi } from "@/services/api";
-import PageHeader from "@/app/components/PageHeader";
-import TableSkeleton from "@/app/components/TableSkeleton";
-import { SyncUsersButton } from "./components/SyncUsersButton";
-import UsersTableWrapper from "./components/UsersTableWrapper";
+import PageHeader from "@/components/common/PageHeader";
+import TableSkeleton from "@/components/data-display/TableSkeleton";
+import { SyncUsersButton } from "./_components/SyncUsersButton";
+import UsersTableWrapper from "./_components/UsersTableWrapper";
 
 async function getUsersData() {
   try {

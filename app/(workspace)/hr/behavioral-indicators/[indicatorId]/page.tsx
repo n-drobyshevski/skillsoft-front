@@ -4,9 +4,9 @@ import type {
 	BehavioralIndicator,
 	AssessmentQuestion,
 } from "@/interfaces/domain-interfaces";
-import IndicatorDetailContent from "./components/IndicatorDetailContent";
-import IndicatorDetailClient from "./components/IndicatorDetailClient";
-import { EntityDetailLayout } from "@/components/EntityDetailLayout";
+import IndicatorDetailContent from "./_components/IndicatorDetailContent";
+import IndicatorDetailClient from "./_components/IndicatorDetailClient";
+import { EntityDetailLayout } from "@/components/common/EntityDetailLayout";
 import Loading from "./loading";
 
 interface IndicatorDetailPageProps {

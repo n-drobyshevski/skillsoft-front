@@ -1,6 +1,6 @@
 import { assessmentQuestionsApi, behavioralIndicatorsApi } from "@/services/api";
 import { notFound } from "next/navigation";
-import EditQuestionForm from "./components/EditQuestionForm";
+import EditQuestionForm from "./_components/EditQuestionForm";
 
 async function getQuestionData(questionId: string) {
   const question = await assessmentQuestionsApi.getQuestionById(questionId);

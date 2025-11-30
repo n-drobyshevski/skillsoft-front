@@ -10,15 +10,15 @@ import {
 } from "@/components/ui/card";
 import { competenciesApi } from "@/services/api";
 import { Competency, DashboardStats } from "@/app/interfaces/domain-interfaces";
-import FlexibleStatsCards from "@/app/components/FlexibleStatsCards";
-import ErrorCard from "@/app/components/ErrorCard";
-import CompetencyByCategoryBarChart from "@/components/charts/CompetencyByCategoryBarChart";
-import AverageIndicatorsGauge from "@/components/charts/AverageIndicatorsGauge";
-import RecentActivityCard from "@/components/RecentActivityCard";
-import QuickActionsCard from "@/components/QuickActionsCard";
-import CompetencyTable from "@/app/components/CompetencyTable";
-import PageHeader from "@/app/components/PageHeader";
-import { ClientOnly } from "@/components/ClientOnly";
+import FlexibleStatsCards from "@/components/data-display/FlexibleStatsCards";
+import ErrorCard from "@/components/feedback/ErrorCard";
+import CompetencyByCategoryBarChart from "@/components/data-display/charts/CompetencyByCategoryBarChart";
+import AverageIndicatorsGauge from "@/components/data-display/charts/AverageIndicatorsGauge";
+import RecentActivityCard from "@/components/dashboard/RecentActivityCard";
+import QuickActionsCard from "@/components/dashboard/QuickActionsCard";
+import CompetencyTable from "@/components/data-display/CompetencyTable";
+import PageHeader from "@/components/common/PageHeader";
+import { ClientOnly } from "@/components/common/ClientOnly";
 import { auth } from "@clerk/nextjs/server";
 
 export const metadata: Metadata = {

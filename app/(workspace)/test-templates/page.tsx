@@ -6,9 +6,9 @@ import { redirect } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { testTemplatesApi } from "@/services/api";
 import { canCreateContent } from "@/services/roleApi";
-import PageHeader from "@/components/PageHeader";
-import TestTemplatesGrid from "./components/TestTemplatesGrid";
-import TestTemplatesGridSkeleton from "./components/TestTemplatesGridSkeleton";
+import PageHeader from "@/components/common/PageHeader";
+import TestTemplatesGrid from "./_components/TestTemplatesGrid";
+import TestTemplatesGridSkeleton from "./_components/TestTemplatesGridSkeleton";
 import { ListFilter, History, Plus } from "lucide-react";
 
 export const metadata: Metadata = {

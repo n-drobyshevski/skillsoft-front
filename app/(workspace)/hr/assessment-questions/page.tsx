@@ -17,10 +17,10 @@ export const metadata: Metadata = {
 import { AssessmentQuestion } from "@/app/interfaces/domain-interfaces";
 import { assessmentQuestionsApi } from "@/services/api";
 import { Button } from "@/components/ui/button";
-import FlexibleStatsCards from "@/app/components/FlexibleStatsCards";
-import PageHeader from "@/app/components/PageHeader";
-import QuestionsTable from "./components/QuestionsTable";
-import TableSkeleton from "@/app/components/TableSkeleton";
+import FlexibleStatsCards from "@/components/data-display/FlexibleStatsCards";
+import PageHeader from "@/components/common/PageHeader";
+import QuestionsTable from "./_components/QuestionsTable";
+import TableSkeleton from "@/components/data-display/TableSkeleton";
 
 // Define the shape of the data we'll be using
 interface EnrichedQuestion extends AssessmentQuestion {

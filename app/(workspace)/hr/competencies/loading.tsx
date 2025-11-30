@@ -1,7 +1,7 @@
 import React from "react";
 // import { LoadingSkeleton } from "@/app/competencies/components/loading-skeleton";
-import PageHeader from "@/components/PageHeader";
-import TableSkeleton from "@/components/TableSkeleton";
+import PageHeader from "@/components/common/PageHeader";
+import TableSkeleton from "@/components/data-display/TableSkeleton";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function Loading() {

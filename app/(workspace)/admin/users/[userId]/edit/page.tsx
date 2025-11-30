@@ -14,7 +14,7 @@ import {
   getRoleBadgeColor,
   getRoleDisplayName,
 } from "@/app/interfaces/user-interfaces";
-import UserEditForm from "./components/UserEditForm";
+import UserEditForm from "./_components/UserEditForm";
 
 interface UserEditPageProps {
   params: Promise<{ userId: string }>;

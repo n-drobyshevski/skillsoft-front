@@ -22,7 +22,7 @@ import { Loader2, Database, Zap, Search, Layers } from 'lucide-react';
 // Dynamic import with loading fallback for code splitting
 // This splits SkillMapper into a separate chunk, reducing initial bundle size
 const SkillMapper = dynamic(
-  () => import('@/components/skill-mapper').then(mod => mod.SkillMapper),
+  () => import('@/components/common/skill-mapper').then(mod => mod.SkillMapper),
   {
     loading: () => (
       <div className="flex items-center justify-center h-full">

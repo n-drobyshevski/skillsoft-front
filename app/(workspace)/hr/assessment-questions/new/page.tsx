@@ -1,10 +1,10 @@
 'use client';
 
 import { useState, useCallback } from 'react';
-import { QuestionForm } from '../components/QuestionForm';
-import QuestionPreview from '../components/QuestionPreview';
-import IndicatorSelector from '../components/IndicatorSelector';
-import PageHeader from '@/components/PageHeader';
+import { QuestionForm } from '../_components/QuestionForm';
+import QuestionPreview from '../_components/QuestionPreview';
+import IndicatorSelector from '../_components/IndicatorSelector';
+import PageHeader from '@/components/common/PageHeader';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { Suspense } from 'react';

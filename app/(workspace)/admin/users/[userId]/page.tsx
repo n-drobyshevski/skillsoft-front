@@ -33,7 +33,7 @@ import {
   getRoleDisplayName,
   UserRole,
 } from "@/app/interfaces/user-interfaces";
-import UserProfileClient from "./components/UserProfileClient";
+import UserProfileClient from "./_components/UserProfileClient";
 
 interface UserProfilePageProps {
   params: Promise<{ userId: string }>;

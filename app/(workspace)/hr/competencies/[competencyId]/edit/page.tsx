@@ -1,16 +1,16 @@
 'use client';
 
 import { competenciesApi } from "@/services/api";
-import { CompetencyForm } from "../../components/CompetencyForm";
+import { CompetencyForm } from "../../_components/CompetencyForm";
 import { notFound, useParams } from "next/navigation";
-import CompetencyPreview from "../../components/CompetencyPreview";
+import CompetencyPreview from "../../_components/CompetencyPreview";
 import { Competency } from "@/app/interfaces/domain-interfaces";
 import { useEffect, useState } from "react";
-import { EditCompetencyPageSkeleton } from "../../components/EditCompetencyPageSkeleton";
-import PageHeader from "@/components/PageHeader";
+import { EditCompetencyPageSkeleton } from "../../_components/EditCompetencyPageSkeleton";
+import PageHeader from "@/components/common/PageHeader";
 import { CompetencyCategory, ApprovalStatus, ProficiencyLevel } from "@/app/enums/domain_enums";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { CompetencyIndicatorsManager } from "../../components/CompetencyIndicatorsManager";
+import { CompetencyIndicatorsManager } from "../../_components/CompetencyIndicatorsManager";
 
 
 type CompetencyFormData = {

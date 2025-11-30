@@ -6,9 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import PageHeader from "@/app/components/PageHeader";
-import StartTestSessionButton from "../components/StartTestSessionButton";
-import DeleteTestTemplateButton from "../components/DeleteTestTemplateButton";
+import PageHeader from "@/components/common/PageHeader";
+import StartTestSessionButton from "../_components/StartTestSessionButton";
+import DeleteTestTemplateButton from "../_components/DeleteTestTemplateButton";
 import { AssessmentGoal, AssessmentGoalInfo } from "@/app/enums/domain_enums";
 import { 
   ArrowLeft, 

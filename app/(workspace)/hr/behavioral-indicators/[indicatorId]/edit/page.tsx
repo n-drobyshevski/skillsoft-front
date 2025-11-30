@@ -1,15 +1,15 @@
 'use client';
 
 import { behavioralIndicatorsApi } from "@/services/api";
-import { IndicatorForm } from "../../components/IndicatorForm";
+import { IndicatorForm } from "../../_components/IndicatorForm";
 import { notFound, useParams } from "next/navigation";
-import IndicatorPreview from "../../components/IndicatorPreview";
+import IndicatorPreview from "../../_components/IndicatorPreview";
 import { BehavioralIndicator } from "@/app/interfaces/domain-interfaces";
 import { useEffect, useState } from "react";
-import { EditIndicatorPageSkeleton } from "../../components/EditIndicatorPageSkeleton";
+import { EditIndicatorPageSkeleton } from "../../_components/EditIndicatorPageSkeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { IndicatorQuestionsManager } from "../../components/IndicatorQuestionsManager";
-import PageHeader from "@/app/components/PageHeader";
+import { IndicatorQuestionsManager } from "../../_components/IndicatorQuestionsManager";
+import PageHeader from "@/components/common/PageHeader";
 import { indicatorSchema } from "../../validation";
 import { z } from 'zod';
 

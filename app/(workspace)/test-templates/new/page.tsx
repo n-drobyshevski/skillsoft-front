@@ -3,8 +3,8 @@ import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { canCreateContent } from "@/services/roleApi";
 import { competenciesApi } from "@/services/api";
-import PageHeader from "@/app/components/PageHeader";
-import NewTestForm from "./components/NewTestForm";
+import PageHeader from "@/components/common/PageHeader";
+import NewTestForm from "./_components/NewTestForm";
 
 export default async function NewTestPage() {
   // Check authentication and authorization

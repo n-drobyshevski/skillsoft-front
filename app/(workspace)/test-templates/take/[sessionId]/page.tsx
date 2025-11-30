@@ -40,10 +40,10 @@ import {
 import { toast } from 'sonner';
 
 // Question type components
-import SingleChoiceQuestion from './components/SingleChoiceQuestion';
-import MultipleChoiceQuestion from './components/MultipleChoiceQuestion';
-import LikertScaleQuestion from './components/LikertScaleQuestion';
-import OpenTextQuestion from './components/OpenTextQuestion';
+import SingleChoiceQuestion from './_components/SingleChoiceQuestion';
+import MultipleChoiceQuestion from './_components/MultipleChoiceQuestion';
+import LikertScaleQuestion from './_components/LikertScaleQuestion';
+import OpenTextQuestion from './_components/OpenTextQuestion';
 
 export default function TestTakePage() {
   const router = useRouter();

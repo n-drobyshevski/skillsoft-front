@@ -2,11 +2,11 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { CompetencyForm } from '../components/CompetencyForm';
-import PageHeader from '@/app/components/PageHeader';
+import { CompetencyForm } from '../_components/CompetencyForm';
+import PageHeader from '@/components/common/PageHeader';
 import { Competency } from '@/app/interfaces/domain-interfaces';
 import { CompetencyCategory, ProficiencyLevel, ApprovalStatus } from '@/app/enums/domain_enums';
-import CompetencyPreview from '../components/CompetencyPreview';
+import CompetencyPreview from '../_components/CompetencyPreview';
 
 // Constants
 const PREVIEW_COMPETENCY_ID = 'preview-id';

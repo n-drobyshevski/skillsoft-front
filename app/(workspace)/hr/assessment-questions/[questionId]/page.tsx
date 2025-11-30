@@ -19,10 +19,10 @@ import {
 	ExternalLink
 } from "lucide-react";
 import Link from "next/link";
-import { EntityDetailLayout } from "@/components/EntityDetailLayout";
-import QuestionDetailClient from "./components/QuestionDetailClient";
-import { CompetencyHoverCard } from "@/app/(workspace)/hr/behavioral-indicators/[indicatorId]/components/CompetencyHoverCard";
-import { IndicatorHoverCard } from "@/components/IndicatorHoverCard";
+import { EntityDetailLayout } from "@/components/common/EntityDetailLayout";
+import QuestionDetailClient from "./_components/QuestionDetailClient";
+import { CompetencyHoverCard } from "@/app/(workspace)/hr/behavioral-indicators/[indicatorId]/_components/CompetencyHoverCard";
+import { IndicatorHoverCard } from "@/components/feedback/IndicatorHoverCard";
 import type { BehavioralIndicator, Competency } from "@/interfaces/domain-interfaces";
 interface QuestionDetailPageProps {
 	params: { questionId: string };

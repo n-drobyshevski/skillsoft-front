@@ -15,11 +15,11 @@ import {
 } from "lucide-react";
 import { Suspense } from 'react';
 
-import QuestionsList from './components/QuestionsList';
-import { EntityDetailLayout } from '@/app/components/EntityDetailLayout';
-import CompetencyDetailClient from './components/CompetencyDetailClient';
+import QuestionsList from './_components/QuestionsList';
+import { EntityDetailLayout } from '@/components/common/EntityDetailLayout';
+import CompetencyDetailClient from './_components/CompetencyDetailClient';
 
-import QuestionsListSkeleton from './components/QuestionsListSkeleton';
+import QuestionsListSkeleton from './_components/QuestionsListSkeleton';
 import type {
 	BehavioralIndicator,
 	AssessmentQuestion,

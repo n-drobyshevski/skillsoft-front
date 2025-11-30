@@ -17,8 +17,8 @@ import {
   LineChart,
   Rocket
 } from "lucide-react";
-import { AuthHandlerClient } from "./components/auth-handler-client";
-import { LandingPageContent } from "./components/landing-page-content";
+import { AuthHandlerClient } from "@/components/auth/auth-handler-client";
+import { LandingPageContent } from "./_components/landing-page-content";
 
 // Enhanced metadata for SEO with metadataBase
 export const metadata: Metadata = {

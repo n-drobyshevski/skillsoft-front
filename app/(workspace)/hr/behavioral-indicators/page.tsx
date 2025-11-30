@@ -2,8 +2,8 @@ import React, { Suspense } from "react";
 import Link from "next/link";
 import { Metadata } from "next";
 import { Button } from "@/components/ui/button";
-import PageHeader from "@/app/components/PageHeader";
-import FlexibleStatsCards from "@/app/components/FlexibleStatsCards";
+import PageHeader from "@/components/common/PageHeader";
+import FlexibleStatsCards from "@/components/data-display/FlexibleStatsCards";
 import { Plus } from "lucide-react";
 
 export const metadata: Metadata = {
@@ -20,8 +20,8 @@ import {
   behavioralIndicatorsApi,
   competenciesApi,
 } from "@/services/api";
-import IndicatorsTable from "./components/IndicatorsTable";
-import TableSkeleton from "@/app/components/TableSkeleton";
+import IndicatorsTable from "./_components/IndicatorsTable";
+import TableSkeleton from "@/components/data-display/TableSkeleton";
 
 interface EnrichedIndicator extends BehavioralIndicator {
   competencyName: string;

@@ -1,11 +1,11 @@
 'use client';
 
 import { useState } from 'react';
-import { IndicatorForm } from '../components/IndicatorForm';
-import { IndicatorQuestionsManager } from '../components/IndicatorQuestionsManager';
-import CompetencySelector from '../components/CompetencySelector';
-import IndicatorPreview from '../components/IndicatorPreview';
-import PageHeader from '@/components/PageHeader';
+import { IndicatorForm } from '../_components/IndicatorForm';
+import { IndicatorQuestionsManager } from '../_components/IndicatorQuestionsManager';
+import CompetencySelector from '../_components/CompetencySelector';
+import IndicatorPreview from '../_components/IndicatorPreview';
+import PageHeader from '@/components/common/PageHeader';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useSearchParams, useRouter } from 'next/navigation';

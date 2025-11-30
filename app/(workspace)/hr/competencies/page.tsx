@@ -18,10 +18,10 @@ export const metadata: Metadata = {
   },
 };
 import { competenciesApi } from "@/services/api";
-import FlexibleStatsCards from "@/app/components/FlexibleStatsCards";
-import PageHeader from "@/app/components/PageHeader";
-import CompetenciesTable from "./components/CompetenciesTable";
-import TableSkeleton from "@/app/components/TableSkeleton";
+import FlexibleStatsCards from "@/components/data-display/FlexibleStatsCards";
+import PageHeader from "@/components/common/PageHeader";
+import CompetenciesTable from "./_components/CompetenciesTable";
+import TableSkeleton from "@/components/data-display/TableSkeleton";
 
 async function getCompetenciesData() {
   try {

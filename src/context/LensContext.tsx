@@ -77,8 +77,8 @@ const HR_ROUTES: string[] = [
 export const LENS_CONFIGS: Record<LensType, LensConfig> = {
   user: {
     id: "user",
-    name: "Personal",
-    description: "Your profile and settings",
+    name: "Личное",
+    description: "Ваш профиль и настройки",
     icon: "user",
     color: "text-emerald-600 dark:text-emerald-400",
     bgColor: "bg-emerald-50 dark:bg-emerald-950/40",
@@ -92,8 +92,8 @@ export const LENS_CONFIGS: Record<LensType, LensConfig> = {
   },
   editor: {
     id: "editor",
-    name: "Content",
-    description: "Manage competencies & content",
+    name: "Контент",
+    description: "Управление компетенциями и содержимым",
     icon: "edit",
     color: "text-blue-600 dark:text-blue-400",
     bgColor: "bg-blue-50 dark:bg-blue-950/40",
@@ -122,8 +122,8 @@ export const LENS_CONFIGS: Record<LensType, LensConfig> = {
   },
   admin: {
     id: "admin",
-    name: "Admin",
-    description: "Full system & user management",
+    name: "Админ",
+    description: "Полное управление системой",
     icon: "shield",
     color: "text-violet-600 dark:text-violet-400",
     bgColor: "bg-violet-50 dark:bg-violet-950/40",
@@ -299,9 +299,12 @@ export function LensProvider({ children }: { children: ReactNode }) {
       
       // Check if current route is accessible in the new lens
       const newLensConfig = getLensConfig(lens);
-      const normalizedPath = pathname.replace(/\/$/, "").split("/").slice(0, 2).join("/") || "/";
+      const normalizedPath = pathname.replace(/\/$/, "") || "/";
       const isRouteAccessible = newLensConfig.visibleRoutes.some(
-        (route) => normalizedPath === route || normalizedPath.startsWith(route + "/")
+        (route) => 
+          normalizedPath === route || 
+          normalizedPath.startsWith(route + "/") ||
+          route.startsWith(normalizedPath + "/")
       );
       
       // Redirect to appropriate fallback page if current route is inaccessible
@@ -319,12 +322,13 @@ export function LensProvider({ children }: { children: ReactNode }) {
 
   const isRouteVisible = useCallback(
     (route: string) => {
-      // Normalize route (remove trailing slash, handle dynamic segments)
-      const normalizedRoute = route.replace(/\/$/, "").split("/").slice(0, 2).join("/") || "/";
+      // Normalize route (remove trailing slash)
+      const normalizedRoute = route.replace(/\/$/, "") || "/";
       return lensConfig.visibleRoutes.some(
         (visibleRoute) =>
           normalizedRoute === visibleRoute ||
-          normalizedRoute.startsWith(visibleRoute + "/")
+          normalizedRoute.startsWith(visibleRoute + "/") ||
+          visibleRoute.startsWith(normalizedRoute + "/")
       );
     },
     [lensConfig]
