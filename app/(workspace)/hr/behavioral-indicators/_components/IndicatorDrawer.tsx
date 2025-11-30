@@ -159,7 +159,7 @@ export default function IndicatorDrawer({
                     <span className="text-sm text-muted-foreground leading-normal">Part of:</span>
                     <CompetencyHoverCard competencyId={indicator.competencyId}>
                       <Link 
-                        href={`/competencies/${indicator.competencyId}`}
+                        href={`/hr/competencies/${indicator.competencyId}`}
                         className="text-sm text-primary hover:text-primary/80 hover:underline font-medium inline-flex items-center gap-1.5 min-h-11 p-1"
                         aria-label="View competency details"
                       >
@@ -206,7 +206,7 @@ export default function IndicatorDrawer({
               <Trash2 className="mr-1.5 h-4 w-4" />
               Delete
             </Button>
-            <Link href={`/behavioral-indicators/${indicator.id}`} passHref className="flex-1">
+            <Link href={`/hr/behavioral-indicators/${indicator.id}`} passHref className="flex-1">
                 <Button 
                   variant="outline" 
                   size="sm"
@@ -217,7 +217,7 @@ export default function IndicatorDrawer({
                     View
                 </Button>
             </Link>
-            <Link href={`/behavioral-indicators/${indicator.id}/edit`} passHref className="flex-1">
+            <Link href={`/hr/behavioral-indicators/${indicator.id}/edit`} passHref className="flex-1">
               <Button 
                 variant="default" 
                 size="sm"

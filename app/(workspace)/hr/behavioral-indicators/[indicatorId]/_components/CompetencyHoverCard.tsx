@@ -84,7 +84,7 @@ export function CompetencyHoverCard({ competencyId, children }: CompetencyHoverC
                     </Badge>
                   </div>
                 </div>
-                <Link href={`/competencies/${competency.id}`} className="shrink-0">
+                <Link href={`/hr/competencies/${competency.id}`} className="shrink-0">
                   <Button size="sm" variant="ghost" className="h-8 w-8 p-0">
                     <ExternalLink className="h-3 w-3" />
                   </Button>
@@ -132,7 +132,7 @@ export function CompetencyHoverCard({ competencyId, children }: CompetencyHoverC
 
             {/* Footer */}
             <div className="p-3 pt-0">
-              <Link href={`/competencies/${competency.id}`}>
+              <Link href={`/hr/competencies/${competency.id}`}>
                 <Button size="sm" className="w-full">
                   <ExternalLink className="h-3 w-3 mr-2" />
                   View Full Details

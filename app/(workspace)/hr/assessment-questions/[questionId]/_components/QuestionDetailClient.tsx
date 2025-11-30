@@ -64,8 +64,8 @@ export default function QuestionDetailClient({ question, competency, indicator, 
       <EntityDetailHeader
         title={question.questionText}
         badges={badges}
-        backHref="/assessment-questions"
-        editHref={`/assessment-questions/${question.id}/edit`}
+        backHref="/hr/assessment-questions"
+        editHref={`/hr/assessment-questions/${question.id}/edit`}
         onDelete={handleDeleteQuestion}
         deleteConfig={{
           title: 'Delete Assessment Question',

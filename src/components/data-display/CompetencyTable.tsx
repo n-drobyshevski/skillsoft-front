@@ -44,7 +44,7 @@ const CompetencyTable: React.FC<CompetencyTableProps> = ({ competencies }) => {
           <HoverCard openDelay={300} closeDelay={100}>
             <HoverCardTrigger asChild>
               <Link 
-                href={`/competencies/${competency.id}`} 
+                href={`/hr/competencies/${competency.id}`} 
                 className="font-medium text-primary hover:underline cursor-pointer"
               >
                 {competency.name}

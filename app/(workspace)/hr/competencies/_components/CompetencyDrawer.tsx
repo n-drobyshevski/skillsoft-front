@@ -139,7 +139,7 @@ export default function CompetencyDrawer({
                               </Badge>
                             </div>
                             <Link 
-                              href={`/behavioral-indicators/${indicator.id}`}
+                              href={`/hr/behavioral-indicators/${indicator.id}`}
                               className="text-primary hover:text-primary/80 hover:underline text-sm flex items-center gap-1.5 min-h-11 p-1"
                               aria-label={`View details for ${indicator.title}`}
                             >
@@ -170,7 +170,7 @@ export default function CompetencyDrawer({
               <Trash2 className="mr-1.5 h-4 w-4" />
               Delete
             </Button>
-            <Link href={`/competencies/${competency.id}`} passHref className="flex-1">
+            <Link href={`/hr/competencies/${competency.id}`} passHref className="flex-1">
               <Button 
                 variant="outline" 
                 size="sm"
@@ -181,7 +181,7 @@ export default function CompetencyDrawer({
                 View
               </Button>
             </Link>
-            <Link href={`/competencies/${competency.id}/edit`} passHref className="flex-1">
+            <Link href={`/hr/competencies/${competency.id}/edit`} passHref className="flex-1">
               <Button 
                 variant="default" 
                 size="sm"

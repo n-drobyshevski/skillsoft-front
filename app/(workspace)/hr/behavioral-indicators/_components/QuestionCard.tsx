@@ -27,7 +27,7 @@ export default function QuestionCard({ question }: { question: AssessmentQuestio
 
   return (
     <Link 
-      href={`/assessment-questions/${question.id}`}
+      href={`/hr/assessment-questions/${question.id}`}
       className="block group focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-md"
     >
       <div className={`

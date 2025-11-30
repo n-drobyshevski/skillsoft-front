@@ -86,7 +86,7 @@ export default function IndicatorPreview({ indicator }: { indicator: BehavioralI
                   </div>
                 </div>
                 <Button variant="ghost" size="sm" className="h-8 w-8 p-0 shrink-0" asChild>
-                  <Link href={`/competencies/${competency.id}`}>
+                  <Link href={`/hr/competencies/${competency.id}`}>
                     <ExternalLink className="h-3 w-3" />
                     <span className="sr-only">View competency details</span>
                   </Link>

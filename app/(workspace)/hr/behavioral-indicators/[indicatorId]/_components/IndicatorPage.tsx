@@ -132,7 +132,7 @@ export default function IndicatorPage({ indicator, assessmentQuestions }: Indica
             <Trash2 className="mr-2 h-4 w-4" />
             Delete
           </Button>
-          <Link href={`/behavioral-indicators/${indicator.id}/edit`} passHref>
+          <Link href={`/hr/behavioral-indicators/${indicator.id}/edit`} passHref>
             <Button>
               <Pencil className="mr-2 h-4 w-4" />
               Edit
@@ -203,7 +203,7 @@ export default function IndicatorPage({ indicator, assessmentQuestions }: Indica
                   Assessment Questions ({assessmentQuestions.length})
                 </CardTitle>
                 <Button asChild size="sm">
-                  <Link href={`/assessment-questions/new?competencyId=${indicator.competencyId}&behavioralIndicatorId=${indicator.id}`}>
+                  <Link href={`/hr/assessment-questions/new?competencyId=${indicator.competencyId}&behavioralIndicatorId=${indicator.id}`}>
                       <Plus className="mr-2 h-4 w-4" />
                       Add Question
                   </Link>
@@ -260,7 +260,7 @@ export default function IndicatorPage({ indicator, assessmentQuestions }: Indica
                 <div className="text-center py-8">
                   <p className="text-muted-foreground mb-4">No assessment questions found for this indicator.</p>
                   <Button asChild>
-                    <Link href={`/assessment-questions/new?competencyId=${indicator.competencyId}&behavioralIndicatorId=${indicator.id}`}>
+                    <Link href={`/hr/assessment-questions/new?competencyId=${indicator.competencyId}&behavioralIndicatorId=${indicator.id}`}>
                         <Plus className="mr-2 h-4 w-4" />
                         Add Question
                     </Link>
@@ -314,7 +314,7 @@ export default function IndicatorPage({ indicator, assessmentQuestions }: Indica
               <div className="grid gap-1">
                 <div className="font-semibold text-muted-foreground">Competency</div>
                 <CompetencyHoverCard competencyId={indicator.competencyId}>
-                  <Link href={`/competencies/${indicator.competencyId}`} className="text-primary hover:underline inline-flex items-center gap-1">
+                  <Link href={`/hr/competencies/${indicator.competencyId}`} className="text-primary hover:underline inline-flex items-center gap-1">
                     View Competency
                     <Info className="h-3 w-3 opacity-60" />
                   </Link>

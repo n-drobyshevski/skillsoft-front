@@ -47,8 +47,8 @@ export default function CompetencyDetailClient({ competency, children }: Compete
       <EntityDetailHeader
         title={competency.name}
         badges={badges}
-        backHref="/competencies"
-        editHref={`/competencies/${competency.id}/edit`}
+        backHref="/hr/competencies"
+        editHref={`/hr/competencies/${competency.id}/edit`}
         onDelete={handleDeleteCompetency}
         deleteConfig={{
           title: 'Delete Competency',

@@ -236,7 +236,7 @@ const CurrentQuestionRow = React.memo(({
                 View Details
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
-                <Link href={`/assessment-questions/${question.id}`}>
+                <Link href={`/hr/assessment-questions/${question.id}`}>
                   <Pencil className="w-4 h-4 mr-2" />
                   Edit Question
                 </Link>
@@ -415,7 +415,7 @@ export function IndicatorQuestionsManager({
         
         <div className="flex items-center gap-2">
           {indicator.id !== PREVIEW_INDICATOR_ID ? (
-            <Link href={`/assessment-questions/new?indicatorId=${indicator.id}&competencyId=${indicator.competencyId}`}>
+            <Link href={`/hr/assessment-questions/new?indicatorId=${indicator.id}&competencyId=${indicator.competencyId}`}>
               <Button variant="default" size="sm">
                 <Plus className="w-4 h-4 mr-2" />
                 Create New Question
@@ -557,7 +557,7 @@ export function IndicatorQuestionsManager({
                   {!currentFilters.search && currentFilters.type === 'all' && currentFilters.difficulty === 'all' && (
                     <div className="flex flex-col sm:flex-row gap-2 justify-center">
                       {indicator.id !== PREVIEW_INDICATOR_ID ? (
-                        <Link href={`/assessment-questions/new?indicatorId=${indicator.id}&competencyId=${indicator.competencyId}`}>
+                        <Link href={`/hr/assessment-questions/new?indicatorId=${indicator.id}&competencyId=${indicator.competencyId}`}>
                           <Button variant="default" size="sm">
                             <Plus className="w-4 h-4 mr-2" />
                             Create Question

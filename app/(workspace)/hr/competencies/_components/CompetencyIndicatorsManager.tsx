@@ -237,7 +237,7 @@ const CurrentIndicatorRow = React.memo(({
                 View Details
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
-                <Link href={`/behavioral-indicators/${indicator.id}`}>
+                <Link href={`/hr/behavioral-indicators/${indicator.id}`}>
                   <Pencil className="w-4 h-4 mr-2" />
                   Edit Indicator
                 </Link>
@@ -415,7 +415,7 @@ export function CompetencyIndicatorsManager({
         </div>
         
         <div className="flex items-center gap-2">
-          <Link href={`/behavioral-indicators/new?competencyId=${competency.id}`}>
+          <Link href={`/hr/behavioral-indicators/new?competencyId=${competency.id}`}>
             <Button variant="default" size="sm">
               <Plus className="w-4 h-4 mr-2" />
               Create New Indicator
@@ -620,7 +620,7 @@ export function CompetencyIndicatorsManager({
                   </p>
                   {!currentFilters.search && currentFilters.observabilityLevel === 'all' && (
                     <div className="flex flex-col sm:flex-row gap-2 justify-center">
-                      <Link href={`/behavioral-indicators/new?competencyId=${competency.id}`}>
+                      <Link href={`/hr/behavioral-indicators/new?competencyId=${competency.id}`}>
                         <Button variant="default" size="sm">
                           <Plus className="w-4 h-4 mr-2" />
                           Create Indicator

@@ -87,7 +87,7 @@ export default function IndicatorsTable({ indicators }: IndicatorsTableProps) {
         <div className="flex items-center gap-2">
           <CompetencyHoverCard competencyId={row.original.competencyId}>
             <Link
-              href={`/competencies/${row.original.competencyId}`}
+              href={`/hr/competencies/${row.original.competencyId}`}
               className="text-primary hover:underline"
             >
               {row.original.competencyName}

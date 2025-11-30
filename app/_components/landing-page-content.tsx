@@ -1,5 +1,8 @@
+'use client';
+
+import { useRef } from 'react';
+import { motion, useScroll, useTransform, useReducedMotion } from 'framer-motion';
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { 
   ArrowRight,
@@ -12,346 +15,490 @@ import {
   Zap,
   TrendingUp,
   Star,
-  Globe
+  Globe,
+  Play,
+  Layers,
+  Award
 } from "lucide-react";
-import { DashboardAccessButtons } from "@/components/dashboard/dashboard-access-buttons";
+import Link from "next/link";
+
+// Animation variants for consistent motion design
+const fadeInUp = {
+  hidden: { opacity: 0, y: 30 },
+  visible: { 
+    opacity: 1, 
+    y: 0,
+    transition: { duration: 0.6 }
+  }
+};
+
+const fadeIn = {
+  hidden: { opacity: 0 },
+  visible: { 
+    opacity: 1,
+    transition: { duration: 0.5 }
+  }
+};
+
+const staggerContainer = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+      delayChildren: 0.2
+    }
+  }
+};
+
+const scaleIn = {
+  hidden: { opacity: 0, scale: 0.95 },
+  visible: { 
+    opacity: 1, 
+    scale: 1,
+    transition: { duration: 0.5 }
+  }
+};
 
 /**
- * Modern minimalistic server-rendered landing page content
- * Features: Clean typography, subtle animations, geometric shapes, premium aesthetic
+ * Modern Minimalist Landing Page (2025 Redesign)
+ * 
+ * Design Principles:
+ * - Clean typography with generous white space
+ * - Subtle micro-interactions (hover, scroll-triggered)
+ * - GPU-accelerated animations (transform, opacity only)
+ * - Reduced motion support for accessibility
+ * - Single clear CTA per section
+ * - Consistent color palette with brand identity
  */
 export function LandingPageContent() {
+  const prefersReducedMotion = useReducedMotion();
+  const heroRef = useRef<HTMLElement>(null);
+  
+  const { scrollYProgress } = useScroll({
+    target: heroRef,
+    offset: ["start start", "end start"]
+  });
+  
+  const heroOpacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
+  const heroY = useTransform(scrollYProgress, [0, 0.5], [0, 100]);
+
+  // Respect user preference for reduced motion
+  const motionProps = prefersReducedMotion 
+    ? { initial: "visible", animate: "visible" }
+    : { initial: "hidden", whileInView: "visible", viewport: { once: true, margin: "-100px" } };
+
   return (
-    <div className="relative">
-      {/* Animated Background Elements */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-20 left-10 w-2 h-2 bg-primary/20 rounded-full animate-pulse"></div>
-        <div className="absolute top-40 right-20 w-1 h-1 bg-primary/30 rounded-full animate-ping" style={{animationDelay: '1s'}}></div>
-        <div className="absolute bottom-40 left-20 w-1.5 h-1.5 bg-primary/25 rounded-full animate-pulse" style={{animationDelay: '2s'}}></div>
-        <div className="absolute top-60 left-1/3 w-1 h-1 bg-primary/20 rounded-full animate-ping" style={{animationDelay: '3s'}}></div>
-      </div>
-
-      {/* Minimalist Header */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-border/50">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8">
+    <div className="relative bg-background overflow-hidden">
+      
+      {/* ===== HEADER ===== */}
+      <motion.header 
+        className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border/40"
+        initial={{ y: -100, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+      >
+        <div className="max-w-6xl mx-auto px-6">
           <div className="flex h-16 items-center justify-between">
+            {/* Logo */}
+            <Link href="/" className="flex items-center gap-2.5 group">
+              <motion.div 
+                className="w-9 h-9 bg-primary rounded-xl flex items-center justify-center"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <Sparkles className="w-5 h-5 text-primary-foreground" />
+              </motion.div>
+              <span className="text-lg font-semibold tracking-tight">SkillSoft</span>
+            </Link>
+            
+            {/* Navigation */}
+            <nav className="hidden md:flex items-center gap-8">
+              <a href="#features" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                Features
+              </a>
+              <a href="#how-it-works" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                How It Works
+              </a>
+              <a href="#pricing" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                Pricing
+              </a>
+            </nav>
+            
+            {/* CTA Buttons */}
             <div className="flex items-center gap-3">
-              <div className="relative">
-                <div className="w-8 h-8 bg-linear-to-br from-primary to-primary/60 rounded-lg flex items-center justify-center">
-                  <Sparkles className="w-4 h-4 text-primary-foreground" />
-                </div>
-                <div className="absolute -top-1 -right-1 w-2 h-2 bg-primary rounded-full animate-pulse"></div>
-              </div>
-              <span className="text-lg font-semibold tracking-tight text-foreground">SkillSoft</span>
-            </div>
-            
-            <DashboardAccessButtons />
-          </div>
-        </div>
-      </header>
-
-      {/* Hero Section - Modern Minimalist Design */}
-      <section className="pt-32 pb-20 px-6 lg:px-8 relative overflow-hidden">
-        {/* Enhanced Geometric Background with Modern Animations */}
-        <div className="absolute inset-0">
-          <div className="absolute top-20 right-20 w-72 h-72 bg-linear-to-br from-primary/5 to-transparent rounded-full blur-3xl animate-pulse-glow"></div>
-          <div className="absolute bottom-20 left-20 w-96 h-96 bg-linear-to-tr from-primary/3 to-transparent rounded-full blur-3xl animate-float"></div>
-          
-          {/* Additional modern geometric elements */}
-          <div className="absolute top-1/3 left-1/4 w-4 h-4 border border-primary/20 rotate-45 animate-spin" style={{ animationDuration: '15s' }}></div>
-          <div className="absolute bottom-1/3 right-1/3 w-6 h-6 bg-primary/10 rounded-full animate-pulse shadow-modern"></div>
-          <div className="absolute top-2/3 right-1/4 w-8 h-1 bg-linear-to-r from-primary/20 to-transparent animate-fade-in-up"></div>
-        </div>
-        
-        <div className="max-w-7xl mx-auto relative">
-          <div className="grid lg:grid-cols-2 gap-16 items-center">
-            {/* Content */}
-            <div className="space-y-8 text-center lg:text-left">
-              <div className="space-y-6">
-                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-medium">
-                  <Zap className="w-3 h-3" />
-                  <span>Professional Development Platform</span>
-                </div>
-                
-                <h1 className="text-5xl lg:text-6xl xl:text-7xl font-bold tracking-tight">
-                  <span className="bg-linear-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
-                    Transform Your
-                  </span>
-                  <br />
-                  <span className="bg-linear-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-                    Career Journey
-                  </span>
-                </h1>
-                
-                <p className="text-xl text-muted-foreground max-w-2xl mx-auto lg:mx-0 leading-relaxed">
-                  Accelerate professional growth with our intelligent competency platform. 
-                  Track skills, measure progress, and unlock your potential with precision analytics.
-                </p>
-              </div>
-
-              <div className="flex justify-center lg:justify-start">
-                <Button size="lg" className="btn-modern bg-primary text-primary-foreground hover:bg-primary/90 shadow-modern-lg hover:shadow-xl transition-all duration-300 group animate-scale-in">
-                  Start Free Trial
-                  <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              <Link href="/sign-in">
+                <Button variant="ghost" size="sm" className="text-sm">
+                  Sign In
                 </Button>
-              </div>
-
-              {/* Trust Indicators */}
-              <div className="flex flex-wrap items-center justify-center lg:justify-start gap-8 pt-8">
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                  <span>2,500+ professionals</span>
-                </div>
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                  <span>Enterprise secure</span>
-                </div>
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-                  <span>ISO certified</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Enhanced Modern Dashboard Preview */}
-            <div className="relative animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
-              <div className="absolute inset-0 bg-linear-to-br from-primary/5 to-transparent rounded-3xl animate-gradient"></div>
-              <Card className="card-modern relative p-8 hover-lift shadow-modern-lg transition-all duration-500">
-                <div className="space-y-6">
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-1">
-                      <h3 className="font-semibold text-foreground text-gradient-subtle">Skills Dashboard</h3>
-                      <p className="text-sm text-muted-foreground">Real-time insights</p>
-                    </div>
-                    <Badge variant="secondary" className="bg-primary/10 text-primary animate-pulse-glow border-gradient">
-                      Live
-                    </Badge>
-                  </div>
-                  
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="p-4 rounded-lg bg-background/50 border border-border/50 hover-glow transition-all duration-300 hover:border-primary/30 animate-scale-in" style={{ animationDelay: '0.6s' }}>
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center shadow-modern animate-float">
-                          <Target className="w-4 h-4 text-primary-foreground" />
-                        </div>
-                        <div>
-                          <p className="text-2xl font-bold text-primary">24</p>
-                          <p className="text-xs text-muted-foreground">Skills Mastered</p>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div className="p-4 rounded-lg bg-background/50 border border-border/50 hover-glow transition-all duration-300 hover:border-green-500/30 animate-scale-in" style={{ animationDelay: '0.8s' }}>
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center shadow-modern animate-float" style={{ animationDelay: '1s' }}>
-                          <TrendingUp className="w-4 h-4 text-white" />
-                        </div>
-                        <div>
-                          <p className="text-2xl font-bold text-green-600">94%</p>
-                          <p className="text-xs text-muted-foreground">Progress Rate</p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Enhanced Mini Chart Visualization */}
-                  <div className="h-16 bg-linear-to-r from-primary/10 to-primary/5 rounded-lg flex items-center justify-center relative overflow-hidden animate-scale-in" style={{ animationDelay: '1s' }}>
-                    <div className="absolute inset-0 bg-linear-to-r from-transparent via-primary/5 to-transparent animate-gradient"></div>
-                    <BarChart3 className="w-6 h-6 text-primary relative z-10 animate-pulse-glow" />
-                  </div>
-                </div>
-              </Card>
+              </Link>
+              <Link href="/sign-up">
+                <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                  <Button size="sm" className="text-sm">
+                    Get Started
+                    <ArrowRight className="ml-1.5 w-3.5 h-3.5" />
+                  </Button>
+                </motion.div>
+              </Link>
             </div>
           </div>
         </div>
-      </section>
+      </motion.header>
 
-      {/* Features Section - Clean Grid */}
-      <section id="features" className="py-24 px-6 lg:px-8 bg-muted/30">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center space-y-4 mb-16">
-            <Badge className="bg-primary/10 text-primary border-primary/20">
-              Core Features
-            </Badge>
-            <h2 className="text-3xl lg:text-4xl font-bold tracking-tight">
-              Everything you need to <span className="text-primary">excel</span>
-            </h2>
-            <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
-              Comprehensive tools designed for modern professional development, 
-              backed by intelligent analytics and seamless user experience.
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {/* Feature 1 */}
-            <Card className="group p-8 bg-background/50 backdrop-blur-sm border-border/50 rounded-xl hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
-              <div className="space-y-4">
-                <div className="w-12 h-12 bg-linear-to-br from-primary to-primary/60 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                  <Target className="w-6 h-6 text-primary-foreground" />
-                </div>
-                <div className="space-y-2">
-                  <h3 className="text-lg font-semibold text-foreground">
-                    Smart Competency Framework
-                  </h3>
-                  <p className="text-muted-foreground text-sm leading-relaxed">
-                    Define and track competencies with AI-powered behavioral indicators 
-                    and dynamic assessment criteria.
-                  </p>
-                </div>
-              </div>
-            </Card>
-
-            {/* Feature 2 */}
-            <Card className="group p-8 bg-background/50 backdrop-blur-sm border-border/50 rounded-xl hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
-              <div className="space-y-4">
-                <div className="w-12 h-12 bg-linear-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                  <BarChart3 className="w-6 h-6 text-white" />
-                </div>
-                <div className="space-y-2">
-                  <h3 className="text-lg font-semibold text-foreground">
-                    Advanced Analytics
-                  </h3>
-                  <p className="text-muted-foreground text-sm leading-relaxed">
-                    Gain insights with real-time analytics, predictive modeling, 
-                    and personalized development recommendations.
-                  </p>
-                </div>
-              </div>
-            </Card>
-
-            {/* Feature 3 */}
-            <Card className="group p-8 bg-background/50 backdrop-blur-sm border-border/50 rounded-xl hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
-              <div className="space-y-4">
-                <div className="w-12 h-12 bg-linear-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                  <Users className="w-6 h-6 text-white" />
-                </div>
-                <div className="space-y-2">
-                  <h3 className="text-lg font-semibold text-foreground">
-                    Interactive Assessments
-                  </h3>
-                  <p className="text-muted-foreground text-sm leading-relaxed">
-                    Create engaging assessments with multimedia content 
-                    and instant feedback mechanisms.
-                  </p>
-                </div>
-              </div>
-            </Card>
-
-            {/* Feature 4 */}
-            <Card className="group p-8 bg-background/50 backdrop-blur-sm border-border/50 rounded-xl hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
-              <div className="space-y-4">
-                <div className="w-12 h-12 bg-linear-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                  <Shield className="w-6 h-6 text-white" />
-                </div>
-                <div className="space-y-2">
-                  <h3 className="text-lg font-semibold text-foreground">
-                    Enterprise Security
-                  </h3>
-                  <p className="text-muted-foreground text-sm leading-relaxed">
-                    Bank-level security with SOC 2 compliance, 
-                    SSO integration, and data encryption.
-                  </p>
-                </div>
-              </div>
-            </Card>
-
-            {/* Feature 5 */}
-            <Card className="group p-8 bg-background/50 backdrop-blur-sm border-border/50 rounded-xl hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
-              <div className="space-y-4">
-                <div className="w-12 h-12 bg-linear-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                  <Zap className="w-6 h-6 text-white" />
-                </div>
-                <div className="space-y-2">
-                  <h3 className="text-lg font-semibold text-foreground">
-                    AI-Powered Insights
-                  </h3>
-                  <p className="text-muted-foreground text-sm leading-relaxed">
-                    Leverage machine learning for personalized 
-                    skill recommendations and growth paths.
-                  </p>
-                </div>
-              </div>
-            </Card>
-
-            {/* Feature 6 */}
-            <Card className="group p-8 bg-background/50 backdrop-blur-sm border-border/50 rounded-xl hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
-              <div className="space-y-4">
-                <div className="w-12 h-12 bg-linear-to-br from-pink-500 to-pink-600 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                  <Globe className="w-6 h-6 text-white" />
-                </div>
-                <div className="space-y-2">
-                  <h3 className="text-lg font-semibold text-foreground">
-                    Global Scalability
-                  </h3>
-                  <p className="text-muted-foreground text-sm leading-relaxed">
-                    Multi-language support, regional compliance, 
-                    and global deployment capabilities.
-                  </p>
-                </div>
-              </div>
-            </Card>
-          </div>
+      {/* ===== HERO SECTION ===== */}
+      <section ref={heroRef} className="relative min-h-screen flex items-center pt-16">
+        {/* Subtle Background Gradient */}
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute top-0 left-1/4 w-[600px] h-[600px] bg-primary/5 rounded-full blur-[120px]" />
+          <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] bg-primary/3 rounded-full blur-[100px]" />
         </div>
-      </section>
-
-      {/* Social Proof Section */}
-      <section className="py-16 px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto text-center">
-          <p className="text-muted-foreground mb-8">Trusted by leading organizations worldwide</p>
-          <div className="flex flex-wrap items-center justify-center gap-8 opacity-60">
-            {/* Placeholder for company logos */}
-            <div className="w-24 h-12 bg-muted/50 rounded flex items-center justify-center">
-              <span className="text-xs font-semibold text-muted-foreground">Company A</span>
-            </div>
-            <div className="w-24 h-12 bg-muted/50 rounded flex items-center justify-center">
-              <span className="text-xs font-semibold text-muted-foreground">Company B</span>
-            </div>
-            <div className="w-24 h-12 bg-muted/50 rounded flex items-center justify-center">
-              <span className="text-xs font-semibold text-muted-foreground">Company C</span>
-            </div>
-            <div className="w-24 h-12 bg-muted/50 rounded flex items-center justify-center">
-              <span className="text-xs font-semibold text-muted-foreground">Company D</span>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* CTA Section - Modern Gradient */}
-      <section className="py-24 px-6 lg:px-8 relative overflow-hidden">
-        <div className="absolute inset-0 bg-linear-to-br from-primary/5 via-primary/10 to-primary/5"></div>
-        <div className="absolute inset-0 bg-grid-foreground/[0.02]"></div>
         
-        <div className="max-w-4xl mx-auto text-center relative">
-          <div className="space-y-6">
-            <Badge className="bg-primary/20 text-primary border-primary/30">
-              <Star className="w-3 h-3 mr-1" />
-              Ready to Transform?
-            </Badge>
+        <motion.div 
+          className="relative max-w-6xl mx-auto px-6 py-24"
+          style={{ opacity: prefersReducedMotion ? 1 : heroOpacity, y: prefersReducedMotion ? 0 : heroY }}
+        >
+          <div className="max-w-4xl mx-auto text-center space-y-8">
+            {/* Badge */}
+            <motion.div {...motionProps} variants={fadeIn}>
+              <Badge variant="secondary" className="px-4 py-1.5 text-sm font-medium bg-primary/10 text-primary border-primary/20 hover:bg-primary/15 transition-colors">
+                <Zap className="w-3.5 h-3.5 mr-1.5" />
+                Competency Management Platform
+              </Badge>
+            </motion.div>
             
-            <h2 className="text-4xl lg:text-5xl font-bold tracking-tight">
-              Start Your Growth
-              <br />
-              <span className="bg-linear-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-                Journey Today
-              </span>
-            </h2>
+            {/* Headline */}
+            <motion.div {...motionProps} variants={fadeInUp} className="space-y-4">
+              <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.1]">
+                Build Skills That
+                <span className="block text-primary">Drive Results</span>
+              </h1>
+              <p className="text-xl md:text-2xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
+                The intelligent platform for tracking competencies, measuring growth, 
+                and accelerating professional development.
+              </p>
+            </motion.div>
             
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Join over 2,500 professionals transforming their careers with intelligent competency management.
-            </p>
+            {/* CTA Buttons */}
+            <motion.div 
+              {...motionProps} 
+              variants={fadeInUp}
+              className="flex flex-col sm:flex-row items-center justify-center gap-4"
+            >
+              <Link href="/sign-up">
+                <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                  <Button size="lg" className="h-12 px-8 text-base">
+                    Start Free Trial
+                    <ArrowRight className="ml-2 w-4 h-4" />
+                  </Button>
+                </motion.div>
+              </Link>
+              <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                <Button variant="outline" size="lg" className="h-12 px-8 text-base group">
+                  <Play className="mr-2 w-4 h-4 group-hover:scale-110 transition-transform" />
+                  Watch Demo
+                </Button>
+              </motion.div>
+            </motion.div>
             
-            <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
-              <Button size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg hover:shadow-xl transition-all duration-300 group">
-                Start Free Trial
-                <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
-              </Button>
-              <Button size="lg" variant="outline" className="border-2">
-                Schedule Demo
-              </Button>
-            </div>
-
             {/* Trust Indicators */}
-            <div className="flex flex-wrap items-center justify-center gap-6 pt-8 text-sm text-muted-foreground">
+            <motion.div 
+              {...motionProps} 
+              variants={fadeIn}
+              className="flex flex-wrap items-center justify-center gap-x-8 gap-y-3 pt-4 text-sm text-muted-foreground"
+            >
+              <div className="flex items-center gap-2">
+                <CheckCircle className="w-4 h-4 text-green-500" />
+                <span>Free 30-day trial</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Shield className="w-4 h-4 text-blue-500" />
+                <span>SOC 2 Compliant</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Users className="w-4 h-4 text-purple-500" />
+                <span>2,500+ Professionals</span>
+              </div>
+            </motion.div>
+          </div>
+        </motion.div>
+        
+        {/* Scroll Indicator */}
+        <motion.div 
+          className="absolute bottom-8 left-1/2 -translate-x-1/2"
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 1, duration: 0.5 }}
+        >
+          <motion.div
+            animate={{ y: [0, 8, 0] }}
+            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+            className="w-6 h-10 border-2 border-muted-foreground/30 rounded-full flex justify-center"
+          >
+            <motion.div 
+              className="w-1.5 h-1.5 bg-muted-foreground/50 rounded-full mt-2"
+              animate={{ opacity: [0.5, 1, 0.5] }}
+              transition={{ duration: 2, repeat: Infinity }}
+            />
+          </motion.div>
+        </motion.div>
+      </section>
+
+      {/* ===== FEATURES SECTION ===== */}
+      <section id="features" className="py-32 bg-muted/30">
+        <div className="max-w-6xl mx-auto px-6">
+          {/* Section Header */}
+          <motion.div 
+            {...motionProps} 
+            variants={staggerContainer}
+            className="text-center space-y-4 mb-20"
+          >
+            <motion.div variants={fadeIn}>
+              <Badge variant="outline" className="mb-4">Features</Badge>
+            </motion.div>
+            <motion.h2 variants={fadeInUp} className="text-4xl md:text-5xl font-bold tracking-tight">
+              Everything you need to{' '}
+              <span className="text-primary">succeed</span>
+            </motion.h2>
+            <motion.p variants={fadeInUp} className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              Comprehensive tools designed for modern professional development,
+              backed by intelligent analytics.
+            </motion.p>
+          </motion.div>
+
+          {/* Features Grid */}
+          <motion.div 
+            {...motionProps}
+            variants={staggerContainer}
+            className="grid md:grid-cols-2 lg:grid-cols-3 gap-6"
+          >
+            {[
+              {
+                icon: Target,
+                title: "Smart Competency Framework",
+                description: "Define and track competencies with AI-powered behavioral indicators.",
+                color: "bg-primary"
+              },
+              {
+                icon: BarChart3,
+                title: "Advanced Analytics",
+                description: "Real-time insights with predictive modeling and trend analysis.",
+                color: "bg-blue-500"
+              },
+              {
+                icon: Users,
+                title: "Interactive Assessments",
+                description: "Engaging evaluations with instant feedback and multimedia support.",
+                color: "bg-green-500"
+              },
+              {
+                icon: Shield,
+                title: "Enterprise Security",
+                description: "SOC 2 compliance, SSO integration, and end-to-end encryption.",
+                color: "bg-purple-500"
+              },
+              {
+                icon: Zap,
+                title: "AI-Powered Insights",
+                description: "Personalized skill recommendations and growth pathways.",
+                color: "bg-orange-500"
+              },
+              {
+                icon: Globe,
+                title: "Global Scalability",
+                description: "Multi-language support and regional compliance capabilities.",
+                color: "bg-pink-500"
+              }
+            ].map((feature) => (
+              <motion.div
+                key={feature.title}
+                variants={scaleIn}
+                className="group"
+              >
+                <motion.div
+                  whileHover={{ y: -4 }}
+                  transition={{ duration: 0.2 }}
+                  className="h-full p-8 rounded-2xl bg-background border border-border/50 hover:border-border hover:shadow-lg transition-all duration-300"
+                >
+                  <div className="space-y-4">
+                    <motion.div 
+                      className={`w-12 h-12 ${feature.color} rounded-xl flex items-center justify-center`}
+                      whileHover={{ scale: 1.1, rotate: 5 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      <feature.icon className="w-6 h-6 text-white" />
+                    </motion.div>
+                    <h3 className="text-lg font-semibold">{feature.title}</h3>
+                    <p className="text-muted-foreground text-sm leading-relaxed">
+                      {feature.description}
+                    </p>
+                  </div>
+                </motion.div>
+              </motion.div>
+            ))}
+          </motion.div>
+        </div>
+      </section>
+
+      {/* ===== HOW IT WORKS SECTION ===== */}
+      <section id="how-it-works" className="py-32">
+        <div className="max-w-6xl mx-auto px-6">
+          <motion.div 
+            {...motionProps}
+            variants={staggerContainer}
+            className="text-center space-y-4 mb-20"
+          >
+            <motion.div variants={fadeIn}>
+              <Badge variant="outline" className="mb-4">How It Works</Badge>
+            </motion.div>
+            <motion.h2 variants={fadeInUp} className="text-4xl md:text-5xl font-bold tracking-tight">
+              Simple steps to{' '}
+              <span className="text-primary">growth</span>
+            </motion.h2>
+          </motion.div>
+
+          <motion.div 
+            {...motionProps}
+            variants={staggerContainer}
+            className="grid md:grid-cols-3 gap-12"
+          >
+            {[
+              {
+                step: "01",
+                icon: Layers,
+                title: "Define Your Framework",
+                description: "Create competency models tailored to your organization's goals and industry standards."
+              },
+              {
+                step: "02",
+                icon: TrendingUp,
+                title: "Track Progress",
+                description: "Monitor skill development with real-time dashboards and detailed analytics."
+              },
+              {
+                step: "03",
+                icon: Award,
+                title: "Achieve Excellence",
+                description: "Celebrate milestones and continuously improve with data-driven insights."
+              }
+            ].map((item, index) => (
+              <motion.div
+                key={item.step}
+                variants={fadeInUp}
+                className="relative text-center"
+              >
+                {/* Connector Line */}
+                {index < 2 && (
+                  <div className="hidden md:block absolute top-16 left-[60%] w-[80%] h-px bg-gradient-to-r from-border to-transparent" />
+                )}
+                
+                <div className="space-y-6">
+                  <div className="relative inline-flex">
+                    <motion.div
+                      whileHover={{ scale: 1.05 }}
+                      className="w-32 h-32 rounded-full bg-muted/50 flex items-center justify-center"
+                    >
+                      <div className="w-24 h-24 rounded-full bg-background border-2 border-primary/20 flex items-center justify-center">
+                        <item.icon className="w-10 h-10 text-primary" />
+                      </div>
+                    </motion.div>
+                    <span className="absolute -top-2 -right-2 w-10 h-10 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-sm font-bold">
+                      {item.step}
+                    </span>
+                  </div>
+                  <h3 className="text-xl font-semibold">{item.title}</h3>
+                  <p className="text-muted-foreground leading-relaxed max-w-xs mx-auto">
+                    {item.description}
+                  </p>
+                </div>
+              </motion.div>
+            ))}
+          </motion.div>
+        </div>
+      </section>
+
+      {/* ===== STATS SECTION ===== */}
+      <section className="py-24 bg-primary">
+        <div className="max-w-6xl mx-auto px-6">
+          <motion.div 
+            {...motionProps}
+            variants={staggerContainer}
+            className="grid grid-cols-2 md:grid-cols-4 gap-8"
+          >
+            {[
+              { value: "2,500+", label: "Active Users" },
+              { value: "150+", label: "Organizations" },
+              { value: "98%", label: "Satisfaction Rate" },
+              { value: "45%", label: "Productivity Gain" }
+            ].map((stat) => (
+              <motion.div
+                key={stat.label}
+                variants={scaleIn}
+                className="text-center"
+              >
+                <motion.div
+                  initial={{ scale: 0.5, opacity: 0 }}
+                  whileInView={{ scale: 1, opacity: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+                  className="text-4xl md:text-5xl font-bold text-primary-foreground mb-2"
+                >
+                  {stat.value}
+                </motion.div>
+                <div className="text-primary-foreground/80 text-sm">{stat.label}</div>
+              </motion.div>
+            ))}
+          </motion.div>
+        </div>
+      </section>
+
+      {/* ===== CTA SECTION ===== */}
+      <section id="pricing" className="py-32">
+        <div className="max-w-4xl mx-auto px-6 text-center">
+          <motion.div 
+            {...motionProps}
+            variants={staggerContainer}
+            className="space-y-8"
+          >
+            <motion.div variants={fadeIn}>
+              <Badge className="bg-primary/10 text-primary border-primary/20 mb-4">
+                <Star className="w-3.5 h-3.5 mr-1.5" />
+                Ready to Transform?
+              </Badge>
+            </motion.div>
+            
+            <motion.h2 variants={fadeInUp} className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight">
+              Start Your Growth
+              <span className="block text-primary">Journey Today</span>
+            </motion.h2>
+            
+            <motion.p variants={fadeInUp} className="text-xl text-muted-foreground max-w-2xl mx-auto">
+              Join thousands of professionals transforming their careers 
+              with intelligent competency management.
+            </motion.p>
+            
+            <motion.div 
+              variants={fadeInUp}
+              className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4"
+            >
+              <Link href="/sign-up">
+                <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                  <Button size="lg" className="h-14 px-10 text-lg">
+                    Start Free Trial
+                    <ArrowRight className="ml-2 w-5 h-5" />
+                  </Button>
+                </motion.div>
+              </Link>
+              <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                <Button variant="outline" size="lg" className="h-14 px-10 text-lg">
+                  Schedule Demo
+                </Button>
+              </motion.div>
+            </motion.div>
+            
+            <motion.div 
+              variants={fadeIn}
+              className="flex flex-wrap items-center justify-center gap-8 pt-8 text-sm text-muted-foreground"
+            >
               <div className="flex items-center gap-2">
                 <CheckCircle className="w-4 h-4 text-green-500" />
                 <span>30-day free trial</span>
@@ -364,29 +511,56 @@ export function LandingPageContent() {
                 <Users className="w-4 h-4 text-purple-500" />
                 <span>24/7 support</span>
               </div>
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
         </div>
       </section>
 
-      {/* Minimal Footer */}
-      <footer className="border-t border-border/50 bg-background/50 backdrop-blur-sm">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8 py-12">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-8">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-linear-to-br from-primary to-primary/60 rounded-lg flex items-center justify-center">
-                <Sparkles className="w-4 h-4 text-primary-foreground" />
+      {/* ===== FOOTER ===== */}
+      <footer className="border-t border-border/50 bg-muted/20">
+        <div className="max-w-6xl mx-auto px-6 py-16">
+          <div className="grid md:grid-cols-4 gap-12">
+            {/* Brand */}
+            <div className="md:col-span-2 space-y-4">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 bg-primary rounded-xl flex items-center justify-center">
+                  <Sparkles className="w-5 h-5 text-primary-foreground" />
+                </div>
+                <span className="text-lg font-semibold">SkillSoft</span>
               </div>
-              <span className="text-lg font-semibold tracking-tight text-foreground">SkillSoft</span>
+              <p className="text-muted-foreground text-sm max-w-xs leading-relaxed">
+                The intelligent platform for professional development and competency management.
+              </p>
             </div>
             
-            <div className="flex items-center gap-8 text-sm text-muted-foreground">
-              <span>© 2025 SkillSoft. All rights reserved.</span>
-              <div className="flex gap-6">
-                <a href="#" className="hover:text-foreground transition-colors">Privacy</a>
-                <a href="#" className="hover:text-foreground transition-colors">Terms</a>
-                <a href="#" className="hover:text-foreground transition-colors">Contact</a>
+            {/* Links */}
+            <div className="space-y-4">
+              <h4 className="font-semibold text-sm">Product</h4>
+              <div className="space-y-3 text-sm text-muted-foreground">
+                <a href="#features" className="block hover:text-foreground transition-colors">Features</a>
+                <a href="#pricing" className="block hover:text-foreground transition-colors">Pricing</a>
+                <a href="#" className="block hover:text-foreground transition-colors">Integrations</a>
               </div>
+            </div>
+            
+            <div className="space-y-4">
+              <h4 className="font-semibold text-sm">Company</h4>
+              <div className="space-y-3 text-sm text-muted-foreground">
+                <a href="#" className="block hover:text-foreground transition-colors">About</a>
+                <a href="#" className="block hover:text-foreground transition-colors">Blog</a>
+                <a href="#" className="block hover:text-foreground transition-colors">Careers</a>
+              </div>
+            </div>
+          </div>
+          
+          <div className="flex flex-col md:flex-row justify-between items-center gap-4 mt-16 pt-8 border-t border-border/50">
+            <p className="text-sm text-muted-foreground">
+              © 2025 SkillSoft. All rights reserved.
+            </p>
+            <div className="flex gap-6 text-sm text-muted-foreground">
+              <a href="#" className="hover:text-foreground transition-colors">Privacy</a>
+              <a href="#" className="hover:text-foreground transition-colors">Terms</a>
+              <a href="#" className="hover:text-foreground transition-colors">Cookies</a>
             </div>
           </div>
         </div>
@@ -394,3 +568,5 @@ export function LandingPageContent() {
     </div>
   );
 }
+
+// Social Proof Section removed and integrated into main content

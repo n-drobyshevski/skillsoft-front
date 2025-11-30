@@ -12,13 +12,13 @@ export function Header() {
 
         {/* Navigation - hidden on mobile */}
         <nav className="hidden md:flex items-center space-x-6 text-sm font-medium">
-          <a href="/competencies" className="transition-colors hover:text-foreground/80">
+          <a href="/hr/competencies" className="transition-colors hover:text-foreground/80">
             Competencies
           </a>
-          <a href="/behavioral-indicators" className="transition-colors hover:text-foreground/80">
+          <a href="/hr/behavioral-indicators" className="transition-colors hover:text-foreground/80">
             Indicators
           </a>
-          <a href="/assessment-questions" className="transition-colors hover:text-foreground/80">
+          <a href="/hr/assessment-questions" className="transition-colors hover:text-foreground/80">
             Questions
           </a>
         </nav>

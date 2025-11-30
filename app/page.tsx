@@ -1,22 +1,5 @@
 import { Suspense } from "react";
 import { Metadata } from "next";
-import { Button } from "@/components/ui/button";
-import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { 
-  CheckCircle, 
-  TrendingUp, 
-  Users, 
-  Target, 
-  BarChart3, 
-  Shield, 
-  Globe,
-  ArrowRight,
-  Sparkles,
-  Award,
-  LineChart,
-  Rocket
-} from "lucide-react";
 import { AuthHandlerClient } from "@/components/auth/auth-handler-client";
 import { LandingPageContent } from "./_components/landing-page-content";
 

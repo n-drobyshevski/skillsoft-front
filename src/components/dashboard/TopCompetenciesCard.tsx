@@ -28,7 +28,7 @@ export default function TopCompetenciesCard({ competencies }: TopCompetenciesCar
           </Avatar>
           <div className="space-y-1 flex-1 min-w-0">
             <Link 
-              href={`/competencies/${competency.id}`}
+              href={`/hr/competencies/${competency.id}`}
               className="text-sm font-medium leading-none hover:underline block truncate"
             >
               {competency.name}

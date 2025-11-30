@@ -68,7 +68,7 @@ export default function QuestionsTable({ questions }: QuestionsTableProps) {
                   {question.behavioralIndicatorId ? (
                     <IndicatorHoverCard indicatorId={question.behavioralIndicatorId}>
                       <Link
-                        href={`/behavioral-indicators/${question.behavioralIndicatorId}`}
+                        href={`/hr/behavioral-indicators/${question.behavioralIndicatorId}`}
                         className="text-primary hover:underline"
                       >
                         View Indicator

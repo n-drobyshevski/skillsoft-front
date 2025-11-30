@@ -44,7 +44,7 @@ export function CompetencyHeader({ competency }: CompetencyHeaderProps) {
       <div className="flex items-center justify-between mb-8">
         <div className="flex items-center gap-4">
           <Button variant="ghost" size="icon" asChild>
-            <Link href="/competencies">
+            <Link href="/hr/competencies">
               <ArrowLeft className="w-4 h-4" />
               <span className="sr-only">Go back</span>
             </Link>
@@ -82,7 +82,7 @@ export function CompetencyHeader({ competency }: CompetencyHeaderProps) {
             <Trash2 className="mr-2 h-4 w-4" />
             Delete
           </Button>
-          <Link href={`/competencies/${competency.id}/edit`} passHref>
+          <Link href={`/hr/competencies/${competency.id}/edit`} passHref>
             <Button>
               <Edit className="mr-2 h-4 w-4" />
               Edit

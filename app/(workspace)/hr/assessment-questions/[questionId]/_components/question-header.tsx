@@ -48,7 +48,7 @@ export default function QuestionHeader({
             <div className="flex items-center justify-between mb-8">
                 <div className="flex items-center gap-4">
                     <Button variant="ghost" size="icon" asChild>
-                        <Link href="/assessment-questions">
+                        <Link href="/hr/assessment-questions">
                             <ArrowLeft className="w-4 h-4" />
                             <span className="sr-only">Go back</span>
                         </Link>
@@ -80,7 +80,7 @@ export default function QuestionHeader({
                         <Trash2 className="mr-2 h-4 w-4" />
                         Delete
                     </Button>
-                    <Link href={`/assessment-questions/${questionId}/edit`} passHref>
+                    <Link href={`/hr/assessment-questions/${questionId}/edit`} passHref>
                         <Button>
                             <Pencil className="mr-2 h-4 w-4" />
                             Edit

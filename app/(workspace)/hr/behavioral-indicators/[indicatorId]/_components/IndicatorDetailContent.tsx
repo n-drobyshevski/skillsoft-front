@@ -104,7 +104,7 @@ export default function IndicatorDetailContent({ indicator, assessmentQuestions 
                   </Badge>
                 </CardTitle>
                 <Button asChild size="sm" variant="outline" className="h-8">
-                  <Link href={`/assessment-questions/new?competencyId=${indicator.competencyId}&behavioralIndicatorId=${indicator.id}`}>
+                  <Link href={`/hr/assessment-questions/new?competencyId=${indicator.competencyId}&behavioralIndicatorId=${indicator.id}`}>
                       <Plus className="mr-1.5 h-3.5 w-3.5" />
                       Add Question
                   </Link>
@@ -189,7 +189,7 @@ export default function IndicatorDetailContent({ indicator, assessmentQuestions 
                     No assessment questions found for this indicator.
                   </p>
                   <Button asChild variant="outline">
-                    <Link href={`/assessment-questions/new?competencyId=${indicator.competencyId}&behavioralIndicatorId=${indicator.id}`}>
+                    <Link href={`/hr/assessment-questions/new?competencyId=${indicator.competencyId}&behavioralIndicatorId=${indicator.id}`}>
                         <Plus className="mr-2 h-4 w-4" />
                         Add Question
                     </Link>
@@ -277,7 +277,7 @@ export default function IndicatorDetailContent({ indicator, assessmentQuestions 
                       asChild 
                       className="h-7 px-2.5 text-xs hover:bg-muted/80 text-primary"
                     >
-                      <Link href={`/competencies/${indicator.competencyId}`}>
+                      <Link href={`/hr/competencies/${indicator.competencyId}`}>
                         View Details
                         <Info className="h-3 w-3 ml-1.5 opacity-60" />
                       </Link>

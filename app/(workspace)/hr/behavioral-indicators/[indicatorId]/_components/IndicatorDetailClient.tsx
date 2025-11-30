@@ -67,10 +67,10 @@ export default function IndicatorDetailClient({ indicator, children }: Indicator
       <EntityDetailHeader
         title={indicator.title}
         badges={badges}
-        backHref="/behavioral-indicators"
-        editHref={`/behavioral-indicators/${indicator.id}/edit`}
+        backHref="/hr/behavioral-indicators"
+        editHref={`/hr/behavioral-indicators/${indicator.id}/edit`}
         onDelete={handleDelete}
-        deleteConfig={{
+        deleteConfig={{{
           title: 'Delete Behavioral Indicator',
           description: 'This action cannot be undone. This will permanently delete the behavioral indicator and all associated data.',
           entityName: indicator.title,

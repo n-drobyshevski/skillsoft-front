@@ -157,7 +157,7 @@ export default function AssessmentQuestionDrawer({
                         <span className="text-muted-foreground">Competency:</span>
                         <CompetencyHoverCard competencyId={competency.id}>
                           <Link 
-                            href={`/competencies/${competency.id}`}
+                            href={`/hr/competencies/${competency.id}`}
                             className="text-primary hover:text-primary/80 font-medium inline-flex items-center gap-1.5 min-h-11 p-1"
                             aria-label={`View competency: ${competency.name}`}
                           >
@@ -173,7 +173,7 @@ export default function AssessmentQuestionDrawer({
                         <span className="text-muted-foreground">Indicator:</span>
                         <IndicatorHoverCard indicatorId={currentIndicator.id}>
                           <Link 
-                            href={`/behavioral-indicators/${currentIndicator.id}`}
+                            href={`/hr/behavioral-indicators/${currentIndicator.id}`}
                             className="text-primary hover:text-primary/80 font-medium inline-flex items-center gap-1.5 min-h-11 p-1"
                             aria-label={`View indicator: ${currentIndicator.title}`}
                           >
@@ -234,7 +234,7 @@ export default function AssessmentQuestionDrawer({
               <Trash2 className="mr-1.5 h-4 w-4" />
               Delete
             </Button>
-            <Link href={`/assessment-questions/${question.id}`} passHref className="flex-1">
+            <Link href={`/hr/assessment-questions/${question.id}`} passHref className="flex-1">
               <Button 
                 variant="outline" 
                 size="sm"
@@ -245,7 +245,7 @@ export default function AssessmentQuestionDrawer({
                 View
               </Button>
             </Link>
-            <Link href={`/assessment-questions/${question.id}/edit`} passHref className="flex-1">
+            <Link href={`/hr/assessment-questions/${question.id}/edit`} passHref className="flex-1">
               <Button 
                 variant="default" 
                 size="sm"

@@ -52,7 +52,7 @@ export default function CompetencyCard({ competency }: { competency: Competency 
 					<div className="flex items-start justify-between mb-2">
 						<div>
 							<Link
-								href={`/competencies/${competency.id}`}
+								href={`/hr/competencies/${competency.id}`}
 								className="font-semibold text-xl hover:text-primary transition-colors line-clamp-1"
 							>
 								{competency.name}
@@ -95,7 +95,7 @@ export default function CompetencyCard({ competency }: { competency: Competency 
 								<DropdownMenuSeparator />
 								<DropdownMenuItem asChild>
 									<Link
-										href={`/competencies/${competency.id}`}
+										href={`/hr/competencies/${competency.id}`}
 										className="flex items-center"
 									>
 										<Eye className="mr-2 h-4 w-4" />
@@ -134,7 +134,7 @@ export default function CompetencyCard({ competency }: { competency: Competency 
 						<div className="flex-grow" />
 						<Button asChild variant="outline" className="ml-auto">
 							<Link
-								href={`/competencies/${competency.id}`}
+								href={`/hr/competencies/${competency.id}`}
 								className="flex items-center"
 							>
 								View Details

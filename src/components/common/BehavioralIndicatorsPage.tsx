@@ -125,7 +125,7 @@ const columns: ColumnDef<BehavioralIndicator>[] = [
 		cell: ({ row }: { row: any }) => (
 			<div className="flex items-center gap-2">
 				<Link
-					href={`/competency/${row.original.competency.id}`}
+					href={`/hr/competencies/${row.original.competency.id}`}
 					className="text-primary hover:underline"
 				>
 					{row.original.competency.name}
