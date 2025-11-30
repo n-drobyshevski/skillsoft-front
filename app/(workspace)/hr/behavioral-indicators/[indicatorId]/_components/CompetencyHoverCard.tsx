@@ -30,9 +30,10 @@ export function CompetencyHoverCard({ competencyId, children }: CompetencyHoverC
   const [competency, setCompetency] = useState<Competency | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [hasFetched, setHasFetched] = useState(false);
 
   const fetchCompetencyData = async () => {
-    if (competency) return; // Don't refetch if already loaded
+    if (competency || hasFetched) return; // Don't refetch if already loaded or attempted
     
     setIsLoading(true);
     setError(null);
@@ -44,6 +45,7 @@ export function CompetencyHoverCard({ competencyId, children }: CompetencyHoverC
       setError('Failed to load competency details');
     } finally {
       setIsLoading(false);
+      setHasFetched(true);
     }
   };
 
@@ -140,11 +142,11 @@ export function CompetencyHoverCard({ competencyId, children }: CompetencyHoverC
               </Link>
             </div>
           </div>
-        ) : (
+        ) : hasFetched && !isLoading ? (
           <div className="p-4 text-center text-sm text-muted-foreground">
-            No competency data available
+            Competency not found
           </div>
-        )}
+        ) : null}
       </HoverCardContent>
     </HoverCard>
   );

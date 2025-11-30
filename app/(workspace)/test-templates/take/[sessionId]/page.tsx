@@ -490,16 +490,16 @@ export default function TestTakePage() {
 
   return (
     <div className="min-h-screen bg-muted/30">
-      {/* Header */}
+      {/* Header - sticky with mobile-first design */}
       <header className="sticky top-0 z-50 bg-background border-b shadow-sm">
-        <div className="container max-w-4xl mx-auto px-4 py-3">
-          <div className="flex items-center justify-between gap-4">
+        <div className="container max-w-4xl mx-auto px-3 py-2 sm:px-4 sm:py-3">
+          <div className="flex items-center justify-between gap-2 sm:gap-4">
             {/* Test name and progress */}
             <div className="flex-1 min-w-0">
-              <h1 className="text-lg font-semibold truncate">{session.templateName}</h1>
+              <h1 className="text-base sm:text-lg font-semibold truncate">{session.templateName}</h1>
               <div className="flex items-center gap-2 mt-1">
                 <Progress value={progressPercent} className="flex-1 h-2" />
-                <span className="text-sm text-muted-foreground whitespace-nowrap">
+                <span className="text-xs sm:text-sm text-muted-foreground whitespace-nowrap">
                   {currentQuestion.questionNumber}/{currentQuestion.totalQuestions}
                 </span>
               </div>
@@ -509,18 +509,19 @@ export default function TestTakePage() {
             {timeRemaining !== null && (
               <Badge 
                 variant={timeRemaining <= 300 ? "destructive" : "secondary"}
-                className="flex items-center gap-1.5 px-3 py-1.5 text-base font-mono"
+                className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1 sm:py-1.5 text-sm sm:text-base font-mono shrink-0"
               >
-                <Clock className="h-4 w-4" />
+                <Clock className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                 {formatTime(timeRemaining)}
               </Badge>
             )}
             
-            {/* Exit button */}
+            {/* Exit button - touch-friendly */}
             <Button 
               variant="ghost" 
               size="sm"
               onClick={() => setShowAbandonDialog(true)}
+              className="min-h-10 min-w-10 p-2 sm:px-3"
             >
               <Flag className="h-4 w-4" />
               <span className="hidden sm:inline ml-2">Выйти</span>
@@ -529,8 +530,8 @@ export default function TestTakePage() {
         </div>
       </header>
 
-      {/* Main content */}
-      <main className="container max-w-3xl mx-auto py-6 px-4">
+      {/* Main content - mobile-optimized padding */}
+      <main className="container max-w-3xl mx-auto py-4 px-3 sm:py-6 sm:px-4">
         <Card>
           <CardHeader>
             <div className="flex items-start justify-between gap-4">
@@ -569,6 +570,7 @@ export default function TestTakePage() {
                   variant="outline"
                   onClick={handlePreviousQuestion}
                   disabled={isSubmitting}
+                  className="min-h-11 flex-1 sm:flex-initial"
                 >
                   <ChevronLeft className="h-4 w-4 mr-1" />
                   Назад
@@ -580,6 +582,7 @@ export default function TestTakePage() {
                   variant="ghost"
                   onClick={() => handleSubmitAnswer(true)}
                   disabled={isSubmitting}
+                  className="min-h-11 flex-1 sm:flex-initial"
                 >
                   <SkipForward className="h-4 w-4 mr-1" />
                   Пропустить
@@ -589,7 +592,7 @@ export default function TestTakePage() {
             
             {/* Submit button */}
             <Button
-              className="w-full sm:w-auto sm:ml-auto"
+              className="w-full sm:w-auto sm:ml-auto min-h-11"
               onClick={() => handleSubmitAnswer(false)}
               disabled={isSubmitting || !isAnswerValid()}
             >

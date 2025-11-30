@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 // Create a stable timestamp that won't cause React Compiler issues
 const getStableNow = () => {
@@ -72,7 +72,17 @@ export default function UserDrawer({
   onOpenChange,
   user,
 }: UserDrawerProps) {
+  const router = useRouter();
   const [copiedField, setCopiedField] = useState<string | null>(null);
+
+  // Handle navigation - close drawer then navigate after animation completes
+  const handleNavigate = (path: string) => {
+    onOpenChange(false);
+    // Wait for drawer close animation (typically 150-200ms) then navigate
+    setTimeout(() => {
+      router.push(path);
+    }, 150);
+  };
 
   const copyToClipboard = (text: string, field: string) => {
     navigator.clipboard.writeText(text);
@@ -338,14 +348,21 @@ export default function UserDrawer({
 
           {/* Footer Actions */}
           <div className="p-4 border-t bg-muted/30 space-y-2">
-            <Button className="w-full h-9" size="sm" asChild>
-              <Link href={`/users/${user.id}`}>
-                <ExternalLink className="h-3.5 w-3.5 mr-2" />
-                View Full Profile
-              </Link>
+            <Button 
+              className="w-full h-9" 
+              size="sm"
+              onClick={() => handleNavigate(`/admin/users/${user.id}`)}
+            >
+              <ExternalLink className="h-3.5 w-3.5 mr-2" />
+              View Full Profile
             </Button>
             <div className="flex gap-2">
-              <Button variant="outline" size="sm" className="flex-1 h-8">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="flex-1 h-8"
+                onClick={() => handleNavigate(`/admin/users/${user.id}/edit`)}
+              >
                 <Edit className="h-3.5 w-3.5 mr-1.5" />
                 Edit
               </Button>

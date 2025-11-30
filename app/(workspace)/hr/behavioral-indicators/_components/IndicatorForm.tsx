@@ -30,11 +30,27 @@ import { ProficiencyLevel, ApprovalStatus, IndicatorMeasurementType } from '@/ty
 import { updateIndicatorAction, createIndicatorAction } from '@/app/actions';
 import { useRouter } from 'next/navigation';
 import { useState, useCallback, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertTriangle, Info } from "lucide-react";
+import { 
+  AlertTriangle, 
+  Info, 
+  FileText, 
+  Settings2, 
+  ThumbsUp, 
+  ThumbsDown, 
+  CheckCircle2,
+  Loader2,
+  X,
+  Save,
+  RefreshCw,
+  Scale,
+  Check,
+  AlertCircle
+} from "lucide-react";
+import { HelpTooltip, formHelp } from '@/components/ui/help-tooltip';
+import { cn } from '@/lib/utils';
 
 type IndicatorFormValues = z.infer<typeof indicatorSchema>;
 const measurementTypes = Object.values(IndicatorMeasurementType);
@@ -48,6 +64,7 @@ export function IndicatorForm({ indicator, competencyId, onUpdatePreview }: { in
   // Initialize form 
   const form = useForm<IndicatorFormValues>({
     resolver: zodResolver(indicatorSchema),
+    mode: 'onChange', // Enable inline validation
     defaultValues: {
       title: indicator?.title || '',
       description: indicator?.description || "", // Still empty but will be validated as required
@@ -61,6 +78,20 @@ export function IndicatorForm({ indicator, competencyId, onUpdatePreview }: { in
       orderIndex: indicator?.orderIndex || 1,
     },
   });
+
+  // Get validation state for visual feedback
+  const { errors, dirtyFields } = form.formState;
+  
+  // Helper to get field validation state
+  const getFieldState = useCallback((fieldName: keyof IndicatorFormValues) => {
+    const isDirty = dirtyFields[fieldName];
+    const hasError = !!errors[fieldName];
+    return {
+      isDirty,
+      hasError,
+      isValid: isDirty && !hasError,
+    };
+  }, [dirtyFields, errors]);
 
   // Watch the weight field for real-time validation
   const currentWeight = form.watch('weight');
@@ -190,70 +221,114 @@ export function IndicatorForm({ indicator, competencyId, onUpdatePreview }: { in
           )}
 
           {/* Core Information Section */}
-          <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
-            <div className="p-4 pb-3">
-              <h3 className="text-lg font-semibold leading-none tracking-tight">Core Information</h3>
-              <p className="text-sm text-muted-foreground mt-1">Provide the main details for this indicator</p>
+          <div className="rounded-xl border bg-card shadow-sm overflow-hidden">
+            <div className="flex items-center gap-3 px-5 py-4 bg-muted/40 border-b">
+              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                <FileText className="h-5 w-5" />
+              </div>
+              <div>
+                <h3 className="text-base font-semibold">Core Information</h3>
+                <p className="text-sm text-muted-foreground">Title and description for this indicator</p>
+              </div>
             </div>
-            <div className="px-4 pb-4 space-y-4">
+            <div className="p-5 space-y-5">
               <FormField
                 control={form.control}
                 name="title"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-sm font-medium">Title <span className="text-red-500">*</span></FormLabel>
-                    <FormControl>
-                      <Input 
-                        placeholder="e.g., Proactive Communication" 
-                        className="h-9"
-                        {...field} 
-                        onBlur={() => {
-                          field.onBlur();
-                          handleFieldBlur();
-                        }}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+                render={({ field }) => {
+                  const fieldState = getFieldState('title');
+                  return (
+                    <FormItem>
+                      <FormLabel className="text-sm font-medium flex items-center gap-1">
+                        Title <span className="text-destructive">*</span>
+                        <HelpTooltip content={formHelp.indicator.title} />
+                      </FormLabel>
+                      <FormControl>
+                        <div className="relative">
+                          <Input 
+                            placeholder="e.g., Proactive Communication" 
+                            className={cn(
+                              "h-10 pr-8",
+                              fieldState.isValid && "border-green-500 focus-visible:ring-green-500",
+                              fieldState.hasError && "border-destructive focus-visible:ring-destructive"
+                            )}
+                            {...field} 
+                            onBlur={() => {
+                              field.onBlur();
+                              handleFieldBlur();
+                            }}
+                          />
+                          {fieldState.isDirty && (
+                            <div className="absolute right-2.5 top-1/2 -translate-y-1/2">
+                              {fieldState.isValid ? (
+                                <Check className="h-4 w-4 text-green-500" />
+                              ) : fieldState.hasError ? (
+                                <AlertCircle className="h-4 w-4 text-destructive" />
+                              ) : null}
+                            </div>
+                          )}
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  );
+                }}
               />
               <FormField
                 control={form.control}
                 name="description"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-sm font-medium">Description <span className="text-red-500">*</span></FormLabel>
-                    <FormControl>
-                      <Textarea
-                        placeholder="Detailed description of what this indicator measures"
-                        className="min-h-[80px] resize-none"
-                        {...field}
-                        onBlur={() => {
-                          field.onBlur();
-                          handleFieldBlur();
-                        }}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+                render={({ field }) => {
+                  const fieldState = getFieldState('description');
+                  return (
+                    <FormItem>
+                      <FormLabel className="text-sm font-medium flex items-center gap-1">
+                        Description <span className="text-destructive">*</span>
+                        <HelpTooltip content={formHelp.indicator.description} />
+                      </FormLabel>
+                      <FormControl>
+                        <Textarea
+                          placeholder="Detailed description of what this indicator measures..."
+                          className={cn(
+                            "min-h-24 resize-none",
+                            fieldState.isValid && "border-green-500 focus-visible:ring-green-500",
+                            fieldState.hasError && "border-destructive focus-visible:ring-destructive"
+                          )}
+                          {...field}
+                          onBlur={() => {
+                            field.onBlur();
+                            handleFieldBlur();
+                          }}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  );
+                }}
               />
             </div>
           </div>
 
           {/* Classification Section */}
-          <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
-            <div className="p-4 pb-3">
-              <h3 className="text-lg font-semibold leading-none tracking-tight">Classification</h3>
-              <p className="text-sm text-muted-foreground mt-1">Categorize and define the indicator's properties</p>
+          <div className="rounded-xl border bg-card shadow-sm overflow-hidden">
+            <div className="flex items-center gap-3 px-5 py-4 bg-muted/40 border-b">
+              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-100 text-blue-600 dark:bg-blue-950 dark:text-blue-400">
+                <Settings2 className="h-5 w-5" />
+              </div>
+              <div>
+                <h3 className="text-base font-semibold">Classification & Metrics</h3>
+                <p className="text-sm text-muted-foreground">Observability, measurement type, and weight</p>
+              </div>
             </div>
-            <div className="px-4 pb-4 grid grid-cols-2 md:grid-cols-3 gap-4">
+            <div className="p-5 grid grid-cols-2 md:grid-cols-3 gap-5">
               <FormField
                 control={form.control}
                 name="observabilityLevel"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-sm font-medium">Observability Level</FormLabel>
+                    <FormLabel className="text-sm font-medium flex items-center gap-1">
+                      Observability Level
+                      <HelpTooltip content={formHelp.indicator.observabilityLevel} />
+                    </FormLabel>
                     <Select 
                       onValueChange={(value) => {
                         field.onChange(value);
@@ -262,7 +337,7 @@ export function IndicatorForm({ indicator, competencyId, onUpdatePreview }: { in
                       defaultValue={field.value}
                     >
                       <FormControl>
-                        <SelectTrigger className="h-9">
+                        <SelectTrigger className="h-10">
                           <SelectValue placeholder="Select level" />
                         </SelectTrigger>
                       </FormControl>
@@ -283,7 +358,10 @@ export function IndicatorForm({ indicator, competencyId, onUpdatePreview }: { in
                 name="measurementType"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-sm font-medium">Measurement Type</FormLabel>
+                    <FormLabel className="text-sm font-medium flex items-center gap-1">
+                      Measurement Type
+                      <HelpTooltip content={formHelp.indicator.measurementType} />
+                    </FormLabel>
                     <Select 
                       onValueChange={(value) => {
                         field.onChange(value);
@@ -292,7 +370,7 @@ export function IndicatorForm({ indicator, competencyId, onUpdatePreview }: { in
                       defaultValue={field.value}
                     >
                       <FormControl>
-                        <SelectTrigger className="h-9">
+                        <SelectTrigger className="h-10">
                           <SelectValue placeholder="Select type" />
                         </SelectTrigger>
                       </FormControl>
@@ -313,26 +391,33 @@ export function IndicatorForm({ indicator, competencyId, onUpdatePreview }: { in
                 name="weight"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-sm font-medium">Weight <span className="text-red-500">*</span></FormLabel>
-                    <FormControl>
-                      <Input 
-                        type="number" 
-                        step="0.01" 
-                        min="0.01"
-                        max="1"
-                        placeholder="0.25" 
-                        className="h-9"
-                        {...field} 
-                        onChange={event => field.onChange(parseFloat(event.target.value) || 0.01)}
-                        onBlur={() => {
-                          field.onBlur();
-                          handleFieldBlur();
-                        }}
-                      />
-                    </FormControl>
+                    <FormLabel className="text-sm font-medium flex items-center gap-1">
+                      Weight <span className="text-destructive">*</span>
+                      <HelpTooltip content={formHelp.indicator.weight} />
+                    </FormLabel>
+                    <div className="relative">
+                      <Scale className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <FormControl>
+                        <Input 
+                          type="number" 
+                          inputMode="decimal"
+                          step="0.01" 
+                          min="0.01"
+                          max="1"
+                          placeholder="0.25" 
+                          className="h-10 pl-10"
+                          {...field} 
+                          onChange={event => field.onChange(parseFloat(event.target.value) || 0.01)}
+                          onBlur={() => {
+                            field.onBlur();
+                            handleFieldBlur();
+                          }}
+                        />
+                      </FormControl>
+                    </div>
                     {!weightValidation.isLoading && competencyId && (
                       <FormDescription className="text-xs">
-                        Total: {weightValidation.currentTotal.toFixed(3)}, Available: {weightValidation.remainingWeight.toFixed(3)}
+                        Total: {weightValidation.currentTotal.toFixed(3)} / Available: {weightValidation.remainingWeight.toFixed(3)}
                       </FormDescription>
                     )}
                     <FormMessage />
@@ -348,8 +433,9 @@ export function IndicatorForm({ indicator, competencyId, onUpdatePreview }: { in
                     <FormControl>
                       <Input 
                         type="number" 
+                        inputMode="numeric"
                         placeholder="1" 
-                        className="h-9"
+                        className="h-10"
                         {...field} 
                         onChange={event => field.onChange(parseInt(event.target.value))}
                         onBlur={() => {
@@ -366,22 +452,31 @@ export function IndicatorForm({ indicator, competencyId, onUpdatePreview }: { in
           </div>
 
           {/* Contextual Examples Section */}
-          <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
-            <div className="p-4 pb-3">
-              <h3 className="text-lg font-semibold leading-none tracking-tight">Contextual Examples</h3>
-              <p className="text-sm text-muted-foreground mt-1">Provide specific examples to clarify the indicator</p>
+          <div className="rounded-xl border bg-card shadow-sm overflow-hidden">
+            <div className="flex items-center gap-3 px-5 py-4 bg-muted/40 border-b">
+              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-100 text-amber-600 dark:bg-amber-950 dark:text-amber-400">
+                <ThumbsUp className="h-5 w-5" />
+              </div>
+              <div>
+                <h3 className="text-base font-semibold">Contextual Examples</h3>
+                <p className="text-sm text-muted-foreground">Provide examples to clarify the indicator</p>
+              </div>
             </div>
-            <div className="px-4 pb-4 space-y-4">
+            <div className="p-5 space-y-5">
               <FormField
                 control={form.control}
                 name="examples"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-sm font-medium">Positive Examples</FormLabel>
+                    <FormLabel className="text-sm font-medium flex items-center gap-2">
+                      <ThumbsUp className="h-4 w-4 text-green-600" />
+                      Positive Examples
+                      <HelpTooltip content={formHelp.indicator.examples} variant="tip" />
+                    </FormLabel>
                     <FormControl>
                       <Textarea 
-                        placeholder="List behaviors that demonstrate this indicator" 
-                        className="min-h-[80px] resize-none"
+                        placeholder="List behaviors that demonstrate this indicator..." 
+                        className="min-h-24 resize-none border-green-200 focus-visible:ring-green-500/20 dark:border-green-800"
                         {...field} 
                         onBlur={() => {
                           field.onBlur();
@@ -398,11 +493,15 @@ export function IndicatorForm({ indicator, competencyId, onUpdatePreview }: { in
                 name="counterExamples"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-sm font-medium">Counter Examples</FormLabel>
+                    <FormLabel className="text-sm font-medium flex items-center gap-2">
+                      <ThumbsDown className="h-4 w-4 text-red-600" />
+                      Counter Examples
+                      <HelpTooltip content={formHelp.indicator.counterExamples} variant="tip" />
+                    </FormLabel>
                     <FormControl>
                       <Textarea 
-                        placeholder="List behaviors that contradict this indicator" 
-                        className="min-h-[80px] resize-none"
+                        placeholder="List behaviors that contradict this indicator..." 
+                        className="min-h-24 resize-none border-red-200 focus-visible:ring-red-500/20 dark:border-red-800"
                         {...field} 
                         onBlur={() => {
                           field.onBlur();
@@ -418,11 +517,17 @@ export function IndicatorForm({ indicator, competencyId, onUpdatePreview }: { in
           </div>
 
           {/* Status Section */}
-          <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
-            <div className="p-4 pb-3">
-              <h3 className="text-lg font-semibold leading-none tracking-tight">Status</h3>
+          <div className="rounded-xl border bg-card shadow-sm overflow-hidden">
+            <div className="flex items-center gap-3 px-5 py-4 bg-muted/40 border-b">
+              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-green-100 text-green-600 dark:bg-green-950 dark:text-green-400">
+                <CheckCircle2 className="h-5 w-5" />
+              </div>
+              <div>
+                <h3 className="text-base font-semibold">Status & Approval</h3>
+                <p className="text-sm text-muted-foreground">Manage visibility and workflow</p>
+              </div>
             </div>
-            <div className="px-4 pb-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="p-5 grid grid-cols-1 md:grid-cols-2 gap-5">
               <FormField
                 control={form.control}
                 name="approvalStatus"
@@ -437,7 +542,7 @@ export function IndicatorForm({ indicator, competencyId, onUpdatePreview }: { in
                       defaultValue={field.value}
                     >
                       <FormControl>
-                        <SelectTrigger className="h-9">
+                        <SelectTrigger className="h-10">
                           <SelectValue placeholder="Select status" />
                         </SelectTrigger>
                       </FormControl>
@@ -457,9 +562,9 @@ export function IndicatorForm({ indicator, competencyId, onUpdatePreview }: { in
                 control={form.control}
                 name="isActive"
                 render={({ field }) => (
-                  <FormItem className="flex flex-col justify-end">
-                    <FormLabel className="text-sm font-medium">Active</FormLabel>
-                    <div className="flex items-center space-x-2 h-9">
+                  <FormItem>
+                    <FormLabel className="text-sm font-medium">Visibility</FormLabel>
+                    <div className="flex items-center gap-3 h-10 px-3 rounded-lg border bg-muted/30">
                       <FormControl>
                         <Switch
                           checked={field.value}
@@ -469,7 +574,7 @@ export function IndicatorForm({ indicator, competencyId, onUpdatePreview }: { in
                           }}
                         />
                       </FormControl>
-                      <span className="text-sm text-muted-foreground">
+                      <span className={`text-sm font-medium ${field.value ? 'text-green-600 dark:text-green-400' : 'text-muted-foreground'}`}>
                         {field.value ? 'Active' : 'Inactive'}
                       </span>
                     </div>
@@ -480,14 +585,15 @@ export function IndicatorForm({ indicator, competencyId, onUpdatePreview }: { in
           </div>
 
           {/* Action Buttons */}
-          <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3">
+          <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 pt-2">
             <Button 
               type="button" 
               variant="outline" 
               onClick={() => router.back()} 
               disabled={isLoading}
-              className="h-9"
+              className="h-10 min-h-11"
             >
+              <X className="h-4 w-4 mr-2" />
               Cancel
             </Button>
             {onUpdatePreview && (
@@ -496,17 +602,28 @@ export function IndicatorForm({ indicator, competencyId, onUpdatePreview }: { in
                 variant="secondary" 
                 onClick={handlePreviewClick} 
                 disabled={isLoading}
-                className="h-9"
+                className="h-10 min-h-11"
               >
+                <RefreshCw className="h-4 w-4 mr-2" />
                 Update Preview
               </Button>
             )}
             <Button 
               type="submit" 
               disabled={isLoading || !weightValidation.isValid}
-              className="h-9"
+              className="h-10 min-h-11"
             >
-              {isLoading ? (isEditMode ? 'Saving...' : 'Creating...') : (isEditMode ? 'Save Changes' : 'Create Indicator')}
+              {isLoading ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  {isEditMode ? 'Saving...' : 'Creating...'}
+                </>
+              ) : (
+                <>
+                  <Save className="h-4 w-4 mr-2" />
+                  {isEditMode ? 'Save Changes' : 'Create Indicator'}
+                </>
+              )}
             </Button>
           </div>
         </form>

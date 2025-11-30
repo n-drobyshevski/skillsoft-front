@@ -41,12 +41,12 @@ export default function DashboardLoading() {
           <CardContent className="pl-2">
             <div className="h-[300px] flex items-center justify-center">
               <div className="space-y-3 w-full">
-                {Array.from({ length: 5 }).map((_, i) => (
+                {[85, 70, 55, 90, 65].map((width, i) => (
                   <div key={i} className="flex items-center gap-3">
                     <Skeleton className="h-4 w-16" />
                     <Skeleton 
                       className="h-4 flex-1" 
-                      style={{ width: `${Math.random() * 60 + 40}%` }}
+                      style={{ width: `${width}%` }}
                     />
                   </div>
                 ))}

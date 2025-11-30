@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect, useCallback } from "react";
 import type * as React from "react";
 import * as TooltipPrimitive from "@radix-ui/react-tooltip";
 
@@ -18,12 +19,48 @@ function TooltipProvider({
 	);
 }
 
+interface TooltipProps extends React.ComponentProps<typeof TooltipPrimitive.Root> {
+	/** Auto-hide the tooltip after this duration (in ms). Set to 0 to disable. */
+	autoHideDuration?: number;
+}
+
 function Tooltip({
+	autoHideDuration = 0,
+	open: controlledOpen,
+	onOpenChange,
+	defaultOpen,
 	...props
-}: React.ComponentProps<typeof TooltipPrimitive.Root>) {
+}: TooltipProps) {
+	const [internalOpen, setInternalOpen] = useState(defaultOpen ?? false);
+	const isControlled = controlledOpen !== undefined;
+	const open = isControlled ? controlledOpen : internalOpen;
+
+	const handleOpenChange = useCallback((nextOpen: boolean) => {
+		if (!isControlled) {
+			setInternalOpen(nextOpen);
+		}
+		onOpenChange?.(nextOpen);
+	}, [isControlled, onOpenChange]);
+
+	// Auto-hide timer
+	useEffect(() => {
+		if (!open || autoHideDuration <= 0) return;
+
+		const timer = setTimeout(() => {
+			handleOpenChange(false);
+		}, autoHideDuration);
+
+		return () => clearTimeout(timer);
+	}, [open, autoHideDuration, handleOpenChange]);
+
 	return (
 		<TooltipProvider>
-			<TooltipPrimitive.Root data-slot="tooltip" {...props} />
+			<TooltipPrimitive.Root 
+				data-slot="tooltip" 
+				open={open}
+				onOpenChange={handleOpenChange}
+				{...props} 
+			/>
 		</TooltipProvider>
 	);
 }

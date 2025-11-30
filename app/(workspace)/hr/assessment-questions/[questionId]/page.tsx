@@ -213,7 +213,7 @@ export default async function Page({ params }: QuestionDetailPageProps) {
 												<div className="text-xs text-muted-foreground mb-0.5">Competency</div>
 												<CompetencyHoverCard competencyId={competency.id}>
 													<Link 
-														href={`/hr/competencies/${competency.id}`}
+														href={`/competencies/${competency.id}`}
 														className="text-blue-600 hover:text-blue-800 dark:hover:text-blue-300 hover:underline font-medium flex items-center gap-1.5 transition-colors group text-sm"
 													>
 														<span className="line-clamp-1">{competency.name}</span>
@@ -233,7 +233,7 @@ export default async function Page({ params }: QuestionDetailPageProps) {
 												<div className="text-xs text-muted-foreground mb-0.5">Behavioral Indicator</div>
 												<IndicatorHoverCard indicatorId={indicator.id}>
 													<Link 
-														href={`/hr/behavioral-indicators/${indicator.id}`}
+														href={`/behavioral-indicators/${indicator.id}`}
 														className="text-green-600 hover:text-green-800 dark:hover:text-green-300 hover:underline font-medium flex items-center gap-1.5 transition-colors group text-sm"
 													>
 														<span className="line-clamp-1">{indicator.title}</span>

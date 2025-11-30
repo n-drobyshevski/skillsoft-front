@@ -35,8 +35,8 @@ export default function MultipleChoiceQuestion({
   };
 
   return (
-    <div className="space-y-3">
-      <p className="text-sm text-muted-foreground mb-4">
+    <div className="space-y-2 sm:space-y-3">
+      <p className="text-sm text-muted-foreground mb-3 sm:mb-4">
         Выберите один или несколько вариантов ответа
       </p>
       
@@ -50,15 +50,21 @@ export default function MultipleChoiceQuestion({
             type="button"
             onClick={() => toggleOption(optionId)}
             className={cn(
-              "w-full flex items-start gap-3 p-4 rounded-lg border text-left transition-all",
+              // Base styles with mobile-first 44px min touch target
+              "w-full flex items-start gap-3 p-3 sm:p-4 rounded-lg border text-left transition-all",
+              "min-h-11", // 44px minimum touch target
+              // Touch-friendly interactions
+              "touch-manipulation active:scale-[0.98]",
+              // Hover/focus states
               "hover:border-primary/50 hover:bg-primary/5",
               "focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2",
+              // Selected state
               isSelected && "border-primary bg-primary/10"
             )}
           >
             {/* Checkbox indicator */}
             <div className={cn(
-              "flex-shrink-0 w-5 h-5 rounded border-2 flex items-center justify-center mt-0.5",
+              "shrink-0 w-5 h-5 rounded border-2 flex items-center justify-center mt-0.5",
               "transition-colors",
               isSelected ? "border-primary bg-primary" : "border-muted-foreground/40"
             )}>
@@ -75,7 +81,7 @@ export default function MultipleChoiceQuestion({
                 </span>
               )}
               <span className={cn(
-                "text-sm",
+                "text-sm sm:text-base",
                 isSelected && "font-medium"
               )}>
                 {option.text}

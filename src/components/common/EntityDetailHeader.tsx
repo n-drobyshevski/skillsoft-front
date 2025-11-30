@@ -70,54 +70,86 @@ export function EntityDetailHeader({
 
   return (
     <>
-      <div className="flex items-center justify-between mb-8">
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" asChild>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+        {/* Left section: Back button, title, badges */}
+        <div className="flex items-start gap-3">
+          <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0 mt-0.5" asChild>
             <Link href={backHref}>
               <ArrowLeft className="w-4 h-4" />
               <span className="sr-only">Go back</span>
             </Link>
           </Button>
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight">
-              {title}
-            </h1>
+          <div className="min-w-0">
+            {/* Title and badges inline on larger screens */}
+            <div className="flex flex-wrap items-center gap-2">
+              <h1 className="text-xl sm:text-2xl font-semibold tracking-tight truncate">
+                {title}
+              </h1>
+              <div className="hidden sm:flex items-center gap-1.5">
+                {badges.slice(0, 3).map((badge, index) => (
+                  <Badge
+                    key={index}
+                    variant={badge.variant || 'outline'}
+                    className={`text-xs px-2 py-0.5 ${badge.className || ''}`}
+                  >
+                    {badge.label}
+                  </Badge>
+                ))}
+              </div>
+            </div>
             {subtitle && (
-              <p className="text-muted-foreground mt-1">
+              <p className="text-sm text-muted-foreground mt-0.5">
                 {subtitle}
               </p>
             )}
-            <div className="flex items-center gap-2 mt-2">
+            {/* Mobile: Show all badges below */}
+            <div className="flex sm:hidden items-center gap-1.5 mt-2 flex-wrap">
               {badges.map((badge, index) => (
                 <Badge
                   key={index}
                   variant={badge.variant || 'outline'}
-                  className={badge.className}
+                  className={`text-xs px-2 py-0.5 ${badge.className || ''}`}
                 >
                   {badge.label}
                 </Badge>
               ))}
             </div>
+            {/* Desktop: Show remaining badges if more than 3 */}
+            {badges.length > 3 && (
+              <div className="hidden sm:flex items-center gap-1.5 mt-1.5">
+                {badges.slice(3).map((badge, index) => (
+                  <Badge
+                    key={index + 3}
+                    variant={badge.variant || 'outline'}
+                    className={`text-xs px-2 py-0.5 ${badge.className || ''}`}
+                  >
+                    {badge.label}
+                  </Badge>
+                ))}
+              </div>
+            )}
           </div>
         </div>
-        <div className="flex items-center gap-2">
+        
+        {/* Right section: Actions */}
+        <div className="flex items-center gap-2 sm:shrink-0">
           {onDelete && deleteConfig && (
             <Button
-              variant="outline"
+              variant="ghost"
               size="sm"
               onClick={() => setShowDeleteDialog(true)}
-              className="text-destructive hover:text-destructive hover:bg-destructive/10"
+              className="h-10 sm:h-8 min-w-11 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
             >
-              <Trash2 className="mr-2 h-4 w-4" />
-              Delete
+              <Trash2 className="h-4 w-4" />
+              <span className="sr-only sm:not-sr-only sm:ml-1.5">Delete</span>
             </Button>
           )}
-          <Link href={editHref} passHref>
-            <Button>
-              <Edit className="mr-2 h-4 w-4" />
-              Edit
-            </Button>
-          </Link>
+          <Button size="sm" className="h-10 sm:h-8 min-w-11" asChild>
+            <Link href={editHref}>
+              <Edit className="h-4 w-4" />
+              <span className="sr-only sm:not-sr-only sm:ml-1.5">Edit</span>
+            </Link>
+          </Button>
         </div>
       </div>
 

@@ -324,11 +324,10 @@ export default function EntitiesTable<TData, TValue>({
                     data-state={row.getIsSelected() && "selected"}
                     onClick={() => onRowClick?.(row.original)}
                     className={`
-                      cursor-pointer border-b transition-all duration-150
-                      hover:bg-muted/60 active:bg-muted/80
-                      data-[state=selected]:bg-muted/80
-                      ${index % 2 === 0 ? 'bg-background' : 'bg-muted/20'}
-                      @lg/table:hover:bg-muted/40
+                      group cursor-pointer border-b border-border/40 transition-all duration-150
+                      hover:bg-muted/40 active:bg-muted/50
+                      data-[state=selected]:bg-muted/50
+                      ${index % 2 === 0 ? 'bg-background' : 'bg-muted/10'}
                     `}
                   >
                     {row.getVisibleCells().map((cell) => (

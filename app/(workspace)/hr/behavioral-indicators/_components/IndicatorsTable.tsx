@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import type { ColumnDef } from "@tanstack/react-table";
 
@@ -19,7 +20,9 @@ import {
   ArrowUpDown,
   MoreHorizontal,
   Settings2,
-  Eye,
+  Copy,
+  ExternalLink,
+  Layers,
 } from "lucide-react";
 import { BehavioralIndicator } from "@/types/domain";
 import { biLevelToColor } from "@/lib/ui-utils";
@@ -36,6 +39,7 @@ interface IndicatorsTableProps {
 }
 
 export default function IndicatorsTable({ indicators }: IndicatorsTableProps) {
+  const router = useRouter();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [selectedIndicator, setSelectedIndicator] =
     useState<BehavioralIndicator | null>(null);
@@ -161,6 +165,7 @@ export default function IndicatorsTable({ indicators }: IndicatorsTableProps) {
         );
       },
     },
+    // Action column - uses group-hover to show/hide the menu button
     {
       id: "actions",
       cell: ({ row }) => {
@@ -168,26 +173,50 @@ export default function IndicatorsTable({ indicators }: IndicatorsTableProps) {
         return (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="h-8 w-8 p-0">
+              <Button 
+                variant="ghost" 
+                size="icon"
+                className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity focus:opacity-100"
+                onClick={(e) => e.stopPropagation()}
+              >
                 <span className="sr-only">Open menu</span>
                 <MoreHorizontal className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuLabel>Actions</DropdownMenuLabel>
-              <DropdownMenuItem
-                onClick={() => navigator.clipboard.writeText(indicator.id)}
-              >
-                Copy ID
-              </DropdownMenuItem>
+            <DropdownMenuContent align="end" className="w-48">
+              <DropdownMenuLabel className="text-xs text-muted-foreground font-normal">Actions</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => handleViewDetails(indicator)}>
-                <Eye className="mr-2 h-4 w-4" />
+              <DropdownMenuItem onClick={(e) => {
+                e.stopPropagation();
+                handleViewDetails(indicator);
+              }}>
+                <Layers className="mr-2 h-4 w-4 text-muted-foreground" />
+                Quick View
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={(e) => {
+                e.stopPropagation();
+                router.push(`/hr/behavioral-indicators/${indicator.id}`);
+              }}>
+                <ExternalLink className="mr-2 h-4 w-4 text-muted-foreground" />
                 View Details
               </DropdownMenuItem>
-              <DropdownMenuItem>
-                <Settings2 className="mr-2 h-4 w-4" />
-                Edit Indicator
+              <DropdownMenuItem onClick={(e) => {
+                e.stopPropagation();
+                router.push(`/hr/behavioral-indicators/${indicator.id}/edit`);
+              }}>
+                <Settings2 className="mr-2 h-4 w-4 text-muted-foreground" />
+                Edit
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onClick={(e) => {
+                  e.stopPropagation();
+                  navigator.clipboard.writeText(indicator.id);
+                }}
+                className="text-muted-foreground"
+              >
+                <Copy className="mr-2 h-4 w-4" />
+                Copy ID
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

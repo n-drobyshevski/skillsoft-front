@@ -74,6 +74,8 @@ interface DashboardStats {
   totalCompetencies: number;
   totalBehavioralIndicators: number;
   totalAssessmentQuestions: number;
+  totalTestTemplates?: number;
+  activeTestTemplates?: number;
   competenciesByCategory?: Record<string, number>;
   competenciesByLevel?: Record<string, number>;
   averageIndicatorsPerCompetency?: number;
@@ -146,18 +148,22 @@ export default function FlexibleStatsCards({ data, loading = false, onCardClick 
             title: "Competencies",
             mobileTitle: "Competencies",
             value: data.stats.totalCompetencies,
-            icon: BookOpen,
-            trend: { value: "+20.1%", label: FROM_LAST_MONTH, isPositive: true },
-            description: "Active"
+            icon: Target,
+            href: "/hr/competencies",
+            description: data.stats.competenciesByCategory 
+              ? `${Object.keys(data.stats.competenciesByCategory).length} categories` 
+              : "Active"
           },
           {
             key: "indicators",
             title: "Behavioral Indicators",
             mobileTitle: "Indicators",
             value: data.stats.totalBehavioralIndicators,
-            icon: Users,
-            trend: { value: "+180.1%", label: FROM_LAST_MONTH, isPositive: true },
-            description: "Total"
+            icon: Layers,
+            href: "/hr/behavioral-indicators",
+            description: data.stats.averageIndicatorsPerCompetency 
+              ? `~${data.stats.averageIndicatorsPerCompetency.toFixed(1)} per competency`
+              : "Total"
           },
           {
             key: "questions",
@@ -165,17 +171,19 @@ export default function FlexibleStatsCards({ data, loading = false, onCardClick 
             mobileTitle: "Questions",
             value: data.stats.totalAssessmentQuestions,
             icon: ClipboardList,
-            trend: { value: "+19%", label: FROM_LAST_MONTH, isPositive: true },
-            description: "Tests"
+            href: "/hr/assessment-questions",
+            description: "Total questions"
           },
           {
-            key: "active",
-            title: "Active Now",
-            mobileTitle: "Active Now",
-            value: "+573",
+            key: "templates",
+            title: "Test Templates",
+            mobileTitle: "Templates",
+            value: data.stats.totalTestTemplates ?? 0,
             icon: Activity,
-            trend: { value: "+201", label: SINCE_LAST_HOUR, isPositive: true },
-            description: "Live"
+            href: "/test-templates",
+            description: data.stats.activeTestTemplates !== undefined 
+              ? `${data.stats.activeTestTemplates} active`
+              : "Available"
           }
         ];
 

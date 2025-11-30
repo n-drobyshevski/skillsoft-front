@@ -1,7 +1,15 @@
 "use client";
 
 import * as React from "react";
-import { Eye, Settings2, Trash2, ExternalLink } from "lucide-react";
+import { 
+  Trash2, 
+  FileText, 
+  Link2, 
+  HelpCircle,
+  Layers,
+  Pencil,
+  ChevronRight,
+} from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -20,7 +28,7 @@ import { CompetencyHoverCard } from "../[indicatorId]/_components/CompetencyHove
 import { DeleteConfirmationDialog } from "@/components/feedback/DeleteConfirmationDialog";
 import { deleteIndicator } from "@/src/app/actions";
 import { toast } from "sonner";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export default function IndicatorDrawer({
   open,
@@ -31,12 +39,20 @@ export default function IndicatorDrawer({
   onOpenChange: (isOpen: boolean) => void;
   indicator: BehavioralIndicator;
 }) {
+  const router = useRouter();
   const [questions, setQuestions] = useState<AssessmentQuestion[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const isMobile = useIsMobile();
+
+  const handleNavigate = (path: string) => {
+    onOpenChange(false);
+    setTimeout(() => {
+      router.push(path);
+    }, 150);
+  };
 
   useEffect(() => {
     if (open) {
@@ -92,142 +108,158 @@ export default function IndicatorDrawer({
         className={`${
           isMobile 
             ? "w-full max-w-full sm:max-w-full" 
-            : "sm:max-w-xl"
-        } p-0 flex flex-col`}
+            : "sm:max-w-lg"
+        } p-0 flex flex-col gap-0 border-l border-border/50`}
         style={{
           WebkitOverflowScrolling: 'touch',
         }}
       >
-        {/* WCAG 2.1 Compliant Header with Proper SheetTitle */}
-        <div className={`${isMobile ? "p-3" : "p-4"} border-b bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60`}>
-          <div className="space-y-2.5">
-            <SheetTitle className={`${isMobile ? "text-lg" : "text-xl"} font-semibold leading-normal line-clamp-2`}>
-              {indicator.title}
-            </SheetTitle>
-            <SheetDescription className="text-sm text-muted-foreground leading-normal">
-              Behavioral Indicator Details
-            </SheetDescription>
-            
-            {/* Accessible Badge Layout */}
-            <div className="flex items-center gap-2 flex-wrap">
-              <Badge 
-                variant={indicator.isActive ? "default" : "secondary"} 
-                className="h-7 text-sm px-2 min-h-7 leading-normal"
-                role="status"
-                aria-label={`Status: ${indicator.isActive ? "Active" : "Inactive"}`}
-              >
-                {indicator.isActive ? "Active" : "Inactive"}
-              </Badge>
-              <Badge
-                variant="outline"
-                className={`${biLevelToColor(indicator.observabilityLevel)} h-7 text-sm px-2 min-h-7 leading-normal`}
-                role="status"
-                aria-label={`Observability Level: ${indicator.observabilityLevel}`}
-              >
-                {indicator.observabilityLevel}
-              </Badge>
-              <Badge 
-                variant="secondary" 
-                className="h-7 text-sm px-2 min-h-7 leading-normal"
-                role="status"
-                aria-label={`Weight: ${indicator.weight.toFixed(2)}`}
-              >
-                Weight: {indicator.weight.toFixed(2)}
-              </Badge>
+        {/* Clean Header */}
+        <div className={`${isMobile ? "px-4 py-3" : "px-5 py-4"} border-b border-border/40`}>
+          <div className="flex items-start justify-between gap-3 pr-8">
+            <div className="flex-1 min-w-0 space-y-1">
+              <SheetTitle className="text-base font-semibold leading-tight line-clamp-2 text-foreground">
+                {indicator.title}
+              </SheetTitle>
+              <SheetDescription className="text-xs text-muted-foreground">
+                Behavioral Indicator Overview
+              </SheetDescription>
             </div>
+          </div>
+          
+          {/* Status Badges */}
+          <div className="flex items-center gap-1.5 flex-wrap mt-3">
+            <Badge 
+              variant={indicator.isActive ? "default" : "secondary"} 
+              className="h-5 text-[11px] px-1.5 font-medium"
+            >
+              {indicator.isActive ? "Active" : "Inactive"}
+            </Badge>
+            <Badge
+              variant="outline"
+              className={`${biLevelToColor(indicator.observabilityLevel)} h-5 text-[11px] px-1.5 font-medium`}
+            >
+              {indicator.observabilityLevel}
+            </Badge>
+            <Badge 
+              variant="outline" 
+              className="h-5 text-[11px] px-1.5 font-medium text-muted-foreground"
+            >
+              Weight: {indicator.weight.toFixed(2)}
+            </Badge>
           </div>
         </div>
 
-        {/* Accessible Content Section */}
+        {/* Scrollable Content */}
         <div className="flex-1 overflow-y-auto">
-          <div className={`${isMobile ? "p-3" : "p-4"} space-y-4`}>
-            <div className="space-y-2.5">
-              <h3 className="text-sm font-medium leading-normal">Description</h3>
-              <div className="rounded-md border bg-card/50 p-3">
-                <p className="text-sm leading-relaxed text-foreground">
-                  {indicator.description}
-                </p>
+          <div className={`${isMobile ? "px-4 py-4" : "px-5 py-5"} space-y-5`}>
+            {/* Description Section */}
+            <section className="space-y-2">
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <FileText className="h-3.5 w-3.5" />
+                <h3 className="text-xs font-medium uppercase tracking-wide">Description</h3>
               </div>
-            </div>
+              <p className="text-sm leading-relaxed text-foreground/90 pl-5">
+                {indicator.description}
+              </p>
+            </section>
             
             {/* Competency Section */}
             {indicator.competencyId && (
-              <div className="space-y-2.5">
-                <h3 className="text-sm font-medium leading-normal">Competency</h3>
-                <div className="rounded-md border bg-card/50 p-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-muted-foreground leading-normal">Part of:</span>
+              <section className="space-y-2">
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <Link2 className="h-3.5 w-3.5" />
+                  <h3 className="text-xs font-medium uppercase tracking-wide">Linked Competency</h3>
+                </div>
+                <div className="pl-5">
+                  <div className="flex items-center justify-between rounded-lg border border-border/40 bg-muted/20 px-3 py-2">
+                    <span className="text-xs text-muted-foreground">Part of:</span>
                     <CompetencyHoverCard competencyId={indicator.competencyId}>
-                      <Link 
-                        href={`/hr/competencies/${indicator.competencyId}`}
-                        className="text-sm text-primary hover:text-primary/80 hover:underline font-medium inline-flex items-center gap-1.5 min-h-11 p-1"
-                        aria-label="View competency details"
+                      <button 
+                        onClick={() => handleNavigate(`/hr/competencies/${indicator.competencyId}`)}
+                        className="text-xs text-primary/80 hover:text-primary flex items-center gap-1 transition-colors"
                       >
                         View Competency
-                        <ExternalLink className="h-3 w-3" />
-                      </Link>
+                        <ChevronRight className="h-3 w-3" />
+                      </button>
                     </CompetencyHoverCard>
                   </div>
                 </div>
-              </div>
+              </section>
             )}
             
-            <div className="space-y-2.5">
-              <h3 className="text-sm font-medium leading-normal">Assessment Questions</h3>
-              {loading && <p className="text-sm text-muted-foreground leading-normal">Loading questions...</p>}
-              {error && <p className="text-sm text-destructive leading-normal">{error}</p>}
-              {!loading && !error && (
-                <div className="space-y-2">
-                  {questions.length === 0 ? (
-                    <p className="text-sm text-muted-foreground text-center py-4 leading-normal">No questions found</p>
-                  ) : (
-                    questions.map((question) => (
-                      <div key={question.id} className="rounded-md border bg-card/30 p-3">
-                        <QuestionCard question={question} />
-                      </div>
-                    ))
-                  )}
-                </div>
-              )}
-            </div>
+            {/* Questions Section */}
+            <section className="space-y-2">
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <HelpCircle className="h-3.5 w-3.5" />
+                <h3 className="text-xs font-medium uppercase tracking-wide">Assessment Questions</h3>
+                {!loading && !error && (
+                  <Badge variant="secondary" className="h-4 text-[10px] px-1.5 ml-auto">
+                    {questions.length}
+                  </Badge>
+                )}
+              </div>
+              <div className="pl-5">
+                {loading && (
+                  <p className="text-xs text-muted-foreground py-3">Loading questions...</p>
+                )}
+                {error && (
+                  <p className="text-xs text-destructive py-3">{error}</p>
+                )}
+                {!loading && !error && (
+                  <div className="space-y-1.5">
+                    {questions.length === 0 ? (
+                      <p className="text-xs text-muted-foreground text-center py-4">
+                        No questions found
+                      </p>
+                    ) : (
+                      questions.map((question) => (
+                        <div 
+                          key={question.id} 
+                          className="rounded-lg border border-border/40 bg-muted/20 p-2.5"
+                        >
+                          <QuestionCard question={question} />
+                        </div>
+                      ))
+                    )}
+                  </div>
+                )}
+              </div>
+            </section>
           </div>
         </div>
 
-        {/* Accessible Footer with Proper Touch Targets */}
-        <div className={`${isMobile ? "p-3" : "p-4"} border-t bg-muted/30`}>
-          <div className={`flex ${isMobile ? "flex-col gap-2.5" : "gap-2.5"} w-full`}>
+        {/* Clean Footer */}
+        <div className={`${isMobile ? "px-4 py-3" : "px-5 py-4"} border-t border-border/40 bg-muted/20`}>
+          <div className="flex items-center gap-2">
             <Button 
-              variant="outline"
+              variant="ghost"
               size="sm"
               onClick={() => setShowDeleteDialog(true)}
-              className="text-destructive hover:text-destructive hover:bg-destructive/10 border-destructive/20 hover:border-destructive/30 min-h-11 text-sm"
-              aria-label="Delete behavioral indicator"
+              className="h-8 px-2.5 text-xs text-muted-foreground hover:text-destructive hover:bg-destructive/10"
             >
-              <Trash2 className="mr-1.5 h-4 w-4" />
+              <Trash2 className="mr-1.5 h-3.5 w-3.5" />
               Delete
             </Button>
-            <Link href={`/hr/behavioral-indicators/${indicator.id}`} passHref className="flex-1">
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  className="w-full min-h-11 text-sm"
-                  aria-label="View behavioral indicator details"
-                >
-                    <Eye className="mr-1.5 h-4 w-4" />
-                    View
-                </Button>
-            </Link>
-            <Link href={`/hr/behavioral-indicators/${indicator.id}/edit`} passHref className="flex-1">
-              <Button 
-                variant="default" 
-                size="sm"
-                className="w-full min-h-11 text-sm"
-                aria-label="Edit behavioral indicator"
-              >
-                <Settings2 className="mr-1.5 h-4 w-4" />
-                Edit
-              </Button>
-            </Link>
+            <div className="flex-1" />
+            <Button 
+              variant="ghost" 
+              size="sm"
+              onClick={() => handleNavigate(`/hr/behavioral-indicators/${indicator.id}`)}
+              className="h-8 px-2.5 text-xs text-muted-foreground hover:text-foreground"
+            >
+              <Layers className="mr-1.5 h-3.5 w-3.5" />
+              View
+            </Button>
+            <Button 
+              variant="default" 
+              size="sm"
+              onClick={() => handleNavigate(`/hr/behavioral-indicators/${indicator.id}/edit`)}
+              className="h-8 px-3 text-xs"
+            >
+              <Pencil className="mr-1.5 h-3.5 w-3.5" />
+              Edit
+            </Button>
           </div>
         </div>
       </SheetContent>

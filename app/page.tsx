@@ -79,10 +79,6 @@ export const metadata: Metadata = {
   category: "technology",
 };
 
-// Enable static generation for better performance
-// This page will be statically generated at build time
-export const revalidate = 3600; // Revalidate every hour
-
 export default function HomePage() {
   return (
     <div className="min-h-screen w-full bg-background overflow-x-hidden">

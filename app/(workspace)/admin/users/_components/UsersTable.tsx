@@ -2,6 +2,7 @@
 
 import React, { useState, useMemo } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   type ColumnDef,
   type ColumnFiltersState,
@@ -85,6 +86,7 @@ interface UsersTableProps {
 type RoleFilter = "all" | UserRole;
 
 export default function UsersTable({ users }: UsersTableProps) {
+  const router = useRouter();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [sorting, setSorting] = useState<SortingState>([]);
@@ -396,13 +398,21 @@ export default function UsersTable({ users }: UsersTableProps) {
                 <Eye className="mr-2 h-4 w-4" />
                 Quick View
               </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link href={`/users/${user.id}`} className="flex items-center cursor-pointer">
-                  <ExternalLink className="mr-2 h-4 w-4" />
-                  View Profile
-                </Link>
+              <DropdownMenuItem 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  router.push(`/admin/users/${user.id}`);
+                }}
+              >
+                <ExternalLink className="mr-2 h-4 w-4" />
+                View Profile
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={(e) => e.stopPropagation()}>
+              <DropdownMenuItem 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  router.push(`/admin/users/${user.id}/edit`);
+                }}
+              >
                 <UserCog className="mr-2 h-4 w-4" />
                 Edit User
               </DropdownMenuItem>

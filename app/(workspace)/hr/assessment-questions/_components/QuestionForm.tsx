@@ -9,7 +9,6 @@ import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -29,8 +28,22 @@ import { DifficultyLevel, QuestionType } from '@/types/domain';
 import { assessmentQuestionsApi } from '@/services/api';
 import { useRouter } from 'next/navigation';
 import { useState, useEffect, useCallback } from 'react';
-import { TrashIcon } from 'lucide-react';
+import { 
+  TrashIcon, 
+  MessageSquare, 
+  Settings2, 
+  ListChecks,
+  Loader2,
+  X,
+  Save,
+  RefreshCw,
+  Plus,
+  Check,
+  AlertCircle
+} from 'lucide-react';
 import { toast } from "sonner";
+import { HelpTooltip, formHelp } from '@/components/ui/help-tooltip';
+import { cn } from '@/lib/utils';
 
 type QuestionFormValues = z.infer<typeof questionSchema>;
 
@@ -48,6 +61,7 @@ export function QuestionForm({ question, competencyId, behavioralIndicatorId, on
 
   const form = useForm<QuestionFormValues>({
     resolver: zodResolver(questionSchema),
+    mode: 'onChange', // Enable inline validation
     defaultValues: {
       questionText: question?.questionText || '',
       questionType: question?.questionType || QuestionType.MULTIPLE_CHOICE,
@@ -63,6 +77,20 @@ export function QuestionForm({ question, competencyId, behavioralIndicatorId, on
       })) || [],
     },
   });
+
+  // Get validation state for visual feedback
+  const { errors, dirtyFields } = form.formState;
+  
+  // Helper to get field validation state
+  const getFieldState = useCallback((fieldName: keyof QuestionFormValues) => {
+    const isDirty = dirtyFields[fieldName];
+    const hasError = !!errors[fieldName];
+    return {
+      isDirty,
+      hasError,
+      isValid: isDirty && !hasError,
+    };
+  }, [dirtyFields, errors]);
 
   const { fields, append, remove } = useFieldArray({
     control: form.control,
@@ -138,27 +166,36 @@ export function QuestionForm({ question, competencyId, behavioralIndicatorId, on
       case 'MULTIPLE_CHOICE':
       case 'MCQ':  // Primary type per ROADMAP.md
         return (
-          <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
-            <div className="p-4 pb-3 flex items-center justify-between">
-              <h3 className="text-lg font-semibold leading-none tracking-tight">Answer Options</h3>
+          <div className="rounded-xl border bg-card shadow-sm overflow-hidden">
+            <div className="flex items-center justify-between px-5 py-4 bg-muted/40 border-b">
+              <div className="flex items-center gap-3">
+                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-purple-100 text-purple-600 dark:bg-purple-950 dark:text-purple-400">
+                  <ListChecks className="h-5 w-5" />
+                </div>
+                <div>
+                  <h3 className="text-base font-semibold">Answer Options</h3>
+                  <p className="text-sm text-muted-foreground">Configure multiple choice answers</p>
+                </div>
+              </div>
               <Button
                 type="button"
                 variant="outline"
                 size="sm"
                 onClick={() => append({ text: "", score: fields.length + 1, correct: false })}
-                className="h-8 text-xs"
+                className="h-9"
               >
+                <Plus className="h-4 w-4 mr-1" />
                 Add Option
               </Button>
             </div>
-            <div className="px-4 pb-4 space-y-3">
+            <div className="p-5 space-y-3">
               {fields.map((field, index) => (
-                <div key={field.id} className="flex items-start gap-3 p-3 rounded-md border bg-muted/30">
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary text-sm font-medium">
-                    {index + 1}
+                <div key={field.id} className="flex items-start gap-3 p-4 rounded-lg border bg-muted/30 hover:bg-muted/40 transition-colors">
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary text-sm font-semibold">
+                    {String.fromCharCode(65 + index)}
                   </div>
                   
-                  <div className="flex-1 space-y-2">
+                  <div className="flex-1 space-y-3">
                     <FormField
                       control={form.control}
                       name={`answerOptions.${index}.text`}
@@ -168,7 +205,7 @@ export function QuestionForm({ question, competencyId, behavioralIndicatorId, on
                             <Input 
                               {...field} 
                               placeholder="Enter answer option"
-                              className="h-8 text-sm"
+                              className="h-9"
                               onBlur={() => {
                                 field.onBlur();
                                 handleFieldBlur();
@@ -189,7 +226,7 @@ export function QuestionForm({ question, competencyId, behavioralIndicatorId, on
                               <Input
                                 type="number"
                                 placeholder="Score"
-                                className="h-8 text-sm"
+                                className="h-9"
                                 {...field}
                                 onChange={event => field.onChange(event.target.value === '' ? null : Number(event.target.value))}
                                 onBlur={() => {
@@ -410,46 +447,65 @@ export function QuestionForm({ question, competencyId, behavioralIndicatorId, on
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           {/* Basic Information Section */}
-          <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
-            <div className="p-4 pb-3">
-              <h3 className="text-lg font-semibold leading-none tracking-tight">Basic Information</h3>
+          <div className="rounded-xl border bg-card shadow-sm overflow-hidden">
+            <div className="flex items-center gap-3 px-5 py-4 bg-muted/40 border-b">
+              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                <MessageSquare className="h-5 w-5" />
+              </div>
+              <div>
+                <h3 className="text-base font-semibold">Question Details</h3>
+                <p className="text-sm text-muted-foreground">Question text and classification</p>
+              </div>
             </div>
-            <div className="px-4 pb-4 space-y-4">
+            <div className="p-5 space-y-5">
               <FormField
                 control={form.control}
                 name="questionText"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-sm font-medium">Question Text</FormLabel>
-                    <FormControl>
-                      <Textarea 
-                        placeholder="e.g., How do you handle tight deadlines?" 
-                        className="min-h-[100px] resize-none"
-                        {...field} 
-                        onBlur={() => {
-                          field.onBlur();
-                          handleFieldBlur();
-                        }}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+                render={({ field }) => {
+                  const fieldState = getFieldState('questionText');
+                  return (
+                    <FormItem>
+                      <FormLabel className="text-sm font-medium flex items-center gap-1">
+                        Question Text <span className="text-destructive">*</span>
+                        <HelpTooltip content={formHelp.question.questionText} />
+                      </FormLabel>
+                      <FormControl>
+                        <Textarea 
+                          placeholder="e.g., How do you handle tight deadlines?" 
+                          className={cn(
+                            "min-h-28 resize-none",
+                            fieldState.isValid && "border-green-500 focus-visible:ring-green-500",
+                            fieldState.hasError && "border-destructive focus-visible:ring-destructive"
+                          )}
+                          {...field} 
+                          onBlur={() => {
+                            field.onBlur();
+                            handleFieldBlur();
+                          }}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  );
+                }}
               />
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <FormField
                   control={form.control}
                   name="questionType"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm font-medium">Question Type</FormLabel>
+                      <FormLabel className="text-sm font-medium flex items-center gap-1">
+                        Question Type
+                        <HelpTooltip content={formHelp.question.questionType} />
+                      </FormLabel>
                       <Select 
                         onValueChange={field.onChange} 
                         defaultValue={field.value}
                       >
                         <FormControl>
-                          <SelectTrigger className="h-9">
+                          <SelectTrigger className="h-10">
                             <SelectValue placeholder="Select type" />
                           </SelectTrigger>
                         </FormControl>
@@ -471,13 +527,16 @@ export function QuestionForm({ question, competencyId, behavioralIndicatorId, on
                   name="difficultyLevel"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm font-medium">Difficulty Level</FormLabel>
+                      <FormLabel className="text-sm font-medium flex items-center gap-1">
+                        Difficulty Level
+                        <HelpTooltip content={formHelp.question.difficultyLevel} />
+                      </FormLabel>
                       <Select 
                         onValueChange={field.onChange} 
                         defaultValue={field.value}
                       >
                         <FormControl>
-                          <SelectTrigger className="h-9">
+                          <SelectTrigger className="h-10">
                             <SelectValue placeholder="Select level" />
                           </SelectTrigger>
                         </FormControl>
@@ -498,21 +557,30 @@ export function QuestionForm({ question, competencyId, behavioralIndicatorId, on
           </div>
 
           {/* Configuration Section */}
-          <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
-            <div className="p-4 pb-3">
-              <h3 className="text-lg font-semibold leading-none tracking-tight">Configuration</h3>
+          <div className="rounded-xl border bg-card shadow-sm overflow-hidden">
+            <div className="flex items-center gap-3 px-5 py-4 bg-muted/40 border-b">
+              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-100 text-blue-600 dark:bg-blue-950 dark:text-blue-400">
+                <Settings2 className="h-5 w-5" />
+              </div>
+              <div>
+                <h3 className="text-base font-semibold">Configuration</h3>
+                <p className="text-sm text-muted-foreground">Scoring, timing, and display settings</p>
+              </div>
             </div>
-            <div className="px-4 pb-4 space-y-4">
+            <div className="p-5 space-y-5">
               <FormField
                 control={form.control}
                 name="scoringRubric"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-sm font-medium">Scoring Rubric</FormLabel>
+                    <FormLabel className="text-sm font-medium flex items-center gap-1">
+                      Scoring Rubric
+                      <HelpTooltip content={formHelp.question.scoringRubric} />
+                    </FormLabel>
                     <FormControl>
                       <Textarea 
                         placeholder="e.g., Based on clarity and feasibility" 
-                        className="min-h-[80px] resize-none"
+                        className="min-h-24 resize-none"
                         {...field}
                         onBlur={() => {
                           field.onBlur();
@@ -525,7 +593,7 @@ export function QuestionForm({ question, competencyId, behavioralIndicatorId, on
                 )}
               />
               
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-5">
                 <FormField
                   control={form.control}
                   name="orderIndex"
@@ -535,7 +603,8 @@ export function QuestionForm({ question, competencyId, behavioralIndicatorId, on
                       <FormControl>
                         <Input 
                           type="number" 
-                          className="h-9"
+                          inputMode="numeric"
+                          className="h-10"
                           {...field}
                           onChange={event => field.onChange(event.target.value === '' ? 0 : Number(event.target.value))}
                         />
@@ -550,11 +619,15 @@ export function QuestionForm({ question, competencyId, behavioralIndicatorId, on
                   name="timeLimit"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm font-medium">Time Limit (s)</FormLabel>
+                      <FormLabel className="text-sm font-medium flex items-center gap-1">
+                        Time Limit (s)
+                        <HelpTooltip content={formHelp.question.timeLimit} />
+                      </FormLabel>
                       <FormControl>
                         <Input 
                           type="number" 
-                          className="h-9"
+                          inputMode="numeric"
+                          className="h-10"
                           {...field}
                           onChange={event => field.onChange(event.target.value === '' ? 60 : Number(event.target.value))}
                           onBlur={() => {
@@ -572,9 +645,9 @@ export function QuestionForm({ question, competencyId, behavioralIndicatorId, on
                   control={form.control}
                   name="isActive"
                   render={({ field }) => (
-                    <FormItem className="flex flex-col justify-end">
-                      <FormLabel className="text-sm font-medium">Active</FormLabel>
-                      <div className="flex items-center space-x-2 h-9">
+                    <FormItem>
+                      <FormLabel className="text-sm font-medium">Visibility</FormLabel>
+                      <div className="flex items-center gap-3 h-10 px-3 rounded-lg border bg-muted/30">
                         <FormControl>
                           <Switch
                             checked={field.value}
@@ -584,7 +657,7 @@ export function QuestionForm({ question, competencyId, behavioralIndicatorId, on
                             }}
                           />
                         </FormControl>
-                        <span className="text-sm text-muted-foreground">
+                        <span className={`text-sm font-medium ${field.value ? 'text-green-600 dark:text-green-400' : 'text-muted-foreground'}`}>
                           {field.value ? 'Active' : 'Inactive'}
                         </span>
                       </div>
@@ -599,14 +672,15 @@ export function QuestionForm({ question, competencyId, behavioralIndicatorId, on
           {renderAnswerOptions()}
 
           {/* Action Buttons */}
-          <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3">
+          <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 pt-2">
             <Button 
               type="button" 
               variant="outline" 
               onClick={() => router.back()} 
               disabled={isLoading}
-              className="h-9"
+              className="h-10 min-h-11"
             >
+              <X className="h-4 w-4 mr-2" />
               Cancel
             </Button>
             {onUpdatePreview && (
@@ -615,17 +689,28 @@ export function QuestionForm({ question, competencyId, behavioralIndicatorId, on
                 variant="secondary" 
                 onClick={handlePreviewClick} 
                 disabled={isLoading}
-                className="h-9"
+                className="h-10 min-h-11"
               >
+                <RefreshCw className="h-4 w-4 mr-2" />
                 Update Preview
               </Button>
             )}
             <Button 
               type="submit" 
               disabled={isLoading}
-              className="h-9"
+              className="h-10 min-h-11"
             >
-              {isLoading ? (isEditMode ? 'Saving...' : 'Creating...') : (isEditMode ? 'Save Changes' : 'Create Question')}
+              {isLoading ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  {isEditMode ? 'Saving...' : 'Creating...'}
+                </>
+              ) : (
+                <>
+                  <Save className="h-4 w-4 mr-2" />
+                  {isEditMode ? 'Save Changes' : 'Create Question'}
+                </>
+              )}
             </Button>
           </div>
         </form>

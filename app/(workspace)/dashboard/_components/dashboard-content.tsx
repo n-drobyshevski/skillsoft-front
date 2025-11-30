@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
-import { StatsCard } from "@/components/ui/stats-card";
+import FlexibleStatsCards from "@/components/data-display/FlexibleStatsCards";
 import {
   ArrowRight,
   BarChart3,
@@ -254,100 +254,62 @@ export default function DashboardContent({
     : 0;
 
   const activeTemplates = testTemplates.filter(t => t.isActive);
-  const categoryCount = Object.keys(stats.competenciesByCategory).length;
 
   return (
-    <div className="flex flex-1 flex-col gap-8 p-6 lg:p-8 max-w-[1600px] mx-auto w-full">
+    <div className="flex flex-1 flex-col gap-6 sm:gap-8 p-4 sm:p-6 lg:p-8 max-w-[1600px] mx-auto w-full">
       
       {/* ===== HEADER ===== */}
       <motion.header
         initial={{ opacity: 0, y: -8 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
-        className="flex flex-col md:flex-row md:items-end md:justify-between gap-4"
+        className="flex flex-col gap-4"
       >
         <div className="space-y-1">
-          <h1 className="text-2xl md:text-3xl font-bold tracking-tight">
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight">
             {greeting()}{currentUser?.firstName ? `, ${currentUser.firstName}` : ''}
           </h1>
-          <p className="text-muted-foreground">
+          <p className="text-sm sm:text-base text-muted-foreground">
             Overview of your competency framework and assessments
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        {/* Action buttons - stack on mobile, row on larger screens */}
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
           {isEditor && (
-            <Link href="/hr/competencies/new">
-              <Button variant="outline" size="sm" className="gap-2">
+            <Link href="/hr/competencies/new" className="w-full sm:w-auto">
+              <Button variant="outline" size="default" className="w-full sm:w-auto gap-2 min-h-11 justify-center">
                 <Plus className="w-4 h-4" />
-                Add Competency
+                <span>Add Competency</span>
               </Button>
             </Link>
           )}
-          <Link href="/test-templates">
-            <Button size="sm" className="gap-2">
+          <Link href="/test-templates" className="w-full sm:w-auto">
+            <Button size="default" className="w-full sm:w-auto gap-2 min-h-11 justify-center">
               <Play className="w-4 h-4" />
-              Take Assessment
+              <span>Take Assessment</span>
             </Button>
           </Link>
         </div>
       </motion.header>
 
       {/* ===== BENTO GRID - Stats Cards ===== */}
-      <motion.div
-        {...motionProps}
-        variants={staggerContainer}
-        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4"
-      >
-        <motion.div variants={scaleIn}>
-          <StatsCard
-            title="Competencies"
-            value={stats.totalCompetencies}
-            icon={Target}
-            variant="primary"
-            href="/hr/competencies"
-            description={`${categoryCount} categories`}
-            size="lg"
-          />
-        </motion.div>
-
-        <motion.div variants={scaleIn}>
-          <StatsCard
-            title="Behavioral Indicators"
-            value={stats.totalBehavioralIndicators}
-            icon={Brain}
-            variant="blue"
-            href="/hr/behavioral-indicators"
-            description={`~${stats.averageIndicatorsPerCompetency.toFixed(1)} per competency`}
-            size="lg"
-          />
-        </motion.div>
-
-        <motion.div variants={scaleIn}>
-          <StatsCard
-            title="Assessment Questions"
-            value={stats.totalAssessmentQuestions}
-            icon={ClipboardList}
-            variant="green"
-            href="/hr/assessment-questions"
-            size="lg"
-          />
-        </motion.div>
-
-        <motion.div variants={scaleIn}>
-          <StatsCard
-            title="Test Templates"
-            value={testTemplates.length}
-            icon={FileText}
-            variant="purple"
-            href="/test-templates"
-            description={`${activeTemplates.length} active`}
-            size="lg"
-          />
-        </motion.div>
-      </motion.div>
+      <FlexibleStatsCards
+        data={{
+          type: "dashboard",
+          stats: {
+            totalCompetencies: stats.totalCompetencies,
+            totalBehavioralIndicators: stats.totalBehavioralIndicators,
+            totalAssessmentQuestions: stats.totalAssessmentQuestions,
+            totalTestTemplates: testTemplates.length,
+            activeTestTemplates: activeTemplates.length,
+            competenciesByCategory: stats.competenciesByCategory,
+            averageIndicatorsPerCompetency: stats.averageIndicatorsPerCompetency,
+          }
+        }}
+      />
 
       {/* ===== MAIN CONTENT GRID ===== */}
-      <div className="grid gap-6 lg:grid-cols-12">
+      <div className="grid gap-4 sm:gap-6 lg:grid-cols-12">
         
         {/* LEFT COLUMN - Charts & Standards */}
         <motion.div 

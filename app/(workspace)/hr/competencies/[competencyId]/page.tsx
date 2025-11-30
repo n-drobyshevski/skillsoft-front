@@ -120,7 +120,7 @@ export default async function CompetencyDetailPage({
                                                 </Badge>
                                             </div>
                                             <Button asChild variant="outline" size="sm">
-                                                <Link href={`/hr/behavioral-indicators/new?competencyId=${competency.id}`}>
+                                                <Link href={`/behavioral-indicators/new?competencyId=${competency.id}`}>
                                                     <Plus className="mr-2 h-4 w-4" />
                                                     Add Indicator
                                                 </Link>
@@ -147,7 +147,7 @@ export default async function CompetencyDetailPage({
                                             Add some to start defining what success looks like.
                                         </p>
                                         <Button variant="outline" asChild className="touch-target">
-                                            <Link href={`/hr/behavioral-indicators/new?competencyId=${competency.id}`}>
+                                            <Link href={`/behavioral-indicators/new?competencyId=${competency.id}`}>
                                                 <Target className="h-4 w-4 mr-2" />
                                                 Add Indicator
                                             </Link>
@@ -172,12 +172,12 @@ export default async function CompetencyDetailPage({
 												This competency doesn&apos;t have any assessment questions yet.
 												Questions help evaluate behavioral indicators.
 											</p>
-												<Button variant="outline" asChild className="touch-target">
-													<Link href="/hr/assessment-questions">
-														<FilePen className="h-4 w-4 mr-2" />
-														Browse Questions
-													</Link>
-												</Button>
+											<Button variant="outline" asChild className="touch-target">
+												<Link href="/assessment-questions">
+													<FilePen className="h-4 w-4 mr-2" />
+													Browse Questions
+												</Link>
+											</Button>
 										</div>
 									)}
 								</Suspense>
@@ -381,7 +381,7 @@ function IndicatorCard({
 									asChild 
 									className="h-6 w-6 p-0 hover:bg-primary/10 hover:text-primary"
 								>
-									<Link href={`/hr/behavioral-indicators/${indicator.id}`} title="View Details">
+									<Link href={`/behavioral-indicators/${indicator.id}`} title="View Details">
 										<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
 											<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
 											<circle cx="12" cy="12" r="3"/>
@@ -394,9 +394,9 @@ function IndicatorCard({
 									asChild 
 									className="h-6 w-6 p-0 hover:bg-primary/10 hover:text-primary"
 								>
-								<Link href={`/hr/behavioral-indicators/${indicator.id}/edit`} title="Edit">
-									<Edit className="h-3 w-3" />
-								</Link>
+									<Link href={`/behavioral-indicators/${indicator.id}/edit`} title="Edit">
+										<Edit className="h-3 w-3" />
+									</Link>
 								</Button>
 							</div>
 						</div>

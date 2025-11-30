@@ -53,7 +53,7 @@ export default async function CompetenciesPage() {
         description="Manage and track competency definitions and assessments"
       >
         <div className="flex items-center gap-2">
-          <Link href="/hr/competencies/new">
+          <Link href="/competencies/new">
             <Button variant="outline">
               <Plus className="mr-2 h-4 w-4" />
               Create Competency

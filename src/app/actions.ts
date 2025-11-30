@@ -24,7 +24,8 @@ export async function revalidateCompetencyTags(competencyId?: string) {
       revalidatePath(`${COMPETENCIES_PATH}/${competencyId}`);
     }
     
-    // Invalidate cache tags used by fetchApi
+    // Invalidate cache tags used by 'use cache' functions
+    // Using 'max' profile for stale-while-revalidate semantics (Next.js 16)
     revalidateTag('competencies', 'max');
     if (competencyId) {
       revalidateTag(`competency-${competencyId}`, 'max');
@@ -126,7 +127,8 @@ export async function revalidateUserTags(userId?: string) {
       revalidatePath(`${USERS_PATH}/${userId}`);
     }
     
-    // Invalidate cache tags used by fetchApi
+    // Invalidate cache tags used by 'use cache' functions
+    // Using 'max' profile for stale-while-revalidate semantics (Next.js 16)
     revalidateTag('users', 'max');
     revalidateTag('users-stats', 'max');
     if (userId) {

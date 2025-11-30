@@ -1,11 +1,59 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-	/* config options here */
+	// Enable React Compiler for automatic memoization (Next.js 16)
+	reactCompiler: true,
+	// Enable cacheComponents (Partial Prerendering) for Next.js 16
+	// ClerkProvider must be inside <body> for compatibility
+	// See: https://github.com/clerk/javascript/pull/7119
+	cacheComponents: true,
 	turbopack: {
 		root: __dirname,
 	},
+	// ============================================================================
+	// Custom cacheLife profiles for 'use cache' directive
+	// Usage: cacheLife('entityData') in server functions
+	// ============================================================================
+	cacheLife: {
+		// Short-lived data: user sessions, real-time stats (1 minute)
+		realtime: {
+			stale: 30,       // Allow stale for 30s
+			revalidate: 30,  // Revalidate every 30s
+			expire: 60,      // Expire after 1 minute
+		},
+		// Entity data: competencies, questions, indicators (5 minutes)
+		entityData: {
+			stale: 60,       // Allow stale for 1 minute
+			revalidate: 300, // Revalidate every 5 minutes
+			expire: 600,     // Expire after 10 minutes
+		},
+		// User data: profiles, roles (15 minutes)
+		userData: {
+			stale: 300,      // Allow stale for 5 minutes
+			revalidate: 900, // Revalidate every 15 minutes
+			expire: 1800,    // Expire after 30 minutes
+		},
+		// Reference data: standards, categories (1 hour)
+		referenceData: {
+			stale: 1800,     // Allow stale for 30 minutes
+			revalidate: 3600, // Revalidate every hour
+			expire: 7200,    // Expire after 2 hours
+		},
+	},
 	experimental: {
+		// ========================================================================
+		// Turbopack Filesystem Cache (Beta) - Speeds up dev restarts
+		// ========================================================================
+		// Enable filesystem caching for Turbopack in development
+		// Persists cache across dev server restarts for faster startup
+		turbopackFileSystemCacheForDev: true,
+		// Note: turbopackFileSystemCacheForBuild requires Next.js canary
+		
+		// Control client-side router cache staleness
+		staleTimes: {
+			dynamic: 30, // Cache dynamic pages for 30s on client
+			static: 180, // Cache static pages for 3 minutes on client
+		},
 		// Enable optimized imports for better tree-shaking and path resolution
 		optimizePackageImports: [
 			"@/components", 
@@ -15,12 +63,20 @@ const nextConfig: NextConfig = {
 			"lucide-react",
 			"@clerk/nextjs",
 			"recharts",
+			"@radix-ui/react-icons",
+			"@tanstack/react-table",
+			"framer-motion",
 		],
 		// Enable server source maps for better debugging (disable in production)
 		serverSourceMaps: false,
 		// Enable View Transitions API for smooth page transitions (Next.js 16)
 		viewTransition: true,
 	},
+	// ========================================================================
+	// Build Performance Optimizations
+	// ========================================================================
+	// Disable development indicator for cleaner UI
+	devIndicators: false,
 	// Enable static optimization
 	output: undefined, // Allow both static and server rendering
 	// Disable source maps in production to reduce bundle size
@@ -33,6 +89,13 @@ const nextConfig: NextConfig = {
 		minimumCacheTTL: 60,
 		deviceSizes: [320, 420, 640, 768, 1024, 1200, 1920],
 		imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
+		// Disable blur placeholders in development for faster builds
+		disableStaticImages: false,
+	},
+	// Skip type checking during build (run separately with npm run type-check)
+	typescript: {
+		// Set to true if you want faster builds (type-check separately)
+		ignoreBuildErrors: false,
 	},
 	// Add headers for better CORS handling and performance
 	async headers() {

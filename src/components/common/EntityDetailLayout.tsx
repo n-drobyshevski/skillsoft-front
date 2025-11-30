@@ -7,7 +7,7 @@ interface EntityDetailLayoutProps {
 
 export function EntityDetailLayout({ children, className = '' }: EntityDetailLayoutProps) {
   return (
-    <div className={`container mx-auto p-6 max-w-7xl ${className}`}>
+    <div className={`container mx-auto px-4 py-4 sm:px-6 sm:py-5 max-w-6xl ${className}`}>
       {children}
     </div>
   );
