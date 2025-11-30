@@ -42,8 +42,8 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { testTemplatesApi } from '@/services/api';
-import { TestTemplate, UpdateTestTemplateRequest } from '@/app/interfaces/domain-interfaces';
-import { AssessmentGoal, AssessmentGoalInfo } from '@/app/enums/domain_enums';
+import { TestTemplate, UpdateTestTemplateRequest } from '@/types/domain';
+import { AssessmentGoal, AssessmentGoalInfo } from '@/types/domain';
 import { toast } from 'sonner';
 import { 
   Loader2, 

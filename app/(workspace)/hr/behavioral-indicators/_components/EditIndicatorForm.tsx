@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { indicatorSchema } from '../validation';
-import { BehavioralIndicator } from '@/app/interfaces/domain-interfaces';
+import { BehavioralIndicator } from '@/types/domain';
 import { Button } from '@/components/ui/button';
 import {
   Form,
@@ -24,7 +24,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
-import { ProficiencyLevel, ApprovalStatus } from '@/app/enums/domain_enums';
+import { ProficiencyLevel, ApprovalStatus, IndicatorMeasurementType } from '@/types/domain';
 import { updateIndicatorAction } from '@/app/actions';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
@@ -32,9 +32,6 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Textarea } from "@/components/ui/textarea";
 
 type IndicatorFormValues = z.infer<typeof indicatorSchema>;
-
-
-import { IndicatorMeasurementType } from '@/app/enums/domain_enums';
 
 export function EditIndicatorForm({ indicator }: { indicator: BehavioralIndicator }) {
   const router = useRouter();

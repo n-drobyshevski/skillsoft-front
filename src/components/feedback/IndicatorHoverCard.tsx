@@ -19,7 +19,7 @@ import {
   AlertCircle
 } from 'lucide-react';
 import { biLevelToColor, approvalStatusToColor } from '@/app/utils';
-import type { BehavioralIndicator } from '@/app/interfaces/domain-interfaces';
+import type { BehavioralIndicator } from '@/types/domain';
 
 interface IndicatorHoverCardProps {
   indicatorId: string;

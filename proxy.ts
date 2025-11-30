@@ -13,7 +13,7 @@
 
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
-import type { UserRole } from '@/app/types/globals.d';
+import { UserRole } from '@/types/user';
 
 // ============================================================================
 // Route Matchers - Define which routes require authentication/authorization
@@ -92,9 +92,9 @@ function getUserRoleFromAuthObject(
   sessionClaims: Record<string, unknown> | null
 ): UserRole {
   // Priority 1: Organization role from auth object (this is the correct source)
-  if (orgRole === 'org:admin') return 'ADMIN';
-  if (orgRole === 'org:editor') return 'EDITOR';
-  if (orgRole === 'org:member') return 'USER';
+  if (orgRole === 'org:admin') return UserRole.ADMIN;
+  if (orgRole === 'org:editor') return UserRole.EDITOR;
+  if (orgRole === 'org:member') return UserRole.USER;
   
   // Priority 2: publicMetadata.role (set manually or via sync)
   if (sessionClaims) {
@@ -106,7 +106,7 @@ function getUserRoleFromAuthObject(
   }
   
   // Default to USER
-  return 'USER';
+  return UserRole.USER;
 }
 
 /**

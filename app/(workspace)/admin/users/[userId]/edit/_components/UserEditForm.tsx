@@ -27,7 +27,7 @@ import {
   Lock,
   Unlock,
 } from "lucide-react";
-import { User, UserRole, getRoleDisplayName } from "@/app/interfaces/user-interfaces";
+import { User, UserRole, getRoleDisplayName } from "@/types/user";
 import {
   updateUserAction,
   syncUserToBackend,

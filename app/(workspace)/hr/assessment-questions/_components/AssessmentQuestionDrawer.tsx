@@ -10,7 +10,7 @@ import {
   SheetTitle,
   SheetDescription,
 } from "@/components/ui/sheet";
-import { AssessmentQuestion, BehavioralIndicator, Competency } from "@/app/interfaces/domain-interfaces";
+import { AssessmentQuestion, BehavioralIndicator, Competency } from "@/types/domain";
 import { competenciesApi, behavioralIndicatorsApi } from "@/services/api";
 import { questionDifficultyToColor } from "@/app/utils";
 import { CompetencyHoverCard } from "@/app/(workspace)/hr/behavioral-indicators/[indicatorId]/_components/CompetencyHoverCard";

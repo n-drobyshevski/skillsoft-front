@@ -33,7 +33,7 @@ import {
   getRoleBadgeColor,
   getRoleDisplayName,
   getUserStatus,
-} from "@/app/interfaces/user-interfaces";
+} from "@/types/user";
 import {
   Mail,
   Calendar,

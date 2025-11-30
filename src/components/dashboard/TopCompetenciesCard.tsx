@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
 import { Badge } from "@/components/ui/badge";
-import { Competency } from "@/app/interfaces/domain-interfaces";
+import { Competency } from "@/types/domain";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import Link from "next/link";
 import { competencyCategoryToIcon, levelToColor } from "@/app/utils";

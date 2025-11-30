@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from "react";
 import { z } from "zod";
-import { AssessmentQuestion } from "@/app/interfaces/domain-interfaces";
+import { AssessmentQuestion } from "@/types/domain";
 import { QuestionForm } from "../../../_components/QuestionForm";
 import QuestionPreview from "../../../_components/QuestionPreview";
 import PageHeader from "@/components/common/PageHeader";

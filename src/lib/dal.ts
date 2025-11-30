@@ -26,7 +26,7 @@
 import { cache } from 'react';
 import { auth, currentUser } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
-import type { UserRole } from '@/app/types/globals.d';
+import { UserRole } from '@/types/user';
 
 // ============================================================================
 // Types
@@ -53,11 +53,11 @@ export interface VerifiedSession {
 function mapOrgRoleToUserRole(orgRole: string | undefined): UserRole | null {
   switch (orgRole) {
     case 'org:admin':
-      return 'ADMIN';
+      return UserRole.ADMIN;
     case 'org:editor':
-      return 'EDITOR';
+      return UserRole.EDITOR;
     case 'org:member':
-      return 'USER';
+      return UserRole.USER;
     default:
       return null;
   }
@@ -89,7 +89,7 @@ export const verifySession = cache(async (): Promise<VerifiedSession | null> => 
     // Get role from org membership or metadata
     const mappedRole = mapOrgRoleToUserRole(orgRole as string | undefined);
     const metadataRole = sessionClaims?.metadata?.role as UserRole | undefined;
-    const role: UserRole = mappedRole ?? metadataRole ?? 'USER';
+    const role: UserRole = mappedRole ?? metadataRole ?? UserRole.USER;
     
     // Get user details (also cached by Clerk)
     const user = await currentUser();
@@ -116,7 +116,7 @@ export const verifySession = cache(async (): Promise<VerifiedSession | null> => 
  */
 export const getUserRole = cache(async (): Promise<UserRole> => {
   const session = await verifySession();
-  return session?.role ?? 'USER';
+  return session?.role ?? UserRole.USER;
 });
 
 // ============================================================================

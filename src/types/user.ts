@@ -1,5 +1,6 @@
 /**
- * User entity interfaces for Clerk.js integration
+ * User entity interfaces for Clerk.js integration.
+ * Consolidated from app/interfaces/user-interfaces.ts
  */
 
 export enum UserRole {
@@ -40,9 +41,6 @@ export interface UserStats {
   recentlyActive: number;
 }
 
-/**
- * Input types for user operations
- */
 export interface UserCreateInput {
   clerkId: string;
   email?: string;
@@ -60,9 +58,10 @@ export interface UserUpdateInput {
   preferences?: string;
 }
 
-/**
- * Helper function to get user's full name
- */
+// ============================================
+// USER HELPER FUNCTIONS
+// ============================================
+
 export function getUserFullName(user: User): string {
   if (user.firstName && user.lastName) {
     return `${user.firstName} ${user.lastName}`;
@@ -78,16 +77,10 @@ export function getUserFullName(user: User): string {
   return user.clerkId;
 }
 
-/**
- * Helper function to check if user can access the system
- */
 export function canUserAccess(user: User): boolean {
   return user.isActive && !user.banned && !user.locked;
 }
 
-/**
- * Helper function to get user status description
- */
 export function getUserStatus(user: User): { label: string; variant: 'default' | 'success' | 'warning' | 'destructive' } {
   if (user.banned) {
     return { label: 'Banned', variant: 'destructive' };
@@ -101,9 +94,6 @@ export function getUserStatus(user: User): { label: string; variant: 'default' |
   return { label: 'Active', variant: 'success' };
 }
 
-/**
- * Helper function to get user initials for avatar
- */
 export function getUserInitials(user: User): string {
   if (user.firstName && user.lastName) {
     return `${user.firstName[0]}${user.lastName[0]}`.toUpperCase();
@@ -119,9 +109,6 @@ export function getUserInitials(user: User): string {
   return 'U';
 }
 
-/**
- * Get role badge color class
- */
 export function getRoleBadgeColor(role: UserRole): string {
   switch (role) {
     case UserRole.ADMIN:
@@ -135,9 +122,6 @@ export function getRoleBadgeColor(role: UserRole): string {
   }
 }
 
-/**
- * Get role display name
- */
 export function getRoleDisplayName(role: UserRole): string {
   switch (role) {
     case UserRole.ADMIN:

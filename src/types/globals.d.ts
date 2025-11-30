@@ -5,16 +5,15 @@
 
 export {};
 
-// Define the roles available in the application
-export type UserRole = 'ADMIN' | 'EDITOR' | 'USER';
+// Re-export UserRole for backwards compatibility
+export { UserRole } from './user';
 
 // Extend Clerk's session claims to include our custom metadata
 declare global {
   interface CustomJwtSessionClaims {
     metadata: {
-      role?: UserRole;
+      role?: 'ADMIN' | 'EDITOR' | 'USER';
     };
-    // Organization membership data (if using Clerk Organizations)
     org_role?: string;
     org_id?: string;
     org_slug?: string;
@@ -25,7 +24,7 @@ declare global {
  * Role hierarchy for permission checking.
  * Higher number = more permissions.
  */
-export const ROLE_HIERARCHY: Record<UserRole, number> = {
+export const ROLE_HIERARCHY: Record<'ADMIN' | 'EDITOR' | 'USER', number> = {
   USER: 1,
   EDITOR: 2,
   ADMIN: 3,
@@ -33,9 +32,8 @@ export const ROLE_HIERARCHY: Record<UserRole, number> = {
 
 /**
  * Route permissions configuration.
- * Defines which roles can access which routes.
  */
-export const ROUTE_PERMISSIONS: Record<string, UserRole[]> = {
+export const ROUTE_PERMISSIONS: Record<string, ('ADMIN' | 'EDITOR' | 'USER')[]> = {
   // Admin-only routes
   '/users': ['ADMIN'],
   '/users/(.*)': ['ADMIN'],

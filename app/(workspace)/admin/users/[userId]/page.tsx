@@ -32,7 +32,7 @@ import {
   getRoleBadgeColor,
   getRoleDisplayName,
   UserRole,
-} from "@/app/interfaces/user-interfaces";
+} from "@/types/user";
 import UserProfileClient from "./_components/UserProfileClient";
 
 interface UserProfilePageProps {

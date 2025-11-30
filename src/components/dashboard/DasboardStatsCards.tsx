@@ -8,7 +8,7 @@ import {
   CheckCircle2,
   Layers,
 } from "lucide-react";
-import { DashboardStats } from "@/app/interfaces/domain-interfaces";
+import { DashboardStats } from "@/types/domain";
 import { competencyCategoryToIcon } from "@/app/utils";
 
 export default function DashboardStatsCards({ stats }: { stats: DashboardStats }) {

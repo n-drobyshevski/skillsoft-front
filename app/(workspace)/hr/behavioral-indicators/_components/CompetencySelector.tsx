@@ -14,8 +14,8 @@ import {
 } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Search, ArrowRight, Loader2, Building2 } from 'lucide-react';
-import { Competency } from '@/app/interfaces/domain-interfaces';
-import { CompetencyCategory, ProficiencyLevel } from '@/app/enums/domain_enums';
+import { Competency } from '@/types/domain';
+import { CompetencyCategory, ProficiencyLevel } from '@/types/domain';
 import { competenciesApi } from '@/services/api';
 import { toast } from 'sonner';
 

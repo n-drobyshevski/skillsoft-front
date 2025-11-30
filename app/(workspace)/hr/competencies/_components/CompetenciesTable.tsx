@@ -16,11 +16,11 @@ import {
   CompetencyCategory,
   ProficiencyLevel,
   ApprovalStatus,
-} from "@/app/enums/domain_enums";
+} from "@/types/domain";
 import {
   Competency,
   BehavioralIndicator,
-} from "@/app/interfaces/domain-interfaces";
+} from "@/types/domain";
 import {
   ArrowUpDown,
   Eye,

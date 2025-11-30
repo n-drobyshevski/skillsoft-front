@@ -5,7 +5,7 @@ import { toast } from 'sonner';
 import { EntityDetailHeader } from '@/components/common/EntityDetailHeader';
 import { deleteCompetency } from '@/src/app/actions';
 import { levelToColor, approvalStatusToColor } from '@/app/utils';
-import type { Competency } from '@/app/interfaces/domain-interfaces';
+import type { Competency } from '@/types/domain';
 
 interface CompetencyDetailClientProps {
   competency: Competency;

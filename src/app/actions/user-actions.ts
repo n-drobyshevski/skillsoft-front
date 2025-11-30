@@ -2,7 +2,7 @@
 
 import { revalidatePath, revalidateTag } from 'next/cache';
 import { clerkClient } from '@clerk/nextjs/server';
-import { UserRole } from '../../../app/interfaces/user-interfaces';
+import { UserRole } from '@/types/user';
 
 // Backend API URL
 const getBackendUrl = () => {

@@ -7,7 +7,7 @@ import { EntityDetailHeader } from "@/components/common/EntityDetailHeader";
 import { deleteIndicator } from "@/app/actions";
 import { approvalStatusToColor, levelToColor, formatProficiencyLevel } from "@/components/common/entity-utils";
 import { useBreadcrumbContext } from '@/src/context/BreadcrumbContext';
-import type { BehavioralIndicator } from "@/app/interfaces/domain-interfaces";
+import type { BehavioralIndicator } from "@/types/domain";
 
 interface IndicatorDetailClientProps {
   indicator: BehavioralIndicator;

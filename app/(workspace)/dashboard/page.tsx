@@ -9,7 +9,7 @@ import {
 	CardTitle,
 } from "@/components/ui/card";
 import { competenciesApi } from "@/services/api";
-import { Competency, DashboardStats } from "@/app/interfaces/domain-interfaces";
+import { Competency, DashboardStats } from "@/types/domain";
 import FlexibleStatsCards from "@/components/data-display/FlexibleStatsCards";
 import ErrorCard from "@/components/feedback/ErrorCard";
 import CompetencyByCategoryBarChart from "@/components/data-display/charts/CompetencyByCategoryBarChart";

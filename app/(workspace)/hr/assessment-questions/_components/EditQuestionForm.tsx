@@ -4,8 +4,8 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { z } from 'zod';
 import { questionSchema } from '../validation';
-import { AssessmentQuestion } from '@/app/interfaces/domain-interfaces';
-import { QuestionType } from '@/app/enums/domain_enums'; 
+import { AssessmentQuestion } from '@/types/domain';
+import { QuestionType, DifficultyLevel } from '@/types/domain';
 import { Button } from '@/components/ui/button';
 import {
   Form,
@@ -25,7 +25,6 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
-import { DifficultyLevel } from '@/app/enums/domain_enums';
 import { assessmentQuestionsApi } from '@/services/api';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';

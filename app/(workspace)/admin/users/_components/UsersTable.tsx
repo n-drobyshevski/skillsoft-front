@@ -48,7 +48,7 @@ import {
   getRoleDisplayName,
   getUserStatus,
   canUserAccess,
-} from "@/app/interfaces/user-interfaces";
+} from "@/types/user";
 import {
   ArrowUpDown,
   Eye,

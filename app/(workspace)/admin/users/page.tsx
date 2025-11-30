@@ -7,7 +7,7 @@ import {
   User,
   UserRole,
   canUserAccess,
-} from "@/app/interfaces/user-interfaces";
+} from "@/types/user";
 
 export const metadata: Metadata = {
   title: "Users - SkillSoft",

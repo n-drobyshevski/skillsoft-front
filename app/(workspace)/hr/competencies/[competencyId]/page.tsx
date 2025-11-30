@@ -23,8 +23,8 @@ import QuestionsListSkeleton from './_components/QuestionsListSkeleton';
 import type {
 	BehavioralIndicator,
 	AssessmentQuestion,
-} from "@/app/interfaces/domain-interfaces";
-import { ProficiencyLevel } from "@/app/enums/domain_enums";
+} from "@/types/domain";
+import { ProficiencyLevel } from "@/types/domain";
 import { levelToColor, approvalStatusToColor } from "@/app/utils";
 
 interface CompetencyDetailPageProps {

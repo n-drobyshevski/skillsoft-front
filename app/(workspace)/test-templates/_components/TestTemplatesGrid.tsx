@@ -5,8 +5,8 @@ import Link from "next/link";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { TestTemplateSummary } from "@/app/interfaces/domain-interfaces";
-import { AssessmentGoal, AssessmentGoalInfo } from "@/app/enums/domain_enums";
+import { TestTemplateSummary } from "@/types/domain";
+import { AssessmentGoal, AssessmentGoalInfo } from "@/types/domain";
 import { Clock, Target, ArrowRight, BookOpen, CheckCircle2, Pencil, Crosshair, Users, Briefcase } from "lucide-react";
 
 interface TestTemplatesGridProps {

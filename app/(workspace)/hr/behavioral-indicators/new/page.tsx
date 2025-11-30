@@ -10,8 +10,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { Suspense } from 'react';
-import { BehavioralIndicator } from '@/interfaces/domain-interfaces';
-import { IndicatorMeasurementType, ProficiencyLevel, ApprovalStatus } from '@/enums/domain_enums';
+import { BehavioralIndicator } from '@/types/domain';
+import { IndicatorMeasurementType, ProficiencyLevel, ApprovalStatus } from '@/types/domain';
 import { Info } from 'lucide-react';
 
 // Constants

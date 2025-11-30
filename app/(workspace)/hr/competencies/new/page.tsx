@@ -4,8 +4,8 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { CompetencyForm } from '../_components/CompetencyForm';
 import PageHeader from '@/components/common/PageHeader';
-import { Competency } from '@/app/interfaces/domain-interfaces';
-import { CompetencyCategory, ProficiencyLevel, ApprovalStatus } from '@/app/enums/domain_enums';
+import { Competency } from '@/types/domain';
+import { CompetencyCategory, ProficiencyLevel, ApprovalStatus } from '@/types/domain';
 import CompetencyPreview from '../_components/CompetencyPreview';
 
 // Constants

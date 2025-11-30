@@ -11,7 +11,7 @@ import {
   BookOpen,
   ClipboardList
 } from "lucide-react";
-import { DashboardStats } from "@/app/interfaces/domain-interfaces";
+import { DashboardStats } from "@/types/domain";
 import MobileStatsCard from "./MobileStatsCard";
 
 interface ResponsiveStatsCardsProps {

@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { z } from 'zod';
 import { questionSchema } from '../validation';
-import { AssessmentQuestion } from '@/app/interfaces/domain-interfaces';
+import { AssessmentQuestion } from '@/types/domain';
 import { Button } from '@/components/ui/button';
 import {
   Form,
@@ -25,7 +25,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
-import { DifficultyLevel } from '@/app/enums/domain_enums';
+import { DifficultyLevel, QuestionType } from '@/types/domain';
 import { assessmentQuestionsApi } from '@/services/api';
 import { useRouter } from 'next/navigation';
 import { useState, useEffect, useCallback } from 'react';
@@ -33,8 +33,6 @@ import { TrashIcon } from 'lucide-react';
 import { toast } from "sonner";
 
 type QuestionFormValues = z.infer<typeof questionSchema>;
-
-import { QuestionType } from '@/app/enums/domain_enums';
 
 const questionTypes = Object.values(QuestionType);
 

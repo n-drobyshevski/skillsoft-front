@@ -23,7 +23,7 @@ import { EntityDetailLayout } from "@/components/common/EntityDetailLayout";
 import QuestionDetailClient from "./_components/QuestionDetailClient";
 import { CompetencyHoverCard } from "@/app/(workspace)/hr/behavioral-indicators/[indicatorId]/_components/CompetencyHoverCard";
 import { IndicatorHoverCard } from "@/components/feedback/IndicatorHoverCard";
-import type { BehavioralIndicator, Competency } from "@/interfaces/domain-interfaces";
+import type { BehavioralIndicator, Competency } from "@/types/domain";
 interface QuestionDetailPageProps {
 	params: { questionId: string };
 }

@@ -14,7 +14,7 @@ import {
 } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Search, ArrowRight, Loader2 } from 'lucide-react';
-import { BehavioralIndicator, Competency } from '@/app/interfaces/domain-interfaces';
+import { BehavioralIndicator, Competency } from '@/types/domain';
 import { behavioralIndicatorsApi, competenciesApi } from '@/services/api';
 import { toast } from 'sonner';
 

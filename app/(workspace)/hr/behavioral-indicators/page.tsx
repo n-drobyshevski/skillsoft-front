@@ -14,7 +14,7 @@ export const metadata: Metadata = {
     description: "Define and manage measurable behavioral indicators for competency assessment.",
   },
 };
-import { BehavioralIndicator } from "@/app/interfaces/domain-interfaces";
+import { BehavioralIndicator } from "@/types/domain";
 import {
   assessmentQuestionsApi,
   behavioralIndicatorsApi,

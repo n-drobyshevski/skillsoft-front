@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useMemo, useCallback, Suspense } from 'react';
-import { BehavioralIndicator, Competency } from '@/app/interfaces/domain-interfaces';
+import { BehavioralIndicator, Competency } from '@/types/domain';
 import { behavioralIndicatorsApi } from '@/services/api';
 import { 
   Search, 

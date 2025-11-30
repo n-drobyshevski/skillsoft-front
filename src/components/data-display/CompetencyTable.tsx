@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { ColumnDef } from '@tanstack/react-table';
-import { Competency } from '@/app/interfaces/domain-interfaces';
+import { Competency } from '@/types/domain';
 import { Button } from '@/components/ui/button';
 import { ArrowUpDown, Target, TrendingUp, CheckCircle2, Clock } from 'lucide-react';
 import Link from 'next/link';

@@ -4,7 +4,7 @@ import { Metadata } from "next";
 import { Button } from "@/components/ui/button";
 import {
   Competency,
-} from "@/app/interfaces/domain-interfaces";
+} from "@/types/domain";
 import {
   Plus,
 } from "lucide-react";

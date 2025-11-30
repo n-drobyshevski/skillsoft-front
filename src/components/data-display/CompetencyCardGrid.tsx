@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { Competency } from "@/app/interfaces/domain-interfaces";
+import { Competency } from "@/types/domain";
 import CompetencyCard  from "./CompetencyCard";
 import { levelToNumber } from "@/app/utils";
 import { Skeleton } from "@/components/ui/skeleton";

@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { DifficultyLevel, QuestionType } from '@/enums/domain_enums';
+import { DifficultyLevel, QuestionType } from '@/types/domain';
 
 /**
  * Schema for answer options with optional vector weights for SJT questions.

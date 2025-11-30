@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { SessionQuestion } from '@/app/interfaces/domain-interfaces';
+import { SessionQuestion } from '@/types/domain';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 

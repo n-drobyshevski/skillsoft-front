@@ -32,8 +32,8 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { testTemplatesApi } from '@/services/api';
-import { CreateTestTemplateRequest } from '@/app/interfaces/domain-interfaces';
-import { AssessmentGoal, AssessmentGoalInfo } from '@/app/enums/domain_enums';
+import { CreateTestTemplateRequest } from '@/types/domain';
+import { AssessmentGoal, AssessmentGoalInfo } from '@/types/domain';
 import { toast } from 'sonner';
 import { 
   Loader2, 

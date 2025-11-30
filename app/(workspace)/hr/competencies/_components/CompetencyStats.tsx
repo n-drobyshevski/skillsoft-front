@@ -3,7 +3,7 @@
 import React from "react";
 
 import { Activity, Target, Users } from "lucide-react";
-import { Competency } from "@/app/interfaces/domain-interfaces";
+import { Competency } from "@/types/domain";
 import StatsCard from "@/components/data-display/StatsCard";
 
 export default function CompetencyStats({

@@ -3,7 +3,7 @@ import { behavioralIndicatorsApi, assessmentQuestionsApi } from "@/services/api"
 import type {
 	BehavioralIndicator,
 	AssessmentQuestion,
-} from "@/interfaces/domain-interfaces";
+} from "@/types/domain";
 import IndicatorDetailContent from "./_components/IndicatorDetailContent";
 import IndicatorDetailClient from "./_components/IndicatorDetailClient";
 import { EntityDetailLayout } from "@/components/common/EntityDetailLayout";

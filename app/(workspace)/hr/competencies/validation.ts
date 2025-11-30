@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { CompetencyCategory, ProficiencyLevel, ApprovalStatus } from '@/enums/domain_enums';
+import { CompetencyCategory, ProficiencyLevel, ApprovalStatus } from '@/types/domain';
 
 export const competencySchema = z.object({
   name: z.string().min(3, 'Name must be at least 3 characters'),

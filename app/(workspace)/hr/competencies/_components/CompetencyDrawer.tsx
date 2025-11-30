@@ -9,7 +9,7 @@ import {
   SheetTitle,
   SheetDescription,
 } from "@/components/ui/sheet";
-import { Competency } from "@/app/interfaces/domain-interfaces";
+import { Competency } from "@/types/domain";
 import { approvalStatusToColor, competencyProficiencyLevelToColor } from "@/app/utils";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { useIsMobile } from "@/hooks/use-mobile";

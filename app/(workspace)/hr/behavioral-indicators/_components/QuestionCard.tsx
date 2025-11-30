@@ -2,7 +2,7 @@
 
 import { Badge } from "@/components/ui/badge";
 import React from "react";
-import { AssessmentQuestion } from "@/app/interfaces/domain-interfaces";
+import { AssessmentQuestion } from "@/types/domain";
 import { CheckCircle, HelpCircle, ExternalLink } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import Link from "next/link";

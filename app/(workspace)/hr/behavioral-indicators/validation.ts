@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { ProficiencyLevel, ApprovalStatus, IndicatorMeasurementType } from '@/app/enums/domain_enums';
+import { ProficiencyLevel, ApprovalStatus, IndicatorMeasurementType } from '@/types/domain';
 
 const measurementTypes = Object.values(IndicatorMeasurementType);
 

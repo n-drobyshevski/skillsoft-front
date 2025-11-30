@@ -21,7 +21,7 @@ import {
   Settings2,
   Eye,
 } from "lucide-react";
-import { BehavioralIndicator } from "@/app/interfaces/domain-interfaces";
+import { BehavioralIndicator } from "@/types/domain";
 import { biLevelToColor } from "@/app/utils";
 import IndicatorDrawer from "./IndicatorDrawer";
 import { CompetencyHoverCard } from "../[indicatorId]/_components/CompetencyHoverCard";

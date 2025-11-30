@@ -8,7 +8,7 @@ import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { AlertTriangle, Scale, Zap, RotateCcw, CheckCircle2, Calculator } from 'lucide-react';
-import { BehavioralIndicator } from '@/app/interfaces/domain-interfaces';
+import { BehavioralIndicator } from '@/types/domain';
 import { behavioralIndicatorsApi } from '@/services/api';
 import { updateIndicatorAction, type IndicatorFormData } from '@/app/actions';
 import { toast } from 'sonner';

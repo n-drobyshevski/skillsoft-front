@@ -1,7 +1,7 @@
 
-import { AssessmentQuestion } from "@/app/interfaces/domain-interfaces";
+import { AssessmentQuestion } from "@/types/domain";
 import { Badge } from "@/components/ui/badge";
-import { DifficultyLevel } from "@/app/enums/domain_enums";
+import { DifficultyLevel } from "@/types/domain";
 
 function QuestionCard({ question, index }: { question: AssessmentQuestion; index: number }) {
   return (

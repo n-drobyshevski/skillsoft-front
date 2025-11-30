@@ -16,8 +16,8 @@ import {
 import type {
   BehavioralIndicator,
   AssessmentQuestion,
-} from "@/app/interfaces/domain-interfaces";
-import { DifficultyLevel } from "@/app/enums/domain_enums";
+} from "@/types/domain";
+import { DifficultyLevel } from "@/types/domain";
 import AssessmentQuestionDrawer from "@/app/(workspace)/hr/assessment-questions/_components/AssessmentQuestionDrawer";
 import { CompetencyHoverCard } from "./CompetencyHoverCard";
 

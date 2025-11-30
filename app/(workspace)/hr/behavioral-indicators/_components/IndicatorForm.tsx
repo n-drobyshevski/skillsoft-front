@@ -5,7 +5,7 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { indicatorSchema } from '../validation';
 import { useWeightValidation } from '../hooks/useWeightValidation';
-import { BehavioralIndicator } from '@/app/interfaces/domain-interfaces';
+import { BehavioralIndicator } from '@/types/domain';
 import { WeightAdjustmentModal } from './WeightAdjustmentModal';
 import { Button } from '@/components/ui/button';
 import {
@@ -26,7 +26,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
-import { ProficiencyLevel, ApprovalStatus, IndicatorMeasurementType } from '@/app/enums/domain_enums';
+import { ProficiencyLevel, ApprovalStatus, IndicatorMeasurementType } from '@/types/domain';
 import { updateIndicatorAction, createIndicatorAction } from '@/app/actions';
 import { useRouter } from 'next/navigation';
 import { useState, useCallback, useEffect } from 'react';

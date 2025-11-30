@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { Badge } from "@/components/ui/badge";
-import { AssessmentQuestion } from "@/app/interfaces/domain-interfaces";
+import { AssessmentQuestion } from "@/types/domain";
 import { questionDifficultyToColor, questionTypeToIcon } from "@/app/utils";
 import { Separator } from "@/components/ui/separator";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";

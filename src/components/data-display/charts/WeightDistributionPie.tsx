@@ -2,7 +2,7 @@ import type React from "react";
 import { PieChart, Pie, Cell, Legend } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
-import type { BehavioralIndicator } from "@/app/interfaces/domain-interfaces";
+import type { BehavioralIndicator } from "@/types/domain";
 import { BarChart3 } from "lucide-react";
 
 interface WeightDistributionPieProps {

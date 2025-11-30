@@ -9,8 +9,8 @@ import {
   CurrentQuestionResponse, 
   SessionQuestion,
   SubmitAnswerRequest 
-} from '@/app/interfaces/domain-interfaces';
-import { SessionStatus, QuestionType } from '@/app/enums/domain_enums';
+} from '@/types/domain';
+import { SessionStatus, QuestionType } from '@/types/domain';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';

@@ -24,7 +24,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
-import { AssessmentQuestion } from "@/app/interfaces/domain-interfaces";
+import { AssessmentQuestion } from "@/types/domain";
 import { questionTypeToIcon, questionDifficultyToColor } from "@/app/utils";
 import EntitiesTable from "@/components/data-display/Table";
 import AssessmentQuestionDrawer from "./AssessmentQuestionDrawer";

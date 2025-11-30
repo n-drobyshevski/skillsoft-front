@@ -14,7 +14,7 @@
 'use server';
 
 import { auth } from '@clerk/nextjs/server';
-import type { UserRole } from '@/app/types/globals.d';
+import { UserRole } from '@/types/user';
 
 /**
  * Get the role from Clerk organization role string.
@@ -24,11 +24,11 @@ function mapOrgRole(orgRole: string | undefined): UserRole | null {
   
   switch (orgRole) {
     case 'org:admin':
-      return 'ADMIN';
+      return UserRole.ADMIN;
     case 'org:editor':
-      return 'EDITOR';
+      return UserRole.EDITOR;
     case 'org:member':
-      return 'USER';
+      return UserRole.USER;
     default:
       return null;
   }
@@ -63,7 +63,7 @@ export async function getAuthHeaders(): Promise<Record<string, string>> {
     
     // Priority: Organization role > metadata role > default USER
     const mappedRole = mapOrgRole(orgRole as string | undefined);
-    const userRole: UserRole = mappedRole ?? metadataRole ?? 'USER';
+    const userRole: UserRole = mappedRole ?? metadataRole ?? UserRole.USER;
     
     return {
       'X-User-Id': userId,
@@ -87,15 +87,15 @@ export async function getCurrentUserRole(): Promise<UserRole> {
     const { userId, sessionClaims, orgRole } = authResult;
     
     if (!userId) {
-      return 'USER';
+      return UserRole.USER;
     }
     
     const metadataRole = sessionClaims?.metadata?.role as UserRole | undefined;
     const mappedRole = mapOrgRole(orgRole as string | undefined);
     
-    return mappedRole ?? metadataRole ?? 'USER';
+    return mappedRole ?? metadataRole ?? UserRole.USER;
   } catch {
-    return 'USER';
+    return UserRole.USER;
   }
 }
 
@@ -106,7 +106,7 @@ export async function getCurrentUserRole(): Promise<UserRole> {
  */
 export async function canCreateContent(): Promise<boolean> {
   const role = await getCurrentUserRole();
-  return role === 'ADMIN' || role === 'EDITOR';
+  return role === UserRole.ADMIN || role === UserRole.EDITOR;
 }
 
 /**

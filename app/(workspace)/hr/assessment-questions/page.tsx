@@ -14,7 +14,7 @@ export const metadata: Metadata = {
   },
 };
 
-import { AssessmentQuestion } from "@/app/interfaces/domain-interfaces";
+import { AssessmentQuestion } from "@/types/domain";
 import { assessmentQuestionsApi } from "@/services/api";
 import { Button } from "@/components/ui/button";
 import FlexibleStatsCards from "@/components/data-display/FlexibleStatsCards";

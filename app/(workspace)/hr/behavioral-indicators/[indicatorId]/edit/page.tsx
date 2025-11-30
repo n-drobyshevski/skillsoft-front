@@ -4,7 +4,7 @@ import { behavioralIndicatorsApi } from "@/services/api";
 import { IndicatorForm } from "../../_components/IndicatorForm";
 import { notFound, useParams } from "next/navigation";
 import IndicatorPreview from "../../_components/IndicatorPreview";
-import { BehavioralIndicator } from "@/app/interfaces/domain-interfaces";
+import { BehavioralIndicator } from "@/types/domain";
 import { useEffect, useState } from "react";
 import { EditIndicatorPageSkeleton } from "../../_components/EditIndicatorPageSkeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";

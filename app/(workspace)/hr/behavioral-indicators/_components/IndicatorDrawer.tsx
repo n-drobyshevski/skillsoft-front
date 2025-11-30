@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/sheet";
 import { biLevelToColor } from "@/app/utils";
 import { useState, useEffect } from "react";
-import { AssessmentQuestion, BehavioralIndicator } from "@/app/interfaces/domain-interfaces";
+import { AssessmentQuestion, BehavioralIndicator } from "@/types/domain";
 import { assessmentQuestionsApi } from "@/services/api";
 import QuestionCard from "./QuestionCard";
 import { useIsMobile } from "@/hooks/use-mobile";

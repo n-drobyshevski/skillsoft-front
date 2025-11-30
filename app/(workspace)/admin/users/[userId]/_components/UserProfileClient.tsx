@@ -1,6 +1,6 @@
 "use client";
 
-import { User } from "@/app/interfaces/user-interfaces";
+import { User } from "@/types/user";
 
 interface UserProfileClientProps {
   user: User;

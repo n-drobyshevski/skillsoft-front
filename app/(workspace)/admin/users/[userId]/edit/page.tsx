@@ -13,7 +13,7 @@ import {
   getUserStatus,
   getRoleBadgeColor,
   getRoleDisplayName,
-} from "@/app/interfaces/user-interfaces";
+} from "@/types/user";
 import UserEditForm from "./_components/UserEditForm";
 
 interface UserEditPageProps {

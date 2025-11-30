@@ -45,7 +45,7 @@ import Link from "next/link";
 import { ClientOnly } from "@/components/common/ClientOnly";
 import { LensSwitcher } from "@/components/layout/lens-switcher";
 import { useLens } from "@/context/LensContext";
-import { UserRole } from "@/interfaces/user-interfaces";
+import { UserRole } from "@/types/user";
 import { cn } from "@/lib/utils";
 
 // Lens glow animation classes for ring/glow highlight on lens switch

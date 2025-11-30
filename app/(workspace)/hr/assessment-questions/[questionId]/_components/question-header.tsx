@@ -11,7 +11,7 @@ import { ArrowLeft, Pencil, Trash2 } from "lucide-react";
 import Link from "next/link";
 
 import { questionDifficultyToColor } from "@/app/utils";
-import { DifficultyLevel } from "@/enums/domain_enums";
+import { DifficultyLevel } from "@/types/domain";
 export default function QuestionHeader({
     questionId,
     questionText,

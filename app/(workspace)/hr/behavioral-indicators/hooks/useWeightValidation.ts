@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { behavioralIndicatorsApi } from '@/services/api';
-import { BehavioralIndicator } from '@/app/interfaces/domain-interfaces';
+import { BehavioralIndicator } from '@/types/domain';
 
 interface UseWeightValidationProps {
   competencyId?: string;

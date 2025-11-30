@@ -9,7 +9,7 @@ import { Separator } from "@/components/ui/separator";
 import PageHeader from "@/components/common/PageHeader";
 import StartTestSessionButton from "../_components/StartTestSessionButton";
 import DeleteTestTemplateButton from "../_components/DeleteTestTemplateButton";
-import { AssessmentGoal, AssessmentGoalInfo } from "@/app/enums/domain_enums";
+import { AssessmentGoal, AssessmentGoalInfo } from "@/types/domain";
 import { 
   ArrowLeft, 
   Clock, 

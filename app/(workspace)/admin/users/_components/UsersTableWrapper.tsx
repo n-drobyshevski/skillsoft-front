@@ -2,7 +2,7 @@
 
 import dynamic from "next/dynamic";
 import TableSkeleton from "@/components/data-display/TableSkeleton";
-import type { User } from "@/app/interfaces/user-interfaces";
+import type { User } from "@/types/user";
 
 // Dynamic import with ssr: false to avoid hydration mismatch with Radix UI components
 // This must be in a Client Component

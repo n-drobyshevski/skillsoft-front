@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { competencySchema } from '../validation';
-import { Competency } from '@/app/interfaces/domain-interfaces';
+import { Competency } from '@/types/domain';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
@@ -25,7 +25,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
-import { CompetencyCategory, ProficiencyLevel, ApprovalStatus } from '@/app/enums/domain_enums';
+import { CompetencyCategory, ProficiencyLevel, ApprovalStatus } from '@/types/domain';
 import { competenciesApi } from '@/services/api';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';

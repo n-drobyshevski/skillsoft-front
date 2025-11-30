@@ -8,8 +8,8 @@ import PageHeader from '@/components/common/PageHeader';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { Suspense } from 'react';
-import { AssessmentQuestion } from '@/interfaces/domain-interfaces';
-import { QuestionType, DifficultyLevel } from '@/enums/domain_enums';
+import { AssessmentQuestion } from '@/types/domain';
+import { QuestionType, DifficultyLevel } from '@/types/domain';
 
 // Constants
 const PREVIEW_QUESTION_ID = 'preview-id';

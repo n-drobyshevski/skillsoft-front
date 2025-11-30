@@ -2,8 +2,8 @@ import { cache } from 'react';
 import { revalidateCompetencyTags, revalidateQuestionTags, revalidateUserTags } from '@/app/actions';
 import { getAuthHeaders } from './roleApi';
 
-import { AssessmentQuestion, BehavioralIndicator, Competency } from '../../app/interfaces/domain-interfaces';
-import { User, UserCreateInput, UserUpdateInput, UserRole } from '../../app/interfaces/user-interfaces';
+import { AssessmentQuestion, BehavioralIndicator, Competency } from '@/types/domain';
+import { User, UserCreateInput, UserUpdateInput, UserRole } from '@/types/user';
 
 const getApiBaseUrl = () => {
     const apiUrl = process.env.NEXT_PUBLIC_API_URL;
@@ -610,7 +610,7 @@ import {
   CurrentQuestionResponse,
   UserStatistics,
   TemplateStatistics,
-} from '../../app/interfaces/domain-interfaces';
+} from '@/types/domain';
 
 const TESTS_BASE = '/v1/tests';
 

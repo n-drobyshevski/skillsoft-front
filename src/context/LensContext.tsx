@@ -11,7 +11,7 @@ import {
   useCallback,
 } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import { UserRole } from "../../app/interfaces/user-interfaces";
+import { UserRole } from "@/types/user";
 
 /**
  * Lens represents a role-based view that filters the UI experience.
