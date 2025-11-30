@@ -2,7 +2,6 @@
 
 import * as React from "react";
 import { useState, useEffect } from "react";
-import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import {
   Sheet,
@@ -20,7 +19,16 @@ import { deleteAssessmentQuestion } from "@/src/app/actions";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { Eye, Settings2, ExternalLink, Loader2, Trash2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { 
+  Loader2, 
+  Trash2, 
+  ListChecks, 
+  FileText,
+  Layers,
+  Pencil,
+  ChevronRight,
+} from "lucide-react";
 
 export default function AssessmentQuestionDrawer({
   open,
@@ -35,12 +43,20 @@ export default function AssessmentQuestionDrawer({
   indicator?: BehavioralIndicator;
   onQuestionDeleted?: () => void;
 }) {
+  const router = useRouter();
   const isMobile = useIsMobile();
   const [competency, setCompetency] = useState<Competency | null>(null);
   const [currentIndicator, setCurrentIndicator] = useState<BehavioralIndicator | null>(indicator || null);
   const [isLoadingContext, setIsLoadingContext] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+
+  const handleNavigate = (path: string) => {
+    onOpenChange(false);
+    setTimeout(() => {
+      router.push(path);
+    }, 150);
+  };
 
   const handleDelete = async () => {
     setIsDeleting(true);
@@ -95,167 +111,169 @@ export default function AssessmentQuestionDrawer({
         className={`${
           isMobile 
             ? "w-full max-w-full sm:max-w-full" 
-            : "sm:max-w-xl"
-        } p-0 flex flex-col`}
+            : "sm:max-w-lg"
+        } p-0 flex flex-col gap-0 border-l border-border/50`}
         style={{
           WebkitOverflowScrolling: 'touch',
         }}
       >
-        {/* WCAG 2.1 Compliant Header with Proper SheetTitle */}
-        <div className={`${isMobile ? "p-3" : "p-4"} border-b bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60`}>
-          <div className="space-y-2.5">
-            <SheetTitle className={`${isMobile ? "text-lg" : "text-xl"} font-semibold leading-normal line-clamp-2`}>
-              {question.questionText}
-            </SheetTitle>
-            <SheetDescription className="text-sm text-muted-foreground leading-normal">
-              Assessment Question Details
-            </SheetDescription>
-            
-            {/* Accessible Badge Layout */}
-            <div className="flex items-center gap-2 flex-wrap">
-              <Badge 
-                variant={question.isActive ? "default" : "secondary"} 
-                className="h-7 text-sm px-2 min-h-7 leading-normal"
-                role="status"
-                aria-label={`Status: ${question.isActive ? "Active" : "Inactive"}`}
-              >
-                {question.isActive ? "Active" : "Inactive"}
-              </Badge>
-              <Badge
-                variant="outline"
-                className={`${questionDifficultyToColor(question.difficultyLevel)} h-7 text-sm px-2 min-h-7 leading-normal`}
-                role="status"
-                aria-label={`Difficulty Level: ${question.difficultyLevel}`}
-              >
-                {question.difficultyLevel}
-              </Badge>
-              <Badge 
-                variant="secondary" 
-                className="h-7 text-sm px-2 min-h-7 leading-normal"
-                role="status"
-                aria-label={`Question Type: ${question.questionType.split("_").map((word) => word.charAt(0) + word.slice(1).toLowerCase()).join(" ")}`}
-              >
-                {question.questionType
-                  .split("_")
-                  .map((word) => word.charAt(0) + word.slice(1).toLowerCase())
-                  .join(" ")}
-              </Badge>
+        {/* Clean Header */}
+        <div className={`${isMobile ? "px-4 py-3" : "px-5 py-4"} border-b border-border/40`}>
+          <div className="flex items-start justify-between gap-3 pr-8">
+            <div className="flex-1 min-w-0 space-y-1">
+              <SheetTitle className="text-base font-semibold leading-tight line-clamp-2 text-foreground">
+                {question.questionText.length > 80 
+                  ? `${question.questionText.substring(0, 80)}...` 
+                  : question.questionText}
+              </SheetTitle>
+              <SheetDescription className="text-xs text-muted-foreground">
+                Assessment Question Overview
+              </SheetDescription>
             </div>
-
-            {/* Accessible Context Information */}
-            {(competency || currentIndicator || isLoadingContext) && (
-              <div className="rounded-md border bg-muted/30 p-3 space-y-2 text-sm">
-                {isLoadingContext ? (
-                  <div className="flex items-center gap-2 text-muted-foreground">
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    Loading context...
-                  </div>
-                ) : (
-                  <div className="space-y-2">
-                    {competency && (
-                      <div className="flex items-center justify-between">
-                        <span className="text-muted-foreground">Competency:</span>
-                        <CompetencyHoverCard competencyId={competency.id}>
-                          <Link 
-                            href={`/hr/competencies/${competency.id}`}
-                            className="text-primary hover:text-primary/80 font-medium inline-flex items-center gap-1.5 min-h-11 p-1"
-                            aria-label={`View competency: ${competency.name}`}
-                          >
-                            {competency.name.length > 25 ? `${competency.name.substring(0, 25)}...` : competency.name}
-                            <ExternalLink className="h-3 w-3" />
-                          </Link>
-                        </CompetencyHoverCard>
-                      </div>
-                    )}
-                    
-                    {currentIndicator && (
-                      <div className="flex items-center justify-between">
-                        <span className="text-muted-foreground">Indicator:</span>
-                        <IndicatorHoverCard indicatorId={currentIndicator.id}>
-                          <Link 
-                            href={`/hr/behavioral-indicators/${currentIndicator.id}`}
-                            className="text-primary hover:text-primary/80 font-medium inline-flex items-center gap-1.5 min-h-11 p-1"
-                            aria-label={`View indicator: ${currentIndicator.title}`}
-                          >
-                            {currentIndicator.title.length > 25 ? `${currentIndicator.title.substring(0, 25)}...` : currentIndicator.title}
-                            <ExternalLink className="h-3 w-3" />
-                          </Link>
-                        </IndicatorHoverCard>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-            )}
           </div>
+          
+          {/* Status Badges */}
+          <div className="flex items-center gap-1.5 flex-wrap mt-3">
+            <Badge 
+              variant={question.isActive ? "default" : "secondary"} 
+              className="h-5 text-[11px] px-1.5 font-medium"
+            >
+              {question.isActive ? "Active" : "Inactive"}
+            </Badge>
+            <Badge
+              variant="outline"
+              className={`${questionDifficultyToColor(question.difficultyLevel)} h-5 text-[11px] px-1.5 font-medium`}
+            >
+              {question.difficultyLevel}
+            </Badge>
+            <Badge 
+              variant="outline" 
+              className="h-5 text-[11px] px-1.5 font-medium text-muted-foreground"
+            >
+              {question.questionType.split("_").map((word) => word.charAt(0) + word.slice(1).toLowerCase()).join(" ")}
+            </Badge>
+          </div>
+
+          {/* Context Information */}
+          {(competency || currentIndicator || isLoadingContext) && (
+            <div className="mt-3 rounded-lg border border-border/40 bg-muted/20 p-2.5 space-y-1.5">
+              {isLoadingContext ? (
+                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                  <Loader2 className="h-3 w-3 animate-spin" />
+                  Loading context...
+                </div>
+              ) : (
+                <>
+                  {competency && (
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-muted-foreground">Competency:</span>
+                      <CompetencyHoverCard competencyId={competency.id}>
+                        <button 
+                          onClick={() => handleNavigate(`/hr/competencies/${competency.id}`)}
+                          className="text-primary/80 hover:text-primary flex items-center gap-1 transition-colors font-medium"
+                        >
+                          {competency.name.length > 20 ? `${competency.name.substring(0, 20)}...` : competency.name}
+                          <ChevronRight className="h-3 w-3" />
+                        </button>
+                      </CompetencyHoverCard>
+                    </div>
+                  )}
+                  
+                  {currentIndicator && (
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-muted-foreground">Indicator:</span>
+                      <IndicatorHoverCard indicatorId={currentIndicator.id}>
+                        <button 
+                          onClick={() => handleNavigate(`/hr/behavioral-indicators/${currentIndicator.id}`)}
+                          className="text-primary/80 hover:text-primary flex items-center gap-1 transition-colors font-medium"
+                        >
+                          {currentIndicator.title.length > 20 ? `${currentIndicator.title.substring(0, 20)}...` : currentIndicator.title}
+                          <ChevronRight className="h-3 w-3" />
+                        </button>
+                      </IndicatorHoverCard>
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+          )}
         </div>
 
-        {/* Accessible Content Section */}
+        {/* Scrollable Content */}
         <div className="flex-1 overflow-y-auto">
-          <div className={`${isMobile ? "p-3" : "p-4"} space-y-4`}>
+          <div className={`${isMobile ? "px-4 py-4" : "px-5 py-5"} space-y-5`}>
+            {/* Answer Options Section */}
             {question.answerOptions && question.answerOptions.length > 0 && (
-              <div className="space-y-2.5">
-                <h3 className="text-sm font-medium leading-normal">Answer Options</h3>
-                <div className="space-y-2">
+              <section className="space-y-2">
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <ListChecks className="h-3.5 w-3.5" />
+                  <h3 className="text-xs font-medium uppercase tracking-wide">Answer Options</h3>
+                  <Badge variant="secondary" className="h-4 text-[10px] px-1.5 ml-auto">
+                    {question.answerOptions.length}
+                  </Badge>
+                </div>
+                <div className="space-y-1.5 pl-5">
                   {question.answerOptions.map((option, index) => (
                     <div 
                       key={index} 
-                      className="text-sm p-3 border rounded-md bg-card/50 flex gap-2 leading-relaxed"
+                      className="text-sm px-3 py-2 rounded-lg border border-border/40 bg-muted/20 flex gap-2"
                     >
-                      <span className="font-medium text-primary min-w-4">{String.fromCharCode(65 + index)}.</span>
-                      <span className="text-foreground">{option.text}</span>
+                      <span className="font-medium text-primary/70 text-xs min-w-4">
+                        {String.fromCharCode(65 + index)}.
+                      </span>
+                      <span className="text-foreground/90 text-xs leading-relaxed">
+                        {option.text}
+                      </span>
                     </div>
                   ))}
                 </div>
-              </div>
+              </section>
             )}
             
-            <div className="space-y-2.5">
-              <h3 className="text-sm font-medium leading-normal">Scoring Rubric</h3>
-              <div className="rounded-md border bg-card/50 p-3">
-                <p className="text-sm text-foreground leading-relaxed">
-                  {question.scoringRubric}
-                </p>
+            {/* Scoring Rubric Section */}
+            <section className="space-y-2">
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <FileText className="h-3.5 w-3.5" />
+                <h3 className="text-xs font-medium uppercase tracking-wide">Scoring Rubric</h3>
               </div>
-            </div>
+              <p className="text-sm leading-relaxed text-foreground/90 pl-5">
+                {question.scoringRubric}
+              </p>
+            </section>
           </div>
         </div>
 
-        {/* Accessible Footer with Proper Touch Targets */}
-        <div className={`${isMobile ? "p-3" : "p-4"} border-t bg-muted/30`}>
-          <div className={`flex ${isMobile ? "flex-col gap-2.5" : "gap-2.5"} w-full`}>
+        {/* Clean Footer */}
+        <div className={`${isMobile ? "px-4 py-3" : "px-5 py-4"} border-t border-border/40 bg-muted/20`}>
+          <div className="flex items-center gap-2">
             <Button 
-              variant="outline"
+              variant="ghost"
               size="sm"
               onClick={() => setShowDeleteDialog(true)}
-              className="text-destructive hover:text-destructive hover:bg-destructive/10 border-destructive/20 hover:border-destructive/30 min-h-11 text-sm"
-              aria-label="Delete assessment question"
+              className="h-8 px-2.5 text-xs text-muted-foreground hover:text-destructive hover:bg-destructive/10"
             >
-              <Trash2 className="mr-1.5 h-4 w-4" />
+              <Trash2 className="mr-1.5 h-3.5 w-3.5" />
               Delete
             </Button>
-            <Link href={`/hr/assessment-questions/${question.id}`} passHref className="flex-1">
-              <Button 
-                variant="outline" 
-                size="sm"
-                className="w-full min-h-11 text-sm"
-                aria-label="View assessment question details"
-              >
-                <Eye className="mr-1.5 h-4 w-4" />
-                View
-              </Button>
-            </Link>
-            <Link href={`/hr/assessment-questions/${question.id}/edit`} passHref className="flex-1">
-              <Button 
-                variant="default" 
-                size="sm"
-                className="w-full min-h-11 text-sm"
-                aria-label="Edit assessment question"
-              >
-                <Settings2 className="mr-1.5 h-4 w-4" />
-                Edit
-              </Button>
-            </Link>
+            <div className="flex-1" />
+            <Button 
+              variant="ghost" 
+              size="sm"
+              onClick={() => handleNavigate(`/hr/assessment-questions/${question.id}`)}
+              className="h-8 px-2.5 text-xs text-muted-foreground hover:text-foreground"
+            >
+              <Layers className="mr-1.5 h-3.5 w-3.5" />
+              View
+            </Button>
+            <Button 
+              variant="default" 
+              size="sm"
+              onClick={() => handleNavigate(`/hr/assessment-questions/${question.id}/edit`)}
+              className="h-8 px-3 text-xs"
+            >
+              <Pencil className="mr-1.5 h-3.5 w-3.5" />
+              Edit
+            </Button>
           </div>
         </div>
       </SheetContent>

@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { Metadata } from "next";
 import { competenciesApi, testTemplatesApi, usersApi, assessmentQuestionsApi } from "@/services/api";
 import { Competency, DashboardStats, TestTemplateSummary } from "@/types/domain";
@@ -5,11 +6,31 @@ import { UserStats, User, UserRole } from "@/types/user";
 import ErrorCard from "@/components/feedback/ErrorCard";
 import DashboardContent from "./_components/dashboard-content";
 import { auth, currentUser } from "@clerk/nextjs/server";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export const metadata: Metadata = {
   title: "Dashboard - SkillSoft",
   description: "Your SkillSoft dashboard - manage competencies, track progress, and develop skills.",
 };
+
+// Dashboard loading skeleton
+function DashboardSkeleton() {
+	return (
+		<div className="flex flex-1 flex-col gap-6 p-6">
+			{/* Stats cards skeleton */}
+			<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+				{Array.from({ length: 4 }).map((_, i) => (
+					<Skeleton key={i} className="h-32 w-full" />
+				))}
+			</div>
+			{/* Main content skeleton */}
+			<div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+				<Skeleton className="h-64 lg:col-span-2" />
+				<Skeleton className="h-64" />
+			</div>
+		</div>
+	);
+}
 
 async function getDashboardData() {
 	try {
@@ -109,8 +130,8 @@ async function getCurrentUserInfo() {
 	}
 }
 
-// Main Dashboard Component
-export default async function DashboardPage() {
+// Async Dashboard content wrapper - streams after initial render
+async function DashboardDataLoader() {
 	// Fetch all data in parallel
 	const [dashboardData, userData, userInfo] = await Promise.all([
 		getDashboardData(),
@@ -133,5 +154,14 @@ export default async function DashboardPage() {
 			recentUsers={recentUsers}
 			currentUser={userInfo || undefined}
 		/>
+	);
+}
+
+// Main Dashboard Component - Static shell with streaming content
+export default function DashboardPage() {
+	return (
+		<Suspense fallback={<DashboardSkeleton />}>
+			<DashboardDataLoader />
+		</Suspense>
 	);
 }

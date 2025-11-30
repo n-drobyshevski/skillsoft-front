@@ -180,7 +180,7 @@ export default clerkMiddleware(async (auth, req) => {
       return NextResponse.redirect(redirectUrl);
     }
   }
-}, { debug: process.env.NODE_ENV === 'development' });
+}, { debug: false });
 
 export const config = {
   matcher: [

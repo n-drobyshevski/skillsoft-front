@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 import { type ColumnDef } from "@tanstack/react-table";
 import {
   DropdownMenu,
@@ -25,10 +26,11 @@ import {
   ArrowUpDown,
   Eye,
   MoreHorizontal,
-  Activity,
   Target,
-  Clock,
   Settings2,
+  Copy,
+  ExternalLink,
+  Layers,
 } from "lucide-react";
 import {
   approvalStatusToColor,
@@ -43,6 +45,7 @@ interface CompetenciesTableProps {
 }
 
 export default function CompetenciesTable({ competencies }: CompetenciesTableProps) {
+  const router = useRouter();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [selectedCompetency, setSelectedCompetency] =
     useState<Competency | null>(null);
@@ -74,15 +77,11 @@ export default function CompetenciesTable({ competencies }: CompetenciesTablePro
         const category = row.original.category;
         return (
           <div className="flex items-start gap-3">
-            <div className="shrink-0 w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
-              <span className="text-base">
-                {competencyCategoryToIcon(category)}
-              </span>
+            <div className="shrink-0 w-8 h-8 bg-muted/50 rounded-lg flex items-center justify-center text-muted-foreground">
+              {competencyCategoryToIcon(category)}
             </div>
             <div className="flex-1 min-w-0">
-              <div
-                className="font-medium text-primary hover:underline block truncate"
-              >
+              <div className="font-medium text-foreground block truncate">
                 {row.getValue("name")}
               </div>
               <p className="max-w-xs text-xs text-muted-foreground truncate mt-0.5">
@@ -161,7 +160,7 @@ export default function CompetenciesTable({ competencies }: CompetenciesTablePro
         );
       },
     },
-    // ... other columns can be added here following the same pattern
+    // Action column - uses group-hover to show/hide the menu button
     {
       id: "actions",
       cell: ({ row }) => {
@@ -169,26 +168,50 @@ export default function CompetenciesTable({ competencies }: CompetenciesTablePro
         return (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="h-8 w-8 p-0">
+              <Button 
+                variant="ghost" 
+                size="icon"
+                className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity focus:opacity-100"
+                onClick={(e) => e.stopPropagation()}
+              >
                 <span className="sr-only">Open menu</span>
                 <MoreHorizontal className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuLabel>Actions</DropdownMenuLabel>
-              <DropdownMenuItem
-                onClick={() => navigator.clipboard.writeText(competency.id)}
-              >
-                Copy ID
-              </DropdownMenuItem>
+            <DropdownMenuContent align="end" className="w-48">
+              <DropdownMenuLabel className="text-xs text-muted-foreground font-normal">Actions</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => handleViewDetails(competency)}>
-                <Eye className="mr-2 h-4 w-4" />
+              <DropdownMenuItem onClick={(e) => {
+                e.stopPropagation();
+                handleViewDetails(competency);
+              }}>
+                <Layers className="mr-2 h-4 w-4 text-muted-foreground" />
+                Quick View
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={(e) => {
+                e.stopPropagation();
+                router.push(`/hr/competencies/${competency.id}`);
+              }}>
+                <ExternalLink className="mr-2 h-4 w-4 text-muted-foreground" />
                 View Details
               </DropdownMenuItem>
-              <DropdownMenuItem>
-                <Settings2 className="mr-2 h-4 w-4" />
-                Edit Competency
+              <DropdownMenuItem onClick={(e) => {
+                e.stopPropagation();
+                router.push(`/hr/competencies/${competency.id}/edit`);
+              }}>
+                <Settings2 className="mr-2 h-4 w-4 text-muted-foreground" />
+                Edit
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onClick={(e) => {
+                  e.stopPropagation();
+                  navigator.clipboard.writeText(competency.id);
+                }}
+                className="text-muted-foreground"
+              >
+                <Copy className="mr-2 h-4 w-4" />
+                Copy ID
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

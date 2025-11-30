@@ -257,36 +257,37 @@ export default function DashboardContent({
   const categoryCount = Object.keys(stats.competenciesByCategory).length;
 
   return (
-    <div className="flex flex-1 flex-col gap-8 p-6 lg:p-8 max-w-[1600px] mx-auto w-full">
+    <div className="flex flex-1 flex-col gap-6 sm:gap-8 p-4 sm:p-6 lg:p-8 max-w-[1600px] mx-auto w-full">
       
       {/* ===== HEADER ===== */}
       <motion.header
         initial={{ opacity: 0, y: -8 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
-        className="flex flex-col md:flex-row md:items-end md:justify-between gap-4"
+        className="flex flex-col gap-4"
       >
         <div className="space-y-1">
-          <h1 className="text-2xl md:text-3xl font-bold tracking-tight">
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight">
             {greeting()}{currentUser?.firstName ? `, ${currentUser.firstName}` : ''}
           </h1>
-          <p className="text-muted-foreground">
+          <p className="text-sm sm:text-base text-muted-foreground">
             Overview of your competency framework and assessments
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        {/* Action buttons - stack on mobile, row on larger screens */}
+        <div className="flex flex-col xs:flex-row items-stretch xs:items-center gap-2 sm:gap-3">
           {isEditor && (
-            <Link href="/hr/competencies/new">
-              <Button variant="outline" size="sm" className="gap-2">
+            <Link href="/hr/competencies/new" className="flex-1 xs:flex-initial">
+              <Button variant="outline" size="default" className="w-full xs:w-auto gap-2 min-h-11">
                 <Plus className="w-4 h-4" />
-                Add Competency
+                <span className="sm:inline">Add Competency</span>
               </Button>
             </Link>
           )}
-          <Link href="/test-templates">
-            <Button size="sm" className="gap-2">
+          <Link href="/test-templates" className="flex-1 xs:flex-initial">
+            <Button size="default" className="w-full xs:w-auto gap-2 min-h-11">
               <Play className="w-4 h-4" />
-              Take Assessment
+              <span>Take Assessment</span>
             </Button>
           </Link>
         </div>
@@ -296,7 +297,7 @@ export default function DashboardContent({
       <motion.div
         {...motionProps}
         variants={staggerContainer}
-        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4"
+        className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4"
       >
         <motion.div variants={scaleIn}>
           <StatsCard
@@ -347,7 +348,7 @@ export default function DashboardContent({
       </motion.div>
 
       {/* ===== MAIN CONTENT GRID ===== */}
-      <div className="grid gap-6 lg:grid-cols-12">
+      <div className="grid gap-4 sm:gap-6 lg:grid-cols-12">
         
         {/* LEFT COLUMN - Charts & Standards */}
         <motion.div 

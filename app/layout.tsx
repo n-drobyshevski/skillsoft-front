@@ -1,6 +1,7 @@
 import "./globals.css";
 
 import * as React from "react";
+import { Suspense } from "react";
 import { Metadata, Viewport } from "next";
 import { ClerkProvider } from '@clerk/nextjs';
 import { LayoutProvider } from "@/components/layout/layout-provider";
@@ -52,18 +53,22 @@ export default function RootLayout({
 	};
 
 	// Always return the HTML structure, conditionally wrap with ClerkProvider
+	// ClerkProvider must be inside <body> for Next.js 16 cacheComponents compatibility
+	// See: https://github.com/clerk/javascript/pull/7119
 	if (publishableKey && publishableKey.trim() !== '') {
 		return (
-			<ClerkProvider appearance={appearance}>
-				<html lang="en" suppressHydrationWarning className="mobile-container">
-					<body className="mobile-container" suppressHydrationWarning>
-						<LayoutProvider>
-							{children}
-							<Toaster richColors />
-						</LayoutProvider>
-					</body>
-				</html>
-			</ClerkProvider>
+			<html lang="en" suppressHydrationWarning className="mobile-container">
+				<body className="mobile-container" suppressHydrationWarning>
+					<Suspense fallback={null}>
+						<ClerkProvider appearance={appearance}>
+							<LayoutProvider>
+								{children}
+								<Toaster richColors />
+							</LayoutProvider>
+						</ClerkProvider>
+					</Suspense>
+				</body>
+			</html>
 		);
 	}
 

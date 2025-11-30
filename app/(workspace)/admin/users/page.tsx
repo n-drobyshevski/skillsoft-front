@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Metadata } from "next";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   User,
   UserRole,
@@ -83,11 +84,30 @@ function StatCard({
   );
 }
 
-// Main component
-export default async function UsersPage() {
-  const { users, error } = await getUsersData();
+// Stats skeleton for loading state
+function StatsGridSkeleton() {
+  return (
+    <div className="grid gap-4 grid-cols-2 lg:grid-cols-5">
+      {Array.from({ length: 5 }).map((_, i) => (
+        <Card key={i} className="bg-card/50 backdrop-blur-sm">
+          <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+            <Skeleton className="h-4 w-20" />
+            <Skeleton className="h-4 w-4" />
+          </CardHeader>
+          <CardContent>
+            <Skeleton className="h-8 w-12 mb-1" />
+            <Skeleton className="h-3 w-16" />
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  );
+}
 
-  // Calculate stats
+// Async component for stats - streams after static shell
+async function UserStats() {
+  const { users } = await getUsersData();
+  
   const totalUsers = users.length;
   const activeUsers = users.filter(u => canUserAccess(u)).length;
   const adminCount = users.filter(u => u.role === UserRole.ADMIN).length;
@@ -95,7 +115,6 @@ export default async function UsersPage() {
   const bannedCount = users.filter(u => u.banned).length;
   const lockedCount = users.filter(u => u.locked).length;
   
-  // Users with recent activity (signed in within last 30 days)
   const thirtyDaysAgo = new Date();
   thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
   const recentlyActive = users.filter(u => {
@@ -109,7 +128,73 @@ export default async function UsersPage() {
     : "0%";
 
   return (
+    <div className="grid gap-4 grid-cols-2 lg:grid-cols-5">
+      <StatCard
+        title="Total Users"
+        value={totalUsers}
+        icon={Users}
+        description={`${activeUsers} can access`}
+        iconColor="text-primary"
+      />
+      <StatCard
+        title="Active Rate"
+        value={activeRate}
+        icon={Activity}
+        description={`${recentlyActive} active this month`}
+        iconColor="text-emerald-500"
+      />
+      <StatCard
+        title="Admins"
+        value={adminCount}
+        icon={ShieldAlert}
+        description="Full access"
+        iconColor="text-red-500"
+      />
+      <StatCard
+        title="Editors"
+        value={editorCount}
+        icon={ShieldCheck}
+        description="Content editors"
+        iconColor="text-blue-500"
+      />
+      <StatCard
+        title="Restricted"
+        value={bannedCount + lockedCount}
+        icon={AlertTriangle}
+        description={`${bannedCount} banned, ${lockedCount} locked`}
+        iconColor="text-amber-500"
+      />
+    </div>
+  );
+}
+
+// Async component for users table - streams after static shell
+async function UsersContent() {
+  const { users, error } = await getUsersData();
+  
+  return (
+    <>
+      {error && (
+        <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-4 text-sm text-destructive">
+          <div className="font-medium mb-1">Error Loading Users</div>
+          <div>{error}</div>
+          {error.includes('backend') && (
+            <div className="mt-2 text-xs text-muted-foreground">
+              Tip: Start the backend with: <code className="bg-muted px-1 rounded">cd assessment-backend && ./mvnw spring-boot:run</code>
+            </div>
+          )}
+        </div>
+      )}
+      <UsersTableWrapper users={users} />
+    </>
+  );
+}
+
+// Main component - Static shell rendered immediately
+export default function UsersPage() {
+  return (
     <div className="flex flex-1 flex-col gap-4 p-4 pt-6 md:gap-6 md:p-6">
+      {/* Static header - part of static shell */}
       <PageHeader 
         title="User Management"
         description="Manage users, roles, and access permissions"
@@ -126,60 +211,15 @@ export default async function UsersPage() {
         </div>
       </PageHeader> 
       
-      {/* Compact Stats Row */}
-      <div className="grid gap-4 grid-cols-2 lg:grid-cols-5">
-        <StatCard
-          title="Total Users"
-          value={totalUsers}
-          icon={Users}
-          description={`${activeUsers} can access`}
-          iconColor="text-primary"
-        />
-        <StatCard
-          title="Active Rate"
-          value={activeRate}
-          icon={Activity}
-          description={`${recentlyActive} active this month`}
-          iconColor="text-emerald-500"
-        />
-        <StatCard
-          title="Admins"
-          value={adminCount}
-          icon={ShieldAlert}
-          description="Full access"
-          iconColor="text-red-500"
-        />
-        <StatCard
-          title="Editors"
-          value={editorCount}
-          icon={ShieldCheck}
-          description="Content editors"
-          iconColor="text-blue-500"
-        />
-        <StatCard
-          title="Restricted"
-          value={bannedCount + lockedCount}
-          icon={AlertTriangle}
-          description={`${bannedCount} banned, ${lockedCount} locked`}
-          iconColor="text-amber-500"
-        />
-      </div>
+      {/* Dynamic stats - streams in after static shell */}
+      <Suspense fallback={<StatsGridSkeleton />}>
+        <UserStats />
+      </Suspense>
 
-      {/* Error Message */}
-      {error && (
-        <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-4 text-sm text-destructive">
-          <div className="font-medium mb-1">Error Loading Users</div>
-          <div>{error}</div>
-          {error.includes('backend') && (
-            <div className="mt-2 text-xs text-muted-foreground">
-              Tip: Start the backend with: <code className="bg-muted px-1 rounded">cd assessment-backend && ./mvnw spring-boot:run</code>
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Users Table - wrapped in client component to avoid hydration mismatch */}
-      <UsersTableWrapper users={users} />
+      {/* Dynamic table - streams in after static shell */}
+      <Suspense fallback={<TableSkeleton />}>
+        <UsersContent />
+      </Suspense>
     </div>
   );
 }

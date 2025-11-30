@@ -47,11 +47,11 @@ export default function OpenTextQuestion({
         value={value}
         onChange={(e) => onChange(e.target.value.slice(0, MAX_CHARACTERS))}
         placeholder={getPlaceholder()}
-        className="min-h-[150px] resize-y"
+        className="min-h-[120px] sm:min-h-[150px] resize-y text-base"
         aria-describedby="char-counter"
       />
       
-      <div className="flex justify-between items-center text-xs">
+      <div className="flex flex-col sm:flex-row sm:justify-between gap-1 sm:items-center text-xs">
         <span className={charCount < MIN_CHARACTERS ? 'text-muted-foreground' : 'text-green-600'}>
           {charCount < MIN_CHARACTERS 
             ? `Минимум ${MIN_CHARACTERS} символов (осталось ${MIN_CHARACTERS - charCount})`

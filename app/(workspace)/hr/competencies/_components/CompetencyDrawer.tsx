@@ -13,13 +13,20 @@ import { Competency } from "@/types/domain";
 import { approvalStatusToColor, competencyProficiencyLevelToColor } from "@/lib/ui-utils";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { Eye, Settings2, ExternalLink, Trash2 } from "lucide-react";
+import { 
+  Trash2, 
+  Layers, 
+  FileText, 
+  Activity,
+  ChevronRight,
+  Pencil,
+} from "lucide-react";
 import { IndicatorHoverCard } from "@/components/feedback/IndicatorHoverCard";
 import { DeleteConfirmationDialog } from "@/components/feedback/DeleteConfirmationDialog";
 import { deleteCompetency } from "@/src/app/actions";
 import { toast } from "sonner";
 import { useState } from "react";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export default function CompetencyDrawer({
   open,
@@ -30,9 +37,17 @@ export default function CompetencyDrawer({
   onOpenChange: (isOpen: boolean) => void;
   competency: Competency;
 }) {
+  const router = useRouter();
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const isMobile = useIsMobile();
+
+  const handleNavigate = (path: string) => {
+    onOpenChange(false);
+    setTimeout(() => {
+      router.push(path);
+    }, 150);
+  };
 
   const handleDelete = async () => {
     setIsDeleting(true);
@@ -54,144 +69,146 @@ export default function CompetencyDrawer({
         className={`${
           isMobile 
             ? "w-full max-w-full sm:max-w-full" 
-            : "sm:max-w-xl"
-        } p-0 flex flex-col`}
+            : "sm:max-w-lg"
+        } p-0 flex flex-col gap-0 border-l border-border/50`}
         style={{
           WebkitOverflowScrolling: 'touch',
         }}
       >
-        {/* WCAG 2.1 Compliant Header with Proper SheetTitle */}
-        <div className={`${isMobile ? "p-3" : "p-4"} border-b bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60`}>
-          <div className="space-y-2.5">
-            <SheetTitle className={`${isMobile ? "text-lg" : "text-xl"} font-semibold leading-normal line-clamp-2`}>
-              {competency.name}
-            </SheetTitle>
-            <SheetDescription className="text-sm text-muted-foreground leading-normal">
-              Competency Details
-            </SheetDescription>
-            
-            {/* Accessible Badge Layout */}
-            <div className="flex items-center gap-2 flex-wrap">
-              <Badge 
-                variant={competency.isActive ? "default" : "secondary"} 
-                className="h-7 text-sm px-2 min-h-7 leading-normal"
-                role="status"
-                aria-label={`Status: ${competency.isActive ? "Active" : "Inactive"}`}
-              >
-                {competency.isActive ? "Active" : "Inactive"}
-              </Badge>
-              <Badge
-                variant="outline"
-                className={`${approvalStatusToColor(competency.approvalStatus)} h-7 text-sm px-2 min-h-7 leading-normal`}
-                role="status"
-                aria-label={`Approval Status: ${competency.approvalStatus}`}
-              >
-                {competency.approvalStatus}
-              </Badge>
-              <Badge
-                variant="outline"
-                className={`${competencyProficiencyLevelToColor(competency.level)} h-7 text-sm px-2 min-h-7 leading-normal`}
-                role="status"
-                aria-label={`Proficiency Level: ${competency.level}`}
-              >
-                {competency.level}
-              </Badge>
+        {/* Clean Header */}
+        <div className={`${isMobile ? "px-4 py-3" : "px-5 py-4"} border-b border-border/40`}>
+          <div className="flex items-start justify-between gap-3 pr-8">
+            <div className="flex-1 min-w-0 space-y-1">
+              <SheetTitle className="text-base font-semibold leading-tight line-clamp-2 text-foreground">
+                {competency.name}
+              </SheetTitle>
+              <SheetDescription className="text-xs text-muted-foreground">
+                Competency Overview
+              </SheetDescription>
             </div>
+          </div>
+          
+          {/* Status Badges */}
+          <div className="flex items-center gap-1.5 flex-wrap mt-3">
+            <Badge 
+              variant={competency.isActive ? "default" : "secondary"} 
+              className="h-5 text-[11px] px-1.5 font-medium"
+            >
+              {competency.isActive ? "Active" : "Inactive"}
+            </Badge>
+            <Badge
+              variant="outline"
+              className={`${approvalStatusToColor(competency.approvalStatus)} h-5 text-[11px] px-1.5 font-medium`}
+            >
+              {competency.approvalStatus.replace("_", " ")}
+            </Badge>
+            <Badge
+              variant="outline"
+              className={`${competencyProficiencyLevelToColor(competency.level)} h-5 text-[11px] px-1.5 font-medium`}
+            >
+              {competency.level}
+            </Badge>
           </div>
         </div>
 
-        {/* Accessible Content Section */}
+        {/* Scrollable Content */}
         <div className="flex-1 overflow-y-auto">
-          <div className={`${isMobile ? "p-3" : "p-4"} space-y-4`}>
-            <div className="space-y-2.5">
-              <h3 className="text-sm font-medium leading-normal">Description</h3>
-              <div className="rounded-md border bg-card/50 p-3">
-                <p className="text-sm leading-relaxed text-foreground">
-                  {competency.description}
-                </p>
+          <div className={`${isMobile ? "px-4 py-4" : "px-5 py-5"} space-y-5`}>
+            {/* Description Section */}
+            <section className="space-y-2">
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <FileText className="h-3.5 w-3.5" />
+                <h3 className="text-xs font-medium uppercase tracking-wide">Description</h3>
               </div>
-            </div>
+              <p className="text-sm leading-relaxed text-foreground/90 pl-5">
+                {competency.description}
+              </p>
+            </section>
 
+            {/* Behavioral Indicators Section */}
             {competency.behavioralIndicators && competency.behavioralIndicators.length > 0 && (
-              <div className="space-y-2.5">
-                <h3 className="text-sm font-medium leading-normal">Behavioral Indicators ({competency.behavioralIndicators.length})</h3>
-                <Accordion type="single" collapsible className="w-full space-y-2">
+              <section className="space-y-2">
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <Activity className="h-3.5 w-3.5" />
+                  <h3 className="text-xs font-medium uppercase tracking-wide">
+                    Behavioral Indicators
+                  </h3>
+                  <Badge variant="secondary" className="h-4 text-[10px] px-1.5 ml-auto">
+                    {competency.behavioralIndicators.length}
+                  </Badge>
+                </div>
+                <Accordion type="single" collapsible className="space-y-1.5 pl-5">
                   {competency.behavioralIndicators.map((indicator) => (
                     <AccordionItem 
                       value={indicator.id} 
                       key={indicator.id}
-                      className="border rounded-md bg-card/30"
+                      className="border border-border/40 rounded-lg bg-muted/20 data-[state=open]:bg-muted/30"
                     >
-                      <AccordionTrigger className="text-sm text-left hover:no-underline px-3 py-3 min-h-11">
+                      <AccordionTrigger className="text-sm text-left hover:no-underline px-3 py-2.5 [&>svg]:h-3.5 [&>svg]:w-3.5 [&>svg]:text-muted-foreground">
                         <IndicatorHoverCard indicatorId={indicator.id}>
-                          <span className="hover:text-primary transition-colors line-clamp-1 leading-normal">
+                          <span className="hover:text-primary transition-colors line-clamp-1 text-foreground/90">
                             {indicator.title}
                           </span>
                         </IndicatorHoverCard>
                       </AccordionTrigger>
                       <AccordionContent className="px-3 pb-3">
                         <div className="space-y-2.5 text-sm">
-                          <p className="leading-relaxed text-muted-foreground">{indicator.description}</p>
+                          <p className="text-muted-foreground text-xs leading-relaxed">
+                            {indicator.description}
+                          </p>
                           <div className="flex items-center justify-between pt-1">
-                            <div className="flex gap-1.5">
-                              <Badge variant="outline" className="h-6 text-sm px-2">
-                                Weight: {indicator.weight.toFixed(2)}
-                              </Badge>
-                            </div>
-                            <Link 
-                              href={`/hr/behavioral-indicators/${indicator.id}`}
-                              className="text-primary hover:text-primary/80 hover:underline text-sm flex items-center gap-1.5 min-h-11 p-1"
-                              aria-label={`View details for ${indicator.title}`}
+                            <Badge variant="outline" className="h-5 text-[10px] px-1.5 text-muted-foreground">
+                              Weight: {indicator.weight.toFixed(2)}
+                            </Badge>
+                            <button 
+                              onClick={() => handleNavigate(`/hr/behavioral-indicators/${indicator.id}`)}
+                              className="text-xs text-primary/80 hover:text-primary flex items-center gap-1 transition-colors"
                             >
                               View Details
-                              <ExternalLink className="h-3 w-3" />
-                            </Link>
+                              <ChevronRight className="h-3 w-3" />
+                            </button>
                           </div>
                         </div>
                       </AccordionContent>
                     </AccordionItem>
                   ))}
                 </Accordion>
-              </div>
+              </section>
             )}
           </div>
         </div>
 
-        {/* Accessible Footer with Proper Touch Targets */}
-        <div className={`${isMobile ? "p-3" : "p-4"} border-t bg-muted/30`}>
-          <div className={`flex ${isMobile ? "flex-col gap-2.5" : "gap-2.5"} w-full`}>
+        {/* Clean Footer */}
+        <div className={`${isMobile ? "px-4 py-3" : "px-5 py-4"} border-t border-border/40 bg-muted/20`}>
+          <div className="flex items-center gap-2">
             <Button 
-              variant="outline"
+              variant="ghost"
               size="sm"
               onClick={() => setShowDeleteDialog(true)}
-              className="text-destructive hover:text-destructive hover:bg-destructive/10 border-destructive/20 hover:border-destructive/30 min-h-11 text-sm"
-              aria-label="Delete competency"
+              className="h-8 px-2.5 text-xs text-muted-foreground hover:text-destructive hover:bg-destructive/10"
             >
-              <Trash2 className="mr-1.5 h-4 w-4" />
+              <Trash2 className="mr-1.5 h-3.5 w-3.5" />
               Delete
             </Button>
-            <Link href={`/hr/competencies/${competency.id}`} passHref className="flex-1">
-              <Button 
-                variant="outline" 
-                size="sm"
-                className="w-full min-h-11 text-sm"
-                aria-label="View competency details"
-              >
-                <Eye className="mr-1.5 h-4 w-4" />
-                View
-              </Button>
-            </Link>
-            <Link href={`/hr/competencies/${competency.id}/edit`} passHref className="flex-1">
-              <Button 
-                variant="default" 
-                size="sm"
-                className="w-full min-h-11 text-sm"
-                aria-label="Edit competency"
-              >
-                <Settings2 className="mr-1.5 h-4 w-4" />
-                Edit
-              </Button>
-            </Link>
+            <div className="flex-1" />
+            <Button 
+              variant="ghost" 
+              size="sm"
+              onClick={() => handleNavigate(`/hr/competencies/${competency.id}`)}
+              className="h-8 px-2.5 text-xs text-muted-foreground hover:text-foreground"
+            >
+              <Layers className="mr-1.5 h-3.5 w-3.5" />
+              View
+            </Button>
+            <Button 
+              variant="default" 
+              size="sm"
+              onClick={() => handleNavigate(`/hr/competencies/${competency.id}/edit`)}
+              className="h-8 px-3 text-xs"
+            >
+              <Pencil className="mr-1.5 h-3.5 w-3.5" />
+              Edit
+            </Button>
           </div>
         </div>
       </SheetContent>

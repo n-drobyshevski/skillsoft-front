@@ -37,6 +37,13 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from '@/components/ui/collapsible';
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerClose,
+} from '@/components/ui/drawer';
 
 // =============================================================================
 // Types
@@ -120,9 +127,11 @@ const SearchResultItem = memo(function SearchResultItem({
     <button
       onClick={onClick}
       className={cn(
-        'w-full text-left p-3 rounded-lg border transition-all',
+        'w-full text-left p-3 sm:p-3 rounded-lg border transition-all',
         'hover:bg-accent hover:border-accent-foreground/20',
-        'focus:outline-none focus:ring-2 focus:ring-ring',
+        'focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2',
+        'touch-manipulation active:scale-[0.98]',
+        'min-h-[72px] sm:min-h-0', // Ensure minimum 72px height on mobile for good touch target
         isSelected
           ? 'bg-accent border-primary shadow-sm'
           : 'bg-card border-border'
@@ -130,7 +139,7 @@ const SearchResultItem = memo(function SearchResultItem({
     >
       <div className="flex items-start justify-between gap-2">
         <div className="flex-1 min-w-0">
-          <h4 className="font-medium text-sm truncate">
+          <h4 className="font-medium text-sm sm:text-sm truncate">
             <HighlightedText text={item.name} indices={nameIndices} />
           </h4>
           <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
@@ -166,13 +175,16 @@ const SearchResultItem = memo(function SearchResultItem({
 /**
  * Skill details panel
  * Memoized to prevent re-renders when skill hasn't changed
+ * Works in both inline (desktop) and drawer (mobile) modes
  */
 const SkillDetailsPanel = memo(function SkillDetailsPanel({
   skill,
   onClose,
+  isDrawer = false,
 }: {
   skill: UnifiedSkill | null;
   onClose: () => void;
+  isDrawer?: boolean;
 }) {
   if (!skill) {
     return (
@@ -195,11 +207,14 @@ const SkillDetailsPanel = memo(function SkillDetailsPanel({
   }> | undefined;
   
   return (
-    <div className="h-full flex flex-col overflow-hidden">
+    <div className={cn("flex flex-col overflow-hidden", isDrawer ? "h-full" : "h-full")}>
       {/* Header */}
-      <div className="flex items-start justify-between p-4 border-b shrink-0">
+      <div className={cn(
+        "flex items-start justify-between border-b shrink-0",
+        isDrawer ? "p-3" : "p-4"
+      )}>
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 mb-1">
+          <div className="flex items-center gap-2 mb-1 flex-wrap">
             <Badge
               variant={skill.source === 'esco' ? 'default' : 'secondary'}
               className="uppercase text-[10px]"
@@ -210,16 +225,18 @@ const SkillDetailsPanel = memo(function SkillDetailsPanel({
               {skill.category}
             </Badge>
           </div>
-          <h2 className="text-lg font-semibold">{skill.name}</h2>
+          <h2 className={cn("font-semibold", isDrawer ? "text-base" : "text-lg")}>{skill.name}</h2>
         </div>
-        <Button variant="ghost" size="icon" onClick={onClose}>
-          <X className="h-4 w-4" />
-        </Button>
+        {!isDrawer && (
+          <Button variant="ghost" size="icon" onClick={onClose} className="min-w-11 min-h-11 touch-manipulation">
+            <X className="h-4 w-4" />
+          </Button>
+        )}
       </div>
       
       {/* Content - min-h-0 allows flex-1 to shrink for proper scrolling */}
       <ScrollArea className="flex-1 min-h-0">
-        <div className="p-4 space-y-4">
+        <div className={cn("space-y-4", isDrawer ? "p-3" : "p-4")}>
           {/* Description */}
           <div>
             <h3 className="text-sm font-medium mb-2 flex items-center gap-2">
@@ -267,7 +284,7 @@ const SkillDetailsPanel = memo(function SkillDetailsPanel({
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
                 <span className="text-muted-foreground">ID:</span>
-                <code className="text-xs bg-muted px-2 py-1 rounded">
+                <code className="text-xs bg-muted px-2 py-1 rounded truncate max-w-[180px]">
                   {skill.id}
                 </code>
               </div>
@@ -286,7 +303,7 @@ const SkillDetailsPanel = memo(function SkillDetailsPanel({
                     href={skill.uri}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-xs text-primary hover:underline flex items-center gap-1"
+                    className="text-xs text-primary hover:underline flex items-center gap-1 min-h-11 px-2 touch-manipulation"
                   >
                     View <ExternalLink className="h-3 w-3" />
                   </a>
@@ -300,7 +317,7 @@ const SkillDetailsPanel = memo(function SkillDetailsPanel({
             <>
               <Separator />
               <Collapsible>
-                <CollapsibleTrigger className="flex items-center gap-2 text-sm font-medium w-full">
+                <CollapsibleTrigger className="flex items-center gap-2 text-sm font-medium w-full min-h-11 touch-manipulation">
                   <Clock className="h-4 w-4" />
                   Related Occupations ({topOccupations.length})
                 </CollapsibleTrigger>
@@ -333,7 +350,7 @@ const SkillDetailsPanel = memo(function SkillDetailsPanel({
           {/* Metadata */}
           <Separator />
           <Collapsible>
-            <CollapsibleTrigger className="flex items-center gap-2 text-sm font-medium w-full">
+            <CollapsibleTrigger className="flex items-center gap-2 text-sm font-medium w-full min-h-11 touch-manipulation">
               <Info className="h-4 w-4" />
               Raw Metadata
             </CollapsibleTrigger>
@@ -391,7 +408,11 @@ const FilterPanel = memo(function FilterPanel({
     <Collapsible open={isOpen} onOpenChange={setIsOpen}>
       <div className="flex items-center gap-2">
         <CollapsibleTrigger asChild>
-          <Button variant="outline" size="sm" className="gap-2">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="gap-2 min-h-11 px-4 touch-manipulation active:scale-[0.98] transition-transform"
+          >
             <Filter className="h-4 w-4" />
             Filters
             {activeFilterCount > 0 && (
@@ -402,14 +423,19 @@ const FilterPanel = memo(function FilterPanel({
           </Button>
         </CollapsibleTrigger>
         {activeFilterCount > 0 && (
-          <Button variant="ghost" size="sm" onClick={clearFilters}>
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={clearFilters}
+            className="min-h-11 px-4 touch-manipulation active:scale-[0.98] transition-transform"
+          >
             Clear
           </Button>
         )}
       </div>
       
-      <CollapsibleContent className="mt-3 space-y-3">
-        {/* Source filters */}
+      <CollapsibleContent className="mt-3 space-y-4">
+        {/* Source filters - 44px touch targets */}
         <div>
           <h4 className="text-xs font-medium mb-2 text-muted-foreground">
             Data Source
@@ -420,7 +446,8 @@ const FilterPanel = memo(function FilterPanel({
                 key={source}
                 onClick={() => toggleSource(source)}
                 className={cn(
-                  'px-3 py-1.5 rounded-md text-xs font-medium transition-colors',
+                  'min-h-11 px-4 py-2 rounded-md text-sm font-medium transition-all',
+                  'touch-manipulation active:scale-[0.98]',
                   filters.sources?.includes(source)
                     ? 'bg-primary text-primary-foreground'
                     : 'bg-muted hover:bg-muted/80'
@@ -432,18 +459,19 @@ const FilterPanel = memo(function FilterPanel({
           </div>
         </div>
         
-        {/* Category filters */}
+        {/* Category filters - 44px touch targets */}
         <div>
           <h4 className="text-xs font-medium mb-2 text-muted-foreground">
             Categories
           </h4>
-          <div className="flex flex-wrap gap-1">
+          <div className="flex flex-wrap gap-1.5">
             {categories.slice(0, 12).map(category => (
               <button
                 key={category}
                 onClick={() => toggleCategory(category)}
                 className={cn(
-                  'px-2 py-1 rounded text-[10px] font-medium transition-colors',
+                  'min-h-11 px-3 py-2 rounded-md text-xs font-medium transition-all',
+                  'touch-manipulation active:scale-[0.98]',
                   filters.categories?.includes(category)
                     ? 'bg-primary text-primary-foreground'
                     : 'bg-muted hover:bg-muted/80'
@@ -490,6 +518,7 @@ export function SkillMapper({
 }: SkillMapperProps) {
   const [selectedSkill, setSelectedSkill] = useState<UnifiedSkill | null>(null);
   const [filters, setFilters] = useState<SkillSearchFilters>({});
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   
   // Get unique categories (memoized)
   const categories = useMemo(() => {
@@ -524,12 +553,14 @@ export function SkillMapper({
   // Handle skill selection (memoized to prevent child re-renders)
   const handleSkillSelect = useCallback((skill: UnifiedSkill) => {
     setSelectedSkill(skill);
+    setIsDrawerOpen(true); // Open drawer on mobile when skill is selected
     onSkillSelect?.(skill);
   }, [onSkillSelect]);
   
   // Handle closing details panel (memoized)
   const handleCloseDetails = useCallback(() => {
     setSelectedSkill(null);
+    setIsDrawerOpen(false);
   }, []);
   
   // Handle filter changes (memoized)
@@ -556,28 +587,33 @@ export function SkillMapper({
   
   return (
     <div className={cn('flex h-full', className)}>
-      {/* Left Panel: Search */}
-      <div className="w-full md:w-1/2 lg:w-2/5 border-r flex flex-col">
+      {/* Left Panel: Search - Full width on mobile, partial on desktop */}
+      <div className="w-full md:w-1/2 lg:w-2/5 md:border-r flex flex-col">
         {/* Search Header */}
-        <div className="p-4 border-b space-y-3">
-          {/* Search Input */}
+        <div className="p-3 sm:p-4 border-b space-y-3">
+          {/* Search Input - Better mobile touch targets */}
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
             <Input
               value={state.query}
               onChange={handleSearchChange}
               placeholder={placeholder}
-              className="pl-9 pr-9"
+              className="pl-9 pr-11 h-11 text-base sm:text-sm"
+              inputMode="search"
+              enterKeyHint="search"
             />
             {/* Show spinner when input is ahead of deferred value, or clear button */}
             {state.query && (
-              <div className="absolute right-3 top-1/2 -translate-y-1/2">
+              <div className="absolute right-1 top-1/2 -translate-y-1/2">
                 {isInputAhead || state.isSearching ? (
-                  <Loader2 className="h-4 w-4 text-muted-foreground animate-spin" />
+                  <div className="p-2">
+                    <Loader2 className="h-4 w-4 text-muted-foreground animate-spin" />
+                  </div>
                 ) : (
                   <button
                     onClick={actions.clearQuery}
-                    className="text-muted-foreground hover:text-foreground"
+                    className="p-2 min-w-9 min-h-9 flex items-center justify-center text-muted-foreground hover:text-foreground touch-manipulation active:scale-[0.95] transition-transform rounded-md hover:bg-muted"
+                    aria-label="Clear search"
                   >
                     <X className="h-4 w-4" />
                   </button>
@@ -626,7 +662,7 @@ export function SkillMapper({
           className="flex-1 overflow-auto"
           style={{ contain: 'strict' }}
         >
-          <div className="p-4">
+          <div className="p-3 sm:p-4">
             {state.isIndexing ? (
               <div className="text-center text-muted-foreground py-8">
                 <Loader2 className="h-6 w-6 animate-spin mx-auto mb-2" />
@@ -690,13 +726,40 @@ export function SkillMapper({
         </div>
       </div>
       
-      {/* Right Panel: Details - overflow-hidden ensures ScrollArea works */}
+      {/* Right Panel: Details - Desktop only (inline) */}
       <div className="hidden md:flex md:w-1/2 lg:w-3/5 flex-col bg-muted/30 overflow-hidden">
         <SkillDetailsPanel
           skill={selectedSkill}
           onClose={handleCloseDetails}
         />
       </div>
+      
+      {/* Mobile Drawer for Skill Details */}
+      <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
+        <DrawerContent className="max-h-[85vh]">
+          <DrawerHeader className="border-b">
+            <div className="flex items-center justify-between">
+              <DrawerTitle className="text-base">Skill Details</DrawerTitle>
+              <DrawerClose asChild>
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="min-w-11 min-h-11 touch-manipulation active:scale-[0.95]"
+                >
+                  <X className="h-5 w-5" />
+                </Button>
+              </DrawerClose>
+            </div>
+          </DrawerHeader>
+          <div className="flex-1 overflow-hidden">
+            <SkillDetailsPanel
+              skill={selectedSkill}
+              onClose={handleCloseDetails}
+              isDrawer
+            />
+          </div>
+        </DrawerContent>
+      </Drawer>
     </div>
   );
 }

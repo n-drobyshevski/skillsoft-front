@@ -1,13 +1,15 @@
 "use client";
 
 import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
-	Clock,
 	MoreHorizontal,
-	Eye,
 	Settings2,
 	ArrowUpDown,
+	Copy,
+	ExternalLink,
+	Layers,
 } from "lucide-react";
 import {
 	type ColumnDef,
@@ -35,6 +37,7 @@ interface QuestionsTableProps {
 }
 
 export default function QuestionsTable({ questions }: QuestionsTableProps) {
+    const router = useRouter();
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
     const [selectedQuestion, setSelectedQuestion] = useState<AssessmentQuestion | null>(null);
 
@@ -128,7 +131,7 @@ export default function QuestionsTable({ questions }: QuestionsTableProps) {
             );
           },
         },
-        // ... other columns can be added here
+        // Action column - uses group-hover to show/hide the menu button
         {
           id: "actions",
           cell: ({ row }) => {
@@ -136,16 +139,50 @@ export default function QuestionsTable({ questions }: QuestionsTableProps) {
             return (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="h-8 w-8 p-0">
+                  <Button 
+                    variant="ghost" 
+                    size="icon"
+                    className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity focus:opacity-100"
+                    onClick={(e) => e.stopPropagation()}
+                  >
                     <span className="sr-only">Open menu</span>
                     <MoreHorizontal className="h-4 w-4" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                  <DropdownMenuItem onClick={() => handleViewDetails(question)}>
-                    <Eye className="mr-2 h-4 w-4" />
+                <DropdownMenuContent align="end" className="w-48">
+                  <DropdownMenuLabel className="text-xs text-muted-foreground font-normal">Actions</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={(e) => {
+                    e.stopPropagation();
+                    handleViewDetails(question);
+                  }}>
+                    <Layers className="mr-2 h-4 w-4 text-muted-foreground" />
+                    Quick View
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={(e) => {
+                    e.stopPropagation();
+                    router.push(`/hr/assessment-questions/${question.id}`);
+                  }}>
+                    <ExternalLink className="mr-2 h-4 w-4 text-muted-foreground" />
                     View Details
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={(e) => {
+                    e.stopPropagation();
+                    router.push(`/hr/assessment-questions/${question.id}/edit`);
+                  }}>
+                    <Settings2 className="mr-2 h-4 w-4 text-muted-foreground" />
+                    Edit
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigator.clipboard.writeText(question.id);
+                    }}
+                    className="text-muted-foreground"
+                  >
+                    <Copy className="mr-2 h-4 w-4" />
+                    Copy ID
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>

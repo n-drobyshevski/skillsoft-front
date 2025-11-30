@@ -19,7 +19,7 @@ export default function SingleChoiceQuestion({
   const options = question.answerOptions || [];
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-2 sm:space-y-3">
       {options.map((option, index) => {
         const optionId = option.id || `option-${index}`;
         const isSelected = selectedOption === optionId;
@@ -30,15 +30,21 @@ export default function SingleChoiceQuestion({
             type="button"
             onClick={() => onSelectionChange(isSelected ? null : optionId)}
             className={cn(
-              "w-full flex items-start gap-3 p-4 rounded-lg border text-left transition-all",
+              // Base styles with mobile-first 44px min touch target
+              "w-full flex items-start gap-3 p-3 sm:p-4 rounded-lg border text-left transition-all",
+              "min-h-11", // 44px minimum touch target
+              // Touch-friendly interactions
+              "touch-manipulation active:scale-[0.98]",
+              // Hover/focus states
               "hover:border-primary/50 hover:bg-primary/5",
               "focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2",
+              // Selected state
               isSelected && "border-primary bg-primary/10"
             )}
           >
-            {/* Radio indicator */}
+            {/* Radio indicator - larger on mobile */}
             <div className={cn(
-              "flex-shrink-0 w-5 h-5 rounded-full border-2 flex items-center justify-center mt-0.5",
+              "shrink-0 w-5 h-5 sm:w-5 sm:h-5 rounded-full border-2 flex items-center justify-center mt-0.5",
               "transition-colors",
               isSelected ? "border-primary bg-primary" : "border-muted-foreground/40"
             )}>
@@ -55,7 +61,7 @@ export default function SingleChoiceQuestion({
                 </span>
               )}
               <span className={cn(
-                "text-sm",
+                "text-sm sm:text-base",
                 isSelected && "font-medium"
               )}>
                 {option.text}
@@ -64,7 +70,7 @@ export default function SingleChoiceQuestion({
             
             {/* Selected indicator */}
             {isSelected && (
-              <CheckCircle2 className="flex-shrink-0 h-5 w-5 text-primary" />
+              <CheckCircle2 className="shrink-0 h-5 w-5 text-primary" />
             )}
           </button>
         );

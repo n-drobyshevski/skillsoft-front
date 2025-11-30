@@ -175,16 +175,13 @@ export async function fetchApi<T>(
     }
 }
 
-// Cached competencies fetcher
-const getCompetenciesCached = cache(async () : Promise<Competency[] | null> => {
-    return fetchApi(COMPETENCIES_ENDPOINT, {
-        tags: ['competencies'],
-        revalidate: 60, // Revalidate every minute
-    });
-});
-
 export const competenciesApi = {
-    getAllCompetencies: getCompetenciesCached,
+    getAllCompetencies: async (): Promise<Competency[] | null> => {
+        return fetchApi(COMPETENCIES_ENDPOINT, {
+            tags: ['competencies'],
+            revalidate: 300, // 5 minutes
+        });
+    },
 
     getCompetencyById: async (competencyId: string) : Promise<Competency | null> => {
         return fetchApi(`/competencies/${competencyId}`, {

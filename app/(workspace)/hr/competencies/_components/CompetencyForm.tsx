@@ -13,6 +13,7 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
+  FormDescription,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -27,8 +28,11 @@ import { Switch } from '@/components/ui/switch';
 import { CompetencyCategory, ProficiencyLevel, ApprovalStatus } from '@/types/domain';
 import { competenciesApi } from '@/services/api';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { toast } from "sonner";
+import { FileText, Tag, CheckCircle2, Loader2, X, Save, RefreshCw, Check, AlertCircle } from "lucide-react";
+import { HelpTooltip, formHelp } from '@/components/ui/help-tooltip';
+import { cn } from '@/lib/utils';
 
 type CompetencyFormValues = z.infer<typeof competencySchema>;
 
@@ -47,15 +51,30 @@ export function CompetencyForm({
 
   const form = useForm<CompetencyFormValues>({
     resolver: zodResolver(competencySchema),
+    mode: 'onChange', // Enable inline validation
     defaultValues: {
       name: competency?.name || '',
       description: competency?.description || '',
       category: competency?.category || CompetencyCategory.LEADERSHIP,
       level: competency?.level || ProficiencyLevel.NOVICE,
-      isActive: competency?.isActive || true,
+      isActive: competency?.isActive ?? true,
       approvalStatus: competency?.approvalStatus || ApprovalStatus.DRAFT,
     },
   });
+
+  // Get validation state for visual feedback
+  const { errors, dirtyFields, isValid } = form.formState;
+  
+  // Helper to get field validation state
+  const getFieldState = useCallback((fieldName: keyof CompetencyFormValues) => {
+    const isDirty = dirtyFields[fieldName];
+    const hasError = !!errors[fieldName];
+    return {
+      isDirty,
+      hasError,
+      isValid: isDirty && !hasError,
+    };
+  }, [dirtyFields, errors]);
 
   async function onSubmit(data: CompetencyFormValues) {
     setIsLoading(true);
@@ -95,70 +114,126 @@ export function CompetencyForm({
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           {/* Basic Information Section */}
-          <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
-            <div className="p-4 pb-3">
-              <h3 className="text-lg font-semibold leading-none tracking-tight">Basic Information</h3>
-              <p className="text-sm text-muted-foreground mt-1">Provide the name and description for this competency</p>
+          <div className="rounded-xl border bg-card shadow-sm overflow-hidden">
+            <div className="flex items-center gap-3 px-5 py-4 bg-muted/40 border-b">
+              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                <FileText className="h-5 w-5" />
+              </div>
+              <div>
+                <h3 className="text-base font-semibold">Basic Information</h3>
+                <p className="text-sm text-muted-foreground">Name and description for this competency</p>
+              </div>
             </div>
-            <div className="px-4 pb-4 space-y-4">
+            <div className="p-5 space-y-5">
               <FormField
                 control={form.control}
                 name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-sm font-medium">Name <span className="text-red-500">*</span></FormLabel>
-                    <FormControl>
-                      <Input 
-                        placeholder="e.g., Strategic Leadership" 
-                        className="h-9"
-                        {...field}
-                        onBlur={() => {
-                          field.onBlur();
-                          handlePreviewClick();
-                        }}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+                render={({ field }) => {
+                  const fieldState = getFieldState('name');
+                  return (
+                    <FormItem>
+                      <FormLabel className="text-sm font-medium flex items-center gap-1">
+                        Name <span className="text-destructive">*</span>
+                        <HelpTooltip content={formHelp.competency.name} />
+                      </FormLabel>
+                      <FormControl>
+                        <div className="relative">
+                          <Input 
+                            placeholder="e.g., Strategic Leadership" 
+                            className={cn(
+                              "h-10 pr-8",
+                              fieldState.isValid && "border-green-500 focus-visible:ring-green-500",
+                              fieldState.hasError && "border-destructive focus-visible:ring-destructive"
+                            )}
+                            {...field}
+                            onBlur={() => {
+                              field.onBlur();
+                              handlePreviewClick();
+                            }}
+                          />
+                          {fieldState.isDirty && (
+                            <div className="absolute right-2.5 top-1/2 -translate-y-1/2">
+                              {fieldState.isValid ? (
+                                <Check className="h-4 w-4 text-green-500" />
+                              ) : fieldState.hasError ? (
+                                <AlertCircle className="h-4 w-4 text-destructive" />
+                              ) : null}
+                            </div>
+                          )}
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  );
+                }}
               />
               <FormField
                 control={form.control}
                 name="description"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-sm font-medium">Description <span className="text-red-500">*</span></FormLabel>
-                    <FormControl>
-                      <Textarea
-                        placeholder="A detailed description of the competency"
-                        className="min-h-20 resize-none"
-                        {...field}
-                        onBlur={() => {
-                          field.onBlur();
-                          handlePreviewClick();
-                        }}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+                render={({ field }) => {
+                  const fieldState = getFieldState('description');
+                  const charCount = field.value?.length || 0;
+                  const minChars = 10;
+                  return (
+                    <FormItem>
+                      <FormLabel className="text-sm font-medium flex items-center gap-1">
+                        Description <span className="text-destructive">*</span>
+                        <HelpTooltip content={formHelp.competency.description} />
+                      </FormLabel>
+                      <FormControl>
+                        <div className="relative">
+                          <Textarea
+                            placeholder="A detailed description of the competency and what it measures..."
+                            className={cn(
+                              "min-h-24 resize-none",
+                              fieldState.isValid && "border-green-500 focus-visible:ring-green-500",
+                              fieldState.hasError && "border-destructive focus-visible:ring-destructive"
+                            )}
+                            {...field}
+                            onBlur={() => {
+                              field.onBlur();
+                              handlePreviewClick();
+                            }}
+                          />
+                        </div>
+                      </FormControl>
+                      <div className="flex items-center justify-between">
+                        <FormMessage />
+                        <span className={cn(
+                          "text-xs",
+                          charCount < minChars ? "text-muted-foreground" : "text-green-600"
+                        )}>
+                          {charCount}/{minChars}+ characters
+                        </span>
+                      </div>
+                    </FormItem>
+                  );
+                }}
               />
             </div>
           </div>
 
           {/* Classification Section */}
-          <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
-            <div className="p-4 pb-3">
-              <h3 className="text-lg font-semibold leading-none tracking-tight">Classification</h3>
-              <p className="text-sm text-muted-foreground mt-1">Categorize and define the competency&apos;s properties</p>
+          <div className="rounded-xl border bg-card shadow-sm overflow-hidden">
+            <div className="flex items-center gap-3 px-5 py-4 bg-muted/40 border-b">
+              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-100 text-blue-600 dark:bg-blue-950 dark:text-blue-400">
+                <Tag className="h-5 w-5" />
+              </div>
+              <div>
+                <h3 className="text-base font-semibold">Classification</h3>
+                <p className="text-sm text-muted-foreground">Category and proficiency level</p>
+              </div>
             </div>
-            <div className="px-4 pb-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="p-5 grid grid-cols-1 md:grid-cols-2 gap-5">
               <FormField
                 control={form.control}
                 name="category"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-sm font-medium">Category</FormLabel>
+                    <FormLabel className="text-sm font-medium flex items-center gap-1">
+                      Category
+                      <HelpTooltip content={formHelp.competency.category} />
+                    </FormLabel>
                     <Select 
                       onValueChange={(value) => {
                         field.onChange(value);
@@ -167,7 +242,7 @@ export function CompetencyForm({
                       defaultValue={field.value}
                     >
                       <FormControl>
-                        <SelectTrigger className="h-9">
+                        <SelectTrigger className="h-10">
                           <SelectValue placeholder="Select category" />
                         </SelectTrigger>
                       </FormControl>
@@ -188,7 +263,10 @@ export function CompetencyForm({
                 name="level"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-sm font-medium">Level</FormLabel>
+                    <FormLabel className="text-sm font-medium flex items-center gap-1">
+                      Proficiency Level
+                      <HelpTooltip content={formHelp.competency.level} />
+                    </FormLabel>
                     <Select 
                       onValueChange={(value) => {
                         field.onChange(value);
@@ -197,7 +275,7 @@ export function CompetencyForm({
                       defaultValue={field.value}
                     >
                       <FormControl>
-                        <SelectTrigger className="h-9">
+                        <SelectTrigger className="h-10">
                           <SelectValue placeholder="Select level" />
                         </SelectTrigger>
                       </FormControl>
@@ -217,17 +295,26 @@ export function CompetencyForm({
           </div>
 
           {/* Status Section */}
-          <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
-            <div className="p-4 pb-3">
-              <h3 className="text-lg font-semibold leading-none tracking-tight">Status</h3>
+          <div className="rounded-xl border bg-card shadow-sm overflow-hidden">
+            <div className="flex items-center gap-3 px-5 py-4 bg-muted/40 border-b">
+              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-green-100 text-green-600 dark:bg-green-950 dark:text-green-400">
+                <CheckCircle2 className="h-5 w-5" />
+              </div>
+              <div>
+                <h3 className="text-base font-semibold">Status & Approval</h3>
+                <p className="text-sm text-muted-foreground">Manage visibility and approval workflow</p>
+              </div>
             </div>
-            <div className="px-4 pb-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="p-5 grid grid-cols-1 md:grid-cols-2 gap-5">
               <FormField
                 control={form.control}
                 name="approvalStatus"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-sm font-medium">Approval Status</FormLabel>
+                    <FormLabel className="text-sm font-medium flex items-center gap-1">
+                      Approval Status
+                      <HelpTooltip content={formHelp.competency.approvalStatus} />
+                    </FormLabel>
                     <Select 
                       onValueChange={(value) => {
                         field.onChange(value);
@@ -236,7 +323,7 @@ export function CompetencyForm({
                       defaultValue={field.value}
                     >
                       <FormControl>
-                        <SelectTrigger className="h-9">
+                        <SelectTrigger className="h-10">
                           <SelectValue placeholder="Select status" />
                         </SelectTrigger>
                       </FormControl>
@@ -256,9 +343,12 @@ export function CompetencyForm({
                 control={form.control}
                 name="isActive"
                 render={({ field }) => (
-                  <FormItem className="flex flex-col justify-end">
-                    <FormLabel className="text-sm font-medium">Active</FormLabel>
-                    <div className="flex items-center space-x-2 h-9">
+                  <FormItem>
+                    <FormLabel className="text-sm font-medium flex items-center gap-1">
+                      Visibility
+                      <HelpTooltip content={formHelp.competency.isActive} />
+                    </FormLabel>
+                    <div className="flex items-center gap-3 h-10 px-3 rounded-lg border bg-muted/30">
                       <FormControl>
                         <Switch
                           checked={field.value}
@@ -268,7 +358,7 @@ export function CompetencyForm({
                           }}
                         />
                       </FormControl>
-                      <span className="text-sm text-muted-foreground">
+                      <span className={`text-sm font-medium ${field.value ? 'text-green-600 dark:text-green-400' : 'text-muted-foreground'}`}>
                         {field.value ? 'Active' : 'Inactive'}
                       </span>
                     </div>
@@ -279,14 +369,15 @@ export function CompetencyForm({
           </div>
 
           {/* Action Buttons */}
-          <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3">
+          <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 pt-2">
             <Button 
               type="button" 
               variant="outline" 
               onClick={() => router.back()} 
               disabled={isLoading}
-              className="h-9"
+              className="h-11 sm:h-10 min-h-11"
             >
+              <X className="h-4 w-4 mr-2" />
               Cancel
             </Button>
             {onUpdatePreview && (
@@ -295,17 +386,28 @@ export function CompetencyForm({
                 variant="secondary" 
                 onClick={handlePreviewClick} 
                 disabled={isLoading}
-                className="h-9"
+                className="h-11 sm:h-10 min-h-11"
               >
+                <RefreshCw className="h-4 w-4 mr-2" />
                 Update Preview
               </Button>
             )}
             <Button 
               type="submit" 
               disabled={isLoading}
-              className="h-9"
+              className="h-11 sm:h-10 min-h-11"
             >
-              {isLoading ? (isEditMode ? 'Saving...' : 'Creating...') : (isEditMode ? 'Save Changes' : 'Create Competency')}
+              {isLoading ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  {isEditMode ? 'Saving...' : 'Creating...'}
+                </>
+              ) : (
+                <>
+                  <Save className="h-4 w-4 mr-2" />
+                  {isEditMode ? 'Save Changes' : 'Create Competency'}
+                </>
+              )}
             </Button>
           </div>
         </form>

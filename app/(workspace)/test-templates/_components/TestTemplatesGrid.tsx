@@ -20,7 +20,7 @@ export default function TestTemplatesGrid({ templates, canEdit = false }: TestTe
   }
 
   return (
-    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
       {templates.map((template) => (
         <TestTemplateCard key={template.id} template={template} canEdit={canEdit} />
       ))}
@@ -75,28 +75,29 @@ function TestTemplateCard({ template, canEdit = false }: TestTemplateCardProps) 
   const goalInfo = template.goal ? AssessmentGoalInfo[template.goal] : AssessmentGoalInfo[AssessmentGoal.OVERVIEW];
 
   return (
-    <Card className="flex flex-col hover:shadow-lg transition-shadow duration-200">
-      <CardHeader className="pb-3">
+    <Card className="flex flex-col hover:shadow-lg transition-shadow duration-200 touch-manipulation">
+      <CardHeader className="pb-2 sm:pb-3">
         <div className="flex items-start justify-between gap-2">
-          <CardTitle className="text-lg leading-tight line-clamp-2">
+          <CardTitle className="text-base sm:text-lg leading-tight line-clamp-2">
             {template.name}
           </CardTitle>
-          <div className="flex items-center gap-1.5 shrink-0">
+          <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
             {canEdit && (
               <Link href={`/test-templates/${template.id}/edit`}>
-                <Button variant="ghost" size="icon" className="h-7 w-7" title="Редактировать">
-                  <Pencil className="h-3.5 w-3.5" />
+                <Button variant="ghost" size="icon" className="h-8 w-8 sm:h-7 sm:w-7 min-h-10 min-w-10 sm:min-h-0 sm:min-w-0" title="Редактировать">
+                  <Pencil className="h-4 w-4 sm:h-3.5 sm:w-3.5" />
                 </Button>
               </Link>
             )}
-            <Badge variant="secondary">
+            <Badge variant="secondary" className="text-xs">
               <CheckCircle2 className="h-3 w-3 mr-1" />
-              Активен
+              <span className="hidden sm:inline">Активен</span>
+              <span className="sm:hidden">✓</span>
             </Badge>
           </div>
         </div>
         {template.description && (
-          <CardDescription className="line-clamp-2 mt-1">
+          <CardDescription className="line-clamp-2 mt-1 text-sm">
             {template.description}
           </CardDescription>
         )}
@@ -104,31 +105,31 @@ function TestTemplateCard({ template, canEdit = false }: TestTemplateCardProps) 
         <div className="mt-2">
           <Badge variant={goalConfig.variant} className={goalConfig.className} title={goalInfo.description}>
             <GoalIcon className="h-3 w-3 mr-1" />
-            {goalInfo.displayName}
+            <span className="text-xs">{goalInfo.displayName}</span>
           </Badge>
         </div>
       </CardHeader>
 
-      <CardContent className="flex-1 pb-3">
-        <div className="grid grid-cols-2 gap-3 text-sm">
-          <div className="flex items-center gap-2 text-muted-foreground">
-            <Clock className="h-4 w-4 shrink-0" />
+      <CardContent className="flex-1 pb-2 sm:pb-3">
+        <div className="grid grid-cols-2 gap-2 sm:gap-3 text-xs sm:text-sm">
+          <div className="flex items-center gap-1.5 sm:gap-2 text-muted-foreground">
+            <Clock className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
             <span>{formatDuration(template.timeLimitMinutes)}</span>
           </div>
-          <div className="flex items-center gap-2 text-muted-foreground">
-            <Target className="h-4 w-4 shrink-0" />
-            <span>{template.passingScore}% для сдачи</span>
+          <div className="flex items-center gap-1.5 sm:gap-2 text-muted-foreground">
+            <Target className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
+            <span>{template.passingScore}%</span>
           </div>
-          <div className="flex items-center gap-2 text-muted-foreground col-span-2">
-            <BookOpen className="h-4 w-4 shrink-0" />
+          <div className="flex items-center gap-1.5 sm:gap-2 text-muted-foreground col-span-2">
+            <BookOpen className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
             <span>{template.competencyCount} компетенций</span>
           </div>
         </div>
       </CardContent>
 
-      <CardFooter className="pt-3 border-t">
+      <CardFooter className="pt-2 sm:pt-3 border-t">
         <Link href={`/test-templates/${template.id}`} className="w-full">
-          <Button className="w-full group">
+          <Button className="w-full group min-h-11">
             Подробнее
             <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
           </Button>

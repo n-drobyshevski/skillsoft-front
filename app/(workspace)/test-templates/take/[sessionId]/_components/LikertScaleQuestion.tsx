@@ -49,8 +49,8 @@ export default function LikertScaleQuestion({
 
   return (
     <div className="space-y-4">
-      {/* Visual scale */}
-      <div className="flex items-center justify-between gap-2">
+      {/* Visual scale - mobile optimized with 44px touch targets */}
+      <div className="flex items-stretch justify-between gap-1.5 sm:gap-2">
         {options.map((option, index) => {
           const optionValue = option.value ?? (index + 1);
           const isSelected = value === optionValue;
@@ -61,16 +61,22 @@ export default function LikertScaleQuestion({
               type="button"
               onClick={() => onChange(isSelected ? null : optionValue)}
               className={cn(
-                "flex-1 flex flex-col items-center gap-2 p-3 rounded-lg border transition-all",
+                // Base styles with mobile-first 44px min touch target
+                "flex-1 flex flex-col items-center gap-1 sm:gap-2 p-2 sm:p-3 rounded-lg border transition-all",
+                "min-h-14 sm:min-h-auto", // 56px minimum height on mobile
+                // Touch-friendly interactions
+                "touch-manipulation active:scale-[0.97]",
+                // Hover/focus states
                 "hover:border-primary/50 hover:bg-primary/5",
                 "focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2",
+                // Selected state
                 isSelected && "border-primary bg-primary/10"
               )}
             >
-              {/* Circle indicator */}
+              {/* Circle indicator - optimized for mobile touch */}
               <div className={cn(
-                "w-10 h-10 rounded-full border-2 flex items-center justify-center",
-                "text-lg font-semibold transition-colors",
+                "w-9 h-9 sm:w-10 sm:h-10 rounded-full border-2 flex items-center justify-center",
+                "text-base sm:text-lg font-semibold transition-colors",
                 isSelected 
                   ? "border-primary bg-primary text-primary-foreground" 
                   : "border-muted-foreground/40"
@@ -78,7 +84,7 @@ export default function LikertScaleQuestion({
                 {option.label || optionValue}
               </div>
               
-              {/* Label */}
+              {/* Label - hidden on mobile, shown on larger screens */}
               <span className={cn(
                 "text-xs text-center line-clamp-2 hidden sm:block",
                 isSelected ? "text-primary font-medium" : "text-muted-foreground"
@@ -90,13 +96,13 @@ export default function LikertScaleQuestion({
         })}
       </div>
 
-      {/* Mobile labels */}
-      <div className="flex justify-between text-xs text-muted-foreground sm:hidden">
-        <span>{options[0]?.text}</span>
-        <span>{options[options.length - 1]?.text}</span>
+      {/* Mobile labels - show range labels on mobile */}
+      <div className="flex justify-between text-xs text-muted-foreground sm:hidden px-1">
+        <span className="max-w-[40%] text-left">{options[0]?.text}</span>
+        <span className="max-w-[40%] text-right">{options[options.length - 1]?.text}</span>
       </div>
 
-      {/* Selected value display */}
+      {/* Selected value display - helpful for mobile users */}
       {value !== null && (
         <p className="text-sm text-center text-muted-foreground">
           Выбрано: <span className="font-medium text-foreground">
