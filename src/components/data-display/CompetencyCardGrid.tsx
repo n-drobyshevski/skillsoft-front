@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { Competency } from "@/types/domain";
 import CompetencyCard  from "./CompetencyCard";
-import { levelToNumber } from "@/app/utils";
+import { levelToNumber } from "@/lib/ui-utils";
 import { Skeleton } from "@/components/ui/skeleton";
 import {Card, CardHeader, CardContent, CardFooter} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";

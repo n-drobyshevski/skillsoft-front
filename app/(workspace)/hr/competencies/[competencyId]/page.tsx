@@ -25,7 +25,7 @@ import type {
 	AssessmentQuestion,
 } from "@/types/domain";
 import { ProficiencyLevel } from "@/types/domain";
-import { levelToColor, approvalStatusToColor } from "@/app/utils";
+import { levelToColor, approvalStatusToColor } from "@/lib/ui-utils";
 
 interface CompetencyDetailPageProps {
 	params: { competencyId: string };

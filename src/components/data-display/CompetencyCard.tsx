@@ -14,8 +14,7 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"; 
 import { Competency } from "@/types/domain";
-import { levelToColor } from "@/app/utils";
-import { competencyCategoryToIcon } from "@/app/utils";
+import { levelToColor, competencyCategoryToIcon } from "@/lib/ui-utils";
 
 import {
   MoreHorizontal,

@@ -18,7 +18,7 @@ import {
   Loader2,
   AlertCircle
 } from 'lucide-react';
-import { levelToColor, approvalStatusToColor } from '@/app/utils';
+import { levelToColor, approvalStatusToColor } from '@/lib/ui-utils';
 import type { Competency } from '@/types/domain';
 
 interface CompetencyHoverCardProps {

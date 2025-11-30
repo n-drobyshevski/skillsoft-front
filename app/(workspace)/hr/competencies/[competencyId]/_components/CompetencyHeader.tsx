@@ -13,7 +13,7 @@ import {
   ArrowLeft,
   Trash2,
 } from 'lucide-react';
-import { levelToColor, approvalStatusToColor } from '@/app/utils';
+import { levelToColor, approvalStatusToColor } from '@/lib/ui-utils';
 import type { Competency } from '@/types/domain';
 
 interface CompetencyHeaderProps {

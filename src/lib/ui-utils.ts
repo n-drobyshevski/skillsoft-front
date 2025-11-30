@@ -1,3 +1,8 @@
+/**
+ * UI utility functions for styling and icons.
+ * Moved from app/utils.ts to follow Next.js 16 best practices.
+ */
+
 import React from "react";
 import {
   BrainCircuit,
@@ -18,7 +23,10 @@ import {
 } from "lucide-react";
 import { ProficiencyLevel, DifficultyLevel } from "@/types/domain";
 
-// Common color constants to avoid duplication
+// ============================================
+// COLOR CONSTANTS
+// ============================================
+
 const COMMON_COLORS = {
   NOVICE: "border-red-500/20 text-red-700 bg-red-50/90 dark:bg-red-950/90 dark:text-red-200 dark:border-red-400/30",
   DEVELOPING: "border-amber-500/20 text-amber-700 bg-amber-50/90 dark:bg-amber-950/90 dark:text-amber-200 dark:border-amber-400/30",
@@ -34,8 +42,12 @@ const LEVEL_COLORS_DARK = {
   ADVANCED: "border-blue-600/30 text-blue-700 bg-blue-50/90 dark:bg-blue-950/90 dark:text-blue-200 dark:border-blue-400/30",
   EXPERT: "border-violet-600/30 text-violet-700 bg-violet-50/90 dark:bg-violet-950/90 dark:text-violet-200 dark:border-violet-400/30",
 } as const;
-// Helper functions
-const competencyCategoryToIcon = (category: string) => {
+
+// ============================================
+// COMPETENCY HELPERS
+// ============================================
+
+export function competencyCategoryToIcon(category: string) {
   const iconMap = new Map([
     ['COGNITIVE', BrainCircuit],
     ['INTERPERSONAL', Users],
@@ -50,9 +62,59 @@ const competencyCategoryToIcon = (category: string) => {
   
   const IconComponent = iconMap.get(category) || Award;
   return React.createElement(IconComponent, { className: "h-4 w-4" });
-};
+}
 
-const approvalStatusToColor = (status: string): string => {
+export function competencyProficiencyLevelToColor(level: ProficiencyLevel): string {
+  switch (level) {
+    case ProficiencyLevel.NOVICE:
+      return COMMON_COLORS.NOVICE;
+    case ProficiencyLevel.DEVELOPING:
+      return COMMON_COLORS.DEVELOPING;
+    case ProficiencyLevel.PROFICIENT:
+      return COMMON_COLORS.PROFICIENT;
+    case ProficiencyLevel.ADVANCED:
+      return COMMON_COLORS.ADVANCED;
+    case ProficiencyLevel.EXPERT:
+      return COMMON_COLORS.EXPERT;
+    default:
+      return COMMON_COLORS.NOVICE;
+  }
+}
+
+export function levelToNumber(level: string): number {
+  const levelMap = new Map([
+    ['NOVICE', 1],
+    ['DEVELOPING', 2],
+    ['PROFICIENT', 3],
+    ['ADVANCED', 4],
+    ['EXPERT', 5],
+  ]);
+  
+  return levelMap.get(level) || 1;
+}
+
+export function levelToColor(level: string): string {
+  switch (level) {
+    case 'NOVICE':
+      return LEVEL_COLORS_DARK.NOVICE;
+    case 'DEVELOPING':
+      return LEVEL_COLORS_DARK.DEVELOPING;
+    case 'PROFICIENT':
+      return LEVEL_COLORS_DARK.PROFICIENT;
+    case 'ADVANCED':
+      return LEVEL_COLORS_DARK.ADVANCED;
+    case 'EXPERT':
+      return LEVEL_COLORS_DARK.EXPERT;
+    default:
+      return LEVEL_COLORS_DARK.NOVICE;
+  }
+}
+
+// ============================================
+// APPROVAL STATUS HELPERS
+// ============================================
+
+export function approvalStatusToColor(status: string): string {
   switch (status) {
     case 'DRAFT':
       return 'border-yellow-500/30 text-yellow-500 bg-yellow-500/8 dark:text-yellow-300';
@@ -69,56 +131,34 @@ const approvalStatusToColor = (status: string): string => {
     default:
       return 'border-gray-500/30 text-gray-400 bg-gray-500/8 dark:text-gray-300';
   }
-};
+}
 
-const competencyProficiencyLevelToColor = (level: ProficiencyLevel): string => {
+// ============================================
+// BEHAVIORAL INDICATOR HELPERS
+// ============================================
+
+export function biLevelToColor(level: string): string {
   switch (level) {
-    case ProficiencyLevel.NOVICE:
+    case 'NOVICE':
       return COMMON_COLORS.NOVICE;
-    case ProficiencyLevel.DEVELOPING:
+    case 'DEVELOPING':
       return COMMON_COLORS.DEVELOPING;
-    case ProficiencyLevel.PROFICIENT:
+    case 'PROFICIENT':
       return COMMON_COLORS.PROFICIENT;
-    case ProficiencyLevel.ADVANCED:
+    case 'ADVANCED':
       return COMMON_COLORS.ADVANCED;
-    case ProficiencyLevel.EXPERT:
+    case 'EXPERT':
       return COMMON_COLORS.EXPERT;
     default:
       return COMMON_COLORS.NOVICE;
   }
-};
+}
 
-const levelToNumber = (level: string): number => {
-  const levelMap = new Map([
-    ['NOVICE', 1],
-    ['DEVELOPING', 2],
-    ['PROFICIENT', 3],
-    ['ADVANCED', 4],
-    ['EXPERT', 5],
-  ]);
-  
-  return levelMap.get(level) || 1;
-};
+// ============================================
+// QUESTION HELPERS
+// ============================================
 
-const levelToColor = (level: string): string => {
-  switch (level) {
-    case 'NOVICE':
-      return LEVEL_COLORS_DARK.NOVICE;
-    case 'DEVELOPING':
-      return LEVEL_COLORS_DARK.DEVELOPING;
-    case 'PROFICIENT':
-      return LEVEL_COLORS_DARK.PROFICIENT;
-    case 'ADVANCED':
-      return LEVEL_COLORS_DARK.ADVANCED;
-    case 'EXPERT':
-      return LEVEL_COLORS_DARK.EXPERT;
-    default:
-      return LEVEL_COLORS_DARK.NOVICE;
-  }
-};
-
-
-const questionTypeToIcon = (category: string) => {
+export function questionTypeToIcon(category: string) {
   const iconMap = new Map([
     ['MULTIPLE_CHOICE', ListTodo],
     ['SITUATIONAL_JUDGMENT', Gavel],
@@ -130,9 +170,9 @@ const questionTypeToIcon = (category: string) => {
   
   const IconComponent = iconMap.get(category) || BadgeQuestionMark;
   return React.createElement(IconComponent, { className: "h-4 w-4" });
-};
+}
 
-const questionDifficultyToColor = (difficulty: DifficultyLevel): string => {
+export function questionDifficultyToColor(difficulty: DifficultyLevel): string {
   switch (difficulty) {
     case DifficultyLevel.FOUNDATIONAL:
       return COMMON_COLORS.PROFICIENT; // Green for easy
@@ -141,30 +181,13 @@ const questionDifficultyToColor = (difficulty: DifficultyLevel): string => {
     case DifficultyLevel.ADVANCED:
       return COMMON_COLORS.NOVICE; // Red for hard
     case DifficultyLevel.EXPERT:
-        return COMMON_COLORS.EXPERT;
+      return COMMON_COLORS.EXPERT;
     default:
       return COMMON_COLORS.PROFICIENT;
   }
-};
+}
 
-// Helper functions
-const biLevelToColor = (level: string): string => {
-	switch (level) {
-		case 'NOVICE':
-			return COMMON_COLORS.NOVICE;
-		case 'DEVELOPING':
-			return COMMON_COLORS.DEVELOPING;
-		case 'PROFICIENT':
-			return COMMON_COLORS.PROFICIENT;
-		case 'ADVANCED':
-			return COMMON_COLORS.ADVANCED;
-		case 'EXPERT':
-			return COMMON_COLORS.EXPERT;
-		default:
-			return COMMON_COLORS.NOVICE;
-	}
-};
-const questionTypeToColor = (type: string): string => {
+export function questionTypeToColor(type: string): string {
   switch (type) {
     case 'MULTIPLE_CHOICE':
       return 'border-blue-500/30 text-blue-700 bg-blue-50/90 dark:bg-blue-950/90 dark:text-blue-200 dark:border-blue-400/30';
@@ -183,6 +206,4 @@ const questionTypeToColor = (type: string): string => {
     default:
       return 'border-border text-muted-foreground bg-muted/50';
   }
-};
-
-export { competencyCategoryToIcon, competencyProficiencyLevelToColor, levelToNumber, levelToColor, questionTypeToIcon, questionDifficultyToColor, questionTypeToColor, biLevelToColor, approvalStatusToColor };
+}

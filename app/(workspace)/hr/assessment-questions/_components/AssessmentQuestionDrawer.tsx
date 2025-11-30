@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/sheet";
 import { AssessmentQuestion, BehavioralIndicator, Competency } from "@/types/domain";
 import { competenciesApi, behavioralIndicatorsApi } from "@/services/api";
-import { questionDifficultyToColor } from "@/app/utils";
+import { questionDifficultyToColor } from "@/lib/ui-utils";
 import { CompetencyHoverCard } from "@/app/(workspace)/hr/behavioral-indicators/[indicatorId]/_components/CompetencyHoverCard";
 import { IndicatorHoverCard } from "@/components/feedback/IndicatorHoverCard";
 import { DeleteConfirmationDialog } from "@/components/feedback/DeleteConfirmationDialog";

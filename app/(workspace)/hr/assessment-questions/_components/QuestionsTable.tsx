@@ -25,7 +25,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
 import { AssessmentQuestion } from "@/types/domain";
-import { questionTypeToIcon, questionDifficultyToColor } from "@/app/utils";
+import { questionTypeToIcon, questionDifficultyToColor } from "@/lib/ui-utils";
 import EntitiesTable from "@/components/data-display/Table";
 import AssessmentQuestionDrawer from "./AssessmentQuestionDrawer";
 import { IndicatorHoverCard } from "@/components/feedback/IndicatorHoverCard";

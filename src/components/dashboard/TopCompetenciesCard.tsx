@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Competency } from "@/types/domain";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import Link from "next/link";
-import { competencyCategoryToIcon, levelToColor } from "@/app/utils";
+import { competencyCategoryToIcon, levelToColor } from "@/lib/ui-utils";
 
 interface TopCompetenciesCardProps {
   competencies: Competency[];

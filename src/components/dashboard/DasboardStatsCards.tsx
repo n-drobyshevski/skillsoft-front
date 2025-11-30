@@ -9,7 +9,7 @@ import {
   Layers,
 } from "lucide-react";
 import { DashboardStats } from "@/types/domain";
-import { competencyCategoryToIcon } from "@/app/utils";
+import { competencyCategoryToIcon } from "@/lib/ui-utils";
 
 export default function DashboardStatsCards({ stats }: { stats: DashboardStats }) {
   return (

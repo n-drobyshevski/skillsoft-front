@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useMemo, useCallback, Suspense } from 'react';
 import { BehavioralIndicator, AssessmentQuestion } from '@/types/domain';
 import { assessmentQuestionsApi } from '@/services/api';
-import { questionDifficultyToColor, questionTypeToColor } from '@/app/utils';
+import { questionDifficultyToColor, questionTypeToColor } from '@/lib/ui-utils';
 import { DifficultyLevel } from '@/types/domain';
 import { toast } from 'sonner';
 import { 

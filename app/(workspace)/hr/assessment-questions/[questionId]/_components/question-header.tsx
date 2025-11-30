@@ -10,7 +10,7 @@ import { toast } from 'sonner';
 import { ArrowLeft, Pencil, Trash2 } from "lucide-react";
 import Link from "next/link";
 
-import { questionDifficultyToColor } from "@/app/utils";
+import { questionDifficultyToColor } from "@/lib/ui-utils";
 import { DifficultyLevel } from "@/types/domain";
 export default function QuestionHeader({
     questionId,

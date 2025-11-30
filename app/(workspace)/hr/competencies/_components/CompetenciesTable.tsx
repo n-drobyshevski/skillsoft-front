@@ -34,7 +34,7 @@ import {
   approvalStatusToColor,
   competencyCategoryToIcon,
   competencyProficiencyLevelToColor,
-} from "@/app/utils";
+} from "@/lib/ui-utils";
 import EntitiesTable from "@/components/data-display/Table";
 import CompetencyDrawer from "./CompetencyDrawer";
 

@@ -3,7 +3,7 @@
 import * as React from "react";
 import { Badge } from "@/components/ui/badge";
 import { AssessmentQuestion } from "@/types/domain";
-import { questionDifficultyToColor, questionTypeToIcon } from "@/app/utils";
+import { questionDifficultyToColor, questionTypeToIcon } from "@/lib/ui-utils";
 import { Separator } from "@/components/ui/separator";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { CheckCircle, Circle } from "lucide-react";

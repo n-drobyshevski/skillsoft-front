@@ -22,7 +22,7 @@ import {
   Eye,
 } from "lucide-react";
 import { BehavioralIndicator } from "@/types/domain";
-import { biLevelToColor } from "@/app/utils";
+import { biLevelToColor } from "@/lib/ui-utils";
 import IndicatorDrawer from "./IndicatorDrawer";
 import { CompetencyHoverCard } from "../[indicatorId]/_components/CompetencyHoverCard";
 

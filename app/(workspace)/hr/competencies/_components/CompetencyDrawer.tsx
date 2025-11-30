@@ -10,7 +10,7 @@ import {
   SheetDescription,
 } from "@/components/ui/sheet";
 import { Competency } from "@/types/domain";
-import { approvalStatusToColor, competencyProficiencyLevelToColor } from "@/app/utils";
+import { approvalStatusToColor, competencyProficiencyLevelToColor } from "@/lib/ui-utils";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Eye, Settings2, ExternalLink, Trash2 } from "lucide-react";

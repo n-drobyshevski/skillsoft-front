@@ -10,7 +10,7 @@ import {
   SheetTitle,
   SheetDescription,
 } from "@/components/ui/sheet";
-import { biLevelToColor } from "@/app/utils";
+import { biLevelToColor } from "@/lib/ui-utils";
 import { useState, useEffect } from "react";
 import { AssessmentQuestion, BehavioralIndicator } from "@/types/domain";
 import { assessmentQuestionsApi } from "@/services/api";

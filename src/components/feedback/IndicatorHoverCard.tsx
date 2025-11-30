@@ -18,7 +18,7 @@ import {
   Loader2,
   AlertCircle
 } from 'lucide-react';
-import { biLevelToColor, approvalStatusToColor } from '@/app/utils';
+import { biLevelToColor, approvalStatusToColor } from '@/lib/ui-utils';
 import type { BehavioralIndicator } from '@/types/domain';
 
 interface IndicatorHoverCardProps {
