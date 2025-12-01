@@ -21,7 +21,8 @@ import {
   BarChart3,
   UserCheck,
   Shield,
-  Clock
+  Clock,
+  LucideProps
 } from "lucide-react";
 import MobileStatsCard from "./MobileStatsCard";
 
@@ -74,6 +75,8 @@ interface DashboardStats {
   totalCompetencies: number;
   totalBehavioralIndicators: number;
   totalAssessmentQuestions: number;
+  totalTestTemplates?: number;
+  activeTestTemplates?: number;
   competenciesByCategory?: Record<string, number>;
   competenciesByLevel?: Record<string, number>;
   averageIndicatorsPerCompetency?: number;
@@ -85,6 +88,24 @@ type EntityStatsData =
   | { type: "behavioral-indicators"; stats: BehavioralIndicatorStats }
   | { type: "assessment-questions"; stats: AssessmentQuestionStats }
   | { type: "users"; stats: UsersStats };
+
+// Card configuration interface for type safety
+interface CardConfig {
+  key: string;
+  title: string;
+  mobileTitle: string;
+  value: number | string;
+  icon: React.ForwardRefExoticComponent<
+    Omit<LucideProps, "ref"> & React.RefAttributes<SVGSVGElement>
+  >;
+  href?: string;
+  trend?: {
+    value: string;
+    label: string;
+    isPositive: boolean;
+  };
+  description: string;
+}
 
 interface FlexibleStatsCardsProps {
   data: EntityStatsData;
@@ -137,7 +158,7 @@ export default function FlexibleStatsCards({ data, loading = false, onCardClick 
   }
 
   // Get card configuration based on entity type
-  const getCardConfigs = () => {
+  const getCardConfigs = (): CardConfig[] => {
     switch (data.type) {
       case "dashboard":
         return [
@@ -146,18 +167,24 @@ export default function FlexibleStatsCards({ data, loading = false, onCardClick 
             title: "Competencies",
             mobileTitle: "Competencies",
             value: data.stats.totalCompetencies,
-            icon: BookOpen,
-            trend: { value: "+20.1%", label: FROM_LAST_MONTH, isPositive: true },
-            description: "Active"
+            icon: Target,
+            href: "/hr/competencies",
+            trend: undefined,
+            description: data.stats.competenciesByCategory 
+              ? `${Object.keys(data.stats.competenciesByCategory).length} categories` 
+              : "Active"
           },
           {
             key: "indicators",
             title: "Behavioral Indicators",
             mobileTitle: "Indicators",
             value: data.stats.totalBehavioralIndicators,
-            icon: Users,
-            trend: { value: "+180.1%", label: FROM_LAST_MONTH, isPositive: true },
-            description: "Total"
+            icon: Layers,
+            href: "/hr/behavioral-indicators",
+            trend: undefined,
+            description: data.stats.averageIndicatorsPerCompetency 
+              ? `~${data.stats.averageIndicatorsPerCompetency.toFixed(1)} per competency`
+              : "Total"
           },
           {
             key: "questions",
@@ -165,17 +192,21 @@ export default function FlexibleStatsCards({ data, loading = false, onCardClick 
             mobileTitle: "Questions",
             value: data.stats.totalAssessmentQuestions,
             icon: ClipboardList,
-            trend: { value: "+19%", label: FROM_LAST_MONTH, isPositive: true },
-            description: "Tests"
+            href: "/hr/assessment-questions",
+            trend: undefined,
+            description: "Total questions"
           },
           {
-            key: "active",
-            title: "Active Now",
-            mobileTitle: "Active Now",
-            value: "+573",
+            key: "templates",
+            title: "Test Templates",
+            mobileTitle: "Templates",
+            value: data.stats.totalTestTemplates ?? 0,
             icon: Activity,
-            trend: { value: "+201", label: SINCE_LAST_HOUR, isPositive: true },
-            description: "Live"
+            href: "/test-templates",
+            trend: undefined,
+            description: data.stats.activeTestTemplates !== undefined 
+              ? `${data.stats.activeTestTemplates} active`
+              : "Available"
           }
         ];
 

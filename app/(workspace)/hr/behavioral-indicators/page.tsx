@@ -5,8 +5,6 @@ import { Button } from "@/components/ui/button";
 import PageHeader from "@/components/common/PageHeader";
 import FlexibleStatsCards from "@/components/data-display/FlexibleStatsCards";
 import { Plus } from "lucide-react";
-import { Skeleton } from "@/components/ui/skeleton";
-import { BehavioralIndicator } from "@/types/domain";
 
 export const metadata: Metadata = {
   title: "Behavioral Indicators - SkillSoft",
@@ -16,6 +14,7 @@ export const metadata: Metadata = {
     description: "Define and manage measurable behavioral indicators for competency assessment.",
   },
 };
+import { BehavioralIndicator } from "@/types/domain";
 import {
   assessmentQuestionsApi,
   behavioralIndicatorsApi,
@@ -70,70 +69,17 @@ async function getIndicatorsData(): Promise<{
   }
 }
 
-// Stats cards skeleton for loading state
-function StatsCardsSkeleton() {
-  return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-      {Array.from({ length: 4 }).map((_, i) => (
-        <Skeleton key={i} className="h-32 w-full" />
-      ))}
-    </div>
-  );
-}
+export default async function BehavioralIndicatorsPage() {
+  const { indicators, error } = await getIndicatorsData();
 
-// Calculate complexity deterministically
-function calculateAverageComplexity(count: number): number {
-  if (count === 0) return 0;
-  // Deterministic calculation based on count
-  return Math.round(((count % 20) / 10 + 2.5) * 10) / 10;
-}
-
-// Async component for stats - streams after initial render
-async function IndicatorStats() {
-  const { indicators } = await getIndicatorsData();
-  
-  return (
-    <FlexibleStatsCards
-      data={{
-        type: "behavioral-indicators",
-        stats: {
-          total: indicators.length,
-          withQuestions: indicators.filter((i) => i.questionCount > 0).length,
-          measurable: Math.floor(indicators.length * 0.7),
-          averageComplexity: calculateAverageComplexity(indicators.length),
-          trend: {
-            value: "+15%",
-            label: "from last month",
-            isPositive: true,
-          },
-        },
-      }}
-      loading={false}
-    />
-  );
-}
-
-// Async component for table - streams after initial render
-async function IndicatorsTableWrapper() {
-  const { indicators } = await getIndicatorsData();
-  return (
-    <div className="space-y-4">
-      <IndicatorsTable indicators={indicators} />
-    </div>
-  );
-}
-
-// Main component - Static shell rendered immediately
-export default function BehavioralIndicatorsPage() {
   return (
     <div className="flex flex-1 flex-col gap-4 p-4 pt-6 md:gap-6 md:p-6">
-      {/* Static content - part of the static shell */}
       <PageHeader 
         title="Behavioral Indicators"
         description="Define and manage measurable behavioral indicators for competency assessment"
       >
-        <div className="flex items-center gap-2">
-          <Link href="/hr/behavioral-indicators/new">
+      <div className="flex items-center gap-2">
+          <Link href="/behavioral-indicators/new">
             <Button variant="outline">
               <Plus className="mr-2 h-4 w-4" />
               Create Indicator
@@ -141,15 +87,32 @@ export default function BehavioralIndicatorsPage() {
           </Link>
         </div>
       </PageHeader>
-      
-      {/* Dynamic stats - streams in after static shell */}
-      <Suspense fallback={<StatsCardsSkeleton />}>
-        <IndicatorStats />
-      </Suspense>
+      {/* Stats Cards */}
+      <FlexibleStatsCards
+        data={{
+          type: "behavioral-indicators",
+          stats: {
+            total: indicators.length,
+            withQuestions: indicators.filter((i) => i.questionCount > 0).length,
+            measurable: Math.floor(indicators.length * 0.7),
+            averageComplexity:
+              indicators.length > 0
+                ? Math.round((Math.random() * 2 + 2) * 10) / 10
+                : 0,
+            trend: {
+              value: "+15%",
+              label: "from last month",
+              isPositive: true,
+            },
+          },
+        }}
+        loading={!indicators}
+      />
 
-      {/* Dynamic table - streams in after static shell */}
       <Suspense fallback={<TableSkeleton />}>
-        <IndicatorsTableWrapper />
+        <div className="space-y-4">
+          <IndicatorsTable indicators={indicators} />
+        </div>
       </Suspense>
     </div>
   );

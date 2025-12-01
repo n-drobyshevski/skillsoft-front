@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
-import { StatsCard } from "@/components/ui/stats-card";
+import FlexibleStatsCards from "@/components/data-display/FlexibleStatsCards";
 import {
   ArrowRight,
   BarChart3,
@@ -254,7 +254,6 @@ export default function DashboardContent({
     : 0;
 
   const activeTemplates = testTemplates.filter(t => t.isActive);
-  const categoryCount = Object.keys(stats.competenciesByCategory).length;
 
   return (
     <div className="flex flex-1 flex-col gap-6 sm:gap-8 p-4 sm:p-6 lg:p-8 max-w-[1600px] mx-auto w-full">
@@ -275,17 +274,17 @@ export default function DashboardContent({
           </p>
         </div>
         {/* Action buttons - stack on mobile, row on larger screens */}
-        <div className="flex flex-col xs:flex-row items-stretch xs:items-center gap-2 sm:gap-3">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
           {isEditor && (
-            <Link href="/hr/competencies/new" className="flex-1 xs:flex-initial">
-              <Button variant="outline" size="default" className="w-full xs:w-auto gap-2 min-h-11">
+            <Link href="/hr/competencies/new" className="w-full sm:w-auto">
+              <Button variant="outline" size="default" className="w-full sm:w-auto gap-2 min-h-11 justify-center">
                 <Plus className="w-4 h-4" />
-                <span className="sm:inline">Add Competency</span>
+                <span>Add Competency</span>
               </Button>
             </Link>
           )}
-          <Link href="/test-templates" className="flex-1 xs:flex-initial">
-            <Button size="default" className="w-full xs:w-auto gap-2 min-h-11">
+          <Link href="/test-templates" className="w-full sm:w-auto">
+            <Button size="default" className="w-full sm:w-auto gap-2 min-h-11 justify-center">
               <Play className="w-4 h-4" />
               <span>Take Assessment</span>
             </Button>
@@ -294,58 +293,20 @@ export default function DashboardContent({
       </motion.header>
 
       {/* ===== BENTO GRID - Stats Cards ===== */}
-      <motion.div
-        {...motionProps}
-        variants={staggerContainer}
-        className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4"
-      >
-        <motion.div variants={scaleIn}>
-          <StatsCard
-            title="Competencies"
-            value={stats.totalCompetencies}
-            icon={Target}
-            variant="primary"
-            href="/hr/competencies"
-            description={`${categoryCount} categories`}
-            size="lg"
-          />
-        </motion.div>
-
-        <motion.div variants={scaleIn}>
-          <StatsCard
-            title="Behavioral Indicators"
-            value={stats.totalBehavioralIndicators}
-            icon={Brain}
-            variant="blue"
-            href="/hr/behavioral-indicators"
-            description={`~${stats.averageIndicatorsPerCompetency.toFixed(1)} per competency`}
-            size="lg"
-          />
-        </motion.div>
-
-        <motion.div variants={scaleIn}>
-          <StatsCard
-            title="Assessment Questions"
-            value={stats.totalAssessmentQuestions}
-            icon={ClipboardList}
-            variant="green"
-            href="/hr/assessment-questions"
-            size="lg"
-          />
-        </motion.div>
-
-        <motion.div variants={scaleIn}>
-          <StatsCard
-            title="Test Templates"
-            value={testTemplates.length}
-            icon={FileText}
-            variant="purple"
-            href="/test-templates"
-            description={`${activeTemplates.length} active`}
-            size="lg"
-          />
-        </motion.div>
-      </motion.div>
+      <FlexibleStatsCards
+        data={{
+          type: "dashboard",
+          stats: {
+            totalCompetencies: stats.totalCompetencies,
+            totalBehavioralIndicators: stats.totalBehavioralIndicators,
+            totalAssessmentQuestions: stats.totalAssessmentQuestions,
+            totalTestTemplates: testTemplates.length,
+            activeTestTemplates: activeTemplates.length,
+            competenciesByCategory: stats.competenciesByCategory,
+            averageIndicatorsPerCompetency: stats.averageIndicatorsPerCompetency,
+          }
+        }}
+      />
 
       {/* ===== MAIN CONTENT GRID ===== */}
       <div className="grid gap-4 sm:gap-6 lg:grid-cols-12">

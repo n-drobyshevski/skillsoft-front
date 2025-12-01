@@ -232,54 +232,43 @@ export function LensProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const [userRoleState, setUserRoleState] = useState<UserRole>(UserRole.USER);
-  const [isHydrated, setIsHydrated] = useState(false);
+  const isMountedRef = useRef(false);
+  // Track if user had a stored lens preference (to know if we should auto-set default)
+  const hadStoredLensRef = useRef<boolean | null>(null); // null = not yet checked
   // Track if we've already applied the role-based default
   const appliedRoleDefaultRef = useRef(false);
-  // Store the initial lens value from localStorage to avoid race conditions
-  const storedLensRef = useRef<LensType | null>(null);
   
-  // Initialize lens with "user" for SSR, will be corrected on hydration
-  const [activeLens, setActiveLens] = useState<LensType>("user");
-
-  // Hydration effect - runs once on mount to sync with localStorage
-  // This pattern ensures proper SSR hydration without mismatches
-  useEffect(() => {
+  // Initialize lens from localStorage with lazy initializer (avoids setState in effect)
+  const [activeLens, setActiveLens] = useState<LensType>(() => {
+    if (typeof window === "undefined") return "user";
     const storedLens = localStorage.getItem(LENS_STORAGE_KEY) as LensType | null;
-    storedLensRef.current = storedLens;
-    
     if (storedLens) {
-      // Validate stored lens is still valid (for UserRole.USER initially)
-      // Full validation happens when userRole is set via setUserRole
-      const validLenses: LensType[] = ["user", "editor", "admin"];
-      if (validLenses.includes(storedLens)) {
-        setActiveLens(storedLens);
+      const availableLenses = getAvailableLenses(UserRole.USER);
+      if (availableLenses.includes(storedLens)) {
+        return storedLens;
       }
     }
-    setIsHydrated(true);
+    return "user";
+  });
+
+  // Track mount state and check stored lens preference
+  useEffect(() => {
+    isMountedRef.current = true;
+    // Check if there was a stored lens preference
+    const storedLens = localStorage.getItem(LENS_STORAGE_KEY) as LensType | null;
+    hadStoredLensRef.current = !!storedLens;
   }, []);
 
   // Wrapper for setUserRole that also handles auto-selecting the role-appropriate default lens
   const setUserRole = useCallback((role: UserRole) => {
     setUserRoleState(role);
     
-    // Check if stored lens is valid for the new role
-    const availableLenses = getAvailableLenses(role);
-    const storedLens = storedLensRef.current;
-    
-    // If user had a stored lens AND it's valid for their role, keep it
-    if (storedLens && availableLenses.includes(storedLens)) {
-      // Stored lens is valid - ensure it's applied
-      setActiveLens(storedLens);
-      return;
-    }
-    
-    // Auto-select role-appropriate default lens when:
-    // 1. No stored lens preference exists, OR
-    // 2. Stored lens is not available for this role
-    // Only applies once per session
+    // Auto-select role-appropriate default lens when role is first set
+    // Only applies if user didn't have a stored lens preference
     if (
+      hadStoredLensRef.current === false && // Only if no stored preference (and checked)
       !appliedRoleDefaultRef.current &&
-      role !== UserRole.USER // Only auto-set for elevated roles
+      role !== UserRole.USER // Only trigger when role is upgraded from default
     ) {
       appliedRoleDefaultRef.current = true;
       const defaultLens = getDefaultLens(role);
@@ -296,14 +285,12 @@ export function LensProvider({ children }: { children: ReactNode }) {
     return getDefaultLens(userRoleState);
   }, [userRoleState, activeLens]);
 
-  // Persist lens selection (only after hydration to avoid SSR issues)
+  // Persist lens selection (only after mount to avoid SSR issues)
   useEffect(() => {
-    if (isHydrated) {
+    if (isMountedRef.current) {
       localStorage.setItem(LENS_STORAGE_KEY, effectiveLens);
-      // Also update the ref so role changes have the latest value
-      storedLensRef.current = effectiveLens;
     }
-  }, [effectiveLens, isHydrated]);
+  }, [effectiveLens]);
 
   const setLens = useCallback((lens: LensType) => {
     const availableLenses = getAvailableLenses(userRoleState);
@@ -321,14 +308,14 @@ export function LensProvider({ children }: { children: ReactNode }) {
       );
       
       // Redirect to appropriate fallback page if current route is inaccessible
-      if (!isRouteAccessible && isHydrated) {
+      if (!isRouteAccessible && isMountedRef.current) {
         // Personal view -> Profile page (or dashboard as fallback)
         // Content/Admin view -> Dashboard
         const fallbackRoute = lens === "user" ? "/dashboard" : "/dashboard";
         router.push(fallbackRoute);
       }
     }
-  }, [userRoleState, pathname, router, isHydrated]);
+  }, [userRoleState, pathname, router]);
 
   const lensConfig = getLensConfig(effectiveLens);
   const availableLenses = getAvailableLenses(userRoleState);
@@ -357,7 +344,7 @@ export function LensProvider({ children }: { children: ReactNode }) {
   return (
     <LensContext.Provider
       value={{
-        activeLens: effectiveLens,
+        activeLens,
         lensConfig,
         setLens,
         isRouteVisible,

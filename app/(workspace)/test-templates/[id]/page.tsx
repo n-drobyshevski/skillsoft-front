@@ -157,28 +157,28 @@ export default async function TestDetailPage({ params }: TestDetailPageProps) {
               })()}
             </div>
           </CardHeader>
-          <CardContent className="space-y-6">
-            {/* Key Stats */}
-            <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-              <div className="flex flex-col items-center p-4 rounded-lg bg-muted/50">
-                <Clock className="h-6 w-6 mb-2 text-primary" />
-                <span className="text-sm text-muted-foreground">Время</span>
-                <span className="font-semibold">{formatDuration(template.timeLimitMinutes)}</span>
+          <CardContent className="space-y-4 sm:space-y-6">
+            {/* Key Stats - Mobile optimized grid */}
+            <div className="grid grid-cols-2 gap-2 sm:gap-4 sm:grid-cols-4">
+              <div className="flex flex-col items-center p-3 sm:p-4 rounded-lg bg-muted/50 min-h-[88px] sm:min-h-0 touch-manipulation active:scale-[0.98] transition-transform">
+                <Clock className="h-5 w-5 sm:h-6 sm:w-6 mb-1.5 sm:mb-2 text-primary" />
+                <span className="text-xs sm:text-sm text-muted-foreground">Время</span>
+                <span className="font-semibold text-sm sm:text-base text-center">{formatDuration(template.timeLimitMinutes)}</span>
               </div>
-              <div className="flex flex-col items-center p-4 rounded-lg bg-muted/50">
-                <Target className="h-6 w-6 mb-2 text-primary" />
-                <span className="text-sm text-muted-foreground">Проходной</span>
-                <span className="font-semibold">{template.passingScore}%</span>
+              <div className="flex flex-col items-center p-3 sm:p-4 rounded-lg bg-muted/50 min-h-[88px] sm:min-h-0 touch-manipulation active:scale-[0.98] transition-transform">
+                <Target className="h-5 w-5 sm:h-6 sm:w-6 mb-1.5 sm:mb-2 text-primary" />
+                <span className="text-xs sm:text-sm text-muted-foreground">Проходной</span>
+                <span className="font-semibold text-sm sm:text-base">{template.passingScore}%</span>
               </div>
-              <div className="flex flex-col items-center p-4 rounded-lg bg-muted/50">
-                <BookOpen className="h-6 w-6 mb-2 text-primary" />
-                <span className="text-sm text-muted-foreground">Компетенций</span>
-                <span className="font-semibold">{competencies.length}</span>
+              <div className="flex flex-col items-center p-3 sm:p-4 rounded-lg bg-muted/50 min-h-[88px] sm:min-h-0 touch-manipulation active:scale-[0.98] transition-transform">
+                <BookOpen className="h-5 w-5 sm:h-6 sm:w-6 mb-1.5 sm:mb-2 text-primary" />
+                <span className="text-xs sm:text-sm text-muted-foreground">Компетенций</span>
+                <span className="font-semibold text-sm sm:text-base">{competencies.length}</span>
               </div>
-              <div className="flex flex-col items-center p-4 rounded-lg bg-muted/50">
-                <CheckCircle2 className="h-6 w-6 mb-2 text-primary" />
-                <span className="text-sm text-muted-foreground">Вопросов/индикатор</span>
-                <span className="font-semibold">{template.questionsPerIndicator}</span>
+              <div className="flex flex-col items-center p-3 sm:p-4 rounded-lg bg-muted/50 min-h-[88px] sm:min-h-0 touch-manipulation active:scale-[0.98] transition-transform">
+                <CheckCircle2 className="h-5 w-5 sm:h-6 sm:w-6 mb-1.5 sm:mb-2 text-primary" />
+                <span className="text-xs sm:text-sm text-muted-foreground text-center">Вопр/инд</span>
+                <span className="font-semibold text-sm sm:text-base">{template.questionsPerIndicator}</span>
               </div>
             </div>
 
@@ -186,8 +186,8 @@ export default async function TestDetailPage({ params }: TestDetailPageProps) {
 
             {/* Test Settings */}
             <div>
-              <h4 className="font-medium mb-3">Настройки прохождения</h4>
-              <div className="grid gap-2 sm:grid-cols-2">
+              <h4 className="font-medium mb-2 sm:mb-3 text-sm sm:text-base">Настройки прохождения</h4>
+              <div className="grid gap-1.5 sm:gap-2 sm:grid-cols-2">
                 <SettingItem
                   icon={Shuffle}
                   label="Перемешивание вопросов"
@@ -274,13 +274,13 @@ interface SettingItemProps {
 
 function SettingItem({ icon: Icon, label, enabled }: SettingItemProps) {
   return (
-    <div className="flex items-center gap-2 p-2 rounded-lg bg-muted/30">
+    <div className="flex items-center gap-2 p-2.5 sm:p-2 rounded-lg bg-muted/30 min-h-11 touch-manipulation">
       {enabled ? (
-        <CheckCircle2 className="h-4 w-4 text-green-600 shrink-0" />
+        <CheckCircle2 className="h-4 w-4 sm:h-4 sm:w-4 text-green-600 shrink-0" />
       ) : (
-        <XCircle className="h-4 w-4 text-muted-foreground shrink-0" />
+        <XCircle className="h-4 w-4 sm:h-4 sm:w-4 text-muted-foreground shrink-0" />
       )}
-      <span className="text-sm">{label}</span>
+      <span className="text-xs sm:text-sm">{label}</span>
     </div>
   );
 }

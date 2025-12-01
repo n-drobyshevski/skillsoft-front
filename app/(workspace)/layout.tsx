@@ -13,53 +13,40 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 /**
  * Sidebar skeleton shown while auth loads
- * Matches the actual AppSidebar structure with proper full-height styling
+ * Provides instant visual feedback with the same layout structure
  */
 function SidebarSkeleton() {
   return (
-    <div className="flex min-h-screen w-60 shrink-0 flex-col border-r bg-sidebar">
-      {/* Header skeleton - matches SidebarHeader with team logo */}
-      <div className="flex h-14 shrink-0 items-center gap-2 border-b px-4">
+    <div className="flex h-full w-60 flex-col border-r bg-sidebar">
+      {/* Header skeleton */}
+      <div className="flex h-14 items-center gap-2 border-b px-4">
         <Skeleton className="h-8 w-8 rounded-lg" />
-        <div className="flex flex-col gap-1">
-          <Skeleton className="h-4 w-20" />
-          <Skeleton className="h-3 w-16" />
-        </div>
+        <Skeleton className="h-5 w-24" />
       </div>
       
-      {/* Nav items skeleton - matches SidebarContent */}
-      <div className="flex flex-1 flex-col gap-2 overflow-hidden p-4">
-        {/* Platform section */}
+      {/* Nav items skeleton */}
+      <div className="flex-1 space-y-4 p-4">
         <div className="space-y-2">
-          <Skeleton className="h-3 w-16" />
+          <Skeleton className="h-4 w-16" />
           <Skeleton className="h-9 w-full rounded-lg" />
           <Skeleton className="h-9 w-full rounded-lg" />
         </div>
-        
-        {/* Library section */}
-        <div className="mt-4 space-y-2">
-          <Skeleton className="h-3 w-20" />
+        <div className="space-y-2">
+          <Skeleton className="h-4 w-20" />
           <Skeleton className="h-9 w-full rounded-lg" />
           <Skeleton className="h-9 w-full rounded-lg" />
-          <Skeleton className="h-9 w-full rounded-lg" />
-        </div>
-        
-        {/* Tools section */}
-        <div className="mt-4 space-y-2">
-          <Skeleton className="h-3 w-16" />
           <Skeleton className="h-9 w-full rounded-lg" />
         </div>
       </div>
       
-      {/* Footer skeleton - matches SidebarFooter with user avatar */}
-      <div className="shrink-0 border-t p-4">
+      {/* Footer skeleton */}
+      <div className="border-t p-4">
         <div className="flex items-center gap-3">
-          <Skeleton className="h-9 w-9 shrink-0 rounded-full" />
-          <div className="flex flex-1 flex-col gap-1">
+          <Skeleton className="h-9 w-9 rounded-full" />
+          <div className="space-y-1">
             <Skeleton className="h-4 w-24" />
             <Skeleton className="h-3 w-32" />
           </div>
-          <Skeleton className="h-4 w-4" />
         </div>
       </div>
     </div>
@@ -68,20 +55,13 @@ function SidebarSkeleton() {
 
 /**
  * Header skeleton shown while auth loads
- * Matches SiteHeader structure
  */
 function HeaderSkeleton() {
   return (
-    <header className="flex h-14 shrink-0 items-center gap-2 border-b bg-background px-4">
-      {/* Sidebar trigger */}
-      <Skeleton className="h-8 w-8 rounded-md" />
-      {/* Separator */}
-      <div className="h-4 w-px bg-border" />
-      {/* Breadcrumb */}
+    <header className="flex h-14 shrink-0 items-center gap-2 border-b px-4">
+      <Skeleton className="h-8 w-8" />
       <Skeleton className="h-5 w-32" />
-      {/* Right side */}
       <div className="ml-auto flex items-center gap-2">
-        <Skeleton className="h-8 w-8 rounded-md" />
         <Skeleton className="h-8 w-8 rounded-full" />
       </div>
     </header>
@@ -90,25 +70,19 @@ function HeaderSkeleton() {
 
 /**
  * Content skeleton for initial page load
- * Matches the structure of most workspace pages
  */
 function ContentSkeleton() {
   return (
     <div className="flex flex-1 flex-col gap-4 p-4 pt-6 md:gap-6 md:p-6">
-      {/* Page Header */}
-      <div className="flex flex-col gap-3 sm:gap-4">
-        <div className="space-y-1 sm:space-y-2">
-          <Skeleton className="h-7 w-48 sm:h-8" />
-          <Skeleton className="h-4 w-80 sm:h-5" />
-        </div>
+      <div className="space-y-2">
+        <Skeleton className="h-8 w-48" />
+        <Skeleton className="h-4 w-80" />
       </div>
-      {/* Stats Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {Array.from({ length: 4 }).map((_, i) => (
-          <Skeleton key={i} className="h-[110px] rounded-xl" />
+          <Skeleton key={i} className="h-28 rounded-xl" />
         ))}
       </div>
-      {/* Table area */}
       <Skeleton className="h-64 rounded-xl" />
     </div>
   );

@@ -30,12 +30,48 @@ export const viewport: Viewport = {
 };
 
 /**
+ * Loading fallback for authentication
+ * Shown while auth state is being resolved
+ */
+function AuthLoadingFallback() {
+	return (
+		<div className="flex min-h-screen items-center justify-center">
+			<div className="animate-pulse text-muted-foreground">Loading...</div>
+		</div>
+	);
+}
+
+/**
+ * Inner layout content that may access auth state
+ * Wrapped in Suspense for Next.js 16 cacheComponents compatibility
+ */
+async function LayoutContent({ children }: { children: React.ReactNode }) {
+	return (
+		<LayoutProvider>
+			{children}
+			<Toaster richColors />
+		</LayoutProvider>
+	);
+}
+
+const clerkAppearance = {
+	baseTheme: shadcn,
+	layout: {
+		socialButtonsVariant: "blockButton" as const,
+		socialButtonsPlacement: "top" as const,
+	}
+};
+
+/**
  * Root Layout
  * 
  * Provides ClerkProvider for authentication and ThemeProvider via LayoutProvider.
  * Route-specific layouts handle sidebar/header:
  * - (auth)/ - Minimal layout for sign-in/sign-up
  * - (workspace)/ - Full dashboard layout with sidebar
+ * 
+ * Note: ClerkProvider uses dynamic prop for Next.js 16 cacheComponents compatibility.
+ * This tells Clerk to defer auth state resolution to runtime.
  */
 export default function RootLayout({
 	children,
@@ -43,32 +79,22 @@ export default function RootLayout({
 	children: React.ReactNode;
 }>) {
 	const publishableKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
-	
-	const appearance = {
-		baseTheme: shadcn,
-		layout: {
-			socialButtonsVariant: "blockButton" as const,
-			socialButtonsPlacement: "top" as const,
-		}
-	};
 
 	// Always return the HTML structure, conditionally wrap with ClerkProvider
-	// ClerkProvider must be inside <body> for Next.js 16 cacheComponents compatibility
-	// See: https://github.com/clerk/javascript/pull/7119
 	if (publishableKey && publishableKey.trim() !== '') {
 		return (
-			<html lang="en" suppressHydrationWarning className="mobile-container">
-				<body className="mobile-container" suppressHydrationWarning>
-					<Suspense fallback={null}>
-						<ClerkProvider appearance={appearance}>
-							<LayoutProvider>
-								{children}
-								<Toaster richColors />
-							</LayoutProvider>
-						</ClerkProvider>
-					</Suspense>
-				</body>
-			</html>
+			<ClerkProvider 
+				appearance={clerkAppearance}
+				dynamic
+			>
+				<html lang="en" suppressHydrationWarning className="mobile-container">
+					<body className="mobile-container" suppressHydrationWarning>
+						<Suspense fallback={<AuthLoadingFallback />}>
+							<LayoutContent>{children}</LayoutContent>
+						</Suspense>
+					</body>
+				</html>
+			</ClerkProvider>
 		);
 	}
 

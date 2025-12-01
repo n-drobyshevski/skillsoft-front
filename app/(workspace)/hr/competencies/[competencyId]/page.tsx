@@ -28,7 +28,7 @@ import { ProficiencyLevel } from "@/types/domain";
 import { levelToColor, approvalStatusToColor } from "@/lib/ui-utils";
 
 interface CompetencyDetailPageProps {
-	params: Promise<{ competencyId: string }>;
+	params: { competencyId: string };
 }
 
 async function getCompetencyData(competencyId: string) {
@@ -66,18 +66,18 @@ export default async function CompetencyDetailPage({
 	return (
 		<EntityDetailLayout>
 			<CompetencyDetailClient competency={competency}>
-				<div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-				<div className="lg:col-span-2 space-y-4">
+				<div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+				<div className="lg:col-span-2 space-y-6">
                     <Card className="border-none shadow-sm bg-muted/30">
-                        <CardHeader className="p-4 pb-2">
-                            <CardTitle className="text-sm font-medium flex items-center gap-2">
-                                <div className="p-1 rounded-md bg-emerald-100 dark:bg-emerald-900/30">
-                                    <FilePen className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
+                        <CardHeader className="pb-4">
+                            <CardTitle className="text-base font-medium flex items-center gap-2.5">
+                                <div className="p-1.5 rounded-lg bg-emerald-100 dark:bg-emerald-900/30">
+                                    <FilePen className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
                                 </div>
                                 Description
                             </CardTitle>
                         </CardHeader>
-                        <CardContent className="p-4 pt-0">
+                        <CardContent className="pt-0">
                             <p className="text-sm text-muted-foreground leading-relaxed">
                                 {competency.description ||
                                     "No description available for this competency."}
@@ -105,49 +105,50 @@ export default async function CompetencyDetailPage({
                                 </TabsTrigger>
                             </TabsList>
 
-                            <TabsContent value="indicators" className="p-4 space-y-3">
+                            <TabsContent value="indicators" className="p-6 space-y-4">
                                 {competency.behavioralIndicators &&
                                 competency.behavioralIndicators.length > 0 ? (
                                     <>
                                         {/* Header with count and add button */}
-                                        <div className="flex items-center justify-between pb-2 border-b border-border/40">
-                                            <div className="flex items-center gap-1.5">
-                                                <h4 className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                                                    Indicators
+                                        <div className="flex items-center justify-between mb-4 pb-3 border-b border-border/50">
+                                            <div className="flex items-center gap-2">
+                                                <h4 className="text-sm font-medium text-muted-foreground">
+                                                    Behavioral Indicators
                                                 </h4>
-                                                <Badge variant="secondary" className="text-xs h-5 px-1.5">
+                                                <Badge variant="secondary" className="text-xs">
                                                     {competency.behavioralIndicators.length}
                                                 </Badge>
                                             </div>
-                                            <Button asChild variant="ghost" size="sm" className="h-7 text-xs">
-                                                <Link href={`/hr/behavioral-indicators/new?competencyId=${competency.id}`}>
-                                                    <Plus className="mr-1.5 h-3 w-3" />
-                                                    Add
+                                            <Button asChild variant="outline" size="sm">
+                                                <Link href={`/behavioral-indicators/new?competencyId=${competency.id}`}>
+                                                    <Plus className="mr-2 h-4 w-4" />
+                                                    Add Indicator
                                                 </Link>
                                             </Button>
                                         </div>
                                         
                                         {/* Indicators list */}
-                                        <div className="space-y-1.5">	
+                                        <div className="space-y-2">	
                                             {competency.behavioralIndicators.map((indicator) => (
                                                 <IndicatorCard key={indicator.id} indicator={indicator} />
                                             ))}
                                         </div>
                                     </>
                                 ) : (
-                                    <div className="text-center py-6 sm:py-8">
-                                        <div className="mx-auto w-10 h-10 sm:w-12 sm:h-12 bg-muted rounded-full flex items-center justify-center mb-3">
-                                            <Target className="h-5 w-5 sm:h-6 sm:w-6 text-muted-foreground" />
+                                    <div className="text-center py-8 sm:py-12">
+                                        <div className="mx-auto w-12 h-12 sm:w-16 sm:h-16 bg-muted rounded-full flex items-center justify-center mb-3 sm:mb-4">
+                                            <Target className="h-6 w-6 sm:h-8 sm:w-8 text-muted-foreground" />
                                         </div>
-                                        <h3 className="text-sm sm:text-base font-medium text-foreground mb-1">
+                                        <h3 className="text-base sm:text-lg font-medium text-foreground mb-2">
                                             No Behavioral Indicators
                                         </h3>
-                                        <p className="text-xs sm:text-sm text-muted-foreground max-w-sm mx-auto mb-4 px-4">
-                                            Add behavioral indicators to define what success looks like.
+                                        <p className="text-sm sm:text-base text-muted-foreground max-w-md mx-auto mb-4 sm:mb-6 px-4 leading-relaxed">
+                                            This competency doesn&apos;t have any behavioral indicators yet.
+                                            Add some to start defining what success looks like.
                                         </p>
-                                        <Button variant="outline" size="sm" asChild>
-                                            <Link href={`/hr/behavioral-indicators/new?competencyId=${competency.id}`}>
-                                                <Target className="h-3.5 w-3.5 mr-1.5" />
+                                        <Button variant="outline" asChild className="touch-target">
+                                            <Link href={`/behavioral-indicators/new?competencyId=${competency.id}`}>
+                                                <Target className="h-4 w-4 mr-2" />
                                                 Add Indicator
                                             </Link>
                                         </Button>
@@ -155,27 +156,28 @@ export default async function CompetencyDetailPage({
                                 )}
                             </TabsContent>
 
-							<TabsContent value="questions" className="p-4 space-y-3">
+							<TabsContent value="questions" className="p-6 space-y-4">
 								<Suspense fallback={<QuestionsListSkeleton />}>
 									{questions.length > 0 ? (
 										<QuestionsList questions={questions} />
 									) : (
-										<div className="text-center py-6 sm:py-8">
-											<div className="mx-auto w-10 h-10 sm:w-12 sm:h-12 bg-muted rounded-full flex items-center justify-center mb-3">
-												<FilePen className="h-5 w-5 sm:h-6 sm:w-6 text-muted-foreground" />
+										<div className="text-center py-8 sm:py-12">
+											<div className="mx-auto w-12 h-12 sm:w-16 sm:h-16 bg-muted rounded-full flex items-center justify-center mb-3 sm:mb-4">
+												<FilePen className="h-6 w-6 sm:h-8 sm:w-8 text-muted-foreground" />
 											</div>
-											<h3 className="text-sm sm:text-base font-medium text-foreground mb-1">
+											<h3 className="text-base sm:text-lg font-medium text-foreground mb-2">
 												No Assessment Questions
 											</h3>
-											<p className="text-xs sm:text-sm text-muted-foreground max-w-sm mx-auto mb-4 px-4">
+											<p className="text-sm sm:text-base text-muted-foreground max-w-md mx-auto mb-4 sm:mb-6 px-4 leading-relaxed">
+												This competency doesn&apos;t have any assessment questions yet.
 												Questions help evaluate behavioral indicators.
 											</p>
-												<Button variant="outline" size="sm" asChild>
-													<Link href="/hr/assessment-questions">
-														<FilePen className="h-3.5 w-3.5 mr-1.5" />
-														Browse Questions
-													</Link>
-												</Button>
+											<Button variant="outline" asChild className="touch-target">
+												<Link href="/assessment-questions">
+													<FilePen className="h-4 w-4 mr-2" />
+													Browse Questions
+												</Link>
+											</Button>
 										</div>
 									)}
 								</Suspense>
@@ -185,61 +187,61 @@ export default async function CompetencyDetailPage({
 				</div>
 
 				{/* Details Card */}
-				<div className="space-y-4">
+				<div className="space-y-6">
 					<Card className="border-none shadow-sm bg-muted/30">
-						<CardHeader className="p-4 pb-2">
-							<CardTitle className="text-sm font-medium flex items-center gap-2 text-foreground">
-								<div className="p-1 rounded-md bg-blue-100 dark:bg-blue-900/30">
-									<Info className="w-3 h-3 text-blue-600 dark:text-blue-400" />
+						<CardHeader className="pb-4">
+							<CardTitle className="text-base font-medium flex items-center gap-2.5 text-foreground">
+								<div className="p-1.5 rounded-lg bg-blue-100 dark:bg-blue-900/30">
+									<Info className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
 								</div>
 								Details
 							</CardTitle>
 						</CardHeader>
-						<CardContent className="p-4 pt-0 space-y-0">
+						<CardContent className="pt-0 space-y-4">
 							{/* Category */}
-							<div className="flex items-center justify-between py-1.5 border-b border-border/40">
-								<span className="text-xs text-muted-foreground">Category</span>
-								<span className="text-xs font-medium text-foreground">{competency.category}</span>
+							<div className="flex items-center justify-between py-2 border-b border-border/50 last:border-0">
+								<span className="text-sm text-muted-foreground font-medium">Category</span>
+								<span className="text-sm font-medium text-foreground">{competency.category}</span>
 							</div>
 							
 							{/* Level */}
-							<div className="flex items-center justify-between py-1.5 border-b border-border/40">
-								<span className="text-xs text-muted-foreground">Level</span>
+							<div className="flex items-center justify-between py-2 border-b border-border/50 last:border-0">
+								<span className="text-sm text-muted-foreground font-medium">Proficiency Level</span>
 								<Badge 
 									variant="secondary" 
-									className={`${levelToColor(competency.level)} text-xs h-5 px-1.5`}
+									className={`${levelToColor(competency.level)} font-medium text-xs px-2.5 py-1`}
 								>
 									{competency.level}
 								</Badge>
 							</div>
 							
 							{/* Approval Status */}
-							<div className="flex items-center justify-between py-1.5 border-b border-border/40">
-								<span className="text-xs text-muted-foreground">Approval</span>
+							<div className="flex items-center justify-between py-2 border-b border-border/50 last:border-0">
+								<span className="text-sm text-muted-foreground font-medium">Approval Status</span>
 								<Badge 
 									variant="secondary" 
-									className={`${approvalStatusToColor(competency.approvalStatus)} text-xs h-5 px-1.5`}
+									className={`${approvalStatusToColor(competency.approvalStatus)} font-medium text-xs px-2.5 py-1`}
 								>
 									{competency.approvalStatus.replace("_", " ")}
 								</Badge>
 							</div>
 							
 							{/* Status */}
-							<div className="flex items-center justify-between py-1.5 border-b border-border/40">
-								<span className="text-xs text-muted-foreground">Status</span>
+							<div className="flex items-center justify-between py-2 border-b border-border/50 last:border-0">
+								<span className="text-sm text-muted-foreground font-medium">Status</span>
 								<Badge 
 									variant={competency.isActive ? "default" : "secondary"}
-									className="text-xs h-5 px-1.5"
+									className="font-medium text-xs px-2.5 py-1"
 								>
-									<div className={`w-1.5 h-1.5 rounded-full mr-1 ${competency.isActive ? 'bg-green-500' : 'bg-gray-400'}`} />
+									<div className={`w-1.5 h-1.5 rounded-full mr-1.5 ${competency.isActive ? 'bg-green-500' : 'bg-gray-400'}`} />
 									{competency.isActive ? "Active" : "Inactive"}
 								</Badge>
 							</div>
 							
 							{/* Version */}
-							<div className="flex items-center justify-between py-1.5">
-								<span className="text-xs text-muted-foreground">Version</span>
-								<span className="font-mono text-xs text-foreground bg-muted px-1.5 py-0.5 rounded">
+							<div className="flex items-center justify-between py-2">
+								<span className="text-sm text-muted-foreground font-medium">Version</span>
+								<span className="font-mono font-medium text-foreground bg-muted px-2 py-0.5 rounded text-xs">
 									v{competency.version}
 								</span>
 							</div>
@@ -249,16 +251,16 @@ export default async function CompetencyDetailPage({
 					{/* Weight Distribution Chart - Only show if there are indicators */}
 					{competency.behavioralIndicators && competency.behavioralIndicators.length > 0 && (
 						<Card className="border-none shadow-sm bg-muted/30">
-							<CardHeader className="p-4 pb-2">
-								<CardTitle className="text-sm font-medium flex items-center gap-2 text-foreground">
-									<div className="p-1 rounded-md bg-purple-100 dark:bg-purple-900/30">
-										<BarChart3 className="w-3 h-3 text-purple-600 dark:text-purple-400" />
+							<CardHeader className="pb-3">
+								<CardTitle className="text-base font-medium flex items-center gap-2.5 text-foreground">
+									<div className="p-1.5 rounded-lg bg-purple-100 dark:bg-purple-900/30">
+										<BarChart3 className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" />
 									</div>
 									Weight Distribution
 								</CardTitle>
 							</CardHeader>
-							<CardContent className="p-4 pt-0">
-								<div className="space-y-2.5">
+							<CardContent className="pt-0">
+								<div className="space-y-3.5">
 									{competency.behavioralIndicators.map((indicator, index) => {
 										const totalWeight = competency.behavioralIndicators?.reduce((sum, i) => sum + i.weight, 0) || 1;
 										const percentage = (indicator.weight / totalWeight) * 100;
@@ -268,27 +270,33 @@ export default async function CompetencyDetailPage({
 										const color = `hsl(${hue}, 65%, 55%)`;
 										
 										return (
-											<div key={indicator.id} className="space-y-1.5 group">
-												<div className="flex justify-between items-center gap-2">
-													<div className="flex items-center gap-2 flex-1 min-w-0">
+											<div key={indicator.id} className="space-y-2.5 group">
+												<div className="flex justify-between items-start gap-3">
+													<div className="flex items-center gap-2.5 flex-1 min-w-0">
 														<div 
-															className="w-2 h-2 rounded-full shrink-0"
+															className="w-2.5 h-2.5 rounded-full shrink-0 ring-1 ring-background/50"
 															style={{ backgroundColor: color }}
 														/>
-														<span className="text-xs truncate">
-															{indicator.title}
-														</span>
+														<div className="flex-1 min-w-0">
+															<div className="text-sm font-medium truncate group-hover:text-foreground transition-colors leading-tight">
+																{indicator.title}
+															</div>
+															<div className="text-xs text-muted-foreground mt-0.5 font-medium">
+																Weight: {indicator.weight}
+															</div>
+														</div>
 													</div>
-													<span className="text-xs text-muted-foreground font-mono shrink-0">
-														{percentage.toFixed(0)}%
-													</span>
+													<Badge variant="secondary" className="text-xs whitespace-nowrap font-medium px-2 py-1 bg-muted">
+														{percentage.toFixed(1)}%
+													</Badge>
 												</div>
-												<div className="w-full bg-muted/60 rounded-full h-1.5 overflow-hidden">
+												<div className="w-full bg-muted/60 rounded-full h-2 overflow-hidden group-hover:bg-muted transition-colors">
 													<div
-														className="h-full rounded-full transition-all duration-500"
+														className="h-full rounded-full transition-all duration-700 ease-out hover:brightness-110"
 														style={{
 															width: `${Math.max(percentage, 3)}%`,
 															backgroundColor: color,
+															boxShadow: `0 0 6px ${color}20`,
 														}}
 													/>
 												</div>
@@ -297,10 +305,10 @@ export default async function CompetencyDetailPage({
 									})}
 									
 									{/* Summary */}
-									<div className="pt-2 mt-2 border-t border-border/40">
-										<div className="flex justify-between text-xs text-muted-foreground">
-											<span>{competency.behavioralIndicators.length} indicators</span>
-											<span className="font-mono">Σ {(competency.behavioralIndicators.reduce((sum, i) => sum + i.weight, 0)).toFixed(2)}</span>
+									<div className="pt-3 mt-4 border-t border-border/60">
+										<div className="flex justify-between text-xs text-muted-foreground font-medium">
+											<span>Total indicators: {competency.behavioralIndicators.length}</span>
+											<span>Total weight: {(competency.behavioralIndicators.reduce((sum, i) => sum + i.weight, 0)).toFixed(3)}</span>
 										</div>
 									</div>
 								</div>
@@ -322,61 +330,82 @@ function IndicatorCard({
 	indicator: BehavioralIndicator;
 }) {
 	return (
-		<div className="group relative flex items-center gap-2.5 p-2.5 rounded-lg border border-border/40 bg-background/50 hover:bg-background hover:border-primary/30 transition-all duration-150">
-			{/* Color accent bar */}
-			<div className="w-1 h-6 bg-primary/20 group-hover:bg-primary/50 rounded-full shrink-0 transition-colors" />
-			
-			{/* Main content */}
-			<div className="flex-1 min-w-0 flex items-center gap-2">
-				<h3 className="text-sm font-medium text-foreground truncate group-hover:text-primary transition-colors">
-					{indicator.title}
-				</h3>
-				<Badge 
-					variant="secondary"
-					className={`text-[10px] h-4 px-1 shrink-0 ${
-						indicator.observabilityLevel === ProficiencyLevel.EXPERT ? 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300' : 
-						indicator.observabilityLevel === ProficiencyLevel.ADVANCED ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300' :
-						indicator.observabilityLevel === ProficiencyLevel.PROFICIENT ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300' : 
-						'bg-gray-100 dark:bg-gray-900/30 text-gray-700 dark:text-gray-300'
-					}`}
-				>
-					{indicator.observabilityLevel}
-				</Badge>
-			</div>
-			
-			{/* Right side: Weight + Actions */}
-			<div className="flex items-center gap-1.5 shrink-0">
-				<span className="text-[10px] font-mono text-muted-foreground bg-muted px-1.5 py-0.5 rounded">
-					{indicator.weight}
-				</span>
-				
-				{/* Action buttons */}
-				<div className="flex gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
-					<Button 
-						variant="ghost" 
-						size="icon" 
-						asChild 
-						className="h-5 w-5 hover:bg-primary/10"
-					>
-						<Link href={`/hr/behavioral-indicators/${indicator.id}`} title="View">
-							<svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-								<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-								<circle cx="12" cy="12" r="3"/>
-							</svg>
-						</Link>
-					</Button>
-					<Button 
-						variant="ghost" 
-						size="icon" 
-						asChild 
-						className="h-5 w-5 hover:bg-primary/10"
-					>
-						<Link href={`/hr/behavioral-indicators/${indicator.id}/edit`} title="Edit">
-							<Edit className="h-3 w-3" />
-						</Link>
-					</Button>
+		<Card className="group relative bg-background/50 border-border/50 hover:bg-background hover:border-primary/40 hover:shadow-sm transition-all duration-200 overflow-hidden">
+			<CardContent className="p-0">
+				{/* Main content area */}
+				<div className="flex items-center gap-3 p-4 min-h-[60px]">
+					{/* Status indicator dot */}
+					<div className="flex items-center gap-3 flex-1 min-w-0">
+						<div className="w-2 h-8 bg-primary/20 group-hover:bg-primary/60 rounded-full transition-colors duration-200 shrink-0" />
+						
+						{/* Content */}
+						<div className="flex-1 min-w-0 space-y-1">
+							{/* Title and level on same line */}
+							<div className="flex items-center gap-2 mb-1">
+								<h3 className="text-sm font-medium text-foreground line-clamp-1 group-hover:text-primary transition-colors">
+									{indicator.title}
+								</h3>
+								<Badge 
+									variant="secondary"
+									className={`text-xs px-1.5 py-0.5 font-medium shrink-0 ${
+										indicator.observabilityLevel === ProficiencyLevel.EXPERT ? 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300' : 
+										indicator.observabilityLevel === ProficiencyLevel.ADVANCED ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300' :
+										indicator.observabilityLevel === ProficiencyLevel.PROFICIENT ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300' : 
+										'bg-gray-100 dark:bg-gray-900/30 text-gray-700 dark:text-gray-300'
+									}`}
+								>
+									{indicator.observabilityLevel}
+								</Badge>
+							</div>
+							
+							{/* Description if exists */}
+							{indicator.description && (
+								<p className="text-xs text-muted-foreground line-clamp-1 leading-relaxed">
+									{indicator.description}
+								</p>
+							)}
+						</div>
+						
+						{/* Weight and actions on the right */}
+						<div className="flex items-center gap-2 shrink-0">
+							{/* Weight badge */}
+							<div className="text-xs font-mono text-muted-foreground bg-muted px-2 py-1 rounded-md">
+								{indicator.weight}
+							</div>
+							
+							{/* Action buttons - only visible on hover */}
+							<div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+								<Button 
+									variant="ghost" 
+									size="sm" 
+									asChild 
+									className="h-6 w-6 p-0 hover:bg-primary/10 hover:text-primary"
+								>
+									<Link href={`/behavioral-indicators/${indicator.id}`} title="View Details">
+										<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+											<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+											<circle cx="12" cy="12" r="3"/>
+										</svg>
+									</Link>
+								</Button>
+								<Button 
+									variant="ghost" 
+									size="sm" 
+									asChild 
+									className="h-6 w-6 p-0 hover:bg-primary/10 hover:text-primary"
+								>
+									<Link href={`/behavioral-indicators/${indicator.id}/edit`} title="Edit">
+										<Edit className="h-3 w-3" />
+									</Link>
+								</Button>
+							</div>
+						</div>
+					</div>
 				</div>
-			</div>
-		</div>
+				
+				{/* Hover effect overlay */}
+				<div className="absolute inset-0 bg-linear-to-r from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none" />
+			</CardContent>
+		</Card>
 	);
 }

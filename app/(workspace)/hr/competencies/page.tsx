@@ -2,13 +2,12 @@ import React, { Suspense } from "react";
 import Link from "next/link";
 import { Metadata } from "next";
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
-import { getCompetenciesCached } from "@/services/api.cache";
-import FlexibleStatsCards from "@/components/data-display/FlexibleStatsCards";
-import PageHeader from "@/components/common/PageHeader";
-import CompetenciesTable from "./_components/CompetenciesTable";
-import TableSkeleton from "@/components/data-display/TableSkeleton";
-import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Competency,
+} from "@/types/domain";
+import {
+  Plus,
+} from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Competencies - SkillSoft",
@@ -18,72 +17,43 @@ export const metadata: Metadata = {
     description: "Manage and track competency definitions and assessments.",
   },
 };
+import { competenciesApi } from "@/services/api";
+import FlexibleStatsCards from "@/components/data-display/FlexibleStatsCards";
+import PageHeader from "@/components/common/PageHeader";
+import CompetenciesTable from "./_components/CompetenciesTable";
+import TableSkeleton from "@/components/data-display/TableSkeleton";
 
-// Stats cards skeleton for loading state
-function StatsCardsSkeleton() {
-  return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-      {Array.from({ length: 4 }).map((_, i) => (
-        <Skeleton key={i} className="h-32 w-full" />
-      ))}
-    </div>
-  );
+async function getCompetenciesData() {
+  try {
+    const competencies = await competenciesApi.getAllCompetencies();
+    if (!Array.isArray(competencies)) {
+      return { competencies: [], error: "Invalid data format from server." };
+    }
+    return { competencies, error: null };
+  } catch (error) {
+    console.error("Failed to fetch competencies:", error);
+    return { competencies: [], error: "Failed to load competencies." };
+  }
 }
 
-// Calculate average weight deterministically based on competency count
-function calculateAverageWeight(count: number): number {
-  if (count === 0) return 0;
-  // Use a deterministic calculation based on count
-  return Math.round((count % 30) + 20);
-}
+// Main component
+export default async function CompetenciesPage() {
+  const { competencies, error } = await getCompetenciesData();
 
-// Async component for stats - streams after initial render
-async function CompetencyStats() {
-  const competencies = await getCompetenciesCached();
-  const safeCompetencies = Array.isArray(competencies) ? competencies : [];
-  
-  return (
-    <FlexibleStatsCards
-      data={{
-        type: "competencies",
-        stats: {
-          total: safeCompetencies.length,
-          withAssessments: safeCompetencies.filter(c => c.behavioralIndicators && c.behavioralIndicators.length > 0).length,
-          averageWeight: calculateAverageWeight(safeCompetencies.length),
-          byLevel: {
-            advanced: safeCompetencies.filter(c => c.level === "ADVANCED").length,
-            expert: safeCompetencies.filter(c => c.level === "EXPERT").length
-          },
-          trend: {
-            value: "+12%",
-            label: "from last month",
-            isPositive: true
-          }
-        }
-      }}
-      loading={false}
-    />
-  );
-}
+  const handleStatsCardClick = (cardType: string) => {
+    // Handle stats card clicks for navigation or filtering
+    // This function will need to be moved to a client component if it needs to be interactive.
+    // For now, it's a placeholder on the server.
+  };
 
-// Async component for table - streams after initial render
-async function CompetenciesTableWrapper() {
-  const competencies = await getCompetenciesCached();
-  const safeCompetencies = Array.isArray(competencies) ? competencies : [];
-  return <CompetenciesTable competencies={safeCompetencies} />;
-}
-
-// Main component - Static shell rendered immediately
-export default function CompetenciesPage() {
   return (
     <div className="flex flex-1 flex-col gap-4 p-4 pt-6 md:gap-6 md:p-6">
-      {/* Static content - part of the static shell */}
       <PageHeader 
         title="Competencies"
         description="Manage and track competency definitions and assessments"
       >
         <div className="flex items-center gap-2">
-          <Link href="/hr/competencies/new">
+          <Link href="/competencies/new">
             <Button variant="outline">
               <Plus className="mr-2 h-4 w-4" />
               Create Competency
@@ -92,14 +62,31 @@ export default function CompetenciesPage() {
         </div>
       </PageHeader> 
       
-      {/* Dynamic stats - streams in after static shell */}
-      <Suspense fallback={<StatsCardsSkeleton />}>
-        <CompetencyStats />
-      </Suspense>
+      {/* Stats Cards */}
+      <FlexibleStatsCards
+        data={{
+          type: "competencies",
+          stats: {
+            total: competencies.length,
+            withAssessments: competencies.filter(c => c.behavioralIndicators && c.behavioralIndicators.length > 0).length,
+            averageWeight: competencies.length > 0 ? Math.round(Math.random() * 30 + 20) : 0,
+            byLevel: {
+              advanced: competencies.filter(c => c.level === "ADVANCED").length,
+              expert: competencies.filter(c => c.level === "EXPERT").length
+            },
+            trend: {
+              value: "+12%",
+              label: "from last month",
+              isPositive: true
+            }
+          }
+        }}
+        loading={!competencies} // Show loading skeleton if data is not yet available
+        // onCardClick={handleStatsCardClick} // This would need to be in a client component
+      />
 
-      {/* Dynamic table - streams in after static shell */}
       <Suspense fallback={<TableSkeleton />}>
-        <CompetenciesTableWrapper />
+        <CompetenciesTable competencies={competencies} />
       </Suspense>
     </div>
   );

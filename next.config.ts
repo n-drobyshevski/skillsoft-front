@@ -3,10 +3,10 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
 	// Enable React Compiler for automatic memoization (Next.js 16)
 	reactCompiler: true,
-	// Enable cacheComponents (Partial Prerendering) for Next.js 16
-	// ClerkProvider must be inside <body> for compatibility
+	// Temporarily disabled cacheComponents due to Clerk compatibility issues
+	// TODO: Re-enable when Clerk fully supports Next.js 16 cacheComponents
 	// See: https://github.com/clerk/javascript/pull/7119
-	cacheComponents: true,
+	cacheComponents: false,
 	turbopack: {
 		root: __dirname,
 	},

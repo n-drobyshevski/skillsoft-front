@@ -5,7 +5,6 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
 import {
   User as UserIcon,
   Mail,
@@ -23,10 +22,6 @@ import {
   Lock,
   CheckCircle2,
   AlertTriangle,
-  ExternalLink,
-  MoreHorizontal,
-  Copy,
-  ArrowUpRight,
 } from "lucide-react";
 import Link from "next/link";
 import {
@@ -39,13 +34,6 @@ import {
   UserRole,
 } from "@/types/user";
 import UserProfileClient from "./_components/UserProfileClient";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 
 interface UserProfilePageProps {
   params: Promise<{ userId: string }>;
@@ -59,32 +47,34 @@ function isClerkId(id: string): boolean {
   return id.startsWith('user_');
 }
 
-/**
- * User data fetcher - uses authenticated API calls
- */
 async function getUserData(userId: string): Promise<User | null> {
-  // Use authenticated API calls (usersApi handles auth headers)
-  if (isClerkId(userId)) {
-    return await usersApi.getUserByClerkId(userId);
+  try {
+    // Determine if this is a Clerk ID or a database UUID
+    if (isClerkId(userId)) {
+      return await usersApi.getUserByClerkId(userId);
+    }
+    return await usersApi.getUserById(userId);
+  } catch {
+    return null;
   }
-  return await usersApi.getUserById(userId);
 }
 
-// Format date helper - compact format
+// Format date helper
 function formatDate(dateString?: string | null): string {
-  if (!dateString) return "—";
+  if (!dateString) return "Never";
   const date = new Date(dateString);
   return date.toLocaleDateString("en-US", {
+    year: "numeric",
     month: "short",
     day: "numeric",
-    year: "numeric",
   });
 }
 
 function formatDateTime(dateString?: string | null): string {
-  if (!dateString) return "—";
+  if (!dateString) return "Never";
   const date = new Date(dateString);
   return date.toLocaleDateString("en-US", {
+    year: "numeric",
     month: "short",
     day: "numeric",
     hour: "2-digit",
@@ -92,49 +82,39 @@ function formatDateTime(dateString?: string | null): string {
   });
 }
 
-// Relative time format
-function formatRelativeTime(dateString?: string | null): string {
-  if (!dateString) return "Never";
-  const date = new Date(dateString);
-  const now = new Date();
-  const diffMs = now.getTime() - date.getTime();
-  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-  
-  if (diffDays === 0) return "Today";
-  if (diffDays === 1) return "Yesterday";
-  if (diffDays < 7) return `${diffDays} days ago`;
-  if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`;
-  if (diffDays < 365) return `${Math.floor(diffDays / 30)} months ago`;
-  return `${Math.floor(diffDays / 365)} years ago`;
-}
-
-// Compact info item for inline displays
-function InfoItem({ 
-  label, 
-  value, 
-  icon: Icon 
-}: { 
-  label: string; 
-  value: React.ReactNode; 
-  icon?: React.ElementType;
+// Info row component for consistent styling
+function InfoRow({
+  icon: Icon,
+  label,
+  value,
+  className = "",
+}: {
+  icon: React.ElementType;
+  label: string;
+  value: React.ReactNode;
+  className?: string;
 }) {
   return (
-    <div className="flex items-center gap-2 text-sm">
-      {Icon && <Icon className="h-3.5 w-3.5 text-muted-foreground shrink-0" />}
-      <span className="text-muted-foreground">{label}:</span>
-      <span className="font-medium">{value}</span>
+    <div className={`flex items-start gap-3 ${className}`}>
+      <div className="p-2 rounded-lg bg-muted/50 shrink-0">
+        <Icon className="h-4 w-4 text-muted-foreground" />
+      </div>
+      <div className="min-w-0 flex-1">
+        <p className="text-xs text-muted-foreground font-medium">{label}</p>
+        <p className="text-sm font-medium truncate">{value}</p>
+      </div>
     </div>
   );
 }
 
-// Status badge component - compact version
-function StatusBadge({ user, size = "default" }: { user: User; size?: "default" | "sm" }) {
+// Status badge component
+function StatusBadge({ user }: { user: User }) {
   const status = getUserStatus(user);
   const variantClasses = {
-    success: "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/50 dark:text-emerald-400 dark:border-emerald-800",
-    warning: "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/50 dark:text-amber-400 dark:border-amber-800",
-    destructive: "bg-red-50 text-red-700 border-red-200 dark:bg-red-950/50 dark:text-red-400 dark:border-red-800",
-    default: "bg-gray-50 text-gray-700 border-gray-200 dark:bg-gray-900 dark:text-gray-400 dark:border-gray-700",
+    success: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400",
+    warning: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400",
+    destructive: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400",
+    default: "bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-400",
   };
 
   const icons = {
@@ -145,45 +125,12 @@ function StatusBadge({ user, size = "default" }: { user: User; size?: "default" 
   };
 
   const StatusIcon = icons[status.label as keyof typeof icons] || Activity;
-  const sizeClasses = size === "sm" ? "text-xs px-1.5 py-0.5 gap-1" : "text-xs px-2 py-0.5 gap-1.5";
 
   return (
-    <span className={`inline-flex items-center font-medium border rounded-full ${sizeClasses} ${variantClasses[status.variant]}`}>
-      <StatusIcon className={size === "sm" ? "h-2.5 w-2.5" : "h-3 w-3"} />
+    <Badge className={`${variantClasses[status.variant]} gap-1.5 px-2.5 py-1`}>
+      <StatusIcon className="h-3 w-3" />
       {status.label}
-    </span>
-  );
-}
-
-// Stat card component
-function StatCard({ 
-  label, 
-  value, 
-  icon: Icon,
-  color = "blue"
-}: { 
-  label: string; 
-  value: string | number; 
-  icon: React.ElementType;
-  color?: "blue" | "emerald" | "purple" | "amber";
-}) {
-  const colorClasses = {
-    blue: "bg-blue-50 text-blue-600 dark:bg-blue-950/50 dark:text-blue-400",
-    emerald: "bg-emerald-50 text-emerald-600 dark:bg-emerald-950/50 dark:text-emerald-400",
-    purple: "bg-purple-50 text-purple-600 dark:bg-purple-950/50 dark:text-purple-400",
-    amber: "bg-amber-50 text-amber-600 dark:bg-amber-950/50 dark:text-amber-400",
-  };
-  
-  return (
-    <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
-      <div className={`p-2 rounded-lg ${colorClasses[color]}`}>
-        <Icon className="h-4 w-4" />
-      </div>
-      <div>
-        <p className="text-lg font-semibold">{value}</p>
-        <p className="text-xs text-muted-foreground">{label}</p>
-      </div>
-    </div>
+    </Badge>
   );
 }
 
@@ -199,333 +146,336 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
   const initials = getUserInitials(user);
 
   return (
-    <div className="flex flex-1 flex-col gap-5 p-4 md:p-6">
-      {/* Back Link */}
-      <Link 
-        href="/admin/users" 
-        className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors w-fit"
-      >
-        <ChevronLeft className="h-4 w-4" />
-        Back to Users
-      </Link>
+    <div className="flex flex-1 flex-col gap-4 p-4 pt-6 md:gap-6 md:p-6">
 
-      {/* Profile Header - Compact Modern Design */}
-      <div className="flex flex-col md:flex-row md:items-start gap-4 md:gap-6">
-        {/* Avatar with Status Indicator */}
-        <div className="relative shrink-0">
-          <Avatar className="h-16 w-16 md:h-20 md:w-20 border-2 border-border shadow-sm">
-            {user.imageUrl && <AvatarImage src={user.imageUrl} alt={fullName} />}
-            <AvatarFallback className="text-xl md:text-2xl font-semibold bg-linear-to-br from-primary/20 to-primary/5 text-primary">
-              {initials}
-            </AvatarFallback>
-          </Avatar>
-          <div className={`absolute bottom-0.5 right-0.5 h-4 w-4 rounded-full border-2 border-background ${
-            user.isActive && !user.banned ? 'bg-emerald-500' : 'bg-gray-400'
-          }`} />
-        </div>
+      {/* Compact Profile Header Card */}
+      <Card className="py-2">
+        <CardContent className="px-4 py-2 md:p-6">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+            {/* Avatar */}
+            <div className="relative shrink-0">
+              <Avatar className="h-14 w-14 md:h-16 md:w-16 border-2 border-muted">
+                {user.imageUrl && <AvatarImage src={user.imageUrl} alt={fullName} />}
+                <AvatarFallback className="text-lg md:text-xl font-semibold bg-primary/10 text-primary">
+                  {initials}
+                </AvatarFallback>
+              </Avatar>
+              {/* Online indicator */}
+              <div className="absolute bottom-0 right-0 h-3.5 w-3.5 rounded-full border-2 border-background bg-emerald-500" />
+            </div>
 
-        {/* User Info */}
-        <div className="flex-1 min-w-0 space-y-2">
-          {/* Name Row */}
-          <div className="flex flex-wrap items-center gap-2">
-            <h1 className="text-xl md:text-2xl font-semibold tracking-tight">{fullName}</h1>
-            <Badge variant="outline" className={`${getRoleBadgeColor(user.role)} text-xs font-medium`}>
-              {getRoleDisplayName(user.role)}
-            </Badge>
-            <StatusBadge user={user} />
-          </div>
-
-          {/* Contact Info */}
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
-            {user.email && (
-              <span className="flex items-center gap-1.5">
-                <Mail className="h-3.5 w-3.5" />
-                {user.email}
-              </span>
-            )}
-            {user.username && (
-              <span className="flex items-center gap-1.5">
-                <AtSign className="h-3.5 w-3.5" />
-                {user.username}
-              </span>
-            )}
-            <span className="flex items-center gap-1.5">
-              <Calendar className="h-3.5 w-3.5" />
-              Joined {formatRelativeTime(user.clerkCreatedAt || user.createdAt)}
-            </span>
-          </div>
-        </div>
-
-        {/* Actions */}
-        <div className="flex items-center gap-2 shrink-0">
-          <Button variant="outline" size="sm" asChild>
-            <Link href={`/admin/users/${userId}/edit`}>
-              <Edit className="h-3.5 w-3.5 mr-1.5" />
-              Edit
-            </Link>
-          </Button>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-8 w-8">
-                <MoreHorizontal className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem>
-                <Copy className="h-3.5 w-3.5 mr-2" />
-                Copy ID
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <ExternalLink className="h-3.5 w-3.5 mr-2" />
-                View in Clerk
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem className="text-destructive focus:text-destructive">
-                <Ban className="h-3.5 w-3.5 mr-2" />
-                {user.banned ? "Unban User" : "Ban User"}
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      </div>
-
-      <Separator />
-
-      {/* Stats Row */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <StatCard label="Assessments" value={0} icon={ClipboardList} color="blue" />
-        <StatCard label="Completed" value={0} icon={CheckCircle2} color="emerald" />
-        <StatCard label="Competencies" value={0} icon={Target} color="purple" />
-        <StatCard label="Last Active" value={formatRelativeTime(user.lastSignInAt)} icon={Clock} color="amber" />
-      </div>
-
-      {/* Main Content - Tabs */}
-      <UserProfileClient user={user}>
-        <Tabs defaultValue="overview" className="w-full">
-          <TabsList className="w-full justify-start border-b rounded-none bg-transparent p-0 h-auto">
-            <TabsTrigger 
-              value="overview" 
-              className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-4 py-2.5"
-            >
-              <Target className="h-4 w-4 mr-2" />
-              Overview
-            </TabsTrigger>
-            <TabsTrigger 
-              value="assessments" 
-              className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-4 py-2.5"
-            >
-              <ClipboardList className="h-4 w-4 mr-2" />
-              Assessments
-            </TabsTrigger>
-            <TabsTrigger 
-              value="activity" 
-              className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-4 py-2.5"
-            >
-              <Activity className="h-4 w-4 mr-2" />
-              Activity
-            </TabsTrigger>
-          </TabsList>
-
-          {/* Overview Tab */}
-          <TabsContent value="overview" className="mt-6">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {/* Left Column - Account Info */}
-              <div className="space-y-4">
-                <Card>
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-sm font-medium flex items-center gap-2">
-                      <UserIcon className="h-4 w-4 text-muted-foreground" />
-                      Account Details
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    <div className="space-y-1">
-                      <p className="text-xs text-muted-foreground">Email</p>
-                      <p className="text-sm font-medium">{user.email || "—"}</p>
-                    </div>
-                    <Separator />
-                    <div className="space-y-1">
-                      <p className="text-xs text-muted-foreground">Username</p>
-                      <p className="text-sm font-medium">{user.username ? `@${user.username}` : "—"}</p>
-                    </div>
-                    <Separator />
-                    <div className="space-y-1">
-                      <p className="text-xs text-muted-foreground">Role</p>
-                      <Badge variant="outline" className={`${getRoleBadgeColor(user.role)} text-xs`}>
-                        {getRoleDisplayName(user.role)}
-                      </Badge>
-                    </div>
-                    <Separator />
-                    <div className="space-y-1">
-                      <p className="text-xs text-muted-foreground">Status</p>
-                      <StatusBadge user={user} size="sm" />
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-sm font-medium flex items-center gap-2">
-                      <Clock className="h-4 w-4 text-muted-foreground" />
-                      Activity
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    <div className="flex justify-between items-center">
-                      <span className="text-xs text-muted-foreground">Created</span>
-                      <span className="text-sm">{formatDate(user.clerkCreatedAt || user.createdAt)}</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-xs text-muted-foreground">Last Login</span>
-                      <span className="text-sm">{formatDateTime(user.lastSignInAt)}</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-xs text-muted-foreground">Updated</span>
-                      <span className="text-sm">{formatDate(user.updatedAt)}</span>
-                    </div>
-                  </CardContent>
-                </Card>
+            {/* Name and Info */}
+            <div className="flex-1 min-w-0">
+              <div className="flex flex-wrap items-center gap-2">
+                <h1 className="text-xl md:text-2xl font-semibold tracking-tight truncate">{fullName}</h1>
+                <Badge variant="secondary" className={`${getRoleBadgeColor(user.role)} shrink-0`}>
+                  {getRoleDisplayName(user.role)}
+                </Badge>
+                <StatusBadge user={user} />
               </div>
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1.5 text-sm text-muted-foreground">
+                {user.email && (
+                  <span className="flex items-center gap-1.5">
+                    <Mail className="h-3.5 w-3.5" />
+                    <span className="truncate">{user.email}</span>
+                  </span>
+                )}
+                {user.username && (
+                  <span className="flex items-center gap-1.5">
+                    <AtSign className="h-3.5 w-3.5" />
+                    <span>{user.username}</span>
+                  </span>
+                )}
+              </div>
+            </div>
 
-              {/* Right Column - Role-based Content */}
-              <div className="lg:col-span-2 space-y-4">
+            {/* Action Buttons */}
+            <div className="flex gap-2 shrink-0">
+              <Button variant="outline" size="sm" asChild>
+                <Link href={`/users/${userId}/edit`}>
+                  <Edit className="h-4 w-4 mr-2" />
+                  Edit
+                </Link>
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Main Content Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Left Column - User Info */}
+        <div className="space-y-6">
+          {/* Account Information Card */}
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base font-medium flex items-center gap-2">
+                <div className="p-1.5 rounded-lg bg-blue-100 dark:bg-blue-900/30">
+                  <UserIcon className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
+                </div>
+                Account Information
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {user.email && (
+                <InfoRow
+                  icon={Mail}
+                  label="Email Address"
+                  value={user.email}
+                />
+              )}
+              {user.username && (
+                <InfoRow
+                  icon={AtSign}
+                  label="Username"
+                  value={`@${user.username}`}
+                />
+              )}
+              <InfoRow
+                icon={Shield}
+                label="Role"
+                value={
+                  <Badge variant="outline" className={`${getRoleBadgeColor(user.role)} text-xs`}>
+                    {getRoleDisplayName(user.role)}
+                  </Badge>
+                }
+              />
+              <InfoRow
+                icon={Activity}
+                label="Account Status"
+                value={<StatusBadge user={user} />}
+              />
+            </CardContent>
+          </Card>
+
+          {/* Activity Card */}
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base font-medium flex items-center gap-2">
+                <div className="p-1.5 rounded-lg bg-emerald-100 dark:bg-emerald-900/30">
+                  <Clock className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                </div>
+                Activity Timeline
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <InfoRow
+                icon={Calendar}
+                label="Member Since"
+                value={formatDate(user.clerkCreatedAt || user.createdAt)}
+              />
+              <InfoRow
+                icon={Clock}
+                label="Last Sign In"
+                value={formatDateTime(user.lastSignInAt || user.lastLogin)}
+              />
+              <InfoRow
+                icon={Activity}
+                label="Last Updated"
+                value={formatDateTime(user.updatedAt)}
+              />
+            </CardContent>
+          </Card>
+
+          {/* Quick Stats Card (for future) */}
+          <Card className="bg-muted/30">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base font-medium flex items-center gap-2">
+                <div className="p-1.5 rounded-lg bg-purple-100 dark:bg-purple-900/30">
+                  <Target className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" />
+                </div>
+                Quick Stats
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="text-center p-3 rounded-lg bg-background/50">
+                  <p className="text-2xl font-bold text-primary">0</p>
+                  <p className="text-xs text-muted-foreground">Assessments</p>
+                </div>
+                <div className="text-center p-3 rounded-lg bg-background/50">
+                  <p className="text-2xl font-bold text-emerald-600">0</p>
+                  <p className="text-xs text-muted-foreground">Completed</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Right Column - Tabs Content */}
+        <div className="lg:col-span-2">
+          <UserProfileClient user={user}>
+            <Tabs defaultValue="overview" className="w-full">
+              <TabsList className="w-full grid grid-cols-3 mb-6">
+                <TabsTrigger value="overview" className="gap-2">
+                  <Target className="h-4 w-4 hidden sm:block" />
+                  Overview
+                </TabsTrigger>
+                <TabsTrigger value="assessments" className="gap-2">
+                  <ClipboardList className="h-4 w-4 hidden sm:block" />
+                  Assessments
+                </TabsTrigger>
+                <TabsTrigger value="activity" className="gap-2">
+                  <Activity className="h-4 w-4 hidden sm:block" />
+                  Activity
+                </TabsTrigger>
+              </TabsList>
+
+              {/* Overview Tab */}
+              <TabsContent value="overview" className="space-y-6">
+                {/* Role-based Content */}
                 {user.role === UserRole.USER ? (
-                  <>
-                    <Card>
-                      <CardHeader className="pb-3">
-                        <CardTitle className="text-sm font-medium flex items-center gap-2">
-                          <ClipboardList className="h-4 w-4 text-muted-foreground" />
-                          Assigned Assessments
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="flex flex-col items-center justify-center py-8 text-center">
-                          <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center mb-3">
-                            <ClipboardList className="h-5 w-5 text-muted-foreground" />
-                          </div>
-                          <p className="text-sm font-medium mb-1">No Assessments</p>
-                          <p className="text-xs text-muted-foreground max-w-xs">
-                            Assigned assessments will appear here
-                          </p>
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-base font-medium flex items-center gap-2">
+                        <div className="p-1.5 rounded-lg bg-amber-100 dark:bg-amber-900/30">
+                          <ClipboardList className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
                         </div>
-                      </CardContent>
-                    </Card>
-
-                    <Card>
-                      <CardHeader className="pb-3">
-                        <CardTitle className="text-sm font-medium flex items-center gap-2">
-                          <Target className="h-4 w-4 text-muted-foreground" />
-                          Competency Progress
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="flex flex-col items-center justify-center py-8 text-center">
-                          <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center mb-3">
-                            <Target className="h-5 w-5 text-muted-foreground" />
-                          </div>
-                          <p className="text-sm font-medium mb-1">No Progress Data</p>
-                          <p className="text-xs text-muted-foreground max-w-xs">
-                            Competency tracking will appear after assessments
-                          </p>
+                        Assigned Assessments
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-center py-8">
+                        <div className="mx-auto w-12 h-12 bg-muted rounded-full flex items-center justify-center mb-3">
+                          <ClipboardList className="h-6 w-6 text-muted-foreground" />
                         </div>
-                      </CardContent>
-                    </Card>
-                  </>
+                        <h3 className="text-sm font-medium mb-1">No Assessments Yet</h3>
+                        <p className="text-sm text-muted-foreground max-w-sm mx-auto">
+                          This user hasn&apos;t been assigned any assessments yet.
+                          Assessments will appear here once assigned.
+                        </p>
+                      </div>
+                    </CardContent>
+                  </Card>
                 ) : (
                   <Card>
-                    <CardHeader className="pb-3">
-                      <CardTitle className="text-sm font-medium flex items-center gap-2">
-                        <FileQuestion className="h-4 w-4 text-muted-foreground" />
+                    <CardHeader>
+                      <CardTitle className="text-base font-medium flex items-center gap-2">
+                        <div className="p-1.5 rounded-lg bg-blue-100 dark:bg-blue-900/30">
+                          <FileQuestion className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
+                        </div>
                         Content Contributions
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <div className="flex flex-col items-center justify-center py-8 text-center">
-                        <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center mb-3">
-                          <FileQuestion className="h-5 w-5 text-muted-foreground" />
+                      <div className="text-center py-8">
+                        <div className="mx-auto w-12 h-12 bg-muted rounded-full flex items-center justify-center mb-3">
+                          <FileQuestion className="h-6 w-6 text-muted-foreground" />
                         </div>
-                        <p className="text-sm font-medium mb-1">No Contributions</p>
-                        <p className="text-xs text-muted-foreground max-w-xs">
-                          Content created by this {getRoleDisplayName(user.role).toLowerCase()} will appear here
+                        <h3 className="text-sm font-medium mb-1">No Contributions Yet</h3>
+                        <p className="text-sm text-muted-foreground max-w-sm mx-auto">
+                          Content created by this {getRoleDisplayName(user.role).toLowerCase()} will appear here.
                         </p>
                       </div>
                     </CardContent>
                   </Card>
                 )}
-              </div>
-            </div>
-          </TabsContent>
 
-          {/* Assessments Tab */}
-          <TabsContent value="assessments" className="mt-6">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between pb-3">
-                <CardTitle className="text-sm font-medium">
-                  {user.role === UserRole.USER ? "Assessment History" : "Created Assessments"}
-                </CardTitle>
-                {user.role !== UserRole.USER && (
-                  <Button variant="outline" size="sm">
-                    <ArrowUpRight className="h-3.5 w-3.5 mr-1.5" />
-                    Create
-                  </Button>
+                {/* Competency Progress (for Users) */}
+                {user.role === UserRole.USER && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-base font-medium flex items-center gap-2">
+                        <div className="p-1.5 rounded-lg bg-purple-100 dark:bg-purple-900/30">
+                          <Target className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" />
+                        </div>
+                        Competency Progress
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-center py-8">
+                        <div className="mx-auto w-12 h-12 bg-muted rounded-full flex items-center justify-center mb-3">
+                          <Target className="h-6 w-6 text-muted-foreground" />
+                        </div>
+                        <h3 className="text-sm font-medium mb-1">No Progress Data</h3>
+                        <p className="text-sm text-muted-foreground max-w-sm mx-auto">
+                          Competency assessments and progress tracking will be displayed here
+                          once the user completes assessments.
+                        </p>
+                      </div>
+                    </CardContent>
+                  </Card>
                 )}
-              </CardHeader>
-              <CardContent>
-                <div className="flex flex-col items-center justify-center py-12 text-center">
-                  <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center mb-4">
-                    <ClipboardList className="h-6 w-6 text-muted-foreground" />
-                  </div>
-                  <p className="font-medium mb-1">Coming Soon</p>
-                  <p className="text-sm text-muted-foreground max-w-sm">
-                    Assessment management and history tracking is in development
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
+              </TabsContent>
 
-          {/* Activity Tab */}
-          <TabsContent value="activity" className="mt-6">
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-medium">Recent Activity</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {/* Activity Timeline */}
-                  <div className="relative pl-6 pb-4 border-l-2 border-border last:pb-0">
-                    <div className="absolute left-0 top-0 -translate-x-1/2 w-2.5 h-2.5 rounded-full bg-primary border-2 border-background" />
-                    <div>
-                      <p className="text-sm font-medium">Account Created</p>
-                      <p className="text-xs text-muted-foreground mt-0.5">
-                        {formatDateTime(user.clerkCreatedAt || user.createdAt)}
+              {/* Assessments Tab */}
+              <TabsContent value="assessments" className="space-y-6">
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between">
+                    <CardTitle className="text-base font-medium">
+                      {user.role === UserRole.USER ? "Assessment History" : "Created Assessments"}
+                    </CardTitle>
+                    {user.role !== UserRole.USER && (
+                      <Button variant="outline" size="sm">
+                        Create Assessment
+                      </Button>
+                    )}
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-center py-12">
+                      <div className="mx-auto w-16 h-16 bg-muted rounded-full flex items-center justify-center mb-4">
+                        <ClipboardList className="h-8 w-8 text-muted-foreground" />
+                      </div>
+                      <h3 className="text-lg font-medium mb-2">Coming Soon</h3>
+                      <p className="text-sm text-muted-foreground max-w-md mx-auto">
+                        Assessment management and history tracking is currently in development.
+                        Check back soon for updates!
                       </p>
                     </div>
-                  </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
 
-                  {user.lastSignInAt && (
-                    <div className="relative pl-6 pb-4 border-l-2 border-border last:pb-0">
-                      <div className="absolute left-0 top-0 -translate-x-1/2 w-2.5 h-2.5 rounded-full bg-emerald-500 border-2 border-background" />
-                      <div>
-                        <p className="text-sm font-medium">Last Sign In</p>
-                        <p className="text-xs text-muted-foreground mt-0.5">
-                          {formatDateTime(user.lastSignInAt)}
+              {/* Activity Tab */}
+              <TabsContent value="activity" className="space-y-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-base font-medium">Recent Activity</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      {/* Activity Timeline Items */}
+                      <div className="flex gap-4">
+                        <div className="flex flex-col items-center">
+                          <div className="w-2 h-2 bg-primary rounded-full" />
+                          <div className="w-px h-full bg-border" />
+                        </div>
+                        <div className="pb-4">
+                          <p className="text-sm font-medium">Account Created</p>
+                          <p className="text-xs text-muted-foreground">
+                            {formatDateTime(user.clerkCreatedAt || user.createdAt)}
+                          </p>
+                        </div>
+                      </div>
+
+                      {user.lastSignInAt && (
+                        <div className="flex gap-4">
+                          <div className="flex flex-col items-center">
+                            <div className="w-2 h-2 bg-emerald-500 rounded-full" />
+                            <div className="w-px h-full bg-border" />
+                          </div>
+                          <div className="pb-4">
+                            <p className="text-sm font-medium">Last Sign In</p>
+                            <p className="text-xs text-muted-foreground">
+                              {formatDateTime(user.lastSignInAt)}
+                            </p>
+                          </div>
+                        </div>
+                      )}
+
+                      <div className="text-center pt-4 border-t">
+                        <p className="text-sm text-muted-foreground">
+                          More detailed activity logging coming soon
                         </p>
                       </div>
                     </div>
-                  )}
-
-                  <div className="pt-4 border-t text-center">
-                    <p className="text-xs text-muted-foreground">
-                      Detailed activity logging coming soon
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
-      </UserProfileClient>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+            </Tabs>
+          </UserProfileClient>
+        </div>
+      </div>
     </div>
   );
 }

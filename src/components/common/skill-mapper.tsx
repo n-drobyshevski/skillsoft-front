@@ -23,6 +23,7 @@ import { useVirtualizer } from '@tanstack/react-virtual';
 import { Search, X, Filter, Info, ExternalLink, Tag, Layers, Clock, Loader2 } from 'lucide-react';
 import { useWorkerSearch } from '@/hooks/use-worker-search';
 import { highlightMatches } from '@/hooks/use-fuzzy-search';
+import { useIsMobile } from '@/hooks/use-mobile';
 import type { UnifiedSkill, SkillSearchResult, SkillSearchFilters } from '@/types/skills';
 import { cn } from '@/lib/utils';
 
@@ -519,6 +520,7 @@ export function SkillMapper({
   const [selectedSkill, setSelectedSkill] = useState<UnifiedSkill | null>(null);
   const [filters, setFilters] = useState<SkillSearchFilters>({});
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const isMobile = useIsMobile();
   
   // Get unique categories (memoized)
   const categories = useMemo(() => {
@@ -553,9 +555,12 @@ export function SkillMapper({
   // Handle skill selection (memoized to prevent child re-renders)
   const handleSkillSelect = useCallback((skill: UnifiedSkill) => {
     setSelectedSkill(skill);
-    setIsDrawerOpen(true); // Open drawer on mobile when skill is selected
+    // Only open drawer on mobile - desktop shows inline panel
+    if (isMobile) {
+      setIsDrawerOpen(true);
+    }
     onSkillSelect?.(skill);
-  }, [onSkillSelect]);
+  }, [onSkillSelect, isMobile]);
   
   // Handle closing details panel (memoized)
   const handleCloseDetails = useCallback(() => {
@@ -734,32 +739,34 @@ export function SkillMapper({
         />
       </div>
       
-      {/* Mobile Drawer for Skill Details */}
-      <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
-        <DrawerContent className="max-h-[85vh]">
-          <DrawerHeader className="border-b">
-            <div className="flex items-center justify-between">
-              <DrawerTitle className="text-base">Skill Details</DrawerTitle>
-              <DrawerClose asChild>
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  className="min-w-11 min-h-11 touch-manipulation active:scale-[0.95]"
-                >
-                  <X className="h-5 w-5" />
-                </Button>
-              </DrawerClose>
+      {/* Mobile Drawer for Skill Details - Only render on mobile */}
+      {isMobile && (
+        <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
+          <DrawerContent className="max-h-[85vh]">
+            <DrawerHeader className="border-b">
+              <div className="flex items-center justify-between">
+                <DrawerTitle className="text-base">Skill Details</DrawerTitle>
+                <DrawerClose asChild>
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="min-w-11 min-h-11 touch-manipulation active:scale-[0.95]"
+                  >
+                    <X className="h-5 w-5" />
+                  </Button>
+                </DrawerClose>
+              </div>
+            </DrawerHeader>
+            <div className="flex-1 overflow-hidden">
+              <SkillDetailsPanel
+                skill={selectedSkill}
+                onClose={handleCloseDetails}
+                isDrawer
+              />
             </div>
-          </DrawerHeader>
-          <div className="flex-1 overflow-hidden">
-            <SkillDetailsPanel
-              skill={selectedSkill}
-              onClose={handleCloseDetails}
-              isDrawer
-            />
-          </div>
-        </DrawerContent>
-      </Drawer>
+          </DrawerContent>
+        </Drawer>
+      )}
     </div>
   );
 }
