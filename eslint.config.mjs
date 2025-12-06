@@ -68,11 +68,13 @@ const eslintConfig = defineConfig([
 		"@microsoft/sdl/no-msapp-exec-unsafe": "error",
 		"@microsoft/sdl/no-postmessage-star-origin": "error",			// TypeScript specific security rules
 			"@typescript-eslint/no-explicit-any": "warn",
-			"@typescript-eslint/no-unsafe-argument": "error",
-			"@typescript-eslint/no-unsafe-assignment": "error",
-			"@typescript-eslint/no-unsafe-call": "error",
-			"@typescript-eslint/no-unsafe-member-access": "error",
-			"@typescript-eslint/no-unsafe-return": "error",
+			// Note: no-unsafe-* rules are set to "warn" because Server Actions crossing
+			// the client/server boundary can cause false positives in VS Code's type-aware linting
+			"@typescript-eslint/no-unsafe-argument": "warn",
+			"@typescript-eslint/no-unsafe-assignment": "warn",
+			"@typescript-eslint/no-unsafe-call": "warn",
+			"@typescript-eslint/no-unsafe-member-access": "warn",
+			"@typescript-eslint/no-unsafe-return": "warn",
 			
 			// Additional DOM and XSS protection rules
 			"no-unsanitized/method": "error",

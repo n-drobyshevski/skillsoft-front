@@ -18,8 +18,8 @@ import type { UnifiedSkill, SkillSearchResult } from '@/types/skills';
 // =============================================================================
 
 export interface WorkerMessage {
-  type: 'build-index' | 'search' | 'update-options';
-  payload: BuildIndexPayload | SearchPayload | UpdateOptionsPayload;
+  type: 'build-index' | 'search' | 'update-options' | 'recommend';
+  payload: BuildIndexPayload | SearchPayload | UpdateOptionsPayload | RecommendPayload;
   id: string;
 }
 
@@ -37,9 +37,15 @@ export interface UpdateOptionsPayload {
   options: Partial<IFuseOptions<UnifiedSkill>>;
 }
 
+export interface RecommendPayload {
+  query: string;
+  standard: 'onet' | 'esco';
+  limit?: number;
+}
+
 export interface WorkerResponse {
-  type: 'index-ready' | 'search-results' | 'error';
-  payload: IndexReadyPayload | SearchResultsPayload | ErrorPayload;
+  type: 'index-ready' | 'search-results' | 'recommendations' | 'error';
+  payload: IndexReadyPayload | SearchResultsPayload | RecommendationsPayload | ErrorPayload;
   id: string;
 }
 
@@ -52,6 +58,13 @@ export interface SearchResultsPayload {
   results: SkillSearchResult[];
   searchTime: number;
   query: string;
+}
+
+export interface RecommendationsPayload {
+  results: SkillSearchResult[];
+  searchTime: number;
+  seedQuery: string;
+  standard: 'onet' | 'esco';
 }
 
 export interface ErrorPayload {
@@ -223,6 +236,80 @@ function handleUpdateOptions(payload: UpdateOptionsPayload, id: string): void {
   self.postMessage(response);
 }
 
+/**
+ * Handle RECOMMEND action - Context-aware smart boosting
+ * Uses the O*NET skill name as a "seed" to recommend relevant ESCO skills
+ */
+function handleRecommend(payload: RecommendPayload, id: string): void {
+  const startTime = performance.now();
+  
+  if (!fuseInstance) {
+    const response: WorkerResponse = {
+      type: 'error',
+      payload: {
+        message: 'Search index not initialized. Call build-index first.',
+        code: 'INDEX_NOT_READY',
+      },
+      id,
+    };
+    
+    self.postMessage(response);
+    return;
+  }
+  
+  try {
+    const query = payload.query.trim();
+    const limit = payload.limit ?? 5; // Default to top 5 recommendations
+    
+    if (query.length === 0) {
+      const response: WorkerResponse = {
+        type: 'recommendations',
+        payload: {
+          results: [],
+          searchTime: 0,
+          seedQuery: '',
+          standard: payload.standard,
+        },
+        id,
+      };
+      
+      self.postMessage(response);
+      return;
+    }
+    
+    // Use the existing Fuse.js instance to search
+    // The index should already be filtered to the target standard (ESCO)
+    const fuseResults = fuseInstance.search(query, { limit });
+    const transformedResults = transformResults(fuseResults);
+    
+    const searchTime = performance.now() - startTime;
+    
+    const response: WorkerResponse = {
+      type: 'recommendations',
+      payload: {
+        results: transformedResults,
+        searchTime,
+        seedQuery: query,
+        standard: payload.standard,
+      },
+      id,
+    };
+    
+    self.postMessage(response);
+  } catch (error) {
+    const response: WorkerResponse = {
+      type: 'error',
+      payload: {
+        message: error instanceof Error ? error.message : 'Unknown recommendation error',
+        code: 'RECOMMEND_ERROR',
+      },
+      id,
+    };
+    
+    self.postMessage(response);
+  }
+}
+
 // =============================================================================
 // Worker Entry Point
 // =============================================================================
@@ -239,6 +326,9 @@ self.onmessage = (event: MessageEvent<WorkerMessage>) => {
       break;
     case 'update-options':
       handleUpdateOptions(payload as UpdateOptionsPayload, id);
+      break;
+    case 'recommend':
+      handleRecommend(payload as RecommendPayload, id);
       break;
     default:
       self.postMessage({

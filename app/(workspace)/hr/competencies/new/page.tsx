@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { CompetencyForm } from '../_components/CompetencyForm';
 import PageHeader from '@/components/common/PageHeader';
 import { Competency } from '@/types/domain';
-import { CompetencyCategory, ProficiencyLevel, ApprovalStatus } from '@/types/domain';
+import { CompetencyCategory, ProficiencyLevel, ApprovalStatus, StandardCodesDto } from '@/types/domain';
 import CompetencyPreview from '../_components/CompetencyPreview';
 
 // Constants
@@ -18,6 +18,7 @@ type CompetencyFormData = {
   isActive: boolean;
   approvalStatus: string;
   description?: string;
+  standardCodes?: StandardCodesDto;
 };
 
 export default function NewCompetencyPage() {
@@ -34,6 +35,7 @@ export default function NewCompetencyPage() {
       level: data.level as ProficiencyLevel,
       isActive: data.isActive,
       approvalStatus: data.approvalStatus as ApprovalStatus,
+      standardCodes: data.standardCodes,
       behavioralIndicators: [],
       version: 1,
       createdAt: new Date().toISOString(),
@@ -44,7 +46,7 @@ export default function NewCompetencyPage() {
 
   const handleCompetencyCreated = (competency: Competency) => {
     // Redirect to the competency details page
-    router.push(`/competencies/${competency.id}`);
+    router.push(`/hr/competencies/${competency.id}`);
   };
 
   return (

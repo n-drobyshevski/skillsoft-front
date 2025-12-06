@@ -7,7 +7,12 @@ import { User, UserCreateInput, UserUpdateInput, UserRole } from '@/types/user';
 
 const getApiBaseUrl = () => {
     const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-    return apiUrl ? `https://${apiUrl}/api` : "http://localhost:8080/api";
+    if (!apiUrl) {
+        return "http://localhost:8080/api";
+    }
+    // For localhost, use http; for production domains, use https
+    const protocol = apiUrl.includes('localhost') || apiUrl.includes('127.0.0.1') ? 'http' : 'https';
+    return `${protocol}://${apiUrl}/api`;
 };
 
 // List of API endpoints that return arrays
@@ -191,45 +196,55 @@ export const competenciesApi = {
     },
 
     createCompetency: async (data: CompetencyInput): Promise<Competency> => {
+        const authHeaders = await getAuthHeaders();
         const result = await fetchApi<Competency>(COMPETENCIES_ENDPOINT, {
             method: 'POST',
             body: JSON.stringify(data),
             cache: 'no-store',
+            authHeaders,
         });
         await revalidateCompetencyTags();
         return result;
     },
 
     updateCompetency: async (competencyId: string, data: CompetencyInput): Promise<Competency> => {
+        const authHeaders = await getAuthHeaders();
         const result = await fetchApi<Competency>(`/competencies/${competencyId}`, {
             method: 'PUT',
             body: JSON.stringify(data),
             cache: 'no-store',
+            authHeaders,
         });
         await revalidateCompetencyTags(competencyId);
         return result;
     },
 
     deleteCompetency: async (competencyId: string) => {
+        const authHeaders = await getAuthHeaders();
         await fetchApi(`/competencies/${competencyId}`, {
             method: 'DELETE',
             cache: 'no-store',
+            authHeaders,
         });
         // Note: Cache revalidation is handled in the server action
     },
 
     attachIndicator: async (competencyId: string, indicatorId: string): Promise<void> => {
+        const authHeaders = await getAuthHeaders();
         await fetchApi(`/competencies/${competencyId}/bi/${indicatorId}`, {
             method: 'POST',
             cache: 'no-store',
+            authHeaders,
         });
         await revalidateCompetencyTags(competencyId);
     },
 
     detachIndicator: async (competencyId: string, indicatorId: string): Promise<void> => {
+        const authHeaders = await getAuthHeaders();
         await fetchApi(`/competencies/${competencyId}/bi/${indicatorId}`, {
             method: 'DELETE',
             cache: 'no-store',
+            authHeaders,
         });
         await revalidateCompetencyTags(competencyId);
     },
@@ -270,10 +285,12 @@ export const behavioralIndicatorsApi = {
   },
 
   createIndicator: async (competencyId: string, data: IndicatorInput): Promise<BehavioralIndicator> => {
+    const authHeaders = await getAuthHeaders();
     return fetchApi<BehavioralIndicator>(`/behavioral-indicators`, {
       method: "POST",
       body: JSON.stringify(data),
       cache: "no-store",
+      authHeaders,
     });
   },
 
@@ -282,28 +299,34 @@ export const behavioralIndicatorsApi = {
     indicatorId: string,
     data: IndicatorInput
   ): Promise<BehavioralIndicator> => {
+    const authHeaders = await getAuthHeaders();
     return fetchApi<BehavioralIndicator>(
       `/behavioral-indicators/${indicatorId}`,
       {
         method: "PUT",
         body: JSON.stringify(data),
         cache: "no-store",
+        authHeaders,
       }
     );
   },
 
   deleteIndicator: async (competencyId: string, indicatorId: string) => {
+    const authHeaders = await getAuthHeaders();
     await fetchApi(`/behavioral-indicators/${indicatorId}`, {
       method: "DELETE",
       cache: "no-store",
+      authHeaders,
     });
   },
 
   updateIndicatorQuestions: async (indicatorId: string, questionIds: string[]) => {
+    const authHeaders = await getAuthHeaders();
     return fetchApi(`/behavioral-indicators/${indicatorId}/questions`, {
       method: 'PUT',
       body: JSON.stringify({ questionIds }),
       cache: 'no-store',
+      authHeaders,
     });
   },
 };
@@ -372,12 +395,14 @@ export const assessmentQuestionsApi = {
       orderIndex: Number(data.orderIndex || 0)
     };
     
+    const authHeaders = await getAuthHeaders();
     const result = await fetchApi<AssessmentQuestion>(
       `/questions?behavioralIndicatorId=${encodeURIComponent(behavioralIndicatorId)}`,
       {
         method: "POST",
         body: JSON.stringify(payload),
         cache: "no-store",
+        authHeaders,
       }
     );
     await revalidateQuestionTags(competencyId, behavioralIndicatorId);
@@ -390,12 +415,14 @@ export const assessmentQuestionsApi = {
     competencyId: string,
     behavioralIndicatorId: string,
   ): Promise<AssessmentQuestion> => {
+    const authHeaders = await getAuthHeaders();
     const result = await fetchApi<AssessmentQuestion>(
       `/questions/${questionId}`,
       {
         method: "PUT",
         body: JSON.stringify(data),
         cache: "no-store",
+        authHeaders,
       }
     );
     await revalidateQuestionTags(
@@ -411,11 +438,13 @@ export const assessmentQuestionsApi = {
     behavioralIndicatorId: string,
     questionId: string
   ) => {
+    const authHeaders = await getAuthHeaders();
     await fetchApi(
       `/questions/${questionId}`,
       {
         method: "DELETE",
         cache: "no-store",
+        authHeaders,
       }
     );
     await revalidateQuestionTags(

@@ -9,10 +9,12 @@ import {
   SheetTitle,
   SheetDescription,
 } from "@/components/ui/sheet";
-import { Competency } from "@/types/domain";
+import { Competency, BigFiveInfo, getEffectiveBigFive, getEffectiveDimension } from "@/types/domain";
+import type { BigFiveDimension } from "@/types/domain";
 import { approvalStatusToColor, competencyProficiencyLevelToColor } from "@/lib/ui-utils";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { getBigFiveMapping } from "@/hooks/useBigFiveMapper";
 import { 
   Trash2, 
   Layers, 
@@ -20,6 +22,15 @@ import {
   Activity,
   ChevronRight,
   Pencil,
+  Globe2,
+  Briefcase,
+  Globe,
+  Lightbulb,
+  Shield,
+  Users,
+  Heart,
+  Smile,
+  Info,
 } from "lucide-react";
 import { IndicatorHoverCard } from "@/components/feedback/IndicatorHoverCard";
 import { DeleteConfirmationDialog } from "@/components/feedback/DeleteConfirmationDialog";
@@ -27,6 +38,15 @@ import { deleteCompetency } from "@/src/app/actions";
 import { toast } from "sonner";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+
+// Big Five dimension icons mapping
+const BigFiveIcons: Record<BigFiveDimension, React.ElementType> = {
+  OPENNESS: Lightbulb,
+  CONSCIENTIOUSNESS: Shield,
+  EXTRAVERSION: Users,
+  AGREEABLENESS: Heart,
+  EMOTIONAL_STABILITY: Smile,
+};
 
 export default function CompetencyDrawer({
   open,
@@ -124,6 +144,116 @@ export default function CompetencyDrawer({
                 {competency.description}
               </p>
             </section>
+
+            {/* Standards Mapping Section */}
+            {(competency.standardCodes?.onetRef || competency.standardCodes?.escoRef || competency.standardCodes?.bigFiveRef) && (
+              <section className="space-y-2">
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <Globe2 className="h-3.5 w-3.5" />
+                  <h3 className="text-xs font-medium uppercase tracking-wide">Standards</h3>
+                </div>
+                <div className="space-y-2 pl-5">
+                  {/* O*NET */}
+                  {competency.standardCodes?.onetRef && (
+                    <div className="flex items-center gap-2 p-2 rounded-md bg-orange-50 dark:bg-orange-950/30 border border-orange-200 dark:border-orange-800">
+                      <Briefcase className="h-3.5 w-3.5 text-orange-600 dark:text-orange-400 shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-1.5">
+                          <Badge variant="secondary" className="h-4 text-[9px] px-1 bg-orange-200 text-orange-800 dark:bg-orange-800 dark:text-orange-200">
+                            O*NET
+                          </Badge>
+                          <span className="text-[10px] font-mono text-orange-700 dark:text-orange-300">
+                            {competency.standardCodes.onetRef.code}
+                          </span>
+                        </div>
+                        <p className="text-xs font-medium text-orange-900 dark:text-orange-100 mt-0.5 truncate">
+                          {competency.standardCodes.onetRef.title || 'Untitled'}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* ESCO */}
+                  {competency.standardCodes?.escoRef && (
+                    <div className="flex items-center gap-2 p-2 rounded-md bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800">
+                      <Globe className="h-3.5 w-3.5 text-blue-600 dark:text-blue-400 shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-1.5">
+                          <Badge variant="secondary" className="h-4 text-[9px] px-1 bg-blue-200 text-blue-800 dark:bg-blue-800 dark:text-blue-200">
+                            ESCO
+                          </Badge>
+                        </div>
+                        <p className="text-xs font-medium text-blue-900 dark:text-blue-100 mt-0.5 truncate">
+                          {competency.standardCodes.escoRef.title || 'ESCO Skill'}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* Big Five - stored or computed from O*NET */}
+                  {(() => {
+                    // Get stored Big Five
+                    const storedBigFive = competency.standardCodes?.bigFiveRef 
+                      ? getEffectiveBigFive(competency.standardCodes.bigFiveRef) 
+                      : null;
+                    const storedFacet = competency.standardCodes?.bigFiveRef 
+                      ? getEffectiveDimension(competency.standardCodes.bigFiveRef) 
+                      : null;
+                    
+                    // Compute from O*NET if not stored
+                    const computedMapping = !storedBigFive && competency.standardCodes?.onetRef?.code
+                      ? getBigFiveMapping(competency.standardCodes.onetRef.code)
+                      : null;
+                    
+                    const bigFive = storedBigFive || (computedMapping?.bigFive ?? null);
+                    const facet = storedFacet || (computedMapping?.dimension ?? null);
+                    const isComputed = !storedBigFive && !!computedMapping?.bigFive;
+                    
+                    if (!bigFive) return null;
+                    
+                    const Icon = BigFiveIcons[bigFive];
+                    const info = BigFiveInfo[bigFive];
+                    
+                    // Color mapping for Big Five
+                    const colorMap: Record<BigFiveDimension, { bg: string; border: string; badge: string; text: string; icon: string }> = {
+                      OPENNESS: { bg: 'bg-purple-50 dark:bg-purple-950/30', border: 'border-purple-200 dark:border-purple-800', badge: 'bg-purple-200 text-purple-800 dark:bg-purple-800 dark:text-purple-200', text: 'text-purple-900 dark:text-purple-100', icon: 'text-purple-600 dark:text-purple-400' },
+                      CONSCIENTIOUSNESS: { bg: 'bg-green-50 dark:bg-green-950/30', border: 'border-green-200 dark:border-green-800', badge: 'bg-green-200 text-green-800 dark:bg-green-800 dark:text-green-200', text: 'text-green-900 dark:text-green-100', icon: 'text-green-600 dark:text-green-400' },
+                      EXTRAVERSION: { bg: 'bg-orange-50 dark:bg-orange-950/30', border: 'border-orange-200 dark:border-orange-800', badge: 'bg-orange-200 text-orange-800 dark:bg-orange-800 dark:text-orange-200', text: 'text-orange-900 dark:text-orange-100', icon: 'text-orange-600 dark:text-orange-400' },
+                      AGREEABLENESS: { bg: 'bg-blue-50 dark:bg-blue-950/30', border: 'border-blue-200 dark:border-blue-800', badge: 'bg-blue-200 text-blue-800 dark:bg-blue-800 dark:text-blue-200', text: 'text-blue-900 dark:text-blue-100', icon: 'text-blue-600 dark:text-blue-400' },
+                      EMOTIONAL_STABILITY: { bg: 'bg-teal-50 dark:bg-teal-950/30', border: 'border-teal-200 dark:border-teal-800', badge: 'bg-teal-200 text-teal-800 dark:bg-teal-800 dark:text-teal-200', text: 'text-teal-900 dark:text-teal-100', icon: 'text-teal-600 dark:text-teal-400' },
+                    };
+                    const colors = colorMap[bigFive];
+                    
+                    return (
+                      <div className={`flex items-center gap-2 p-2 rounded-md ${colors.bg} border ${colors.border}`}>
+                        <Icon className={`h-3.5 w-3.5 ${colors.icon} shrink-0`} />
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <Badge variant="secondary" className={`h-4 text-[9px] px-1 ${colors.badge}`}>
+                              Big Five
+                            </Badge>
+                            {isComputed && (
+                              <Badge variant="secondary" className="h-4 text-[8px] px-1 bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-300 gap-0.5">
+                                <Info className="w-2 h-2" />
+                                Auto
+                              </Badge>
+                            )}
+                          </div>
+                          <p className={`text-xs font-medium ${colors.text} mt-0.5`}>
+                            {info.displayName}
+                          </p>
+                          {facet && (
+                            <p className={`text-[10px] ${colors.icon} capitalize`}>
+                              {facet.replace(/_/g, ' ')}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })()}
+                </div>
+              </section>
+            )}
 
             {/* Behavioral Indicators Section */}
             {competency.behavioralIndicators && competency.behavioralIndicators.length > 0 && (

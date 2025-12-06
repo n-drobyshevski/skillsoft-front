@@ -50,6 +50,7 @@ export interface WorkerSearchState {
   query: string;
   deferredQuery: string;
   results: SkillSearchResult[];
+  recommendations: SkillSearchResult[];
   isSearching: boolean;
   isIndexing: boolean;
   isIndexReady: boolean;
@@ -65,23 +66,29 @@ export interface WorkerSearchActions {
   setFilters: (filters: SkillSearchFilters) => void;
   clearFilters: () => void;
   rebuildIndex: () => void;
+  /** Get context-aware recommendations based on a seed text (e.g., O*NET skill name) */
+  recommend: (seedText: string, standard?: 'onet' | 'esco') => void;
+  /** Clear recommendations */
+  clearRecommendations: () => void;
 }
 
 // Worker message types (must match search.worker.ts)
 interface WorkerMessage {
-  type: 'build-index' | 'search' | 'update-options';
+  type: 'build-index' | 'search' | 'update-options' | 'recommend';
   payload: unknown;
   id: string;
 }
 
 interface WorkerResponse {
-  type: 'index-ready' | 'search-results' | 'error';
+  type: 'index-ready' | 'search-results' | 'recommendations' | 'error';
   payload: {
     indexedCount?: number;
     buildTime?: number;
     results?: SkillSearchResult[];
     searchTime?: number;
     query?: string;
+    seedQuery?: string;
+    standard?: 'onet' | 'esco';
     message?: string;
     code?: string;
   };
@@ -196,6 +203,7 @@ export function useWorkerSearch(
     initialFilters ?? {}
   );
   const [results, setResults] = useState<SkillSearchResult[]>([]);
+  const [recommendations, setRecommendations] = useState<SkillSearchResult[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [isIndexing, setIsIndexing] = useState(false);
   const [isIndexReady, setIsIndexReady] = useState(false);
@@ -262,6 +270,11 @@ export function useWorkerSearch(
             setSearchTime(payload.searchTime ?? 0);
             setIsSearching(false);
           }
+          break;
+
+        case 'recommendations':
+          // Apply recommendations from context-aware search
+          setRecommendations(payload.results ?? []);
           break;
 
         case 'error':
@@ -401,11 +414,66 @@ export function useWorkerSearch(
     workerRef.current.postMessage(message);
   }, [filteredSkills, threshold, workerSupported]);
 
+  /**
+   * Get context-aware recommendations based on a seed text
+   * Used to recommend ESCO skills based on selected O*NET skill name
+   */
+  const recommend = useCallback((seedText: string, standard: 'onet' | 'esco' = 'esco') => {
+    if (!seedText.trim()) {
+      setRecommendations([]);
+      return;
+    }
+
+    if (workerSupported && workerRef.current && isIndexReady) {
+      const message: WorkerMessage = {
+        type: 'recommend',
+        payload: {
+          query: seedText,
+          standard,
+          limit: 5, // Top 5 recommendations
+        },
+        id: generateId(),
+      };
+
+      workerRef.current.postMessage(message);
+    } else if (!workerSupported && isIndexReady) {
+      // Fallback: main thread recommendation
+      import('fuse.js').then(({ default: Fuse }) => {
+        const fuse = new Fuse(filteredSkills, {
+          ...DEFAULT_FUSE_OPTIONS,
+          threshold,
+        });
+
+        const fuseResults = fuse.search(seedText, { limit: 5 });
+
+        const transformedResults: SkillSearchResult[] = fuseResults.map(
+          result => ({
+            item: result.item,
+            score: result.score ?? 0,
+            matches: result.matches?.map(match => ({
+              key: match.key ?? '',
+              value: match.value ?? '',
+              indices: match.indices as [number, number][],
+            })),
+            refIndex: result.refIndex,
+          })
+        );
+
+        setRecommendations(transformedResults);
+      });
+    }
+  }, [workerSupported, isIndexReady, filteredSkills, threshold]);
+
+  const clearRecommendations = useCallback(() => {
+    setRecommendations([]);
+  }, []);
+
   return {
     state: {
       query,
       deferredQuery,
       results,
+      recommendations,
       isSearching,
       isIndexing,
       isIndexReady,
@@ -420,6 +488,8 @@ export function useWorkerSearch(
       setFilters,
       clearFilters,
       rebuildIndex,
+      recommend,
+      clearRecommendations,
     },
   };
 }

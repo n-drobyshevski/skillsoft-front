@@ -13,7 +13,6 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-  FormDescription,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -26,13 +25,16 @@ import {
 } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { CompetencyCategory, ProficiencyLevel, ApprovalStatus } from '@/types/domain';
-import { competenciesApi } from '@/services/api';
+import { createCompetencyAction, updateCompetencyAction, type ActionResult } from '@/app/actions';
 import { useRouter } from 'next/navigation';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { toast } from "sonner";
-import { FileText, Tag, CheckCircle2, Loader2, X, Save, RefreshCw, Check, AlertCircle } from "lucide-react";
+import { FileText, Tag, CheckCircle2, Loader2, X, Save, RefreshCw, Check, AlertCircle, Globe2, Layers } from "lucide-react";
 import { HelpTooltip, formHelp } from '@/components/ui/help-tooltip';
 import { cn } from '@/lib/utils';
+import { StandardsSearchCombobox } from '@/components/common/standards-search-combobox';
+import { getAllSkills } from '@/lib/skill-data-loader';
+import type { UnifiedSkill } from '@/types/skills';
 
 type CompetencyFormValues = z.infer<typeof competencySchema>;
 
@@ -47,7 +49,25 @@ export function CompetencyForm({
 }) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+  const [skills, setSkills] = useState<UnifiedSkill[]>([]);
+  const [isLoadingSkills, setIsLoadingSkills] = useState(true);
   const isEditMode = !!competency;
+
+  // Load skills on mount
+  useEffect(() => {
+    const loadSkills = async () => {
+      setIsLoadingSkills(true);
+      try {
+        const allSkills = getAllSkills();
+        setSkills(allSkills);
+      } catch {
+        // Silently handle - combobox will show "no skills" state
+      } finally {
+        setIsLoadingSkills(false);
+      }
+    };
+    loadSkills();
+  }, []);
 
   const form = useForm<CompetencyFormValues>({
     resolver: zodResolver(competencySchema),
@@ -59,16 +79,17 @@ export function CompetencyForm({
       level: competency?.level || ProficiencyLevel.NOVICE,
       isActive: competency?.isActive ?? true,
       approvalStatus: competency?.approvalStatus || ApprovalStatus.DRAFT,
+      standardCodes: competency?.standardCodes || undefined,
     },
   });
 
   // Get validation state for visual feedback
-  const { errors, dirtyFields, isValid } = form.formState;
+  const { errors, dirtyFields } = form.formState;
   
-  // Helper to get field validation state
+  // Helper to get field validation state (using Object.hasOwn for security)
   const getFieldState = useCallback((fieldName: keyof CompetencyFormValues) => {
-    const isDirty = dirtyFields[fieldName];
-    const hasError = !!errors[fieldName];
+    const isDirty = Object.hasOwn(dirtyFields, fieldName) && dirtyFields[fieldName as keyof typeof dirtyFields];
+    const hasError = Object.hasOwn(errors, fieldName) && !!errors[fieldName as keyof typeof errors];
     return {
       isDirty,
       hasError,
@@ -76,23 +97,48 @@ export function CompetencyForm({
     };
   }, [dirtyFields, errors]);
 
+  // Helper to handle successful competency creation
+  const handleCreateSuccess = (createdCompetency: Competency) => {
+    toast.success("Competency created successfully!");
+    if (onCompetencyCreated) {
+      onCompetencyCreated(createdCompetency);
+    } else {
+      router.push(`/hr/competencies/${createdCompetency.id}`);
+    }
+  };
+
+  // Helper to handle successful competency update
+  const handleUpdateSuccess = () => {
+    toast.success("Competency updated successfully!");
+    if (competency) {
+      router.push(`/hr/competencies/${competency.id}`);
+    }
+  };
+
   async function onSubmit(data: CompetencyFormValues) {
     setIsLoading(true);
+    console.log('[CompetencyForm] onSubmit data:', JSON.stringify(data, null, 2));
     try {
-      if (isEditMode) {
-        await competenciesApi.updateCompetency(competency.id, data);
-        toast.success("Competency updated successfully!");
-        router.push(`/competencies/${competency.id}`);
-      } else {
-        const newCompetency = await competenciesApi.createCompetency(data);
-        toast.success("Competency created successfully!");
-        
-        // Call the callback if provided (for new competency page)
-        if (onCompetencyCreated) {
-          onCompetencyCreated(newCompetency);
+      if (isEditMode && competency) {
+        // Server Action call - types are correctly defined in actions.ts
+        console.log('Updating competency with data:', data);
+        const result: ActionResult<Competency> = await updateCompetencyAction(competency.id, data);
+        if (result.success) {
+          handleUpdateSuccess();
         } else {
-          // Default behavior - navigate to the competency page
-          router.push(`/competencies/${newCompetency.id}`);
+          toast.error(result.message);
+        }
+      } else {
+        // Server Action call - types are correctly defined in actions.ts
+        console.log('[CompetencyForm] Creating competency with data:', JSON.stringify(data, null, 2));
+        const result: ActionResult<Competency> = await createCompetencyAction(data);
+        console.log('[CompetencyForm] Create result:', JSON.stringify(result, null, 2));
+        if (result.success && result.data && result.data.id) {
+          handleCreateSuccess(result.data);
+        } else if (result.success && (!result.data || !result.data.id)) {
+          toast.error('Competency was created but no valid ID was returned. Please refresh and try again.');
+        } else if (!result.success) {
+          toast.error(result.message);
         }
       }
     } catch (e: unknown) {
@@ -109,10 +155,16 @@ export function CompetencyForm({
     }
   };
 
+  // Handle form validation errors
+  const onFormError = (errors: Record<string, unknown>) => {
+    console.error('Form validation errors:', errors);
+    toast.error('Please fix the validation errors before submitting.');
+  };
+
   return (
     <div className="space-y-6">
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <form onSubmit={form.handleSubmit(onSubmit, onFormError)} className="space-y-6">
           {/* Basic Information Section */}
           <div className="rounded-xl border bg-card shadow-sm overflow-hidden">
             <div className="flex items-center gap-3 px-5 py-4 bg-muted/40 border-b">
@@ -287,6 +339,46 @@ export function CompetencyForm({
                         ))}
                       </SelectContent>
                     </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+          </div>
+
+          {/* Standard Mapping Section */}
+          <div className="rounded-xl border bg-card shadow-sm overflow-hidden">
+            <div className="flex items-center gap-3 px-5 py-4 bg-muted/40 border-b">
+              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-purple-100 text-purple-600 dark:bg-purple-950 dark:text-purple-400">
+                <Globe2 className="h-5 w-5" />
+              </div>
+              <div>
+                <h3 className="text-base font-semibold">Standard Mapping</h3>
+                <p className="text-sm text-muted-foreground">Link to O*NET, ESCO, or personality frameworks</p>
+              </div>
+            </div>
+            <div className="p-5">
+              <FormField
+                control={form.control}
+                name="standardCodes"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-sm font-medium flex items-center gap-1">
+                      <Layers className="h-4 w-4 mr-1" />
+                      Standards Reference
+                      <HelpTooltip content="Map this competency to established frameworks like O*NET occupational skills, ESCO European skills taxonomy, or Big Five personality traits for standardized assessment alignment." />
+                    </FormLabel>
+                    <FormControl>
+                      <StandardsSearchCombobox
+                        skills={skills}
+                        isLoading={isLoadingSkills}
+                        value={field.value}
+                        onChange={(value) => {
+                          field.onChange(value);
+                          handlePreviewClick();
+                        }}
+                      />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}

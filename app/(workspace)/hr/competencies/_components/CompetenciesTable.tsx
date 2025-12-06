@@ -14,13 +14,23 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import {
   CompetencyCategory,
   ProficiencyLevel,
   ApprovalStatus,
+  BigFiveInfo,
+  getEffectiveBigFive,
 } from "@/types/domain";
-import {
+import type {
   Competency,
   BehavioralIndicator,
+  StandardCodesDto,
+  BigFiveDimension,
 } from "@/types/domain";
 import {
   ArrowUpDown,
@@ -31,6 +41,9 @@ import {
   Copy,
   ExternalLink,
   Layers,
+  Briefcase,
+  Globe,
+  Brain,
 } from "lucide-react";
 import {
   approvalStatusToColor,
@@ -39,6 +52,77 @@ import {
 } from "@/lib/ui-utils";
 import EntitiesTable from "@/components/data-display/Table";
 import CompetencyDrawer from "./CompetencyDrawer";
+
+// Helper component for standards badges
+function StandardsBadges({ standardCodes }: { standardCodes?: StandardCodesDto }) {
+  if (!standardCodes) return <span className="text-xs text-muted-foreground">—</span>;
+
+  const hasOnet = !!standardCodes.onetRef;
+  const hasEsco = !!standardCodes.escoRef;
+  const bigFive = getEffectiveBigFive(standardCodes.bigFiveRef);
+
+  if (!hasOnet && !hasEsco && !bigFive) {
+    return <span className="text-xs text-muted-foreground">—</span>;
+  }
+
+  return (
+    <TooltipProvider delayDuration={300}>
+      <div className="flex items-center gap-1.5 flex-wrap">
+        {hasOnet && (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Badge 
+                variant="secondary" 
+                className="bg-orange-100 text-orange-700 border-orange-200 dark:bg-orange-950 dark:text-orange-300 dark:border-orange-800 px-1.5 py-0.5 text-[10px] font-medium gap-1"
+              >
+                <Briefcase className="h-2.5 w-2.5" />
+                O*NET
+              </Badge>
+            </TooltipTrigger>
+            <TooltipContent side="top" className="max-w-xs">
+              <p className="font-medium">{standardCodes.onetRef?.title || 'O*NET Standard'}</p>
+              <p className="text-xs text-muted-foreground">{standardCodes.onetRef?.code}</p>
+            </TooltipContent>
+          </Tooltip>
+        )}
+        {hasEsco && (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Badge 
+                variant="secondary" 
+                className="bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-950 dark:text-blue-300 dark:border-blue-800 px-1.5 py-0.5 text-[10px] font-medium gap-1"
+              >
+                <Globe className="h-2.5 w-2.5" />
+                ESCO
+              </Badge>
+            </TooltipTrigger>
+            <TooltipContent side="top" className="max-w-xs">
+              <p className="font-medium">{standardCodes.escoRef?.title || 'ESCO Standard'}</p>
+              <p className="text-xs text-muted-foreground truncate">{standardCodes.escoRef?.uri}</p>
+            </TooltipContent>
+          </Tooltip>
+        )}
+        {bigFive && (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Badge 
+                variant="secondary" 
+                className="bg-teal-100 text-teal-700 border-teal-200 dark:bg-teal-950 dark:text-teal-300 dark:border-teal-800 px-1.5 py-0.5 text-[10px] font-medium gap-1"
+              >
+                <Brain className="h-2.5 w-2.5" />
+                {bigFive.charAt(0)}
+              </Badge>
+            </TooltipTrigger>
+            <TooltipContent side="top">
+              <p className="font-medium">{BigFiveInfo[bigFive]?.displayName}</p>
+              <p className="text-xs text-muted-foreground">{BigFiveInfo[bigFive]?.description}</p>
+            </TooltipContent>
+          </Tooltip>
+        )}
+      </div>
+    </TooltipProvider>
+  );
+}
 
 interface CompetenciesTableProps {
   competencies: Competency[];
@@ -135,6 +219,16 @@ export default function CompetenciesTable({ competencies }: CompetenciesTablePro
             {level}
           </Badge>
         );
+      },
+    },
+    {
+      accessorKey: "standardCodes",
+      header: () => (
+        <div className="text-left pl-3">Standards</div>
+      ),
+      cell: ({ row }) => {
+        const standardCodes = row.original.standardCodes;
+        return <StandardsBadges standardCodes={standardCodes} />;
       },
     },
     {

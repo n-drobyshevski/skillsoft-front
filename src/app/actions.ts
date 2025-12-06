@@ -17,11 +17,14 @@ const HOME_PATH = '/';
 
 export async function revalidateCompetencyTags(competencyId?: string) {
   try {
-    // Invalidate paths
+    // Invalidate paths (both legacy and workspace paths)
     revalidatePath(COMPETENCIES_PATH);
+    revalidatePath('/hr/competencies');
     revalidatePath(HOME_PATH);
+    revalidatePath('/dashboard');
     if (competencyId) {
       revalidatePath(`${COMPETENCIES_PATH}/${competencyId}`);
+      revalidatePath(`/hr/competencies/${competencyId}`);
     }
     
     // Invalidate cache tags used by 'use cache' functions
@@ -35,8 +38,111 @@ export async function revalidateCompetencyTags(competencyId?: string) {
   }
 }
 
-
 import { fetchApi } from '@/services/api';
+import { getAuthHeaders } from '@/services/roleApi';
+import type { Competency } from '@/types/domain';
+
+// Competency form data type
+export type CompetencyFormData = {
+  name: string;
+  description?: string;
+  category: string;
+  level: string;
+  isActive: boolean;
+  approvalStatus: string;
+  standardCodes?: Record<string, unknown>;
+};
+
+// Action result types for type safety
+export type ActionSuccessResult<T = undefined> = {
+  success: true;
+  message: string;
+  data?: T;
+};
+
+export type ActionErrorResult = {
+  success: false;
+  message: string;
+};
+
+export type ActionResult<T = undefined> = ActionSuccessResult<T> | ActionErrorResult;
+
+/**
+ * Server Action: Create a new competency
+ */
+export async function createCompetencyAction(data: CompetencyFormData): Promise<ActionResult<Competency>> {
+  try {
+    console.log('[createCompetencyAction] Received data:', JSON.stringify(data, null, 2));
+    const authHeaders = await getAuthHeaders();
+    const newCompetency = await fetchApi<Competency>('/competencies', {
+      method: 'POST',
+      body: JSON.stringify(data),
+      cache: 'no-store',
+      authHeaders,
+    });
+
+    await revalidateCompetencyTags();
+
+    return { 
+      success: true, 
+      message: 'Competency created successfully.',
+      data: newCompetency 
+    };
+  } catch (error) {
+    console.error('[createCompetencyAction] Error:', error);
+    const errorMessage = error instanceof Error ? error.message : UNKNOWN_ERROR_MESSAGE;
+    return { success: false, message: `Failed to create competency: ${errorMessage}` };
+  }
+}
+
+/**
+ * Server Action: Update an existing competency
+ */
+export async function updateCompetencyAction(competencyId: string, data: CompetencyFormData): Promise<ActionResult<Competency>> {
+  try {
+    console.log('[updateCompetencyAction] Received data:', JSON.stringify(data, null, 2));
+    const authHeaders = await getAuthHeaders();
+    const updatedCompetency = await fetchApi<Competency>(`/competencies/${competencyId}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+      cache: 'no-store',
+      authHeaders,
+    });
+
+    await revalidateCompetencyTags(competencyId);
+
+    return { 
+      success: true, 
+      message: 'Competency updated successfully.',
+      data: updatedCompetency 
+    };
+  } catch (error) {
+    console.error('[updateCompetencyAction] Error:', error);
+    const errorMessage = error instanceof Error ? error.message : UNKNOWN_ERROR_MESSAGE;
+    return { success: false, message: `Failed to update competency: ${errorMessage}` };
+  }
+}
+
+/**
+ * Server Action: Delete a competency
+ */
+export async function deleteCompetencyAction(competencyId: string): Promise<ActionResult> {
+  try {
+    const authHeaders = await getAuthHeaders();
+    await fetchApi(`/competencies/${competencyId}`, {
+      method: 'DELETE',
+      cache: 'no-store',
+      authHeaders,
+    });
+
+    await revalidateCompetencyTags(competencyId);
+
+    return { success: true, message: 'Competency deleted successfully.' };
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : UNKNOWN_ERROR_MESSAGE;
+    return { success: false, message: `Failed to delete competency: ${errorMessage}` };
+  }
+}
 
 // This is a simplified type for the form data.
 // For a real app, this might be shared or generated from the Zod schema.
@@ -158,21 +264,16 @@ export async function updateIndicatorQuestionsAction(indicatorId: string, questi
 
 export async function deleteCompetency(competencyId: string) {
   try {
+    const authHeaders = await getAuthHeaders();
     // First, perform the delete operation (returns null for successful DELETE)
     await fetchApi(`/competencies/${competencyId}`, {
       method: 'DELETE',
       cache: 'no-store',
+      authHeaders,
     });
 
-    // Try to revalidate paths, but don't let revalidation errors fail the delete
-    try {
-      revalidatePath('/competencies');
-      revalidatePath(`/competencies/${competencyId}`);
-      revalidatePath('/'); // Dashboard page
-    } catch {
-      // Revalidation failed but the delete was successful - this is acceptable
-      // We won't throw here since the main operation (deletion) succeeded
-    }
+    // Revalidate all competency-related paths and cache tags
+    await revalidateCompetencyTags(competencyId);
 
     return { success: true };
   } catch (error) {
@@ -183,10 +284,12 @@ export async function deleteCompetency(competencyId: string) {
 
 export async function deleteIndicator(indicatorId: string, competencyId?: string) {
   try {
+    const authHeaders = await getAuthHeaders();
     // Perform the delete operation (returns null for successful DELETE)
     await fetchApi(`/behavioral-indicators/${indicatorId}`, {
       method: 'DELETE',
       cache: 'no-store',
+      authHeaders,
     });
 
     // Try to revalidate paths, but don't let revalidation errors fail the delete
@@ -223,10 +326,12 @@ export async function deleteIndicator(indicatorId: string, competencyId?: string
 
 export async function deleteAssessmentQuestion(questionId: string, competencyId?: string, indicatorId?: string) {
   try {
+    const authHeaders = await getAuthHeaders();
     // Perform the delete operation (returns null for successful DELETE)
     await fetchApi(`/questions/${questionId}`, {
       method: 'DELETE',
       cache: 'no-store',
+      authHeaders,
     });
 
     // Try to revalidate paths, but don't let revalidation errors fail the delete
@@ -275,10 +380,12 @@ export async function revalidateTestTemplateTags(templateId?: string) {
 
 export async function deleteTestTemplate(templateId: string) {
   try {
+    const authHeaders = await getAuthHeaders();
     // Perform the delete operation
     await fetchApi(`/v1/tests/templates/${templateId}`, {
       method: 'DELETE',
       cache: 'no-store',
+      authHeaders,
     });
 
     // Revalidate test template paths

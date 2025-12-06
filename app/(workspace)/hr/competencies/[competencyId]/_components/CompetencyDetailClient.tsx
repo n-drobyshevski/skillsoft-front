@@ -20,14 +20,16 @@ export default function CompetencyDetailClient({ competency, children }: Compete
       const result = await deleteCompetency(competency.id);
       if (result && result.success) {
         toast.success('Competency deleted successfully');
+        // Force refresh to ensure cache is cleared, then navigate
+        router.refresh();
         // Use replace instead of push to avoid back navigation to deleted page
-        router.replace('/competencies');
+        router.replace('/hr/competencies');
       }
     } catch (error) {
       // Handle specific 404 case
       if (error instanceof Error && error.message.includes('404')) {
         toast.error('Competency not found. It may have already been deleted.');
-        router.replace('/competencies');
+        router.replace('/hr/competencies');
       } else {
         toast.error('Failed to delete competency. Please try again.');
       }

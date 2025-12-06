@@ -142,23 +142,148 @@ export function supportsVectorWeights(type: QuestionType): boolean {
 // STANDARD CODE INTERFACES
 // ============================================
 
-export interface StandardCodeMapping {
+/**
+ * Big Five Personality Dimensions (OCEAN Model)
+ * Used for psychological profiling and personality-based competency mapping.
+ */
+export type BigFiveDimension = 
+  | 'OPENNESS'
+  | 'CONSCIENTIOUSNESS' 
+  | 'EXTRAVERSION'
+  | 'AGREEABLENESS'
+  | 'EMOTIONAL_STABILITY';
+
+/**
+ * Display information for Big Five dimensions
+ */
+export const BigFiveInfo: Record<BigFiveDimension, { displayName: string; description: string; color: string }> = {
+  OPENNESS: {
+    displayName: 'Openness',
+    description: 'Creativity, curiosity, and openness to new experiences',
+    color: 'purple'
+  },
+  CONSCIENTIOUSNESS: {
+    displayName: 'Conscientiousness',
+    description: 'Organization, dependability, and self-discipline',
+    color: 'green'
+  },
+  EXTRAVERSION: {
+    displayName: 'Extraversion',
+    description: 'Sociability, assertiveness, and positive emotions',
+    color: 'orange'
+  },
+  AGREEABLENESS: {
+    displayName: 'Agreeableness',
+    description: 'Cooperation, trust, and concern for others',
+    color: 'blue'
+  },
+  EMOTIONAL_STABILITY: {
+    displayName: 'Emotional Stability',
+    description: 'Calmness, resilience, and stress tolerance',
+    color: 'teal'
+  }
+};
+
+/**
+ * All Big Five dimensions as an array for iteration
+ */
+export const BIG_FIVE_DIMENSIONS: BigFiveDimension[] = [
+  'OPENNESS',
+  'CONSCIENTIOUSNESS',
+  'EXTRAVERSION',
+  'AGREEABLENESS',
+  'EMOTIONAL_STABILITY'
+];
+
+/**
+ * O*NET Reference DTO - matches backend StandardCodesDto.OnetRefDto
+ * O*NET codes follow patterns like "2.B.1.a" for abilities, skills, knowledge
+ * 
+ * NOTE: Uses camelCase to match Java record field names for proper Jackson deserialization.
+ * The backend may serialize to snake_case but accepts camelCase for deserialization.
+ */
+export interface OnetRefDto {
+  /** O*NET element code (e.g., "2.B.1.a") */
   code: string;
-  name: string;
-  confidence: "LOW" | "MODERATE" | "HIGH" | "VERIFIED";
+  /** Human-readable title from O*NET database */
+  title?: string;
+  /** Type of O*NET element: ability, skill, knowledge, work_activity, work_style */
+  elementType?: 'ability' | 'skill' | 'knowledge' | 'work_activity' | 'work_style' | 'interest' | 'work_value' | 'work_context';
 }
 
+/**
+ * ESCO Reference DTO - matches backend StandardCodesDto.EscoRefDto
+ * ESCO URIs are persistent identifiers from the European Commission's ESCO classification
+ * 
+ * NOTE: Uses camelCase to match Java record field names.
+ */
+export interface EscoRefDto {
+  /** ESCO persistent URI (e.g., "http://data.europa.eu/esco/skill/...") */
+  uri: string;
+  /** Human-readable label from ESCO */
+  title?: string;
+  /** Type classification: skill, competence, knowledge, language, transversal */
+  skillType?: 'skill' | 'competence' | 'knowledge' | 'language' | 'transversal';
+}
+
+/**
+ * Big Five Reference DTO - matches backend StandardCodesDto.BigFiveRefDto
+ * Follows the same pattern as OnetRefDto and EscoRefDto.
+ * 
+ * Uses simple field names: trait (like code in ONET), title, facet (like elementType/skillType)
+ */
+export interface BigFiveRefDto {
+  /** Big Five personality dimension code (e.g., "CONSCIENTIOUSNESS") */
+  trait: BigFiveDimension;
+  /** Human-readable display name (e.g., "Conscientiousness") */
+  title?: string;
+  /** Optional sub-facet of the trait (e.g., "achievement_striving", "self_discipline") */
+  facet?: string;
+}
+
+/**
+ * Helper to get Big Five dimension from BigFiveRefDto
+ */
+export function getEffectiveBigFive(bigFiveRef?: BigFiveRefDto): BigFiveDimension | null {
+  if (!bigFiveRef) return null;
+  return bigFiveRef.trait || null;
+}
+
+/**
+ * Helper to get effective facet from BigFiveRefDto
+ */
+export function getEffectiveDimension(bigFiveRef?: BigFiveRefDto): string | null {
+  if (!bigFiveRef) return null;
+  return bigFiveRef.facet || null;
+}
+
+/**
+ * Standard Codes DTO - matches backend StandardCodesDto
+ * Type-safe container for O*NET, ESCO, and Big Five standard mappings
+ * 
+ * NOTE: Uses camelCase to match Java record field names.
+ */
+export interface StandardCodesDto {
+  bigFiveRef?: BigFiveRefDto;
+  onetRef?: OnetRefDto;
+  escoRef?: EscoRefDto;
+}
+
+// Legacy interfaces for backwards compatibility
+/** @deprecated Use OnetRefDto instead */
 export interface OnetReference {
   code: string;
   name: string;
   similarity?: number;
 }
 
+/** @deprecated Use EscoRefDto instead */
 export interface EscoReference {
   uri: string;
   label: string;
 }
 
+/** @deprecated Use GlobalCategoryDto.domain with "big_five" prefix */
 export type BigFiveCategory = 
   | 'BIG_FIVE_OPENNESS'
   | 'BIG_FIVE_CONSCIENTIOUSNESS'
@@ -167,17 +292,25 @@ export type BigFiveCategory =
   | 'BIG_FIVE_NEUROTICISM'
   | 'BIG_FIVE_EMOTIONAL_STABILITY';
 
+/** @deprecated Use StandardCodesDto instead */
+export interface StandardCodeMapping {
+  code: string;
+  name: string;
+  confidence: "LOW" | "MODERATE" | "HIGH" | "VERIFIED";
+}
+
+/** @deprecated Use StandardCodesDto instead */
 export interface TripleStandardCodes {
-  global_category?: BigFiveCategory;
-  onet_ref?: OnetReference;
-  esco_ref?: EscoReference;
+  bigFiveRef?: BigFiveRefDto | BigFiveCategory;
+  onetRef?: OnetRefDto | OnetReference;
+  escoRef?: EscoRefDto | EscoReference;
   ESCO?: StandardCodeMapping;
   ONET?: StandardCodeMapping;
   BIG_FIVE?: StandardCodeMapping;
-  [key: string]: StandardCodeMapping | OnetReference | EscoReference | BigFiveCategory | undefined;
+  [key: string]: StandardCodeMapping | OnetRefDto | OnetReference | EscoRefDto | EscoReference | BigFiveRefDto | BigFiveCategory | undefined;
 }
 
-/** @deprecated Use TripleStandardCodes instead */
+/** @deprecated Use StandardCodesDto instead */
 export interface StandardCodes {
   ESCO?: StandardCodeMapping;
   ONET?: StandardCodeMapping;
@@ -245,7 +378,7 @@ export interface Competency {
   description: string;
   category: CompetencyCategory;
   level: ProficiencyLevel;
-  standardCodes?: TripleStandardCodes;
+  standardCodes?: StandardCodesDto;
   isActive: boolean;
   approvalStatus: ApprovalStatus;
   behavioralIndicators?: BehavioralIndicator[];
@@ -287,30 +420,30 @@ export function isContextNeutral(question: AssessmentQuestion): boolean {
 // COMPETENCY HELPER FUNCTIONS
 // ============================================
 
-export function getBigFiveCategory(competency: Competency): BigFiveCategory | undefined {
-  return competency.standardCodes?.global_category;
+export function getBigFiveRef(competency: Competency): BigFiveRefDto | undefined {
+  return competency.standardCodes?.bigFiveRef;
 }
 
-export function getOnetRef(competency: Competency): OnetReference | undefined {
-  return competency.standardCodes?.onet_ref;
+export function getOnetRef(competency: Competency): OnetRefDto | undefined {
+  return competency.standardCodes?.onetRef;
 }
 
 export function getOnetCode(competency: Competency): string | undefined {
-  return competency.standardCodes?.onet_ref?.code;
+  return competency.standardCodes?.onetRef?.code;
 }
 
-export function getEscoRef(competency: Competency): EscoReference | undefined {
-  return competency.standardCodes?.esco_ref;
+export function getEscoRef(competency: Competency): EscoRefDto | undefined {
+  return competency.standardCodes?.escoRef;
 }
 
 export function getEscoUri(competency: Competency): string | undefined {
-  return competency.standardCodes?.esco_ref?.uri;
+  return competency.standardCodes?.escoRef?.uri;
 }
 
 export function hasTripleStandardMapping(competency: Competency): boolean {
   const codes = competency.standardCodes;
   if (!codes) return false;
-  return !!(codes.global_category && codes.onet_ref && codes.esco_ref);
+  return !!(codes.bigFiveRef && codes.onetRef && codes.escoRef);
 }
 
 // ============================================

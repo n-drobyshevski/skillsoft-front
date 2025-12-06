@@ -1,3 +1,4 @@
+/* eslint-disable security/detect-object-injection */
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { competenciesApi, assessmentQuestionsApi } from "@/services/api";
@@ -12,6 +13,10 @@ import {
 	Plus,
     Info,
     BarChart3,
+    Globe,
+    Briefcase,
+    Brain,
+    ExternalLink,
 } from "lucide-react";
 import { Suspense } from 'react';
 
@@ -23,9 +28,12 @@ import QuestionsListSkeleton from './_components/QuestionsListSkeleton';
 import type {
 	BehavioralIndicator,
 	AssessmentQuestion,
+	StandardCodesDto,
+	BigFiveDimension,
 } from "@/types/domain";
-import { ProficiencyLevel } from "@/types/domain";
+import { ProficiencyLevel, BigFiveInfo, getEffectiveBigFive, getEffectiveDimension } from "@/types/domain";
 import { levelToColor, approvalStatusToColor } from "@/lib/ui-utils";
+import { getBigFiveMapping } from "@/hooks/useBigFiveMapper";
 
 interface CompetencyDetailPageProps {
 	params: { competencyId: string };
@@ -222,7 +230,7 @@ export default async function CompetencyDetailPage({
 									variant="secondary" 
 									className={`${approvalStatusToColor(competency.approvalStatus)} font-medium text-xs px-2.5 py-1`}
 								>
-									{competency.approvalStatus.replace("_", " ")}
+									{(competency.approvalStatus ?? "DRAFT").replace("_", " ")}
 								</Badge>
 							</div>
 							
@@ -247,6 +255,9 @@ export default async function CompetencyDetailPage({
 							</div>
 						</CardContent>
 					</Card>
+
+					{/* Standards Mapping Card */}
+					<StandardsCard standardCodes={competency.standardCodes} />
 
 					{/* Weight Distribution Chart - Only show if there are indicators */}
 					{competency.behavioralIndicators && competency.behavioralIndicators.length > 0 && (
@@ -322,6 +333,179 @@ export default async function CompetencyDetailPage({
 	);
 }
 
+// Standards Card Component
+function StandardsCard({ standardCodes }: { standardCodes?: StandardCodesDto }) {
+	const hasOnet: boolean = !!standardCodes?.onetRef;
+	const hasEsco: boolean = !!standardCodes?.escoRef;
+	const hasBigFive: boolean = !!standardCodes?.bigFiveRef;
+	
+	// Get stored Big Five or compute from O*NET mapping
+	const storedBigFive: BigFiveDimension | null = getEffectiveBigFive(standardCodes?.bigFiveRef);
+	const storedFacet: string | null = getEffectiveDimension(standardCodes?.bigFiveRef);
+	
+	// If no stored bigFiveRef but we have O*NET, compute Big Five from mapping
+	const computedMapping = !hasBigFive && hasOnet && standardCodes?.onetRef?.code 
+		? getBigFiveMapping(standardCodes.onetRef.code)
+		: null;
+	
+	// Use stored Big Five or computed from O*NET mapping
+	const bigFive: BigFiveDimension | null = storedBigFive || (computedMapping?.bigFive ?? null);
+	const facet: string | null = storedFacet || (computedMapping?.dimension ?? null);
+	const isComputed: boolean = !storedBigFive && !!computedMapping?.bigFive;
+	
+	const hasAny: boolean = hasOnet || hasEsco || hasBigFive || !!bigFive;
+
+	if (!hasAny) {
+		return (
+			<Card className="border-none shadow-sm bg-muted/30">
+				<CardHeader className="pb-3">
+					<CardTitle className="text-base font-medium flex items-center gap-2.5 text-foreground">
+						<div className="p-1.5 rounded-lg bg-gray-100 dark:bg-gray-900/30">
+							<Globe className="w-3.5 h-3.5 text-gray-600 dark:text-gray-400" />
+						</div>
+						Standards Mapping
+					</CardTitle>
+				</CardHeader>
+				<CardContent className="pt-0">
+					<p className="text-sm text-muted-foreground">
+						No standards have been mapped to this competency yet.
+					</p>
+				</CardContent>
+			</Card>
+		);
+	}
+
+	return (
+		<Card className="border-none shadow-sm bg-muted/30">
+			<CardHeader className="pb-3">
+				<CardTitle className="text-base font-medium flex items-center gap-2.5 text-foreground">
+					<div className="p-1.5 rounded-lg bg-indigo-100 dark:bg-indigo-900/30">
+						<Globe className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
+					</div>
+					Standards Mapping
+				</CardTitle>
+			</CardHeader>
+			<CardContent className="pt-0 space-y-3">
+				{/* O*NET Standard */}
+				{hasOnet && (
+					<div className="p-3 rounded-lg bg-orange-50 dark:bg-orange-950/20 border border-orange-200 dark:border-orange-800">
+						<div className="flex items-start gap-2.5">
+							<div className="p-1.5 rounded bg-orange-100 dark:bg-orange-900/50">
+								<Briefcase className="w-3.5 h-3.5 text-orange-600 dark:text-orange-400" />
+							</div>
+							<div className="flex-1 min-w-0">
+								<div className="flex items-center gap-2">
+									<span className="text-xs font-semibold text-orange-700 dark:text-orange-300 uppercase tracking-wide">O*NET</span>
+									<Badge variant="secondary" className="text-[10px] px-1.5 py-0 bg-orange-100 text-orange-700 dark:bg-orange-900/50 dark:text-orange-300">
+										{standardCodes?.onetRef?.elementType?.replace('_', ' ')}
+									</Badge>
+								</div>
+								<p className="text-sm font-medium text-foreground mt-1 line-clamp-2">
+									{standardCodes?.onetRef?.title || 'Untitled'}
+								</p>
+								<p className="text-xs text-muted-foreground font-mono mt-0.5">
+									{standardCodes?.onetRef?.code}
+								</p>
+							</div>
+						</div>
+					</div>
+				)}
+
+				{/* ESCO Standard */}
+				{hasEsco && (
+					<div className="p-3 rounded-lg bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800">
+						<div className="flex items-start gap-2.5">
+							<div className="p-1.5 rounded bg-blue-100 dark:bg-blue-900/50">
+								<Globe className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
+							</div>
+							<div className="flex-1 min-w-0">
+								<div className="flex items-center gap-2">
+									<span className="text-xs font-semibold text-blue-700 dark:text-blue-300 uppercase tracking-wide">ESCO</span>
+									{standardCodes?.escoRef?.skillType && (
+										<Badge variant="secondary" className="text-[10px] px-1.5 py-0 bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300">
+											{standardCodes?.escoRef?.skillType}
+										</Badge>
+									)}
+								</div>
+								<p className="text-sm font-medium text-foreground mt-1 line-clamp-2">
+									{standardCodes?.escoRef?.title || 'Untitled'}
+								</p>
+								<a 
+									href={standardCodes?.escoRef?.uri}
+									target="_blank"
+									rel="noopener noreferrer"
+									className="inline-flex items-center gap-1 text-xs text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 mt-1"
+								>
+									<ExternalLink className="w-3 h-3" />
+									View in ESCO
+								</a>
+							</div>
+						</div>
+					</div>
+				)}
+
+				{/* Big Five Personality */}
+				{bigFive && (
+					<div className="p-3 rounded-lg bg-teal-50 dark:bg-teal-950/20 border border-teal-200 dark:border-teal-800">
+						<div className="flex items-start gap-2.5">
+							<div className="p-1.5 rounded bg-teal-100 dark:bg-teal-900/50">
+								<Brain className="w-3.5 h-3.5 text-teal-600 dark:text-teal-400" />
+							</div>
+							<div className="flex-1 min-w-0">
+								<div className="flex items-center gap-2 flex-wrap">
+									<span className="text-xs font-semibold text-teal-700 dark:text-teal-300 uppercase tracking-wide">Big Five Personality</span>
+									{isComputed && (
+										<Badge variant="secondary" className="text-[9px] px-1.5 py-0 bg-teal-100/80 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400 gap-0.5">
+											<Info className="w-2.5 h-2.5" />
+											Auto-detected
+										</Badge>
+									)}
+									{facet && (
+										<Badge variant="secondary" className="text-[10px] px-1.5 py-0 bg-teal-100 text-teal-700 dark:bg-teal-900/50 dark:text-teal-300">
+											{facet.replace(/_/g, ' ')}
+										</Badge>
+									)}
+								</div>
+								<p className="text-sm font-medium text-foreground mt-1">
+									{BigFiveInfo[bigFive]?.displayName}
+								</p>
+								<p className="text-xs text-muted-foreground mt-0.5">
+									{BigFiveInfo[bigFive]?.description}
+								</p>
+							</div>
+						</div>
+					</div>
+				)}
+
+				{/* Big Five fallback - when bigFiveRef exists but no trait extracted */}
+				{hasBigFive && !bigFive && standardCodes?.bigFiveRef && (
+					<div className="p-3 rounded-lg bg-purple-50 dark:bg-purple-950/20 border border-purple-200 dark:border-purple-800">
+						<div className="flex items-start gap-2.5">
+							<div className="p-1.5 rounded bg-purple-100 dark:bg-purple-900/50">
+								<Brain className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" />
+							</div>
+							<div className="flex-1 min-w-0">
+								<div className="flex items-center gap-2">
+									<span className="text-xs font-semibold text-purple-700 dark:text-purple-300 uppercase tracking-wide">Big Five</span>
+								</div>
+								{standardCodes.bigFiveRef.title && (
+									<p className="text-sm font-medium text-foreground mt-1 capitalize">
+										{standardCodes.bigFiveRef.title}
+									</p>
+								)}
+								{standardCodes.bigFiveRef.facet && (
+									<p className="text-xs text-muted-foreground mt-0.5 capitalize">
+										{standardCodes.bigFiveRef.facet.replace(/_/g, ' ')}
+									</p>
+								)}
+							</div>
+						</div>
+					</div>
+				)}
+			</CardContent>
+		</Card>
+	);
+}
 
 
 function IndicatorCard({
