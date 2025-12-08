@@ -12,6 +12,11 @@ html {
 	border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
+.dark .glass {
+	background: rgba(0, 0, 0, 0.2);
+	border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
 /* Subtle animations for modern UI */
 @keyframes float {
 
@@ -371,6 +376,20 @@ html {
 		0 20px 40px rgba(0, 0, 0, 0.06);
 }
 
+.dark .shadow-modern {
+	box-shadow:
+		0 0 0 1px rgba(255, 255, 255, 0.03),
+		0 2px 4px rgba(0, 0, 0, 0.2),
+		0 12px 24px rgba(0, 0, 0, 0.3);
+}
+
+.dark .shadow-modern-lg {
+	box-shadow:
+		0 0 0 1px rgba(255, 255, 255, 0.03),
+		0 8px 16px rgba(0, 0, 0, 0.3),
+		0 20px 40px rgba(0, 0, 0, 0.4);
+}
+
 /* Responsive spacing utilities */
 .space-modern>*+* {
 	margin-top: clamp(1rem, 3vw, 2rem);
@@ -427,6 +446,16 @@ html {
 	background: rgba(255, 255, 255, 0.08);
 	border-color: rgba(255, 255, 255, 0.2);
 	transform: translateY(-4px);
+}
+
+.dark .card-modern {
+	background: rgba(255, 255, 255, 0.02);
+	border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.dark .card-modern:hover {
+	background: rgba(255, 255, 255, 0.05);
+	border-color: rgba(255, 255, 255, 0.12);
 }
 
 /* Minimalist loading states */
