@@ -8,12 +8,13 @@ import {
 } from "@/components/ui/resizable";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import PageHeader from "@/components/common/PageHeader";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
 import CompetencyLibrary from "./_components/CompetencyLibrary";
 import BlueprintEditor from "./_components/BlueprintEditor";
 import SimulationPanel from "./_components/SimulationPanel";
 import { BlueprintState, HealthStatus } from "./actions";
-import { ArrowLeft, FileEdit } from "lucide-react";
+import { ArrowLeft, Sparkles, Layers, Save, Play } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
@@ -23,14 +24,15 @@ interface BlueprintCanvasPageProps {
 
 /**
  * Loading skeleton for the competency library panel
+ * Modern airy design with generous spacing
  */
 function CompetencyLibrarySkeleton() {
   return (
-    <div className="flex flex-col gap-3 p-4">
-      <Skeleton className="h-10 w-full" />
-      <div className="space-y-2">
-        {Array.from({ length: 8 }).map((_, i) => (
-          <Skeleton key={i} className="h-16 w-full" />
+    <div className="flex flex-col gap-4 p-6">
+      <Skeleton className="h-11 w-full rounded-xl" />
+      <div className="space-y-3">
+        {Array.from({ length: 6 }).map((_, i) => (
+          <Skeleton key={i} className="h-20 w-full rounded-xl" />
         ))}
       </div>
     </div>
@@ -39,16 +41,17 @@ function CompetencyLibrarySkeleton() {
 
 /**
  * Loading skeleton for the simulation panel
+ * Clean, spacious skeleton with modern rounded corners
  */
 function SimulationPanelSkeleton() {
   return (
-    <div className="flex flex-col gap-3 p-4">
-      <Skeleton className="h-8 w-3/4" />
-      <Skeleton className="h-10 w-full" />
-      <div className="space-y-2 mt-4">
-        <Skeleton className="h-20 w-full" />
-        <Skeleton className="h-20 w-full" />
-        <Skeleton className="h-40 w-full" />
+    <div className="flex flex-col gap-4 p-6">
+      <Skeleton className="h-9 w-2/3 rounded-lg" />
+      <Skeleton className="h-12 w-full rounded-xl" />
+      <div className="space-y-3 mt-2">
+        <Skeleton className="h-24 w-full rounded-xl" />
+        <Skeleton className="h-24 w-full rounded-xl" />
+        <Skeleton className="h-48 w-full rounded-xl" />
       </div>
     </div>
   );
@@ -157,34 +160,56 @@ export default async function BlueprintCanvasPage({ params }: BlueprintCanvasPag
   }));
 
   return (
-    <div className="flex h-full flex-col">
-      {/* Header */}
-      <div className="flex items-center justify-between border-b px-4 py-3">
-        <div className="flex items-center gap-4">
+    <div className="flex h-full flex-col bg-muted/30">
+      {/* Modern Airy Header - Professional Design Tool Style */}
+      <header className="flex items-center justify-between border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-6 py-4">
+        <div className="flex items-center gap-6">
           <Link href={`/test-templates/${id}`}>
-            <Button variant="ghost" size="icon">
+            <Button variant="ghost" size="icon" className="rounded-xl hover:bg-muted/80">
               <ArrowLeft className="h-4 w-4" />
             </Button>
           </Link>
-          <div>
-            <h1 className="text-lg font-semibold flex items-center gap-2">
-              <FileEdit className="h-5 w-5" />
-              Blueprint Canvas
-            </h1>
-            <p className="text-sm text-muted-foreground">{template.name}</p>
+          
+          <Separator orientation="vertical" className="h-8" />
+          
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
+              <Layers className="h-5 w-5 text-primary" />
+            </div>
+            <div>
+              <h1 className="text-lg font-semibold tracking-tight">
+                Blueprint Canvas
+              </h1>
+              <p className="text-sm text-muted-foreground">{template.name}</p>
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* 3-Column Resizable Layout */}
-      <div className="flex-1 overflow-hidden">
-        <ResizablePanelGroup direction="horizontal" className="h-full">
+        {/* Action Toolbar */}
+        <div className="flex items-center gap-3">
+          <Badge variant="outline" className="gap-1.5 px-3 py-1.5 font-medium">
+            <Sparkles className="h-3.5 w-3.5" />
+            Draft
+          </Badge>
+          <Button variant="outline" size="sm" className="gap-2 rounded-xl">
+            <Save className="h-4 w-4" />
+            Save
+          </Button>
+          <Button size="sm" className="gap-2 rounded-xl">
+            <Play className="h-4 w-4" />
+            Publish
+          </Button>
+        </div>
+      </header>
+
+      {/* 3-Column Resizable Layout with Modern Spacing */}
+      <div className="flex-1 overflow-hidden p-3">
+        <ResizablePanelGroup direction="horizontal" className="h-full rounded-xl border bg-background shadow-sm">
           {/* Left Panel: Competency Library */}
           <ResizablePanel 
-            defaultSize={20} 
+            defaultSize={18} 
             minSize={15} 
-            maxSize={30}
-            className="border-r"
+            maxSize={25}
           >
             <Suspense fallback={<CompetencyLibrarySkeleton />}>
               <CompetencyLibrary 
@@ -194,10 +219,10 @@ export default async function BlueprintCanvasPage({ params }: BlueprintCanvasPag
             </Suspense>
           </ResizablePanel>
 
-          <ResizableHandle withHandle />
+          <ResizableHandle withHandle className="bg-muted/50 data-[panel-group-direction=horizontal]:w-1" />
 
-          {/* Center Panel: Blueprint Editor */}
-          <ResizablePanel defaultSize={55} minSize={40}>
+          {/* Center Panel: Blueprint Editor - Main Canvas */}
+          <ResizablePanel defaultSize={54} minSize={40}>
             <ScrollArea className="h-full">
               <BlueprintEditor 
                 initialState={initialState}
@@ -206,14 +231,13 @@ export default async function BlueprintCanvasPage({ params }: BlueprintCanvasPag
             </ScrollArea>
           </ResizablePanel>
 
-          <ResizableHandle withHandle />
+          <ResizableHandle withHandle className="bg-muted/50 data-[panel-group-direction=horizontal]:w-1" />
 
-          {/* Right Panel: Simulation */}
+          {/* Right Panel: Simulation - Live Preview */}
           <ResizablePanel 
-            defaultSize={25} 
+            defaultSize={28} 
             minSize={20} 
             maxSize={35}
-            className="border-l"
           >
             <Suspense fallback={<SimulationPanelSkeleton />}>
               <SimulationPanel 

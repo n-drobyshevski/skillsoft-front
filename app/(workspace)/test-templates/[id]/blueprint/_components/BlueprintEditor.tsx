@@ -1,29 +1,27 @@
 'use client';
 
 import React, { useOptimistic, useTransition, useState, useCallback } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Slider } from '@/components/ui/slider';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { toast } from 'sonner';
 import { 
   GripVertical, 
   Trash2, 
   Plus,
-  Save,
   Loader2,
-  Settings2,
   Target,
   Clock,
   BarChart3,
   Briefcase,
   Users,
-  Brain
+  Brain,
+  Layers,
+  Zap
 } from 'lucide-react';
 import { 
   BlueprintState, 
@@ -36,7 +34,8 @@ import { cn } from '@/lib/utils';
 
 interface BlueprintEditorProps {
   initialState: BlueprintState;
-  availableCompetencies: {
+  /** Available competencies from library (for validation) */
+  availableCompetencies?: {
     id: string;
     name: string;
     category: string;
@@ -89,21 +88,31 @@ function blueprintReducer(
 }
 
 /**
- * Strategy icon mapping
+ * Strategy configuration with icons and descriptions - dark mode support
  */
-function getStrategyIcon(strategy: BlueprintState['strategy']) {
-  switch (strategy) {
-    case 'UNIVERSAL_BASELINE':
-      return Brain;
-    case 'TARGETED_FIT':
-      return Briefcase;
-    case 'DYNAMIC_GAP_ANALYSIS':
-      return Users;
-  }
-}
+const strategyConfig = {
+  UNIVERSAL_BASELINE: {
+    icon: Brain,
+    label: 'Universal Baseline',
+    description: 'Broad assessment of core competencies',
+    color: 'text-violet-600 dark:text-violet-400 bg-violet-50 dark:bg-violet-950/50',
+  },
+  TARGETED_FIT: {
+    icon: Briefcase,
+    label: 'Targeted Job Fit',
+    description: 'Role-specific competency evaluation',
+    color: 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/50',
+  },
+  DYNAMIC_GAP_ANALYSIS: {
+    icon: Users,
+    label: 'Team Gap Analysis',
+    description: 'Fill competency gaps in existing teams',
+    color: 'text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50',
+  },
+};
 
 /**
- * Competency card in the canvas
+ * Modern Competency card - Clean, spacious design
  */
 function CompetencyCard({
   competency,
@@ -118,39 +127,47 @@ function CompetencyCard({
 }) {
   return (
     <Card className={cn(
-      "transition-all",
-      isPending && "opacity-70"
+      "group transition-all duration-200 hover:shadow-md",
+      "border-l-4 border-l-primary/60",
+      isPending && "opacity-60"
     )}>
-      <CardContent className="p-4">
-        <div className="flex items-start gap-3">
-          <GripVertical className="h-5 w-5 text-muted-foreground mt-1 cursor-grab" />
+      <CardContent className="p-5">
+        <div className="flex items-start gap-4">
+          {/* Drag Handle */}
+          <div className="mt-1 cursor-grab opacity-40 group-hover:opacity-100 transition-opacity">
+            <GripVertical className="h-5 w-5 text-muted-foreground" />
+          </div>
           
-          <div className="flex-1 space-y-3">
-            <div className="flex items-center justify-between">
-              <div>
-                <h4 className="font-medium">{competency.name}</h4>
-                <Badge variant="outline" className="text-xs mt-1">
-                  {competency.category.replace('_', ' ')}
+          {/* Main Content */}
+          <div className="flex-1 space-y-4">
+            {/* Header Row */}
+            <div className="flex items-start justify-between gap-4">
+              <div className="space-y-1">
+                <h4 className="font-semibold text-base">{competency.name}</h4>
+                <Badge variant="secondary" className="text-xs font-normal">
+                  {competency.category.replace(/_/g, ' ')}
                 </Badge>
               </div>
               <Button 
                 variant="ghost" 
                 size="icon"
+                className="h-8 w-8 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity hover:bg-destructive/10 hover:text-destructive"
                 onClick={onRemove}
                 disabled={isPending}
               >
-                <Trash2 className="h-4 w-4 text-muted-foreground hover:text-destructive" />
+                <Trash2 className="h-4 w-4" />
               </Button>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              {/* Question Count Slider */}
-              <div className="space-y-2">
-                <div className="flex justify-between">
-                  <Label className="text-xs">Questions</Label>
-                  <span className="text-xs text-muted-foreground">
+            {/* Sliders Row - Modern design */}
+            <div className="grid grid-cols-2 gap-6">
+              {/* Question Count */}
+              <div className="space-y-3">
+                <div className="flex justify-between items-center">
+                  <Label className="text-sm font-medium">Questions</Label>
+                  <Badge variant="outline" className="text-xs tabular-nums">
                     {competency.questionCount}
-                  </span>
+                  </Badge>
                 </div>
                 <Slider
                   value={[competency.questionCount]}
@@ -159,47 +176,51 @@ function CompetencyCard({
                   step={1}
                   onValueChange={([value]) => onUpdate({ questionCount: value })}
                   disabled={isPending}
+                  className="[&_[role=slider]]:h-4 [&_[role=slider]]:w-4"
                 />
               </div>
 
-              {/* Weight Slider */}
-              <div className="space-y-2">
-                <div className="flex justify-between">
-                  <Label className="text-xs">Weight</Label>
-                  <span className="text-xs text-muted-foreground">
-                    {competency.weight.toFixed(1)}
-                  </span>
+              {/* Weight */}
+              <div className="space-y-3">
+                <div className="flex justify-between items-center">
+                  <Label className="text-sm font-medium">Weight</Label>
+                  <Badge variant="outline" className="text-xs tabular-nums">
+                    {competency.weight.toFixed(1)}x
+                  </Badge>
                 </div>
                 <Slider
                   value={[competency.weight * 10]}
-                  min={1}
+                  min={5}
                   max={20}
                   step={1}
                   onValueChange={([value]) => onUpdate({ weight: value / 10 })}
                   disabled={isPending}
+                  className="[&_[role=slider]]:h-4 [&_[role=slider]]:w-4"
                 />
               </div>
             </div>
 
-            {/* Difficulty selector */}
-            <div className="flex items-center gap-2">
-              <Label className="text-xs">Difficulty:</Label>
-              <Select 
-                value={competency.difficulty || 'INTERMEDIATE'}
-                onValueChange={(value) => onUpdate({ 
-                  difficulty: value as BlueprintCompetency['difficulty'] 
-                })}
-                disabled={isPending}
-              >
-                <SelectTrigger className="h-7 text-xs w-32">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="FOUNDATIONAL">Foundational</SelectItem>
-                  <SelectItem value="INTERMEDIATE">Intermediate</SelectItem>
-                  <SelectItem value="ADVANCED">Advanced</SelectItem>
-                </SelectContent>
-              </Select>
+            {/* Difficulty Selector - Pill buttons */}
+            <div className="flex items-center gap-3 pt-1">
+              <Label className="text-sm font-medium shrink-0">Difficulty:</Label>
+              <div className="flex gap-2">
+                {(['FOUNDATIONAL', 'INTERMEDIATE', 'ADVANCED'] as const).map((level) => (
+                  <button
+                    key={level}
+                    type="button"
+                    onClick={() => onUpdate({ difficulty: level })}
+                    disabled={isPending}
+                    className={cn(
+                      "px-3 py-1.5 text-xs font-medium rounded-full transition-all",
+                      competency.difficulty === level
+                        ? "bg-primary text-primary-foreground shadow-sm"
+                        : "bg-muted text-muted-foreground hover:bg-muted/80"
+                    )}
+                  >
+                    {level.charAt(0) + level.slice(1).toLowerCase()}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
         </div>
@@ -216,7 +237,8 @@ function CompetencyCard({
  */
 export default function BlueprintEditor({
   initialState,
-  availableCompetencies,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  availableCompetencies: _availableCompetencies,
 }: BlueprintEditorProps) {
   const [isPending, startTransition] = useTransition();
   const [isSaving, setIsSaving] = useState(false);
@@ -365,115 +387,155 @@ export default function BlueprintEditor({
     }
   };
 
-  const StrategyIcon = getStrategyIcon(optimisticState.strategy);
+  const currentStrategy = strategyConfig[optimisticState.strategy];
+  const StrategyIcon = currentStrategy.icon;
 
   return (
     <div className="p-6 space-y-6">
-      {/* Header with Strategy Selection */}
-      <Card>
-        <CardHeader className="pb-3">
-          <div className="flex items-center justify-between">
-            <CardTitle className="flex items-center gap-2">
-              <Settings2 className="h-5 w-5" />
-              Blueprint Configuration
-            </CardTitle>
-            {(isPending || isSaving) && (
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Loader2 className="h-4 w-4 animate-spin" />
-                Saving...
+      {/* Strategy Card - Modern hero section */}
+      <Card className="overflow-hidden">
+        <div className={cn(
+          "p-6 border-b",
+          currentStrategy.color
+        )}>
+          <div className="flex items-start justify-between">
+            <div className="flex items-center gap-4">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-background shadow-sm">
+                <StrategyIcon className="h-6 w-6" />
               </div>
+              <div>
+                <h3 className="font-semibold text-lg">{currentStrategy.label}</h3>
+                <p className="text-sm opacity-80">{currentStrategy.description}</p>
+              </div>
+            </div>
+            {(isPending || isSaving) && (
+              <Badge variant="secondary" className="gap-1.5">
+                <Loader2 className="h-3 w-3 animate-spin" />
+                Saving
+              </Badge>
             )}
           </div>
-        </CardHeader>
-        <CardContent className="space-y-4">
+        </div>
+        
+        <CardContent className="p-6 space-y-6">
           {/* Strategy Selector */}
-          <div className="space-y-2">
-            <Label>Assessment Strategy</Label>
-            <Select
-              value={optimisticState.strategy}
-              onValueChange={(value) => 
-                handleSettingsUpdate({ strategy: value as BlueprintState['strategy'] })
-              }
-            >
-              <SelectTrigger>
-                <div className="flex items-center gap-2">
-                  <StrategyIcon className="h-4 w-4" />
-                  <SelectValue />
-                </div>
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="UNIVERSAL_BASELINE">
-                  <div className="flex items-center gap-2">
-                    <Brain className="h-4 w-4" />
-                    Universal Baseline
-                  </div>
-                </SelectItem>
-                <SelectItem value="TARGETED_FIT">
-                  <div className="flex items-center gap-2">
-                    <Briefcase className="h-4 w-4" />
-                    Targeted Job Fit
-                  </div>
-                </SelectItem>
-                <SelectItem value="DYNAMIC_GAP_ANALYSIS">
-                  <div className="flex items-center gap-2">
-                    <Users className="h-4 w-4" />
-                    Dynamic Team Gap Analysis
-                  </div>
-                </SelectItem>
-              </SelectContent>
-            </Select>
+          <div className="space-y-3">
+            <Label className="text-sm font-medium">Assessment Strategy</Label>
+            <div className="grid grid-cols-3 gap-3">
+              {(Object.entries(strategyConfig) as [BlueprintState['strategy'], typeof strategyConfig.UNIVERSAL_BASELINE][]).map(([key, config]) => {
+                const Icon = config.icon;
+                const isActive = optimisticState.strategy === key;
+                return (
+                  <button
+                    key={key}
+                    type="button"
+                    onClick={() => handleSettingsUpdate({ strategy: key })}
+                    className={cn(
+                      "flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all",
+                      isActive 
+                        ? "border-primary bg-primary/5 shadow-sm" 
+                        : "border-muted hover:border-muted-foreground/30 hover:bg-muted/50"
+                    )}
+                  >
+                    <div className={cn(
+                      "h-10 w-10 rounded-lg flex items-center justify-center",
+                      isActive ? config.color : "bg-muted"
+                    )}>
+                      <Icon className={cn("h-5 w-5", isActive ? "" : "text-muted-foreground")} />
+                    </div>
+                    <span className={cn(
+                      "text-xs font-medium text-center",
+                      isActive ? "text-foreground" : "text-muted-foreground"
+                    )}>
+                      {config.label}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
           </div>
 
           <Separator />
 
-          {/* Global Settings */}
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <Clock className="h-4 w-4 text-muted-foreground" />
-                <Label>Time Limit (min)</Label>
+          {/* Global Settings - Modern cards */}
+          <div className="grid grid-cols-2 gap-6">
+            {/* Time Limit */}
+            <div className="space-y-4 p-4 rounded-xl bg-muted/30">
+              <div className="flex items-center gap-3">
+                <div className="h-9 w-9 rounded-lg bg-background flex items-center justify-center shadow-sm">
+                  <Clock className="h-4 w-4 text-muted-foreground" />
+                </div>
+                <div>
+                  <Label className="text-sm font-medium">Time Limit</Label>
+                  <p className="text-xs text-muted-foreground">Maximum duration</p>
+                </div>
               </div>
-              <Slider
-                value={[optimisticState.timeLimitMinutes]}
-                min={15}
-                max={120}
-                step={5}
-                onValueChange={([value]) => 
-                  handleSettingsUpdate({ timeLimitMinutes: value })
-                }
-              />
-              <span className="text-sm text-muted-foreground">
-                {optimisticState.timeLimitMinutes} minutes
-              </span>
+              <div className="space-y-2">
+                <Slider
+                  value={[optimisticState.timeLimitMinutes]}
+                  min={15}
+                  max={120}
+                  step={5}
+                  onValueChange={([value]) => 
+                    handleSettingsUpdate({ timeLimitMinutes: value })
+                  }
+                  className="[&_[role=slider]]:h-4 [&_[role=slider]]:w-4"
+                />
+                <div className="flex justify-between text-xs text-muted-foreground">
+                  <span>15 min</span>
+                  <Badge variant="secondary" className="font-mono">
+                    {optimisticState.timeLimitMinutes} min
+                  </Badge>
+                  <span>120 min</span>
+                </div>
+              </div>
             </div>
 
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <Target className="h-4 w-4 text-muted-foreground" />
-                <Label>Passing Score (%)</Label>
+            {/* Passing Score */}
+            <div className="space-y-4 p-4 rounded-xl bg-muted/30">
+              <div className="flex items-center gap-3">
+                <div className="h-9 w-9 rounded-lg bg-background flex items-center justify-center shadow-sm">
+                  <Target className="h-4 w-4 text-muted-foreground" />
+                </div>
+                <div>
+                  <Label className="text-sm font-medium">Passing Score</Label>
+                  <p className="text-xs text-muted-foreground">Minimum to pass</p>
+                </div>
               </div>
-              <Slider
-                value={[optimisticState.passingScore]}
-                min={50}
-                max={100}
-                step={5}
-                onValueChange={([value]) => 
-                  handleSettingsUpdate({ passingScore: value })
-                }
-              />
-              <span className="text-sm text-muted-foreground">
-                {optimisticState.passingScore}%
-              </span>
+              <div className="space-y-2">
+                <Slider
+                  value={[optimisticState.passingScore]}
+                  min={50}
+                  max={100}
+                  step={5}
+                  onValueChange={([value]) => 
+                    handleSettingsUpdate({ passingScore: value })
+                  }
+                  className="[&_[role=slider]]:h-4 [&_[role=slider]]:w-4"
+                />
+                <div className="flex justify-between text-xs text-muted-foreground">
+                  <span>50%</span>
+                  <Badge variant="secondary" className="font-mono">
+                    {optimisticState.passingScore}%
+                  </Badge>
+                  <span>100%</span>
+                </div>
+              </div>
             </div>
           </div>
 
-          {/* Adaptivity Settings */}
-          <div className="flex items-center justify-between pt-2">
-            <div className="space-y-0.5">
-              <Label>Allow Backtracking</Label>
-              <p className="text-xs text-muted-foreground">
-                Let candidates revisit previous questions
-              </p>
+          {/* Adaptivity Toggle - Clean design */}
+          <div className="flex items-center justify-between p-4 rounded-xl bg-muted/30">
+            <div className="flex items-center gap-3">
+              <div className="h-9 w-9 rounded-lg bg-background flex items-center justify-center shadow-sm">
+                <Zap className="h-4 w-4 text-muted-foreground" />
+              </div>
+              <div>
+                <Label className="text-sm font-medium">Allow Backtracking</Label>
+                <p className="text-xs text-muted-foreground">
+                  Candidates can revisit previous questions
+                </p>
+              </div>
             </div>
             <Switch
               checked={optimisticState.adaptivity.allowBacktracking}
@@ -487,21 +549,29 @@ export default function BlueprintEditor({
         </CardContent>
       </Card>
 
-      {/* Competency Canvas - Drop Zone */}
+      {/* Competency Canvas - Modern Drop Zone */}
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <h3 className="font-semibold flex items-center gap-2">
-            <BarChart3 className="h-5 w-5" />
-            Competencies ({optimisticState.competencies.length})
-          </h3>
+          <div className="flex items-center gap-3">
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10">
+              <Layers className="h-4 w-4 text-primary" />
+            </div>
+            <div>
+              <h3 className="font-semibold">Competency Stack</h3>
+              <p className="text-xs text-muted-foreground">
+                {optimisticState.competencies.length} competencies configured
+              </p>
+            </div>
+          </div>
         </div>
 
         <div
           className={cn(
-            "border-2 border-dashed rounded-lg p-6 min-h-[200px] transition-colors",
+            "border-2 border-dashed rounded-2xl transition-all duration-300",
+            "min-h-[240px]",
             isDragOver 
-              ? "border-primary bg-primary/5" 
-              : "border-muted-foreground/25",
+              ? "border-primary bg-primary/5 scale-[1.01] shadow-lg" 
+              : "border-muted-foreground/20",
             optimisticState.competencies.length === 0 && "flex items-center justify-center"
           )}
           onDragOver={(e) => {
@@ -512,13 +582,17 @@ export default function BlueprintEditor({
           onDrop={handleDrop}
         >
           {optimisticState.competencies.length === 0 ? (
-            <div className="text-center text-muted-foreground">
-              <Plus className="h-8 w-8 mx-auto mb-2 opacity-50" />
-              <p className="font-medium">Drop competencies here</p>
-              <p className="text-sm">Drag from the library on the left</p>
+            <div className="text-center p-8">
+              <div className="h-16 w-16 rounded-2xl bg-muted flex items-center justify-center mx-auto mb-4">
+                <Plus className="h-8 w-8 text-muted-foreground/50" />
+              </div>
+              <p className="font-medium text-muted-foreground">Drop competencies here</p>
+              <p className="text-sm text-muted-foreground/70 mt-1">
+                Drag from the library panel on the left
+              </p>
             </div>
           ) : (
-            <div className="grid gap-4">
+            <div className="p-4 space-y-4">
               {optimisticState.competencies.map((competency) => (
                 <CompetencyCard
                   key={competency.id}
@@ -533,38 +607,50 @@ export default function BlueprintEditor({
         </div>
       </div>
 
-      {/* Summary Stats */}
+      {/* Summary Stats - Modern metrics cards */}
       {optimisticState.competencies.length > 0 && (
-        <Card className="bg-muted/30">
-          <CardContent className="py-4">
-            <div className="grid grid-cols-4 gap-4 text-center">
-              <div>
-                <p className="text-2xl font-bold">
-                  {optimisticState.competencies.length}
-                </p>
-                <p className="text-xs text-muted-foreground">Competencies</p>
-              </div>
-              <div>
-                <p className="text-2xl font-bold">
-                  {optimisticState.competencies.reduce((sum, c) => sum + c.questionCount, 0)}
-                </p>
-                <p className="text-xs text-muted-foreground">Questions</p>
-              </div>
-              <div>
-                <p className="text-2xl font-bold">
-                  ~{Math.round(optimisticState.competencies.reduce((sum, c) => sum + c.questionCount * 1.5, 0))}
-                </p>
-                <p className="text-xs text-muted-foreground">Est. Minutes</p>
-              </div>
-              <div>
-                <p className="text-2xl font-bold">
-                  {optimisticState.passingScore}%
-                </p>
-                <p className="text-xs text-muted-foreground">Pass Threshold</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        <div className="grid grid-cols-4 gap-4">
+          {[
+            { 
+              label: 'Competencies', 
+              value: optimisticState.competencies.length,
+              icon: Layers,
+              color: 'text-violet-600 dark:text-violet-400 bg-violet-50 dark:bg-violet-950/50',
+            },
+            { 
+              label: 'Questions', 
+              value: optimisticState.competencies.reduce((sum, c) => sum + c.questionCount, 0),
+              icon: BarChart3,
+              color: 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/50',
+            },
+            { 
+              label: 'Est. Duration', 
+              value: `~${Math.round(optimisticState.competencies.reduce((sum, c) => sum + c.questionCount * 1.5, 0))}m`,
+              icon: Clock,
+              color: 'text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50',
+            },
+            { 
+              label: 'Pass Threshold', 
+              value: `${optimisticState.passingScore}%`,
+              icon: Target,
+              color: 'text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/50',
+            },
+          ].map((stat) => (
+            <Card key={stat.label} className="overflow-hidden">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-3">
+                  <div className={cn("h-10 w-10 rounded-lg flex items-center justify-center", stat.color)}>
+                    <stat.icon className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold tracking-tight">{stat.value}</p>
+                    <p className="text-xs text-muted-foreground">{stat.label}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
       )}
     </div>
   );
