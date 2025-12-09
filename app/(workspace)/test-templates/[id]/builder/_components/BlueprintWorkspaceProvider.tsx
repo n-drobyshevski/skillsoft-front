@@ -41,6 +41,7 @@ interface BlueprintWorkspaceContextValue {
   libraryCompetencies: LibraryCompetency[];
   templateId: string;
   templateName: string;
+  isReadOnly: boolean;
 
   // UI State
   isPending: boolean;
@@ -144,6 +145,7 @@ interface BlueprintWorkspaceProviderProps {
   libraryCompetencies: LibraryCompetency[];
   templateId: string;
   templateName: string;
+  isReadOnly?: boolean;
 }
 
 export function BlueprintWorkspaceProvider({
@@ -152,6 +154,7 @@ export function BlueprintWorkspaceProvider({
   libraryCompetencies: initialLibrary,
   templateId,
   templateName,
+  isReadOnly = false,
 }: BlueprintWorkspaceProviderProps) {
   const [isPending, startTransition] = useTransition();
   const [isSaving, setIsSaving] = useState(false);
@@ -375,6 +378,7 @@ export function BlueprintWorkspaceProvider({
     libraryCompetencies,
     templateId,
     templateName,
+    isReadOnly,
     isPending,
     isSaving,
     isSimulating,

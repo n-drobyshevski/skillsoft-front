@@ -99,6 +99,7 @@ export default async function BuilderLayout({ children, params }: BuilderLayoutP
       libraryCompetencies={libraryCompetencies}
       templateId={template.id}
       templateName={template.name}
+      isReadOnly={template.isActive}
     >
       {children}
     </BlueprintWorkspaceProvider>
