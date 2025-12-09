@@ -21,6 +21,8 @@ import {
 import { cn } from '@/lib/utils';
 import { useTransition } from 'react';
 import { publishTemplate, createNewVersion } from '../actions';
+import { useEffect } from 'react';
+import { useHeader } from '@/context/HeaderContext';
 
 export type TemplateStatus = 'DRAFT' | 'PUBLISHED' | 'ARCHIVED';
 
@@ -69,6 +71,19 @@ export function TemplateHeader({
   status,
 }: TemplateHeaderProps) {
   const [isPending, startTransition] = useTransition();
+  const { setTitle, setSubtitle, setEntityName } = useHeader();
+
+  useEffect(() => {
+    setTitle(templateName);
+    setSubtitle('Управление шаблоном теста');
+    setEntityName('шаблон');
+
+    return () => {
+      setTitle('');
+      setSubtitle('');
+      setEntityName('');
+    };
+  }, [setEntityName, setSubtitle, setTitle, templateName]);
 
   const handlePublish = () => {
     startTransition(async () => {

@@ -28,6 +28,7 @@ async function getTemplateData(id: string) {
     }
     return { template, error: null };
   } catch (error) {
+    // eslint-disable-next-line no-console
     console.error('Failed to fetch template:', error);
     return { template: null, error: 'Failed to load template' };
   }
@@ -60,22 +61,21 @@ export default async function TemplateLayout({
   const status = deriveStatus(template.isActive);
 
   return (
-    <div className="flex min-h-0 flex-col">
-      {/* Sticky Header with Breadcrumb & Actions */}
+    <>
       <TemplateHeader
         templateId={id}
         templateName={template.name}
         status={status}
       />
 
-      {/* Navigation Tabs */}
-      <NavTabs baseUrl={baseUrl} />
+      {/* Navigation Tabs with inline published warning */}
+      <NavTabs baseUrl={baseUrl} status={status} />
 
       {/* Tab Content */}
       <main className="flex-1">
         {children}
       </main>
-    </div>
+    </>
   );
 }
 

@@ -1,13 +1,10 @@
 'use client';
 
 import React, { useState, Suspense, createContext, useContext } from 'react';
-import Link from 'next/link';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
-  ArrowLeft,
   PanelLeftOpen,
   PanelRightOpen,
   PanelLeftClose,
@@ -15,12 +12,6 @@ import {
   Beaker,
   Library,
   Layers,
-  Save,
-  Play,
-  Sparkles,
-  Loader2,
-  Lock,
-  GitBranch,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useBlueprintWorkspace } from './BlueprintWorkspaceProvider';
@@ -85,110 +76,6 @@ function SimulatorSkeleton() {
 // COMPACT HEADER
 // ============================================
 
-function WorkspaceHeader() {
-  const { templateId, templateName, isSaving, isPending, saveBlueprint, isReadOnly } =
-    useBlueprintWorkspace();
-
-  return (
-    <header className="flex items-center justify-between border-b bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60 px-3 h-12 shrink-0">
-      <div className="flex items-center gap-3">
-        <Link href={`/test-templates/${templateId}`}>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8 rounded-lg hover:bg-muted/80"
-            aria-label="Back to template"
-          >
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
-        </Link>
-
-        <div className="flex items-center gap-2">
-          <Layers className="h-4 w-4 text-primary" />
-          <span className="text-sm font-semibold">Blueprint Builder</span>
-          <span className="text-sm text-muted-foreground hidden sm:block">—</span>
-          <span className="text-sm text-muted-foreground hidden sm:block truncate max-w-[180px]">
-            {templateName}
-          </span>
-        </div>
-      </div>
-
-      {/* Action Toolbar */}
-      <div className="flex items-center gap-2">
-        <Badge
-          variant={isReadOnly ? 'secondary' : 'outline'}
-          className="gap-1 px-2 py-0.5 font-medium text-[11px]"
-        >
-          {isReadOnly ? (
-            <>
-              <Lock className="h-3 w-3" />
-              <span className="hidden xs:inline">Published</span>
-            </>
-          ) : (
-            <>
-              <Sparkles className="h-3 w-3" />
-              <span className="hidden xs:inline">Draft</span>
-            </>
-          )}
-        </Badge>
-
-        {!isReadOnly && (
-          <>
-            <Button
-              variant="outline"
-              size="sm"
-              className="gap-1.5 rounded-lg h-7 px-2.5 text-xs"
-              onClick={saveBlueprint}
-              disabled={isSaving || isPending}
-            >
-              {isSaving ? (
-                <Loader2 className="h-3 w-3 animate-spin" />
-              ) : (
-                <Save className="h-3 w-3" />
-              )}
-              <span className="hidden sm:inline">Save</span>
-            </Button>
-
-            <Button size="sm" className="gap-1.5 rounded-lg h-7 px-2.5 text-xs">
-              <Play className="h-3 w-3" />
-              <span className="hidden sm:inline">Publish</span>
-            </Button>
-          </>
-        )}
-      </div>
-    </header>
-  );
-}
-
-// ============================================
-// READ-ONLY BANNER
-// ============================================
-
-function ReadOnlyBanner() {
-  const { templateId } = useBlueprintWorkspace();
-
-  return (
-    <div className="flex items-center justify-between gap-4 bg-amber-50 dark:bg-amber-950/30 border-b border-amber-200 dark:border-amber-800 px-4 py-2 shrink-0">
-      <div className="flex items-center gap-2 text-amber-800 dark:text-amber-200">
-        <Lock className="h-4 w-4" />
-        <span className="text-sm font-medium">Published Version</span>
-        <span className="text-sm text-amber-600 dark:text-amber-400">
-          — This blueprint is locked. Create a new version to make changes.
-        </span>
-      </div>
-      <Link href={`/test-templates/${templateId}`}>
-        <Button
-          variant="outline"
-          size="sm"
-          className="gap-1.5 text-xs border-amber-300 dark:border-amber-700 hover:bg-amber-100 dark:hover:bg-amber-900"
-        >
-          <GitBranch className="h-3.5 w-3.5" />
-          New Version
-        </Button>
-      </Link>
-    </div>
-  );
-}
 
 // ============================================
 // SIDE PANEL (Push layout - shrinks canvas)
@@ -312,7 +199,7 @@ function DesktopLayout() {
           >
             <PanelLeftOpen className="h-3.5 w-3.5" />
             <span
-              className="text-[8px] font-medium text-muted-foreground"
+              className="text-[12px] font-medium text-muted-foreground"
               style={{ writingMode: 'vertical-rl', textOrientation: 'mixed' }}
             >
               Library
@@ -336,7 +223,7 @@ function DesktopLayout() {
           >
             <PanelRightOpen className="h-3.5 w-3.5" />
             <span
-              className="text-[8px] font-medium text-muted-foreground"
+              className="text-[12px] font-medium text-muted-foreground"
               style={{ writingMode: 'vertical-rl', textOrientation: 'mixed' }}
             >
               Simulate
@@ -435,7 +322,6 @@ function MobileLayout() {
 export function BlueprintWorkspace({ templateId: _templateId }: BlueprintWorkspaceProps) {
   const [isLibraryOpen, setLibraryOpen] = useState(false);
   const [isSimulatorOpen, setSimulatorOpen] = useState(false);
-  const { isReadOnly } = useBlueprintWorkspace();
 
   return (
     <PanelStateContext.Provider
@@ -454,12 +340,8 @@ export function BlueprintWorkspace({ templateId: _templateId }: BlueprintWorkspa
       <div 
         className="flex flex-col bg-muted/30"
         style={{ height: 'calc(100vh - 7rem)', maxHeight: 'calc(100vh - 7rem)' }}
+        data-template-id={_templateId}
       >
-        <WorkspaceHeader />
-        
-        {/* Read-only Banner for Published Templates */}
-        {isReadOnly && <ReadOnlyBanner />}
-
         {/* Desktop View */}
         <div className="hidden lg:flex flex-1 min-h-0 overflow-hidden">
           <DesktopLayout />

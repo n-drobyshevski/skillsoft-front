@@ -8,8 +8,10 @@ import {
   Wrench, 
   Users, 
   Settings,
+  Lock,
   type LucideIcon 
 } from 'lucide-react';
+import type { TemplateStatus } from './TemplateHeader';
 
 interface NavTab {
   label: string;
@@ -20,6 +22,7 @@ interface NavTab {
 
 interface NavTabsProps {
   baseUrl: string;
+  status: TemplateStatus;
 }
 
 /**
@@ -27,7 +30,7 @@ interface NavTabsProps {
  * Uses URL-based routing instead of client state
  * Active state determined by useSelectedLayoutSegment()
  */
-export function NavTabs({ baseUrl }: NavTabsProps) {
+export function NavTabs({ baseUrl, status }: NavTabsProps) {
   const segment = useSelectedLayoutSegment();
 
   const tabs: NavTab[] = [
@@ -58,8 +61,8 @@ export function NavTabs({ baseUrl }: NavTabsProps) {
   ];
 
   return (
-    <nav className="flex border-b bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
-      <div className="flex px-4 lg:px-6">
+    <nav className="flex items-center justify-between gap-3 border-b bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60 px-4 lg:px-6">
+      <div className="flex">
         {tabs.map((tab) => {
           const isActive = segment === tab.segment;
           const Icon = tab.icon;
@@ -87,6 +90,16 @@ export function NavTabs({ baseUrl }: NavTabsProps) {
           );
         })}
       </div>
+
+      {status === 'PUBLISHED' && (
+        <div className="hidden md:flex items-center gap-2 text-amber-700 dark:text-amber-200 text-sm">
+          <Lock className="h-4 w-4" />
+          <span className="font-medium">Published Version</span>
+          <span className="text-amber-700/80 dark:text-amber-300/80">
+            — This blueprint is locked. Create a new version to make changes.
+          </span>
+        </div>
+      )}
     </nav>
   );
 }
