@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useTransition, useMemo } from 'react';
+import React, { useState, useTransition, useMemo, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -55,9 +55,14 @@ import {
   X,
   Crosshair,
   Briefcase,
-  Users
+  Users,
+  ChevronDown,
+  ChevronUp,
+  CheckCircle2,
+  Filter
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 
 // ============================================================================
 // Types & Schema
@@ -75,20 +80,10 @@ interface NewTestFormProps {
 }
 
 const formSchema = z.object({
-  // Step 1: Basic Info
-  name: z.string()
-    .min(3, 'Название должно содержать минимум 3 символа')
-    .max(100, 'Название не должно превышать 100 символов'),
-  description: z.string()
-    .max(500, 'Описание не должно превышать 500 символов')
-    .optional(),
+  name: z.string().min(3, 'Минимум 3 символа').max(100, 'Максимум 100 символов'),
+  description: z.string().max(500, 'Максимум 500 символов').optional(),
   goal: z.nativeEnum(AssessmentGoal),
-  
-  // Step 2: Competencies
-  competencyIds: z.array(z.string())
-    .min(1, 'Выберите хотя бы одну компетенцию'),
-  
-  // Step 3: Configuration
+  competencyIds: z.array(z.string()).min(1, 'Выберите хотя бы одну компетенцию'),
   questionsPerIndicator: z.number().min(1).max(5),
   timeLimitMinutes: z.number().min(5).max(180),
   passingScore: z.number().min(10).max(100),
@@ -106,106 +101,67 @@ type FormValues = z.infer<typeof formSchema>;
 // ============================================================================
 
 const STEPS = [
-  { 
-    id: 1, 
-    title: 'Основное', 
-    description: 'Название и описание',
-    icon: FileText 
-  },
-  { 
-    id: 2, 
-    title: 'Компетенции', 
-    description: 'Выберите для оценки',
-    icon: Target 
-  },
-  { 
-    id: 3, 
-    title: 'Настройки', 
-    description: 'Параметры теста',
-    icon: Settings 
-  },
-  { 
-    id: 4, 
-    title: 'Проверка', 
-    description: 'Подтверждение',
-    icon: Eye 
-  },
+  { id: 1, title: 'Основное', description: 'Название и цель', icon: FileText },
+  { id: 2, title: 'Компетенции', description: 'Выбор навыков', icon: Target },
+  { id: 3, title: 'Настройки', description: 'Параметры теста', icon: Settings },
+  { id: 4, title: 'Проверка', description: 'Итог', icon: Eye },
 ] as const;
 
 // ============================================================================
-// Progress Indicator Component
+// Component: Step Indicator
 // ============================================================================
 
-interface StepIndicatorProps {
-  currentStep: number;
-  totalSteps: number;
-}
-
-function StepIndicator({ currentStep, totalSteps }: StepIndicatorProps) {
+function StepIndicator({ currentStep, totalSteps }: { currentStep: number; totalSteps: number }) {
   const progress = ((currentStep - 1) / (totalSteps - 1)) * 100;
+  const currentStepInfo = STEPS[currentStep - 1];
   
   return (
-    <div className="mb-6 md:mb-10">
-      {/* Step Labels - Desktop - Full width horizontal stepper */}
+    <div className="mb-6 md:mb-10 px-1">
+      {/* Desktop Stepper */}
       <div className="hidden md:grid md:grid-cols-4 gap-2 mb-4">
         {STEPS.map((step, index) => {
           const Icon = step.icon;
           const isActive = step.id === currentStep;
           const isCompleted = step.id < currentStep;
-          
           return (
             <div key={step.id} className="flex items-center">
-              <div 
-                className={cn(
-                  "flex items-center gap-3 flex-1 p-3 rounded-lg transition-all",
-                  isActive && "bg-primary/10 border border-primary/20",
-                  isCompleted && "bg-muted/50",
-                  !isActive && !isCompleted && "opacity-50"
-                )}
-              >
+              <div className={cn(
+                "flex items-center gap-3 flex-1 p-3 rounded-lg transition-all",
+                isActive && "bg-primary/10 border border-primary/20",
+                isCompleted && "bg-muted/50",
+                !isActive && !isCompleted && "opacity-50"
+              )}>
                 <div className={cn(
                   "flex items-center justify-center w-10 h-10 rounded-full border-2 transition-all flex-shrink-0",
-                  isActive && "border-primary bg-primary text-primary-foreground",
-                  isCompleted && "border-primary bg-primary text-primary-foreground",
-                  !isActive && !isCompleted && "border-muted-foreground/30 bg-background"
+                  isActive || isCompleted ? "border-primary bg-primary text-primary-foreground" : "border-muted-foreground/30 bg-background"
                 )}>
-                  {isCompleted ? (
-                    <Check className="h-5 w-5" />
-                  ) : (
-                    <Icon className="h-5 w-5" />
-                  )}
+                  {isCompleted ? <Check className="h-5 w-5" /> : <Icon className="h-5 w-5" />}
                 </div>
                 <div className="min-w-0">
-                  <p className={cn(
-                    "text-sm font-semibold truncate",
-                    isActive && "text-primary"
-                  )}>{step.title}</p>
+                  <p className={cn("text-sm font-semibold truncate", isActive && "text-primary")}>{step.title}</p>
                   <p className="text-xs text-muted-foreground truncate">{step.description}</p>
                 </div>
               </div>
               {index < STEPS.length - 1 && (
-                <div className={cn(
-                  "w-4 h-0.5 mx-1 flex-shrink-0",
-                  isCompleted ? "bg-primary" : "bg-border"
-                )} />
+                <div className={cn("w-4 h-0.5 mx-1 flex-shrink-0", isCompleted ? "bg-primary" : "bg-border")} />
               )}
             </div>
           );
         })}
       </div>
       
-      {/* Progress Bar */}
-      <Progress value={progress} className="h-2 md:h-1.5" />
-      
-      {/* Mobile Step Label */}
-      <div className="md:hidden mt-3 text-center">
-        <p className="text-sm font-medium">
-          Шаг {currentStep} из {totalSteps}: {STEPS[currentStep - 1].title}
-        </p>
-        <p className="text-xs text-muted-foreground">
-          {STEPS[currentStep - 1].description}
-        </p>
+      {/* Mobile Header (Modern & Clean) */}
+      <div className="md:hidden flex items-end justify-between mb-4 pt-2">
+        <div>
+           <span className="text-xs font-semibold text-primary uppercase tracking-wider">Шаг {currentStep} из {totalSteps}</span>
+           <h2 className="text-2xl font-bold tracking-tight mt-1">{currentStepInfo.title}</h2>
+        </div>
+        <div className="bg-secondary p-2.5 rounded-xl text-foreground/70">
+            {React.createElement(currentStepInfo.icon, { className: "h-6 w-6" })}
+        </div>
       </div>
+      
+      <Progress value={progress} className="h-1.5 md:h-1.5 rounded-full" />
     </div>
   );
 }
@@ -214,85 +170,58 @@ function StepIndicator({ currentStep, totalSteps }: StepIndicatorProps) {
 // Step 1: Basic Info
 // ============================================================================
 
-interface BasicInfoStepProps {
-  form: ReturnType<typeof useForm<FormValues>>;
-}
-
-/**
- * Goal option configuration for radio group display
- */
 const GOAL_OPTIONS = [
   {
     value: AssessmentGoal.OVERVIEW,
     icon: Crosshair,
-    className: 'border-muted-foreground/30 hover:border-primary/50 hover:bg-primary/5',
-    selectedClassName: 'border-primary bg-primary/10',
-    iconSelectedClassName: 'text-primary',
+    className: 'border-border/60 bg-card hover:border-primary/50 hover:bg-muted/30',
+    selectedClassName: 'border-primary bg-primary/5 ring-1 ring-primary shadow-sm',
   },
   {
     value: AssessmentGoal.JOB_FIT,
     icon: Briefcase,
-    className: 'border-muted-foreground/30 hover:border-blue-500/50 hover:bg-blue-500/5',
-    selectedClassName: 'border-blue-500 bg-blue-500/10',
-    iconSelectedClassName: 'text-blue-500',
+    className: 'border-border/60 bg-card hover:border-blue-500/50 hover:bg-blue-500/5',
+    selectedClassName: 'border-blue-500 bg-blue-500/10 ring-1 ring-blue-500 shadow-sm',
   },
   {
     value: AssessmentGoal.TEAM_FIT,
     icon: Users,
-    className: 'border-muted-foreground/30 hover:border-purple-500/50 hover:bg-purple-500/5',
-    selectedClassName: 'border-purple-500 bg-purple-500/10',
-    iconSelectedClassName: 'text-purple-500',
+    className: 'border-border/60 bg-card hover:border-purple-500/50 hover:bg-purple-500/5',
+    selectedClassName: 'border-purple-500 bg-purple-500/10 ring-1 ring-purple-500 shadow-sm',
   },
 ] as const;
 
-function BasicInfoStep({ form }: BasicInfoStepProps) {
+function BasicInfoStep({ form }: { form: ReturnType<typeof useForm<FormValues>> }) {
   const description = form.watch('description') || '';
   const selectedGoal = form.watch('goal');
   
   return (
-    <div className="space-y-8">
-      {/* Step Header */}
-      <div className="border-b pb-4">
-        <h2 className="text-2xl font-semibold tracking-tight">Основная информация</h2>
-        <p className="text-muted-foreground mt-1">
-          Укажите название, цель и описание теста
-        </p>
-      </div>
-
-      {/* Form Fields - Using full width with larger inputs */}
-      <div className="grid gap-8">
+    <div className="space-y-6 md:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+      <div className="space-y-6">
         <FormField
           control={form.control}
           name="name"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="text-base font-medium">
-                Название теста <span className="text-destructive">*</span>
-              </FormLabel>
+              <FormLabel className="text-base font-medium">Название теста</FormLabel>
               <FormControl>
                 <Input 
                   placeholder="Например: Оценка лидерских качеств" 
                   {...field}
-                  className="h-12 text-base"
+                  className="h-14 md:h-12 text-base rounded-xl" 
                 />
               </FormControl>
-              <FormDescription className="text-sm">
-                Краткое и понятное название для идентификации теста
-              </FormDescription>
               <FormMessage />
             </FormItem>
           )}
         />
 
-        {/* Assessment Goal Selection */}
         <FormField
           control={form.control}
           name="goal"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="text-base font-medium">
-                Цель оценки <span className="text-destructive">*</span>
-              </FormLabel>
+              <FormLabel className="text-base font-medium">Цель оценки</FormLabel>
               <FormControl>
                 <RadioGroup
                   value={field.value}
@@ -305,42 +234,40 @@ function BasicInfoStep({ form }: BasicInfoStepProps) {
                     const isSelected = selectedGoal === option.value;
                     
                     return (
-                      <Label
-                        key={option.value}
-                        htmlFor={`goal-${option.value}`}
-                        className={cn(
-                          "flex flex-col items-center gap-3 rounded-lg border-2 p-4 cursor-pointer transition-all",
-                          isSelected ? option.selectedClassName : option.className
-                        )}
-                      >
-                        <RadioGroupItem
-                          value={option.value}
-                          id={`goal-${option.value}`}
-                          className="sr-only"
-                        />
-                        <Icon className={cn(
-                          "h-8 w-8",
-                          isSelected ? "text-primary" : "text-muted-foreground"
-                        )} />
-                        <div className="text-center">
-                          <p className={cn(
-                            "font-semibold text-sm",
-                            isSelected && "text-primary"
+                      <div key={option.value} className="relative group">
+                        <RadioGroupItem value={option.value} id={`goal-${option.value}`} className="sr-only" />
+                        <Label
+                          htmlFor={`goal-${option.value}`}
+                          className={cn(
+                            "flex sm:flex-col items-center gap-4 sm:gap-3 rounded-2xl border p-4 cursor-pointer transition-all duration-200 w-full h-full relative overflow-hidden active:scale-[0.98]",
+                            isSelected ? option.selectedClassName : option.className
+                          )}
+                        >
+                          {isSelected && (
+                            <div className="absolute top-2 right-2 sm:top-3 sm:right-3 animate-in zoom-in duration-200">
+                                <CheckCircle2 className="h-5 w-5 text-primary fill-background" />
+                            </div>
+                          )}
+                          <div className={cn(
+                            "p-2.5 rounded-full transition-colors shrink-0",
+                            isSelected ? "bg-background" : "bg-muted group-hover:bg-background"
                           )}>
-                            {info.displayName}
-                          </p>
-                          <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
-                            {info.description}
-                          </p>
-                        </div>
-                      </Label>
+                             <Icon className={cn("h-6 w-6 sm:h-8 sm:w-8", isSelected ? "text-primary" : "text-muted-foreground")} />
+                          </div>
+                          <div className="flex-1 sm:text-center min-w-0">
+                            <p className={cn("font-bold text-sm sm:text-base", isSelected && "text-primary")}>
+                              {info.displayName}
+                            </p>
+                            <p className="text-xs text-muted-foreground mt-0.5 sm:mt-2 line-clamp-2 leading-relaxed">
+                              {info.description}
+                            </p>
+                          </div>
+                        </Label>
+                      </div>
                     );
                   })}
                 </RadioGroup>
               </FormControl>
-              <FormDescription className="text-sm">
-                Выберите тип оценки, который определяет стратегию подсчёта результатов
-              </FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -355,19 +282,12 @@ function BasicInfoStep({ form }: BasicInfoStepProps) {
               <FormControl>
                 <Textarea 
                   placeholder="Опишите цель и содержание теста..." 
-                  className="min-h-40 resize-none text-base"
+                  className="min-h-32 rounded-xl resize-none text-base"
                   {...field}
                 />
               </FormControl>
-              <div className="flex justify-between items-center">
-                <FormDescription className="text-sm">
-                  Подробное описание поможет пользователям понять назначение теста
-                </FormDescription>
-                <span className={cn(
-                  "text-sm tabular-nums",
-                  description.length > 450 ? "text-warning" : "text-muted-foreground",
-                  description.length > 500 && "text-destructive"
-                )}>
+              <div className="flex justify-end">
+                <span className={cn("text-xs tabular-nums", description.length > 450 ? "text-warning" : "text-muted-foreground")}>
                   {description.length}/500
                 </span>
               </div>
@@ -381,557 +301,253 @@ function BasicInfoStep({ form }: BasicInfoStepProps) {
 }
 
 // ============================================================================
-// Step 2: Competencies Selection
+// Step 2: Competencies (FIXED: Visible Checkboxes & build error)
 // ============================================================================
 
-interface CompetenciesStepProps {
-  form: ReturnType<typeof useForm<FormValues>>;
-  competencies: CompetencyOption[];
-}
-
-function CompetenciesStep({ form, competencies }: CompetenciesStepProps) {
+function CompetenciesStep({ form, competencies }: NewTestFormProps & { form: any }) {
   const [searchQuery, setSearchQuery] = useState('');
+  const [isSelectedOpen, setIsSelectedOpen] = useState(true);
   const selectedIds = form.watch('competencyIds');
   
-  // Group and filter competencies
   const { filteredByCategory, totalFiltered } = useMemo(() => {
     const filtered = competencies.filter(comp =>
       comp.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       comp.category.toLowerCase().includes(searchQuery.toLowerCase())
     );
-    
     const grouped = new Map<string, CompetencyOption[]>();
     for (const comp of filtered) {
       const category = comp.category || 'Другое';
       const existing = grouped.get(category) || [];
       grouped.set(category, [...existing, comp]);
     }
-    
-    return { 
-      filteredByCategory: Object.fromEntries(grouped), 
-      totalFiltered: filtered.length 
-    };
+    return { filteredByCategory: Object.fromEntries(grouped), totalFiltered: filtered.length };
   }, [competencies, searchQuery]);
 
   const toggleCompetency = (id: string) => {
     const current = form.getValues('competencyIds');
-    const updated = current.includes(id)
-      ? current.filter(c => c !== id)
-      : [...current, id];
+    const updated = current.includes(id) ? current.filter((c: string) => c !== id) : [...current, id];
     form.setValue('competencyIds', updated, { shouldValidate: true });
   };
 
   const selectAllVisible = () => {
-    const allIds = Object.values(filteredByCategory).flat().map(c => c.id);
+    const allIds = Object.values(filteredByCategory).flat().map((c: any) => c.id);
     const currentIds = form.getValues('competencyIds');
     const newIds = [...new Set([...currentIds, ...allIds])];
     form.setValue('competencyIds', newIds, { shouldValidate: true });
   };
 
-  const clearSelection = () => {
-    form.setValue('competencyIds', [], { shouldValidate: true });
-  };
-
-  // Select/deselect all in a specific category
   const toggleCategory = (categoryComps: CompetencyOption[]) => {
     const categoryIds = categoryComps.map(c => c.id);
     const currentIds = form.getValues('competencyIds');
     const allSelected = categoryIds.every(id => currentIds.includes(id));
-    
     if (allSelected) {
-      const newIds = currentIds.filter(id => !categoryIds.includes(id));
-      form.setValue('competencyIds', newIds, { shouldValidate: true });
+      form.setValue('competencyIds', currentIds.filter((id: string) => !categoryIds.includes(id)), { shouldValidate: true });
     } else {
-      const newIds = [...new Set([...currentIds, ...categoryIds])];
-      form.setValue('competencyIds', newIds, { shouldValidate: true });
+      form.setValue('competencyIds', [...new Set([...currentIds, ...categoryIds])], { shouldValidate: true });
     }
   };
 
-  // Check if all items in category are selected
-  const isCategoryFullySelected = (categoryComps: CompetencyOption[]) => {
-    const categoryIds = categoryComps.map(c => c.id);
-    return categoryIds.every(id => selectedIds.includes(id));
-  };
-
-  // Check if some items in category are selected
-  const isCategoryPartiallySelected = (categoryComps: CompetencyOption[]) => {
-    const categoryIds = categoryComps.map(c => c.id);
-    const selectedCount = categoryIds.filter(id => selectedIds.includes(id)).length;
-    return selectedCount > 0 && selectedCount < categoryIds.length;
-  };
-
-  if (competencies.length === 0) {
-    return (
-      <div className="text-center py-16 border rounded-lg bg-muted/20">
-        <Target className="h-16 w-16 mx-auto text-muted-foreground/50 mb-4" />
-        <h3 className="font-semibold text-xl">Нет доступных компетенций</h3>
-        <p className="text-muted-foreground mt-2">
-          Сначала создайте компетенции в системе
-        </p>
-      </div>
-    );
-  }
+  if (competencies.length === 0) return (
+    <div className="text-center py-16 border rounded-2xl bg-muted/20">
+      <Target className="h-16 w-16 mx-auto text-muted-foreground/50 mb-4" />
+      <h3 className="font-semibold text-xl">Нет компетенций</h3>
+    </div>
+  );
 
   return (
-    <div className="space-y-6">
-      {/* Step Header */}
-      <div className="border-b pb-4">
-        <h2 className="text-xl font-semibold">Выбор компетенций</h2>
-        <p className="text-muted-foreground mt-1">Выберите компетенции для оценки в тесте</p>
-      </div>
-
-      {/* Selected Competencies Summary - Chips at top for visibility */}
-      {selectedIds.length > 0 && (
-        <div className="p-4 bg-primary/5 border border-primary/20 rounded-lg">
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-sm font-medium text-primary">
-              Выбранные компетенции ({selectedIds.length})
-            </span>
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              onClick={clearSelection}
-              className="h-7 text-xs text-muted-foreground hover:text-destructive"
-            >
-              <X className="h-3 w-3 mr-1" />
-              Очистить все
-            </Button>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {selectedIds.slice(0, 10).map(id => {
-              const comp = competencies.find(c => c.id === id);
-              return comp ? (
-                <Badge
-                  key={id}
-                  variant="secondary"
-                  className="cursor-pointer hover:bg-destructive/20 hover:text-destructive transition-colors group"
-                  onClick={() => toggleCompetency(id)}
-                >
-                  {comp.name}
-                  <X className="h-3 w-3 ml-1 opacity-50 group-hover:opacity-100" />
-                </Badge>
-              ) : null;
-            })}
-            {selectedIds.length > 10 && (
-              <Badge variant="outline" className="bg-background">
-                +{selectedIds.length - 10} ещё
-              </Badge>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* Search and Actions Bar */}
-      <div className="flex flex-col md:flex-row gap-3">
+    <div className="space-y-4 md:space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+      {/* Search & Actions */}
+      <div className="flex flex-col md:flex-row gap-3 sticky top-0 md:static z-20 bg-background/80 backdrop-blur-md pb-2 md:pb-0 pt-1">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
           <Input
-            placeholder="Поиск по названию или категории..."
+            placeholder="Поиск навыков..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="h-12 text-base pl-10 pr-10"
+            className="h-12 md:h-12 text-base rounded-xl pl-11 pr-10 shadow-sm"
           />
           {searchQuery && (
             <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 p-0"
+              type="button" variant="ghost" size="sm"
+              className="absolute right-1 top-1/2 -translate-y-1/2 h-9 w-9 p-0 rounded-full hover:bg-muted"
               onClick={() => setSearchQuery('')}
             >
               <X className="h-4 w-4" />
             </Button>
           )}
         </div>
-        <div className="flex gap-2">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={selectAllVisible}
-            className="flex-1 md:flex-none h-12 px-4"
+        <Button
+            type="button" variant="outline" onClick={selectAllVisible}
+            className="h-12 rounded-xl px-5 border-dashed"
             disabled={totalFiltered === 0}
           >
             Выбрать все
-          </Button>
-        </div>
+        </Button>
       </div>
 
-      {/* Results Summary Bar */}
-      <div className="flex items-center justify-between px-4 py-3 bg-muted/50 rounded-lg border">
-        <span className="text-sm">
-          {searchQuery ? (
-            <>Найдено: <strong>{totalFiltered}</strong> из {competencies.length}</>
-          ) : (
-            <>Всего компетенций: <strong>{competencies.length}</strong></>
-          )}
-        </span>
-        <Badge 
-          variant={selectedIds.length > 0 ? 'default' : 'secondary'}
-          className="text-sm px-3 py-1"
-        >
-          Выбрано: {selectedIds.length}
-        </Badge>
-      </div>
+      {/* Selected Drawer */}
+      {selectedIds.length > 0 && (
+        <Collapsible open={isSelectedOpen} onOpenChange={setIsSelectedOpen} className="border border-primary/20 rounded-xl bg-primary/5 shadow-sm overflow-hidden">
+            <div className="flex items-center justify-between p-3.5 bg-primary/5">
+                 <div className="flex items-center gap-2.5">
+                    <Badge className="h-6 px-2 rounded-md">{selectedIds.length}</Badge>
+                    <span className="text-sm font-medium text-primary">Выбрано навыков</span>
+                 </div>
+                 <div className="flex items-center gap-1">
+                    <Button type="button" variant="ghost" size="sm" onClick={() => form.setValue('competencyIds', [], { shouldValidate: true })} 
+                      className="h-8 text-xs text-muted-foreground hover:text-destructive px-3 rounded-lg">
+                        Сбросить
+                    </Button>
+                    <CollapsibleTrigger asChild>
+                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0 rounded-lg">
+                            {isSelectedOpen ? <ChevronUp className="h-4 w-4"/> : <ChevronDown className="h-4 w-4"/>}
+                        </Button>
+                    </CollapsibleTrigger>
+                 </div>
+            </div>
+            <CollapsibleContent>
+                <div className="p-3.5 pt-0">
+                    <div className="flex flex-wrap gap-2 max-h-[140px] overflow-y-auto pt-2">
+                        {selectedIds.map((id: string) => {
+                        const comp = competencies.find(c => c.id === id);
+                        return comp ? (
+                            <Badge key={id} variant="secondary" className="pl-2.5 pr-1.5 py-1.5 rounded-md cursor-pointer hover:bg-destructive/10 hover:text-destructive transition-colors group border-transparent hover:border-destructive/20 border" onClick={() => toggleCompetency(id)}>
+                              <span className="truncate max-w-[140px] md:max-w-xs text-sm font-normal">{comp.name}</span>
+                              <X className="h-3.5 w-3.5 ml-1.5 opacity-50 group-hover:opacity-100" />
+                            </Badge>
+                        ) : null;
+                        })}
+                    </div>
+                </div>
+            </CollapsibleContent>
+        </Collapsible>
+      )}
 
-      {/* Empty State for Search */}
+      {/* Competencies List - Optimized for Scrolling & Visibility */}
       {totalFiltered === 0 ? (
-        <div className="text-center py-12 border rounded-lg bg-muted/20">
-          <Search className="h-12 w-12 mx-auto text-muted-foreground/50 mb-4" />
-          <h3 className="font-semibold text-lg">Ничего не найдено</h3>
-          <p className="text-muted-foreground mt-2">
-            Попробуйте изменить поисковый запрос
-          </p>
-          <Button
-            type="button"
-            variant="outline"
-            className="mt-4"
-            onClick={() => setSearchQuery('')}
-          >
-            Сбросить поиск
-          </Button>
+        <div className="text-center py-12 border rounded-2xl bg-muted/20">
+          <Filter className="h-10 w-10 mx-auto text-muted-foreground/50 mb-3" />
+          <p className="text-muted-foreground">Ничего не найдено</p>
         </div>
       ) : (
-        /* Competencies List with Category Grouping */
-        <FormField
-          control={form.control}
-          name="competencyIds"
-          render={() => (
-            <FormItem>
-              <div className="max-h-[500px] overflow-y-auto border rounded-lg">
-                {Object.entries(filteredByCategory).map(([category, comps]) => {
-                  const selectedInCategory = comps.filter(c => selectedIds.includes(c.id)).length;
-                  const isFullySelected = isCategoryFullySelected(comps);
-                  const isPartiallySelected = isCategoryPartiallySelected(comps);
-                  
-                  return (
-                    <div key={category} className="border-b last:border-b-0">
-                      {/* Category Header with Select All */}
-                      <div className="px-4 py-3 bg-muted/30 sticky top-0 z-10 flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <Checkbox
-                            checked={isFullySelected}
-                            ref={(el) => {
-                              if (el) {
-                                (el as HTMLButtonElement & { indeterminate?: boolean }).indeterminate = isPartiallySelected;
-                              }
-                            }}
-                            onCheckedChange={() => toggleCategory(comps)}
-                            className="h-4 w-4"
-                          />
-                          <span className="font-semibold">{category}</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Badge 
-                            variant={selectedInCategory > 0 ? 'default' : 'secondary'}
-                            className="text-xs"
-                          >
-                            {selectedInCategory}/{comps.length}
-                          </Badge>
-                          {selectedInCategory === comps.length && (
-                            <Check className="h-4 w-4 text-green-600" />
-                          )}
-                        </div>
+        <div className="md:max-h-[600px] md:overflow-y-auto md:border md:rounded-xl md:pr-1 min-h-[50vh] pb-8">
+          {Object.entries(filteredByCategory).map(([category, comps]) => {
+            const isFullySelected = comps.every(c => selectedIds.includes(c.id));
+            const isPartiallySelected = !isFullySelected && comps.some(c => selectedIds.includes(c.id));
+            const selectedCount = comps.filter(c => selectedIds.includes(c.id)).length;
+            
+            return (
+              <div key={category} className="mb-4 last:mb-0">
+                <div className="sticky top-[60px] md:top-0 z-10 bg-background/95 backdrop-blur-sm px-1 py-3 mb-1 border-b">
+                   <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3" onClick={() => toggleCategory(comps)}>
+                        {/* CATEGORY CHECKBOX: 5 (20px) with border */}
+                        <Checkbox 
+                          checked={isFullySelected} 
+                          ref={el => { if (el) (el as any).indeterminate = isPartiallySelected; }} 
+                          className="h-5 w-5 rounded-[4px] border-2 border-muted-foreground/50 data-[state=checked]:border-primary pointer-events-none" 
+                        />
+                        <span className="font-bold text-sm uppercase tracking-wide text-foreground/80">{category}</span>
                       </div>
-                      
-                      {/* Competencies Grid */}
-                      <div className="p-3 grid gap-2 md:grid-cols-2 lg:grid-cols-3">
-                        {comps.map((comp) => (
-                          <label
-                            key={comp.id}
-                            className={cn(
-                              "flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-all border group",
-                              selectedIds.includes(comp.id) 
-                                ? "bg-primary/10 border-primary/30 hover:bg-primary/15 shadow-sm" 
-                                : "border-transparent hover:bg-muted hover:border-border"
-                            )}
-                          >
-                            <Checkbox
-                              checked={selectedIds.includes(comp.id)}
-                              onCheckedChange={() => toggleCompetency(comp.id)}
-                              className="h-5 w-5 shrink-0"
-                            />
-                            <div className="flex-1 min-w-0">
-                              <span className="text-sm leading-tight block truncate">
-                                {comp.name}
-                              </span>
-                              {comp.level && (
-                                <span className="text-xs text-muted-foreground mt-0.5 block">
-                                  {comp.level}
-                                </span>
-                              )}
-                            </div>
-                            {selectedIds.includes(comp.id) && (
-                              <Check className="h-4 w-4 text-primary shrink-0" />
-                            )}
-                          </label>
-                        ))}
+                      <span className="text-xs text-muted-foreground font-medium bg-secondary px-2.5 py-1 rounded-full border">
+                        {selectedCount} / {comps.length}
+                      </span>
+                   </div>
+                </div>
+                
+                <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3 pl-1">
+                  {comps.map((comp) => (
+                    <div key={comp.id} onClick={() => toggleCompetency(comp.id)}
+                      className={cn(
+                        "flex items-start gap-4 p-4 rounded-xl cursor-pointer transition-all border active:scale-[0.98]",
+                        selectedIds.includes(comp.id) 
+                          ? "bg-primary/10 border-primary/50 shadow-sm" 
+                          : "bg-card border-border/60 shadow-sm hover:border-primary/30"
+                      )}>
+                      {/* ITEM CHECKBOX: 5 (20px) with border - Reduced from 6. REMOVED readOnly prop. */}
+                      <Checkbox 
+                        checked={selectedIds.includes(comp.id)} 
+                        className="h-5 w-5 mt-0.5 rounded-[6px] border-2 border-muted-foreground/40 data-[state=checked]:bg-primary data-[state=checked]:border-primary transition-all pointer-events-none" 
+                      />
+                      <div className="flex-1 min-w-0 pt-0.5">
+                        <span className={cn("text-sm font-semibold leading-tight block", selectedIds.includes(comp.id) ? "text-foreground" : "text-foreground/90")}>
+                          {comp.name}
+                        </span>
+                        {comp.level && <span className="text-xs text-muted-foreground mt-1.5 block">{comp.level}</span>}
                       </div>
                     </div>
-                  );
-                })}
+                  ))}
+                </div>
               </div>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+            );
+          })}
+        </div>
       )}
     </div>
   );
 }
 
 // ============================================================================
-// Step 3: Configuration
+// Step 3: Configuration (FIXED: Smaller Toggles)
 // ============================================================================
 
-interface ConfigurationStepProps {
-  form: ReturnType<typeof useForm<FormValues>>;
-}
-
-function ConfigurationStep({ form }: ConfigurationStepProps) {
+function ConfigurationStep({ form }: { form: any }) {
   return (
-    <div className="space-y-8">
-      {/* Step Header */}
-      <div className="border-b pb-4">
-        <h2 className="text-2xl font-semibold tracking-tight">Настройки теста</h2>
-        <p className="text-muted-foreground mt-1">
-          Настройте параметры прохождения теста
-        </p>
-      </div>
-
-      {/* Main Parameters - Prominent cards */}
-      <div>
-        <h3 className="text-lg font-medium mb-4">Основные параметры</h3>
-        <div className="grid gap-4 md:grid-cols-3">
-          <FormField
-            control={form.control}
-            name="questionsPerIndicator"
-            render={({ field }) => (
-              <FormItem className="p-4 border rounded-lg bg-card">
-                <FormLabel className="flex items-center gap-2 text-base font-medium">
-                  <HelpCircle className="h-5 w-5 text-primary" />
-                  Вопросов на индикатор
+    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+      <div className="space-y-4">
+        <h3 className="text-lg font-semibold tracking-tight">Основные параметры</h3>
+        <div className="grid gap-3 md:grid-cols-3">
+          {[
+            { name: 'questionsPerIndicator', label: 'Вопросы/индикатор', icon: HelpCircle, options: [1, 2, 3, 5], suffix: 'вопр.' },
+            { name: 'timeLimitMinutes', label: 'Время на тест', icon: Clock, options: [15, 30, 45, 60, 90, 120], suffix: 'мин' },
+            { name: 'passingScore', label: 'Проходной балл', icon: Percent, options: [50, 60, 70, 80, 90], suffix: '%' },
+          ].map((fieldData) => (
+            <FormField key={fieldData.name} control={form.control} name={fieldData.name} render={({ field }) => (
+              <FormItem className="p-4 border rounded-2xl bg-card shadow-sm space-y-3">
+                <FormLabel className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+                  <fieldData.icon className="h-4 w-4" /> {fieldData.label}
                 </FormLabel>
-                <Select
-                  value={field.value.toString()}
-                  onValueChange={(v) => field.onChange(parseInt(v))}
-                >
+                <Select value={field.value.toString()} onValueChange={(v) => field.onChange(parseInt(v))}>
                   <FormControl>
-                    <SelectTrigger className="h-12 mt-2">
+                    <SelectTrigger className="h-12 text-base rounded-xl bg-background border-input/60">
                       <SelectValue />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="1">1 вопрос</SelectItem>
-                    <SelectItem value="2">2 вопроса</SelectItem>
-                    <SelectItem value="3">3 вопроса</SelectItem>
-                    <SelectItem value="5">5 вопросов</SelectItem>
+                    {fieldData.options.map(opt => (
+                      <SelectItem key={opt} value={opt.toString()}>{opt} {fieldData.suffix}</SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
-                <FormDescription className="mt-2">
-                  Количество вопросов для каждого индикатора
-                </FormDescription>
               </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="timeLimitMinutes"
-            render={({ field }) => (
-              <FormItem className="p-4 border rounded-lg bg-card">
-                <FormLabel className="flex items-center gap-2 text-base font-medium">
-                  <Clock className="h-5 w-5 text-primary" />
-                  Время на тест
-                </FormLabel>
-                <Select
-                  value={field.value.toString()}
-                  onValueChange={(v) => field.onChange(parseInt(v))}
-                >
-                  <FormControl>
-                    <SelectTrigger className="h-12 mt-2">
-                      <SelectValue />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="15">15 минут</SelectItem>
-                    <SelectItem value="30">30 минут</SelectItem>
-                    <SelectItem value="45">45 минут</SelectItem>
-                    <SelectItem value="60">1 час</SelectItem>
-                    <SelectItem value="90">1.5 часа</SelectItem>
-                    <SelectItem value="120">2 часа</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormDescription className="mt-2">
-                  Максимальная продолжительность теста
-                </FormDescription>
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="passingScore"
-            render={({ field }) => (
-              <FormItem className="p-4 border rounded-lg bg-card">
-                <FormLabel className="flex items-center gap-2 text-base font-medium">
-                  <Percent className="h-5 w-5 text-primary" />
-                  Проходной балл
-                </FormLabel>
-                <Select
-                  value={field.value.toString()}
-                  onValueChange={(v) => field.onChange(parseInt(v))}
-                >
-                  <FormControl>
-                    <SelectTrigger className="h-12 mt-2">
-                      <SelectValue />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="50">50%</SelectItem>
-                    <SelectItem value="60">60%</SelectItem>
-                    <SelectItem value="70">70%</SelectItem>
-                    <SelectItem value="80">80%</SelectItem>
-                    <SelectItem value="90">90%</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormDescription className="mt-2">
-                  Минимальный балл для прохождения
-                </FormDescription>
-              </FormItem>
-            )}
-          />
+            )} />
+          ))}
         </div>
       </div>
 
-      {/* Toggle Settings - Better organized grid */}
-      <div>
-        <h3 className="text-lg font-medium mb-4">Настройки прохождения</h3>
+      <div className="space-y-4">
+        <h3 className="text-lg font-semibold tracking-tight">Режим прохождения</h3>
         <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
-          <FormField
-            control={form.control}
-            name="shuffleQuestions"
-            render={({ field }) => (
-              <FormItem className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors">
-                <div className="space-y-1">
-                  <FormLabel className="flex items-center gap-2 cursor-pointer text-base">
-                    <Shuffle className="h-4 w-4 text-muted-foreground" />
-                    Перемешивать вопросы
-                  </FormLabel>
-                  <FormDescription>
-                    Случайный порядок вопросов
-                  </FormDescription>
+          {[
+            { name: 'shuffleQuestions', label: 'Перемешать вопросы', desc: 'Случайный порядок' },
+            { name: 'shuffleOptions', label: 'Перемешать ответы', desc: 'Случайный порядок вариантов' },
+            { name: 'allowSkip', label: 'Разрешить пропуск', desc: 'Можно пропустить вопрос' },
+            { name: 'allowBackNavigation', label: 'Возврат назад', desc: 'Можно изменить ответ' },
+            { name: 'showResultsImmediately', label: 'Результат сразу', desc: 'Показать итог в конце' },
+          ].map((item) => (
+            <FormField key={item.name} control={form.control} name={item.name} render={({ field }) => (
+              <FormItem className="flex items-center justify-between p-4 border rounded-2xl bg-card shadow-sm active:bg-muted/30 transition-colors">
+                <div className="space-y-1 mr-4">
+                  <FormLabel className="text-base font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">{item.label}</FormLabel>
+                  <FormDescription className="text-xs">{item.desc}</FormDescription>
                 </div>
                 <FormControl>
-                  <Switch
-                    checked={field.value}
-                    onCheckedChange={field.onChange}
-                    className="scale-110"
-                  />
+                  {/* CHANGED: Removed scale-110, added scale-90 for mobile to make it smaller */}
+                  <Switch checked={field.value} onCheckedChange={field.onChange} className="scale-90 md:scale-100" />
                 </FormControl>
               </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="shuffleOptions"
-            render={({ field }) => (
-              <FormItem className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors">
-                <div className="space-y-1">
-                  <FormLabel className="flex items-center gap-2 cursor-pointer text-base">
-                    <Shuffle className="h-4 w-4 text-muted-foreground" />
-                    Перемешивать ответы
-                  </FormLabel>
-                  <FormDescription>
-                    Случайный порядок вариантов
-                  </FormDescription>
-                </div>
-                <FormControl>
-                  <Switch
-                    checked={field.value}
-                    onCheckedChange={field.onChange}
-                    className="scale-110"
-                  />
-                </FormControl>
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="allowSkip"
-            render={({ field }) => (
-              <FormItem className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors">
-                <div className="space-y-1">
-                  <FormLabel className="flex items-center gap-2 cursor-pointer text-base">
-                    <SkipForward className="h-4 w-4 text-muted-foreground" />
-                    Разрешить пропуск
-                  </FormLabel>
-                  <FormDescription>
-                    Можно пропустить вопрос
-                  </FormDescription>
-                </div>
-                <FormControl>
-                  <Switch
-                    checked={field.value}
-                    onCheckedChange={field.onChange}
-                    className="scale-110"
-                  />
-                </FormControl>
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="allowBackNavigation"
-            render={({ field }) => (
-              <FormItem className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors">
-                <div className="space-y-1">
-                  <FormLabel className="flex items-center gap-2 cursor-pointer text-base">
-                    <RotateCcw className="h-4 w-4 text-muted-foreground" />
-                    Возврат к вопросам
-                  </FormLabel>
-                  <FormDescription>
-                    Можно вернуться назад
-                  </FormDescription>
-                </div>
-                <FormControl>
-                  <Switch
-                    checked={field.value}
-                    onCheckedChange={field.onChange}
-                    className="scale-110"
-                  />
-                </FormControl>
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="showResultsImmediately"
-            render={({ field }) => (
-              <FormItem className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors md:col-span-2 lg:col-span-2">
-                <div className="space-y-1">
-                  <FormLabel className="flex items-center gap-2 cursor-pointer text-base">
-                    <BarChart3 className="h-4 w-4 text-muted-foreground" />
-                    Показать результаты сразу
-                  </FormLabel>
-                  <FormDescription>
-                    Результат виден сразу после завершения теста
-                  </FormDescription>
-                </div>
-                <FormControl>
-                  <Switch
-                    checked={field.value}
-                    onCheckedChange={field.onChange}
-                    className="scale-110"
-                  />
-                </FormControl>
-              </FormItem>
-            )}
-          />
+            )} />
+          ))}
         </div>
       </div>
     </div>
@@ -942,303 +558,164 @@ function ConfigurationStep({ form }: ConfigurationStepProps) {
 // Step 4: Review
 // ============================================================================
 
-interface ReviewStepProps {
-  form: ReturnType<typeof useForm<FormValues>>;
-  competencies: CompetencyOption[];
-}
-
-function ReviewStep({ form, competencies }: ReviewStepProps) {
+function ReviewStep({ form, competencies }: NewTestFormProps & { form: any }) {
   const values = form.getValues();
-  
-  const selectedCompetencies = competencies.filter(c => 
-    values.competencyIds.includes(c.id)
-  );
-
-  const configItems = [
-    { label: 'Вопросов на индикатор', value: values.questionsPerIndicator, icon: HelpCircle },
-    { label: 'Время на тест', value: `${values.timeLimitMinutes} мин`, icon: Clock },
-    { label: 'Проходной балл', value: `${values.passingScore}%`, icon: Percent },
-  ];
-
-  const toggleItems = [
-    { label: 'Перемешивание вопросов', enabled: values.shuffleQuestions },
-    { label: 'Перемешивание ответов', enabled: values.shuffleOptions },
-    { label: 'Пропуск вопросов', enabled: values.allowSkip },
-    { label: 'Возврат к вопросам', enabled: values.allowBackNavigation },
-    { label: 'Результаты сразу', enabled: values.showResultsImmediately },
+  const selectedCompetencies = competencies.filter(c => values.competencyIds.includes(c.id));
+  const config = [
+    { label: 'Вопросов/инд.', value: values.questionsPerIndicator, icon: HelpCircle },
+    { label: 'Время', value: `${values.timeLimitMinutes} мин`, icon: Clock },
+    { label: 'Порог', value: `${values.passingScore}%`, icon: Percent },
   ];
 
   return (
-    <div className="space-y-8">
-      {/* Step Header */}
-      <div className="border-b pb-4">
-        <h2 className="text-2xl font-semibold tracking-tight">Проверка данных</h2>
-        <p className="text-muted-foreground mt-1">
-          Убедитесь, что все данные заполнены верно перед созданием теста
-        </p>
-      </div>
-
-      {/* Summary Grid - Two columns on wide screens */}
-      <div className="grid gap-6 lg:grid-cols-2">
-        {/* Basic Info Summary */}
-        <Card className="border-2">
-          <CardContent className="pt-6">
-            <div className="flex items-start gap-4">
-              <div className="p-3 bg-primary/10 rounded-xl">
-                <FileText className="h-6 w-6 text-primary" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm text-muted-foreground mb-1">Название теста</p>
-                <h3 className="font-semibold text-lg truncate">{values.name}</h3>
-                {values.description ? (
-                  <p className="text-sm text-muted-foreground mt-2 line-clamp-3">
-                    {values.description}
-                  </p>
-                ) : (
-                  <p className="text-sm text-muted-foreground/70 mt-2 italic">
-                    Без описания
-                  </p>
-                )}
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Competencies Summary */}
-        <Card className="border-2">
-          <CardContent className="pt-6">
-            <div className="flex items-start gap-4 mb-4">
-              <div className="p-3 bg-primary/10 rounded-xl">
-                <Target className="h-6 w-6 text-primary" />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground mb-1">Компетенции</p>
-                <h3 className="font-semibold text-lg">
-                  Выбрано: {selectedCompetencies.length}
-                </h3>
-              </div>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {selectedCompetencies.slice(0, 6).map(comp => (
-                <Badge key={comp.id} variant="secondary" className="text-sm">
-                  {comp.name}
-                </Badge>
-              ))}
-              {selectedCompetencies.length > 6 && (
-                <Badge variant="outline" className="text-sm">
-                  +{selectedCompetencies.length - 6} ещё
-                </Badge>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Configuration Summary - Full width */}
-      <Card className="border-2">
-        <CardContent className="pt-6">
-          <div className="flex items-start gap-4 mb-6">
-            <div className="p-3 bg-primary/10 rounded-xl">
-              <Settings className="h-6 w-6 text-primary" />
+    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+      {/* Header Info */}
+      <Card className="rounded-2xl border-none shadow-sm bg-primary/5">
+        <CardContent className="pt-6 pb-6">
+          <div className="flex items-start gap-4">
+            <div className="p-3 bg-background rounded-xl shadow-sm shrink-0 text-primary">
+              <FileText className="h-6 w-6" />
             </div>
             <div>
-              <p className="text-sm text-muted-foreground mb-1">Настройки</p>
-              <h3 className="font-semibold text-lg">Параметры теста</h3>
+               <h3 className="font-bold text-xl break-words leading-tight mb-1">{values.name}</h3>
+               <p className="text-sm text-muted-foreground line-clamp-2">{values.description || "Без описания"}</p>
             </div>
-          </div>
-          
-          {/* Main params in cards */}
-          <div className="grid gap-4 md:grid-cols-3 mb-6">
-            {configItems.map(item => {
-              const Icon = item.icon;
-              return (
-                <div key={item.label} className="flex items-center gap-4 p-4 bg-muted/50 rounded-xl">
-                  <Icon className="h-8 w-8 text-primary/70" />
-                  <div>
-                    <p className="text-3xl font-bold">{item.value}</p>
-                    <p className="text-sm text-muted-foreground">{item.label}</p>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-
-          {/* Toggle status badges */}
-          <div className="flex flex-wrap gap-2">
-            {toggleItems.map(item => (
-              <Badge 
-                key={item.label}
-                variant={item.enabled ? 'default' : 'outline'}
-                className={cn(
-                  "text-sm py-1.5 px-3",
-                  !item.enabled && "opacity-50"
-                )}
-              >
-                {item.enabled ? '✓' : '✗'} {item.label}
-              </Badge>
-            ))}
           </div>
         </CardContent>
       </Card>
+
+      <div className="grid gap-4 lg:grid-cols-2">
+        {/* Competencies */}
+        <Card className="rounded-2xl shadow-sm">
+            <CardContent className="pt-5">
+                <div className="flex items-center gap-3 mb-4">
+                    <div className="p-2 bg-primary/10 rounded-lg text-primary"><Target className="h-5 w-5" /></div>
+                    <span className="font-semibold">Компетенции ({selectedCompetencies.length})</span>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                    {selectedCompetencies.slice(0, 5).map(c => (
+                        <Badge key={c.id} variant="secondary" className="rounded-md font-normal">{c.name}</Badge>
+                    ))}
+                    {selectedCompetencies.length > 5 && <Badge variant="outline">+{selectedCompetencies.length - 5} ещё</Badge>}
+                </div>
+            </CardContent>
+        </Card>
+
+        {/* Settings */}
+        <Card className="rounded-2xl shadow-sm">
+            <CardContent className="pt-5">
+                <div className="flex items-center gap-3 mb-4">
+                    <div className="p-2 bg-primary/10 rounded-lg text-primary"><Settings className="h-5 w-5" /></div>
+                    <span className="font-semibold">Параметры</span>
+                </div>
+                <div className="grid grid-cols-3 gap-2">
+                    {config.map((c, i) => (
+                        <div key={i} className="text-center p-2 rounded-xl bg-muted/30 border">
+                            <div className="text-lg font-bold">{c.value}</div>
+                            <div className="text-[10px] uppercase text-muted-foreground font-medium flex justify-center gap-1 items-center mt-1">
+                                <c.icon className="h-3 w-3" /> {c.label}
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }
 
 // ============================================================================
-// Main Form Component
+// Main Component
 // ============================================================================
 
 export default function NewTestForm({ competencies }: NewTestFormProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [currentStep, setCurrentStep] = useState(1);
-
+  
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: '',
-      description: '',
-      goal: AssessmentGoal.OVERVIEW,
-      competencyIds: [],
-      questionsPerIndicator: 2,
-      timeLimitMinutes: 30,
-      passingScore: 70,
-      shuffleQuestions: true,
-      shuffleOptions: true,
-      allowSkip: false,
-      allowBackNavigation: true,
-      showResultsImmediately: true,
+      name: '', description: '', goal: AssessmentGoal.OVERVIEW, competencyIds: [],
+      questionsPerIndicator: 2, timeLimitMinutes: 30, passingScore: 70,
+      shuffleQuestions: true, shuffleOptions: true, allowSkip: false, allowBackNavigation: true, showResultsImmediately: true,
     },
     mode: 'onChange',
   });
 
-  // Step validation
-  const canProceed = async (step: number): Promise<boolean> => {
-    let fieldsToValidate: (keyof FormValues)[] = [];
-    
-    switch (step) {
-      case 1:
-        fieldsToValidate = ['name', 'description', 'goal'];
-        break;
-      case 2:
-        fieldsToValidate = ['competencyIds'];
-        break;
-      case 3:
-        fieldsToValidate = [
-          'questionsPerIndicator',
-          'timeLimitMinutes', 
-          'passingScore'
-        ];
-        break;
-    }
-    
-    return form.trigger(fieldsToValidate);
-  };
+  // Scroll to top on step change
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [currentStep]);
 
   const handleNext = async () => {
-    const isValid = await canProceed(currentStep);
-    if (isValid && currentStep < STEPS.length) {
-      setCurrentStep(prev => prev + 1);
-    }
-  };
-
-  const handleBack = () => {
-    if (currentStep > 1) {
-      setCurrentStep(prev => prev - 1);
-    }
+    let fields: any[] = [];
+    if (currentStep === 1) fields = ['name', 'description', 'goal'];
+    if (currentStep === 2) fields = ['competencyIds'];
+    if (currentStep === 3) fields = ['questionsPerIndicator', 'timeLimitMinutes', 'passingScore'];
+    
+    const isValid = await form.trigger(fields);
+    if (isValid && currentStep < STEPS.length) setCurrentStep(prev => prev + 1);
   };
 
   const handleSubmit = async (values: FormValues) => {
-    const request: CreateTestTemplateRequest = {
-      name: values.name.trim(),
-      description: values.description?.trim() || undefined,
-      goal: values.goal,
-      competencyIds: values.competencyIds,
-      questionsPerIndicator: values.questionsPerIndicator,
-      timeLimitMinutes: values.timeLimitMinutes,
-      passingScore: values.passingScore,
-      shuffleQuestions: values.shuffleQuestions,
-      shuffleOptions: values.shuffleOptions,
-      allowSkip: values.allowSkip,
-      allowBackNavigation: values.allowBackNavigation,
-      showResultsImmediately: values.showResultsImmediately,
-    };
-
     startTransition(async () => {
       try {
-        const template = await testTemplatesApi.createTemplate(request) as { id: string };
-        toast.success('Тест успешно создан!');
+        const template = await testTemplatesApi.createTemplate(values) as { id: string };
+        toast.success('Тест создан!');
         router.push(`/test-templates/${template.id}`);
-      } catch (error: unknown) {
-        const apiError = error as { message?: string };
-        toast.error(apiError?.message || 'Не удалось создать тест');
+      } catch (e: any) {
+        toast.error(e?.message || 'Ошибка создания');
       }
     });
   };
 
   return (
-    <div className="w-full max-w-5xl mx-auto">
+    <div className="w-full max-w-5xl mx-auto relative min-h-screen pb-32 md:pb-10">
       <StepIndicator currentStep={currentStep} totalSteps={STEPS.length} />
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(handleSubmit)}>
-          <Card className="mb-6 shadow-sm">
-            <CardContent className="p-6 md:p-8">
+          <Card className="border-0 md:border shadow-none md:shadow-sm bg-transparent md:bg-card">
+            <CardContent className="p-0 md:p-8">
               {currentStep === 1 && <BasicInfoStep form={form} />}
-              {currentStep === 2 && (
-                <CompetenciesStep form={form} competencies={competencies} />
-              )}
+              {currentStep === 2 && <CompetenciesStep form={form} competencies={competencies} />}
               {currentStep === 3 && <ConfigurationStep form={form} />}
-              {currentStep === 4 && (
-                <ReviewStep form={form} competencies={competencies} />
-              )}
+              {currentStep === 4 && <ReviewStep form={form} competencies={competencies} />}
             </CardContent>
           </Card>
 
-          {/* Navigation Buttons - Large touch targets for better UX */}
-          <div className="flex justify-between gap-4 pt-2">
-            <Button
-              type="button"
-              variant="outline"
-              size="lg"
-              onClick={currentStep === 1 ? () => router.back() : handleBack}
-              disabled={isPending}
-              className="min-w-[120px] h-12"
-            >
-              <ArrowLeft className="mr-2 h-5 w-5" />
-              {currentStep === 1 ? 'Отмена' : 'Назад'}
-            </Button>
+          {/* Sticky Footer: FIXED GRID LAYOUT (Prevents missing Next button) */}
+          <div className="fixed bottom-0 left-0 right-0 p-4 bg-background/90 backdrop-blur-xl border-t z-50 grid grid-cols-[1fr_2fr] gap-3 safe-area-bottom shadow-lg md:hidden">
+             <Button type="button" variant="outline" size="lg" className="h-12 rounded-xl text-base w-full"
+                onClick={currentStep === 1 ? () => router.back() : () => setCurrentStep(p => p - 1)} disabled={isPending}>
+                {currentStep === 1 ? 'Отмена' : 'Назад'}
+             </Button>
+             
+             {currentStep < STEPS.length ? (
+               <Button type="button" size="lg" className="h-12 rounded-xl text-base w-full shadow-primary/25 shadow-md" onClick={handleNext}>
+                 Далее
+               </Button>
+             ) : (
+               <Button type="submit" size="lg" className="h-12 rounded-xl text-base w-full shadow-primary/25 shadow-md" disabled={isPending}>
+                 {isPending ? <Loader2 className="animate-spin" /> : <><Check className="mr-2 h-5 w-5" /> Создать</>}
+               </Button>
+             )}
+          </div>
 
-            {currentStep < STEPS.length ? (
-              <Button
-                type="button"
-                size="lg"
-                onClick={handleNext}
-                className="min-w-32 h-12"
-              >
-                Далее
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </Button>
-            ) : (
-              <Button 
-                type="submit" 
-                size="lg"
-                disabled={isPending}
-                className="min-w-40 h-12"
-              >
-                {isPending ? (
-                  <>
-                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                    Создание...
-                  </>
-                ) : (
-                  <>
-                    <Check className="mr-2 h-5 w-5" />
-                    Создать тест
-                  </>
-                )}
-              </Button>
-            )}
+          {/* Desktop Footer (Standard) */}
+          <div className="hidden md:flex justify-between mt-8">
+             <Button type="button" variant="ghost" onClick={currentStep === 1 ? () => router.back() : () => setCurrentStep(p => p - 1)}>
+                <ArrowLeft className="mr-2 h-4 w-4" /> Назад
+             </Button>
+             {currentStep < STEPS.length ? (
+               <Button type="button" onClick={handleNext}>Далее <ArrowRight className="ml-2 h-4 w-4" /></Button>
+             ) : (
+               <Button type="submit" disabled={isPending}>
+                 {isPending ? <Loader2 className="animate-spin mr-2" /> : <Check className="mr-2 h-4 w-4" />} Создать тест
+               </Button>
+             )}
           </div>
         </form>
       </Form>

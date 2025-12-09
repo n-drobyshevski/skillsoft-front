@@ -111,7 +111,7 @@ function StatusBadge({ status }: { status: string }) {
   const Icon = config.icon;
 
   return (
-    <Badge variant="outline" className={cn('gap-1 text-xs', config.className)}>
+    <Badge variant="outline" className={cn('gap-1.5 text-xs py-0.5 px-2 whitespace-nowrap', config.className)}>
       <Icon className="h-3 w-3" />
       {config.label}
     </Badge>
@@ -120,8 +120,7 @@ function StatusBadge({ status }: { status: string }) {
 
 /**
  * Results Page - Candidates & Test Sessions
- * 
- * Shows all test sessions for this template with:
+ * * Shows all test sessions for this template with:
  * - Search and filter functionality
  * - Session status and scores
  * - Export capabilities
@@ -136,79 +135,81 @@ export default async function ResultsPage({ params, searchParams }: ResultsPageP
   }
 
   return (
-    <div className="p-4 lg:p-6 space-y-6">
-      {/* Stats Header */}
-      <div className="grid gap-4 sm:grid-cols-4">
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-2">
-              <Users className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm text-muted-foreground">Total Sessions</span>
+    <div className="p-4 lg:p-6 space-y-6 max-w-[100vw] overflow-hidden">
+      {/* Stats Header - Mobile: 2 cols, Desktop: 4 cols */}
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 sm:grid-cols-4">
+        <Card className="shadow-sm">
+          <CardContent className="pt-4 sm:pt-6 p-4 sm:p-6">
+            <div className="flex items-center gap-2 mb-1">
+              <Users className="h-4 w-4 text-muted-foreground shrink-0" />
+              <span className="text-xs sm:text-sm text-muted-foreground font-medium">Total</span>
             </div>
-            <p className="text-2xl font-bold mt-1">{stats?.total || 0}</p>
+            <p className="text-xl sm:text-2xl font-bold">{stats?.total || 0}</p>
           </CardContent>
         </Card>
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-2">
-              <CheckCircle2 className="h-4 w-4 text-green-600" />
-              <span className="text-sm text-muted-foreground">Completed</span>
+        <Card className="shadow-sm">
+          <CardContent className="pt-4 sm:pt-6 p-4 sm:p-6">
+            <div className="flex items-center gap-2 mb-1">
+              <CheckCircle2 className="h-4 w-4 text-green-600 shrink-0" />
+              <span className="text-xs sm:text-sm text-muted-foreground font-medium">Done</span>
             </div>
-            <p className="text-2xl font-bold mt-1">{stats?.completed || 0}</p>
+            <p className="text-xl sm:text-2xl font-bold">{stats?.completed || 0}</p>
           </CardContent>
         </Card>
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-2">
-              <Clock className="h-4 w-4 text-blue-600" />
-              <span className="text-sm text-muted-foreground">In Progress</span>
+        <Card className="shadow-sm">
+          <CardContent className="pt-4 sm:pt-6 p-4 sm:p-6">
+            <div className="flex items-center gap-2 mb-1">
+              <Clock className="h-4 w-4 text-blue-600 shrink-0" />
+              <span className="text-xs sm:text-sm text-muted-foreground font-medium">Active</span>
             </div>
-            <p className="text-2xl font-bold mt-1">{stats?.inProgress || 0}</p>
+            <p className="text-xl sm:text-2xl font-bold">{stats?.inProgress || 0}</p>
           </CardContent>
         </Card>
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-muted-foreground">Avg Score</span>
+        <Card className="shadow-sm">
+          <CardContent className="pt-4 sm:pt-6 p-4 sm:p-6">
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-xs sm:text-sm text-muted-foreground font-medium">Avg Score</span>
             </div>
-            <p className="text-2xl font-bold mt-1">{stats?.avgScore || 0}%</p>
+            <p className="text-xl sm:text-2xl font-bold">{stats?.avgScore || 0}%</p>
           </CardContent>
         </Card>
       </div>
 
       {/* Sessions Table */}
-      <Card>
-        <CardHeader>
+      <Card className="border shadow-sm overflow-hidden">
+        <CardHeader className="p-4 sm:p-6">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-              <CardTitle>Test Sessions</CardTitle>
-              <CardDescription>
+              <CardTitle className="text-lg sm:text-xl">Test Sessions</CardTitle>
+              <CardDescription className="text-xs sm:text-sm mt-1">
                 All candidates who have taken or are taking this test
               </CardDescription>
             </div>
             <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm" className="gap-2">
-                <Download className="h-4 w-4" />
+              <Button variant="outline" size="sm" className="w-full sm:w-auto gap-2 h-9 text-xs sm:text-sm">
+                <Download className="h-3.5 w-3.5" />
                 Export
               </Button>
             </div>
           </div>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-0 sm:p-6 sm:pt-0">
           {/* Filters */}
-          <div className="flex flex-col sm:flex-row gap-4 mb-6">
+          <div className="flex flex-col sm:flex-row gap-3 p-4 sm:p-0 sm:mb-6 border-b sm:border-0 bg-muted/5 sm:bg-transparent">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Search by name or email..."
+                placeholder="Search candidates..."
                 defaultValue={filters.search}
-                className="pl-9"
+                className="pl-9 h-10 text-sm"
               />
             </div>
             <Select defaultValue={filters.status || 'all'}>
-              <SelectTrigger className="w-full sm:w-[180px]">
-                <Filter className="h-4 w-4 mr-2 text-muted-foreground" />
-                <SelectValue placeholder="Filter by status" />
+              <SelectTrigger className="w-full sm:w-[180px] h-10 text-sm">
+                <div className="flex items-center gap-2 text-muted-foreground">
+                    <Filter className="h-3.5 w-3.5" />
+                    <span className="text-foreground"><SelectValue placeholder="Status" /></span>
+                </div>
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Statuses</SelectItem>
@@ -219,51 +220,55 @@ export default async function ResultsPage({ params, searchParams }: ResultsPageP
             </Select>
           </div>
 
-          {/* Table */}
+          {/* Mobile-Optimized Table */}
           {sessions.length === 0 ? (
-            <div className="text-center py-12 border rounded-lg bg-muted/20">
-              <Users className="mx-auto h-12 w-12 text-muted-foreground/30 mb-4" />
-              <h3 className="text-lg font-medium mb-1">No test sessions yet</h3>
-              <p className="text-sm text-muted-foreground">
-                Sessions will appear here when candidates start taking this test.
+            <div className="text-center py-12 px-4 border-t sm:border rounded-b-lg bg-muted/5 sm:bg-muted/20">
+              <Users className="mx-auto h-10 w-10 text-muted-foreground/30 mb-3" />
+              <h3 className="text-base font-medium mb-1">No sessions found</h3>
+              <p className="text-xs text-muted-foreground max-w-xs mx-auto">
+                Candidates will appear here once they start the test.
               </p>
             </div>
           ) : (
-            <div className="rounded-md border">
+            <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
-                  <TableRow>
-                    <TableHead>Candidate</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Score</TableHead>
-                    <TableHead>Duration</TableHead>
-                    <TableHead>Started</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
+                  <TableRow className="bg-muted/5 hover:bg-muted/5">
+                    <TableHead className="w-[40%] min-w-[140px] pl-4">Candidate</TableHead>
+                    <TableHead className="min-w-[100px]">Status</TableHead>
+                    <TableHead className="min-w-[80px]">Score</TableHead>
+                    <TableHead className="hidden md:table-cell min-w-[100px]">Duration</TableHead>
+                    <TableHead className="hidden md:table-cell min-w-[120px]">Started</TableHead>
+                    <TableHead className="text-right pr-4 min-w-[80px]">Action</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {sessions.map((session: ExtendedSession) => (
-                    <TableRow key={session.id}>
-                      <TableCell>
-                        <div>
-                          <p className="font-medium">
+                    <TableRow key={session.id} className="group">
+                      <TableCell className="pl-4 py-3 align-top sm:align-middle">
+                        <div className="flex flex-col gap-0.5">
+                          <p className="font-medium text-sm truncate max-w-[140px] sm:max-w-xs">
                             {session.candidateName || 'Anonymous'}
                           </p>
                           {session.candidateEmail && (
-                            <p className="text-sm text-muted-foreground">
+                            <p className="text-xs text-muted-foreground truncate max-w-[140px] sm:max-w-xs">
                               {session.candidateEmail}
                             </p>
                           )}
+                          {/* Mobile-only date display */}
+                          <p className="text-[10px] text-muted-foreground md:hidden mt-1">
+                             {session.createdAt ? new Date(session.createdAt).toLocaleDateString() : ''}
+                          </p>
                         </div>
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="py-3 align-top sm:align-middle">
                         <StatusBadge status={session.status || 'PENDING'} />
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="py-3 align-top sm:align-middle">
                         {session.score !== undefined ? (
                           <span
                             className={cn(
-                              'font-semibold',
+                              'font-semibold text-sm',
                               session.score >= (template.passingScore || 70)
                                 ? 'text-green-600'
                                 : 'text-red-600'
@@ -272,27 +277,23 @@ export default async function ResultsPage({ params, searchParams }: ResultsPageP
                             {session.score}%
                           </span>
                         ) : (
-                          <span className="text-muted-foreground">—</span>
+                          <span className="text-muted-foreground text-sm">—</span>
                         )}
                       </TableCell>
-                      <TableCell>
-                        {session.durationMinutes ? (
-                          `${session.durationMinutes} min`
-                        ) : (
-                          <span className="text-muted-foreground">—</span>
-                        )}
+                      <TableCell className="hidden md:table-cell text-sm">
+                        {session.durationMinutes ? `${session.durationMinutes} min` : '—'}
                       </TableCell>
-                      <TableCell className="text-muted-foreground">
+                      <TableCell className="hidden md:table-cell text-muted-foreground text-sm">
                         {session.createdAt
                           ? new Date(session.createdAt).toLocaleDateString()
                           : '—'}
                       </TableCell>
-                      <TableCell className="text-right">
+                      <TableCell className="text-right pr-4 py-3 align-top sm:align-middle">
                         {session.status === 'COMPLETED' && (
-                          <Button asChild variant="ghost" size="sm" className="gap-1">
+                          <Button asChild variant="ghost" size="sm" className="h-8 px-2 text-primary hover:text-primary hover:bg-primary/5">
                             <Link href={`/test-templates/${id}/results/${session.id}`}>
-                              View
-                              <ExternalLink className="h-3 w-3" />
+                              <span className="hidden sm:inline mr-1">View</span>
+                              <ExternalLink className="h-4 w-4" />
                             </Link>
                           </Button>
                         )}

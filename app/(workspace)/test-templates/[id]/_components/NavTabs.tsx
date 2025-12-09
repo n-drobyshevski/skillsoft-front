@@ -36,8 +36,11 @@ interface NavTabsProps {
 
 /**
  * Navigation tabs for the Test Template Hub
- * Uses URL-based routing instead of client state
- * Active state determined by useSelectedLayoutSegment()
+ * * Mobile Layout: 
+ * [ Title ....... Action ]
+ * [ Scrollable Tabs...   ]
+ * * Desktop Layout (Unchanged):
+ * [ Title ... Centered Tabs ... Action ]
  */
 export function NavTabs({ baseUrl, status, templateId, templateName }: NavTabsProps) {
   const segment = useSelectedLayoutSegment();
@@ -47,7 +50,7 @@ export function NavTabs({ baseUrl, status, templateId, templateName }: NavTabsPr
     {
       label: 'Overview',
       href: baseUrl,
-      segment: null, // root page
+      segment: null,
       icon: LayoutDashboard,
     },
     {
@@ -71,24 +74,32 @@ export function NavTabs({ baseUrl, status, templateId, templateName }: NavTabsPr
   ];
 
   return (
-    <nav className="flex items-center gap-3 border-b bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60 px-4 lg:px-6">
-      <div className="flex items-center gap-3 min-w-0">
-        <span className="text-lg font-semibold text-foreground truncate max-w-[220px]" title={templateName}>
+    <nav className={cn(
+      "w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60",
+      // Mobile: Allow wrapping so Tabs drop to next line
+      "flex flex-wrap items-center", 
+      // Desktop: No wrap, single row, fixed height to prevent shifting
+      "md:flex-nowrap md:px-6 md:h-14"
+    )}>
+      
+      {/* 1. Title Section */}
+      <div className="flex items-center gap-3 min-w-0 pl-4 py-3 md:pl-0 md:py-0 md:order-1">
+        <span className="text-lg font-semibold text-foreground truncate max-w-[180px] sm:max-w-[300px]" title={templateName}>
           {templateName}
         </span>
         {status === 'PUBLISHED' && (
-          <div className="hidden md:flex items-center gap-2 text-amber-700 dark:text-amber-200 text-sm whitespace-nowrap">
+          <div className="hidden lg:flex items-center gap-2 text-amber-700 dark:text-amber-200 text-sm whitespace-nowrap">
             <Lock className="h-4 w-4" />
-            <span className="font-medium">Published Version</span>
+            <span className="font-medium">Published</span>
             <Popover>
               <PopoverTrigger asChild>
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-7 w-7 text-amber-700/90 dark:text-amber-200/90"
+                  className="h-6 w-6 text-amber-700/90 dark:text-amber-200/90"
                   aria-label="Published info"
                 >
-                  <Info className="h-4 w-4" />
+                  <Info className="h-3.5 w-3.5" />
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="text-sm max-w-xs">
@@ -99,8 +110,37 @@ export function NavTabs({ baseUrl, status, templateId, templateName }: NavTabsPr
         )}
       </div>
 
-      <div className="flex-1 flex justify-center">
-        <div className="flex">
+      {/* 2. Actions Section (Moved here in DOM for Mobile Float Right) */}
+      <div className="flex items-center gap-2 ml-auto pr-4 py-3 md:pr-0 md:py-0 md:order-3">
+        {status === 'PUBLISHED' && (
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => {
+              startTransition(async () => {
+                await createNewVersion(templateId);
+              });
+            }}
+            disabled={isPending}
+            className="gap-1.5 h-8"
+          >
+            {isPending ? (
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            ) : (
+              <GitBranch className="h-3.5 w-3.5" />
+            )}
+            <span className="hidden sm:inline">New Version</span>
+            <span className="inline sm:hidden">New</span>
+          </Button>
+        )}
+      </div>
+
+      {/* 3. Tabs Section */}
+      <div className={cn(
+        "w-full overflow-x-auto scrollbar-hide", // Mobile: Full width, scrollable
+        "md:w-auto md:flex-1 md:flex md:justify-center md:overflow-visible md:order-2" // Desktop: Centered, flexible
+      )}>
+        <div className="flex px-4 md:px-0 w-max md:w-auto min-w-full md:min-w-0">
           {tabs.map((tab) => {
             const isActive = segment === tab.segment;
             const Icon = tab.icon;
@@ -110,7 +150,7 @@ export function NavTabs({ baseUrl, status, templateId, templateName }: NavTabsPr
                 key={tab.href}
                 href={tab.href}
                 className={cn(
-                  'relative flex items-center gap-2 px-4 py-3 text-sm font-medium transition-colors',
+                  'relative flex items-center gap-2 px-4 py-3 text-sm font-medium transition-colors whitespace-nowrap',
                   'hover:text-foreground',
                   isActive
                     ? 'text-primary'
@@ -126,29 +166,6 @@ export function NavTabs({ baseUrl, status, templateId, templateName }: NavTabsPr
             );
           })}
         </div>
-      </div>
-
-      <div className="flex items-center gap-2">
-        {status === 'PUBLISHED' && (
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => {
-              startTransition(async () => {
-                await createNewVersion(templateId);
-              });
-            }}
-            disabled={isPending}
-            className="gap-1.5"
-          >
-            {isPending ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <GitBranch className="h-4 w-4" />
-            )}
-            New Version
-          </Button>
-        )}
       </div>
     </nav>
   );
