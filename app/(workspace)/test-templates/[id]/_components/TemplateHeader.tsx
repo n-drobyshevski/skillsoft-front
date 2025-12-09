@@ -14,13 +14,12 @@ import {
 import { 
   FileText, 
   Send, 
-  GitBranch, 
   ChevronRight,
   Loader2 
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useTransition } from 'react';
-import { publishTemplate, createNewVersion } from '../actions';
+import { publishTemplate } from '../actions';
 import { useEffect } from 'react';
 import { useHeader } from '@/context/HeaderContext';
 
@@ -91,12 +90,6 @@ export function TemplateHeader({
     });
   };
 
-  const handleNewVersion = () => {
-    startTransition(async () => {
-      await createNewVersion(templateId);
-    });
-  };
-
   return (
     <header className="sticky top-0 z-40 flex items-center justify-between border-b bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60 px-4 lg:px-6 h-14">
       {/* Left: Breadcrumb + Status */}
@@ -152,22 +145,6 @@ export function TemplateHeader({
           </Button>
         )}
 
-        {status === 'PUBLISHED' && (
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={handleNewVersion}
-            disabled={isPending}
-            className="gap-1.5"
-          >
-            {isPending ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <GitBranch className="h-4 w-4" />
-            )}
-            New Version
-          </Button>
-        )}
       </div>
     </header>
   );

@@ -1,17 +1,24 @@
 'use client';
 
 import Link from 'next/link';
+import { useTransition } from 'react';
 import { useSelectedLayoutSegment } from 'next/navigation';
 import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
+import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import { 
   LayoutDashboard, 
   Wrench, 
   Users, 
   Settings,
   Lock,
+  Info,
+  GitBranch,
+  Loader2,
   type LucideIcon 
 } from 'lucide-react';
 import type { TemplateStatus } from './TemplateHeader';
+import { createNewVersion } from '../actions';
 
 interface NavTab {
   label: string;
@@ -23,6 +30,8 @@ interface NavTab {
 interface NavTabsProps {
   baseUrl: string;
   status: TemplateStatus;
+  templateId: string;
+  templateName: string;
 }
 
 /**
@@ -30,8 +39,9 @@ interface NavTabsProps {
  * Uses URL-based routing instead of client state
  * Active state determined by useSelectedLayoutSegment()
  */
-export function NavTabs({ baseUrl, status }: NavTabsProps) {
+export function NavTabs({ baseUrl, status, templateId, templateName }: NavTabsProps) {
   const segment = useSelectedLayoutSegment();
+  const [isPending, startTransition] = useTransition();
 
   const tabs: NavTab[] = [
     {
@@ -61,45 +71,85 @@ export function NavTabs({ baseUrl, status }: NavTabsProps) {
   ];
 
   return (
-    <nav className="flex items-center justify-between gap-3 border-b bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60 px-4 lg:px-6">
-      <div className="flex">
-        {tabs.map((tab) => {
-          const isActive = segment === tab.segment;
-          const Icon = tab.icon;
-
-          return (
-            <Link
-              key={tab.href}
-              href={tab.href}
-              className={cn(
-                'relative flex items-center gap-2 px-4 py-3 text-sm font-medium transition-colors',
-                'hover:text-foreground',
-                isActive
-                  ? 'text-primary'
-                  : 'text-muted-foreground'
-              )}
-            >
-              <Icon className="h-4 w-4" />
-              <span>{tab.label}</span>
-              
-              {/* Active indicator */}
-              {isActive && (
-                <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
-              )}
-            </Link>
-          );
-        })}
+    <nav className="flex items-center gap-3 border-b bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60 px-4 lg:px-6">
+      <div className="flex items-center gap-3 min-w-0">
+        <span className="text-lg font-semibold text-foreground truncate max-w-[220px]" title={templateName}>
+          {templateName}
+        </span>
+        {status === 'PUBLISHED' && (
+          <div className="hidden md:flex items-center gap-2 text-amber-700 dark:text-amber-200 text-sm whitespace-nowrap">
+            <Lock className="h-4 w-4" />
+            <span className="font-medium">Published Version</span>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-7 w-7 text-amber-700/90 dark:text-amber-200/90"
+                  aria-label="Published info"
+                >
+                  <Info className="h-4 w-4" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="text-sm max-w-xs">
+                This blueprint is locked. Create a new version to make changes.
+              </PopoverContent>
+            </Popover>
+          </div>
+        )}
       </div>
 
-      {status === 'PUBLISHED' && (
-        <div className="hidden md:flex items-center gap-2 text-amber-700 dark:text-amber-200 text-sm">
-          <Lock className="h-4 w-4" />
-          <span className="font-medium">Published Version</span>
-          <span className="text-amber-700/80 dark:text-amber-300/80">
-            — This blueprint is locked. Create a new version to make changes.
-          </span>
+      <div className="flex-1 flex justify-center">
+        <div className="flex">
+          {tabs.map((tab) => {
+            const isActive = segment === tab.segment;
+            const Icon = tab.icon;
+
+            return (
+              <Link
+                key={tab.href}
+                href={tab.href}
+                className={cn(
+                  'relative flex items-center gap-2 px-4 py-3 text-sm font-medium transition-colors',
+                  'hover:text-foreground',
+                  isActive
+                    ? 'text-primary'
+                    : 'text-muted-foreground'
+                )}
+              >
+                <Icon className="h-4 w-4" />
+                <span>{tab.label}</span>
+                {isActive && (
+                  <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
+                )}
+              </Link>
+            );
+          })}
         </div>
-      )}
+      </div>
+
+      <div className="flex items-center gap-2">
+        {status === 'PUBLISHED' && (
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => {
+              startTransition(async () => {
+                await createNewVersion(templateId);
+              });
+            }}
+            disabled={isPending}
+            className="gap-1.5"
+          >
+            {isPending ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <GitBranch className="h-4 w-4" />
+            )}
+            New Version
+          </Button>
+        )}
+      </div>
     </nav>
   );
 }

@@ -32,6 +32,7 @@ type OptimisticAction =
   | { type: 'remove'; competencyId: string }
   | { type: 'reorder'; fromIndex: number; toIndex: number }
   | { type: 'update'; competencyId: string; updates: Partial<BlueprintCompetency> }
+  | { type: 'setCompetencies'; competencies: BlueprintCompetency[] }
   | { type: 'updateSettings'; settings: Partial<BlueprintState> };
 
 interface BlueprintWorkspaceContextValue {
@@ -57,6 +58,7 @@ interface BlueprintWorkspaceContextValue {
     competencyId: string,
     updates: Partial<BlueprintCompetency>
   ) => void;
+  setCompetencies: (competencies: BlueprintCompetency[]) => void;
   updateSettings: (settings: Partial<BlueprintState>) => void;
   runSimulation: (profile: SimulationProfile) => Promise<void>;
   saveBlueprint: () => Promise<boolean>;
@@ -122,6 +124,12 @@ function blueprintReducer(
         competencies: state.competencies.map((c) =>
           c.id === action.competencyId ? { ...c, ...action.updates } : c
         ),
+      };
+
+    case 'setCompetencies':
+      return {
+        ...state,
+        competencies: action.competencies,
       };
 
     case 'updateSettings':
@@ -313,6 +321,27 @@ export function BlueprintWorkspaceProvider({
     [optimisticState, dispatchOptimistic]
   );
 
+  // Replace full competency list (used for undo/redo)
+  const setCompetencies = useCallback(
+    (competencies: BlueprintCompetency[]) => {
+      startTransition(async () => {
+        dispatchOptimistic({ type: 'setCompetencies', competencies });
+
+        const result = await updateBlueprint({
+          ...optimisticState,
+          competencies,
+        });
+
+        if (result.success) {
+          setServerState(result.data);
+        } else {
+          toast.error(result.error);
+        }
+      });
+    },
+    [optimisticState, dispatchOptimistic]
+  );
+
   // Update blueprint settings (strategy, time limit, etc.)
   const updateSettings = useCallback(
     (settings: Partial<BlueprintState>) => {
@@ -387,6 +416,7 @@ export function BlueprintWorkspaceProvider({
     removeCompetency,
     reorderCompetencies,
     updateCompetency,
+    setCompetencies,
     updateSettings,
     runSimulation,
     saveBlueprint,

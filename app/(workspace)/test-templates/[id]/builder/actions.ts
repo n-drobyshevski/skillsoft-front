@@ -10,7 +10,13 @@ import { getAuthHeaders } from '@/services/roleApi';
 export type HealthStatus = 'CRITICAL' | 'MODERATE' | 'HEALTHY';
 export type SimulationProfile = 'PERFECT_CANDIDATE' | 'RANDOM_GUESSER' | 'FAILING_CANDIDATE';
 export type Strategy = 'UNIVERSAL_BASELINE' | 'TARGETED_FIT' | 'DYNAMIC_GAP_ANALYSIS';
-export type Difficulty = 'FOUNDATIONAL' | 'INTERMEDIATE' | 'ADVANCED';
+export type Difficulty = 'FOUNDATIONAL' | 'INTERMEDIATE' | 'ADVANCED' | 'EXPERT';
+export type SelectionReason =
+  | 'COVERAGE_GAP'
+  | 'CALIBRATION'
+  | 'ADAPTIVE_CHECK'
+  | 'RANDOMIZED'
+  | 'BACKSTOP';
 export type AdaptivityMode = 'LINEAR' | 'ADAPTIVE_STANDARD' | 'RUTHLESS';
 
 export interface BlueprintCompetency {
@@ -53,11 +59,14 @@ export interface LibraryCompetency {
 
 export interface QuestionSummary {
   id: string;
+  competencyId?: string;
   text: string;
   difficulty: string;
   competencyName: string;
   indicatorTitle: string;
   estimatedTimeSeconds: number;
+  selectionReason?: SelectionReason;
+  abilityDelta?: number;
 }
 
 export interface InventoryWarning {
@@ -75,6 +84,15 @@ export interface SimulationResult {
   warnings: InventoryWarning[];
   estimatedDurationMinutes: number;
   difficultyDistribution: Record<string, number>;
+  distributionByCompetency: Array<{
+    competencyId: string;
+    competencyName: string;
+    questionCount: number;
+    weight: number;
+    difficultyMix: Record<Difficulty, number>;
+  }>;
+  distributionByDifficulty: Record<Difficulty, number>;
+  selectionReasons: Record<SelectionReason, number>;
   simulatedScore?: number;
   runLogs: string[];
 }
@@ -84,6 +102,11 @@ export interface InventoryHeatmap {
   totalCompetencies: number;
   healthyCounts: number;
   criticalCounts: number;
+}
+
+export interface SampleQuestionResponse {
+  text: string;
+  difficulty?: Difficulty;
 }
 
 export type ActionResponse<T> =
@@ -176,6 +199,46 @@ export async function updateBlueprint(
 }
 
 /**
+ * Fetch a representative sample question for a competency
+ */
+export async function getSampleQuestion(
+  competencyId: string
+): Promise<ActionResponse<SampleQuestionResponse>> {
+  try {
+    const authHeaders = await getAuthHeaders();
+
+    const response = await fetch(
+      `${getApiBaseUrl()}/v1/tests/competencies/${competencyId}/sample-question`,
+      {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          ...authHeaders,
+        },
+        cache: 'no-store',
+      }
+    );
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.message || `Sample fetch failed: ${response.status}`);
+    }
+
+    const data: SampleQuestionResponse = await response.json();
+    return { success: true, data };
+  } catch (error) {
+    console.error('getSampleQuestion error:', error);
+    return {
+      success: true,
+      data: {
+        text: 'Scenario: You are leading a cross-functional project with conflicting stakeholder goals. How do you align the team and keep delivery on track?',
+        difficulty: 'INTERMEDIATE',
+      },
+    };
+  }
+}
+
+/**
  * Generate mock simulation data for development
  */
 function generateMockSimulation(
@@ -188,7 +251,29 @@ function generateMockSimulation(
     FAILING_CANDIDATE: 25,
   };
 
-  const difficulties = ['FOUNDATIONAL', 'INTERMEDIATE', 'ADVANCED'] as const;
+  const difficulties: Difficulty[] = ['FOUNDATIONAL', 'INTERMEDIATE', 'ADVANCED', 'EXPERT'];
+  const selectionReasons: SelectionReason[] = [
+    'COVERAGE_GAP',
+    'CALIBRATION',
+    'ADAPTIVE_CHECK',
+    'RANDOMIZED',
+    'BACKSTOP',
+  ];
+
+  const difficultyDistribution: Record<Difficulty, number> = {
+    FOUNDATIONAL: 0,
+    INTERMEDIATE: 0,
+    ADVANCED: 0,
+    EXPERT: 0,
+  };
+
+  const selectionReasonCounts: Record<SelectionReason, number> = {
+    COVERAGE_GAP: 0,
+    CALIBRATION: 0,
+    ADAPTIVE_CHECK: 0,
+    RANDOMIZED: 0,
+    BACKSTOP: 0,
+  };
   
   return {
     valid: state.competencies.length > 0,
@@ -201,13 +286,22 @@ function generateMockSimulation(
     ),
     sampleQuestions: Array.from({ length: Math.min(20, state.competencies.length * 3) }, (_, i) => {
       const comp = state.competencies[i % state.competencies.length];
+      const difficulty = difficulties[Math.floor(Math.random() * difficulties.length)];
+      const selectionReason = selectionReasons[Math.floor(Math.random() * selectionReasons.length)];
+
+      difficultyDistribution[difficulty] += 1;
+      selectionReasonCounts[selectionReason] += 1;
+
       return {
         id: `q-${i}`,
+        competencyId: comp?.id,
         text: `Sample question ${i + 1} about ${comp?.name || 'competency'}`,
-        difficulty: difficulties[Math.floor(Math.random() * difficulties.length)],
+        difficulty,
         competencyName: comp?.name || 'Unknown',
         indicatorTitle: `${comp?.name || 'Competency'} - Key Indicator`,
         estimatedTimeSeconds: 60 + Math.floor(Math.random() * 60),
+        selectionReason,
+        abilityDelta: Number(((Math.random() - 0.5) * 0.2).toFixed(2)),
       };
     }),
     warnings: state.competencies
@@ -222,11 +316,21 @@ function generateMockSimulation(
     estimatedDurationMinutes:
       state.timeLimitMinutes ||
       Math.ceil(state.competencies.reduce((sum, c) => sum + c.questionCount * 1.5, 0)),
-    difficultyDistribution: {
-      FOUNDATIONAL: 30,
-      INTERMEDIATE: 50,
-      ADVANCED: 20,
-    },
+    difficultyDistribution,
+    distributionByCompetency: state.competencies.map((c) => ({
+      competencyId: c.id,
+      competencyName: c.name,
+      questionCount: c.questionCount,
+      weight: c.weight,
+      difficultyMix: {
+        FOUNDATIONAL: Math.max(5, Math.floor(Math.random() * 20)),
+        INTERMEDIATE: Math.max(10, Math.floor(Math.random() * 30)),
+        ADVANCED: Math.max(5, Math.floor(Math.random() * 20)),
+        EXPERT: Math.max(0, Math.floor(Math.random() * 10)),
+      },
+    })),
+    distributionByDifficulty: difficultyDistribution,
+    selectionReasons: selectionReasonCounts,
     simulatedScore: scoreByProfile[profile],
     runLogs: [
       `[MOCK] Simulation with profile: ${profile}`,

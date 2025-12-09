@@ -62,14 +62,19 @@ export default async function TemplateLayout({
 
   return (
     <>
-      <TemplateHeader
+      {/* <TemplateHeader
         templateId={id}
         templateName={template.name}
         status={status}
-      />
+      /> */}
 
       {/* Navigation Tabs with inline published warning */}
-      <NavTabs baseUrl={baseUrl} status={status} />
+      <NavTabs
+        baseUrl={baseUrl}
+        status={status}
+        templateId={id}
+        templateName={template.name}
+      />
 
       {/* Tab Content */}
       <main className="flex-1">

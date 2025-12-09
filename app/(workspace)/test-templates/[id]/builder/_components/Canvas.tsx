@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useCallback, useState, useEffect } from 'react';
+import React, { useCallback, useState, useEffect, useRef } from 'react';
 import {
   DndContext,
   closestCenter,
@@ -34,6 +34,10 @@ import {
   Sparkles,
   ChevronDown,
   ChevronUp,
+  Undo2,
+  Redo2,
+  Save,
+  Loader2,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useBlueprintWorkspace } from './BlueprintWorkspaceProvider';
@@ -102,7 +106,7 @@ function SortableCompetencyCard({
         {/* Content */}
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
-            <h4 className="font-medium text-sm truncate">{competency.name}</h4>
+            <h4 className="text-lg font-semibold truncate">{competency.name}</h4>
             <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-5">
               {competency.category.replace(/_/g, ' ').slice(0, 12)}
             </Badge>
@@ -133,7 +137,7 @@ function SortableCompetencyCard({
           <Button
             variant="ghost"
             size="icon"
-            className="h-8 w-8 rounded-lg text-destructive/70 hover:text-destructive hover:bg-destructive/10"
+            className="h-8 w-8 rounded-lg text-destructive/70 hover:text-destructive hover:bg-destructive/10 opacity-0 group-hover:opacity-100 transition-opacity"
             onClick={onRemove}
             aria-label={`Remove ${competency.name}`}
           >
@@ -190,7 +194,7 @@ function DragOverlayCard({ competency }: { competency: BlueprintCompetency }) {
       <div className="flex items-center gap-3">
         <GripVertical className="h-5 w-5 text-muted-foreground/50" />
         <div className="flex-1">
-          <h4 className="font-medium text-sm">{competency.name}</h4>
+          <h4 className="text-lg font-semibold">{competency.name}</h4>
           <p className="text-[11px] text-muted-foreground">
             {competency.category.replace(/_/g, ' ')}
           </p>
@@ -208,24 +212,42 @@ function EmptyState() {
   return (
     <div
       className={cn(
-        'flex flex-col items-center justify-center py-16 px-8',
+        'flex flex-col items-center justify-center py-16 px-8 space-y-4',
         'border-2 border-dashed border-muted-foreground/20 rounded-2xl',
         'bg-linear-to-b from-muted/20 to-transparent'
       )}
     >
-      <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 mb-4">
-        <Layers className="h-8 w-8 text-primary/60" />
-      </div>
-      <h3 className="text-lg font-semibold text-foreground/80 mb-2">
-        Start building your blueprint
+      <svg
+        width="200"
+        height="140"
+        viewBox="0 0 200 140"
+        aria-hidden="true"
+        className="text-primary/60"
+      >
+        <defs>
+          <linearGradient id="bgGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="currentColor" stopOpacity="0.18" />
+            <stop offset="100%" stopColor="currentColor" stopOpacity="0.05" />
+          </linearGradient>
+        </defs>
+        <rect x="10" y="20" width="180" height="100" rx="12" fill="url(#bgGrad)" />
+        <rect x="26" y="36" width="60" height="16" rx="4" fill="currentColor" opacity="0.25" />
+        <rect x="26" y="58" width="120" height="12" rx="4" fill="currentColor" opacity="0.18" />
+        <rect x="26" y="78" width="88" height="12" rx="4" fill="currentColor" opacity="0.18" />
+        <circle cx="150" cy="60" r="10" stroke="currentColor" strokeWidth="2" fill="none" />
+        <path d="M145 60 L155 60 M150 55 L150 65" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+        <circle cx="60" cy="98" r="6" fill="currentColor" opacity="0.3" />
+        <circle cx="80" cy="102" r="4" fill="currentColor" opacity="0.2" />
+      </svg>
+      <h3 className="text-lg font-semibold text-foreground/80">
+        Select a Job Profile to begin
       </h3>
       <p className="text-sm text-muted-foreground text-center max-w-sm">
-        Drag competencies here from the library or click{' '}
-        <span className="inline-flex items-center gap-1 text-primary">
-          <Plus className="h-3 w-3" /> Add
-        </span>{' '}
-        to browse.
+        Your canvas is empty. Choose a job profile and drag competencies here to start building your test blueprint.
       </p>
+      <div className="inline-flex items-center gap-2 text-primary text-sm">
+        <Plus className="h-4 w-4" /> Add competencies from the library
+      </div>
     </div>
   );
 }
@@ -252,21 +274,64 @@ export function Canvas() {
   const {
     state,
     isPending,
+    isSaving,
     removeCompetency,
     reorderCompetencies,
     updateCompetency,
     addCompetency,
-    libraryCompetencies,
+    saveBlueprint,
+    setCompetencies,
   } = useBlueprintWorkspace();
 
   const [activeId, setActiveId] = useState<string | null>(null);
   const [isDragOver, setIsDragOver] = useState(false);
+  const historyRef = useRef<BlueprintCompetency[][]>([]);
+  const futureRef = useRef<BlueprintCompetency[][]>([]);
+  const restoringRef = useRef(false);
+  const lastSnapshotRef = useRef<string>('');
+  const [historyState, setHistoryState] = useState({ canUndo: false, canRedo: false });
   
   // Prevent SSR hydration mismatch - DndContext generates unique IDs
   const [isMounted, setIsMounted] = useState(false);
   useEffect(() => {
     setIsMounted(true);
-  }, []);  const activeCompetency = activeId
+  }, []);
+
+  useEffect(() => {
+    const snapshot = JSON.stringify(state.competencies);
+    const clone = state.competencies.map((c) => ({ ...c }));
+
+    if (!lastSnapshotRef.current) {
+      historyRef.current = [clone];
+      lastSnapshotRef.current = snapshot;
+      setHistoryState({ canUndo: false, canRedo: false });
+      return;
+    }
+
+    if (snapshot === lastSnapshotRef.current) {
+      return;
+    }
+
+    if (restoringRef.current) {
+      lastSnapshotRef.current = snapshot;
+      restoringRef.current = false;
+      setHistoryState({
+        canUndo: historyRef.current.length > 1,
+        canRedo: futureRef.current.length > 0,
+      });
+      return;
+    }
+
+    historyRef.current = [...historyRef.current.slice(-9), clone];
+    futureRef.current = [];
+    lastSnapshotRef.current = snapshot;
+    setHistoryState({
+      canUndo: historyRef.current.length > 1,
+      canRedo: false,
+    });
+  }, [state.competencies]);
+
+  const activeCompetency = activeId
     ? state.competencies.find((c) => c.id === activeId)
     : null;
 
@@ -330,6 +395,43 @@ export function Canvas() {
     setIsDragOver(false);
   }, []);
 
+  const handleUndo = useCallback(() => {
+    if (historyRef.current.length < 2) return;
+
+    const current = historyRef.current.pop();
+    if (current) {
+      futureRef.current.push(current.map((c) => ({ ...c })));
+    }
+
+    const previous = historyRef.current[historyRef.current.length - 1];
+    if (!previous) return;
+
+    restoringRef.current = true;
+    setCompetencies(previous.map((c) => ({ ...c })));
+    setHistoryState({
+      canUndo: historyRef.current.length > 1,
+      canRedo: futureRef.current.length > 0,
+    });
+  }, [setCompetencies]);
+
+  const handleRedo = useCallback(() => {
+    const next = futureRef.current.pop();
+    if (!next) return;
+
+    const clone = next.map((c) => ({ ...c }));
+    historyRef.current.push(clone);
+    restoringRef.current = true;
+    setCompetencies(clone);
+    setHistoryState({
+      canUndo: historyRef.current.length > 1,
+      canRedo: futureRef.current.length > 0,
+    });
+  }, [setCompetencies]);
+
+  const handleSave = useCallback(() => {
+    void saveBlueprint();
+  }, [saveBlueprint]);
+
   return (
     <div className="flex flex-col h-full min-h-0 overflow-hidden">
       {/* Canvas Header */}
@@ -341,12 +443,46 @@ export function Canvas() {
             {state.competencies.length} items
           </Badge>
         </div>
-
-        {/* Stats */}
-        <div className="flex items-center gap-4 text-[11px] text-muted-foreground">
-          <span>
-            ~{Math.ceil(state.competencies.reduce((s, c) => s + c.questionCount * 1.5, 0))} min
-          </span>
+        <div className="flex items-center gap-2">
+          <div className="hidden sm:flex items-center gap-4 text-[11px] text-muted-foreground mr-2">
+            <span>
+              ~{Math.ceil(state.competencies.reduce((s, c) => s + c.questionCount * 1.5, 0))} min
+            </span>
+            <span>Pass: {state.passingScore}%</span>
+          </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 rounded-lg"
+            onClick={handleUndo}
+            disabled={!historyState.canUndo || isPending}
+            aria-label="Undo"
+          >
+            <Undo2 className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 rounded-lg"
+            onClick={handleRedo}
+            disabled={!historyState.canRedo || isPending}
+            aria-label="Redo"
+          >
+            <Redo2 className="h-4 w-4" />
+          </Button>
+          <Button
+            size="sm"
+            className="h-8 rounded-lg gap-1.5"
+            onClick={handleSave}
+            disabled={isSaving || isPending}
+          >
+            {isSaving ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Save className="h-4 w-4" />
+            )}
+            Save
+          </Button>
         </div>
       </div>
 
@@ -377,7 +513,7 @@ export function Canvas() {
                 items={state.competencies.map((c) => c.id)}
                 strategy={verticalListSortingStrategy}
               >
-                <div className="space-y-2">
+                <div className="space-y-6">
                   {state.competencies.map((comp) => (
                     <SortableCompetencyCard
                       key={comp.id}
