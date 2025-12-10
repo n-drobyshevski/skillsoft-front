@@ -14,5 +14,5 @@ export const indicatorSchema = z.object({
   isActive: z.boolean(),
   approvalStatus: z.nativeEnum(ApprovalStatus),
   orderIndex: z.number().min(1, 'Order index must be positive').max(20, 'Order index must be 20 or less'),
-  contextScope: z.nativeEnum(ContextScope).optional().default(ContextScope.UNIVERSAL), // Smart Assessment Two-Tier Filter
+  contextScope: z.nativeEnum(ContextScope), // Smart Assessment Two-Tier Filter
 }).strict(); // Prevent extra fields from being included

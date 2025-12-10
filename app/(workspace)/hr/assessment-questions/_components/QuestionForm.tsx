@@ -49,7 +49,7 @@ import { Badge } from '@/components/ui/badge';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from '@/components/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { QUESTION_TAG_OPTIONS } from '../validation';
+import { QUESTION_TAG_OPTIONS, QuestionTag } from '../validation';
 
 type QuestionFormValues = z.infer<typeof questionSchema>;
 
@@ -90,7 +90,7 @@ export function QuestionForm({ question, competencyId, behavioralIndicatorId, on
       orderIndex: question?.orderIndex ?? 1,
       timeLimit: question?.timeLimit ?? 60,
       metadata: {
-        tags: question?.metadata?.tags || [],
+        tags: (question?.metadata?.tags || []) as QuestionTag[],
       },
       answerOptions: question?.answerOptions?.map(opt => ({
           text: opt.text || '',
@@ -160,7 +160,7 @@ export function QuestionForm({ question, competencyId, behavioralIndicatorId, on
       } else {
         const newQuestion = await assessmentQuestionsApi.createQuestion(competencyId, behavioralIndicatorId, data);
         toast.success("Question created successfully!");
-        router.push(`/hr/assessment-questions/${newQuestion.id}`);
+        router.push(`/hr/ assessment-questions/${newQuestion.id}`);
       }
     } catch (e: unknown) {
       const errorMessage = e instanceof Error ? e.message : "An error occurred.";

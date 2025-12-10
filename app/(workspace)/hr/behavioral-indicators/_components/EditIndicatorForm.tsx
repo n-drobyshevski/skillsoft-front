@@ -24,7 +24,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
-import { ProficiencyLevel, ApprovalStatus, IndicatorMeasurementType } from '@/types/domain';
+import { ProficiencyLevel, ApprovalStatus, IndicatorMeasurementType, ContextScope } from '@/types/domain';
 import { updateIndicatorAction } from '@/app/actions';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
@@ -51,6 +51,7 @@ export function EditIndicatorForm({ indicator }: { indicator: BehavioralIndicato
       isActive: indicator.isActive,
       approvalStatus: indicator.approvalStatus,
       orderIndex: indicator.orderIndex,
+      contextScope: indicator.contextScope || ContextScope.UNIVERSAL,
     },
   });
 
@@ -177,6 +178,33 @@ export function EditIndicatorForm({ indicator }: { indicator: BehavioralIndicato
                       onChange={event => field.onChange(parseInt(event.target.value))}
                     />
                   </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="contextScope"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Context Scope</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select scope" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {Object.values(ContextScope).map((scope) => (
+                        <SelectItem key={scope} value={scope}>
+                          {scope}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormDescription>
+                    Smart Assessment filter: UNIVERSAL for Scenario A, ROLE_SPECIFIC for Scenario B
+                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}

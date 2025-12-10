@@ -690,7 +690,9 @@ export interface CompetencyScore {
   score: number;
   maxScore: number;
   percentage: number;
+  questionsAnswered?: number; // Number of questions answered for this competency
   weight?: number;
+  onetCode?: string; // O*NET code for Big Five projection
   indicatorScores?: IndicatorScore[];
 }
 
