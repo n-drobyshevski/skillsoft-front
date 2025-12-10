@@ -321,6 +321,32 @@ export default async function Page({ params }: QuestionDetailPageProps) {
 									#{question.orderIndex}
 								</dd>
 							</div>
+							
+							{/* Context Tags */}
+							{question.metadata?.tags && question.metadata.tags.length > 0 && (
+								<div className="py-2 border-t border-border/50">
+									<dt className="text-sm font-medium text-muted-foreground mb-2">
+										Context Tags
+									</dt>
+									<dd className="flex flex-wrap gap-1.5">
+										{question.metadata.tags.map((tag: string) => (
+											<Badge 
+												key={tag}
+												variant="secondary"
+												className={`text-xs px-2 py-0.5 font-medium ${
+													tag === 'GENERAL' 
+														? 'bg-teal-100 text-teal-700 border-teal-200 dark:bg-teal-950 dark:text-teal-300 dark:border-teal-800' 
+														: ['IT', 'SALES', 'FINANCE', 'MEDICAL', 'ENGINEERING'].includes(tag)
+														? 'bg-purple-100 text-purple-700 border-purple-200 dark:bg-purple-950 dark:text-purple-300 dark:border-purple-800'
+														: 'bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-950 dark:text-blue-300 dark:border-blue-800'
+												}`}
+											>
+												{tag}
+											</Badge>
+										))}
+									</dd>
+								</div>
+							)}
 						</CardContent>
 					</Card>
 				</div>

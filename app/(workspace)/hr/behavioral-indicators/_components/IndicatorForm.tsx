@@ -26,7 +26,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
-import { ProficiencyLevel, ApprovalStatus, IndicatorMeasurementType } from '@/types/domain';
+import { ProficiencyLevel, ApprovalStatus, IndicatorMeasurementType, ContextScope } from '@/types/domain';
 import { updateIndicatorAction, createIndicatorAction } from '@/app/actions';
 import { useRouter } from 'next/navigation';
 import { useState, useCallback, useEffect } from 'react';
@@ -76,6 +76,7 @@ export function IndicatorForm({ indicator, competencyId, onUpdatePreview }: { in
       isActive: indicator?.isActive || true,
       approvalStatus: indicator?.approvalStatus || ApprovalStatus.DRAFT,
       orderIndex: indicator?.orderIndex || 1,
+      contextScope: indicator?.contextScope || ContextScope.UNIVERSAL, // Smart Assessment default
     },
   });
 
@@ -444,6 +445,71 @@ export function IndicatorForm({ indicator, competencyId, onUpdatePreview }: { in
                         }}
                       />
                     </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="contextScope"
+                render={({ field }) => (
+                  <FormItem className="md:col-span-2">
+                    <FormLabel className="text-sm font-medium flex items-center gap-1">
+                      Context Scope
+                      <HelpTooltip content="Determines the applicability of this indicator. 'Universal' indicators are context-neutral and used in Scenario A (Competency Passport)." />
+                    </FormLabel>
+                    <Select 
+                      onValueChange={(value) => {
+                        field.onChange(value);
+                        handleFieldBlur();
+                      }} 
+                      defaultValue={field.value || ContextScope.UNIVERSAL}
+                    >
+                      <FormControl>
+                        <SelectTrigger className="h-10">
+                          <SelectValue placeholder="Select context scope" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value={ContextScope.UNIVERSAL}>
+                          <div className="flex flex-col items-start py-1">
+                            <span className="font-medium">Universal - All Humans</span>
+                            <span className="text-xs text-muted-foreground">
+                              Context-neutral (Active Listening, Emotional Regulation)
+                            </span>
+                          </div>
+                        </SelectItem>
+                        <SelectItem value={ContextScope.PROFESSIONAL}>
+                          <div className="flex flex-col items-start py-1">
+                            <span className="font-medium">Professional - Office Jobs</span>
+                            <span className="text-xs text-muted-foreground">
+                              White-collar environments (Email Etiquette, Meeting Facilitation)
+                            </span>
+                          </div>
+                        </SelectItem>
+                        <SelectItem value={ContextScope.TECHNICAL}>
+                          <div className="flex flex-col items-start py-1">
+                            <span className="font-medium">Technical - Specialist Roles</span>
+                            <span className="text-xs text-muted-foreground">
+                              IT, Engineering, Data (Code Review, Technical Documentation)
+                            </span>
+                          </div>
+                        </SelectItem>
+                        <SelectItem value={ContextScope.MANAGERIAL}>
+                          <div className="flex flex-col items-start py-1">
+                            <span className="font-medium">Managerial - Leadership</span>
+                            <span className="text-xs text-muted-foreground">
+                              People management (Delegation, Performance Feedback)
+                            </span>
+                          </div>
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormDescription className="text-xs">
+                      <Info className="inline h-3 w-3 mr-1" />
+                      "Universal" indicators are included in Scenario A (General Overview / Competency Passport).
+                      Other scopes are for targeted assessments in Scenarios B and C.
+                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}

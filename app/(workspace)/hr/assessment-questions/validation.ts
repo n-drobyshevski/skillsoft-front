@@ -20,12 +20,33 @@ export const answerOptionSchema = z.object({
 });
 
 /**
+ * Controlled vocabulary for question tags.
+ * Per Smart Assessment Strategy: Two-Tier Scoping System
+ * - GENERAL: Context-neutral (Scenario A - Universal Baseline)
+ * - IT, SALES, FINANCE, MEDICAL, ENGINEERING: Domain-specific (Scenario B)
+ * - JUNIOR, MID, SENIOR: Complexity/seniority markers (Scenario C - Adaptive)
+ */
+export const QUESTION_TAG_OPTIONS = [
+  'GENERAL',
+  'IT',
+  'SALES',
+  'FINANCE',
+  'MEDICAL',
+  'ENGINEERING',
+  'JUNIOR',
+  'MID',
+  'SENIOR',
+] as const;
+
+export type QuestionTag = typeof QUESTION_TAG_OPTIONS[number];
+
+/**
  * Schema for question metadata JSONB field.
  * Per ROADMAP.md Section 1.B: Allows filtering questions by context and difficulty.
  * Used by Context Neutrality Filter in Scenario A (Universal Baseline)
  */
 export const questionMetadataSchema = z.object({
-  tags: z.array(z.string()).optional(),
+  tags: z.array(z.enum(QUESTION_TAG_OPTIONS)).optional(),
   difficulty: z.string().optional(),
   time_limit_sec: z.number().optional(),
   context: z.string().optional(),

@@ -36,6 +36,22 @@ export enum ApprovalStatus {
   UNDER_REVISION = 'UNDER_REVISION'
 }
 
+/**
+ * Context Scope for Behavioral Indicators - Smart Assessment Two-Tier Filtering
+ * Used to ensure context-neutral assessments in Scenario A (Universal Baseline)
+ * Per ROADMAP.md Section 1.B and Smart Assessment documentation
+ */
+export enum ContextScope {
+  /** Context-neutral - Applies to all humans regardless of job role (e.g., Active Listening, Emotional Regulation) */
+  UNIVERSAL = 'UNIVERSAL',
+  /** White-collar jobs - Office environments (e.g., Email Etiquette, Meeting Facilitation) */
+  PROFESSIONAL = 'PROFESSIONAL',
+  /** Technical roles - IT, Engineering, Data Science (e.g., Code Review, Technical Documentation) */
+  TECHNICAL = 'TECHNICAL',
+  /** Leadership roles - People management and organizational leadership (e.g., Delegation, Performance Feedback) */
+  MANAGERIAL = 'MANAGERIAL'
+}
+
 export enum IndicatorMeasurementType {
   FREQUENCY = 'FREQUENCY',
   QUALITY = 'QUALITY',
@@ -335,14 +351,39 @@ export interface BehavioralIndicator {
   approvalStatus: ApprovalStatus;
   orderIndex: number;
   competencyId: string;
+  /** Context scope for Smart Assessment filtering - defaults to UNIVERSAL for backward compatibility */
+  contextScope?: ContextScope;
 }
 
+/**
+ * Question Metadata JSONB structure for Smart Assessment filtering
+ * Two-Tier Scoping System: Macro-level (BehavioralIndicator.contextScope) + Micro-level (tags)
+ * Per ROADMAP.md Section 1.B: Context Neutrality Filter and Smart Assessment documentation
+ */
 export interface QuestionMetadata {
+  /**
+   * Tags for context filtering and difficulty markers
+   * 
+   * Controlled Vocabulary:
+   * - GENERAL: Context-neutral questions for Scenario A (Universal Baseline) - CRITICAL for Competency Passport
+   * - Domain markers: IT, SALES, FINANCE, MEDICAL, ENGINEERING - Industry-specific context for Scenario B
+   * - Complexity markers: JUNIOR, MID, SENIOR - Adaptive difficulty for role-appropriate assessments
+   * 
+   * Usage Examples:
+   * - Scenario A (Universal Baseline): ["GENERAL", "JUNIOR"] - Context-neutral, entry-level
+   * - Scenario B (Job Fit - IT): ["IT", "MID"] - Technical context, mid-career complexity
+   * - Scenario C (Team Fit): ["SALES", "SENIOR", "FINANCE"] - Domain-specific, senior-level
+   */
   tags?: string[];
+  /** Difficulty score 0.0-1.0 for adaptive testing */
   difficulty?: string;
+  /** Time limit in seconds for this specific question */
   time_limit_sec?: number;
+  /** @deprecated Use tags array instead - kept for backward compatibility */
   context?: 'UNIVERSAL' | 'IT' | 'SALES' | 'FINANCE' | 'HEALTHCARE' | string;
+  /** Scenario type classification */
   scenario_type?: 'WORKPLACE' | 'INTERPERSONAL' | 'LEADERSHIP' | string;
+  /** Target measurement dimension */
   measurement_target?: 'BEHAVIORAL' | 'COGNITIVE' | 'EMOTIONAL' | string;
 }
 

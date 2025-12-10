@@ -152,6 +152,21 @@ export default function AssessmentQuestionDrawer({
             >
               {question.questionType.split("_").map((word) => word.charAt(0) + word.slice(1).toLowerCase()).join(" ")}
             </Badge>
+            
+            {/* Context Tags */}
+            {question.metadata?.tags && question.metadata.tags.length > 0 && question.metadata.tags.map((tag: string) => (
+              <Badge 
+                key={tag}
+                variant="secondary"
+                className={`h-5 text-[11px] px-1.5 font-medium ${
+                  tag === 'GENERAL' 
+                    ? 'bg-teal-100 text-teal-700 border-teal-200 dark:bg-teal-950 dark:text-teal-300 dark:border-teal-800' 
+                    : 'bg-purple-100 text-purple-700 border-purple-200 dark:bg-purple-950 dark:text-purple-300 dark:border-purple-800'
+                }`}
+              >
+                {tag}
+              </Badge>
+            ))}
           </div>
 
           {/* Context Information */}

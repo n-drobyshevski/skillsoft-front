@@ -265,6 +265,27 @@ export default function IndicatorDetailContent({ indicator, assessmentQuestions 
                   {indicator.isActive ? "Active" : "Inactive"}
                 </Badge>
               </div>
+              
+              {/* Context Scope */}
+              {indicator.contextScope && (
+                <div className="flex items-center justify-between py-2 border-b border-border/50">
+                  <span className="text-sm text-muted-foreground font-medium">Context Scope</span>
+                  <Badge 
+                    variant="secondary"
+                    className={`font-medium text-xs px-2.5 py-1 ${
+                      indicator.contextScope === 'UNIVERSAL' 
+                        ? 'bg-teal-100 text-teal-700 border-teal-200 dark:bg-teal-950 dark:text-teal-300 dark:border-teal-800' 
+                        : indicator.contextScope === 'PROFESSIONAL'
+                        ? 'bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-950 dark:text-blue-300 dark:border-blue-800'
+                        : indicator.contextScope === 'TECHNICAL'
+                        ? 'bg-purple-100 text-purple-700 border-purple-200 dark:bg-purple-950 dark:text-purple-300 dark:border-purple-800'
+                        : 'bg-amber-100 text-amber-700 border-amber-200 dark:bg-amber-950 dark:text-amber-300 dark:border-amber-800'
+                    }`}
+                  >
+                    {indicator.contextScope}
+                  </Badge>
+                </div>
+              )}
 
               {/* Competency */}
               <div className="flex items-center justify-between py-2">

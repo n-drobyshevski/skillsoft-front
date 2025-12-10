@@ -39,15 +39,34 @@ import {
   RefreshCw,
   Plus,
   Check,
-  AlertCircle
+  AlertCircle,
+  Tag as TagIcon
 } from 'lucide-react';
 import { toast } from "sonner";
 import { HelpTooltip, formHelp } from '@/components/ui/help-tooltip';
 import { cn } from '@/lib/utils';
+import { Badge } from '@/components/ui/badge';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from '@/components/ui/command';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { QUESTION_TAG_OPTIONS } from '../validation';
 
 type QuestionFormValues = z.infer<typeof questionSchema>;
 
 const questionTypes = Object.values(QuestionType);
+
+// Tag options with descriptions for the multi-select
+const TAG_METADATA = [
+  { value: 'GENERAL', label: 'General', description: 'Context-neutral, no industry jargon (Scenario A)' },
+  { value: 'IT', label: 'IT', description: 'Information technology context' },
+  { value: 'SALES', label: 'Sales', description: 'Sales and marketing context' },
+  { value: 'FINANCE', label: 'Finance', description: 'Financial industry context' },
+  { value: 'MEDICAL', label: 'Medical', description: 'Healthcare context' },
+  { value: 'ENGINEERING', label: 'Engineering', description: 'Engineering context' },
+  { value: 'JUNIOR', label: 'Junior', description: 'Entry-level complexity' },
+  { value: 'MID', label: 'Mid', description: 'Mid-career complexity' },
+  { value: 'SENIOR', label: 'Senior', description: 'Senior-level complexity' },
+] as const;
 
 export function QuestionForm({ question, competencyId, behavioralIndicatorId, onUpdatePreview }: { 
   question?: AssessmentQuestion; 
@@ -70,6 +89,9 @@ export function QuestionForm({ question, competencyId, behavioralIndicatorId, on
       isActive: question?.isActive ?? true,
       orderIndex: question?.orderIndex ?? 1,
       timeLimit: question?.timeLimit ?? 60,
+      metadata: {
+        tags: question?.metadata?.tags || [],
+      },
       answerOptions: question?.answerOptions?.map(opt => ({
           text: opt.text || '',
           score: opt.score ?? 0,
@@ -134,11 +156,11 @@ export function QuestionForm({ question, competencyId, behavioralIndicatorId, on
       if (isEditMode) {
         await assessmentQuestionsApi.updateQuestion(question.id, data, competencyId, behavioralIndicatorId);
         toast.success("Question updated successfully!");
-        router.push(`/assessment-questions/${question.id}`);
+        router.push(`/hr/assessment-questions/${question.id}`);
       } else {
         const newQuestion = await assessmentQuestionsApi.createQuestion(competencyId, behavioralIndicatorId, data);
         toast.success("Question created successfully!");
-        router.push(`/assessment-questions/${newQuestion.id}`);
+        router.push(`/hr/assessment-questions/${newQuestion.id}`);
       }
     } catch (e: unknown) {
       const errorMessage = e instanceof Error ? e.message : "An error occurred.";
@@ -553,6 +575,120 @@ export function QuestionForm({ question, competencyId, behavioralIndicatorId, on
                   )}
                 />
               </div>
+
+              {/* Context Tags for Smart Assessment Filtering */}
+              <FormField
+                control={form.control}
+                name="metadata.tags"
+                render={({ field }) => {
+                  const selectedTags = field.value || [];
+                  
+                  return (
+                    <FormItem>
+                      <FormLabel className="text-sm font-medium flex items-center gap-1">
+                        Context Tags
+                        <HelpTooltip content="Tags enable context filtering for different assessment scenarios. Add 'GENERAL' for Universal Baseline (Scenario A) assessments." />
+                      </FormLabel>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <FormControl>
+                            <Button
+                              type="button"
+                              variant="outline"
+                              role="combobox"
+                              className={cn(
+                                "w-full h-auto min-h-10 justify-start text-left font-normal",
+                                !selectedTags.length && "text-muted-foreground"
+                              )}
+                            >
+                              <TagIcon className="mr-2 h-4 w-4 shrink-0" />
+                              {selectedTags.length > 0 ? (
+                                <div className="flex gap-1.5 flex-wrap">
+                                  {selectedTags.map((tag: string) => (
+                                    <Badge
+                                      key={tag}
+                                      variant="secondary"
+                                      className="text-xs px-2 py-0.5"
+                                    >
+                                      {TAG_METADATA.find(t => t.value === tag)?.label || tag}
+                                      <X
+                                        className="ml-1 h-3 w-3 cursor-pointer hover:text-destructive"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          field.onChange(selectedTags.filter((t: string) => t !== tag));
+                                        }}
+                                      />
+                                    </Badge>
+                                  ))}
+                                </div>
+                              ) : (
+                                <span>Select tags...</span>
+                              )}
+                            </Button>
+                          </FormControl>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-[400px] p-0" align="start">
+                          <Command>
+                            <CommandInput placeholder="Search tags..." />
+                            <CommandEmpty>No tag found.</CommandEmpty>
+                            <CommandGroup>
+                              {TAG_METADATA.map((tag) => {
+                                const isSelected = selectedTags.includes(tag.value);
+                                return (
+                                  <CommandItem
+                                    key={tag.value}
+                                    onSelect={() => {
+                                      if (isSelected) {
+                                        field.onChange(selectedTags.filter((t: string) => t !== tag.value));
+                                      } else {
+                                        field.onChange([...selectedTags, tag.value]);
+                                      }
+                                    }}
+                                    className="cursor-pointer"
+                                  >
+                                    <Check
+                                      className={cn(
+                                        "mr-2 h-4 w-4",
+                                        isSelected ? "opacity-100" : "opacity-0"
+                                      )}
+                                    />
+                                    <div className="flex flex-col">
+                                      <span className="font-medium">{tag.label}</span>
+                                      <span className="text-xs text-muted-foreground">{tag.description}</span>
+                                    </div>
+                                  </CommandItem>
+                                );
+                              })}
+                            </CommandGroup>
+                          </Command>
+                        </PopoverContent>
+                      </Popover>
+                      <FormMessage />
+                    </FormItem>
+                  );
+                }}
+              />
+
+              {/* Scenario A Compatibility Warning */}
+              {(() => {
+                const selectedTags = form.watch('metadata.tags') || [];
+                const hasGeneralTag = selectedTags.includes('GENERAL');
+                
+                if (!hasGeneralTag && selectedTags.length > 0) {
+                  return (
+                    <Alert variant="default" className="border-amber-500/50 bg-amber-50 dark:bg-amber-950/20">
+                      <AlertCircle className="h-4 w-4 text-amber-600 dark:text-amber-500" />
+                      <AlertTitle className="text-amber-900 dark:text-amber-300">Scenario A Incompatible</AlertTitle>
+                      <AlertDescription className="text-amber-800 dark:text-amber-400 text-sm">
+                        This question does not have the "GENERAL" tag and will not be included in
+                        Universal Baseline assessments (Competency Passport). Add the "GENERAL" tag
+                        if the scenario is context-neutral and applies to all roles.
+                      </AlertDescription>
+                    </Alert>
+                  );
+                }
+                return null;
+              })()}
             </div>
           </div>
 
