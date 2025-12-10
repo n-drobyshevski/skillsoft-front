@@ -12,7 +12,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { FileText, Send, GitBranch, ChevronRight, Loader2 } from "lucide-react";
+import { FileText, Send, GitBranch, ChevronRight, Loader2, Play, Eye, Share2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useStudioHeader } from "@/context/StudioHeaderContext";
 import { publishTemplate, createNewVersion } from "../actions";
@@ -116,6 +116,26 @@ export function TemplateHubHeader({
           >
             {status === "DRAFT" ? "Черновик" : status === "PUBLISHED" ? "Опубликован" : "В архиве"}
           </Badge>
+
+          {/* Quick Actions Toolbar */}
+          <div className="flex items-center gap-1 border-l border-r px-2 mx-1 border-border/50">
+             <Button variant="ghost" size="sm" className="gap-1.5 h-8 text-xs" asChild>
+                <Link href={`/test-templates/${templateId}/builder?mode=simulate`}>
+                    <Play className="h-3.5 w-3.5" />
+                    Simulate
+                </Link>
+             </Button>
+             <Button variant="ghost" size="sm" className="gap-1.5 h-8 text-xs" asChild>
+                <Link href={`/test-templates/${templateId}/start?mode=test-drive`}>
+                    <Eye className="h-3.5 w-3.5" />
+                    Test Drive
+                </Link>
+             </Button>
+             <Button variant="ghost" size="sm" className="gap-1.5 h-8 text-xs">
+                <Share2 className="h-3.5 w-3.5" />
+                Invite
+             </Button>
+          </div>
 
           {/* Action Buttons */}
           {status === "DRAFT" && (

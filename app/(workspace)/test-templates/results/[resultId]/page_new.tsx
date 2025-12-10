@@ -412,6 +412,27 @@ function ResultsSkeleton() {
           </CardFooter>
         </Card>
         
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+          <Card className="h-full">
+            <CardHeader>
+              <Skeleton className="h-6 w-48" />
+              <Skeleton className="h-4 w-64 mt-2" />
+            </CardHeader>
+            <CardContent className="min-h-[300px] flex items-center justify-center">
+              <Skeleton className="h-64 w-64 rounded-full" />
+            </CardContent>
+          </Card>
+          <Card className="h-full">
+            <CardHeader>
+              <Skeleton className="h-6 w-48" />
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <Skeleton className="h-24 w-full rounded-lg" />
+              <Skeleton className="h-16 w-full rounded-lg" />
+            </CardContent>
+          </Card>
+        </div>
+        
         <Card className="mt-6">
           <CardHeader>
             <Skeleton className="h-6 w-48" />

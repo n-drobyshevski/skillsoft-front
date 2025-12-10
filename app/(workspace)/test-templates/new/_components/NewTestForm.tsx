@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useState, useTransition, useMemo, useEffect } from 'react';
+import React, { useState, useTransition, useMemo, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Card, CardContent } from '@/components/ui/card';
@@ -59,10 +59,24 @@ import {
   ChevronDown,
   ChevronUp,
   CheckCircle2,
-  Filter
+  Filter,
+  Lightbulb,
+  ListChecks,
+  Sparkles,
+  Heart,
+  Shield,
+  Brain,
+  Zap
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion';
+import bigFiveMapping from '@/data/standards/onet_to_bigfive_map.json';
 
 // ============================================================================
 // Types & Schema
@@ -193,7 +207,6 @@ const GOAL_OPTIONS = [
 
 function BasicInfoStep({ form }: { form: ReturnType<typeof useForm<FormValues>> }) {
   const description = form.watch('description') || '';
-  const selectedGoal = form.watch('goal');
   
   return (
     <div className="space-y-6 md:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -231,7 +244,7 @@ function BasicInfoStep({ form }: { form: ReturnType<typeof useForm<FormValues>> 
                   {GOAL_OPTIONS.map((option) => {
                     const Icon = option.icon;
                     const info = AssessmentGoalInfo[option.value];
-                    const isSelected = selectedGoal === option.value;
+                    const isSelected = field.value === option.value;
                     
                     return (
                       <div key={option.value} className="relative group">
@@ -301,187 +314,370 @@ function BasicInfoStep({ form }: { form: ReturnType<typeof useForm<FormValues>> 
 }
 
 // ============================================================================
-// Step 2: Competencies (FIXED: Visible Checkboxes & build error)
+// Step 2: Competencies - Big Five Grouped Selector (Optimized)
 // ============================================================================
+
+const BIG_FIVE_CONFIG = {
+  OPENNESS: {
+    name: 'Openness',
+    nameRu: 'Открытость опыту',
+    description: 'Creativity, curiosity, and willingness to explore',
+    descriptionRu: 'Креативность, любознательность, открытость новому',
+    icon: Lightbulb,
+    color: 'text-purple-600 dark:text-purple-400',
+    bgColor: 'bg-purple-50 dark:bg-purple-950/40',
+    borderColor: 'border-purple-200 dark:border-purple-800',
+    selectedCardBg: 'bg-purple-50/80 dark:bg-purple-950/50',
+  },
+  CONSCIENTIOUSNESS: {
+    name: 'Conscientiousness',
+    nameRu: 'Добросовестность',
+    description: 'Organization, responsibility, and self-discipline',
+    descriptionRu: 'Организованность, ответственность, самодисциплина',
+    icon: ListChecks,
+    color: 'text-blue-600 dark:text-blue-400',
+    bgColor: 'bg-blue-50 dark:bg-blue-950/40',
+    borderColor: 'border-blue-200 dark:border-blue-800',
+    selectedCardBg: 'bg-blue-50/80 dark:bg-blue-950/50',
+  },
+  EXTRAVERSION: {
+    name: 'Extraversion',
+    nameRu: 'Экстраверсия',
+    description: 'Sociability, assertiveness, and energy',
+    descriptionRu: 'Общительность, активность, энергичность',
+    icon: Sparkles,
+    color: 'text-orange-600 dark:text-orange-400',
+    bgColor: 'bg-orange-50 dark:bg-orange-950/40',
+    borderColor: 'border-orange-200 dark:border-orange-800',
+    selectedCardBg: 'bg-orange-50/80 dark:bg-orange-950/50',
+  },
+  AGREEABLENESS: {
+    name: 'Agreeableness',
+    nameRu: 'Доброжелательность',
+    description: 'Cooperation, empathy, and trust',
+    descriptionRu: 'Сотрудничество, эмпатия, доверие',
+    icon: Heart,
+    color: 'text-pink-600 dark:text-pink-400',
+    bgColor: 'bg-pink-50 dark:bg-pink-950/40',
+    borderColor: 'border-pink-200 dark:border-pink-800',
+    selectedCardBg: 'bg-pink-50/80 dark:bg-pink-950/50',
+  },
+  EMOTIONAL_STABILITY: {
+    name: 'Emotional Stability',
+    nameRu: 'Эмоциональная стабильность',
+    description: 'Calmness, resilience, and stress management',
+    descriptionRu: 'Спокойствие, стрессоустойчивость, уравновешенность',
+    icon: Shield,
+    color: 'text-green-600 dark:text-green-400',
+    bgColor: 'bg-green-50 dark:bg-green-950/40',
+    borderColor: 'border-green-200 dark:border-green-800',
+    selectedCardBg: 'bg-green-50/80 dark:bg-green-950/50',
+  },
+} as const;
+
+type BigFiveCategory = keyof typeof BIG_FIVE_CONFIG;
 
 function CompetenciesStep({ form, competencies }: NewTestFormProps & { form: any }) {
   const [searchQuery, setSearchQuery] = useState('');
-  const [isSelectedOpen, setIsSelectedOpen] = useState(true);
-  const selectedIds = form.watch('competencyIds');
+  const [openSections, setOpenSections] = useState<string[]>(['CONSCIENTIOUSNESS', 'EXTRAVERSION']);
   
-  const { filteredByCategory, totalFiltered } = useMemo(() => {
-    const filtered = competencies.filter(comp =>
-      comp.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      comp.category.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-    const grouped = new Map<string, CompetencyOption[]>();
-    for (const comp of filtered) {
-      const category = comp.category || 'Другое';
-      const existing = grouped.get(category) || [];
-      grouped.set(category, [...existing, comp]);
-    }
-    return { filteredByCategory: Object.fromEntries(grouped), totalFiltered: filtered.length };
-  }, [competencies, searchQuery]);
+  // Local state for selections - completely independent of React Hook Form reactive system
+  const [selectedIds, setSelectedIds] = useState<string[]>(() => form.getValues('competencyIds') || []);
 
-  const toggleCompetency = (id: string) => {
-    const current = form.getValues('competencyIds');
-    const updated = current.includes(id) ? current.filter((c: string) => c !== id) : [...current, id];
-    form.setValue('competencyIds', updated, { shouldValidate: true });
-  };
+  // Map competencies to Big Five categories
+  const competenciesByBigFive = useMemo(() => {
+    const grouped: Record<BigFiveCategory, CompetencyOption[]> = {
+      OPENNESS: [],
+      CONSCIENTIOUSNESS: [],
+      EXTRAVERSION: [],
+      AGREEABLENESS: [],
+      EMOTIONAL_STABILITY: [],
+    };
 
-  const selectAllVisible = () => {
-    const allIds = Object.values(filteredByCategory).flat().map((c: any) => c.id);
-    const currentIds = form.getValues('competencyIds');
-    const newIds = [...new Set([...currentIds, ...allIds])];
-    form.setValue('competencyIds', newIds, { shouldValidate: true });
-  };
+    competencies.forEach(comp => {
+      const mapping = (bigFiveMapping.mappings as any)[comp.id];
+      
+      if (mapping?.primaryBigFive) {
+        grouped[mapping.primaryBigFive as BigFiveCategory]?.push(comp);
+      } else {
+        const categoryLower = comp.category.toLowerCase();
+        
+        if (categoryLower.includes('innovation') || categoryLower.includes('creative') || 
+            categoryLower.includes('analytical') || categoryLower.includes('learning')) {
+          grouped.OPENNESS.push(comp);
+        } else if (categoryLower.includes('dependab') || categoryLower.includes('detail') || 
+                   categoryLower.includes('organiz') || categoryLower.includes('planning')) {
+          grouped.CONSCIENTIOUSNESS.push(comp);
+        } else if (categoryLower.includes('leadership') || categoryLower.includes('social') || 
+                   categoryLower.includes('communication') || categoryLower.includes('initiative')) {
+          grouped.EXTRAVERSION.push(comp);
+        } else if (categoryLower.includes('cooperat') || categoryLower.includes('team') || 
+                   categoryLower.includes('empathy') || categoryLower.includes('support')) {
+          grouped.AGREEABLENESS.push(comp);
+        } else if (categoryLower.includes('stress') || categoryLower.includes('adapt') || 
+                   categoryLower.includes('resilience') || categoryLower.includes('control')) {
+          grouped.EMOTIONAL_STABILITY.push(comp);
+        } else {
+          grouped.CONSCIENTIOUSNESS.push(comp);
+        }
+      }
+    });
 
-  const toggleCategory = (categoryComps: CompetencyOption[]) => {
-    const categoryIds = categoryComps.map(c => c.id);
-    const currentIds = form.getValues('competencyIds');
-    const allSelected = categoryIds.every(id => currentIds.includes(id));
-    if (allSelected) {
-      form.setValue('competencyIds', currentIds.filter((id: string) => !categoryIds.includes(id)), { shouldValidate: true });
-    } else {
-      form.setValue('competencyIds', [...new Set([...currentIds, ...categoryIds])], { shouldValidate: true });
-    }
-  };
+    return grouped;
+  }, [competencies]);
 
-  if (competencies.length === 0) return (
-    <div className="text-center py-16 border rounded-2xl bg-muted/20">
-      <Target className="h-16 w-16 mx-auto text-muted-foreground/50 mb-4" />
-      <h3 className="font-semibold text-xl">Нет компетенций</h3>
-    </div>
+  // Filter competencies by search query
+  const filteredByBigFive = useMemo(() => {
+    if (!searchQuery.trim()) return competenciesByBigFive;
+
+    const query = searchQuery.toLowerCase();
+    const filtered: Record<BigFiveCategory, CompetencyOption[]> = {
+      OPENNESS: [],
+      CONSCIENTIOUSNESS: [],
+      EXTRAVERSION: [],
+      AGREEABLENESS: [],
+      EMOTIONAL_STABILITY: [],
+    };
+
+    Object.entries(competenciesByBigFive).forEach(([category, comps]) => {
+      filtered[category as BigFiveCategory] = comps.filter(comp =>
+        comp.name.toLowerCase().includes(query) ||
+        comp.category.toLowerCase().includes(query)
+      );
+    });
+
+    return filtered;
+  }, [competenciesByBigFive, searchQuery]);
+
+  const totalFiltered = useMemo(() => 
+    Object.values(filteredByBigFive).reduce((sum, comps) => sum + comps.length, 0),
+    [filteredByBigFive]
   );
+
+  // Stable toggle function - updates local state, then syncs to form outside React cycle
+  const handleToggleCompetency = useCallback((id: string) => {
+    setSelectedIds(current => {
+      const newIds = current.includes(id) 
+        ? current.filter(cid => cid !== id) 
+        : [...current, id];
+      // Use setTimeout to break the React update cycle
+      setTimeout(() => form.setValue('competencyIds', newIds, { shouldValidate: false }), 0);
+      return newIds;
+    });
+  }, [form]);
+
+  const handleSelectAllInCategory = useCallback((category: BigFiveCategory) => {
+    setSelectedIds(current => {
+      const categoryIds = filteredByBigFive[category].map(c => c.id);
+      const allSelected = categoryIds.every(id => current.includes(id));
+      const newIds = allSelected
+        ? current.filter(id => !categoryIds.includes(id))
+        : [...new Set([...current, ...categoryIds])];
+      setTimeout(() => form.setValue('competencyIds', newIds, { shouldValidate: false }), 0);
+      return newIds;
+    });
+  }, [filteredByBigFive, form]);
+
+  const handleSelectAll = useCallback(() => {
+    setSelectedIds(current => {
+      const allIds = Object.values(filteredByBigFive).flat().map(c => c.id);
+      const newIds = [...new Set([...current, ...allIds])];
+      setTimeout(() => form.setValue('competencyIds', newIds, { shouldValidate: false }), 0);
+      return newIds;
+    });
+  }, [filteredByBigFive, form]);
+
+  const handleClearAll = useCallback(() => {
+    setSelectedIds([]);
+    setTimeout(() => form.setValue('competencyIds', [], { shouldValidate: false }), 0);
+  }, [form]);
+
+  const selectedCount = selectedIds.length;
+
+  if (competencies.length === 0) {
+    return (
+      <div className="text-center py-16 border rounded-2xl bg-muted/20">
+        <Target className="h-16 w-16 mx-auto text-muted-foreground/50 mb-4" />
+        <h3 className="font-semibold text-xl">Нет компетенций</h3>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4 md:space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      {/* Search & Actions */}
-      <div className="flex flex-col md:flex-row gap-3 sticky top-0 md:static z-20 bg-background/80 backdrop-blur-md pb-2 md:pb-0 pt-1">
+      {/* Header with Search */}
+      <div className="flex flex-col md:flex-row gap-3">
         <div className="relative flex-1">
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
           <Input
-            placeholder="Поиск навыков..."
+            placeholder="Поиск компетенций..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="h-12 md:h-12 text-base rounded-xl pl-11 pr-10 shadow-sm"
+            className="h-12 text-base rounded-xl pl-11 pr-10"
           />
           {searchQuery && (
             <Button
-              type="button" variant="ghost" size="sm"
-              className="absolute right-1 top-1/2 -translate-y-1/2 h-9 w-9 p-0 rounded-full hover:bg-muted"
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="absolute right-1 top-1/2 -translate-y-1/2 h-9 w-9 p-0 rounded-full"
               onClick={() => setSearchQuery('')}
             >
               <X className="h-4 w-4" />
             </Button>
           )}
         </div>
-        <Button
-            type="button" variant="outline" onClick={selectAllVisible}
-            className="h-12 rounded-xl px-5 border-dashed"
+        <div className="flex gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={handleSelectAll}
             disabled={totalFiltered === 0}
+            className="h-12 rounded-xl"
           >
+            <CheckCircle2 className="h-4 w-4 mr-2" />
             Выбрать все
-        </Button>
+          </Button>
+          {selectedIds.length > 0 && (
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleClearAll}
+              className="h-12 rounded-xl"
+            >
+              <X className="h-4 w-4 mr-2" />
+              Сбросить
+            </Button>
+          )}
+        </div>
       </div>
 
-      {/* Selected Drawer */}
-      {selectedIds.length > 0 && (
-        <Collapsible open={isSelectedOpen} onOpenChange={setIsSelectedOpen} className="border border-primary/20 rounded-xl bg-primary/5 shadow-sm overflow-hidden">
-            <div className="flex items-center justify-between p-3.5 bg-primary/5">
-                 <div className="flex items-center gap-2.5">
-                    <Badge className="h-6 px-2 rounded-md">{selectedIds.length}</Badge>
-                    <span className="text-sm font-medium text-primary">Выбрано навыков</span>
-                 </div>
-                 <div className="flex items-center gap-1">
-                    <Button type="button" variant="ghost" size="sm" onClick={() => form.setValue('competencyIds', [], { shouldValidate: true })} 
-                      className="h-8 text-xs text-muted-foreground hover:text-destructive px-3 rounded-lg">
-                        Сбросить
-                    </Button>
-                    <CollapsibleTrigger asChild>
-                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0 rounded-lg">
-                            {isSelectedOpen ? <ChevronUp className="h-4 w-4"/> : <ChevronDown className="h-4 w-4"/>}
-                        </Button>
-                    </CollapsibleTrigger>
-                 </div>
-            </div>
-            <CollapsibleContent>
-                <div className="p-3.5 pt-0">
-                    <div className="flex flex-wrap gap-2 max-h-[140px] overflow-y-auto pt-2">
-                        {selectedIds.map((id: string) => {
-                        const comp = competencies.find(c => c.id === id);
-                        return comp ? (
-                            <Badge key={id} variant="secondary" className="pl-2.5 pr-1.5 py-1.5 rounded-md cursor-pointer hover:bg-destructive/10 hover:text-destructive transition-colors group border-transparent hover:border-destructive/20 border" onClick={() => toggleCompetency(id)}>
-                              <span className="truncate max-w-[140px] md:max-w-xs text-sm font-normal">{comp.name}</span>
-                              <X className="h-3.5 w-3.5 ml-1.5 opacity-50 group-hover:opacity-100" />
-                            </Badge>
-                        ) : null;
-                        })}
-                    </div>
-                </div>
-            </CollapsibleContent>
-        </Collapsible>
+      {/* Selected Count Badge */}
+      {selectedCount > 0 && (
+        <div className="flex items-center gap-3 p-4 bg-primary/5 border border-primary/20 rounded-xl">
+          <Badge className="h-7 px-3 text-sm">{selectedCount}</Badge>
+          <span className="text-sm font-medium text-primary">Выбрано компетенций</span>
+        </div>
       )}
 
-      {/* Competencies List - Optimized for Scrolling & Visibility */}
+      {/* Big Five Accordion */}
       {totalFiltered === 0 ? (
         <div className="text-center py-12 border rounded-2xl bg-muted/20">
           <Filter className="h-10 w-10 mx-auto text-muted-foreground/50 mb-3" />
           <p className="text-muted-foreground">Ничего не найдено</p>
         </div>
       ) : (
-        <div className="md:max-h-[600px] md:overflow-y-auto md:border md:rounded-xl md:pr-1 min-h-[50vh] pb-8">
-          {Object.entries(filteredByCategory).map(([category, comps]) => {
-            const isFullySelected = comps.every(c => selectedIds.includes(c.id));
-            const isPartiallySelected = !isFullySelected && comps.some(c => selectedIds.includes(c.id));
-            const selectedCount = comps.filter(c => selectedIds.includes(c.id)).length;
+        <Accordion 
+          type="multiple" 
+          value={openSections} 
+          onValueChange={setOpenSections}
+          className="space-y-3"
+        >
+          {(Object.keys(BIG_FIVE_CONFIG) as BigFiveCategory[]).map((categoryKey) => {
+            const config = BIG_FIVE_CONFIG[categoryKey];
+            const comps = filteredByBigFive[categoryKey];
             
+            if (comps.length === 0) return null;
+
+            const Icon = config.icon;
+            const selectedCount = comps.filter(c => selectedIds.includes(c.id)).length;
+            const allSelected = selectedCount === comps.length && comps.length > 0;
+
             return (
-              <div key={category} className="mb-4 last:mb-0">
-                <div className="sticky top-[60px] md:top-0 z-10 bg-background/95 backdrop-blur-sm px-1 py-3 mb-1 border-b">
-                   <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3" onClick={() => toggleCategory(comps)}>
-                        {/* CATEGORY CHECKBOX: 5 (20px) with border */}
-                        <Checkbox 
-                          checked={isFullySelected} 
-                          ref={el => { if (el) (el as any).indeterminate = isPartiallySelected; }} 
-                          className="h-5 w-5 rounded-[4px] border-2 border-muted-foreground/50 data-[state=checked]:border-primary pointer-events-none" 
-                        />
-                        <span className="font-bold text-sm uppercase tracking-wide text-foreground/80">{category}</span>
-                      </div>
-                      <span className="text-xs text-muted-foreground font-medium bg-secondary px-2.5 py-1 rounded-full border">
-                        {selectedCount} / {comps.length}
-                      </span>
-                   </div>
-                </div>
-                
-                <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3 pl-1">
-                  {comps.map((comp) => (
-                    <div key={comp.id} onClick={() => toggleCompetency(comp.id)}
-                      className={cn(
-                        "flex items-start gap-4 p-4 rounded-xl cursor-pointer transition-all border active:scale-[0.98]",
-                        selectedIds.includes(comp.id) 
-                          ? "bg-primary/10 border-primary/50 shadow-sm" 
-                          : "bg-card border-border/60 shadow-sm hover:border-primary/30"
-                      )}>
-                      {/* ITEM CHECKBOX: 5 (20px) with border - Reduced from 6. REMOVED readOnly prop. */}
-                      <Checkbox 
-                        checked={selectedIds.includes(comp.id)} 
-                        className="h-5 w-5 mt-0.5 rounded-[6px] border-2 border-muted-foreground/40 data-[state=checked]:bg-primary data-[state=checked]:border-primary transition-all pointer-events-none" 
-                      />
-                      <div className="flex-1 min-w-0 pt-0.5">
-                        <span className={cn("text-sm font-semibold leading-tight block", selectedIds.includes(comp.id) ? "text-foreground" : "text-foreground/90")}>
-                          {comp.name}
-                        </span>
-                        {comp.level && <span className="text-xs text-muted-foreground mt-1.5 block">{comp.level}</span>}
-                      </div>
+              <AccordionItem
+                key={categoryKey}
+                value={categoryKey}
+                className={cn(
+                  "border-2 rounded-xl overflow-hidden transition-all",
+                  allSelected ? config.borderColor : "border-border"
+                )}
+              >
+                <AccordionTrigger className={cn(
+                  "px-5 py-4 hover:no-underline",
+                  allSelected ? config.bgColor : "hover:bg-muted/50 dark:hover:bg-muted/30"
+                )}>
+                  <div className="flex items-center gap-4 flex-1">
+                    <div className={cn(
+                      "p-2.5 rounded-lg",
+                      allSelected ? "bg-background/80 dark:bg-background/60" : "bg-muted dark:bg-muted/50"
+                    )}>
+                      <Icon className={cn("h-6 w-6", config.color)} />
                     </div>
-                  ))}
-                </div>
-              </div>
+                    <div className="flex-1 text-left">
+                      <div className="flex items-center gap-3 mb-1">
+                        <h3 className="font-bold text-base">{config.nameRu}</h3>
+                        <Badge variant="secondary" className="text-xs">
+                          {selectedCount} / {comps.length}
+                        </Badge>
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        {config.descriptionRu}
+                      </p>
+                    </div>
+                  </div>
+                </AccordionTrigger>
+                <AccordionContent className="px-5 pb-4">
+                  <div className="flex justify-end mb-3">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleSelectAllInCategory(categoryKey)}
+                      className="h-8 text-xs"
+                    >
+                      {allSelected ? 'Снять выбор' : 'Выбрать все'}
+                    </Button>
+                  </div>
+                  <div className="grid gap-2 md:grid-cols-2">
+                    {comps.map((comp) => {
+                      const isSelected = selectedIds.includes(comp.id);
+                      
+                      return (
+                        <div
+                          key={comp.id}
+                          role="checkbox"
+                          aria-checked={isSelected}
+                          tabIndex={0}
+                          onClick={() => handleToggleCompetency(comp.id)}
+                          onKeyDown={(e) => { if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); handleToggleCompetency(comp.id); }}}
+                          className={cn(
+                            "flex items-start gap-3 p-3 rounded-lg cursor-pointer transition-all border select-none",
+                            isSelected
+                              ? cn(config.selectedCardBg, config.borderColor, "shadow-sm")
+                              : "bg-card border-border hover:border-primary/30 hover:bg-muted/50 dark:hover:bg-muted/30"
+                          )}
+                        >
+                          {/* Custom checkbox visual - no Radix state */}
+                          <div className={cn(
+                            "h-5 w-5 mt-0.5 rounded border-2 flex items-center justify-center shrink-0 transition-colors",
+                            isSelected 
+                              ? "bg-primary border-primary text-primary-foreground" 
+                              : "border-muted-foreground/40 bg-background dark:bg-muted/50"
+                          )}>
+                            {isSelected && <Check className="h-3.5 w-3.5" />}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className={cn(
+                              "text-sm font-semibold leading-tight",
+                              isSelected && "text-foreground"
+                            )}>
+                              {comp.name}
+                            </p>
+                            {comp.level && (
+                              <p className="text-xs text-muted-foreground mt-1">
+                                {comp.level}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
             );
           })}
-        </div>
+        </Accordion>
       )}
     </div>
   );
@@ -641,7 +837,7 @@ export default function NewTestForm({ competencies }: NewTestFormProps) {
       questionsPerIndicator: 2, timeLimitMinutes: 30, passingScore: 70,
       shuffleQuestions: true, shuffleOptions: true, allowSkip: false, allowBackNavigation: true, showResultsImmediately: true,
     },
-    mode: 'onChange',
+    mode: 'onBlur',
   });
 
   // Scroll to top on step change

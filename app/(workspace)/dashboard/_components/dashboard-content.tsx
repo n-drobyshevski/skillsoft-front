@@ -37,10 +37,11 @@ import {
   Zap,
 } from "lucide-react";
 import Link from "next/link";
-import { DashboardStats, TestTemplateSummary, AssessmentGoal, AssessmentGoalInfo } from "@/types/domain";
+import { DashboardStats, TestTemplateSummary, AssessmentGoal, AssessmentGoalInfo, TestSession } from "@/types/domain";
 import { User, UserStats } from "@/types/user";
 import { ClientOnly } from "@/components/common/ClientOnly";
 import CompetencyByCategoryBarChart from "@/components/data-display/charts/CompetencyByCategoryBarChart";
+import { useLens } from "@/context/LensContext";
 
 // ============================================
 // ANIMATION VARIANTS
@@ -90,6 +91,7 @@ const scaleIn: Variants = {
 interface DashboardContentProps {
   stats: DashboardStats;
   testTemplates: TestTemplateSummary[];
+  pendingSessions?: TestSession[];
   userStats: UserStats | null;
   recentUsers: User[];
   currentUser?: {
@@ -218,15 +220,17 @@ function StandardBadge({ icon: Icon, label }: { icon: React.ElementType; label: 
 // ============================================
 // MAIN COMPONENT
 // ============================================
-
 export default function DashboardContent({
   stats,
   testTemplates,
+  pendingSessions = [],
   userStats,
   recentUsers,
   currentUser,
 }: DashboardContentProps) {
   const prefersReducedMotion = useReducedMotion();
+  const { activeLens } = useLens();
+  const isUserLens = activeLens === 'user';
   
   const motionProps = prefersReducedMotion
     ? { initial: "visible", animate: "visible" }
@@ -270,12 +274,14 @@ export default function DashboardContent({
             {greeting()}{currentUser?.firstName ? `, ${currentUser.firstName}` : ''}
           </h1>
           <p className="text-sm sm:text-base text-muted-foreground">
-            Overview of your competency framework and assessments
+            {isUserLens 
+              ? "Here's your personal progress and pending assessments."
+              : "Overview of your competency framework and assessments"}
           </p>
         </div>
         {/* Action buttons - stack on mobile, row on larger screens */}
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
-          {isEditor && (
+          {isEditor && !isUserLens && (
             <Link href="/hr/competencies/new" className="w-full sm:w-auto">
               <Button variant="outline" size="default" className="w-full sm:w-auto gap-2 min-h-11 justify-center">
                 <Plus className="w-4 h-4" />
@@ -286,12 +292,75 @@ export default function DashboardContent({
           <Link href="/test-templates" className="w-full sm:w-auto">
             <Button size="default" className="w-full sm:w-auto gap-2 min-h-11 justify-center">
               <Play className="w-4 h-4" />
-              <span>Take Assessment</span>
+              <span>{isUserLens ? "Browse Assessments" : "Take Assessment"}</span>
             </Button>
           </Link>
         </div>
       </motion.header>
 
+      {/* Pending Assessments Widget (User Lens Only) */}
+      {isUserLens && pendingSessions.length > 0 && (
+        <motion.div
+          initial="hidden"
+          animate="visible"
+          variants={fadeInUp}
+        >
+          <Card className="border-emerald-200 dark:border-emerald-800 bg-emerald-50/30 dark:bg-emerald-950/10">
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <div className="space-y-1">
+                  <CardTitle className="text-lg font-semibold flex items-center gap-2">
+                    <Clock className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+                    Pending Assessments
+                  </CardTitle>
+                  <CardDescription>
+                    You have {pendingSessions.length} assessment{pendingSessions.length > 1 ? 's' : ''} in progress or waiting to start.
+                  </CardDescription>
+                </div>
+                <Button variant="outline" size="sm" asChild className="border-emerald-200 hover:bg-emerald-100 dark:border-emerald-800 dark:hover:bg-emerald-900/50">
+                  <Link href="/test-templates">View All</Link>
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {pendingSessions.map((session) => (
+                <div key={session.id} className="flex flex-col gap-3 rounded-lg border bg-card p-4 shadow-sm transition-all hover:shadow-md">
+                  <div className="flex items-start justify-between">
+                    <div className="space-y-1">
+                      <h4 className="font-medium leading-none">{session.template?.name || "Assessment"}</h4>
+                      <p className="text-xs text-muted-foreground">
+                        {session.status === 'IN_PROGRESS' ? 'In Progress' : 'Not Started'}
+                      </p>
+                    </div>
+                    <Badge variant={session.status === 'IN_PROGRESS' ? 'default' : 'secondary'} className={session.status === 'IN_PROGRESS' ? 'bg-emerald-600' : ''}>
+                      {session.status === 'IN_PROGRESS' ? 'Active' : 'New'}
+                    </Badge>
+                  </div>
+                  
+                  {session.status === 'IN_PROGRESS' && (
+                    <div className="space-y-1">
+                      <div className="flex items-center justify-between text-xs text-muted-foreground">
+                        <span>Progress</span>
+                        <span>{Math.round(((session.currentQuestionIndex || 0) / (session.questionOrder?.length || 1)) * 100)}%</span>
+                      </div>
+                      <Progress value={((session.currentQuestionIndex || 0) / (session.questionOrder?.length || 1)) * 100} className="h-1.5" />
+                    </div>
+                  )}
+                  
+                  <Button size="sm" className="w-full mt-auto" asChild>
+                    <Link href={`/test-templates/take/${session.id}`}>
+                      {session.status === 'IN_PROGRESS' ? 'Resume Assessment' : 'Start Assessment'}
+                      <ArrowRight className="ml-2 h-3 w-3" />
+                    </Link>
+                  </Button>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+        </motion.div>
+      )}
+
+      {/* ===== BENTO GRID - Stats Cards ===== */}
       {/* ===== BENTO GRID - Stats Cards ===== */}
       <FlexibleStatsCards
         data={{

@@ -18,6 +18,7 @@ import {
   LogOut,
   LayoutDashboard,
   UserCircle,
+  FileText,
 } from "lucide-react";
 
 import {
@@ -68,8 +69,8 @@ function getLensGlowClass(lens: keyof typeof LENS_GLOW_CLASSES): string {
   }
 }
 
-// This is the navigation data with new route structure
-const data = {
+// Base navigation data
+const baseData = {
   user: {
     name: "Admin User",
     email: "admin@skillsoft.com",
@@ -81,60 +82,13 @@ const data = {
       plan: "Enterprise",
     },
   ],
-  // Main navigation - organized by section
-  navMain: [
-    {
-      title: "Дашборд",
-      url: "/dashboard",
-      icon: BarChart3,
-    },
-    {
-      title: "Шаблоны тестов",
-      url: "/test-templates",
-      icon: ClipboardCheck,
-    },
-  ],
-  // Library routes (content management) - for admin and editor users
-  navLibrary: [
-    {
-      title: "Компетенции",
-      url: "/hr/competencies",
-      icon: Target,
-    },
-    {
-      title: "Индикаторы",
-      url: "/hr/behavioral-indicators",
-      icon: Lightbulb,
-    },
-    {
-      title: "Вопросы",
-      url: "/hr/assessment-questions",
-      icon: FileQuestion,
-    },
-  ],
-  // Admin routes
-  navAdmin: [
-    {
-      title: "Пользователи",
-      url: "/admin/users",
-      icon: UsersRound,
-    },
-  ],
-  // Tools (available for editors and admins)
-  navTools: [
-    {
-      title: "Skill Mapper",
-      url: "/skill-mapper",
-      icon: BookOpen,
-    },
-  ],
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname();
   const { user: clerkUser } = useUser();
   const { isRouteVisible, setUserRole, activeLens } = useLens();
-  const TeamLogo = data.teams[0].logo;
+  const TeamLogo = baseData.teams[0].logo;
   
   // Track lens changes for temporary flash highlight
   const [showFlash, setShowFlash] = useState(false);
@@ -146,6 +100,72 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   
   // Check if we're in Personal view (user lens)
   const isPersonalView = activeLens === "user";
+
+  // Dynamic Navigation Data based on Lens
+  const navData = {
+    ...baseData,
+    navMain: isPersonalView 
+      ? [
+          {
+            title: "My Hub",
+            url: "/dashboard",
+            icon: BarChart3,
+          },
+          {
+            title: "Assessment Center",
+            url: "/test-templates",
+            icon: ClipboardCheck,
+          },
+          {
+            title: "My Passport",
+            url: "/test-templates/results/latest-scenario-a",
+            icon: FileText,
+          }
+        ]
+      : [
+          {
+            title: "Hiring Overview",
+            url: "/dashboard",
+            icon: BarChart3,
+          },
+          {
+            title: "Studio",
+            url: "/test-templates",
+            icon: ClipboardCheck,
+          },
+        ],
+    navLibrary: [
+      {
+        title: "Компетенции",
+        url: "/hr/competencies",
+        icon: Target,
+      },
+      {
+        title: "Индикаторы",
+        url: "/hr/behavioral-indicators",
+        icon: Lightbulb,
+      },
+      {
+        title: "Вопросы",
+        url: "/hr/assessment-questions",
+        icon: FileQuestion,
+      },
+    ],
+    navAdmin: [
+      {
+        title: "Пользователи",
+        url: "/admin/users",
+        icon: UsersRound,
+      },
+    ],
+    navTools: [
+      {
+        title: "Skill Mapper",
+        url: "/skill-mapper",
+        icon: BookOpen,
+      },
+    ],
+  };
 
   // Show flash and animate items when lens changes
   useEffect(() => {
@@ -194,18 +214,18 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   }, [clerkUser, setUserRole]);
 
   // Get user display info from Clerk
-  const userName = clerkUser?.fullName || clerkUser?.username || data.user.name;
-  const userEmail = clerkUser?.primaryEmailAddress?.emailAddress || clerkUser?.username || data.user.email;
+  const userName = clerkUser?.fullName || clerkUser?.username || navData.user.name;
+  const userEmail = clerkUser?.primaryEmailAddress?.emailAddress || clerkUser?.username || navData.user.email;
   const userInitials = clerkUser?.fullName
     ? clerkUser.fullName.split(" ").map((n) => n[0]).join("")
     : clerkUser?.username?.substring(0, 2).toUpperCase() || "AU";
   const userImageUrl = clerkUser?.imageUrl;
 
   // Filter navigation items based on active lens
-  const visibleNavItems = data.navMain.filter((item) => isRouteVisible(item.url));
-  const visibleLibraryItems = data.navLibrary.filter((item) => isRouteVisible(item.url));
-  const visibleAdminItems = data.navAdmin.filter((item) => isRouteVisible(item.url));
-  const visibleToolItems = data.navTools.filter((item) => isRouteVisible(item.url));
+  const visibleNavItems = navData.navMain.filter((item) => isRouteVisible(item.url));
+  const visibleLibraryItems = navData.navLibrary.filter((item) => isRouteVisible(item.url));
+  const visibleAdminItems = navData.navAdmin.filter((item) => isRouteVisible(item.url));
+  const visibleToolItems = navData.navTools.filter((item) => isRouteVisible(item.url));
   
   // Get lens-specific glow animation class
   const lensGlowClass = getLensGlowClass(activeLens);
@@ -229,9 +249,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-semibold">
-                    {data.teams[0].name}
+                    {navData.teams[0].name}
                   </span>
-                  <span className="truncate text-xs">{data.teams[0].plan}</span>
+                  <span className="truncate text-xs">{navData.teams[0].plan}</span>
                 </div>
               </Link>
             </SidebarMenuButton>
@@ -252,32 +272,27 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               Личное
             </SidebarGroupLabel>
             <SidebarMenu>
-              <SidebarMenuItem
-                className={cn(
-                  "transition-all duration-300",
-                  isLensChanging && "animate-in fade-in-0 slide-in-from-left-3 duration-300"
-                )}
-              >
-                <SidebarMenuButton asChild isActive={pathname === "/dashboard"}>
-                  <Link href="/dashboard">
-                    <BarChart3 />
-                    <span>Дашборд</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem
-                className={cn(
-                  "transition-all duration-300",
-                  isLensChanging && "animate-in fade-in-0 slide-in-from-left-3 duration-300"
-                )}
-              >
-                <SidebarMenuButton asChild isActive={pathname.startsWith("/test-templates")}>
-                  <Link href="/test-templates">
-                    <ClipboardCheck />
-                    <span>Мои тесты</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
+              {visibleNavItems.map((item, index) => (
+                <SidebarMenuItem
+                  key={item.title}
+                  className={cn(
+                    "transition-all duration-300",
+                    isLensChanging && "animate-in fade-in-0 slide-in-from-left-3 duration-300"
+                  )}
+                  style={isLensChanging ? { 
+                    animationDelay: `${index * 50}ms`,
+                    animationDuration: "300ms",
+                    animationFillMode: "both"
+                  } : undefined}
+                >
+                  <SidebarMenuButton asChild isActive={pathname === item.url || pathname.startsWith(item.url + "/")}>
+                    <Link href={item.url}>
+                      <item.icon />
+                      <span>{item.title}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
               <SidebarMenuItem
                 className={cn(
                   "transition-all duration-300",
