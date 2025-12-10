@@ -2,12 +2,19 @@
 
 import { SignUp } from "@clerk/nextjs";
 import { UserPlus } from "lucide-react";
+import { useEffect, useState } from "react";
 
 /**
  * Client-side Sign Up form wrapper
  * Isolates Clerk's dynamic data access to client-side rendering
  */
 export function SignUpForm() {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   // Modern flat design appearance - clean, minimal, compact
   const appearance = {
     elements: {
@@ -116,14 +123,18 @@ export function SignUpForm() {
         </div>
 
         {/* Sign Up Form */}
-        <div className="flex justify-center">
-          <SignUp 
-            appearance={appearance}
-            routing="path"
-            path="/sign-up"
-            afterSignUpUrl="/dashboard"
-            signInUrl="/sign-in"
-          />
+        <div className="flex justify-center min-h-[400px]">
+          {mounted ? (
+            <SignUp 
+              appearance={appearance}
+              routing="path"
+              path="/sign-up"
+              fallbackRedirectUrl="/dashboard"
+              signInUrl="/sign-in"
+            />
+          ) : (
+            <div className="w-full h-[400px] bg-muted/10 rounded-lg animate-pulse" />
+          )}
         </div>
         
         {/* Footer */}

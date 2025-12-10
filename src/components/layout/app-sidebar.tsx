@@ -33,6 +33,7 @@ import {
   SidebarMenuItem,
   SidebarRail,
   SidebarSeparator,
+  useSidebar,
 } from "@/components/ui/sidebar";
 import {
   DropdownMenu,
@@ -43,11 +44,13 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Link from "next/link";
+import { SignOutButton } from "@clerk/nextjs";
 import { ClientOnly } from "@/components/common/ClientOnly";
 import { LensSwitcher } from "@/components/layout/lens-switcher";
 import { useLens } from "@/context/LensContext";
 import { UserRole } from "@/types/user";
 import { cn } from "@/lib/utils";
+import { useIsImmersive } from "@/store/ui-store";
 
 // Lens glow animation classes for ring/glow highlight on lens switch
 const LENS_GLOW_CLASSES = {
@@ -88,6 +91,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname();
   const { user: clerkUser } = useUser();
   const { isRouteVisible, setUserRole, activeLens } = useLens();
+  const { setOpenMobile } = useSidebar();
+  const isImmersive = useIsImmersive();
   const TeamLogo = baseData.teams[0].logo;
   
   // Track lens changes for temporary flash highlight
@@ -100,6 +105,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   
   // Check if we're in Personal view (user lens)
   const isPersonalView = activeLens === "user";
+
+  // Close mobile sidebar when entering immersive mode
+  useEffect(() => {
+    if (isImmersive) {
+      setOpenMobile(false);
+    }
+  }, [isImmersive, setOpenMobile]);
 
   // Dynamic Navigation Data based on Lens
   const navData = {
@@ -157,85 +169,66 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         url: "/admin/users",
         icon: UsersRound,
       },
-    ],
-    navTools: [
       {
-        title: "Skill Mapper",
-        url: "/skill-mapper",
-        icon: BookOpen,
+        title: "Настройки",
+        url: "/settings",
+        icon: Settings,
       },
     ],
   };
 
-  // Show flash and animate items when lens changes
+  // Get user display info
+  const userName = clerkUser?.fullName || clerkUser?.username || baseData.user.name;
+  const userEmail = clerkUser?.primaryEmailAddress?.emailAddress || baseData.user.email;
+  const userImage = clerkUser?.imageUrl;
+  const userInitials = userName
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
+
+  // Trigger flash animation on lens change (skip initial render)
   useEffect(() => {
-    // Skip the initial render to avoid flash on page load
     if (isInitialRenderRef.current) {
       isInitialRenderRef.current = false;
-      prevLensRef.current = activeLens;
       return;
     }
-    
-    // Only animate if lens actually changed
     if (prevLensRef.current !== activeLens) {
-      // Show the flash
       setShowFlash(true);
-      // Trigger nav items animation
       setIsLensChanging(true);
-      
-      // Hide glow after animation completes (2s = 2000ms)
-      const flashTimer = setTimeout(() => {
-        setShowFlash(false);
-      }, 2000);
-      
-      // Reset nav animation state after animation completes 
-      // (50ms stagger per item * ~10 items + 300ms animation = ~1000ms)
-      const animTimer = setTimeout(() => {
-        setIsLensChanging(false);
-      }, 1000);
-      
+      const flashTimer = setTimeout(() => setShowFlash(false), 700);
+      const lensTimer = setTimeout(() => setIsLensChanging(false), 400);
       prevLensRef.current = activeLens;
-      
       return () => {
         clearTimeout(flashTimer);
-        clearTimeout(animTimer);
+        clearTimeout(lensTimer);
       };
     }
   }, [activeLens]);
 
-  // Sync user role from Clerk to lens context
-  useEffect(() => {
-    if (clerkUser?.publicMetadata?.role) {
-      const role = clerkUser.publicMetadata.role as string;
-      if (role === "ADMIN") setUserRole(UserRole.ADMIN);
-      else if (role === "EDITOR") setUserRole(UserRole.EDITOR);
-      else setUserRole(UserRole.USER);
-    }
-  }, [clerkUser, setUserRole]);
+  // Filter visible navigation items based on lens permissions
+  const visibleNavItems = navData.navMain.filter((item) =>
+    isRouteVisible(item.url)
+  );
+  const visibleLibraryItems = navData.navLibrary.filter((item) =>
+    isRouteVisible(item.url)
+  );
+  const visibleAdminItems = navData.navAdmin.filter((item) =>
+    isRouteVisible(item.url)
+  );
 
-  // Get user display info from Clerk
-  const userName = clerkUser?.fullName || clerkUser?.username || navData.user.name;
-  const userEmail = clerkUser?.primaryEmailAddress?.emailAddress || clerkUser?.username || navData.user.email;
-  const userInitials = clerkUser?.fullName
-    ? clerkUser.fullName.split(" ").map((n) => n[0]).join("")
-    : clerkUser?.username?.substring(0, 2).toUpperCase() || "AU";
-  const userImageUrl = clerkUser?.imageUrl;
-
-  // Filter navigation items based on active lens
-  const visibleNavItems = navData.navMain.filter((item) => isRouteVisible(item.url));
-  const visibleLibraryItems = navData.navLibrary.filter((item) => isRouteVisible(item.url));
-  const visibleAdminItems = navData.navAdmin.filter((item) => isRouteVisible(item.url));
-  const visibleToolItems = navData.navTools.filter((item) => isRouteVisible(item.url));
-  
-  // Get lens-specific glow animation class
-  const lensGlowClass = getLensGlowClass(activeLens);
+  // Don't render sidebar in immersive mode
+  if (isImmersive) {
+    return null;
+  }
 
   return (
     <Sidebar 
       collapsible="icon" 
       className={cn(
-        // Apply glow animation class when flash is active
-        showFlash && lensGlowClass
+        "transition-all duration-300 ease-in-out",
+        showFlash && getLensGlowClass(activeLens as keyof typeof LENS_GLOW_CLASSES)
       )}
       {...props}
     >
@@ -243,15 +236,17 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
-              <Link href="/">
+              <Link href="/dashboard">
                 <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
                   <TeamLogo className="size-4" />
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-semibold">
-                    {navData.teams[0].name}
+                    {baseData.teams[0].name}
                   </span>
-                  <span className="truncate text-xs">{navData.teams[0].plan}</span>
+                  <span className="truncate text-xs">
+                    {baseData.teams[0].plan}
+                  </span>
                 </div>
               </Link>
             </SidebarMenuButton>
@@ -323,13 +318,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               </SidebarGroupLabel>
               <SidebarMenu>
                 {visibleNavItems.map((item, index) => (
-                  <SidebarMenuItem 
+                  <SidebarMenuItem
                     key={item.title}
                     className={cn(
                       "transition-all duration-300",
-                      isLensChanging && "animate-in fade-in-0 slide-in-from-left-3"
+                      isLensChanging && "animate-in fade-in-0 slide-in-from-left-3 duration-300"
                     )}
-                    style={isLensChanging ? { 
+                    style={isLensChanging ? {
                       animationDelay: `${index * 50}ms`,
                       animationDuration: "300ms",
                       animationFillMode: "both"
@@ -346,67 +341,30 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               </SidebarMenu>
             </SidebarGroup>
 
-            {/* Library Section - for admin and editor users */}
+            {/* Library Section */}
             {visibleLibraryItems.length > 0 && (
               <SidebarGroup>
                 <SidebarGroupLabel
                   className={cn(
                     "transition-all duration-300",
-                    isLensChanging && "animate-in fade-in-0 slide-in-from-left-2"
+                    isLensChanging && "animate-in fade-in-0 slide-in-from-left-2 duration-200"
                   )}
-                  style={isLensChanging ? { 
-                    animationDelay: `${visibleNavItems.length * 50 + 50}ms`,
-                    animationDuration: "200ms",
-                    animationFillMode: "both"
-                  } : undefined}
                 >
                   Библиотека
                 </SidebarGroupLabel>
                 <SidebarMenu>
                   {visibleLibraryItems.map((item, index) => (
-                    <SidebarMenuItem 
+                    <SidebarMenuItem
                       key={item.title}
                       className={cn(
                         "transition-all duration-300",
-                        isLensChanging && "animate-in fade-in-0 slide-in-from-left-3"
+                        isLensChanging && "animate-in fade-in-0 slide-in-from-left-3 duration-300"
                       )}
-                      style={isLensChanging ? { 
-                        animationDelay: `${(visibleNavItems.length + index + 1) * 50 + 50}ms`,
+                      style={isLensChanging ? {
+                        animationDelay: `${(visibleNavItems.length + index) * 50}ms`,
                         animationDuration: "300ms",
                         animationFillMode: "both"
                       } : undefined}
-                    >
-                      <SidebarMenuButton asChild isActive={pathname === item.url || pathname.startsWith(item.url + "/")}>
-                        <Link href={item.url}>
-                          <item.icon />
-                          <span>{item.title}</span>
-                        </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  ))}
-                </SidebarMenu>
-              </SidebarGroup>
-            )}
-
-            {/* Tools Section */}
-            {visibleToolItems.length > 0 && (
-              <SidebarGroup>
-                <SidebarGroupLabel
-                  className={cn(
-                    "transition-all duration-300",
-                    isLensChanging && "animate-in fade-in-0 slide-in-from-left-2"
-                  )}
-                >
-                  Инструменты
-                </SidebarGroupLabel>
-                <SidebarMenu>
-                  {visibleToolItems.map((item) => (
-                    <SidebarMenuItem 
-                      key={item.title}
-                      className={cn(
-                        "transition-all duration-300",
-                        isLensChanging && "animate-in fade-in-0 slide-in-from-left-3"
-                      )}
                     >
                       <SidebarMenuButton asChild isActive={pathname === item.url || pathname.startsWith(item.url + "/")}>
                         <Link href={item.url}>
@@ -426,19 +384,24 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 <SidebarGroupLabel
                   className={cn(
                     "transition-all duration-300",
-                    isLensChanging && "animate-in fade-in-0 slide-in-from-left-2"
+                    isLensChanging && "animate-in fade-in-0 slide-in-from-left-2 duration-200"
                   )}
                 >
                   Администрирование
                 </SidebarGroupLabel>
                 <SidebarMenu>
-                  {visibleAdminItems.map((item) => (
-                    <SidebarMenuItem 
+                  {visibleAdminItems.map((item, index) => (
+                    <SidebarMenuItem
                       key={item.title}
                       className={cn(
                         "transition-all duration-300",
-                        isLensChanging && "animate-in fade-in-0 slide-in-from-left-3"
+                        isLensChanging && "animate-in fade-in-0 slide-in-from-left-3 duration-300"
                       )}
+                      style={isLensChanging ? {
+                        animationDelay: `${(visibleNavItems.length + visibleLibraryItems.length + index) * 50}ms`,
+                        animationDuration: "300ms",
+                        animationFillMode: "both"
+                      } : undefined}
                     >
                       <SidebarMenuButton asChild isActive={pathname === item.url || pathname.startsWith(item.url + "/")}>
                         <Link href={item.url}>
@@ -458,7 +421,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarFooter>
         {/* Lens Switcher - Role-based view selector */}
         <SidebarMenu>
-          <SidebarMenuItem >
+          <SidebarMenuItem>
             <ClientOnly fallback={null}>
               <LensSwitcher />
             </ClientOnly>
@@ -496,59 +459,55 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                     size="lg"
                     className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
                   >
-                  
-                  <Avatar className="h-8 w-8 rounded-lg">
-                    {userImageUrl && <AvatarImage src={userImageUrl} alt={userName} />}
-                    <AvatarFallback className="rounded-lg">
-                      {userInitials}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="grid flex-1 text-left text-sm leading-tight">
-                    <span className="truncate font-semibold">
-                      {userName}
-                    </span>
-                    <span className="truncate text-xs">{userEmail}</span>
-                  </div>
-                  <ChevronDown className="ml-auto size-4" />
-                </SidebarMenuButton>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent
-                className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg"
-                side="bottom"
-                align="end"
-                sideOffset={4}
-              >
-                {clerkUser && (
+                    <Avatar className="h-8 w-8 rounded-lg">
+                      <AvatarImage src={userImage} alt={userName} />
+                      <AvatarFallback className="rounded-lg">
+                        {userInitials}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="grid flex-1 text-left text-sm leading-tight">
+                      <span className="truncate font-semibold">
+                        {userName}
+                      </span>
+                      <span className="truncate text-xs">
+                        {userEmail}
+                      </span>
+                    </div>
+                    <ChevronDown className="ml-auto size-4" />
+                  </SidebarMenuButton>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg"
+                  side="bottom"
+                  align="end"
+                  sideOffset={4}
+                >
                   <DropdownMenuItem asChild>
-                    <Link href={`/admin/users/${clerkUser.id}`} className="flex items-center gap-2 cursor-pointer">
-                      <UserCircle className="h-4 w-4" />
-                      My Profile
+                    <Link href={clerkUser ? `/admin/users/${clerkUser.id}` : "/dashboard"}>
+                      <User className="mr-2 h-4 w-4" />
+                      Профиль
                     </Link>
                   </DropdownMenuItem>
-                )}
-                <DropdownMenuItem>
-                  <User />
-                  Account
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <Settings />
-                  Settings
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <HelpCircle />
-                  Support
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem>
-                  <LogOut />
-                  Log out
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+                  <DropdownMenuItem asChild>
+                    <Link href="/settings">
+                      <Settings className="mr-2 h-4 w-4" />
+                      Настройки
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <SignOutButton>
+                    <DropdownMenuItem>
+                      <LogOut className="mr-2 h-4 w-4" />
+                      Выйти
+                    </DropdownMenuItem>
+                  </SignOutButton>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </ClientOnly>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarFooter>
+
       <SidebarRail />
     </Sidebar>
   );

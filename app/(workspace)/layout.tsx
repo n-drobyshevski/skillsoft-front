@@ -10,44 +10,24 @@ import { HeaderProvider } from "@/src/context/HeaderContext";
 import { BreadcrumbProvider } from "@/src/context/BreadcrumbContext";
 import { LensProvider } from "@/context/LensContext";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ViewModeProvider, useViewMode } from "@/src/context/ViewModeContext";
+import { cn } from "@/lib/utils";
 
 /**
  * Sidebar skeleton shown while auth loads
- * Provides instant visual feedback with the same layout structure
  */
 function SidebarSkeleton() {
   return (
-    <div className="flex h-full w-60 flex-col border-r bg-sidebar">
-      {/* Header skeleton */}
-      <div className="flex h-14 items-center gap-2 border-b px-4">
-        <Skeleton className="h-8 w-8 rounded-lg" />
-        <Skeleton className="h-5 w-24" />
+    <div className="hidden md:flex w-[15rem] border-r bg-sidebar flex-col">
+      <div className="p-4 space-y-4">
+        <Skeleton className="h-10 w-full" />
+        <Skeleton className="h-8 w-3/4" />
+        <Skeleton className="h-8 w-1/2" />
       </div>
-      
-      {/* Nav items skeleton */}
-      <div className="flex-1 space-y-4 p-4">
-        <div className="space-y-2">
-          <Skeleton className="h-4 w-16" />
-          <Skeleton className="h-9 w-full rounded-lg" />
-          <Skeleton className="h-9 w-full rounded-lg" />
-        </div>
-        <div className="space-y-2">
-          <Skeleton className="h-4 w-20" />
-          <Skeleton className="h-9 w-full rounded-lg" />
-          <Skeleton className="h-9 w-full rounded-lg" />
-          <Skeleton className="h-9 w-full rounded-lg" />
-        </div>
-      </div>
-      
-      {/* Footer skeleton */}
-      <div className="border-t p-4">
-        <div className="flex items-center gap-3">
-          <Skeleton className="h-9 w-9 rounded-full" />
-          <div className="space-y-1">
-            <Skeleton className="h-4 w-24" />
-            <Skeleton className="h-3 w-32" />
-          </div>
-        </div>
+      <div className="flex-1 p-4 space-y-2">
+        {Array.from({ length: 6 }).map((_, i) => (
+          <Skeleton key={i} className="h-9 w-full" />
+        ))}
       </div>
     </div>
   );
@@ -58,12 +38,11 @@ function SidebarSkeleton() {
  */
 function HeaderSkeleton() {
   return (
-    <header className="flex h-14 shrink-0 items-center gap-2 border-b px-4">
-      <Skeleton className="h-8 w-8" />
-      <Skeleton className="h-5 w-32" />
-      <div className="ml-auto flex items-center gap-2">
-        <Skeleton className="h-8 w-8 rounded-full" />
-      </div>
+    <header className="h-14 border-b flex items-center px-4 gap-4">
+      <Skeleton className="h-8 w-8 md:hidden" />
+      <Skeleton className="h-6 w-32" />
+      <div className="flex-1" />
+      <Skeleton className="h-8 w-8 rounded-full" />
     </header>
   );
 }
@@ -73,18 +52,79 @@ function HeaderSkeleton() {
  */
 function ContentSkeleton() {
   return (
-    <div className="flex flex-1 flex-col gap-4 p-4 pt-6 md:gap-6 md:p-6">
-      <div className="space-y-2">
-        <Skeleton className="h-8 w-48" />
-        <Skeleton className="h-4 w-80" />
-      </div>
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        {Array.from({ length: 4 }).map((_, i) => (
-          <Skeleton key={i} className="h-28 rounded-xl" />
+    <div className="flex-1 p-6 space-y-6">
+      <Skeleton className="h-8 w-64" />
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        {Array.from({ length: 6 }).map((_, i) => (
+          <Skeleton key={i} className="h-32 w-full rounded-lg" />
         ))}
       </div>
-      <Skeleton className="h-64 rounded-xl" />
     </div>
+  );
+}
+
+/**
+ * Inner layout component that consumes ViewModeContext
+ * Handles the "Zen Mode" transitions
+ */
+function WorkspaceLayoutContent({ children }: { children: React.ReactNode }) {
+  const { viewMode, isTransitioning } = useViewMode();
+  const isImmersive = viewMode === "immersive";
+
+  return (
+    <SidebarProvider 
+      defaultOpen={false}
+      style={{
+        "--sidebar-width": "15rem",
+        "--sidebar-width-mobile": "16rem",
+      } as React.CSSProperties}
+    >
+      {/* Sidebar - hidden in immersive mode with smooth transition */}
+      <div
+        className={cn(
+          "transition-all duration-300 ease-in-out",
+          isImmersive && "opacity-0 pointer-events-none w-0 overflow-hidden"
+        )}
+        aria-hidden={isImmersive}
+      >
+        {!isImmersive && <AppSidebar />}
+      </div>
+      
+      <SidebarInset 
+        className={cn(
+          "flex flex-col min-h-screen bg-background mobile-container",
+          "transition-all duration-300 ease-in-out",
+          isImmersive && "ml-0 p-0",
+          isTransitioning && "will-change-transform"
+        )}
+      >
+        {/* Header - hidden in immersive mode */}
+        <div
+          className={cn(
+            "transition-all duration-300 ease-in-out",
+            isImmersive && "opacity-0 h-0 overflow-hidden pointer-events-none"
+          )}
+          aria-hidden={isImmersive}
+        >
+          {!isImmersive && <SiteHeader />}
+        </div>
+        
+        <main 
+          id="main-content" 
+          className={cn(
+            "flex flex-1 flex-col focus:outline-none overflow-hidden mobile-container",
+            "transition-all duration-300 ease-in-out",
+            isImmersive && "max-w-full"
+          )}
+          tabIndex={-1}
+          role="main"
+        >
+          <Suspense fallback={<ContentSkeleton />}>
+            {children}
+          </Suspense>
+        </main>
+      </SidebarInset>
+    </SidebarProvider>
   );
 }
 
@@ -95,8 +135,7 @@ function ContentSkeleton() {
  * Includes sidebar, header, and lens context for role-based views.
  * 
  * Next.js 16 behavior: Layouts preserve state, remain interactive,
- * and do not re-render during navigation. This means the sidebar
- * and header will stay visible while page content loads.
+ * and do not re-render during navigation.
  */
 export default function WorkspaceLayout({
   children,
@@ -126,32 +165,16 @@ export default function WorkspaceLayout({
   }
 
   return (
-    <LensProvider>
-      <HeaderProvider>
-        <BreadcrumbProvider>
-          <SidebarProvider 
-            defaultOpen={false}
-            style={{
-              "--sidebar-width": "15rem",
-              "--sidebar-width-mobile": "16rem",
-            } as React.CSSProperties}
-          >
-            <AppSidebar />
-            <SidebarInset className="flex flex-col min-h-screen bg-background mobile-container">
-              <SiteHeader />
-              <main 
-                id="main-content" 
-                className="flex flex-1 flex-col focus:outline-none overflow-hidden mobile-container"
-                tabIndex={-1}
-              >
-                <Suspense fallback={<ContentSkeleton />}>
-                  {children}
-                </Suspense>
-              </main>
-            </SidebarInset>
-          </SidebarProvider>
-        </BreadcrumbProvider>
-      </HeaderProvider>
-    </LensProvider>
+    <ViewModeProvider>
+      <LensProvider>
+        <HeaderProvider>
+          <BreadcrumbProvider>
+            <WorkspaceLayoutContent>
+              {children}
+            </WorkspaceLayoutContent>
+          </BreadcrumbProvider>
+        </HeaderProvider>
+      </LensProvider>
+    </ViewModeProvider>
   );
 }

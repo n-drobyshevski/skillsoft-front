@@ -3,9 +3,9 @@ import { testResultsApi } from '@/services/api';
 import TestResultView from './_components/TestResultView';
 
 interface TestResultPageProps {
-  params: {
+  params: Promise<{
     resultId: string;
-  };
+  }>;
 }
 
 /**
@@ -19,7 +19,7 @@ interface TestResultPageProps {
  * Uses Server Component for initial data fetch with proper caching.
  */
 export default async function TestResultPage({ params }: TestResultPageProps) {
-  const { resultId } = params;
+  const { resultId } = await params;
 
   // Fetch test result from backend
   const result = await testResultsApi.getResultById(resultId);
@@ -35,7 +35,7 @@ export default async function TestResultPage({ params }: TestResultPageProps) {
  * Generate metadata for the page
  */
 export async function generateMetadata({ params }: TestResultPageProps) {
-  const { resultId } = params;
+  const { resultId } = await params;
   const result = await testResultsApi.getResultById(resultId);
 
   if (!result) {

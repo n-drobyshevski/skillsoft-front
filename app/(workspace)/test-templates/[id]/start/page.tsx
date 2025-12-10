@@ -9,12 +9,12 @@ import { auth } from "@clerk/nextjs/server";
 import Link from "next/link";
 
 interface StartPageProps {
-  params: {
+  params: Promise<{
     id: string;
-  };
-  searchParams: {
+  }>;
+  searchParams: Promise<{
     mode?: string;
-  };
+  }>;
 }
 
 export const metadata: Metadata = {
@@ -23,22 +23,29 @@ export const metadata: Metadata = {
 };
 
 export default async function StartPage({ params, searchParams }: StartPageProps) {
-  const { userId } = auth();
+  const { id } = await params;
+  const { userId } = await auth();
   if (!userId) redirect("/sign-in");
 
-  const template = await testTemplatesApi.getTemplateById(params.id);
+  const template = await testTemplatesApi.getTemplateById(id);
   if (!template) notFound();
 
-  // Check for existing session
-  const existingSession = await testSessionsApi.getInProgressSession(userId, params.id);
+  // Check for existing session (may not exist, which is fine)
+  let existingSession = null;
+  try {
+    existingSession = await testSessionsApi.getInProgressSession(userId, id);
+  } catch (error) {
+    // No existing session, which is expected for new starts
+    existingSession = null;
+  }
   
   async function startSessionAction() {
     "use server";
-    const { userId } = auth();
+    const { userId } = await auth();
     if (!userId) redirect("/sign-in");
     
     const session = await testSessionsApi.startSession({
-        templateId: params.id,
+        templateId: id,
         clerkUserId: userId,
     });
     redirect(`/test-templates/take/${session.id}`);
@@ -73,7 +80,7 @@ export default async function StartPage({ params, searchParams }: StartPageProps
                     </div>
                     <div className="flex flex-col items-center p-4 bg-muted/50 rounded-lg text-center">
                         <HelpCircle className="h-6 w-6 text-muted-foreground mb-2" />
-                        <span className="font-semibold">~{template.competencyCount * 3} Questions</span>
+                        <span className="font-semibold">~{template.competencyIds.length * 3} Questions</span>
                         <span className="text-xs text-muted-foreground">Estimated</span>
                     </div>
                     <div className="flex flex-col items-center p-4 bg-muted/50 rounded-lg text-center">
@@ -107,8 +114,12 @@ export default async function StartPage({ params, searchParams }: StartPageProps
                     </Button>
                 ) : (
                     <form action={startSessionAction} className="w-full max-w-md mx-auto">
-                        <Button size="lg" className="w-full text-lg h-12 shadow-md hover:shadow-lg transition-all">
+                        <Button 
+                            size="lg" 
+                            className="w-full text-lg h-14 shadow-xl hover:shadow-2xl transition-all bg-primary hover:bg-primary/90 animate-pulse hover:animate-none font-bold tracking-wide"
+                        >
                             Begin Assessment
+                            <Play className="ml-2 h-5 w-5 fill-current" />
                         </Button>
                     </form>
                 )}

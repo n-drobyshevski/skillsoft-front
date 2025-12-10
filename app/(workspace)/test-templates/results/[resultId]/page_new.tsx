@@ -20,8 +20,9 @@ import {
   RotateCcw,
   UserPlus
 } from 'lucide-react';
-import { CompetencyRadarChart } from '@/components/data-display/charts/CompetencyRadarChart';
-import { GapAnalysisBarChart } from '@/components/data-display/charts/GapAnalysisBarChart';
+import CompetencyRadarChart from '@/components/data-display/charts/CompetencyRadarChart';
+import GapAnalysisBarChart from '@/components/data-display/charts/GapAnalysisBarChart';
+import { AssessmentGoal } from '@/types/domain';
 
 interface PageProps {
   params: Promise<{
@@ -76,8 +77,8 @@ async function ResultsContent({ resultId }: { resultId: string }) {
   });
 
   // Determine which chart to show based on goal
-  // Default to Radar for OVERVIEW/SELF_ASSESSMENT, Gap for JOB_FIT/ASSESSMENT
-  const showGapAnalysis = template?.goal === 'JOB_FIT' || template?.goal === 'ASSESSMENT';
+  // Default to Radar for OVERVIEW, Gap for JOB_FIT/TEAM_FIT
+  const showGapAnalysis = template?.goal === AssessmentGoal.JOB_FIT || template?.goal === AssessmentGoal.TEAM_FIT;
 
   return (
     <div className="min-h-screen bg-muted/30 py-8">

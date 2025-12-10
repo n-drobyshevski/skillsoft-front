@@ -20,8 +20,10 @@ import {
   RotateCcw,
   UserPlus
 } from 'lucide-react';
-import { CompetencyRadarChart } from '@/components/data-display/charts/CompetencyRadarChart';
-import { GapAnalysisBarChart } from '@/components/data-display/charts/GapAnalysisBarChart';
+import CompetencyRadarChart from '@/components/data-display/charts/CompetencyRadarChart';
+import GapAnalysisBarChart from '@/components/data-display/charts/GapAnalysisBarChart';
+import { ResultsHeader } from './_components/ResultsHeader';
+import { AssessmentGoal } from '@/types/domain';
 
 interface PageProps {
   params: Promise<{
@@ -41,10 +43,20 @@ export default async function TestResultsPage({ params }: PageProps) {
 
 async function ResultsContent({ resultId }: { resultId: string }) {
   // First try to get by result ID, then by session ID
-  let result = await testResultsApi.getResultById(resultId);
+  let result = null;
+  
+  try {
+    result = await testResultsApi.getResultById(resultId);
+  } catch (error) {
+    // Continue to try by session ID
+  }
   
   if (!result) {
-    result = await testResultsApi.getResultBySession(resultId);
+    try {
+      result = await testResultsApi.getResultBySession(resultId);
+    } catch (error) {
+      // Both attempts failed
+    }
   }
   
   if (!result) {
@@ -76,8 +88,8 @@ async function ResultsContent({ resultId }: { resultId: string }) {
   });
 
   // Determine which chart to show based on goal
-  // Default to Radar for OVERVIEW/SELF_ASSESSMENT, Gap for JOB_FIT/ASSESSMENT
-  const showGapAnalysis = template?.goal === 'JOB_FIT' || template?.goal === 'ASSESSMENT';
+  // Default to Radar for OVERVIEW, Gap for JOB_FIT/TEAM_FIT
+  const showGapAnalysis = template?.goal === AssessmentGoal.JOB_FIT || template?.goal === AssessmentGoal.TEAM_FIT;
 
   return (
     <div className="min-h-screen bg-muted/30 py-8">
@@ -85,17 +97,7 @@ async function ResultsContent({ resultId }: { resultId: string }) {
         {/* Header Card */}
         <Card className={isPassed ? 'border-green-500/50' : 'border-amber-500/50'}>
           <CardHeader className="text-center pb-2">
-            <div className="flex justify-center mb-4">
-              {isPassed ? (
-                <div className="w-20 h-20 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
-                  <Trophy className="h-10 w-10 text-green-600 dark:text-green-400" />
-                </div>
-              ) : (
-                <div className="w-20 h-20 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center">
-                  <Target className="h-10 w-10 text-amber-600 dark:text-amber-400" />
-                </div>
-              )}
-            </div>
+            <ResultsHeader isPassed={isPassed} />
             
             <CardTitle className="text-2xl sm:text-3xl">
               {isPassed ? 'Поздравляем!' : 'Попробуйте ещё раз'}

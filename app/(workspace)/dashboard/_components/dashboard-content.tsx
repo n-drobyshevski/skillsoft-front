@@ -327,7 +327,7 @@ export default function DashboardContent({
                 <div key={session.id} className="flex flex-col gap-3 rounded-lg border bg-card p-4 shadow-sm transition-all hover:shadow-md">
                   <div className="flex items-start justify-between">
                     <div className="space-y-1">
-                      <h4 className="font-medium leading-none">{session.template?.name || "Assessment"}</h4>
+                      <h4 className="font-medium leading-none">{session.templateName || "Assessment"}</h4>
                       <p className="text-xs text-muted-foreground">
                         {session.status === 'IN_PROGRESS' ? 'In Progress' : 'Not Started'}
                       </p>

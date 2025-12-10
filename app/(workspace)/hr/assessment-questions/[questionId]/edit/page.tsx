@@ -16,7 +16,7 @@ async function getQuestionData(questionId: string) {
   return { question, competencyId: indicator.competencyId };
 }
 
-export default async function EditQuestionPage({ params }: { params: { questionId: string } }) {
+export default async function EditQuestionPage({ params }: { params: Promise<{ questionId: string }> }) {
   const { questionId } = await params;
   const { question, competencyId } = await getQuestionData(questionId);
 

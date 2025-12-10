@@ -657,8 +657,8 @@ export interface SubmitAnswerRequest {
   likertValue?: number;
   rankingOrder?: string[];
   textResponse?: string;
-  timeSpentSeconds: number;
-  isSkipped?: boolean;
+  timeSpentSeconds?: number;
+  skip?: boolean;
 }
 
 // ============================================
