@@ -136,7 +136,7 @@ async function ResultsList({ userId }: { userId: string }) {
         <StatCard
           icon={<Clock className="h-4 w-4" />}
           label="Общее время"
-          value={formatTotalTime(results.reduce((acc, r) => acc + r.totalTimeSeconds, 0))}
+          value={formatTotalTime(results.reduce((acc, r) => acc + (r.totalTimeSeconds || 0), 0))}
         />
       </div>
 
@@ -349,6 +349,7 @@ function formatDate(dateString: string | undefined): string {
 }
 
 function formatDuration(seconds: number): string {
+  if (!seconds || !Number.isFinite(seconds)) return "0м";
   const hours = Math.floor(seconds / 3600);
   const mins = Math.floor((seconds % 3600) / 60);
   if (hours > 0) return `${hours}ч ${mins}м`;
@@ -356,6 +357,7 @@ function formatDuration(seconds: number): string {
 }
 
 function formatTotalTime(seconds: number): string {
+  if (!seconds || !Number.isFinite(seconds)) return "0м";
   const hours = Math.floor(seconds / 3600);
   const mins = Math.floor((seconds % 3600) / 60);
   if (hours > 0) return `${hours}ч`;

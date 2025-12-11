@@ -3,7 +3,7 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { TestSession, SessionQuestion, AnswerValue } from '@/types/domain';
+import { TestSession, SessionQuestion, CurrentQuestionResponse, TestAnswer, SubmitAnswerRequest, QuestionType } from '@/types/domain';
 import { testSessionsApi } from '@/services/api';
 import { SessionHeader } from './SessionHeader';
 import { QuestionCard } from './QuestionCard';
@@ -11,23 +11,28 @@ import { QuestionNavigation } from './QuestionNavigation';
 import { CompletionDialog } from './CompletionDialog';
 import { useUIStore } from '@/store/ui-store';
 import { toast } from 'sonner';
-import { cn } from '@/lib/utils';
 
 interface ImmersivePlayerProps {
   session: TestSession;
+  initialQuestion: CurrentQuestionResponse;
 }
 
 interface PlayerState {
-  currentQuestionIndex: number;
-  answers: Map<string, AnswerValue>;
-  questions: SessionQuestion[];
+  currentQuestion: SessionQuestion | null;
+  questionNumber: number;
+  totalQuestions: number;
+  previousAnswer?: TestAnswer;
+  allowSkip: boolean;
+  allowBackNavigation: boolean;
+  timeRemainingSeconds?: number;
   isSubmitting: boolean;
   direction: 'forward' | 'backward';
+  answeredCount: number;
 }
 
 /**
  * ImmersivePlayer - Main test-taking experience
- * 
+ *
  * Features:
  * - Animated question transitions
  * - Keyboard navigation
@@ -35,27 +40,43 @@ interface PlayerState {
  * - Progress tracking
  * - Timer management
  */
-export function ImmersivePlayer({ session }: ImmersivePlayerProps) {
+export function ImmersivePlayer({ session, initialQuestion }: ImmersivePlayerProps) {
   const router = useRouter();
   const enterImmersiveMode = useUIStore((state) => state.enterImmersiveMode);
   const exitImmersiveMode = useUIStore((state) => state.exitImmersiveMode);
 
   // Player state
   const [state, setState] = useState<PlayerState>({
-    currentQuestionIndex: session.currentQuestionIndex || 0,
-    answers: new Map(
-      session.answers?.map(a => [a.questionId, a.value]) || []
-    ),
-    questions: session.questions || [],
+    currentQuestion: initialQuestion.question,
+    questionNumber: initialQuestion.questionNumber,
+    totalQuestions: initialQuestion.totalQuestions,
+    previousAnswer: initialQuestion.previousAnswer,
+    allowSkip: initialQuestion.allowSkip,
+    allowBackNavigation: initialQuestion.allowBackNavigation,
+    timeRemainingSeconds: initialQuestion.timeRemainingSeconds,
     isSubmitting: false,
     direction: 'forward',
+    answeredCount: session.answeredQuestions,
+  });
+
+  // Current answer value
+  const [currentAnswer, setCurrentAnswer] = useState<string | number | string[] | undefined>(() => {
+    if (initialQuestion.previousAnswer) {
+      if (initialQuestion.previousAnswer.likertValue !== undefined) {
+        return initialQuestion.previousAnswer.likertValue;
+      }
+      if (initialQuestion.previousAnswer.selectedOptionIds?.length) {
+        return initialQuestion.previousAnswer.selectedOptionIds.length === 1
+          ? initialQuestion.previousAnswer.selectedOptionIds[0]
+          : initialQuestion.previousAnswer.selectedOptionIds;
+      }
+    }
+    return undefined;
   });
 
   // Timer state
   const [timeRemaining, setTimeRemaining] = useState<number | null>(
-    session.endTime 
-      ? Math.max(0, Math.floor((new Date(session.endTime).getTime() - Date.now()) / 1000))
-      : null
+    initialQuestion.timeRemainingSeconds ?? null
   );
 
   // Completion dialog
@@ -88,42 +109,89 @@ export function ImmersivePlayer({ session }: ImmersivePlayerProps) {
     return () => clearInterval(timer);
   }, [timeRemaining]);
 
-  // Current question
-  const currentQuestion = state.questions[state.currentQuestionIndex];
-  const currentAnswer = currentQuestion 
-    ? state.answers.get(currentQuestion.id) 
-    : undefined;
-  const totalQuestions = state.questions.length;
-  const progress = totalQuestions > 0 
-    ? ((state.currentQuestionIndex + 1) / totalQuestions) * 100 
+  const currentQuestion = state.currentQuestion;
+  const progress = state.totalQuestions > 0
+    ? (state.questionNumber / state.totalQuestions) * 100
     : 0;
+
+  /**
+   * Build SubmitAnswerRequest from answer value
+   */
+  const buildAnswerRequest = useCallback((value: string | number | string[]): SubmitAnswerRequest => {
+    const timeSpentSeconds = Math.floor((Date.now() - questionStartTime.current) / 1000);
+    const request: SubmitAnswerRequest = {
+      sessionId: session.id,
+      questionId: state.currentQuestion?.id || '',
+      timeSpentSeconds,
+    };
+
+    if (typeof value === 'number') {
+      request.likertValue = value;
+    } else if (Array.isArray(value)) {
+      request.selectedOptionIds = value;
+    } else {
+      request.selectedOptionIds = [value];
+    }
+
+    return request;
+  }, [session.id, state.currentQuestion?.id]);
 
   /**
    * Handle answer selection
    */
-  const handleAnswer = useCallback(async (value: AnswerValue) => {
+  const handleAnswer = useCallback(async (value: string | number | string[]) => {
     if (!currentQuestion || state.isSubmitting) return;
 
-    const timeSpentMs = Date.now() - questionStartTime.current;
-
     // Optimistic update
-    setState(prev => ({
-      ...prev,
-      answers: new Map(prev.answers).set(currentQuestion.id, value),
-    }));
+    setCurrentAnswer(value);
+  }, [currentQuestion, state.isSubmitting]);
 
-    // Submit to server
+  /**
+   * Fetch and display question at given index
+   */
+  const loadQuestion = useCallback(async (direction: 'forward' | 'backward') => {
     try {
-      await testSessionsApi.submitAnswer(session.id, {
-        questionId: currentQuestion.id,
-        value,
-        timeSpentMs,
-      });
+      const response = await testSessionsApi.getCurrentQuestion(session.id);
+      if (response) {
+        setState(prev => ({
+          ...prev,
+          currentQuestion: response.question,
+          questionNumber: response.questionNumber,
+          totalQuestions: response.totalQuestions,
+          previousAnswer: response.previousAnswer,
+          allowSkip: response.allowSkip,
+          allowBackNavigation: response.allowBackNavigation,
+          timeRemainingSeconds: response.timeRemainingSeconds,
+          direction,
+        }));
+
+        // Set previous answer if exists
+        if (response.previousAnswer) {
+          if (response.previousAnswer.likertValue !== undefined) {
+            setCurrentAnswer(response.previousAnswer.likertValue);
+          } else if (response.previousAnswer.selectedOptionIds?.length) {
+            setCurrentAnswer(
+              response.previousAnswer.selectedOptionIds.length === 1
+                ? response.previousAnswer.selectedOptionIds[0]
+                : response.previousAnswer.selectedOptionIds
+            );
+          } else {
+            setCurrentAnswer(undefined);
+          }
+        } else {
+          setCurrentAnswer(undefined);
+        }
+
+        if (response.timeRemainingSeconds !== undefined) {
+          setTimeRemaining(response.timeRemainingSeconds);
+        }
+      }
     } catch (error) {
-      console.error('Failed to save answer:', error);
-      toast.error('Failed to save answer. Please try again.');
+      console.error('Failed to load question:', error);
+      toast.error('Failed to load question. Please try again.');
     }
-  }, [currentQuestion, session.id, state.isSubmitting]);
+    questionStartTime.current = Date.now();
+  }, [session.id]);
 
   /**
    * Navigate to next question
@@ -132,38 +200,57 @@ export function ImmersivePlayer({ session }: ImmersivePlayerProps) {
     if (state.isSubmitting) return;
 
     // Check if current question is answered
-    if (currentQuestion && !state.answers.has(currentQuestion.id)) {
+    if (currentQuestion && currentAnswer === undefined) {
       toast.warning('Please select an answer before continuing.');
       return;
     }
 
-    // Check if last question
-    if (state.currentQuestionIndex >= totalQuestions - 1) {
-      setShowCompletion(true);
-      return;
+    setState(prev => ({ ...prev, isSubmitting: true }));
+
+    try {
+      // Submit answer
+      if (currentQuestion && currentAnswer !== undefined) {
+        const request = buildAnswerRequest(currentAnswer);
+        await testSessionsApi.submitAnswer(session.id, request);
+        setState(prev => ({ ...prev, answeredCount: prev.answeredCount + 1 }));
+      }
+
+      // Check if last question
+      if (state.questionNumber >= state.totalQuestions) {
+        setShowCompletion(true);
+        setState(prev => ({ ...prev, isSubmitting: false }));
+        return;
+      }
+
+      // Navigate to next question
+      await testSessionsApi.navigateToQuestion(session.id, session.currentQuestionIndex + 1);
+      await loadQuestion('forward');
+    } catch (error) {
+      console.error('Failed to submit answer:', error);
+      toast.error('Failed to save answer. Please try again.');
     }
 
-    setState(prev => ({
-      ...prev,
-      currentQuestionIndex: prev.currentQuestionIndex + 1,
-      direction: 'forward',
-    }));
-    questionStartTime.current = Date.now();
-  }, [state.isSubmitting, state.answers, currentQuestion, state.currentQuestionIndex, totalQuestions]);
+    setState(prev => ({ ...prev, isSubmitting: false }));
+  }, [state.isSubmitting, state.questionNumber, state.totalQuestions, currentQuestion, currentAnswer, buildAnswerRequest, session.id, session.currentQuestionIndex, loadQuestion]);
 
   /**
    * Navigate to previous question
    */
-  const handlePrevious = useCallback(() => {
-    if (state.currentQuestionIndex <= 0 || state.isSubmitting) return;
+  const handlePrevious = useCallback(async () => {
+    if (!state.allowBackNavigation || state.isSubmitting) return;
 
-    setState(prev => ({
-      ...prev,
-      currentQuestionIndex: prev.currentQuestionIndex - 1,
-      direction: 'backward',
-    }));
-    questionStartTime.current = Date.now();
-  }, [state.currentQuestionIndex, state.isSubmitting]);
+    setState(prev => ({ ...prev, isSubmitting: true }));
+
+    try {
+      await testSessionsApi.navigateToQuestion(session.id, session.currentQuestionIndex - 1);
+      await loadQuestion('backward');
+    } catch (error) {
+      console.error('Failed to navigate back:', error);
+      toast.error('Failed to go back. Please try again.');
+    }
+
+    setState(prev => ({ ...prev, isSubmitting: false }));
+  }, [state.allowBackNavigation, state.isSubmitting, session.id, session.currentQuestionIndex, loadQuestion]);
 
   /**
    * Handle test completion
@@ -172,14 +259,20 @@ export function ImmersivePlayer({ session }: ImmersivePlayerProps) {
     setState(prev => ({ ...prev, isSubmitting: true }));
 
     try {
-      await testSessionsApi.completeSession(session.id);
-      router.push(`/test-templates/results/${session.id}`);
+      // Submit current answer if exists
+      if (currentQuestion && currentAnswer !== undefined) {
+        const request = buildAnswerRequest(currentAnswer);
+        await testSessionsApi.submitAnswer(session.id, request);
+      }
+
+      const result = await testSessionsApi.completeSession(session.id);
+      router.push(`/test-templates/results/${result.id}`);
     } catch (error) {
       console.error('Failed to complete session:', error);
       toast.error('Failed to submit assessment. Please try again.');
       setState(prev => ({ ...prev, isSubmitting: false }));
     }
-  }, [session.id, router]);
+  }, [session.id, router, currentQuestion, currentAnswer, buildAnswerRequest]);
 
   /**
    * Handle time expiration
@@ -257,8 +350,8 @@ export function ImmersivePlayer({ session }: ImmersivePlayerProps) {
     <div className="min-h-screen bg-slate-950 flex flex-col">
       {/* Session Header */}
       <SessionHeader
-        currentQuestion={state.currentQuestionIndex + 1}
-        totalQuestions={totalQuestions}
+        currentQuestion={state.questionNumber}
+        totalQuestions={state.totalQuestions}
         progress={progress}
         timeRemaining={timeRemaining}
         onExit={handleExit}
@@ -284,7 +377,7 @@ export function ImmersivePlayer({ session }: ImmersivePlayerProps) {
                 question={currentQuestion}
                 selectedValue={currentAnswer}
                 onAnswer={handleAnswer}
-                questionNumber={state.currentQuestionIndex + 1}
+                questionNumber={state.questionNumber}
               />
             </motion.div>
           </AnimatePresence>
@@ -293,9 +386,9 @@ export function ImmersivePlayer({ session }: ImmersivePlayerProps) {
 
       {/* Navigation Footer */}
       <QuestionNavigation
-        canGoBack={state.currentQuestionIndex > 0}
+        canGoBack={state.allowBackNavigation && state.questionNumber > 1}
         canGoForward={currentAnswer !== undefined}
-        isLastQuestion={state.currentQuestionIndex >= totalQuestions - 1}
+        isLastQuestion={state.questionNumber >= state.totalQuestions}
         isSubmitting={state.isSubmitting}
         onPrevious={handlePrevious}
         onNext={handleNext}
@@ -306,8 +399,8 @@ export function ImmersivePlayer({ session }: ImmersivePlayerProps) {
         open={showCompletion}
         onOpenChange={setShowCompletion}
         onComplete={handleComplete}
-        answeredCount={state.answers.size}
-        totalQuestions={totalQuestions}
+        answeredCount={state.answeredCount}
+        totalQuestions={state.totalQuestions}
         isSubmitting={state.isSubmitting}
       />
     </div>

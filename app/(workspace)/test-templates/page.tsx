@@ -45,15 +45,27 @@ async function TemplatesContent({ canCreate }: { canCreate: boolean }) {
   
   if (templates.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-12 text-center">
-        <div className="rounded-full bg-muted p-4 mb-4">
-          <ListFilter className="h-8 w-8 text-muted-foreground" />
+      <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
+        <div className="relative">
+          {/* Decorative background circle */}
+          <div className="absolute inset-0 -m-4 rounded-full bg-gradient-to-br from-muted/40 to-muted/10 blur-2xl" />
+          <div className="relative rounded-2xl bg-muted/30 p-6 backdrop-blur-sm border border-border/50">
+            <ListFilter className="h-12 w-12 text-muted-foreground/60 mx-auto" strokeWidth={1.5} />
+          </div>
         </div>
-        <h3 className="text-lg font-semibold mb-2">Нет доступных шаблонов</h3>
-        <p className="text-sm text-muted-foreground max-w-md">
+        <h3 className="text-lg sm:text-xl font-semibold mt-6 mb-2">Нет доступных шаблонов</h3>
+        <p className="text-sm sm:text-base text-muted-foreground max-w-md leading-relaxed">
           В данный момент нет активных шаблонов тестов. Пожалуйста, проверьте позже или
           обратитесь к администратору.
         </p>
+        {canCreate && (
+          <Button asChild className="mt-6 shadow-sm hover:shadow-md transition-all" size="lg">
+            <Link href="/test-templates/new">
+              <Plus className="mr-2 h-4 w-4" />
+              Создать первый шаблон
+            </Link>
+          </Button>
+        )}
       </div>
     );
   }
@@ -79,18 +91,25 @@ export default async function TestsPage() {
         title="Шаблоны тестов"
         description="Выберите шаблон для оценки ваших компетенций. Каждый тест помогает определить ваш уровень владения определёнными навыками."
       >
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 w-full sm:w-auto">
           <Link href="/test-templates/history" className="w-full sm:w-auto">
-            <Button variant="outline" size="sm" className="w-full sm:w-auto min-h-10 sm:min-h-0">
-              <History className="mr-2 h-4 w-4" />
-              Мои результаты
+            <Button
+              variant="outline"
+              size="sm"
+              className="w-full sm:w-auto min-h-10 sm:min-h-0 gap-2 hover:bg-accent/50 transition-colors"
+            >
+              <History className="h-4 w-4" />
+              <span>Мои результаты</span>
             </Button>
           </Link>
           {canCreate && (
             <Link href="/test-templates/new" className="w-full sm:w-auto">
-              <Button size="sm" className="w-full sm:w-auto min-h-10 sm:min-h-0">
-                <Plus className="mr-2 h-4 w-4" />
-                Новый шаблон
+              <Button
+                size="sm"
+                className="w-full sm:w-auto min-h-10 sm:min-h-0 gap-2 shadow-sm hover:shadow-md transition-all"
+              >
+                <Plus className="h-4 w-4" />
+                <span>Новый шаблон</span>
               </Button>
             </Link>
           )}
