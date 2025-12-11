@@ -1,24 +1,19 @@
 'use client';
 
-import React, { useEffect, useState, useCallback, useRef } from 'react';
-import { useRouter, useParams } from 'next/navigation';
+import React, { useEffect, useState, useCallback, useRef, useMemo } from 'react';
+import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import { useAuth } from '@clerk/nextjs';
 import { useUIStore } from "@/store/ui-store";
 import { SessionHeader } from "@/components/layout/session-header";
-import { cn } from "@/lib/utils";
-import { testSessionsApi } from '@/services/api';
-import { 
-  TestSession, 
-  CurrentQuestionResponse, 
-  SessionQuestion,
+import { testSessionsClientApi, type ApiError } from '@/services/api.client';
+import {
+  TestSession,
+  CurrentQuestionResponse,
   SubmitAnswerRequest,
   TestAnswer
 } from '@/types/domain';
-import { SessionStatus, QuestionType } from '@/types/domain';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
-import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
   AlertDialog,
@@ -30,18 +25,18 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { 
-  Clock, 
-  ChevronLeft, 
-  ChevronRight, 
-  Flag, 
-  CheckCircle2, 
-  XCircle, 
+import {
+  Clock,
+  ChevronLeft,
+  ChevronRight,
+  CheckCircle2,
+  XCircle,
   AlertTriangle,
   Loader2,
-  SkipForward
+  RefreshCw
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { retryWithBackoff, getUserFriendlyErrorMessage, isRetryableError } from '@/utils/retry';
 
 // Question type components
 import SingleChoiceQuestion from './_components/SingleChoiceQuestion';
@@ -49,10 +44,20 @@ import MultipleChoiceQuestion from './_components/MultipleChoiceQuestion';
 import LikertScaleQuestion from './_components/LikertScaleQuestion';
 import OpenTextQuestion from './_components/OpenTextQuestion';
 
+// Loading status type for clearer state management
+type LoadingStatus = 
+  | 'waiting-for-auth'    // Auth not yet loaded
+  | 'auth-error'          // User not signed in
+  | 'loading-session'     // Fetching session data
+  | 'ready'               // Session loaded successfully
+  | 'error';              // Error occurred
+
 export default function TestTakePage() {
   const router = useRouter();
   const params = useParams();
+  const searchParams = useSearchParams();
   const sessionId = params.sessionId as string;
+  const templateId = searchParams.get('template');
   const { userId, isSignedIn, isLoaded } = useAuth();
   
   // Use Zustand store directly for immersive mode
@@ -68,9 +73,33 @@ export default function TestTakePage() {
   // State
   const [session, setSession] = useState<TestSession | null>(null);
   const [currentQuestion, setCurrentQuestion] = useState<CurrentQuestionResponse | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [status, setStatus] = useState<LoadingStatus>('waiting-for-auth');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [errorStatus, setErrorStatus] = useState<number | null>(null);
+  const [retryAttempt, setRetryAttempt] = useState(0);
+  const [isRetrying, setIsRetrying] = useState(false);
+
+  // Track if we've already started loading (to prevent double-loads)
+  const hasStartedLoading = useRef(false);
+  
+  // Reset loading state when sessionId changes (e.g., after redirect from 'new' to actual ID)
+  useEffect(() => {
+    hasStartedLoading.current = false;
+    setStatus('waiting-for-auth');
+    setSession(null);
+    setCurrentQuestion(null);
+    setError(null);
+    setErrorStatus(null);
+    setRetryAttempt(0);
+    setIsRetrying(false);
+  }, [sessionId]);
+  
+  // Auth headers for API calls - memoized to prevent unnecessary recreations
+  const authHeaders = useMemo((): Record<string, string> => {
+    if (!userId) return {};
+    return { 'X-User-Id': userId };
+  }, [userId]);
   
   // Answer state
   const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
@@ -86,6 +115,8 @@ export default function TestTakePage() {
   const [showCompleteDialog, setShowCompleteDialog] = useState(false);
   const [showAbandonDialog, setShowAbandonDialog] = useState(false);
   const [showTimeoutDialog, setShowTimeoutDialog] = useState(false);
+  const [showExistingSessionDialog, setShowExistingSessionDialog] = useState(false);
+  const [existingSessionId, setExistingSessionId] = useState<string | null>(null);
 
   // Reset answer state when question changes
   const resetAnswerState = useCallback((previousAnswer?: TestAnswer | null) => {
@@ -115,42 +146,176 @@ export default function TestTakePage() {
     }
   }, []);
 
-  // Load session and current question
-  const loadSessionData = useCallback(async () => {
-    if (!sessionId || !userId) return;
+  // Load session data - main loading logic with retry support
+  const loadSessionData = useCallback(async (currentUserId: string, isManualRetry = false) => {
+    // Build auth headers using the passed userId (guaranteed to be valid)
+    const localAuthHeaders = { 'X-User-Id': currentUserId };
 
     try {
-      setIsLoading(true);
+      setStatus('loading-session');
       setError(null);
+      setErrorStatus(null);
 
-      const [sessionData, questionData] = await Promise.all([
-        testSessionsApi.getSessionById(sessionId),
-        testSessionsApi.getCurrentQuestion(sessionId),
-      ]);
+      if (isManualRetry) {
+        setIsRetrying(false);
+      }
+
+      // Handle 'new' session creation
+      if (sessionId === 'new') {
+        if (!templateId) {
+          setError('Не указан шаблон теста');
+          setErrorStatus(400);
+          setStatus('error');
+          return;
+        }
+
+        // First check if user already has an in-progress session for this template
+        try {
+          const existingSession = await testSessionsClientApi.getInProgressSession(currentUserId, templateId, localAuthHeaders);
+          if (existingSession) {
+            // Show dialog to let user choose: continue existing or start new
+            setExistingSessionId(existingSession.id);
+            setShowExistingSessionDialog(true);
+            setStatus('ready'); // Not an error, just waiting for user choice
+            return;
+          }
+        } catch {
+          // No existing session found (404), which is fine - proceed to create new
+        }
+
+        // Try to create a new session
+        try {
+          const newSession = await testSessionsClientApi.startSession({
+            templateId,
+            clerkUserId: currentUserId,
+          }, localAuthHeaders);
+          // Redirect to the actual session URL for clean URLs
+          router.replace(`/test-templates/take/${newSession.id}`);
+          return; // The redirect will trigger a new load
+        } catch (createErr: unknown) {
+          // Check if the error is about existing session (in case the check above missed it)
+          const errorMessage = createErr instanceof Error ? createErr.message : '';
+          if (errorMessage.toLowerCase().includes('already has') ||
+              errorMessage.toLowerCase().includes('in-progress') ||
+              errorMessage.toLowerCase().includes('existing session')) {
+            // Try to find and offer the existing session
+            try {
+              const existingSession = await testSessionsClientApi.getInProgressSession(currentUserId, templateId, localAuthHeaders);
+              if (existingSession) {
+                setExistingSessionId(existingSession.id);
+                setShowExistingSessionDialog(true);
+                setStatus('ready');
+                return;
+              }
+            } catch {
+              // Couldn't find existing session, show generic error
+            }
+          }
+
+          const apiError = createErr as ApiError;
+          setError(getUserFriendlyErrorMessage(createErr));
+          setErrorStatus(apiError.status ?? null);
+          setStatus('error');
+          return;
+        }
+      }
+
+      // Load existing session - wrap getCurrentQuestion in retry logic for 500 errors
+      const sessionData = await testSessionsClientApi.getSessionById(sessionId, localAuthHeaders);
+
+      const questionData = await retryWithBackoff(
+        () => testSessionsClientApi.getCurrentQuestion(sessionId, localAuthHeaders),
+        {
+          maxRetries: 3,
+          initialDelayMs: 1000,
+          shouldRetry: isRetryableError,
+          onRetry: (error, attempt) => {
+            setRetryAttempt(attempt);
+            setIsRetrying(true);
+            // eslint-disable-next-line no-console
+            console.log(`Retrying getCurrentQuestion (attempt ${attempt}/3)...`);
+            toast.info(`Повторная попытка... (${attempt}/3)`, { duration: 2000 });
+          },
+        }
+      );
 
       setSession(sessionData);
       setCurrentQuestion(questionData);
       resetAnswerState(questionData?.previousAnswer);
       setQuestionStartTime(Date.now());
+      setRetryAttempt(0);
+      setIsRetrying(false);
 
       // Initialize timer if session has time limit
       if (sessionData?.timeRemainingSeconds && sessionData.timeRemainingSeconds > 0) {
         setTimeRemaining(sessionData.timeRemainingSeconds);
       }
-    } catch (err: any) {
-      console.error('Failed to load session:', err);
-      setError(err.message || 'Failed to load assessment session');
-    } finally {
-      setIsLoading(false);
-    }
-  }, [sessionId, userId, resetAnswerState]);
 
-  // Initial load
-  useEffect(() => {
-    if (isLoaded && isSignedIn) {
-      loadSessionData();
+      setStatus('ready');
+    } catch (err: unknown) {
+      // eslint-disable-next-line no-console
+      console.error('Failed to load session:', err);
+
+      const apiError = err as ApiError;
+      const errorMessage = getUserFriendlyErrorMessage(err);
+      const errorStatusCode = apiError.status;
+
+      setError(errorMessage);
+      setErrorStatus(errorStatusCode ?? null);
+      setStatus('error');
+      setRetryAttempt(0);
+      setIsRetrying(false);
+
+      // Handle specific error scenarios
+      if (errorStatusCode === 404) {
+        toast.error('Тест не найден');
+      } else if (errorStatusCode === 400) {
+        toast.error('Недействительная сессия теста');
+      } else if (errorStatusCode && errorStatusCode >= 500) {
+        toast.error('Ошибка сервера. Попробуйте ещё раз.');
+      }
     }
-  }, [isLoaded, isSignedIn, loadSessionData]);
+  }, [sessionId, templateId, resetAnswerState, router]);
+
+  // Manual retry function for user-initiated retries
+  const handleManualRetry = useCallback(() => {
+    if (!userId) return;
+    hasStartedLoading.current = false;
+    setRetryAttempt(0);
+    loadSessionData(userId, true);
+  }, [userId, loadSessionData]);
+
+  // Main initialization effect - handles auth state transitions
+  useEffect(() => {
+    // Wait for auth to load
+    if (!isLoaded) {
+      setStatus('waiting-for-auth');
+      return;
+    }
+
+    // Check if user is signed in
+    if (!isSignedIn) {
+      setStatus('auth-error');
+      setError('Вы должны войти в систему для прохождения теста');
+      return;
+    }
+
+    // Check if we have userId
+    if (!userId) {
+      setStatus('auth-error');
+      setError('Не удалось получить данные пользователя');
+      return;
+    }
+
+    // Prevent double-loading
+    if (hasStartedLoading.current) {
+      return;
+    }
+
+    // Start loading session data
+    hasStartedLoading.current = true;
+    loadSessionData(userId);
+  }, [isLoaded, isSignedIn, userId, loadSessionData]);
 
   // Timer countdown
   useEffect(() => {
@@ -213,9 +378,9 @@ export default function TestTakePage() {
 
     try {
       setIsSubmitting(true);
-      
+
       const timeSpentSeconds = Math.floor((Date.now() - questionStartTime) / 1000);
-      
+
       const request: SubmitAnswerRequest = {
         sessionId: session.id,
         questionId: currentQuestion.question.id,
@@ -226,25 +391,52 @@ export default function TestTakePage() {
         skip: isSkipped,
       };
 
-      await testSessionsApi.submitAnswer(sessionId, request);
+      // Submit the answer
+      await testSessionsClientApi.submitAnswer(sessionId, request, authHeaders);
 
       // Check if this was the last question
       if (currentQuestion.questionNumber >= currentQuestion.totalQuestions) {
         setShowCompleteDialog(true);
       } else {
-        // Load next question
-        const nextQuestion = await testSessionsApi.getCurrentQuestion(sessionId);
+        // Navigate to the next question (increment the index)
+        const nextIndex = session.currentQuestionIndex + 1;
+
+        // Validate next index is within bounds
+        if (nextIndex >= currentQuestion.totalQuestions) {
+          // This shouldn't happen, but handle gracefully
+          setShowCompleteDialog(true);
+          return;
+        }
+
+        // Navigate to the next question in the backend
+        await testSessionsClientApi.navigateToQuestion(sessionId, nextIndex, authHeaders);
+
+        // Load the next question
+        const nextQuestion = await testSessionsClientApi.getCurrentQuestion(sessionId, authHeaders);
         setCurrentQuestion(nextQuestion);
         resetAnswerState(nextQuestion?.previousAnswer);
         setQuestionStartTime(Date.now());
-        
+
+        // Update session state with new index
+        setSession(prev => prev ? { ...prev, currentQuestionIndex: nextIndex } : null);
+
         if (isSkipped) {
           toast.info('Вопрос пропущен');
         }
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
+      // eslint-disable-next-line no-console
       console.error('Failed to submit answer:', err);
-      toast.error('Не удалось сохранить ответ');
+
+      // Provide more specific error messages
+      const apiError = err as ApiError;
+      if (apiError.status === 400) {
+        toast.error('Недействительный переход к следующему вопросу');
+      } else if (apiError.status === 404) {
+        toast.error('Вопрос не найден');
+      } else {
+        toast.error('Не удалось сохранить ответ');
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -264,15 +456,16 @@ export default function TestTakePage() {
       setIsSubmitting(true);
       // Navigate to previous question index
       const prevIndex = session.currentQuestionIndex - 1;
-      await testSessionsApi.navigateToQuestion(sessionId, prevIndex);
+      await testSessionsClientApi.navigateToQuestion(sessionId, prevIndex, authHeaders);
       // Fetch the question after navigation
-      const prevQuestion = await testSessionsApi.getCurrentQuestion(sessionId);
+      const prevQuestion = await testSessionsClientApi.getCurrentQuestion(sessionId, authHeaders);
       setCurrentQuestion(prevQuestion);
       resetAnswerState(prevQuestion?.previousAnswer);
       setQuestionStartTime(Date.now());
       // Update session state
       setSession(prev => prev ? { ...prev, currentQuestionIndex: prevIndex } : null);
-    } catch (err: any) {
+    } catch (err: unknown) {
+      // eslint-disable-next-line no-console
       console.error('Failed to navigate back:', err);
       toast.error('Не удалось вернуться к предыдущему вопросу');
     } finally {
@@ -284,9 +477,10 @@ export default function TestTakePage() {
   const handleCompleteTest = async () => {
     try {
       setIsSubmitting(true);
-      const result = await testSessionsApi.completeSession(sessionId);
+      const result = await testSessionsClientApi.completeSession(sessionId, authHeaders);
       router.push(`/test-templates/results/${result.id}`);
-    } catch (err: any) {
+    } catch (err: unknown) {
+      // eslint-disable-next-line no-console
       console.error('Failed to complete test:', err);
       toast.error('Не удалось завершить тест');
     } finally {
@@ -298,13 +492,48 @@ export default function TestTakePage() {
   // Abandon the test
   const handleAbandonTest = async () => {
     try {
-      await testSessionsApi.abandonSession(sessionId);
+      await testSessionsClientApi.abandonSession(sessionId, authHeaders);
       router.push('/test-templates');
-    } catch (err: any) {
+    } catch (err: unknown) {
+      // eslint-disable-next-line no-console
       console.error('Failed to abandon test:', err);
       toast.error('Не удалось отменить тест');
     } finally {
       setShowAbandonDialog(false);
+    }
+  };
+
+  // Continue with existing session
+  const handleContinueExistingSession = () => {
+    if (existingSessionId) {
+      setShowExistingSessionDialog(false);
+      router.replace(`/test-templates/take/${existingSessionId}`);
+    }
+  };
+
+  // Discard existing session and start new
+  const handleDiscardAndStartNew = async () => {
+    if (!existingSessionId || !templateId || !userId) return;
+    
+    try {
+      setIsSubmitting(true);
+      // Abandon the existing session
+      await testSessionsClientApi.abandonSession(existingSessionId, authHeaders);
+      setShowExistingSessionDialog(false);
+      
+      // Now create a new session
+      const newSession = await testSessionsClientApi.startSession({
+        templateId,
+        clerkUserId: userId,
+      }, authHeaders);
+      router.replace(`/test-templates/take/${newSession.id}`);
+    } catch (err: unknown) {
+      // eslint-disable-next-line no-console
+      console.error('Failed to discard and start new session:', err);
+      toast.error('Не удалось начать новую сессию');
+      setShowExistingSessionDialog(false);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -361,6 +590,7 @@ export default function TestTakePage() {
   };
 
   // Keyboard navigation
+  // Keyboard shortcut for submitting answer
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Enter' && !e.shiftKey && isAnswerValid() && !isSubmitting) {
@@ -371,48 +601,132 @@ export default function TestTakePage() {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
+    // Note: handleSubmitAnswer is stable due to deps, but we suppress the warning
+    // to avoid recreation when session/currentQuestion change (handled by internal checks)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAnswerValid, isSubmitting]);
 
-  // Loading state
-  if (!isLoaded || isLoading) {
-    return <TestTakeSkeleton />;
+  // Loading state - show skeleton while waiting for auth or loading session
+  if (status === 'waiting-for-auth' || status === 'loading-session') {
+    return <TestTakeSkeleton retryAttempt={retryAttempt} isRetrying={isRetrying} />;
   }
 
-  // Error state
-  if (error) {
+  // Error state (including auth errors)
+  if (status === 'error' || status === 'auth-error' || error) {
+    const isNotFound = errorStatus === 404;
+    const isInvalidState = errorStatus === 400;
+    const isServerError = errorStatus !== null && errorStatus >= 500;
+    const canRetry = isServerError && !isRetrying;
+
+    // Determine appropriate error message and actions
+    const getErrorConfig = () => {
+      if (isNotFound) {
+        return {
+          title: 'Тест не найден',
+          description: error || 'Сессия тестирования не найдена. Возможно, она была удалена или завершена.',
+          icon: XCircle,
+          actions: [
+            { label: 'К списку тестов', onClick: () => router.push('/test-templates'), variant: 'default' as const },
+          ],
+        };
+      }
+
+      if (isInvalidState) {
+        return {
+          title: 'Недействительная сессия',
+          description: error || 'Эта сессия тестирования уже завершена или отменена.',
+          icon: AlertTriangle,
+          actions: [
+            { label: 'К списку тестов', onClick: () => router.push('/test-templates'), variant: 'default' as const },
+          ],
+        };
+      }
+
+      if (isServerError) {
+        return {
+          title: 'Ошибка сервера',
+          description: error || 'Не удалось загрузить тест из-за ошибки сервера. Попробуйте ещё раз через несколько секунд.',
+          icon: AlertTriangle,
+          actions: [
+            { label: 'Попробовать снова', onClick: handleManualRetry, variant: 'default' as const, icon: RefreshCw },
+            { label: 'К списку тестов', onClick: () => router.push('/test-templates'), variant: 'outline' as const },
+          ],
+        };
+      }
+
+      return {
+        title: 'Ошибка',
+        description: error || 'Произошла ошибка при загрузке теста',
+        icon: XCircle,
+        actions: [
+          { label: 'Попробовать снова', onClick: handleManualRetry, variant: 'default' as const, icon: RefreshCw },
+          { label: 'К списку тестов', onClick: () => router.push('/test-templates'), variant: 'outline' as const },
+        ],
+      };
+    };
+
+    const errorConfig = getErrorConfig();
+    const ErrorIcon = errorConfig.icon;
+
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
         <Card className="max-w-md w-full border-destructive">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-destructive">
-              <XCircle className="h-5 w-5" />
-              Ошибка
-            </CardTitle>
+          <CardHeader className="text-center">
+            <div className="mx-auto mb-4 h-12 w-12 rounded-full bg-destructive/10 flex items-center justify-center">
+              <ErrorIcon className="h-6 w-6 text-destructive" />
+            </div>
+            <CardTitle className="text-destructive">{errorConfig.title}</CardTitle>
           </CardHeader>
-          <CardContent>
-            <p className="text-muted-foreground">{error}</p>
+          <CardContent className="space-y-4">
+            <p className="text-muted-foreground text-center">{errorConfig.description}</p>
+            {errorStatus && (
+              <div className="text-xs text-muted-foreground bg-muted p-2 rounded text-center font-mono">
+                HTTP {errorStatus}
+              </div>
+            )}
+            {process.env.NODE_ENV === 'development' && error && (
+              <div className="text-xs text-muted-foreground bg-muted p-2 rounded overflow-auto max-h-32">
+                <p className="font-medium mb-1">Dev Info:</p>
+                <pre className="whitespace-pre-wrap">{error}</pre>
+              </div>
+            )}
           </CardContent>
-          <CardFooter>
-            <Button onClick={() => router.push('/test-templates')}>
-              Вернуться к шаблонам
-            </Button>
+          <CardFooter className="flex flex-col gap-2">
+            {errorConfig.actions.map((action, index) => {
+              const ActionIcon = 'icon' in action ? action.icon : null;
+              return (
+                <Button
+                  key={index}
+                  variant={action.variant}
+                  onClick={action.onClick}
+                  className="w-full"
+                  disabled={action.label.includes('снова') && isRetrying}
+                >
+                  {ActionIcon && <ActionIcon className="w-4 h-4 mr-2" />}
+                  {action.label}
+                </Button>
+              );
+            })}
           </CardFooter>
         </Card>
       </div>
     );
   }
 
-  if (!session || !currentQuestion) {
-    return <TestTakeSkeleton />;
+  // Waiting for user choice (existing session dialog) or no data yet
+  if ((showExistingSessionDialog && !session && !currentQuestion) ||
+      (!session || !currentQuestion)) {
+    return <TestTakeSkeleton retryAttempt={retryAttempt} isRetrying={isRetrying} />;
   }
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <SessionHeader 
-        currentQuestion={currentQuestion.questionNumber} 
+      <SessionHeader
+        currentQuestion={currentQuestion.questionNumber}
         totalQuestions={currentQuestion.totalQuestions}
-        timeLeft={timeRemaining !== null ? formatTime(timeRemaining) : undefined}
-        onQuit={() => setShowAbandonDialog(true)}
+        progress={(currentQuestion.questionNumber / currentQuestion.totalQuestions) * 100}
+        timeRemaining={timeRemaining}
+        onExit={() => setShowAbandonDialog(true)}
       />
 
       <main className="flex-1 flex flex-col justify-center max-w-3xl mx-auto w-full p-6">
@@ -544,30 +858,32 @@ export default function TestTakePage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Existing session dialog */}
+      <AlertDialog open={showExistingSessionDialog} onOpenChange={setShowExistingSessionDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Продолжить предыдущую сессию?</AlertDialogTitle>
+            <AlertDialogDescription>
+              У вас есть незавершённый тест. Вы можете продолжить его или начать заново.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={handleDiscardAndStartNew} disabled={isSubmitting}>
+              {isSubmitting ? 'Загрузка...' : 'Начать заново'}
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={handleContinueExistingSession}>
+              Продолжить
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
 
-// Question type label helper
-function getQuestionTypeLabel(type: QuestionType | string): string {
-  const labels: Record<string, string> = {
-    SINGLE_CHOICE: 'Один вариант',
-    MULTIPLE_CHOICE: 'Несколько вариантов',
-    MCQ: 'Несколько вариантов',
-    LIKERT_SCALE: 'Шкала',
-    LIKERT: 'Шкала',
-    OPEN_TEXT: 'Открытый ответ',
-    BEHAVIORAL_EXAMPLE: 'Пример поведения',
-    SELF_REFLECTION: 'Самооценка',
-    PEER_FEEDBACK: 'Обратная связь',
-    SJT: 'Ситуационный',
-    SITUATIONAL_JUDGMENT: 'Ситуационный',
-  };
-  return labels[type as string] || String(type);
-}
-
-// Loading skeleton
-function TestTakeSkeleton() {
+// Loading skeleton with retry indicator
+function TestTakeSkeleton({ retryAttempt = 0, isRetrying = false }: { retryAttempt?: number; isRetrying?: boolean }) {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       {/* Header skeleton */}
@@ -586,6 +902,14 @@ function TestTakeSkeleton() {
       {/* Content skeleton */}
       <main className="flex-1 flex flex-col justify-center max-w-3xl mx-auto w-full p-6">
         <div className="space-y-8">
+          {/* Retry indicator */}
+          {isRetrying && retryAttempt > 0 && (
+            <div className="flex items-center justify-center gap-2 text-muted-foreground mb-4">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              <p className="text-sm">Повторная попытка {retryAttempt} из 3...</p>
+            </div>
+          )}
+
           <Skeleton className="h-12 w-full max-w-2xl mx-auto" />
           <Skeleton className="h-8 w-3/4 mx-auto" />
           <div className="space-y-3 max-w-2xl mx-auto">

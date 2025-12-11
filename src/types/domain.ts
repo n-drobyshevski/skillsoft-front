@@ -76,6 +76,7 @@ export enum QuestionType {
   PEER_FEEDBACK = 'PEER_FEEDBACK',
   FREQUENCY_SCALE = 'FREQUENCY_SCALE',
   OPEN_TEXT = 'OPEN_TEXT',
+  SINGLE_CHOICE = 'SINGLE_CHOICE',
 }
 
 export enum DifficultyLevel {
@@ -92,6 +93,39 @@ export enum SessionStatus {
   COMPLETED = 'COMPLETED',
   ABANDONED = 'ABANDONED',
   TIMED_OUT = 'TIMED_OUT'
+}
+
+export type AnswerValue = string | number | string[];
+
+export interface SessionQuestion {
+  id: string;
+  questionText: string;
+  questionType: QuestionType;
+  scenario?: string;
+  options?: Array<{
+    id: string;
+    text: string;
+    label?: string;
+    value?: number;
+  }>;
+  orderIndex: number;
+  timeLimit?: number;
+}
+
+/** @deprecated Use TestSession interface below - kept for backwards compatibility */
+export interface LegacyTestSession {
+  id: string;
+  templateId: string;
+  status: 'IN_PROGRESS' | 'COMPLETED' | 'ABANDONED' | 'EXPIRED';
+  currentQuestionIndex: number;
+  startTime: string;
+  endTime?: string;
+  questions: SessionQuestion[];
+  answers?: Array<{
+    questionId: string;
+    value: AnswerValue;
+    timeSpentMs?: number;
+  }>;
 }
 
 /**

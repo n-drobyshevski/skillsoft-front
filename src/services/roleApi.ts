@@ -52,24 +52,38 @@ export async function getAuthHeaders(): Promise<Record<string, string>> {
   try {
     const authResult = await auth();
     const { userId, sessionClaims, orgRole } = authResult;
-    
+
     if (!userId) {
+      console.warn('[Auth] No userId found in Clerk session');
       return {};
     }
-    
+
     // Get role from auth object (orgRole comes from Clerk organization)
     // orgRole is directly on auth result, NOT in sessionClaims
     const metadataRole = sessionClaims?.metadata?.role as UserRole | undefined;
-    
+
     // Priority: Organization role > metadata role > default USER
     const mappedRole = mapOrgRole(orgRole as string | undefined);
     const userRole: UserRole = mappedRole ?? metadataRole ?? UserRole.USER;
-    
+
+    // Debug logging (only in development)
+    if (process.env.NODE_ENV === 'development') {
+      console.log('[Auth] Headers generated:', {
+        userId: userId.substring(0, 8) + '...',
+        role: userRole,
+        source: mappedRole ? 'orgRole' : metadataRole ? 'metadata' : 'default'
+      });
+    }
+
     return {
       'X-User-Id': userId,
       'X-User-Role': userRole,
     };
-  } catch {
+  } catch (error) {
+    // Log the error in development
+    if (process.env.NODE_ENV === 'development') {
+      console.error('[Auth] Failed to get auth headers:', error);
+    }
     // Silent fail - return empty headers if auth fails
     return {};
   }

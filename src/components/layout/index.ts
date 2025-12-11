@@ -5,3 +5,4 @@ export { LensSwitcher, LensIndicator } from './lens-switcher';
 export { ModeToggle } from './mode-toggle';
 export { default as ResponsiveHeader } from './responsive-header';
 export { SiteHeader } from './site-header';
+export { SessionHeader } from './session-header';

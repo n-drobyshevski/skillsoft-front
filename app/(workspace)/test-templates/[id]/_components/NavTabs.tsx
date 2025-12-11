@@ -98,6 +98,7 @@ export function NavTabs({ baseUrl, status, templateId, templateName }: NavTabsPr
                   size="icon"
                   className="h-6 w-6 text-amber-700/90 dark:text-amber-200/90"
                   aria-label="Published info"
+                  suppressHydrationWarning
                 >
                   <Info className="h-3.5 w-3.5" />
                 </Button>

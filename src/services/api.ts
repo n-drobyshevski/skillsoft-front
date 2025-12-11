@@ -83,13 +83,35 @@ async function handleResponse<T>(response: Response): Promise<T> {
     if (!response.ok) {
         const error: ApiError = new Error('API request failed for url: ' + response.url);
         error.status = response.status;
-        
+
         try {
             const errorData = await response.json() as ErrorResponse;
             error.message = errorData.message || `HTTP error! status: ${response.status}`;
             error.code = errorData.code;
+
+            // Add specific messaging for common errors
+            if (response.status === 403) {
+                error.message = errorData.message || 'Access denied. Please sign in and try again.';
+            } else if (response.status === 401) {
+                error.message = errorData.message || 'Authentication required. Please sign in.';
+            } else if (response.status === 404) {
+                error.message = errorData.message || 'Resource not found.';
+            } else if (response.status >= 500) {
+                error.message = errorData.message || 'Server error. Please try again later.';
+            }
         } catch {
-            error.message = `HTTP error! status: ${response.status}`;
+            // Provide more specific error messages based on status code
+            if (response.status === 403) {
+                error.message = 'Access denied. Please sign in and try again.';
+            } else if (response.status === 401) {
+                error.message = 'Authentication required. Please sign in.';
+            } else if (response.status === 404) {
+                error.message = 'Resource not found.';
+            } else if (response.status >= 500) {
+                error.message = 'Server error. Please try again later.';
+            } else {
+                error.message = `HTTP error! status: ${response.status}`;
+            }
         }
         throw error;
     }
@@ -134,12 +156,20 @@ export async function fetchApi<T>(
     } = {}
 ): Promise<T> {
     const { tags = [], revalidate, cache = 'force-cache', authHeaders = {}, ...fetchOptions } = options;
-    
+
     try {
         // Auth headers can be passed in for RBAC (includes X-User-Id and X-User-Role)
         // For server components, use getAuthHeaders() from roleApi.ts
         // For client components, use useAuth() hook from Clerk
-        
+
+        // Debug logging for auth headers (only in development)
+        if (process.env.NODE_ENV === 'development' && Object.keys(authHeaders).length > 0) {
+            console.log(`[API] ${fetchOptions.method || 'GET'} ${endpoint}`, {
+                userId: authHeaders['X-User-Id'] ? 'present' : 'missing',
+                role: authHeaders['X-User-Role'] || 'missing'
+            });
+        }
+
         const response = await fetch(`${getApiBaseUrl()}${endpoint}`, {
             ...fetchOptions,
             headers: {
