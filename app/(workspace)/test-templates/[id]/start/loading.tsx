@@ -3,11 +3,11 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 
 export default function StartPageLoading() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 flex items-center justify-center p-4 md:p-8">
+    <div className="min-h-screen bg-muted/30 flex items-center justify-center p-4 md:p-8">
       <div className="w-full max-w-3xl space-y-6">
-        <Card className="bg-card/95 backdrop-blur-sm border shadow-xl overflow-hidden">
-          {/* Gradient accent bar */}
-          <div className="h-1 bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-600" />
+        <Card className="bg-card backdrop-blur-sm border shadow-xl overflow-hidden">
+          {/* Gradient accent bar - subtle gray accent */}
+          <div className="h-1 bg-gradient-to-r from-muted-foreground/40 via-muted-foreground/60 to-muted-foreground/40" />
 
           <CardHeader className="space-y-4 pb-2">
             {/* Badges skeleton */}

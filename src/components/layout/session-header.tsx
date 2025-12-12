@@ -47,7 +47,7 @@ export function SessionHeader({
   const isTimeCritical = timeRemaining !== null && timeRemaining <= 60; // 1 min
 
   return (
-    <header className="sticky top-0 z-50 bg-slate-950/95 backdrop-blur-sm border-b border-slate-800">
+    <header className="sticky top-0 z-50 bg-neutral-950/95 backdrop-blur-sm border-b border-neutral-800">
       <div className="max-w-4xl mx-auto px-4 py-3">
         <div className="flex items-center justify-between gap-4">
           {/* Exit Button */}
@@ -56,13 +56,13 @@ export function SessionHeader({
               <Button
                 variant="ghost"
                 size="icon"
-                className="text-slate-400 hover:text-white hover:bg-slate-800"
+                className="text-neutral-400 hover:text-white hover:bg-neutral-800"
               >
                 <X className="h-5 w-5" />
                 <span className="sr-only">Exit assessment</span>
               </Button>
             </AlertDialogTrigger>
-            <AlertDialogContent className="bg-slate-900 border-slate-800">
+            <AlertDialogContent className="bg-neutral-900 border-neutral-800">
               <AlertDialogHeader>
                 <AlertDialogTitle>Exit Assessment?</AlertDialogTitle>
                 <AlertDialogDescription>
@@ -70,12 +70,12 @@ export function SessionHeader({
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
-                <AlertDialogCancel className="bg-slate-800 border-slate-700 hover:bg-slate-700">
+                <AlertDialogCancel className="bg-neutral-800 border-neutral-700 hover:bg-neutral-700">
                   Continue Test
                 </AlertDialogCancel>
                 <AlertDialogAction
                   onClick={onExit}
-                  className="bg-slate-700 hover:bg-slate-600"
+                  className="bg-neutral-700 hover:bg-neutral-600"
                 >
                   Save & Exit
                 </AlertDialogAction>
@@ -86,17 +86,17 @@ export function SessionHeader({
           {/* Progress Section */}
           <div className="flex-1 flex items-center gap-4">
             {/* Question Counter */}
-            <span className="text-sm text-slate-400 whitespace-nowrap min-w-[4rem]">
-              <span className="text-white font-medium">{currentQuestion}</span>
+            <span className="text-sm text-neutral-400 whitespace-nowrap min-w-[4rem]">
+              <span className="text-white font-medium">{currentQuestion || 0}</span>
               <span className="mx-1">/</span>
-              <span>{totalQuestions}</span>
+              <span>{totalQuestions || 0}</span>
             </span>
 
             {/* Progress Bar */}
             <div className="flex-1 max-w-md">
               <Progress
                 value={progress}
-                className="h-2 bg-slate-800"
+                className="h-2 bg-neutral-800"
               />
             </div>
           </div>
@@ -110,7 +110,7 @@ export function SessionHeader({
                   ? "bg-red-500/20 text-red-400 animate-pulse"
                   : isTimeWarning
                   ? "bg-amber-500/20 text-amber-400"
-                  : "bg-slate-800 text-slate-300"
+                  : "bg-neutral-800 text-neutral-300"
               )}
             >
               <Clock className="h-4 w-4" />

@@ -18,8 +18,8 @@ export default function StartPageError({
   }, [error]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 flex items-center justify-center p-4">
-      <Card className="max-w-md w-full border-destructive bg-card/95 backdrop-blur-sm shadow-xl">
+    <div className="min-h-screen bg-muted/30 flex items-center justify-center p-4">
+      <Card className="max-w-md w-full border-destructive bg-card backdrop-blur-sm shadow-xl">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-destructive">
             <AlertTriangle className="h-5 w-5" />

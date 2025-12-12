@@ -27,7 +27,7 @@ export function QuestionCard({
   onAnswer,
   questionNumber,
 }: QuestionCardProps) {
-  const { questionType, questionText, options, scenario } = question;
+  const { questionType, questionText, answerOptions, scenario } = question;
 
   // Keyboard shortcuts for options (1-9)
   useEffect(() => {
@@ -41,15 +41,16 @@ export function QuestionCard({
       if (!isNaN(num) && num >= 1 && num <= 9) {
         if (questionType === 'LIKERT_SCALE' && num <= 5) {
           onAnswer(num);
-        } else if (options && num <= options.length) {
-          onAnswer(options[num - 1].id);
+        } else if (answerOptions && num <= answerOptions.length) {
+          const option = answerOptions[num - 1];
+          onAnswer(option.id || `option-${num - 1}`);
         }
       }
     };
 
     window.addEventListener('keypress', handleKeyPress);
     return () => window.removeEventListener('keypress', handleKeyPress);
-  }, [questionType, options, onAnswer]);
+  }, [questionType, answerOptions, onAnswer]);
 
   return (
     <div className="space-y-8">
@@ -83,7 +84,7 @@ export function QuestionCard({
           />
         ) : (
           <SingleChoiceOptions
-            options={options || []}
+            options={answerOptions || []}
             selectedId={selectedValue as string | undefined}
             onSelect={onAnswer}
             isSJT={questionType === 'SJT' || questionType === 'SITUATIONAL_JUDGMENT'}
@@ -93,7 +94,7 @@ export function QuestionCard({
 
       {/* Keyboard hint */}
       <p className="text-center text-slate-600 text-sm">
-        Press <kbd className="px-2 py-0.5 bg-slate-800 rounded text-slate-400 font-mono text-xs">1-{questionType === 'LIKERT_SCALE' ? '5' : Math.min(options?.length || 4, 9)}</kbd> to select • <kbd className="px-2 py-0.5 bg-slate-800 rounded text-slate-400 font-mono text-xs">Enter</kbd> to continue
+        Press <kbd className="px-2 py-0.5 bg-slate-800 rounded text-slate-400 font-mono text-xs">1-{questionType === 'LIKERT_SCALE' ? '5' : Math.min(answerOptions?.length || 4, 9)}</kbd> to select • <kbd className="px-2 py-0.5 bg-slate-800 rounded text-slate-400 font-mono text-xs">Enter</kbd> to continue
       </p>
     </div>
   );
@@ -103,7 +104,7 @@ export function QuestionCard({
  * Single Choice Options - Vertical stack of selectable cards
  */
 interface SingleChoiceOptionsProps {
-  options: Array<{ id: string; text: string; label?: string }>;
+  options: Array<{ id?: string; text?: string; label?: string; value?: number }>;
   selectedId?: string;
   onSelect: (id: string) => void;
   isSJT?: boolean;
@@ -113,13 +114,15 @@ function SingleChoiceOptions({ options, selectedId, onSelect, isSJT }: SingleCho
   return (
     <div className="space-y-3">
       {options.map((option, index) => {
-        const isSelected = selectedId === option.id;
+        const optionId = option.id || `option-${index}`;
+        const optionText = option.text || '';
+        const isSelected = selectedId === optionId;
         const shortcutKey = index + 1;
 
         return (
           <motion.button
-            key={option.id}
-            onClick={() => onSelect(option.id)}
+            key={optionId}
+            onClick={() => onSelect(optionId)}
             whileHover={{ scale: 1.01 }}
             whileTap={{ scale: 0.99 }}
             className={cn(
@@ -157,7 +160,7 @@ function SingleChoiceOptions({ options, selectedId, onSelect, isSJT }: SingleCho
                   {option.label}:
                 </span>
               )}
-              {option.text}
+              {optionText}
             </span>
           </motion.button>
         );

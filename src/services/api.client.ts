@@ -74,8 +74,17 @@ async function handleResponse<T>(response: Response, endpoint: string, method: s
       // Enhanced error messages for common scenarios
       if (response.status === 404 && endpoint.includes('/current-question')) {
         error.message = 'Вопрос не найден. Возможно, тест был завершён или удалён.';
+      } else if (response.status === 400 && endpoint.includes('/current-question')) {
+        // Specific handling for abandoned session errors when getting current question
+        if (errorData.message?.toLowerCase().includes('abandoned')) {
+          error.message = 'Эта сессия была отменена. Вы можете начать новый тест.';
+        } else {
+          error.message = errorData.message || 'Недействительная сессия теста. Она могла быть завершена или отменена.';
+        }
       } else if (response.status === 400 && endpoint.includes('/sessions/')) {
         error.message = errorData.message || 'Недействительная сессия теста. Она могла быть завершена или отменена.';
+      } else if (response.status === 403) {
+        error.message = errorData.message || 'Доступ запрещён. Вы не имеете прав для выполнения этого действия.';
       } else if (response.status === 500) {
         error.message = 'Внутренняя ошибка сервера. Повторите попытку через несколько секунд.';
       }

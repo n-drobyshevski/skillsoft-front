@@ -76,8 +76,8 @@ export function ExistingSessionDialog({
       <DialogContent className="sm:max-w-[540px]" showCloseButton={false}>
         <DialogHeader className="space-y-3">
           <div className="flex items-start gap-4">
-            <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500/10 via-indigo-500/10 to-purple-500/10 dark:from-blue-500/20 dark:via-indigo-500/20 dark:to-purple-500/20 flex items-center justify-center border border-blue-200/50 dark:border-blue-500/30">
-              <BookmarkCheck className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+            <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-muted flex items-center justify-center border border-muted-foreground/20">
+              <BookmarkCheck className="w-6 h-6 text-muted-foreground" />
             </div>
             <div className="flex-1 space-y-1.5">
               <DialogTitle className="text-xl sm:text-2xl leading-tight">
@@ -91,10 +91,10 @@ export function ExistingSessionDialog({
         </DialogHeader>
 
         {/* Session Overview Card */}
-        <div className="relative overflow-hidden rounded-xl border bg-gradient-to-br from-blue-50/50 via-indigo-50/30 to-purple-50/50 dark:from-blue-950/20 dark:via-indigo-950/10 dark:to-purple-950/20 dark:border-blue-900/30">
+        <div className="relative overflow-hidden rounded-xl border bg-muted/50">
           {/* Progress indicator background */}
           <div
-            className="absolute inset-0 bg-gradient-to-r from-blue-500/5 via-indigo-500/5 to-purple-500/5 dark:from-blue-500/10 dark:via-indigo-500/10 dark:to-purple-500/10 transition-all duration-500"
+            className="absolute inset-0 bg-muted-foreground/5 transition-all duration-500"
             style={{
               clipPath: `inset(0 ${100 - progressPercentage}% 0 0)`,
             }}
@@ -114,8 +114,8 @@ export function ExistingSessionDialog({
             {/* Stats Grid */}
             <div className="grid grid-cols-2 gap-3">
               <div className="flex items-center gap-3 p-3 rounded-lg bg-background/60 dark:bg-background/40 border border-border/50">
-                <div className="flex-shrink-0 w-9 h-9 rounded-lg bg-blue-500/10 dark:bg-blue-500/20 flex items-center justify-center">
-                  <Clock className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                <div className="flex-shrink-0 w-9 h-9 rounded-lg bg-muted flex items-center justify-center">
+                  <Clock className="w-4 h-4 text-muted-foreground" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">
@@ -128,8 +128,8 @@ export function ExistingSessionDialog({
               </div>
 
               <div className="flex items-center gap-3 p-3 rounded-lg bg-background/60 dark:bg-background/40 border border-border/50">
-                <div className="flex-shrink-0 w-9 h-9 rounded-lg bg-green-500/10 dark:bg-green-500/20 flex items-center justify-center">
-                  <CheckCircle2 className="w-4 h-4 text-green-600 dark:text-green-400" />
+                <div className="flex-shrink-0 w-9 h-9 rounded-lg bg-muted flex items-center justify-center">
+                  <CheckCircle2 className="w-4 h-4 text-muted-foreground" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">
@@ -150,7 +150,7 @@ export function ExistingSessionDialog({
                 </span>
                 <Badge
                   variant="outline"
-                  className="bg-background/80 dark:bg-background/60 border-blue-200/70 dark:border-blue-500/30 text-blue-700 dark:text-blue-300 font-semibold px-2 py-0.5"
+                  className="bg-background/80 dark:bg-background/60 border-muted-foreground/30 text-foreground font-semibold px-2 py-0.5"
                 >
                   {progressPercentage}% Complete
                 </Badge>
@@ -159,11 +159,11 @@ export function ExistingSessionDialog({
               {/* Enhanced Progress Bar */}
               <div className="relative h-2.5 bg-background/80 dark:bg-background/60 rounded-full overflow-hidden border border-border/50">
                 <div
-                  className="absolute inset-y-0 left-0 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 dark:from-blue-500 dark:via-indigo-500 dark:to-purple-500 transition-all duration-500 ease-out shadow-lg shadow-blue-500/30"
+                  className="absolute inset-y-0 left-0 bg-gradient-to-r from-muted-foreground/60 to-muted-foreground/80 transition-all duration-500 ease-out"
                   style={{ width: `${progressPercentage}%` }}
                 >
                   {/* Shimmer effect */}
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer" />
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-shimmer" />
                 </div>
               </div>
 
@@ -185,9 +185,9 @@ export function ExistingSessionDialog({
         )}
 
         {/* Info Note */}
-        <div className="rounded-lg border border-blue-200/50 dark:border-blue-500/20 bg-blue-50/50 dark:bg-blue-950/20 p-3.5 flex items-start gap-3">
-          <Info className="w-4 h-4 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
-          <p className="text-xs text-blue-700 dark:text-blue-300 leading-relaxed">
+        <div className="rounded-lg border border-blue-500/20 bg-blue-950/30 p-3.5 flex items-start gap-3">
+          <Info className="w-4 h-4 text-blue-400/80 flex-shrink-0 mt-0.5" />
+          <p className="text-xs text-blue-300/90 leading-relaxed">
             Starting a new session will permanently discard your current progress. This action cannot be undone.
           </p>
         </div>
@@ -198,7 +198,7 @@ export function ExistingSessionDialog({
             size="lg"
             onClick={onResume}
             disabled={isStartingNew}
-            className="w-full bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-700 hover:via-indigo-700 hover:to-purple-700 text-white shadow-lg shadow-blue-500/25 hover:shadow-xl hover:shadow-blue-500/30 transition-all duration-200 font-semibold"
+            className="w-full bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg hover:shadow-xl transition-all duration-200 font-semibold"
           >
             <PlayCircle className="w-4 h-4" />
             Continue Assessment

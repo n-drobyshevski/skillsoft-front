@@ -40,7 +40,7 @@ export function CompletionDialog({
 
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent className="bg-slate-900 border-slate-800 max-w-md">
+      <AlertDialogContent className="bg-neutral-900 border-neutral-800 max-w-md">
         <AlertDialogHeader>
           <div className="flex justify-center mb-4">
             <div className={cn(
@@ -54,14 +54,14 @@ export function CompletionDialog({
               )}
             </div>
           </div>
-          
+
           <AlertDialogTitle className="text-center text-xl">
             {allAnswered ? 'Ready to Submit?' : 'Submit Incomplete?'}
           </AlertDialogTitle>
-          
+
           <AlertDialogDescription className="text-center space-y-4">
             <p>
-              {allAnswered 
+              {allAnswered
                 ? "You've answered all questions. Submit your assessment now?"
                 : `You've answered ${answeredCount} of ${totalQuestions} questions.`
               }
@@ -69,11 +69,11 @@ export function CompletionDialog({
 
             {/* Progress indicator */}
             <div className="pt-2 space-y-2">
-              <Progress 
-                value={completionPercentage} 
-                className="h-2 bg-slate-800"
+              <Progress
+                value={completionPercentage}
+                className="h-2 bg-neutral-800"
               />
-              <p className="text-sm text-slate-500">
+              <p className="text-sm text-neutral-500">
                 {answeredCount} / {totalQuestions} questions completed
               </p>
             </div>
@@ -81,8 +81,8 @@ export function CompletionDialog({
         </AlertDialogHeader>
 
         <AlertDialogFooter className="flex-col sm:flex-row gap-2">
-          <AlertDialogCancel 
-            className="bg-slate-800 border-slate-700 hover:bg-slate-700"
+          <AlertDialogCancel
+            className="bg-neutral-800 border-neutral-700 hover:bg-neutral-700"
             disabled={isSubmitting}
           >
             Review Answers

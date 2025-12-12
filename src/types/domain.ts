@@ -97,21 +97,6 @@ export enum SessionStatus {
 
 export type AnswerValue = string | number | string[];
 
-export interface SessionQuestion {
-  id: string;
-  questionText: string;
-  questionType: QuestionType;
-  scenario?: string;
-  options?: Array<{
-    id: string;
-    text: string;
-    label?: string;
-    value?: number;
-  }>;
-  orderIndex: number;
-  timeLimit?: number;
-}
-
 /** @deprecated Use TestSession interface below - kept for backwards compatibility */
 export interface LegacyTestSession {
   id: string;
@@ -641,6 +626,7 @@ export interface SessionQuestion {
   id: string;
   questionText: string;
   questionType: QuestionType;
+  scenario?: string;
   answerOptions?: Array<{
     id?: string;
     text?: string;
@@ -659,7 +645,7 @@ export interface SessionQuestion {
 export interface CurrentQuestionResponse {
   sessionId: string;
   question: SessionQuestion;
-  questionNumber: number;
+  questionIndex: number;  // Backend uses questionIndex, not questionNumber
   totalQuestions: number;
   previousAnswer?: TestAnswer;
   allowSkip: boolean;
