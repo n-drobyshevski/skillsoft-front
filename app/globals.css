@@ -1474,3 +1474,90 @@ img {
 	animation-timing-function: linear;
 	animation-fill-mode: forwards;
 }
+
+/* ===== TEST RESULTS PAGE ENHANCEMENTS ===== */
+
+/* Gentle bounce animation for success icons */
+@keyframes bounce-gentle {
+	0%, 100% {
+		transform: translateY(0);
+	}
+	50% {
+		transform: translateY(-10px);
+	}
+}
+
+.animate-bounce-gentle {
+	animation: bounce-gentle 2s ease-in-out infinite;
+}
+
+/* Gentle pulse animation for attention icons */
+@keyframes pulse-gentle {
+	0%, 100% {
+		opacity: 1;
+		transform: scale(1);
+	}
+	50% {
+		opacity: 0.8;
+		transform: scale(1.05);
+	}
+}
+
+.animate-pulse-gentle {
+	animation: pulse-gentle 3s ease-in-out infinite;
+}
+
+/* Score hero typography class */
+.score-hero {
+	font-size: clamp(3rem, 12vw, 5rem);
+	font-weight: 800;
+	line-height: 1;
+	letter-spacing: -0.02em;
+	font-variant-numeric: tabular-nums;
+}
+
+/* Staggered fade-in animations for sequential reveals */
+.animate-fadeInUp-1 {
+	animation: fade-in-up 0.6s ease-out 0.1s both;
+}
+
+.animate-fadeInUp-2 {
+	animation: fade-in-up 0.6s ease-out 0.2s both;
+}
+
+.animate-fadeInUp-3 {
+	animation: fade-in-up 0.6s ease-out 0.3s both;
+}
+
+.animate-fadeInUp-4 {
+	animation: fade-in-up 0.6s ease-out 0.4s both;
+}
+
+.animate-fadeInUp-5 {
+	animation: fade-in-up 0.6s ease-out 0.5s both;
+}
+
+/* Shimmer effect for progress bars */
+.progress-shimmer {
+	position: relative;
+	overflow: hidden;
+}
+
+.progress-shimmer::after {
+	content: '';
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+	animation: shimmer 2s infinite;
+}
+
+/* Responsive stat value typography */
+.stat-value {
+	font-size: clamp(1.5rem, 5vw, 2.25rem);
+	font-weight: 700;
+	font-variant-numeric: tabular-nums;
+	line-height: 1.2;
+}
