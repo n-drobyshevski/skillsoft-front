@@ -2,7 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import { useUser } from "@clerk/nextjs";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useMemo, useCallback } from "react";
 import {
   BookOpen,
   UsersRound,
@@ -47,8 +47,8 @@ import Link from "next/link";
 import { SignOutButton } from "@clerk/nextjs";
 import { ClientOnly } from "@/components/common/ClientOnly";
 import { LensSwitcher } from "@/components/layout/lens-switcher";
-import { useLens } from "@/context/LensContext";
-import { UserRole } from "@/types/user";
+import { useActiveLens } from "@/hooks/useLens";
+import { useFilterVisibleRoutes } from "@/hooks/useIsRouteVisible";
 import { cn } from "@/lib/utils";
 import { useIsImmersive } from "@/store/ui-store";
 
@@ -90,19 +90,19 @@ const baseData = {
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname();
   const { user: clerkUser } = useUser();
-  const { isRouteVisible, setUserRole, activeLens } = useLens();
+  const activeLens = useActiveLens();
   const { setOpenMobile } = useSidebar();
   const isImmersive = useIsImmersive();
   const TeamLogo = baseData.teams[0].logo;
-  
+
   // Track lens changes for temporary flash highlight
   const [showFlash, setShowFlash] = useState(false);
   const isInitialRenderRef = useRef(true);
-  
+
   // Track lens changes for nav item animation
   const [isLensChanging, setIsLensChanging] = useState(false);
   const prevLensRef = useRef(activeLens);
-  
+
   // Check if we're in Personal view (user lens)
   const isPersonalView = activeLens === "user";
 
@@ -114,9 +114,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   }, [isImmersive, setOpenMobile]);
 
   // Dynamic Navigation Data based on Lens
-  const navData = {
+  // Memoize to prevent recreating arrays on every render (causes hook dependency changes)
+  const navData = useMemo(() => ({
     ...baseData,
-    navMain: isPersonalView 
+    navMain: isPersonalView
       ? [
           {
             title: "My Hub",
@@ -175,7 +176,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         icon: Settings,
       },
     ],
-  };
+  }), [isPersonalView]);
 
   // Get user display info
   const userName = clerkUser?.fullName || clerkUser?.username || baseData.user.name;
@@ -207,16 +208,14 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     }
   }, [activeLens]);
 
+  // Stable getRoute function to prevent hook dependency changes
+  const getRoute = useCallback((item: { url: string }) => item.url, []);
+
   // Filter visible navigation items based on lens permissions
-  const visibleNavItems = navData.navMain.filter((item) =>
-    isRouteVisible(item.url)
-  );
-  const visibleLibraryItems = navData.navLibrary.filter((item) =>
-    isRouteVisible(item.url)
-  );
-  const visibleAdminItems = navData.navAdmin.filter((item) =>
-    isRouteVisible(item.url)
-  );
+  // useFilterVisibleRoutes hook handles route visibility checks with optimal performance
+  const visibleNavItems = useFilterVisibleRoutes(navData.navMain, getRoute);
+  const visibleLibraryItems = useFilterVisibleRoutes(navData.navLibrary, getRoute);
+  const visibleAdminItems = useFilterVisibleRoutes(navData.navAdmin, getRoute);
 
   // Don't render sidebar in immersive mode
   if (isImmersive) {

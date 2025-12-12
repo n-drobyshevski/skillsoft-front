@@ -11,7 +11,16 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { AlertTriangle, Clock, PlayCircle, RefreshCw } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import {
+  BookmarkCheck,
+  ArrowLeft,
+  Clock,
+  PlayCircle,
+  RefreshCw,
+  CheckCircle2,
+  Info
+} from 'lucide-react';
 import { TestSession } from '@/types/domain';
 
 interface ExistingSessionDialogProps {
@@ -36,10 +45,8 @@ export function ExistingSessionDialog({
       const result = await onStartNew();
 
       if (result.success && result.sessionId) {
-        // Navigate to the new session using client-side routing
         router.push(`/test-templates/take/${result.sessionId}`);
       } else {
-        // Show error message
         setError(result.error || 'Failed to start new session');
         setIsStartingNew(false);
       }
@@ -49,12 +56,12 @@ export function ExistingSessionDialog({
     }
   };
 
-  // Calculate progress percentage
   const progressPercentage = session.totalQuestions > 0
     ? Math.round((session.answeredQuestions / session.totalQuestions) * 100)
     : 0;
 
-  // Format start time
+  const remainingQuestions = session.totalQuestions - session.answeredQuestions;
+
   const startTime = session.startedAt
     ? new Date(session.startedAt).toLocaleString('en-US', {
         month: 'short',
@@ -66,92 +73,168 @@ export function ExistingSessionDialog({
 
   return (
     <Dialog open={true}>
-      <DialogContent className="sm:max-w-[500px]">
-        <DialogHeader>
-          <div className="flex items-center gap-3 mb-2">
-            <div className="p-2 rounded-lg bg-yellow-500/10 dark:bg-yellow-500/20">
-              <AlertTriangle className="w-6 h-6 text-yellow-600 dark:text-yellow-400" />
+      <DialogContent className="sm:max-w-[540px]" showCloseButton={false}>
+        <DialogHeader className="space-y-3">
+          <div className="flex items-start gap-4">
+            <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500/10 via-indigo-500/10 to-purple-500/10 dark:from-blue-500/20 dark:via-indigo-500/20 dark:to-purple-500/20 flex items-center justify-center border border-blue-200/50 dark:border-blue-500/30">
+              <BookmarkCheck className="w-6 h-6 text-blue-600 dark:text-blue-400" />
             </div>
-            <DialogTitle className="text-2xl">Assessment In Progress</DialogTitle>
+            <div className="flex-1 space-y-1.5">
+              <DialogTitle className="text-xl sm:text-2xl leading-tight">
+                Welcome Back!
+              </DialogTitle>
+              <DialogDescription className="text-base leading-relaxed">
+                You have a saved assessment in progress. Pick up where you left off or start fresh.
+              </DialogDescription>
+            </div>
           </div>
-          <DialogDescription className="text-base pt-2">
-            You have an existing assessment session for this template. Would you like to resume where you left off or start fresh?
-          </DialogDescription>
         </DialogHeader>
 
-        {/* Session Details */}
-        <div className="bg-muted/50 rounded-lg p-4 space-y-3 border">
-          <div className="flex items-center justify-between">
-            <span className="text-sm text-muted-foreground">Template</span>
-            <span className="font-medium text-foreground">{session.templateName}</span>
-          </div>
+        {/* Session Overview Card */}
+        <div className="relative overflow-hidden rounded-xl border bg-gradient-to-br from-blue-50/50 via-indigo-50/30 to-purple-50/50 dark:from-blue-950/20 dark:via-indigo-950/10 dark:to-purple-950/20 dark:border-blue-900/30">
+          {/* Progress indicator background */}
+          <div
+            className="absolute inset-0 bg-gradient-to-r from-blue-500/5 via-indigo-500/5 to-purple-500/5 dark:from-blue-500/10 dark:via-indigo-500/10 dark:to-purple-500/10 transition-all duration-500"
+            style={{
+              clipPath: `inset(0 ${100 - progressPercentage}% 0 0)`,
+            }}
+          />
 
-          <div className="flex items-center justify-between">
-            <span className="text-sm text-muted-foreground flex items-center gap-2">
-              <Clock className="w-4 h-4" />
-              Started
-            </span>
-            <span className="font-medium text-foreground">{startTime}</span>
-          </div>
-
-          <div className="space-y-2">
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-muted-foreground">Progress</span>
-              <span className="font-medium text-foreground">
-                {session.answeredQuestions} / {session.totalQuestions} questions
-              </span>
+          <div className="relative p-5 space-y-4">
+            {/* Template Name */}
+            <div className="space-y-1.5">
+              <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                Assessment Template
+              </div>
+              <div className="text-base font-semibold text-foreground">
+                {session.templateName}
+              </div>
             </div>
-            {/* Progress bar */}
-            <div className="h-2 bg-muted rounded-full overflow-hidden">
-              <div
-                className="h-full bg-blue-600 dark:bg-blue-500 transition-all duration-300"
-                style={{ width: `${progressPercentage}%` }}
-              />
+
+            {/* Stats Grid */}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="flex items-center gap-3 p-3 rounded-lg bg-background/60 dark:bg-background/40 border border-border/50">
+                <div className="flex-shrink-0 w-9 h-9 rounded-lg bg-blue-500/10 dark:bg-blue-500/20 flex items-center justify-center">
+                  <Clock className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">
+                    Started
+                  </div>
+                  <div className="text-sm font-semibold text-foreground truncate">
+                    {startTime}
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3 p-3 rounded-lg bg-background/60 dark:bg-background/40 border border-border/50">
+                <div className="flex-shrink-0 w-9 h-9 rounded-lg bg-green-500/10 dark:bg-green-500/20 flex items-center justify-center">
+                  <CheckCircle2 className="w-4 h-4 text-green-600 dark:text-green-400" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">
+                    Completed
+                  </div>
+                  <div className="text-sm font-semibold text-foreground">
+                    {session.answeredQuestions} / {session.totalQuestions}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Progress Section */}
+            <div className="space-y-2.5">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-medium text-muted-foreground">
+                  Your Progress
+                </span>
+                <Badge
+                  variant="outline"
+                  className="bg-background/80 dark:bg-background/60 border-blue-200/70 dark:border-blue-500/30 text-blue-700 dark:text-blue-300 font-semibold px-2 py-0.5"
+                >
+                  {progressPercentage}% Complete
+                </Badge>
+              </div>
+
+              {/* Enhanced Progress Bar */}
+              <div className="relative h-2.5 bg-background/80 dark:bg-background/60 rounded-full overflow-hidden border border-border/50">
+                <div
+                  className="absolute inset-y-0 left-0 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 dark:from-blue-500 dark:via-indigo-500 dark:to-purple-500 transition-all duration-500 ease-out shadow-lg shadow-blue-500/30"
+                  style={{ width: `${progressPercentage}%` }}
+                >
+                  {/* Shimmer effect */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer" />
+                </div>
+              </div>
+
+              {remainingQuestions > 0 && (
+                <p className="text-xs text-muted-foreground">
+                  {remainingQuestions} question{remainingQuestions !== 1 ? 's' : ''} remaining
+                </p>
+              )}
             </div>
           </div>
         </div>
 
-        {/* Error message */}
+        {/* Error Message */}
         {error && (
-          <div className="bg-destructive/10 border border-destructive/50 rounded-lg p-3">
-            <p className="text-sm text-destructive">{error}</p>
+          <div className="rounded-lg border border-destructive/50 bg-destructive/5 dark:bg-destructive/10 p-3.5 flex items-start gap-3">
+            <Info className="w-4 h-4 text-destructive flex-shrink-0 mt-0.5" />
+            <p className="text-sm text-destructive leading-relaxed">{error}</p>
           </div>
         )}
 
-        {/* Warning message */}
-        <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-3">
-          <p className="text-sm text-yellow-700 dark:text-yellow-300">
-            <strong>Warning:</strong> Starting a new session will abandon your current progress and cannot be undone.
+        {/* Info Note */}
+        <div className="rounded-lg border border-blue-200/50 dark:border-blue-500/20 bg-blue-50/50 dark:bg-blue-950/20 p-3.5 flex items-start gap-3">
+          <Info className="w-4 h-4 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
+          <p className="text-xs text-blue-700 dark:text-blue-300 leading-relaxed">
+            Starting a new session will permanently discard your current progress. This action cannot be undone.
           </p>
         </div>
 
-        <DialogFooter className="flex-col sm:flex-row gap-2 sm:gap-0">
+        <DialogFooter className="flex-col sm:flex-col gap-2.5 pt-2">
+          {/* Primary Action - Resume (Most Prominent) */}
           <Button
-            variant="outline"
-            onClick={handleStartNew}
-            disabled={isStartingNew}
-            className="w-full sm:w-auto order-2 sm:order-1"
-          >
-            {isStartingNew ? (
-              <>
-                <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
-                Starting New...
-              </>
-            ) : (
-              <>
-                <RefreshCw className="mr-2 h-4 w-4" />
-                Start New Session
-              </>
-            )}
-          </Button>
-          <Button
+            size="lg"
             onClick={onResume}
             disabled={isStartingNew}
-            className="w-full sm:w-auto order-1 sm:order-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
+            className="w-full bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-700 hover:via-indigo-700 hover:to-purple-700 text-white shadow-lg shadow-blue-500/25 hover:shadow-xl hover:shadow-blue-500/30 transition-all duration-200 font-semibold"
           >
-            <PlayCircle className="mr-2 h-4 w-4" />
-            Resume Session
+            <PlayCircle className="w-4 h-4" />
+            Continue Assessment
           </Button>
+
+          {/* Secondary Actions Row */}
+          <div className="flex flex-col sm:flex-row gap-2 w-full">
+            <Button
+              variant="outline"
+              onClick={handleStartNew}
+              disabled={isStartingNew}
+              className="flex-1 border-muted-foreground/20 hover:border-muted-foreground/40 hover:bg-muted/50"
+            >
+              {isStartingNew ? (
+                <>
+                  <RefreshCw className="w-4 h-4 animate-spin" />
+                  Starting...
+                </>
+              ) : (
+                <>
+                  <RefreshCw className="w-4 h-4" />
+                  Start New
+                </>
+              )}
+            </Button>
+
+            <Button
+              variant="ghost"
+              onClick={() => router.push('/test-templates')}
+              disabled={isStartingNew}
+              className="flex-1 text-muted-foreground hover:text-foreground"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              Go Back
+            </Button>
+          </div>
         </DialogFooter>
       </DialogContent>
     </Dialog>

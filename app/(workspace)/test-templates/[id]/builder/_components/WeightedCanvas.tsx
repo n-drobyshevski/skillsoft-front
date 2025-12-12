@@ -15,7 +15,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Info, Loader2, Redo2, Save, Sparkles, Undo2 } from "lucide-react";
+import { Info, Loader2, Play, Redo2, Save, Sparkles, Undo2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useBlueprintWorkspace } from "./BlueprintWorkspaceProvider";
 import { CompetencySmartCard } from "./CompetencySmartCard";
@@ -29,6 +29,7 @@ export function WeightedCanvas() {
     saveBlueprint,
     setCompetencies,
     addCompetency,
+    templateId,
   } = useBlueprintWorkspace();
 
   const historyRef = useRef<BlueprintCompetency[][]>([]);
@@ -96,6 +97,10 @@ export function WeightedCanvas() {
   const handleSave = useCallback(() => {
     void saveBlueprint();
   }, [saveBlueprint]);
+
+  const handleTestDrive = useCallback(() => {
+    window.open(`/test-templates/${templateId}/start?mode=test-drive`, '_blank');
+  }, [templateId]);
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
@@ -177,6 +182,16 @@ export function WeightedCanvas() {
           </Button>
           <Button variant="ghost" size="icon" className="h-9 w-9 md:h-8 md:w-8" onClick={handleRedo} disabled={!historyState.canRedo || isPending}>
             <Redo2 className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="secondary"
+            size="sm"
+            className="h-9 md:h-8 gap-1.5"
+            onClick={handleTestDrive}
+            disabled={state.competencies.length === 0}
+          >
+            <Play className="h-4 w-4" />
+            <span className="hidden sm:inline">Test Drive</span>
           </Button>
           <Button size="sm" className="h-9 md:h-8 gap-1.5" onClick={handleSave} disabled={isSaving || isPending}>
             {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}

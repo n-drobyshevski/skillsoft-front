@@ -166,16 +166,25 @@ export const testSessionsClientApi = {
 
   /**
    * Check for in-progress session for a user and template
+   * Returns null if no in-progress session exists (handles 404 from backend)
    */
   getInProgressSession: async (
     clerkUserId: string,
     templateId: string,
     authHeaders: Record<string, string>
   ): Promise<TestSession | null> => {
-    return clientFetch(
-      `${TESTS_BASE}/sessions/user/${clerkUserId}/in-progress?templateId=${templateId}`,
-      authHeaders
-    );
+    try {
+      return await clientFetch(
+        `${TESTS_BASE}/sessions/user/${clerkUserId}/in-progress?templateId=${templateId}`,
+        authHeaders
+      );
+    } catch (error) {
+      // 404 means no in-progress session exists, which is expected
+      if (error instanceof Error && 'status' in error && (error as ApiError).status === 404) {
+        return null;
+      }
+      throw error;
+    }
   },
 
   /**

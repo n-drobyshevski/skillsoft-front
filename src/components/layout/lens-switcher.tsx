@@ -9,16 +9,22 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { SidebarMenuButton } from "@/components/ui/sidebar";
-import { useLens, LENS_CONFIGS, type LensType } from "@/context/LensContext";
+import { useLens, useLensConfig, useAvailableLenses } from "@/hooks/useLens";
+import { LENS_CONFIGS, getLensConfig, type LensConfig } from "@/config/lens-configs";
+import { type LensType } from "@/store/lens-store";
 import { cn } from "@/lib/utils";
 
 /**
  * Lens Switcher - Role-based view selector for sidebar
- * 
+ *
+ * Migrated to Zustand for better performance:
+ * - Selective subscriptions (no unnecessary re-renders)
+ * - Memoized handlers and computed values
+ * - Respects reduced motion preferences
+ *
  * Animation principles:
  * - Subtle micro-interactions (150-200ms duration)
  * - Hardware-accelerated transforms (scale, rotate)
- * - Respect reduced motion preferences
  * - Easing: ease-out for snappy feel
  */
 
@@ -43,21 +49,12 @@ function LensIcon({ type, className }: { type: string; className?: string }) {
   }
 }
 
-// Get safe lens config
-function getLensConfig(lensId: LensType) {
-  switch (lensId) {
-    case "admin":
-      return LENS_CONFIGS.admin;
-    case "editor":
-      return LENS_CONFIGS.editor;
-    case "user":
-    default:
-      return LENS_CONFIGS.user;
-  }
-}
 
 export function LensSwitcher() {
-  const { activeLens, setLens, availableLenses, lensConfig } = useLens();
+  // Subscribe only to what we need (selective subscriptions)
+  const { activeLens, setLens } = useLens();
+  const lensConfig = useLensConfig();
+  const availableLenses = useAvailableLenses();
 
   // Memoize lens selection handler
   const handleLensSelect = useCallback(
@@ -97,12 +94,12 @@ export function LensSwitcher() {
               lensConfig.bgColor
             )}
           >
-            <LensIcon 
-              type={lensConfig.icon} 
-              className={cn("size-4", ANIM.transform, lensConfig.color)} 
+            <LensIcon
+              type={lensConfig.icon}
+              className={cn("size-4", ANIM.transform, lensConfig.color)}
             />
           </div>
-          
+
           {/* Label & Description */}
           <div className="grid flex-1 text-left text-sm leading-tight">
             <span className="truncate font-semibold">
@@ -112,18 +109,18 @@ export function LensSwitcher() {
               Режим
             </span>
           </div>
-          
+
           {/* Chevron with rotation animation */}
-          <ChevronDown 
+          <ChevronDown
             className={cn(
               "ml-auto size-4",
               ANIM.transform,
               "group-data-[state=open]/lens:rotate-180"
-            )} 
+            )}
           />
         </SidebarMenuButton>
       </DropdownMenuTrigger>
-      
+
       <DropdownMenuContent
         side="top"
         align="start"
@@ -161,16 +158,16 @@ export function LensSwitcher() {
                   isActive ? "bg-background/60" : config.bgColor
                 )}
               >
-                <LensIcon 
-                  type={config.icon} 
+                <LensIcon
+                  type={config.icon}
                   className={cn(
                     "size-4",
                     ANIM.colors,
                     isActive ? config.color : "text-muted-foreground"
-                  )} 
+                  )}
                 />
               </div>
-              
+
               {/* Text */}
               <div className="flex-1 min-w-0">
                 <p className={cn(
@@ -184,15 +181,15 @@ export function LensSwitcher() {
                   {config.description}
                 </p>
               </div>
-              
+
               {/* Check indicator with scale-in animation */}
               {isActive && (
-                <Check 
+                <Check
                   className={cn(
                     "size-4 shrink-0",
                     "animate-in zoom-in-50 duration-200 motion-reduce:animate-none",
                     config.color
-                  )} 
+                  )}
                 />
               )}
             </DropdownMenuItem>
@@ -207,7 +204,8 @@ export function LensSwitcher() {
  * Compact lens indicator for collapsed sidebar state
  */
 export function LensIndicator() {
-  const { lensConfig, availableLenses } = useLens();
+  const lensConfig = useLensConfig();
+  const availableLenses = useAvailableLenses();
 
   if (availableLenses.length <= 1) {
     return null;
@@ -223,9 +221,9 @@ export function LensIndicator() {
       )}
       title={`${lensConfig.name} View`}
     >
-      <LensIcon 
-        type={lensConfig.icon} 
-        className={cn("size-4", lensConfig.color)} 
+      <LensIcon
+        type={lensConfig.icon}
+        className={cn("size-4", lensConfig.color)}
       />
     </div>
   );

@@ -8,7 +8,7 @@ import { AppSidebar } from "@/components/layout/app-sidebar";
 import { SiteHeader } from "@/components/layout/site-header";
 import { HeaderProvider } from "@/src/context/HeaderContext";
 import { BreadcrumbProvider } from "@/src/context/BreadcrumbContext";
-import { LensProvider } from "@/context/LensContext";
+import { LensInitializer } from "@/components/providers/LensInitializer";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ViewModeProvider, useViewMode } from "@/src/context/ViewModeContext";
 import { cn } from "@/lib/utils";
@@ -166,15 +166,15 @@ export default function WorkspaceLayout({
 
   return (
     <ViewModeProvider>
-      <LensProvider>
-        <HeaderProvider>
-          <BreadcrumbProvider>
-            <WorkspaceLayoutContent>
-              {children}
-            </WorkspaceLayoutContent>
-          </BreadcrumbProvider>
-        </HeaderProvider>
-      </LensProvider>
+      {/* LensInitializer must render BEFORE sidebar to prevent flash of wrong content */}
+      <LensInitializer />
+      <HeaderProvider>
+        <BreadcrumbProvider>
+          <WorkspaceLayoutContent>
+            {children}
+          </WorkspaceLayoutContent>
+        </BreadcrumbProvider>
+      </HeaderProvider>
     </ViewModeProvider>
   );
 }

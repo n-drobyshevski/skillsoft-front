@@ -41,7 +41,7 @@ import { DashboardStats, TestTemplateSummary, AssessmentGoal, AssessmentGoalInfo
 import { User, UserStats } from "@/types/user";
 import { ClientOnly } from "@/components/common/ClientOnly";
 import CompetencyByCategoryBarChart from "@/components/data-display/charts/CompetencyByCategoryBarChart";
-import { useLens } from "@/context/LensContext";
+import { useActiveLens } from "@/hooks/useLens";
 
 // ============================================
 // ANIMATION VARIANTS
@@ -229,7 +229,7 @@ export default function DashboardContent({
   currentUser,
 }: DashboardContentProps) {
   const prefersReducedMotion = useReducedMotion();
-  const { activeLens } = useLens();
+  const activeLens = useActiveLens();
   const isUserLens = activeLens === 'user';
   
   const motionProps = prefersReducedMotion
