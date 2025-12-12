@@ -2,12 +2,18 @@ import React from 'react';
 import { notFound } from 'next/navigation';
 import { testTemplatesApi } from '@/services/api';
 import { SettingsForm } from './_components/SettingsForm';
+import { isReservedTestTemplateSegment } from '@/lib/routing-constants';
 
 interface SettingsPageProps {
   params: Promise<{ id: string }>;
 }
 
 async function getTemplateData(id: string) {
+  // Reject reserved route segments to prevent routing conflicts
+  if (isReservedTestTemplateSegment(id)) {
+    return { template: null, error: 'Invalid route segment' };
+  }
+
   try {
     const template = await testTemplatesApi.getTemplateById(id);
     if (!template) {

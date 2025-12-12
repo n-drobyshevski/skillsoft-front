@@ -30,6 +30,7 @@ import {
   AlertCircle,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { isReservedTestTemplateSegment } from '@/lib/routing-constants';
 
 interface OverviewPageProps {
   params: Promise<{ id: string }>;
@@ -39,6 +40,11 @@ interface OverviewPageProps {
  * Fetch template with competencies and performance data
  */
 async function getOverviewData(id: string) {
+  // Reject reserved route segments to prevent routing conflicts
+  if (isReservedTestTemplateSegment(id)) {
+    return { template: null, competencies: [], sessions: [] as TestSession[], stats: null, error: 'Invalid route segment' };
+  }
+
   try {
     const [template, allCompetencies] = await Promise.all([
       testTemplatesApi.getTemplateById(id),

@@ -21,6 +21,7 @@ import {
   Clock,
 } from 'lucide-react';
 import { SessionsTable } from './_components';
+import { isReservedTestTemplateSegment } from '@/lib/routing-constants';
 
 // Extended session type with additional fields that may come from API
 type ExtendedSession = TestSession & {
@@ -36,6 +37,11 @@ interface ResultsPageProps {
 }
 
 async function getResultsData(id: string, filters: { status?: string; search?: string }) {
+  // Reject reserved route segments to prevent routing conflicts
+  if (isReservedTestTemplateSegment(id)) {
+    return { template: null, sessions: [] as ExtendedSession[], stats: null, error: 'Invalid route segment' };
+  }
+
   try {
     const template = await testTemplatesApi.getTemplateById(id);
 

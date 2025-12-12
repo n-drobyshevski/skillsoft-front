@@ -19,6 +19,7 @@ import {
   LayoutDashboard,
   UserCircle,
   FileText,
+  Network,
 } from "lucide-react";
 
 import {
@@ -162,6 +163,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         title: "Вопросы",
         url: "/hr/assessment-questions",
         icon: FileQuestion,
+      },
+      {
+        title: "Skill Mapper",
+        url: "/skill-mapper",
+        icon: Network,
       },
     ],
     navAdmin: [

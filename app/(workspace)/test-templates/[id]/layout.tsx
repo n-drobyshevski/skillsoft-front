@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import { testTemplatesApi } from '@/services/api';
 import { TemplateHeader, type TemplateStatus } from './_components/TemplateHeader';
 import { NavTabs } from './_components/NavTabs';
+import { isReservedTestTemplateSegment } from '@/lib/routing-constants';
 
 interface TemplateLayoutProps {
   children: React.ReactNode;
@@ -21,6 +22,11 @@ function deriveStatus(isActive: boolean): TemplateStatus {
  * Fetch template data server-side (once per layout)
  */
 async function getTemplateData(id: string) {
+  // Reject reserved route segments to prevent routing conflicts
+  if (isReservedTestTemplateSegment(id)) {
+    return { template: null, error: 'Invalid route segment' };
+  }
+
   try {
     const template = await testTemplatesApi.getTemplateById(id);
     if (!template) {

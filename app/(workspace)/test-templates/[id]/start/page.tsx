@@ -3,6 +3,7 @@ import { testTemplatesApi, testSessionsApi } from "@/services/api";
 import { notFound, redirect } from "next/navigation";
 import { auth } from "@clerk/nextjs/server";
 import { StartAssessmentClient } from "./StartAssessmentClient";
+import { isReservedTestTemplateSegment } from "@/lib/routing-constants";
 
 interface StartPageProps {
   params: Promise<{
@@ -17,6 +18,14 @@ interface StartPageProps {
 // Dynamic metadata generation with template data
 export async function generateMetadata({ params }: StartPageProps): Promise<Metadata> {
   const { id } = await params;
+
+  // Reject reserved route segments
+  if (isReservedTestTemplateSegment(id)) {
+    return {
+      title: "Invalid Route - SkillSoft",
+      description: "Invalid route segment.",
+    };
+  }
 
   try {
     const template = await testTemplatesApi.getTemplateById(id);
@@ -49,6 +58,11 @@ export default async function StartPage({ params, searchParams }: StartPageProps
   const { id } = await params;
   const resolvedSearchParams = await searchParams;
   const errorMessage = resolvedSearchParams.error;
+
+  // Reject reserved route segments to prevent routing conflicts
+  if (isReservedTestTemplateSegment(id)) {
+    notFound();
+  }
 
   const { userId } = await auth();
   if (!userId) redirect("/sign-in");
