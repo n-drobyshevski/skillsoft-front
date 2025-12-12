@@ -48,7 +48,7 @@ import Link from "next/link";
 import { SignOutButton } from "@clerk/nextjs";
 import { ClientOnly } from "@/components/common/ClientOnly";
 import { LensSwitcher } from "@/components/layout/lens-switcher";
-import { useActiveLens } from "@/hooks/useLens";
+import { useActiveLens, useLensReady } from "@/hooks/useLens";
 import { useFilterVisibleRoutes } from "@/hooks/useIsRouteVisible";
 import { cn } from "@/lib/utils";
 import { useIsImmersive } from "@/store/ui-store";
@@ -92,6 +92,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname();
   const { user: clerkUser } = useUser();
   const activeLens = useActiveLens();
+  const lensReady = useLensReady();
   const { setOpenMobile } = useSidebar();
   const isImmersive = useIsImmersive();
   const TeamLogo = baseData.teams[0].logo;
@@ -259,8 +260,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </SidebarMenu>
       </SidebarHeader>
 
-      <SidebarContent>
-        {isPersonalView ? (
+      <SidebarContent suppressHydrationWarning>
+        {!lensReady ? (
+          /* Loading skeleton while lens system initializes */
+          <SidebarGroup>
+            <SidebarGroupLabel>Loading...</SidebarGroupLabel>
+          </SidebarGroup>
+        ) : isPersonalView ? (
           /* Personal View - Only My Profile and Tests */
           <SidebarGroup>
             <SidebarGroupLabel

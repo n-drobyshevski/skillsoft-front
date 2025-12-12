@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { testTemplatesApi } from '@/services/api';
+import { AssessmentGoal } from '@/types/domain';
 
 /**
  * Publish a draft template
@@ -132,5 +133,45 @@ export async function updateTemplateMetadata(
   } catch (error) {
     console.error('Failed to update template:', error);
     return { success: false, error: 'Failed to update template' };
+  }
+}
+
+/**
+ * Update all template settings
+ * Handles full configuration update including assessment options
+ */
+export async function updateTemplateSettings(
+  templateId: string,
+  data: {
+    name?: string;
+    description?: string;
+    goal?: AssessmentGoal;
+    questionsPerIndicator?: number;
+    timeLimitMinutes?: number;
+    passingScore?: number;
+    isActive?: boolean;
+    shuffleQuestions?: boolean;
+    shuffleOptions?: boolean;
+    allowSkip?: boolean;
+    allowBackNavigation?: boolean;
+    showResultsImmediately?: boolean;
+  }
+) {
+  try {
+    await testTemplatesApi.updateTemplate(templateId, data);
+
+    // Revalidate all affected paths
+    revalidatePath(`/test-templates/${templateId}`);
+    revalidatePath(`/test-templates/${templateId}/settings`);
+    revalidatePath(`/test-templates/${templateId}/builder`);
+    revalidatePath('/test-templates');
+
+    return { success: true };
+  } catch (error) {
+    console.error('Failed to update template settings:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to update template settings'
+    };
   }
 }

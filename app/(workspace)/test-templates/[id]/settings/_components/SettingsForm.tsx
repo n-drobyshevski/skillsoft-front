@@ -1,13 +1,35 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useTransition } from 'react';
 import { useRouter } from 'next/navigation';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
+import { Switch } from '@/components/ui/switch';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Badge } from '@/components/ui/badge';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -19,40 +41,110 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import { Save, Loader2, Archive, Trash2, AlertTriangle } from 'lucide-react';
+import {
+  Save,
+  Loader2,
+  Archive,
+  Trash2,
+  AlertTriangle,
+  Clock,
+  Target,
+  ListChecks,
+  Shuffle,
+  SkipForward,
+  ArrowLeftRight,
+  Eye,
+  Check,
+  Briefcase,
+  Users,
+  Crosshair,
+  Settings2,
+  ToggleRight,
+} from 'lucide-react';
 import { toast } from 'sonner';
-import { updateTemplateMetadata, archiveTemplate, deleteTemplate } from '../../actions';
+import { cn } from '@/lib/utils';
+import { AssessmentGoal, AssessmentGoalInfo, TestTemplate } from '@/types/domain';
+import { updateTemplateSettings, archiveTemplate, deleteTemplate } from '../../actions';
+
+// Validation schema for all settings
+const settingsSchema = z.object({
+  name: z.string().min(3, 'Minimum 3 characters').max(100, 'Maximum 100 characters'),
+  description: z.string().max(500, 'Maximum 500 characters').optional(),
+  goal: z.nativeEnum(AssessmentGoal),
+  questionsPerIndicator: z.number().min(1).max(10),
+  timeLimitMinutes: z.number().min(5).max(180),
+  passingScore: z.number().min(10).max(100),
+  isActive: z.boolean(),
+  shuffleQuestions: z.boolean(),
+  shuffleOptions: z.boolean(),
+  allowSkip: z.boolean(),
+  allowBackNavigation: z.boolean(),
+  showResultsImmediately: z.boolean(),
+});
+
+type SettingsFormValues = z.infer<typeof settingsSchema>;
 
 interface SettingsFormProps {
-  templateId: string;
-  name: string;
-  description: string;
-  status: string;
+  template: TestTemplate;
 }
 
-export function SettingsForm({ templateId, name, description, status }: SettingsFormProps) {
+// Goal configuration for visual display
+const goalConfig: Record<AssessmentGoal, { icon: typeof Briefcase; color: string }> = {
+  [AssessmentGoal.JOB_FIT]: {
+    icon: Briefcase,
+    color: 'border-blue-500 bg-blue-50 dark:bg-blue-950/30',
+  },
+  [AssessmentGoal.TEAM_FIT]: {
+    icon: Users,
+    color: 'border-violet-500 bg-violet-50 dark:bg-violet-950/30',
+  },
+  [AssessmentGoal.OVERVIEW]: {
+    icon: Crosshair,
+    color: 'border-emerald-500 bg-emerald-50 dark:bg-emerald-950/30',
+  },
+};
+
+export function SettingsForm({ template }: SettingsFormProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
-  const [formData, setFormData] = useState({
-    name,
-    description,
+
+  const form = useForm<SettingsFormValues>({
+    resolver: zodResolver(settingsSchema),
+    defaultValues: {
+      name: template.name,
+      description: template.description || '',
+      goal: template.goal,
+      questionsPerIndicator: template.questionsPerIndicator,
+      timeLimitMinutes: template.timeLimitMinutes,
+      passingScore: template.passingScore,
+      isActive: template.isActive,
+      shuffleQuestions: template.shuffleQuestions,
+      shuffleOptions: template.shuffleOptions,
+      allowSkip: template.allowSkip,
+      allowBackNavigation: template.allowBackNavigation,
+      showResultsImmediately: template.showResultsImmediately,
+    },
+    mode: 'onBlur',
   });
 
-  const handleSave = () => {
+  const isDirty = form.formState.isDirty;
+
+  const handleSave = (values: SettingsFormValues) => {
     startTransition(async () => {
-      const result = await updateTemplateMetadata(templateId, formData);
+      const result = await updateTemplateSettings(template.id, values);
       if (result.success) {
-        toast.success('Settings saved');
+        toast.success('Settings saved successfully');
+        form.reset(values);
         router.refresh();
       } else {
-        toast.error(result.error || 'Failed to save');
+        toast.error(result.error || 'Failed to save settings');
       }
     });
   };
 
   const handleArchive = () => {
     startTransition(async () => {
-      const result = await archiveTemplate(templateId);
+      const result = await archiveTemplate(template.id);
       if (result.success) {
         toast.success('Template archived');
         router.refresh();
@@ -64,145 +156,593 @@ export function SettingsForm({ templateId, name, description, status }: Settings
 
   const handleDelete = () => {
     startTransition(async () => {
-      await deleteTemplate(templateId);
-      // Redirect happens in the action
+      await deleteTemplate(template.id);
     });
   };
 
-  const isArchived = status === 'ARCHIVED';
+  const handleReset = () => {
+    form.reset();
+    toast.info('Changes discarded');
+  };
 
   return (
-    <div className="space-y-6">
-      {/* General Settings */}
-      <Card>
-        <CardHeader>
-          <CardTitle>General</CardTitle>
-          <CardDescription>
-            Update template name and description. These can be changed even after publishing.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="name">Template Name</Label>
-            <Input
-              id="name"
-              value={formData.name}
-              onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
-              placeholder="Enter template name"
-            />
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(handleSave)}>
+        {/* Main 2-column grid */}
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-12 lg:gap-8">
+
+          {/* LEFT COLUMN: Main Content (8/12) */}
+          <div className="space-y-6 lg:col-span-8">
+
+            {/* Section 1: General Information */}
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle className="flex items-center gap-2">
+                      <Settings2 className="h-5 w-5" />
+                      General Information
+                    </CardTitle>
+                    <CardDescription className="mt-1.5">
+                      Basic template details visible to administrators
+                    </CardDescription>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <div className="flex items-center justify-between">
+                        <FormLabel>Template Name</FormLabel>
+                        <span className="text-xs text-muted-foreground">
+                          {field.value.length}/100
+                        </span>
+                      </div>
+                      <FormControl>
+                        <Input {...field} placeholder="e.g., Customer Service Skills Assessment" className="h-11" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="description"
+                  render={({ field }) => (
+                    <FormItem>
+                      <div className="flex items-center justify-between">
+                        <FormLabel>Description (Optional)</FormLabel>
+                        <span className="text-xs text-muted-foreground">
+                          {field.value?.length || 0}/500
+                        </span>
+                      </div>
+                      <FormControl>
+                        <Textarea
+                          {...field}
+                          placeholder="Brief description of what this test measures..."
+                          rows={3}
+                          className="resize-none"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </CardContent>
+            </Card>
+
+            {/* Section 2: Assessment Goal */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Target className="h-5 w-5" />
+                  Assessment Goal
+                </CardTitle>
+                <CardDescription className="mt-1.5">
+                  Select the primary purpose of this assessment
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <FormField
+                  control={form.control}
+                  name="goal"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <RadioGroup
+                          value={field.value}
+                          onValueChange={field.onChange}
+                          className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
+                        >
+                          {Object.values(AssessmentGoal).map((goal) => {
+                            const info = AssessmentGoalInfo[goal];
+                            const config = goalConfig[goal];
+                            const GoalIcon = config.icon;
+                            const isSelected = field.value === goal;
+
+                            return (
+                              <div key={goal} className="relative group">
+                                <RadioGroupItem value={goal} id={`goal-${goal}`} className="sr-only" />
+                                <Label
+                                  htmlFor={`goal-${goal}`}
+                                  className={cn(
+                                    'flex flex-col gap-3 rounded-xl border-2 p-5 cursor-pointer',
+                                    'transition-all duration-200 ease-out',
+                                    'hover:shadow-lg hover:-translate-y-0.5',
+                                    isSelected
+                                      ? `border-primary shadow-md ${config.color}`
+                                      : 'border-border hover:border-primary/50 bg-card'
+                                  )}
+                                >
+                                  <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-2.5">
+                                      <div className={cn(
+                                        "p-2 rounded-lg transition-colors",
+                                        isSelected ? "bg-primary/10" : "bg-muted"
+                                      )}>
+                                        <GoalIcon className={cn(
+                                          "h-5 w-5 transition-colors",
+                                          isSelected ? "text-primary" : "text-muted-foreground"
+                                        )} />
+                                      </div>
+                                      <span className="font-semibold text-sm">
+                                        {info.displayName}
+                                      </span>
+                                    </div>
+                                    {isSelected && (
+                                      <Check className="h-5 w-5 text-primary animate-in fade-in zoom-in duration-200" />
+                                    )}
+                                  </div>
+                                  <p className="text-xs text-muted-foreground leading-relaxed min-h-[2.5rem]">
+                                    {info.description}
+                                  </p>
+                                </Label>
+                              </div>
+                            );
+                          })}
+                        </RadioGroup>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </CardContent>
+            </Card>
+
+            {/* Section 3: Test Configuration */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <ListChecks className="h-5 w-5" />
+                  Test Configuration
+                </CardTitle>
+                <CardDescription className="mt-1.5">
+                  Define test structure and scoring parameters
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                  <FormField
+                    control={form.control}
+                    name="questionsPerIndicator"
+                    render={({ field }) => (
+                      <FormItem className="space-y-3">
+                        <FormLabel className="flex items-center gap-2 text-sm font-medium">
+                          <div className="p-1.5 rounded-md bg-primary/10">
+                            <ListChecks className="h-4 w-4 text-primary" />
+                          </div>
+                          Questions per Indicator
+                        </FormLabel>
+                        <Select
+                          value={field.value.toString()}
+                          onValueChange={(v) => field.onChange(parseInt(v))}
+                        >
+                          <FormControl>
+                            <SelectTrigger className="h-11">
+                              <SelectValue />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {[1, 2, 3, 5].map((n) => (
+                              <SelectItem key={n} value={n.toString()}>
+                                {n} {n === 1 ? 'question' : 'questions'}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormDescription className="text-xs leading-relaxed">
+                          Questions per behavioral indicator
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="timeLimitMinutes"
+                    render={({ field }) => (
+                      <FormItem className="space-y-3">
+                        <FormLabel className="flex items-center gap-2 text-sm font-medium">
+                          <div className="p-1.5 rounded-md bg-amber-500/10">
+                            <Clock className="h-4 w-4 text-amber-600 dark:text-amber-500" />
+                          </div>
+                          Time Limit
+                        </FormLabel>
+                        <Select
+                          value={field.value.toString()}
+                          onValueChange={(v) => field.onChange(parseInt(v))}
+                        >
+                          <FormControl>
+                            <SelectTrigger className="h-11">
+                              <SelectValue />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {[15, 30, 45, 60, 90, 120].map((n) => (
+                              <SelectItem key={n} value={n.toString()}>
+                                {n} minutes
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormDescription className="text-xs leading-relaxed">
+                          Maximum test duration
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="passingScore"
+                    render={({ field }) => (
+                      <FormItem className="space-y-3">
+                        <FormLabel className="flex items-center gap-2 text-sm font-medium">
+                          <div className="p-1.5 rounded-md bg-emerald-500/10">
+                            <Target className="h-4 w-4 text-emerald-600 dark:text-emerald-500" />
+                          </div>
+                          Passing Score
+                        </FormLabel>
+                        <Select
+                          value={field.value.toString()}
+                          onValueChange={(v) => field.onChange(parseInt(v))}
+                        >
+                          <FormControl>
+                            <SelectTrigger className="h-11">
+                              <SelectValue />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {[50, 60, 70, 80, 90].map((n) => (
+                              <SelectItem key={n} value={n.toString()}>
+                                {n}%
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormDescription className="text-xs leading-relaxed">
+                          Minimum percentage required
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Section 4: Test Behavior */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <ToggleRight className="h-5 w-5" />
+                  Test Behavior
+                </CardTitle>
+                <CardDescription className="mt-1.5">
+                  Control how test-takers interact with the assessment
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  {[
+                    {
+                      name: 'shuffleQuestions' as const,
+                      label: 'Shuffle Questions',
+                      description: 'Randomize question order for each session',
+                      icon: Shuffle,
+                    },
+                    {
+                      name: 'shuffleOptions' as const,
+                      label: 'Shuffle Answer Options',
+                      description: 'Randomize answer choices for each question',
+                      icon: Shuffle,
+                    },
+                    {
+                      name: 'allowSkip' as const,
+                      label: 'Allow Skip',
+                      description: 'Test-takers can skip questions and return later',
+                      icon: SkipForward,
+                    },
+                    {
+                      name: 'allowBackNavigation' as const,
+                      label: 'Allow Back Navigation',
+                      description: 'Test-takers can go back and change answers',
+                      icon: ArrowLeftRight,
+                    },
+                    {
+                      name: 'showResultsImmediately' as const,
+                      label: 'Show Results Immediately',
+                      description: 'Display results right after test completion',
+                      icon: Eye,
+                    },
+                  ].map((setting) => {
+                    const Icon = setting.icon;
+                    return (
+                      <FormField
+                        key={setting.name}
+                        control={form.control}
+                        name={setting.name}
+                        render={({ field }) => (
+                          <FormItem className="flex items-center justify-between gap-4 rounded-lg border p-4 hover:bg-muted/50 transition-colors">
+                            <div className="flex items-start gap-3 flex-1 min-w-0">
+                              <div className="p-2 rounded-lg bg-muted shrink-0">
+                                <Icon className="h-4 w-4 text-muted-foreground" />
+                              </div>
+                              <div className="space-y-0.5 flex-1 min-w-0">
+                                <FormLabel className="text-sm font-medium cursor-pointer">
+                                  {setting.label}
+                                </FormLabel>
+                                <FormDescription className="text-xs leading-relaxed">
+                                  {setting.description}
+                                </FormDescription>
+                              </div>
+                            </div>
+                            <FormControl>
+                              <Switch
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                                className="shrink-0"
+                              />
+                            </FormControl>
+                          </FormItem>
+                        )}
+                      />
+                    );
+                  })}
+                </div>
+              </CardContent>
+            </Card>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="description">Description</Label>
-            <Textarea
-              id="description"
-              value={formData.description}
-              onChange={(e) => setFormData((prev) => ({ ...prev, description: e.target.value }))}
-              placeholder="Enter template description"
-              rows={4}
-            />
+          {/* RIGHT COLUMN: Sidebar (4/12) */}
+          <div className="space-y-6 lg:col-span-4">
+
+            {/* Publication Status (Sticky) */}
+            <Card className="lg:sticky lg:top-6">
+              <CardHeader>
+                <CardTitle className="text-base">Publication Status</CardTitle>
+                <CardDescription className="text-xs mt-1.5">
+                  Control template visibility
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <FormField
+                  control={form.control}
+                  name="isActive"
+                  render={({ field }) => (
+                    <FormItem>
+                      <div className={cn(
+                        "flex items-center justify-between rounded-lg border-2 p-4 transition-colors",
+                        field.value
+                          ? "border-emerald-500/50 bg-emerald-50 dark:bg-emerald-950/30"
+                          : "border-border bg-muted/30"
+                      )}>
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-2">
+                            <div className={cn(
+                              "h-2 w-2 rounded-full",
+                              field.value ? "bg-emerald-500 animate-pulse" : "bg-muted-foreground"
+                            )} />
+                            <FormLabel className="text-sm font-semibold cursor-pointer">
+                              {field.value ? "Published" : "Draft"}
+                            </FormLabel>
+                          </div>
+                          <FormDescription className="text-xs leading-relaxed">
+                            {field.value
+                              ? "Visible and available for assessments"
+                              : "Hidden from test-takers"}
+                          </FormDescription>
+                        </div>
+                        <FormControl>
+                          <Switch
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                      </div>
+                    </FormItem>
+                  )}
+                />
+              </CardContent>
+            </Card>
+
+            {/* Template Info */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base">Template Info</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3 text-sm">
+                <div className="flex justify-between items-center">
+                  <span className="text-muted-foreground">Created</span>
+                  <span className="font-medium">
+                    {new Date(template.createdAt).toLocaleDateString()}
+                  </span>
+                </div>
+                <Separator />
+                <div className="flex justify-between items-center">
+                  <span className="text-muted-foreground">Last Modified</span>
+                  <span className="font-medium">
+                    {new Date(template.updatedAt).toLocaleDateString()}
+                  </span>
+                </div>
+                <Separator />
+                <div className="flex justify-between items-center">
+                  <span className="text-muted-foreground">Competencies</span>
+                  <Badge variant="secondary" className="font-medium">
+                    {template.competencyIds?.length || 0}
+                  </Badge>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Danger Zone */}
+            <Card className="border-destructive/50 bg-destructive/5">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-base text-destructive">
+                  <AlertTriangle className="h-4 w-4" />
+                  Danger Zone
+                </CardTitle>
+                <CardDescription className="text-xs mt-1.5">
+                  Irreversible actions
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {/* Archive */}
+                {template.isActive && (
+                  <>
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className="w-full justify-start gap-2 text-sm h-9"
+                          size="sm"
+                        >
+                          <Archive className="h-4 w-4" />
+                          Archive Template
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Archive Template?</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            This will hide the template from active use. Existing test sessions
+                            will be preserved. You can restore it later.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction onClick={handleArchive} disabled={isPending}>
+                            {isPending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+                            Archive
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                    <Separator />
+                  </>
+                )}
+
+                {/* Delete */}
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button
+                      variant="destructive"
+                      className="w-full justify-start gap-2 text-sm h-9"
+                      size="sm"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                      Delete Forever
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Delete Template Permanently?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        This action cannot be undone. This will permanently delete the
+                        template and all associated test sessions and results.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={handleDelete}
+                        disabled={isPending}
+                        className="bg-destructive hover:bg-destructive/90"
+                      >
+                        {isPending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+                        Delete Forever
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </CardContent>
+            </Card>
           </div>
+        </div>
 
-          <Button onClick={handleSave} disabled={isPending} className="gap-2">
-            {isPending ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <Save className="h-4 w-4" />
-            )}
-            Save Changes
-          </Button>
-        </CardContent>
-      </Card>
-
-      {/* Danger Zone */}
-      <Card className="border-destructive/50">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-destructive">
-            <AlertTriangle className="h-5 w-5" />
-            Danger Zone
-          </CardTitle>
-          <CardDescription>
-            Irreversible actions. Please be careful.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {/* Archive */}
-          {!isArchived && (
-            <div className="flex items-center justify-between rounded-lg border p-4">
-              <div>
-                <p className="font-medium">Archive Template</p>
-                <p className="text-sm text-muted-foreground">
-                  Hide this template from active use. Can be restored later.
-                </p>
+        {/* Sticky Save Bar - Full Width */}
+        <div className="sticky bottom-0 z-10 mt-6 -mx-4 lg:-mx-6 border-t bg-background/95 backdrop-blur-sm">
+          <div className="px-4 lg:px-6 py-4">
+            <div className="flex items-center justify-between gap-4">
+              {/* Left side: Status indicator */}
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                {isDirty ? (
+                  <>
+                    <div className="h-2 w-2 rounded-full bg-amber-500 animate-pulse" />
+                    <span className="hidden sm:inline">Unsaved changes</span>
+                    <span className="sm:hidden">Unsaved</span>
+                  </>
+                ) : (
+                  <>
+                    <Check className="h-4 w-4 text-emerald-500" />
+                    <span className="hidden sm:inline">All changes saved</span>
+                    <span className="sm:hidden">Saved</span>
+                  </>
+                )}
               </div>
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <Button variant="outline" className="gap-2">
-                    <Archive className="h-4 w-4" />
-                    Archive
-                  </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Archive Template?</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      This will hide the template from active use. Existing test sessions
-                      will be preserved. You can restore it later.
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction onClick={handleArchive} disabled={isPending}>
-                      {isPending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-                      Archive
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
-            </div>
-          )}
 
-          <Separator />
-
-          {/* Delete */}
-          <div className="flex items-center justify-between rounded-lg border border-destructive/30 bg-destructive/5 p-4">
-            <div>
-              <p className="font-medium text-destructive">Delete Template</p>
-              <p className="text-sm text-muted-foreground">
-                Permanently delete this template and all associated data.
-              </p>
-            </div>
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button variant="destructive" className="gap-2">
-                  <Trash2 className="h-4 w-4" />
-                  Delete
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Delete Template Permanently?</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    This action cannot be undone. This will permanently delete the
-                    template and all associated test sessions and results.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction
-                    onClick={handleDelete}
+              {/* Right side: Action buttons */}
+              <div className="flex gap-3">
+                {isDirty && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={handleReset}
                     disabled={isPending}
-                    className="bg-destructive hover:bg-destructive/90"
+                    size="sm"
                   >
-                    {isPending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-                    Delete Forever
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
+                    Discard
+                  </Button>
+                )}
+                <Button
+                  type="submit"
+                  disabled={isPending || !isDirty}
+                  className="gap-2 min-w-[120px]"
+                  size="sm"
+                >
+                  {isPending ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Saving...
+                    </>
+                  ) : (
+                    <>
+                      <Save className="h-4 w-4" />
+                      Save Changes
+                    </>
+                  )}
+                </Button>
+              </div>
+            </div>
           </div>
-        </CardContent>
-      </Card>
-    </div>
+        </div>
+      </form>
+    </Form>
   );
 }

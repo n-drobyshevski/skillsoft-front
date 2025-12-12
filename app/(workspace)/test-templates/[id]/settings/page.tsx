@@ -28,11 +28,14 @@ async function getTemplateData(id: string) {
 
 /**
  * Settings Page
- * 
- * Meta-data management and danger zone actions:
- * - Edit name and description (allowed even on published templates)
- * - Archive template
- * - Delete template
+ *
+ * Full template configuration management:
+ * - General Information (name, description)
+ * - Assessment Goal (OVERVIEW, JOB_FIT, TEAM_FIT)
+ * - Test Configuration (questions per indicator, time limit, passing score)
+ * - Test Behavior (shuffle, skip, navigation, results display)
+ * - Publication Status (active/inactive)
+ * - Danger Zone (archive, delete)
  */
 export default async function SettingsPage({ params }: SettingsPageProps) {
   const { id } = await params;
@@ -43,20 +46,15 @@ export default async function SettingsPage({ params }: SettingsPageProps) {
   }
 
   return (
-    <div className="p-4 lg:p-6 max-w-2xl">
+    <div className="mx-auto w-full max-w-7xl px-4 py-6 lg:px-8">
       <div className="mb-6">
         <h1 className="text-2xl font-bold">Settings</h1>
         <p className="text-muted-foreground">
-          Manage template settings and configuration
+          Configure all template settings and behavior options
         </p>
       </div>
 
-      <SettingsForm
-        templateId={id}
-        name={template.name}
-        description={template.description || ''}
-        status={template.isActive ? 'PUBLISHED' : 'DRAFT'}
-      />
+      <SettingsForm template={template} />
     </div>
   );
 }

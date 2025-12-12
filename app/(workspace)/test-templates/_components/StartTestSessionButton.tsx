@@ -2,7 +2,7 @@
 
 import React, { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { useAuth, useUser } from "@clerk/nextjs";
+import { useAuth } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
 import {
   AlertDialog,
@@ -13,26 +13,26 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { testSessionsApi } from "@/services/api";
-import { Play, Loader2, AlertTriangle } from "lucide-react";
+import { Loader2, AlertTriangle, PlayCircle, Rocket } from "lucide-react";
 import { toast } from "sonner";
 
 interface StartTestSessionButtonProps {
   templateId: string;
   templateName: string;
   fullWidth?: boolean;
+  variant?: "default" | "hero";
 }
 
-export default function StartTestSessionButton({ 
-  templateId, 
-  templateName, 
-  fullWidth = false 
+export default function StartTestSessionButton({
+  templateId,
+  templateName,
+  fullWidth = false,
+  variant = "default"
 }: StartTestSessionButtonProps) {
   const router = useRouter();
   const { userId, isSignedIn } = useAuth();
-  const { user } = useUser();
   const [isPending, startTransition] = useTransition();
   const [isChecking, setIsChecking] = useState(false);
   const [existingSessionId, setExistingSessionId] = useState<string | null>(null);
@@ -118,12 +118,68 @@ export default function StartTestSessionButton({
 
   const isLoading = isPending || isChecking;
 
+  // Shared dialog component
+  const alertDialog = (
+    <AlertDialog open={showDialog} onOpenChange={setShowDialog}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle className="flex items-center gap-2">
+            <AlertTriangle className="h-5 w-5 text-amber-500" />
+            Незавершённый тест
+          </AlertDialogTitle>
+          <AlertDialogDescription>
+            У вас уже есть незавершённая сессия для теста &quot;{templateName}&quot;.
+            Вы хотите продолжить её или начать заново?
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter className="flex-col sm:flex-row gap-2">
+          <AlertDialogCancel>Отмена</AlertDialogCancel>
+          <Button variant="outline" onClick={handleStartNew}>
+            Начать заново
+          </Button>
+          <AlertDialogAction onClick={handleContinueExisting}>
+            Продолжить
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+
+  // Hero variant - prominent, gradient styling
+  if (variant === "hero") {
+    return (
+      <>
+        <Button
+          onClick={handleStartTest}
+          disabled={isLoading}
+          className={`${fullWidth ? "w-full" : ""} bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary shadow-lg hover:shadow-xl transition-all duration-300 group min-h-11`}
+          size="lg"
+        >
+          {isLoading ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Подготовка теста...
+            </>
+          ) : (
+            <>
+              <Rocket className="mr-2 h-4 w-4 transition-transform group-hover:scale-110 group-hover:-rotate-12" />
+              <span className="font-semibold">Начать тест-драйв</span>
+              <PlayCircle className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+            </>
+          )}
+        </Button>
+        {alertDialog}
+      </>
+    );
+  }
+
+  // Default variant - standard button
   return (
     <>
-      <Button 
+      <Button
         onClick={handleStartTest}
         disabled={isLoading}
-        className={fullWidth ? "w-full" : ""}
+        className={`${fullWidth ? "w-full" : ""} shadow-sm hover:shadow-md transition-all group`}
         size="lg"
       >
         {isLoading ? (
@@ -133,35 +189,12 @@ export default function StartTestSessionButton({
           </>
         ) : (
           <>
-            <Play className="mr-2 h-4 w-4" />
-            Начать тест
+            <PlayCircle className="mr-2 h-4 w-4 transition-transform group-hover:scale-110" />
+            <span className="font-medium">Начать тест</span>
           </>
         )}
       </Button>
-
-      <AlertDialog open={showDialog} onOpenChange={setShowDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle className="flex items-center gap-2">
-              <AlertTriangle className="h-5 w-5 text-amber-500" />
-              Незавершённый тест
-            </AlertDialogTitle>
-            <AlertDialogDescription>
-              У вас уже есть незавершённая сессия для теста &quot;{templateName}&quot;.
-              Вы хотите продолжить её или начать заново?
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter className="flex-col sm:flex-row gap-2">
-            <AlertDialogCancel>Отмена</AlertDialogCancel>
-            <Button variant="outline" onClick={handleStartNew}>
-              Начать заново
-            </Button>
-            <AlertDialogAction onClick={handleContinueExisting}>
-              Продолжить
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      {alertDialog}
     </>
   );
 }
