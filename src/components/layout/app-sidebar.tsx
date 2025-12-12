@@ -126,8 +126,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             icon: BarChart3,
           },
           {
-            title: "Assessment Center",
-            url: "/test-templates",
+            title: "Мои тесты",
+            url: "/my-tests",
             icon: ClipboardCheck,
           },
           {

@@ -31,6 +31,7 @@ export interface LensConfig {
 // Common routes - note: route groups (auth), (workspace) are not part of URL path
 const ROUTE_DASHBOARD = "/dashboard";
 const ROUTE_TESTS = "/test-templates";
+const ROUTE_MY_TESTS = "/my-tests";
 // HR Library routes (under (workspace)/hr/ in file system, but /hr/ in URL)
 const ROUTE_HR_COMPETENCIES = "/hr/competencies";
 const ROUTE_HR_INDICATORS = "/hr/behavioral-indicators";
@@ -73,6 +74,7 @@ export const LENS_CONFIGS: Record<LensType, LensConfig> = {
     borderColor: "border-emerald-200/60 dark:border-emerald-800/60",
     visibleRoutes: [
       ROUTE_DASHBOARD,
+      ROUTE_MY_TESTS,
       ROUTE_TESTS,
     ],
     dashboardWidgets: ["my-progress", "recent-activity"],
