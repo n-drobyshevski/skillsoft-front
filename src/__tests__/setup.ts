@@ -3,9 +3,10 @@
  * Runs before all tests - sets up jsdom, mocks, and global utilities
  */
 import '@testing-library/jest-dom/vitest';
-import { afterEach, beforeAll, vi } from 'vitest';
+import { afterEach, beforeEach, beforeAll, afterAll, vi } from 'vitest';
 import { cleanup } from '@testing-library/react';
 import { server } from './mocks/server';
+import { resetMockStores } from './mocks/handlers';
 
 // Cleanup after each test
 afterEach(() => {
@@ -14,7 +15,10 @@ afterEach(() => {
 
 // MSW Server lifecycle
 beforeAll(() => server.listen({ onUnhandledRequest: 'warn' }));
-afterEach(() => server.resetHandlers());
+afterEach(() => {
+  server.resetHandlers();
+  resetMockStores(); // Reset mock data stores between tests
+});
 afterAll(() => server.close());
 
 // Mock window.matchMedia
@@ -56,12 +60,38 @@ beforeAll(() => {
 });
 
 // Mock requestAnimationFrame for hooks that use it
+// Using proper ID tracking and Promise.resolve() for async execution without timer conflicts
+let rafId = 0;
+const rafCallbacks = new Map<number, FrameRequestCallback>();
+
 beforeAll(() => {
-  global.requestAnimationFrame = vi.fn((cb) => {
-    setTimeout(cb, 0);
-    return 0;
+  global.requestAnimationFrame = vi.fn((cb: FrameRequestCallback) => {
+    const id = ++rafId;
+    rafCallbacks.set(id, cb);
+    // Use Promise.resolve().then() for proper async execution that won't conflict with fake timers
+    Promise.resolve().then(() => {
+      const callback = rafCallbacks.get(id);
+      if (callback) {
+        rafCallbacks.delete(id);
+        callback(performance.now());
+      }
+    });
+    return id;
   });
-  global.cancelAnimationFrame = vi.fn();
+
+  global.cancelAnimationFrame = vi.fn((id: number) => {
+    rafCallbacks.delete(id);
+  });
+});
+
+// Reset RAF ID counter before each test for consistent behavior
+beforeEach(() => {
+  rafId = 0;
+});
+
+// Clear pending RAF callbacks after each test to prevent leaks
+afterEach(() => {
+  rafCallbacks.clear();
 });
 
 // Mock localStorage
