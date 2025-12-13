@@ -26,6 +26,8 @@ import { SessionStatus } from '@/types/domain';
 interface TestCardProps {
   session: EnrichedTestSession;
   style?: CSSProperties;
+  /** When true, renders a more compact card without the outer card container */
+  compact?: boolean;
 }
 
 // Status configuration
@@ -71,7 +73,7 @@ const STATUS_CONFIG: Record<SessionStatus, {
  * Test Card Component
  * Displays a single test session with status-specific styling and actions
  */
-export function TestCard({ session, style }: TestCardProps) {
+export function TestCard({ session, style, compact = false }: TestCardProps) {
   const config = STATUS_CONFIG[session.status];
   const StatusIcon = config.icon;
 
@@ -129,6 +131,108 @@ export function TestCard({ session, style }: TestCardProps) {
 
   const ActionIcon = actionConfig.icon;
 
+  // Compact mode renders without outer Card wrapper (for use inside TemplateGroup)
+  if (compact) {
+    return (
+      <div
+        className={cn(
+          "p-3 rounded-lg border transition-all duration-200 hover:shadow-md",
+          config.className
+        )}
+        style={style}
+      >
+        {/* Compact Header Row */}
+        <div className="flex items-center justify-between gap-2 flex-wrap mb-2">
+          <Badge variant="outline" className={cn("gap-1 text-xs", config.badgeClassName)}>
+            <StatusIcon className="size-3" />
+            {config.label}
+          </Badge>
+
+          {/* Score Badge for completed tests */}
+          {session.status === SessionStatus.COMPLETED && session.result && (
+            <Badge
+              variant="outline"
+              className={cn(
+                "gap-1 text-xs",
+                session.result.passed
+                  ? "border-emerald-500/30 bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400"
+                  : "border-red-500/30 bg-red-50 dark:bg-red-950/30 text-red-700 dark:text-red-400"
+              )}
+            >
+              {session.result.passed ? (
+                <Trophy className="size-3" />
+              ) : (
+                <Target className="size-3" />
+              )}
+              {Math.round(session.result.overallPercentage)}%
+            </Badge>
+          )}
+        </div>
+
+        {/* Compact Progress (IN_PROGRESS only) */}
+        {session.status === SessionStatus.IN_PROGRESS && progress && (
+          <div className="mb-3">
+            <Progress value={progress.percentage} className="h-1.5 mb-1" />
+            <p className="text-xs text-muted-foreground">
+              {progress.answeredCount}/{session.totalQuestions} вопросов
+            </p>
+          </div>
+        )}
+
+        {/* Compact Score Display (COMPLETED only) */}
+        {session.status === SessionStatus.COMPLETED && session.result && (
+          <div className="flex items-center gap-2 mb-3 p-2 rounded-md bg-muted/50">
+            <div className={cn(
+              "text-xl font-bold tabular-nums",
+              session.result.passed
+                ? "text-emerald-600 dark:text-emerald-400"
+                : "text-red-600 dark:text-red-400"
+            )}>
+              {Math.round(session.result.overallPercentage)}%
+            </div>
+            <div className="text-xs">
+              {session.result.passed ? (
+                <span className="text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                  <CheckCircle2 className="size-3" />
+                  Пройден
+                </span>
+              ) : (
+                <span className="text-red-600 dark:text-red-400 flex items-center gap-1">
+                  <XCircle className="size-3" />
+                  Не пройден
+                </span>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Compact Date */}
+        <div className="flex items-center gap-1.5 text-xs text-muted-foreground mb-3">
+          <Calendar className="size-3" />
+          <span>
+            {session.status === SessionStatus.COMPLETED ? 'Завершен' : 'Создан'}:{' '}
+            {formatRelativeDate(session.status === SessionStatus.COMPLETED ? session.completedAt : session.createdAt)}
+          </span>
+        </div>
+
+        {/* Action Button */}
+        <Button
+          asChild
+          variant={actionConfig.variant}
+          size="sm"
+          className="w-full group touch-manipulation"
+        >
+          <Link href={actionConfig.href}>
+            <ActionIcon className="size-3.5 mr-1.5 transition-transform group-hover:translate-x-0.5" />
+            {actionConfig.label}
+            <ArrowRight className="size-3.5 ml-auto opacity-50 transition-transform group-hover:translate-x-1" />
+          </Link>
+        </Button>
+      </div>
+    );
+  }
+
+  // Full card mode (original implementation)
   return (
     <Card
       className={cn(

@@ -2,9 +2,32 @@ import { Suspense } from 'react';
 import { currentUser } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
 import { testSessionsApi, testResultsApi } from '@/services/api';
-import { MyTestsContent } from './_components/MyTestsContent';
+import { MyTestsClientWrapper } from './_components/MyTestsClientWrapper';
 import { TestCardSkeleton } from './_components/TestCardSkeleton';
 import { ClipboardList } from 'lucide-react';
+
+/**
+ * Loading skeleton while data is being fetched
+ */
+function LoadingSkeleton() {
+  return (
+    <div className="space-y-6">
+      {/* Tabs skeleton */}
+      <div className="flex gap-2 border-b pb-2">
+        {[1, 2, 3, 4].map(i => (
+          <div key={i} className="h-9 w-24 bg-muted animate-pulse rounded-md" />
+        ))}
+      </div>
+
+      {/* Cards skeleton */}
+      <div className="grid gap-4">
+        <TestCardSkeleton />
+        <TestCardSkeleton />
+        <TestCardSkeleton />
+      </div>
+    </div>
+  );
+}
 
 /**
  * My Assigned Tests Page (Server Component)
@@ -70,28 +93,5 @@ async function TestsDataLoader({ userId }: { userId: string }) {
     result: resultsBySessionId.get(session.id) || null,
   }));
 
-  return <MyTestsContent sessions={enrichedSessions} />;
-}
-
-/**
- * Loading skeleton while data is being fetched
- */
-function LoadingSkeleton() {
-  return (
-    <div className="space-y-6">
-      {/* Tabs skeleton */}
-      <div className="flex gap-2 border-b pb-2">
-        {[1, 2, 3, 4].map(i => (
-          <div key={i} className="h-9 w-24 bg-muted animate-pulse rounded-md" />
-        ))}
-      </div>
-
-      {/* Cards skeleton */}
-      <div className="grid gap-4">
-        <TestCardSkeleton />
-        <TestCardSkeleton />
-        <TestCardSkeleton />
-      </div>
-    </div>
-  );
+  return <MyTestsClientWrapper sessions={enrichedSessions} />;
 }

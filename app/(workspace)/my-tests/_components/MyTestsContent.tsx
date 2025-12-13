@@ -3,7 +3,7 @@
 import { useMemo, useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { TestCard } from './TestCard';
+import { TemplateGroup, groupSessionsByTemplate } from './TemplateGroup';
 import { EmptyState } from './EmptyState';
 import { TestSessionSummary, TestResult, SessionStatus } from '@/types/domain';
 import { cn } from '@/lib/utils';
@@ -27,14 +27,14 @@ const TAB_CONFIG: { value: TabValue; label: string; statuses: SessionStatus[] }[
 ];
 
 /**
- * Client component for My Tests page with tabs and filtering
+ * Client component for My Tests page with tabs, filtering, and template grouping
  */
 export function MyTestsContent({ sessions }: MyTestsContentProps) {
   const [activeTab, setActiveTab] = useState<TabValue>('all');
 
-  // Group sessions by status
-  const groupedSessions = useMemo(() => {
-    const groups = {
+  // Group sessions by status for tab filtering
+  const sessionsByStatus = useMemo(() => {
+    return {
       all: sessions,
       pending: sessions.filter(s => s.status === SessionStatus.NOT_STARTED),
       in_progress: sessions.filter(s => s.status === SessionStatus.IN_PROGRESS),
@@ -44,38 +44,34 @@ export function MyTestsContent({ sessions }: MyTestsContentProps) {
         s.status === SessionStatus.TIMED_OUT
       ),
     };
-    return groups;
   }, [sessions]);
 
-  // Sort sessions by relevance
-  const sortedSessions = useMemo(() => {
-    const currentSessions = groupedSessions[activeTab];
+  // Helper function to get sessions for a tab value (avoids object injection lint warning)
+  const getSessionsForTab = (tab: TabValue) => {
+    switch (tab) {
+      case 'all': return sessionsByStatus.all;
+      case 'pending': return sessionsByStatus.pending;
+      case 'in_progress': return sessionsByStatus.in_progress;
+      case 'completed': return sessionsByStatus.completed;
+    }
+  };
 
-    return [...currentSessions].sort((a, b) => {
-      // IN_PROGRESS first, then NOT_STARTED, then COMPLETED
-      const statusOrder: Record<string, number> = {
-        'IN_PROGRESS': 0,
-        'NOT_STARTED': 1,
-        'COMPLETED': 2,
-        'ABANDONED': 3,
-        'TIMED_OUT': 4,
-      };
+  // Group filtered sessions by template
+  const groupedByTemplate = useMemo(() => {
+    const currentSessions = getSessionsForTab(activeTab);
+    if (currentSessions.length === 0) return [];
 
-      const orderDiff = (statusOrder[a.status] || 99) - (statusOrder[b.status] || 99);
-      if (orderDiff !== 0) return orderDiff;
-
-      // Within same status, sort by date (most recent first)
-      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-    });
-  }, [groupedSessions, activeTab]);
+    return groupSessionsByTemplate(currentSessions);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sessionsByStatus, activeTab]);
 
   // Count badges
   const counts = useMemo(() => ({
     all: sessions.length,
-    pending: groupedSessions.pending.length,
-    in_progress: groupedSessions.in_progress.length,
-    completed: groupedSessions.completed.length,
-  }), [sessions.length, groupedSessions]);
+    pending: sessionsByStatus.pending.length,
+    in_progress: sessionsByStatus.in_progress.length,
+    completed: sessionsByStatus.completed.length,
+  }), [sessions.length, sessionsByStatus]);
 
   if (sessions.length === 0) {
     return <EmptyState type="no_tests" />;
@@ -111,17 +107,15 @@ export function MyTestsContent({ sessions }: MyTestsContentProps) {
       {/* Tab Content */}
       {TAB_CONFIG.map(tab => (
         <TabsContent key={tab.value} value={tab.value} className="mt-0">
-          {groupedSessions[tab.value].length === 0 ? (
+          {getSessionsForTab(tab.value).length === 0 ? (
             <EmptyState type={`no_${tab.value}` as EmptyStateType} />
           ) : (
             <div className="grid gap-4">
-              {sortedSessions.map((session, index) => (
-                <TestCard
-                  key={session.id}
-                  session={session}
-                  style={{
-                    animationDelay: `${index * 50}ms`,
-                  }}
+              {groupedByTemplate.map((group) => (
+                <TemplateGroup
+                  key={group.templateId}
+                  group={group}
+                  defaultExpanded={false}
                 />
               ))}
             </div>

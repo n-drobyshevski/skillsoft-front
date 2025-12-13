@@ -130,11 +130,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             title: "Мои тесты",
             url: "/my-tests",
             icon: ClipboardCheck,
-          },
-          {
-            title: "My Passport",
-            url: "/test-templates/results/latest-scenario-a",
-            icon: FileText,
           }
         ]
       : [
