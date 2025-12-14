@@ -258,4 +258,14 @@ export const testSessionsClientApi = {
       method: 'POST',
     });
   },
+
+  /**
+   * Get all answers for a session (for answer summary review)
+   */
+  getSessionAnswers: async (
+    sessionId: string,
+    authHeaders: Record<string, string>
+  ): Promise<TestAnswer[]> => {
+    return clientFetch(`${TESTS_BASE}/sessions/${sessionId}/answers`, authHeaders);
+  },
 };

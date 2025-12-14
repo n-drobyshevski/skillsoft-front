@@ -118,7 +118,8 @@ export function QuestionCard({
             onChange={(e) => handleTextChange(e.target.value)}
             placeholder={placeholder}
             className={cn(
-              "min-h-[160px] bg-neutral-800/30 border-neutral-700 text-white placeholder:text-neutral-500",
+              // Reduced min-height on mobile for better fit
+              "min-h-[120px] sm:min-h-[160px] bg-neutral-800/30 border-neutral-700 text-white placeholder:text-neutral-500",
               "focus:ring-emerald-500/20 resize-none text-sm sm:text-base leading-relaxed",
               validationError
                 ? "border-red-500/50 focus:border-red-500"
@@ -168,13 +169,14 @@ export function QuestionCard({
 
     return (
       <div className="space-y-4">
-        {/* Mobile: vertical stack, Tablet+: horizontal grid */}
+        {/* Mobile: vertical stack for 5+ options, Tablet+: horizontal grid */}
         <div className={cn(
           "grid gap-3",
-          // Responsive grid: 1 column on mobile, 3-5 columns on larger screens
+          // Responsive grid: vertical on mobile for 5+ options, horizontal on larger screens
           question.answerOptions.length <= 3 && "grid-cols-1 sm:grid-cols-3",
           question.answerOptions.length === 4 && "grid-cols-2 sm:grid-cols-4",
-          question.answerOptions.length >= 5 && "grid-cols-2 sm:grid-cols-3 md:grid-cols-5"
+          // Changed: use single column on mobile for 5+ options to avoid cramped layout
+          question.answerOptions.length >= 5 && "grid-cols-1 sm:grid-cols-3 md:grid-cols-5"
         )}>
           {question.answerOptions.map((option) => {
             const optionId = option.id || String(option.value);
@@ -188,7 +190,8 @@ export function QuestionCard({
                 key={optionId}
                 onClick={() => onAnswer(optionValue)}
                 className={cn(
-                  "flex flex-col items-center justify-center min-h-[64px] p-4 rounded-lg border-2 transition-all duration-200",
+                  // Ensure minimum touch target size: 56px on mobile, 64px on desktop
+                  "flex flex-col items-center justify-center min-h-[56px] sm:min-h-[64px] p-3 sm:p-4 rounded-lg border-2 transition-all duration-200",
                   "hover:border-neutral-600 hover:bg-neutral-800/50 active:scale-95",
                   "focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500",
                   isSelected
@@ -200,12 +203,12 @@ export function QuestionCard({
               >
                 <span className="text-xl sm:text-2xl font-bold">{option.value ?? option.label}</span>
                 {option.label && option.value !== undefined && (
-                  <span className="text-xs sm:text-sm mt-2 text-center leading-tight opacity-80 line-clamp-2">
+                  <span className="text-xs sm:text-sm mt-1.5 sm:mt-2 text-center leading-tight opacity-80 line-clamp-2">
                     {option.label}
                   </span>
                 )}
                 {option.text && !option.label && (
-                  <span className="text-xs sm:text-sm mt-2 text-center leading-tight opacity-80 line-clamp-2">
+                  <span className="text-xs sm:text-sm mt-1.5 sm:mt-2 text-center leading-tight opacity-80 line-clamp-2">
                     {option.text}
                   </span>
                 )}
@@ -289,18 +292,70 @@ export function QuestionCard({
     <Card className="bg-neutral-900/50 border-neutral-800 shadow-2xl">
       <CardContent className="p-6 sm:p-8">
         {/* Question header */}
-        <div className="flex items-start gap-4 mb-6">
-          <span
-            className="shrink-0 w-9 h-9 rounded-full bg-neutral-800 text-neutral-400 text-sm font-bold flex items-center justify-center"
-            aria-label={`Question ${questionNumber}`}
-          >
-            {questionNumber}
-          </span>
-          <div className="space-y-3 flex-1">
+        <div className="space-y-4 mb-6">
+          {/* Mobile: Question number on separate line */}
+          <div className="flex items-center gap-3 sm:hidden">
+            <span
+              className="shrink-0 w-9 h-9 rounded-full bg-neutral-800 text-neutral-400 text-sm font-bold flex items-center justify-center"
+              aria-label={`Question ${questionNumber}`}
+            >
+              {questionNumber}
+            </span>
+            <span className="text-sm font-medium text-neutral-500">
+              Вопрос {questionNumber}
+            </span>
+            {/* Question type badge (mobile) */}
+            <span className="ml-auto inline-block text-[10px] text-neutral-500 bg-neutral-800/50 px-2 py-1 rounded whitespace-nowrap">
+              {isSJT && 'Ситуационный'}
+              {isMCQ && 'Выбор'}
+              {isLikertType && 'Шкала'}
+              {isBehavioralExample && 'Поведенческий'}
+              {isOpenText && 'Открытый'}
+            </span>
+          </div>
+
+          {/* Desktop: Question number beside text (original layout) */}
+          <div className="hidden sm:flex items-start gap-4">
+            <span
+              className="shrink-0 w-9 h-9 rounded-full bg-neutral-800 text-neutral-400 text-sm font-bold flex items-center justify-center"
+              aria-label={`Question ${questionNumber}`}
+            >
+              {questionNumber}
+            </span>
+            <div className="space-y-3 flex-1">
+              {/* Scenario (for SJT questions) */}
+              {question.scenario && (
+                <div
+                  className="text-neutral-400 text-sm leading-relaxed italic border-l-2 border-neutral-700 pl-4 py-2 bg-neutral-800/20 rounded-r"
+                  role="note"
+                  aria-label="Scenario context"
+                >
+                  {question.scenario}
+                </div>
+              )}
+
+              {/* Question text */}
+              <h2 className="text-lg sm:text-xl text-white font-medium leading-relaxed">
+                {question.questionText}
+              </h2>
+
+              {/* Question type badge (desktop) */}
+              <span className="inline-block text-xs text-neutral-500 bg-neutral-800/50 px-2 py-1 rounded">
+                {isSJT && 'Ситуационный вопрос'}
+                {isMCQ && 'Множественный выбор'}
+                {isLikertType && 'Шкала оценки'}
+                {isBehavioralExample && 'Поведенческий пример'}
+                {isOpenText && 'Открытый вопрос'}
+              </span>
+            </div>
+          </div>
+
+          {/* Mobile: Question content (scenario and text) */}
+          <div className="space-y-3 sm:hidden">
             {/* Scenario (for SJT questions) */}
             {question.scenario && (
               <div
-                className="text-neutral-400 text-sm leading-relaxed italic border-l-2 border-neutral-700 pl-4 py-2 bg-neutral-800/20 rounded-r"
+                className="text-neutral-400 text-sm leading-relaxed italic border-l-2 border-neutral-700 pl-3 py-2 bg-neutral-800/20 rounded-r"
                 role="note"
                 aria-label="Scenario context"
               >
@@ -309,18 +364,9 @@ export function QuestionCard({
             )}
 
             {/* Question text */}
-            <h2 className="text-lg sm:text-xl text-white font-medium leading-relaxed">
+            <h2 className="text-base sm:text-xl text-white font-medium leading-relaxed">
               {question.questionText}
             </h2>
-
-            {/* Question type badge (for clarity) */}
-            <span className="inline-block text-xs text-neutral-500 bg-neutral-800/50 px-2 py-1 rounded">
-              {isSJT && 'Ситуационный вопрос'}
-              {isMCQ && 'Множественный выбор'}
-              {isLikertType && 'Шкала оценки'}
-              {isBehavioralExample && 'Поведенческий пример'}
-              {isOpenText && 'Открытый вопрос'}
-            </span>
           </div>
         </div>
 

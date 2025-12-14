@@ -1,10 +1,12 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo, useCallback, useTransition } from 'react';
+import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { TemplateGroup, groupSessionsByTemplate } from './TemplateGroup';
 import { EmptyState } from './EmptyState';
+import { SummaryStats } from './SummaryStats';
 import { TestSessionSummary, TestResult, SessionStatus } from '@/types/domain';
 import { cn } from '@/lib/utils';
 
@@ -13,11 +15,12 @@ export interface EnrichedTestSession extends TestSessionSummary {
   result: TestResult | null;
 }
 
+export type TabValue = 'all' | 'pending' | 'in_progress' | 'completed';
+
 interface MyTestsContentProps {
   sessions: EnrichedTestSession[];
+  initialTab?: TabValue;
 }
-
-type TabValue = 'all' | 'pending' | 'in_progress' | 'completed';
 
 const TAB_CONFIG: { value: TabValue; label: string; statuses: SessionStatus[] }[] = [
   { value: 'all', label: 'Все', statuses: [] },
@@ -28,9 +31,35 @@ const TAB_CONFIG: { value: TabValue; label: string; statuses: SessionStatus[] }[
 
 /**
  * Client component for My Tests page with tabs, filtering, and template grouping
+ * Uses URL-based tab state for bookmarkable/shareable links
  */
-export function MyTestsContent({ sessions }: MyTestsContentProps) {
-  const [activeTab, setActiveTab] = useState<TabValue>('all');
+export function MyTestsContent({ sessions, initialTab = 'all' }: MyTestsContentProps) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const [isPending, startTransition] = useTransition();
+
+  // Get active tab from URL or use initial value
+  const activeTab = (searchParams.get('tab') as TabValue) || initialTab;
+
+  // Handle tab change - update URL without full page reload
+  const handleTabChange = useCallback(
+    (value: string) => {
+      startTransition(() => {
+        const params = new URLSearchParams(searchParams.toString());
+        if (value === 'all') {
+          params.delete('tab'); // Clean URL for default tab
+        } else {
+          params.set('tab', value);
+        }
+        const queryString = params.toString();
+        router.push(`${pathname}${queryString ? `?${queryString}` : ''}`, {
+          scroll: false,
+        });
+      });
+    },
+    [router, pathname, searchParams]
+  );
 
   // Group sessions by status for tab filtering
   const sessionsByStatus = useMemo(() => {
@@ -78,51 +107,55 @@ export function MyTestsContent({ sessions }: MyTestsContentProps) {
   }
 
   return (
-    <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as TabValue)}>
-      {/* Tabs Header */}
-      <TabsList className="w-full justify-start h-auto p-1 bg-muted/50 rounded-lg mb-6 flex-wrap">
-        {TAB_CONFIG.map(tab => (
-          <TabsTrigger
-            key={tab.value}
-            value={tab.value}
-            className={cn(
-              "flex items-center gap-2 px-4 py-2 data-[state=active]:bg-background data-[state=active]:shadow-sm",
-              "text-sm font-medium transition-all"
-            )}
-          >
-            {tab.label}
-            <Badge
-              variant="secondary"
+    <div className="space-y-6">
+      {/* Summary Stats Dashboard */}
+      <SummaryStats counts={counts} activeTab={activeTab} onTabChange={handleTabChange} />
+
+      {/* Tabs with URL-synced state */}
+      <Tabs value={activeTab} onValueChange={handleTabChange}>
+        {/* Tabs Header */}
+        <TabsList className="w-full justify-start h-auto p-1 bg-muted/50 rounded-lg mb-6 flex-wrap">
+          {TAB_CONFIG.map(tab => (
+            <TabsTrigger
+              key={tab.value}
+              value={tab.value}
+              disabled={isPending}
               className={cn(
-                "ml-1 min-w-[1.5rem] justify-center text-xs",
-                activeTab === tab.value && "bg-primary text-primary-foreground"
+                'flex items-center gap-2 px-4 py-2 data-[state=active]:bg-background data-[state=active]:shadow-sm',
+                'text-sm font-medium transition-all',
+                isPending && 'opacity-70'
               )}
             >
-              {counts[tab.value]}
-            </Badge>
-          </TabsTrigger>
-        ))}
-      </TabsList>
+              {tab.label}
+              <Badge
+                variant="secondary"
+                className={cn(
+                  'ml-1 min-w-[1.5rem] justify-center text-xs',
+                  activeTab === tab.value && 'bg-primary text-primary-foreground'
+                )}
+              >
+                {counts[tab.value]}
+              </Badge>
+            </TabsTrigger>
+          ))}
+        </TabsList>
 
-      {/* Tab Content */}
-      {TAB_CONFIG.map(tab => (
-        <TabsContent key={tab.value} value={tab.value} className="mt-0">
-          {getSessionsForTab(tab.value).length === 0 ? (
-            <EmptyState type={`no_${tab.value}` as EmptyStateType} />
-          ) : (
-            <div className="grid gap-4">
-              {groupedByTemplate.map((group) => (
-                <TemplateGroup
-                  key={group.templateId}
-                  group={group}
-                  defaultExpanded={false}
-                />
-              ))}
-            </div>
-          )}
-        </TabsContent>
-      ))}
-    </Tabs>
+        {/* Tab Content */}
+        {TAB_CONFIG.map(tab => (
+          <TabsContent key={tab.value} value={tab.value} className="mt-0">
+            {getSessionsForTab(tab.value).length === 0 ? (
+              <EmptyState type={`no_${tab.value}` as EmptyStateType} />
+            ) : (
+              <div className={cn('grid gap-4', isPending && 'opacity-70 transition-opacity')}>
+                {groupedByTemplate.map(group => (
+                  <TemplateGroup key={group.templateId} group={group} defaultExpanded={false} />
+                ))}
+              </div>
+            )}
+          </TabsContent>
+        ))}
+      </Tabs>
+    </div>
   );
 }
 

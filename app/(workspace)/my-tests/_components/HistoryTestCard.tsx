@@ -23,36 +23,50 @@ interface HistoryTestCardProps {
   session: EnrichedTestSession;
 }
 
-// Compact status configuration
-const STATUS_CONFIG: Record<SessionStatus, {
-  label: string;
-  icon: typeof Clock;
-  badgeClassName: string;
-}> = {
+// Compact status configuration with left border
+const STATUS_CONFIG: Record<
+  SessionStatus,
+  {
+    label: string;
+    icon: typeof Clock;
+    borderClass: string;
+    badgeClassName: string;
+  }
+> = {
   NOT_STARTED: {
     label: 'Ожидает',
     icon: Clock,
-    badgeClassName: 'border-blue-500/30 bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-400',
+    borderClass: 'border-l-blue-500',
+    badgeClassName:
+      'border-blue-500/30 bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-400',
   },
   IN_PROGRESS: {
     label: 'В работе',
     icon: PlayCircle,
-    badgeClassName: 'border-amber-500/30 bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-400',
+    borderClass: 'border-l-amber-500',
+    badgeClassName:
+      'border-amber-500/30 bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-400',
   },
   COMPLETED: {
     label: 'Завершен',
     icon: CheckCircle2,
-    badgeClassName: 'border-emerald-500/30 bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400',
+    borderClass: 'border-l-emerald-500',
+    badgeClassName:
+      'border-emerald-500/30 bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400',
   },
   ABANDONED: {
     label: 'Прерван',
     icon: XCircle,
-    badgeClassName: 'border-red-500/30 bg-red-50 dark:bg-red-950/30 text-red-700 dark:text-red-400',
+    borderClass: 'border-l-red-500',
+    badgeClassName:
+      'border-red-500/30 bg-red-50 dark:bg-red-950/30 text-red-700 dark:text-red-400',
   },
   TIMED_OUT: {
     label: 'Время истекло',
     icon: AlertCircle,
-    badgeClassName: 'border-gray-500/30 bg-gray-50 dark:bg-gray-950/30 text-gray-700 dark:text-gray-400',
+    borderClass: 'border-l-gray-400',
+    badgeClassName:
+      'border-gray-500/30 bg-gray-50 dark:bg-gray-950/30 text-gray-700 dark:text-gray-400',
   },
 };
 
@@ -68,12 +82,15 @@ export function HistoryTestCard({ session }: HistoryTestCardProps) {
   const actionConfig = getActionConfig(session);
 
   return (
-    <div className="flex items-center gap-3 py-3 px-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors">
+    <div
+      className={cn(
+        'flex items-center gap-3 py-2.5 px-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors',
+        'border-l-2',
+        config.borderClass
+      )}
+    >
       {/* Status Badge */}
-      <Badge
-        variant="outline"
-        className={cn("gap-1 shrink-0 text-xs", config.badgeClassName)}
-      >
+      <Badge variant="outline" className={cn('gap-1 shrink-0 text-xs', config.badgeClassName)}>
         <StatusIcon className="size-3" />
         <span className="hidden xs:inline">{config.label}</span>
       </Badge>

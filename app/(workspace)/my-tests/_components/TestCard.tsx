@@ -2,17 +2,14 @@
 
 import { CSSProperties, useMemo } from 'react';
 import Link from 'next/link';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
 import {
   Clock,
   PlayCircle,
   CheckCircle2,
   XCircle,
   AlertCircle,
-  Calendar,
   ArrowRight,
   RotateCcw,
   Eye,
@@ -22,56 +19,82 @@ import {
 import { cn } from '@/lib/utils';
 import { EnrichedTestSession } from './MyTestsContent';
 import { SessionStatus } from '@/types/domain';
+import { CircularProgress, ScoreGauge } from './CircularProgress';
 
 interface TestCardProps {
   session: EnrichedTestSession;
   style?: CSSProperties;
-  /** When true, renders a more compact card without the outer card container */
+  /** When true, renders a more compact card without template name (used inside TemplateGroup) */
   compact?: boolean;
 }
 
-// Status configuration
-const STATUS_CONFIG: Record<SessionStatus, {
-  label: string;
-  icon: typeof Clock;
-  className: string;
-  badgeClassName: string;
-}> = {
+// Status configuration with left border colors
+const STATUS_CONFIG: Record<
+  SessionStatus,
+  {
+    label: string;
+    icon: typeof Clock;
+    borderClass: string;
+    badgeClassName: string;
+    progressColor: string;
+    progressTrack: string;
+  }
+> = {
   NOT_STARTED: {
     label: 'Ожидает',
     icon: Clock,
-    className: 'border-blue-500/20 hover:border-blue-500/40',
-    badgeClassName: 'border-blue-500/30 bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-400',
+    borderClass: 'border-l-blue-500',
+    badgeClassName:
+      'border-blue-500/30 bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-400',
+    progressColor: 'text-blue-500',
+    progressTrack: 'text-blue-100 dark:text-blue-950',
   },
   IN_PROGRESS: {
     label: 'В работе',
     icon: PlayCircle,
-    className: 'border-amber-500/20 hover:border-amber-500/40',
-    badgeClassName: 'border-amber-500/30 bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-400',
+    borderClass: 'border-l-amber-500',
+    badgeClassName:
+      'border-amber-500/30 bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-400',
+    progressColor: 'text-amber-500',
+    progressTrack: 'text-amber-100 dark:text-amber-950',
   },
   COMPLETED: {
     label: 'Завершен',
     icon: CheckCircle2,
-    className: 'border-emerald-500/20 hover:border-emerald-500/40',
-    badgeClassName: 'border-emerald-500/30 bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400',
+    borderClass: 'border-l-emerald-500',
+    badgeClassName:
+      'border-emerald-500/30 bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400',
+    progressColor: 'text-emerald-500',
+    progressTrack: 'text-emerald-100 dark:text-emerald-950',
   },
   ABANDONED: {
     label: 'Прерван',
     icon: XCircle,
-    className: 'border-red-500/20 hover:border-red-500/40',
-    badgeClassName: 'border-red-500/30 bg-red-50 dark:bg-red-950/30 text-red-700 dark:text-red-400',
+    borderClass: 'border-l-red-500',
+    badgeClassName:
+      'border-red-500/30 bg-red-50 dark:bg-red-950/30 text-red-700 dark:text-red-400',
+    progressColor: 'text-red-500',
+    progressTrack: 'text-red-100 dark:text-red-950',
   },
   TIMED_OUT: {
     label: 'Время истекло',
     icon: AlertCircle,
-    className: 'border-gray-500/20 hover:border-gray-500/40',
-    badgeClassName: 'border-gray-500/30 bg-gray-50 dark:bg-gray-950/30 text-gray-700 dark:text-gray-400',
+    borderClass: 'border-l-gray-400',
+    badgeClassName:
+      'border-gray-500/30 bg-gray-50 dark:bg-gray-950/30 text-gray-700 dark:text-gray-400',
+    progressColor: 'text-gray-400',
+    progressTrack: 'text-gray-100 dark:text-gray-900',
   },
 };
 
 /**
- * Test Card Component
- * Displays a single test session with status-specific styling and actions
+ * Test Card Component - Redesigned
+ *
+ * New layout features:
+ * - Status-colored left border for quick visual scanning
+ * - Action button in header row for immediate access
+ * - Circular progress for in-progress tests
+ * - Reduced redundancy and cleaner hierarchy
  */
 export function TestCard({ session, style, compact = false }: TestCardProps) {
   const config = STATUS_CONFIG[session.status];
@@ -93,7 +116,8 @@ export function TestCard({ session, style, compact = false }: TestCardProps) {
       case SessionStatus.NOT_STARTED:
         return {
           href: `/test-templates/${session.templateId}/start`,
-          label: 'Начать тест',
+          label: 'Начать',
+          labelFull: 'Начать тест',
           icon: PlayCircle,
           variant: 'default' as const,
         };
@@ -101,6 +125,7 @@ export function TestCard({ session, style, compact = false }: TestCardProps) {
         return {
           href: `/test-templates/take/${session.id}`,
           label: 'Продолжить',
+          labelFull: 'Продолжить',
           icon: ArrowRight,
           variant: 'default' as const,
         };
@@ -108,6 +133,7 @@ export function TestCard({ session, style, compact = false }: TestCardProps) {
         return {
           href: `/test-templates/results/${session.id}`,
           label: 'Результаты',
+          labelFull: 'Результаты',
           icon: Eye,
           variant: 'outline' as const,
         };
@@ -116,13 +142,15 @@ export function TestCard({ session, style, compact = false }: TestCardProps) {
         return {
           href: `/test-templates/${session.templateId}/start`,
           label: 'Повторить',
+          labelFull: 'Повторить',
           icon: RotateCcw,
           variant: 'secondary' as const,
         };
       default:
         return {
           href: '#',
-          label: 'Подробнее',
+          label: 'Открыть',
+          labelFull: 'Открыть',
           icon: ArrowRight,
           variant: 'outline' as const,
         };
@@ -131,222 +159,118 @@ export function TestCard({ session, style, compact = false }: TestCardProps) {
 
   const ActionIcon = actionConfig.icon;
 
-  // Compact mode renders without outer Card wrapper (for use inside TemplateGroup)
-  if (compact) {
-    return (
-      <div
-        className={cn(
-          "p-3 rounded-lg border transition-all duration-200 hover:shadow-md",
-          config.className
-        )}
-        style={style}
-      >
-        {/* Compact Header Row */}
-        <div className="flex items-center justify-between gap-2 flex-wrap mb-2">
-          <Badge variant="outline" className={cn("gap-1 text-xs", config.badgeClassName)}>
-            <StatusIcon className="size-3" />
-            {config.label}
-          </Badge>
-
-          {/* Score Badge for completed tests */}
-          {session.status === SessionStatus.COMPLETED && session.result && (
-            <Badge
-              variant="outline"
-              className={cn(
-                "gap-1 text-xs",
-                session.result.passed
-                  ? "border-emerald-500/30 bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400"
-                  : "border-red-500/30 bg-red-50 dark:bg-red-950/30 text-red-700 dark:text-red-400"
-              )}
-            >
-              {session.result.passed ? (
-                <Trophy className="size-3" />
-              ) : (
-                <Target className="size-3" />
-              )}
-              {Math.round(session.result.overallPercentage)}%
-            </Badge>
-          )}
-        </div>
-
-        {/* Compact Progress (IN_PROGRESS only) */}
-        {session.status === SessionStatus.IN_PROGRESS && progress && (
-          <div className="mb-3">
-            <Progress value={progress.percentage} className="h-1.5 mb-1" />
-            <p className="text-xs text-muted-foreground">
-              {progress.answeredCount}/{session.totalQuestions} вопросов
-            </p>
-          </div>
-        )}
-
-        {/* Compact Score Display (COMPLETED only) */}
-        {session.status === SessionStatus.COMPLETED && session.result && (
-          <div className="flex items-center gap-2 mb-3 p-2 rounded-md bg-muted/50">
-            <div className={cn(
-              "text-xl font-bold tabular-nums",
-              session.result.passed
-                ? "text-emerald-600 dark:text-emerald-400"
-                : "text-red-600 dark:text-red-400"
-            )}>
-              {Math.round(session.result.overallPercentage)}%
-            </div>
-            <div className="text-xs">
-              {session.result.passed ? (
-                <span className="text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
-                  <CheckCircle2 className="size-3" />
-                  Пройден
-                </span>
-              ) : (
-                <span className="text-red-600 dark:text-red-400 flex items-center gap-1">
-                  <XCircle className="size-3" />
-                  Не пройден
-                </span>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* Compact Date */}
-        <div className="flex items-center gap-1.5 text-xs text-muted-foreground mb-3">
-          <Calendar className="size-3" />
-          <span>
-            {session.status === SessionStatus.COMPLETED ? 'Завершен' : 'Создан'}:{' '}
-            {formatRelativeDate(session.status === SessionStatus.COMPLETED ? session.completedAt : session.createdAt)}
-          </span>
-        </div>
-
-        {/* Action Button */}
-        <Button
-          asChild
-          variant={actionConfig.variant}
-          size="sm"
-          className="w-full group touch-manipulation"
-        >
-          <Link href={actionConfig.href}>
-            <ActionIcon className="size-3.5 mr-1.5 transition-transform group-hover:translate-x-0.5" />
-            {actionConfig.label}
-            <ArrowRight className="size-3.5 ml-auto opacity-50 transition-transform group-hover:translate-x-1" />
-          </Link>
-        </Button>
-      </div>
-    );
-  }
-
-  // Full card mode (original implementation)
   return (
-    <Card
+    <div
       className={cn(
-        "overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1 animate-fadeInUp",
-        config.className
+        'relative overflow-hidden rounded-lg border bg-card transition-all duration-200',
+        'hover:shadow-md hover:-translate-y-0.5',
+        'border-l-4',
+        config.borderClass
       )}
       style={style}
     >
-      <CardHeader className="pb-3">
-        {/* Status Row */}
-        <div className="flex items-start justify-between gap-2 flex-wrap">
-          <Badge variant="outline" className={cn("gap-1.5", config.badgeClassName)}>
-            <StatusIcon className="size-3" />
+      <div className="p-4">
+        {/* Header Row: Status Badge + Action Button */}
+        <div className="flex items-center justify-between gap-3 mb-3">
+          <Badge variant="outline" className={cn('gap-1.5 text-xs font-medium', config.badgeClassName)}>
+            <StatusIcon className="size-3.5" />
             {config.label}
           </Badge>
 
-          {/* Score Badge for completed tests */}
+          <Button
+            asChild
+            variant={actionConfig.variant}
+            size="sm"
+            className="shrink-0 group h-8 px-3"
+          >
+            <Link
+              href={actionConfig.href}
+              aria-label={`${actionConfig.labelFull} - ${session.templateName}`}
+            >
+              <ActionIcon className="size-3.5 mr-1.5 transition-transform group-hover:scale-110" />
+              <span className="hidden xs:inline">{actionConfig.label}</span>
+              <span className="xs:hidden">{actionConfig.label}</span>
+            </Link>
+          </Button>
+        </div>
+
+        {/* Template Name (only in non-compact mode) */}
+        {!compact && (
+          <h3 className="font-semibold text-base line-clamp-1 mb-2">{session.templateName}</h3>
+        )}
+
+        {/* Content Row: Progress/Score + Metadata */}
+        <div className="flex items-center gap-4">
+          {/* IN_PROGRESS: Circular Progress */}
+          {session.status === SessionStatus.IN_PROGRESS && progress && (
+            <div className="flex items-center gap-3">
+              <CircularProgress
+                value={progress.percentage}
+                size={44}
+                strokeWidth={4}
+                progressClassName={config.progressColor}
+                trackClassName={config.progressTrack}
+              />
+              <div>
+                <p className="text-sm font-medium tabular-nums">
+                  {progress.answeredCount} из {session.totalQuestions}
+                </p>
+                <p className="text-xs text-muted-foreground">вопросов</p>
+              </div>
+            </div>
+          )}
+
+          {/* COMPLETED: Score Gauge */}
           {session.status === SessionStatus.COMPLETED && session.result && (
+            <ScoreGauge
+              score={session.result.overallPercentage}
+              passed={session.result.passed}
+              size={44}
+              showLabel={true}
+            />
+          )}
+
+          {/* NOT_STARTED: Question count */}
+          {session.status === SessionStatus.NOT_STARTED && session.totalQuestions && (
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <span className="tabular-nums">{session.totalQuestions} вопросов</span>
+              <span className="text-muted-foreground/50">•</span>
+              <span>{formatRelativeDate(session.createdAt)}</span>
+            </div>
+          )}
+
+          {/* ABANDONED/TIMED_OUT: Show date */}
+          {(session.status === SessionStatus.ABANDONED ||
+            session.status === SessionStatus.TIMED_OUT) && (
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <span>
+                {session.status === SessionStatus.ABANDONED ? 'Прерван' : 'Истекло'}:{' '}
+                {formatRelativeDate(session.completedAt || session.createdAt)}
+              </span>
+            </div>
+          )}
+
+          {/* Spacer */}
+          <div className="flex-1" />
+
+          {/* Score Badge for completed (compact additional indicator) */}
+          {session.status === SessionStatus.COMPLETED && session.result && compact && (
             <Badge
               variant="outline"
               className={cn(
-                "gap-1.5",
+                'gap-1 text-xs shrink-0',
                 session.result.passed
-                  ? "border-emerald-500/30 bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400"
-                  : "border-red-500/30 bg-red-50 dark:bg-red-950/30 text-red-700 dark:text-red-400"
+                  ? 'border-emerald-500/30 bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400'
+                  : 'border-red-500/30 bg-red-50 dark:bg-red-950/30 text-red-700 dark:text-red-400'
               )}
             >
-              {session.result.passed ? (
-                <Trophy className="size-3" />
-              ) : (
-                <Target className="size-3" />
-              )}
+              {session.result.passed ? <Trophy className="size-3" /> : <Target className="size-3" />}
               {Math.round(session.result.overallPercentage)}%
             </Badge>
           )}
         </div>
-
-        {/* Template Name */}
-        <CardTitle className="text-lg sm:text-xl line-clamp-2 mt-2">
-          {session.templateName}
-        </CardTitle>
-
-        {/* Description placeholder - can be added if templates have descriptions */}
-        {session.totalQuestions && (
-          <CardDescription className="line-clamp-1">
-            {session.totalQuestions} вопросов
-          </CardDescription>
-        )}
-      </CardHeader>
-
-      <CardContent className="pb-3 space-y-3">
-        {/* Progress Bar (IN_PROGRESS only) */}
-        {session.status === SessionStatus.IN_PROGRESS && progress && (
-          <div className="space-y-2">
-            <Progress value={progress.percentage} className="h-2" />
-            <p className="text-sm text-muted-foreground">
-              {progress.answeredCount}/{session.totalQuestions} вопросов ({progress.percentage}%)
-            </p>
-          </div>
-        )}
-
-        {/* Score Display (COMPLETED only) */}
-        {session.status === SessionStatus.COMPLETED && session.result && (
-          <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
-            <div className={cn(
-              "text-2xl sm:text-3xl font-bold tabular-nums",
-              session.result.passed
-                ? "text-emerald-600 dark:text-emerald-400"
-                : "text-red-600 dark:text-red-400"
-            )}>
-              {Math.round(session.result.overallPercentage)}%
-            </div>
-            <div className="text-sm">
-              {session.result.passed ? (
-                <span className="text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
-                  <CheckCircle2 className="size-4" />
-                  Тест пройден
-                </span>
-              ) : (
-                <span className="text-red-600 dark:text-red-400 flex items-center gap-1">
-                  <XCircle className="size-4" />
-                  Не пройден
-                </span>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* Timeline Metadata */}
-        <div className="flex flex-col sm:flex-row gap-2 text-xs text-muted-foreground">
-          <div className="flex items-center gap-1.5">
-            <Calendar className="size-3" />
-            <span>
-              {session.status === SessionStatus.COMPLETED ? 'Завершен' : 'Создан'}:{' '}
-              {formatRelativeDate(session.status === SessionStatus.COMPLETED ? session.completedAt : session.createdAt)}
-            </span>
-          </div>
-        </div>
-      </CardContent>
-
-      <CardFooter className="pt-0">
-        <Button
-          asChild
-          variant={actionConfig.variant}
-          className="w-full group touch-manipulation"
-        >
-          <Link href={actionConfig.href}>
-            <ActionIcon className="size-4 mr-2 transition-transform group-hover:translate-x-0.5" />
-            {actionConfig.label}
-            <ArrowRight className="size-4 ml-auto opacity-50 transition-transform group-hover:translate-x-1" />
-          </Link>
-        </Button>
-      </CardFooter>
-    </Card>
+      </div>
+    </div>
   );
 }
 

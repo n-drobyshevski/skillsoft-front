@@ -1,15 +1,19 @@
 'use client';
 
 import { useState } from 'react';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { ChevronDown, History } from 'lucide-react';
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/components/ui/collapsible';
+import { ChevronDown, History, Trophy } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { EnrichedTestSession } from './MyTestsContent';
 import { TestCard } from './TestCard';
 import { HistoryTestCard } from './HistoryTestCard';
-import { TemplateHeader, TemplateStats, calculateTemplateStats } from './TemplateHeader';
+import { TemplateStats, calculateTemplateStats } from './TemplateHeader';
 
 export interface TemplateGroupData {
   templateId: string;
@@ -26,60 +30,99 @@ interface TemplateGroupProps {
 }
 
 /**
- * Template Group Component
- * Groups test sessions by template with latest attempt prominently displayed
- * and previous attempts in a collapsible section
+ * Template Group Component - Simplified
+ *
+ * Redesigned to reduce visual nesting:
+ * - Removed outer Card wrapper
+ * - Simplified header to just template name + key stats
+ * - Cleaner collapsible history section
  */
 export function TemplateGroup({ group, defaultExpanded = false }: TemplateGroupProps) {
   const [isOpen, setIsOpen] = useState(defaultExpanded);
   const hasPreviousAttempts = group.previousSessions.length > 0;
+  const showBestScore = group.stats.bestScore !== null && group.stats.completedAttempts > 0;
 
   return (
-    <Card className="overflow-hidden">
-      <CardHeader className="pb-2 pt-4 px-4">
-        <TemplateHeader stats={group.stats} />
-      </CardHeader>
+    <div className="space-y-2">
+      {/* Simplified Header: Template Name + Key Stats */}
+      <div className="flex items-center justify-between gap-3 px-1">
+        <h3 className="font-semibold text-base truncate">{group.templateName}</h3>
 
-      <CardContent className="px-4 pb-4 space-y-3">
-        {/* Latest Attempt - Always Visible */}
-        <div className="relative">
-          <TestCard session={group.latestSession} compact />
+        <div className="flex items-center gap-2 shrink-0">
+          {/* Best Score (if any completed) */}
+          {showBestScore && (
+            <Badge
+              variant="outline"
+              className={cn(
+                'gap-1 text-xs',
+                group.stats.bestScore! >= 70
+                  ? 'border-emerald-500/30 bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400'
+                  : 'border-amber-500/30 bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-400'
+              )}
+            >
+              <Trophy className="size-3" />
+              {Math.round(group.stats.bestScore!)}%
+            </Badge>
+          )}
+
+          {/* Attempts count (only if multiple) */}
+          {group.stats.totalAttempts > 1 && (
+            <Badge variant="secondary" className="text-xs">
+              {group.stats.totalAttempts} {getAttemptsLabel(group.stats.totalAttempts)}
+            </Badge>
+          )}
         </div>
+      </div>
 
-        {/* Previous Attempts - Collapsible */}
-        {hasPreviousAttempts && (
-          <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-            <CollapsibleTrigger asChild>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="w-full justify-between h-9 px-3 text-muted-foreground hover:text-foreground"
-              >
-                <span className="flex items-center gap-2 text-xs">
-                  <History className="size-3.5" />
-                  {getPreviousAttemptsLabel(group.previousSessions.length)}
-                </span>
-                <ChevronDown
-                  className={cn(
-                    "size-4 transition-transform duration-200",
-                    isOpen && "rotate-180"
-                  )}
-                />
-              </Button>
-            </CollapsibleTrigger>
+      {/* Latest Attempt - Main Card */}
+      <TestCard session={group.latestSession} compact />
 
-            <CollapsibleContent className="data-[state=closed]:animate-collapsible-up data-[state=open]:animate-collapsible-down">
-              <div className="space-y-2 pt-2">
-                {group.previousSessions.map((session) => (
-                  <HistoryTestCard key={session.id} session={session} />
-                ))}
-              </div>
-            </CollapsibleContent>
-          </Collapsible>
-        )}
-      </CardContent>
-    </Card>
+      {/* Previous Attempts - Collapsible */}
+      {hasPreviousAttempts && (
+        <Collapsible open={isOpen} onOpenChange={setIsOpen}>
+          <CollapsibleTrigger asChild>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="w-full justify-between h-8 px-3 text-muted-foreground hover:text-foreground hover:bg-muted/50"
+            >
+              <span className="flex items-center gap-2 text-xs">
+                <History className="size-3.5" />
+                {getPreviousAttemptsLabel(group.previousSessions.length)}
+              </span>
+              <ChevronDown
+                className={cn(
+                  'size-4 transition-transform duration-200',
+                  isOpen && 'rotate-180'
+                )}
+              />
+            </Button>
+          </CollapsibleTrigger>
+
+          <CollapsibleContent className="overflow-hidden data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down">
+            <div className="space-y-2 pt-2">
+              {group.previousSessions.map(session => (
+                <HistoryTestCard key={session.id} session={session} />
+              ))}
+            </div>
+          </CollapsibleContent>
+        </Collapsible>
+      )}
+    </div>
   );
+}
+
+/**
+ * Get Russian plural form for attempts
+ */
+function getAttemptsLabel(count: number): string {
+  const lastTwo = count % 100;
+  const lastOne = count % 10;
+
+  if (lastTwo >= 11 && lastTwo <= 14) return 'попыток';
+  if (lastOne === 1) return 'попытка';
+  if (lastOne >= 2 && lastOne <= 4) return 'попытки';
+  return 'попыток';
 }
 
 /**

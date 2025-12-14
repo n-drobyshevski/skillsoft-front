@@ -499,6 +499,22 @@ html {
 	animation: shimmer 2s infinite;
 }
 
+/* Tab underline slide animation for TestDriveInsights */
+@keyframes tab-underline-slide {
+	from {
+		transform: scaleX(0);
+		opacity: 0;
+	}
+	to {
+		transform: scaleX(1);
+		opacity: 1;
+	}
+}
+
+.animate-tab-underline-slide {
+	animation: tab-underline-slide 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
 /* Modern focus styles */
 .focus-modern:focus {
 	outline: none;
@@ -1977,6 +1993,18 @@ textarea:focus-visible,
 	background: hsl(var(--background));
 	border: 2px solid hsl(var(--ring));
 	border-radius: var(--radius);
+}
+
+/* ===== SCROLLBAR UTILITIES ===== */
+
+/* Hide scrollbar but keep scrolling functionality */
+.scrollbar-hide {
+	-ms-overflow-style: none; /* IE and Edge */
+	scrollbar-width: none; /* Firefox */
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+	display: none; /* Chrome, Safari, Opera */
 }
 
 /* ===== ACCESSIBILITY: LIVE REGION UTILITIES ===== */

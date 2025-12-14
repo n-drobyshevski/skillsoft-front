@@ -1,8 +1,9 @@
 "use client";
 
 import React from "react";
-import { X, Clock } from "lucide-react";
+import { X, Clock, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import {
   AlertDialog,
@@ -16,6 +17,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { cn } from "@/lib/utils";
+import { useIsTestDriveMode } from "@/store/test-drive-store";
 
 interface SessionHeaderProps {
   currentQuestion: number;
@@ -35,6 +37,8 @@ export function SessionHeader({
   timeRemaining,
   onExit,
 }: SessionHeaderProps) {
+  const isTestDriveMode = useIsTestDriveMode();
+
   // Format time display
   const formatTime = (seconds: number): string => {
     const mins = Math.floor(seconds / 60);
@@ -47,9 +51,23 @@ export function SessionHeader({
   const isTimeCritical = timeRemaining !== null && timeRemaining <= 60; // 1 min
 
   return (
-    <header className="sticky top-0 z-50 bg-neutral-950/95 backdrop-blur-sm border-b border-neutral-800 pt-safe">
+    <header className={cn(
+      "sticky top-0 z-50 bg-neutral-950/95 backdrop-blur-sm border-b pt-safe",
+      isTestDriveMode ? "border-amber-500/30" : "border-neutral-800"
+    )}>
       <div className="max-w-4xl mx-auto px-3 sm:px-4 py-2 sm:py-3">
         <div className="flex items-center justify-between gap-2 sm:gap-4">
+          {/* Test-Drive Mode Badge */}
+          {isTestDriveMode && (
+            <Badge
+              variant="outline"
+              className="bg-amber-500/10 border-amber-500/30 text-amber-400 text-xs gap-1 shrink-0"
+            >
+              <Eye className="h-3 w-3" />
+              <span className="hidden sm:inline">Test-Drive Mode</span>
+              <span className="sm:hidden">TD</span>
+            </Badge>
+          )}
           {/* Exit Button */}
           <AlertDialog>
             <AlertDialogTrigger asChild>

@@ -47,6 +47,7 @@ export default function TestTakePage() {
   const searchParams = useSearchParams();
   const sessionId = params.sessionId as string;
   const templateId = searchParams.get('template');
+  const testDriveMode = searchParams.get('testDrive') === 'true';
   const { userId, isSignedIn, isLoaded } = useAuth();
 
   // Use Zustand store directly for immersive mode
@@ -490,6 +491,7 @@ export default function TestTakePage() {
       session={session}
       initialQuestion={currentQuestion}
       authHeaders={authHeaders}
+      testDriveMode={testDriveMode}
     />
   );
 }

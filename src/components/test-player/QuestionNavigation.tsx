@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { ChevronLeft, ChevronRight, CheckCircle, Loader2 } from 'lucide-react';
+import { ChevronLeft, ChevronRight, CheckCircle, Loader2, SkipForward } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Tooltip,
@@ -14,23 +14,34 @@ import { cn } from '@/lib/utils';
 interface QuestionNavigationProps {
   canGoBack: boolean;
   canGoForward: boolean;
+  canSkip: boolean;
   isLastQuestion: boolean;
   isSubmitting: boolean;
   onPrevious: () => void;
   onNext: () => void;
+  onSkip: () => void;
   validationError?: string | null;
 }
 
 /**
- * QuestionNavigation - Footer with back/next buttons
+ * QuestionNavigation - Footer with back/next/skip buttons
+ *
+ * Features:
+ * - Back button (when allowBackNavigation is enabled)
+ * - Skip button (when allowSkip is enabled and not on last question)
+ * - Next/Complete button
+ * - Validation error tooltips
+ * - Keyboard hints
  */
 export function QuestionNavigation({
   canGoBack,
   canGoForward,
+  canSkip,
   isLastQuestion,
   isSubmitting,
   onPrevious,
   onNext,
+  onSkip,
   validationError,
 }: QuestionNavigationProps) {
   const nextButtonContent = isSubmitting ? (
@@ -76,9 +87,30 @@ export function QuestionNavigation({
           Back
         </Button>
 
-        {/* Keyboard hint - desktop only */}
-        <div className="hidden md:flex items-center gap-2 text-xs text-neutral-600">
-          <kbd className="px-2 py-1 bg-neutral-800 rounded font-mono">Enter ↵</kbd>
+        {/* Center section with keyboard hints and skip button */}
+        <div className="flex items-center gap-2 sm:gap-4">
+          {/* Keyboard hint - desktop only */}
+          <div className="hidden md:flex items-center gap-2 text-xs text-neutral-600">
+            <kbd className="px-2 py-1 bg-neutral-800 rounded font-mono">Enter ↵</kbd>
+            {canSkip && !isLastQuestion && (
+              <kbd className="px-2 py-1 bg-neutral-800 rounded font-mono">S</kbd>
+            )}
+          </div>
+
+          {/* Skip Button - shown when skip is allowed and not on last question */}
+          {canSkip && !isLastQuestion && (
+            <Button
+              variant="ghost"
+              onClick={onSkip}
+              disabled={isSubmitting}
+              className="text-neutral-400 hover:text-neutral-200 hover:bg-neutral-800"
+              aria-label="Skip this question"
+            >
+              <SkipForward className="w-4 h-4 sm:mr-1" aria-hidden="true" />
+              {/* Hide label on very small screens, show only icon */}
+              <span className="hidden sm:inline">Пропустить</span>
+            </Button>
+          )}
         </div>
 
         {/* Next/Submit Button with Tooltip */}

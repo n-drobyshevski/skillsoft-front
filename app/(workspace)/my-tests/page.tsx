@@ -2,31 +2,25 @@ import { Suspense } from 'react';
 import { currentUser } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
 import { testSessionsApi, testResultsApi } from '@/services/api';
-import { MyTestsClientWrapper } from './_components/MyTestsClientWrapper';
-import { TestCardSkeleton } from './_components/TestCardSkeleton';
+import { MyTestsContent } from './_components/MyTestsContent';
+import { ContentSkeleton } from './_components/ContentSkeleton';
 import { ClipboardList } from 'lucide-react';
 
-/**
- * Loading skeleton while data is being fetched
- */
-function LoadingSkeleton() {
-  return (
-    <div className="space-y-6">
-      {/* Tabs skeleton */}
-      <div className="flex gap-2 border-b pb-2">
-        {[1, 2, 3, 4].map(i => (
-          <div key={i} className="h-9 w-24 bg-muted animate-pulse rounded-md" />
-        ))}
-      </div>
+// ISR: Revalidate every 60 seconds
+export const revalidate = 60;
 
-      {/* Cards skeleton */}
-      <div className="grid gap-4">
-        <TestCardSkeleton />
-        <TestCardSkeleton />
-        <TestCardSkeleton />
-      </div>
-    </div>
-  );
+// Page metadata
+export const metadata = {
+  title: 'Мои тесты | SkillSoft',
+  description: 'Просматривайте назначенные тесты и отслеживайте прогресс',
+};
+
+// Valid tab values for URL state
+type TabValue = 'all' | 'pending' | 'in_progress' | 'completed';
+const VALID_TABS: TabValue[] = ['all', 'pending', 'in_progress', 'completed'];
+
+interface PageProps {
+  searchParams: Promise<{ tab?: string }>;
 }
 
 /**
@@ -34,13 +28,21 @@ function LoadingSkeleton() {
  *
  * Displays all tests assigned to the current user with filtering by status.
  * Mobile-first responsive design with clean, modern UI.
+ * Uses URL-based tab state for better UX (bookmarkable, shareable).
  */
-export default async function MyTestsPage() {
+export default async function MyTestsPage({ searchParams }: PageProps) {
   const user = await currentUser();
 
   if (!user) {
     redirect('/sign-in');
   }
+
+  // Await searchParams (Next.js 15+ requirement)
+  const params = await searchParams;
+  const tabParam = params.tab;
+  const initialTab: TabValue = VALID_TABS.includes(tabParam as TabValue)
+    ? (tabParam as TabValue)
+    : 'all';
 
   return (
     <div className="min-h-screen bg-background">
@@ -61,8 +63,8 @@ export default async function MyTestsPage() {
         </header>
 
         {/* Main Content with Suspense */}
-        <Suspense fallback={<LoadingSkeleton />}>
-          <TestsDataLoader userId={user.id} />
+        <Suspense fallback={<ContentSkeleton />}>
+          <TestsDataLoader userId={user.id} initialTab={initialTab} />
         </Suspense>
       </div>
     </div>
@@ -71,8 +73,15 @@ export default async function MyTestsPage() {
 
 /**
  * Server component that fetches test data
+ * Fetches sessions and results in parallel for optimal performance
  */
-async function TestsDataLoader({ userId }: { userId: string }) {
+async function TestsDataLoader({
+  userId,
+  initialTab,
+}: {
+  userId: string;
+  initialTab: TabValue;
+}) {
   // Fetch user sessions and results in parallel
   const [sessionsResponse, resultsResponse] = await Promise.all([
     testSessionsApi.getUserSessions(userId, 0, 100),
@@ -83,9 +92,7 @@ async function TestsDataLoader({ userId }: { userId: string }) {
   const results = resultsResponse?.content || [];
 
   // Create a map of session ID to result for quick lookup
-  const resultsBySessionId = new Map(
-    results.map(r => [r.sessionId, r])
-  );
+  const resultsBySessionId = new Map(results.map(r => [r.sessionId, r]));
 
   // Enrich sessions with their results
   const enrichedSessions = sessions.map(session => ({
@@ -93,5 +100,5 @@ async function TestsDataLoader({ userId }: { userId: string }) {
     result: resultsBySessionId.get(session.id) || null,
   }));
 
-  return <MyTestsClientWrapper sessions={enrichedSessions} />;
+  return <MyTestsContent sessions={enrichedSessions} initialTab={initialTab} />;
 }

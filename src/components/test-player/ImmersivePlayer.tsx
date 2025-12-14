@@ -5,11 +5,21 @@ import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { TestSession, SessionQuestion, CurrentQuestionResponse, TestAnswer, SubmitAnswerRequest, QuestionType } from '@/types/domain';
 import { testSessionsClientApi, type ApiError } from '@/services/api.client';
-import { SessionHeader } from '@/components/layout/session-header';
+import { competenciesApi, behavioralIndicatorsApi } from '@/services/api';
+import { EnhancedSessionHeader } from '@/components/layout/enhanced-session-header';
 import { QuestionCard, MIN_CHARS_OPEN_TEXT, MIN_CHARS_BEHAVIORAL } from './QuestionCard';
 import { QuestionNavigation } from './QuestionNavigation';
 import { CompletionDialog } from './CompletionDialog';
+import { AnswerSummaryScreen } from './answer-summary';
 import { useUIStore } from '@/store/ui-store';
+import { useTestDriveStore } from '@/store/test-drive-store';
+import {
+  useReviewStore,
+  AnswerSummaryItem,
+  CompetencyGroup,
+  createAnswerSummaryItem,
+  isRetryableError as isRetryableSubmissionError,
+} from '@/store/review-store';
 import { toast } from 'sonner';
 import { retryWithBackoff, getUserFriendlyErrorMessage, isRetryableError } from '@/utils/retry';
 import { useSwipeNavigation, useReducedMotion } from '@/hooks/use-swipe-navigation';
@@ -26,12 +36,18 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { Clock, AlertTriangle } from 'lucide-react';
+import { TestDriveInsights, InsightsToggle } from './insights';
 
 interface ImmersivePlayerProps {
   session: TestSession;
   initialQuestion: CurrentQuestionResponse;
   authHeaders: Record<string, string>;
+  /** Enable test-drive mode for HR insights panel */
+  testDriveMode?: boolean;
 }
+
+/** Question state for progress tracking */
+export type QuestionState = 'answered' | 'skipped' | 'current' | 'pending';
 
 interface PlayerState {
   currentQuestion: SessionQuestion | null;
@@ -44,6 +60,8 @@ interface PlayerState {
   isSubmitting: boolean;
   direction: 'forward' | 'backward';
   answeredCount: number;
+  skippedCount: number;
+  questionStates: QuestionState[];
 }
 
 /**
@@ -58,13 +76,32 @@ interface PlayerState {
  * - Error handling with retry
  * - Multiple dialog states
  */
-export function ImmersivePlayer({ session, initialQuestion, authHeaders }: ImmersivePlayerProps) {
+export function ImmersivePlayer({ session, initialQuestion, authHeaders, testDriveMode = false }: ImmersivePlayerProps) {
   const router = useRouter();
   const enterImmersiveMode = useUIStore((state) => state.enterImmersiveMode);
   const exitImmersiveMode = useUIStore((state) => state.exitImmersiveMode);
 
+  // Test-drive mode store actions
+  const enableTestDrive = useTestDriveStore((state) => state.enableTestDriveMode);
+  const disableTestDrive = useTestDriveStore((state) => state.disableTestDriveMode);
+  const setCurrentQuestionData = useTestDriveStore((state) => state.setCurrentQuestionData);
+
+  // Initialize question states based on session progress
+  const initializeQuestionStates = (totalQuestions: number, currentIndex: number, answeredQuestions: number): QuestionState[] => {
+    const states: QuestionState[] = Array.from({ length: totalQuestions }, () => 'pending' as QuestionState);
+    // Mark questions before current as answered (simplified - actual state comes from session)
+    for (let i = 0; i < Math.min(currentIndex, answeredQuestions); i++) {
+      states[i] = 'answered';
+    }
+    // Mark current question
+    if (currentIndex < totalQuestions) {
+      states[currentIndex] = 'current';
+    }
+    return states;
+  };
+
   // Player state
-  const [state, setState] = useState<PlayerState>({
+  const [state, setState] = useState<PlayerState>(() => ({
     currentQuestion: initialQuestion.question,
     questionIndex: initialQuestion.questionIndex,
     totalQuestions: initialQuestion.totalQuestions,
@@ -75,7 +112,13 @@ export function ImmersivePlayer({ session, initialQuestion, authHeaders }: Immer
     isSubmitting: false,
     direction: 'forward',
     answeredCount: session.answeredQuestions,
-  });
+    skippedCount: 0,
+    questionStates: initializeQuestionStates(
+      initialQuestion.totalQuestions,
+      initialQuestion.questionIndex,
+      session.answeredQuestions
+    ),
+  }));
 
   // Current answer value
   const [currentAnswer, setCurrentAnswer] = useState<string | number | string[] | undefined>(() => {
@@ -105,6 +148,20 @@ export function ImmersivePlayer({ session, initialQuestion, authHeaders }: Immer
   const [showAbandonDialog, setShowAbandonDialog] = useState(false);
   const [showTimeoutDialog, setShowTimeoutDialog] = useState(false);
 
+  // Answer Summary Review state
+  const [showSummary, setShowSummary] = useState(false);
+  const [summaryAnswers, setSummaryAnswers] = useState<AnswerSummaryItem[]>([]);
+  const [summaryGroups, setSummaryGroups] = useState<CompetencyGroup[]>([]);
+  const [isSummarySubmitting, setIsSummarySubmitting] = useState(false);
+
+  // Review store actions
+  const enterReviewPhase = useReviewStore((state) => state.enterReviewPhase);
+  const exitEditPhase = useReviewStore((state) => state.exitEditPhase);
+  const startSubmission = useReviewStore((state) => state.startSubmission);
+  const completeSubmission = useReviewStore((state) => state.completeSubmission);
+  const failSubmission = useReviewStore((state) => state.failSubmission);
+  const resetReviewStore = useReviewStore((state) => state.reset);
+
   // Validation state
   const [validationError, setValidationError] = useState<string | null>(null);
 
@@ -123,6 +180,89 @@ export function ImmersivePlayer({ session, initialQuestion, authHeaders }: Immer
     enterImmersiveMode();
     return () => exitImmersiveMode();
   }, [enterImmersiveMode, exitImmersiveMode]);
+
+  // Enable/disable test-drive mode based on prop
+  useEffect(() => {
+    if (testDriveMode) {
+      enableTestDrive();
+    }
+    return () => {
+      if (testDriveMode) {
+        disableTestDrive();
+      }
+    };
+  }, [testDriveMode, enableTestDrive, disableTestDrive]);
+
+  // Update test-drive question data when current question changes
+  useEffect(() => {
+    const question = state.currentQuestion;
+    if (!testDriveMode || !question) return;
+
+    // Set initial data immediately with loading placeholders
+    setCurrentQuestionData({
+      question: question,
+      psychometrics: {
+        difficultyIndex: question.difficultyLevel === 'FOUNDATIONAL' ? 0.8
+          : question.difficultyLevel === 'INTERMEDIATE' ? 0.6
+          : question.difficultyLevel === 'ADVANCED' ? 0.4
+          : question.difficultyLevel === 'EXPERT' ? 0.25
+          : 0.5,
+        discriminationIndex: 0.35,
+      },
+      scoring: {
+        maxScore: question.answerOptions?.reduce((max, opt) =>
+          Math.max(max, opt.score ?? opt.value ?? 0), 0) ?? 5,
+        optionScores: question.answerOptions?.reduce((acc, opt, idx) => {
+          const optId = opt.id || `option-${idx}`;
+          acc[optId] = opt.score ?? opt.value ?? 0;
+          return acc;
+        }, {} as Record<string, number>),
+      },
+    });
+
+    // Fetch full competency and behavioral indicator data
+    const fetchHierarchyData = async () => {
+      try {
+        // First fetch the behavioral indicator
+        const indicator = await behavioralIndicatorsApi.getIndicatorById(question.behavioralIndicatorId);
+
+        // Then fetch the competency using competencyId from question or indicator
+        const competencyId = question.competencyId || indicator?.competencyId;
+        const competency = competencyId
+          ? await competenciesApi.getCompetencyById(competencyId)
+          : null;
+
+        // Update store with full data
+        setCurrentQuestionData({
+          question: question,
+          behavioralIndicator: indicator || undefined,
+          competency: competency || undefined,
+          psychometrics: {
+            difficultyIndex: question.difficultyLevel === 'FOUNDATIONAL' ? 0.8
+              : question.difficultyLevel === 'INTERMEDIATE' ? 0.6
+              : question.difficultyLevel === 'ADVANCED' ? 0.4
+              : question.difficultyLevel === 'EXPERT' ? 0.25
+              : 0.5,
+            discriminationIndex: 0.35,
+          },
+          scoring: {
+            maxScore: question.answerOptions?.reduce((max, opt) =>
+              Math.max(max, opt.score ?? opt.value ?? 0), 0) ?? 5,
+            optionScores: question.answerOptions?.reduce((acc, opt, idx) => {
+              const optId = opt.id || `option-${idx}`;
+              acc[optId] = opt.score ?? opt.value ?? 0;
+              return acc;
+            }, {} as Record<string, number>),
+          },
+        });
+      } catch (error) {
+        console.error('Failed to fetch test-drive hierarchy data:', error);
+        // Keep the basic data already set
+      }
+    };
+
+    fetchHierarchyData();
+  }, [testDriveMode, state.currentQuestion, setCurrentQuestionData]);
 
   // Timer countdown
   useEffect(() => {
@@ -143,9 +283,6 @@ export function ImmersivePlayer({ session, initialQuestion, authHeaders }: Immer
   }, [timeRemaining, handleTimeExpired]);
 
   const currentQuestion = state.currentQuestion;
-  const progress = state.totalQuestions > 0
-    ? ((state.questionIndex + 1) / state.totalQuestions) * 100
-    : 0;
 
   /**
    * Validate current answer based on question type
@@ -412,13 +549,28 @@ export function ImmersivePlayer({ session, initialQuestion, authHeaders }: Immer
       if (currentQuestion && currentAnswer !== undefined) {
         const request = buildAnswerRequest(currentAnswer);
         await testSessionsClientApi.submitAnswer(session.id, request, authHeaders);
-        setState(prev => ({ ...prev, answeredCount: prev.answeredCount + 1 }));
+
+        // Update question states - mark current as answered
+        setState(prev => {
+          const newQuestionStates = [...prev.questionStates];
+          newQuestionStates[prev.questionIndex] = 'answered';
+          const nextIndex = prev.questionIndex + 1;
+          if (nextIndex < prev.totalQuestions) {
+            newQuestionStates[nextIndex] = 'current';
+          }
+          return {
+            ...prev,
+            answeredCount: prev.answeredCount + 1,
+            questionStates: newQuestionStates,
+          };
+        });
       }
 
-      // Check if last question
+      // Check if last question - show answer summary instead of completion dialog
       if (state.questionIndex + 1 >= state.totalQuestions) {
-        setShowCompletion(true);
         setState(prev => ({ ...prev, isSubmitting: false }));
+        // Enter answer summary review screen
+        await handleEnterSummary();
         return;
       }
 
@@ -452,6 +604,7 @@ export function ImmersivePlayer({ session, initialQuestion, authHeaders }: Immer
     }
 
     setState(prev => ({ ...prev, isSubmitting: false }));
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- handleEnterSummary is defined after handleNext but stable
   }, [state.isSubmitting, state.questionIndex, state.totalQuestions, currentQuestion, currentAnswer, buildAnswerRequest, session.id, loadQuestion, authHeaders, validateAnswer, router]);
 
   /**
@@ -490,6 +643,122 @@ export function ImmersivePlayer({ session, initialQuestion, authHeaders }: Immer
 
     setState(prev => ({ ...prev, isSubmitting: false }));
   }, [state.allowBackNavigation, state.isSubmitting, state.questionIndex, session.id, loadQuestion, authHeaders, router]);
+
+  /**
+   * Navigate to a specific question by index (for dot navigation)
+   */
+  const handleNavigateToQuestion = useCallback(async (targetIndex: number) => {
+    if (!state.allowBackNavigation || state.isSubmitting) return;
+    if (targetIndex === state.questionIndex) return;
+    if (targetIndex < 0 || targetIndex >= state.totalQuestions) return;
+
+    // Only allow navigation to previously visited questions
+    const targetState = state.questionStates[targetIndex];
+    if (targetState === 'pending') return;
+
+    setState(prev => ({ ...prev, isSubmitting: true }));
+
+    const direction = targetIndex > state.questionIndex ? 'forward' : 'backward';
+
+    try {
+      await testSessionsClientApi.navigateToQuestion(session.id, targetIndex, authHeaders);
+      await loadQuestion(direction);
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error('Failed to navigate to question:', error);
+      const apiError = error as ApiError;
+
+      if (apiError.status === 400 || apiError.status === 403) {
+        const errorMessage = apiError.message || '';
+        if (errorMessage.toLowerCase().includes('abandon')) {
+          toast.error('Сессия была отменена');
+          router.push('/test-templates');
+          return;
+        } else if (errorMessage.toLowerCase().includes('complet')) {
+          toast.info('Тест уже завершён');
+          router.push('/test-templates');
+          return;
+        }
+      }
+
+      toast.error('Не удалось перейти к вопросу');
+    }
+
+    setState(prev => ({ ...prev, isSubmitting: false }));
+  }, [state.allowBackNavigation, state.isSubmitting, state.questionIndex, state.totalQuestions, state.questionStates, session.id, loadQuestion, authHeaders, router]);
+
+  /**
+   * Skip current question without answering
+   */
+  const handleSkip = useCallback(async () => {
+    if (!state.allowSkip || state.isSubmitting) return;
+
+    // Cannot skip the last question - must answer or go back
+    if (state.questionIndex + 1 >= state.totalQuestions) {
+      toast.warning('Последний вопрос нельзя пропустить');
+      return;
+    }
+
+    setState(prev => ({ ...prev, isSubmitting: true }));
+
+    try {
+      // Submit answer with skip flag
+      if (currentQuestion) {
+        const request: SubmitAnswerRequest = {
+          sessionId: session.id,
+          questionId: currentQuestion.id,
+          timeSpentSeconds: Math.floor((Date.now() - questionStartTime.current) / 1000),
+          skip: true,
+        };
+        await testSessionsClientApi.submitAnswer(session.id, request, authHeaders);
+      }
+
+      // Update question states - mark current as skipped
+      setState(prev => {
+        const newQuestionStates = [...prev.questionStates];
+        newQuestionStates[prev.questionIndex] = 'skipped';
+        const nextIndex = prev.questionIndex + 1;
+        if (nextIndex < prev.totalQuestions) {
+          newQuestionStates[nextIndex] = 'current';
+        }
+        return {
+          ...prev,
+          skippedCount: prev.skippedCount + 1,
+          questionStates: newQuestionStates,
+        };
+      });
+
+      // Navigate to next question
+      const nextIndex = state.questionIndex + 1;
+      await testSessionsClientApi.navigateToQuestion(session.id, nextIndex, authHeaders);
+      await loadQuestion('forward');
+
+      // Clear answer for next question
+      setCurrentAnswer(undefined);
+      setValidationError(null);
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error('Failed to skip question:', error);
+      const apiError = error as ApiError;
+
+      if (apiError.status === 400 || apiError.status === 403) {
+        const errorMessage = apiError.message || '';
+        if (errorMessage.toLowerCase().includes('abandon')) {
+          toast.error('Сессия была отменена');
+          router.push('/test-templates');
+          return;
+        } else if (errorMessage.toLowerCase().includes('complet')) {
+          toast.info('Тест уже завершён');
+          router.push('/test-templates');
+          return;
+        }
+      }
+
+      toast.error('Не удалось пропустить вопрос');
+    }
+
+    setState(prev => ({ ...prev, isSubmitting: false }));
+  }, [state.allowSkip, state.isSubmitting, state.questionIndex, state.totalQuestions, currentQuestion, session.id, loadQuestion, authHeaders, router]);
 
   /**
    * Handle test completion
@@ -537,6 +806,192 @@ export function ImmersivePlayer({ session, initialQuestion, authHeaders }: Immer
     }
   }, [session.id, authHeaders, router]);
 
+  /**
+   * Enter answer summary review screen
+   * Fetches all answers and builds summary items for display
+   */
+  const handleEnterSummary = useCallback(async () => {
+    setState(prev => ({ ...prev, isSubmitting: true }));
+
+    try {
+      // Fetch all answers for the session
+      const answers = await testSessionsClientApi.getSessionAnswers(session.id, authHeaders);
+
+      // Build answer summary items from answers
+      // Each answer has questionId which maps to the question order
+      const summaryItems: AnswerSummaryItem[] = [];
+      const competencyCache = new Map<string, string>(); // competencyId -> competencyName
+
+      // Create a map of questionId to answer for quick lookup
+      const answerMap = new Map(answers.map(a => [a.questionId, a]));
+
+      // Build summary items for each question in order
+      for (let i = 0; i < session.questionOrder.length; i++) {
+        const questionId = session.questionOrder[i];
+        const answer = answerMap.get(questionId) || null;
+
+        // Create summary item with minimal data from the answer
+        // We don't have full question text from the answers endpoint,
+        // so we use placeholder text that will show question number
+        summaryItems.push({
+          questionId,
+          questionIndex: i,
+          questionText: `Вопрос ${i + 1}`, // Placeholder - could be enhanced with batch question fetch
+          questionType: 'LIKERT' as QuestionType, // Default type
+          behavioralIndicatorId: '',
+          answer,
+          answerDisplayText: formatAnswerForSummary(answer),
+          status: answer?.isSkipped ? 'skipped' : answer ? 'answered' : 'pending',
+          timeSpentSeconds: answer?.timeSpentSeconds || 0,
+          answeredAt: answer?.answeredAt || null,
+        });
+      }
+
+      // Group by competency (will mostly be "Other" since we don't have competency data)
+      const groups = groupAnswersByCompetency(summaryItems);
+
+      // Update state
+      setSummaryAnswers(summaryItems);
+      setSummaryGroups(groups);
+      setShowSummary(true);
+      enterReviewPhase(session.id, summaryItems);
+
+    } catch (error) {
+      console.error('Failed to load answer summary:', error);
+      toast.error('Не удалось загрузить сводку ответов');
+      // Fallback to completion dialog
+      setShowCompletion(true);
+    }
+
+    setState(prev => ({ ...prev, isSubmitting: false }));
+  }, [session.id, session.questionOrder, authHeaders, enterReviewPhase]);
+
+  /**
+   * Format answer for display in summary
+   */
+  const formatAnswerForSummary = (answer: TestAnswer | null): string => {
+    if (!answer || answer.isSkipped) {
+      return 'Пропущено';
+    }
+
+    if (answer.likertValue !== undefined) {
+      return `${answer.likertValue}/5`;
+    }
+
+    if (answer.selectedOptionIds?.length) {
+      return `Выбрано: ${answer.selectedOptionIds.length}`;
+    }
+
+    if (answer.textResponse) {
+      return answer.textResponse.substring(0, 50) + (answer.textResponse.length > 50 ? '...' : '');
+    }
+
+    return 'Ответ дан';
+  };
+
+  /**
+   * Group answers by competency for summary display
+   */
+  const groupAnswersByCompetency = (items: AnswerSummaryItem[]): CompetencyGroup[] => {
+    const groups = new Map<string, CompetencyGroup>();
+
+    for (const item of items) {
+      const competencyId = item.competencyId || 'uncategorized';
+      const competencyName = item.competencyName || 'Другие вопросы';
+
+      if (!groups.has(competencyId)) {
+        groups.set(competencyId, {
+          competencyId,
+          competencyName,
+          items: [],
+          answeredCount: 0,
+          skippedCount: 0,
+        });
+      }
+
+      const group = groups.get(competencyId)!;
+      group.items.push(item);
+
+      if (item.status === 'answered') {
+        group.answeredCount++;
+      } else if (item.status === 'skipped') {
+        group.skippedCount++;
+      }
+    }
+
+    return Array.from(groups.values()).sort((a, b) => {
+      if (a.competencyId === 'uncategorized') return 1;
+      if (b.competencyId === 'uncategorized') return -1;
+      return a.competencyName.localeCompare(b.competencyName);
+    });
+  };
+
+  /**
+   * Handle editing an answer from the summary screen
+   * Navigates back to the specific question
+   */
+  const handleEditFromSummary = useCallback(async (questionId: string, questionIndex: number) => {
+    setShowSummary(false);
+
+    setState(prev => ({ ...prev, isSubmitting: true }));
+
+    try {
+      // Navigate to the question
+      await testSessionsClientApi.navigateToQuestion(session.id, questionIndex, authHeaders);
+      await loadQuestion(questionIndex < state.questionIndex ? 'backward' : 'forward');
+
+      // Mark that we came from summary (for return behavior)
+      // The user can use the normal navigation to go back through questions
+      // and then click "Next" on the last question to return to summary
+    } catch (error) {
+      console.error('Failed to navigate to question for edit:', error);
+      toast.error('Не удалось перейти к вопросу');
+      // Return to summary on error
+      setShowSummary(true);
+    }
+
+    setState(prev => ({ ...prev, isSubmitting: false }));
+  }, [session.id, authHeaders, state.questionIndex, loadQuestion]);
+
+  /**
+   * Handle going back from summary to continue answering
+   */
+  const handleGoBackFromSummary = useCallback(() => {
+    setShowSummary(false);
+    resetReviewStore();
+  }, [resetReviewStore]);
+
+  /**
+   * Handle submission from the summary screen
+   */
+  const handleSubmitFromSummary = useCallback(async () => {
+    setIsSummarySubmitting(true);
+    startSubmission();
+
+    try {
+      const result = await testSessionsClientApi.completeSession(session.id, authHeaders);
+      completeSubmission();
+      router.push(`/test-templates/results/${result.id}`);
+    } catch (error) {
+      console.error('Failed to complete session from summary:', error);
+      const apiError = error as ApiError;
+
+      failSubmission({
+        code: apiError.code,
+        message: apiError.message || 'Не удалось завершить тест',
+        isRetryable: isRetryableSubmissionError(apiError.status, apiError.code),
+        timestamp: Date.now(),
+      });
+
+      toast.error('Не удалось завершить тест');
+    }
+
+    setIsSummarySubmitting(false);
+  }, [session.id, authHeaders, router, startSubmission, completeSubmission, failSubmission]);
+
+  // Check if skip is available (not last question and allowSkip is enabled)
+  const canSkip = state.allowSkip && state.questionIndex + 1 < state.totalQuestions;
+
   // Keyboard navigation
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -560,6 +1015,14 @@ export function ImmersivePlayer({ session, initialQuestion, authHeaders }: Immer
         case 'ArrowLeft':
           handlePrevious();
           break;
+        case 's':
+        case 'S':
+          // Skip question with 'S' key (when skip is allowed)
+          if (canSkip && !state.isSubmitting) {
+            e.preventDefault();
+            handleSkip();
+          }
+          break;
         case 'Escape':
           // Could show exit confirmation
           break;
@@ -568,7 +1031,7 @@ export function ImmersivePlayer({ session, initialQuestion, authHeaders }: Immer
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isAnswerValid, handleNext, handlePrevious]);
+  }, [isAnswerValid, handleNext, handlePrevious, handleSkip, canSkip, state.isSubmitting]);
 
   // Responsive settings
   const isMobile = useIsMobile();
@@ -632,15 +1095,35 @@ export function ImmersivePlayer({ session, initialQuestion, authHeaders }: Immer
     );
   }
 
+  // Render Answer Summary Screen when in review mode
+  if (showSummary) {
+    return (
+      <AnswerSummaryScreen
+        session={session}
+        answers={summaryAnswers}
+        competencyGroups={summaryGroups}
+        timeRemaining={timeRemaining}
+        onGoBack={handleGoBackFromSummary}
+        onSubmit={handleSubmitFromSummary}
+        onEditAnswer={handleEditFromSummary}
+        isSubmitting={isSummarySubmitting}
+      />
+    );
+  }
+
   return (
     <div className="min-h-screen min-h-[100dvh] bg-neutral-950 flex flex-col safe-area-inset-all">
-      {/* Session Header */}
-      <SessionHeader
+      {/* Enhanced Session Header - unified progress display */}
+      <EnhancedSessionHeader
+        testName={session.templateName}
         currentQuestion={state.questionIndex + 1}
         totalQuestions={state.totalQuestions}
-        progress={progress}
+        questionStates={state.questionStates}
         timeRemaining={timeRemaining}
+        allowNavigation={state.allowBackNavigation}
+        allowSkip={state.allowSkip}
         onExit={handleExit}
+        onNavigate={handleNavigateToQuestion}
       />
 
       {/* Main Content - responsive padding for mobile with swipe support */}
@@ -704,10 +1187,12 @@ export function ImmersivePlayer({ session, initialQuestion, authHeaders }: Immer
       <QuestionNavigation
         canGoBack={state.allowBackNavigation && state.questionIndex > 0}
         canGoForward={isAnswerValid}
+        canSkip={canSkip}
         isLastQuestion={state.questionIndex + 1 >= state.totalQuestions}
         isSubmitting={state.isSubmitting}
         onPrevious={handlePrevious}
         onNext={handleNext}
+        onSkip={handleSkip}
         validationError={validationError}
       />
 
@@ -718,6 +1203,7 @@ export function ImmersivePlayer({ session, initialQuestion, authHeaders }: Immer
         onComplete={handleComplete}
         answeredCount={state.answeredCount}
         totalQuestions={state.totalQuestions}
+        skippedCount={state.skippedCount}
         isSubmitting={state.isSubmitting}
       />
 
@@ -764,6 +1250,10 @@ export function ImmersivePlayer({ session, initialQuestion, authHeaders }: Immer
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Test-Drive Mode Components */}
+      <InsightsToggle />
+      <TestDriveInsights />
     </div>
   );
 }
