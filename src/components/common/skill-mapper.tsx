@@ -229,7 +229,7 @@ const SkillDetailsPanel = memo(function SkillDetailsPanel({
           <h2 className={cn("font-semibold", isDrawer ? "text-base" : "text-lg")}>{skill.name}</h2>
         </div>
         {!isDrawer && (
-          <Button variant="ghost" size="icon" onClick={onClose} className="min-w-11 min-h-11 touch-manipulation">
+          <Button variant="ghost" size="icon" onClick={onClose} className="min-w-11 min-h-11 touch-manipulation" aria-label="Close skill details">
             <X className="h-4 w-4" />
           </Button>
         )}
@@ -747,10 +747,11 @@ export function SkillMapper({
               <div className="flex items-center justify-between">
                 <DrawerTitle className="text-base">Skill Details</DrawerTitle>
                 <DrawerClose asChild>
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
+                  <Button
+                    variant="ghost"
+                    size="icon"
                     className="min-w-11 min-h-11 touch-manipulation active:scale-[0.95]"
+                    aria-label="Close skill details"
                   >
                     <X className="h-5 w-5" />
                   </Button>

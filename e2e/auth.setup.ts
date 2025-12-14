@@ -1,4 +1,4 @@
-import { test as setup, expect } from '@playwright/test';
+import { test as setup, expect, type Page } from '@playwright/test';
 import path from 'path';
 import fs from 'fs';
 
@@ -26,7 +26,7 @@ setup.describe.configure({ mode: 'serial' });
  * Helper function to perform Clerk login.
  */
 async function clerkLogin(
-  page: typeof setup extends (title: string, fn: (args: infer T) => unknown) => unknown ? T['page'] : never,
+  page: Page,
   email: string,
   password: string
 ): Promise<void> {

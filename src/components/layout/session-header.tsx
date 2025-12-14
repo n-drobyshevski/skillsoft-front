@@ -47,9 +47,9 @@ export function SessionHeader({
   const isTimeCritical = timeRemaining !== null && timeRemaining <= 60; // 1 min
 
   return (
-    <header className="sticky top-0 z-50 bg-neutral-950/95 backdrop-blur-sm border-b border-neutral-800">
-      <div className="max-w-4xl mx-auto px-4 py-3">
-        <div className="flex items-center justify-between gap-4">
+    <header className="sticky top-0 z-50 bg-neutral-950/95 backdrop-blur-sm border-b border-neutral-800 pt-safe">
+      <div className="max-w-4xl mx-auto px-3 sm:px-4 py-2 sm:py-3">
+        <div className="flex items-center justify-between gap-2 sm:gap-4">
           {/* Exit Button */}
           <AlertDialog>
             <AlertDialogTrigger asChild>
@@ -84,11 +84,16 @@ export function SessionHeader({
           </AlertDialog>
 
           {/* Progress Section */}
-          <div className="flex-1 flex items-center gap-4">
-            {/* Question Counter */}
-            <span className="text-sm text-neutral-400 whitespace-nowrap min-w-[4rem]">
+          <div className="flex-1 flex items-center gap-2 sm:gap-4">
+            {/* Question Counter - announced to screen readers */}
+            <span
+              className="text-xs sm:text-sm text-neutral-400 whitespace-nowrap min-w-[3rem] sm:min-w-[4rem]"
+              aria-live="polite"
+              aria-atomic="true"
+              aria-label={`Question ${currentQuestion || 0} of ${totalQuestions || 0}`}
+            >
               <span className="text-white font-medium">{currentQuestion || 0}</span>
-              <span className="mx-1">/</span>
+              <span className="mx-0.5 sm:mx-1">/</span>
               <span>{totalQuestions || 0}</span>
             </span>
 
@@ -96,25 +101,30 @@ export function SessionHeader({
             <div className="flex-1 max-w-md">
               <Progress
                 value={progress}
-                className="h-2 bg-neutral-800"
+                className="h-1.5 sm:h-2 bg-neutral-800"
+                aria-label={`Assessment progress: ${Math.round(progress)}% complete`}
               />
             </div>
           </div>
 
-          {/* Timer */}
+          {/* Timer - announces when time is low */}
           {timeRemaining !== null && (
             <div
               className={cn(
-                "flex items-center gap-2 px-3 py-1.5 rounded-lg transition-colors",
+                "flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg transition-colors",
                 isTimeCritical
                   ? "bg-red-500/20 text-red-400 animate-pulse"
                   : isTimeWarning
                   ? "bg-amber-500/20 text-amber-400"
                   : "bg-neutral-800 text-neutral-300"
               )}
+              role="timer"
+              aria-live={isTimeCritical ? "assertive" : isTimeWarning ? "polite" : "off"}
+              aria-atomic="true"
+              aria-label={`Time remaining: ${formatTime(timeRemaining)}${isTimeCritical ? ', less than 1 minute remaining' : isTimeWarning ? ', less than 5 minutes remaining' : ''}`}
             >
-              <Clock className="h-4 w-4" />
-              <span className="font-mono font-medium text-sm">
+              <Clock className="h-3.5 w-3.5 sm:h-4 sm:w-4" aria-hidden="true" />
+              <span className="font-mono font-medium text-xs sm:text-sm">
                 {formatTime(timeRemaining)}
               </span>
             </div>

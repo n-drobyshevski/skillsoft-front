@@ -12,6 +12,9 @@ import { CompletionDialog } from './CompletionDialog';
 import { useUIStore } from '@/store/ui-store';
 import { toast } from 'sonner';
 import { retryWithBackoff, getUserFriendlyErrorMessage, isRetryableError } from '@/utils/retry';
+import { useSwipeNavigation, useReducedMotion } from '@/hooks/use-swipe-navigation';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -567,21 +570,59 @@ export function ImmersivePlayer({ session, initialQuestion, authHeaders }: Immer
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isAnswerValid, handleNext, handlePrevious]);
 
-  // Animation variants
-  const slideVariants = {
-    enter: (direction: 'forward' | 'backward') => ({
-      x: direction === 'forward' ? 300 : -300,
-      opacity: 0,
-    }),
-    center: {
-      x: 0,
-      opacity: 1,
-    },
-    exit: (direction: 'forward' | 'backward') => ({
-      x: direction === 'forward' ? -300 : 300,
-      opacity: 0,
-    }),
-  };
+  // Responsive settings
+  const isMobile = useIsMobile();
+  const prefersReducedMotion = useReducedMotion();
+
+  // Animation distance - smaller on mobile for better UX
+  const animationDistance = isMobile ? 100 : 300;
+
+  // Swipe navigation for mobile touch gestures
+  const canSwipeNext = isAnswerValid && !state.isSubmitting;
+  const canSwipePrevious = state.allowBackNavigation && state.questionIndex > 0 && !state.isSubmitting;
+
+  const { swipeState, handlers: swipeHandlers } = useSwipeNavigation({
+    enabled: isMobile && (canSwipeNext || canSwipePrevious),
+    minSwipeDistance: 50,
+    maxVerticalDistance: 100,
+    onSwipeLeft: canSwipeNext ? handleNext : undefined,
+    onSwipeRight: canSwipePrevious ? handlePrevious : undefined,
+  });
+
+  // Animation variants with responsive distances and reduced motion support
+  const slideVariants = prefersReducedMotion
+    ? {
+        enter: { opacity: 0 },
+        center: { opacity: 1 },
+        exit: { opacity: 0 },
+      }
+    : {
+        enter: (direction: 'forward' | 'backward') => ({
+          x: direction === 'forward' ? animationDistance : -animationDistance,
+          opacity: 0,
+        }),
+        center: {
+          x: 0,
+          opacity: 1,
+        },
+        exit: (direction: 'forward' | 'backward') => ({
+          x: direction === 'forward' ? -animationDistance : animationDistance,
+          opacity: 0,
+        }),
+      };
+
+  // Optimized transition settings for mobile
+  const transitionSettings = prefersReducedMotion
+    ? { duration: 0.01 }
+    : isMobile
+      ? {
+          x: { type: 'spring' as const, stiffness: 400, damping: 35 },
+          opacity: { duration: 0.15 },
+        }
+      : {
+          x: { type: 'spring' as const, stiffness: 300, damping: 30 },
+          opacity: { duration: 0.2 },
+        };
 
   if (!currentQuestion) {
     return (
@@ -592,7 +633,7 @@ export function ImmersivePlayer({ session, initialQuestion, authHeaders }: Immer
   }
 
   return (
-    <div className="min-h-screen bg-neutral-950 flex flex-col">
+    <div className="min-h-screen min-h-[100dvh] bg-neutral-950 flex flex-col safe-area-inset-all">
       {/* Session Header */}
       <SessionHeader
         currentQuestion={state.questionIndex + 1}
@@ -602,9 +643,40 @@ export function ImmersivePlayer({ session, initialQuestion, authHeaders }: Immer
         onExit={handleExit}
       />
 
-      {/* Main Content */}
-      <main className="flex-1 flex items-center justify-center px-4 py-8 overflow-hidden">
-        <div className="w-full max-w-3xl relative">
+      {/* Main Content - responsive padding for mobile with swipe support */}
+      <main
+        className="flex-1 flex items-center justify-center px-3 sm:px-4 py-4 sm:py-8 overflow-hidden pb-safe swipe-container"
+        {...swipeHandlers}
+      >
+        <div className="w-full max-w-3xl relative will-change-slide">
+          {/* Swipe indicators for mobile */}
+          {isMobile && swipeState.isSwiping && (
+            <>
+              {/* Left indicator (swipe right = go back) */}
+              {canSwipePrevious && swipeState.direction === 1 && (
+                <div
+                  className="swipe-indicator swipe-indicator-left visible z-10"
+                  style={{ opacity: Math.min(Math.abs(swipeState.offsetX) / 100, 0.8) }}
+                >
+                  <div className="flex items-center justify-center w-10 h-10 rounded-full bg-neutral-800/80 backdrop-blur-sm">
+                    <ChevronLeft className="w-6 h-6 text-neutral-300" />
+                  </div>
+                </div>
+              )}
+              {/* Right indicator (swipe left = go next) */}
+              {canSwipeNext && swipeState.direction === -1 && (
+                <div
+                  className="swipe-indicator swipe-indicator-right visible z-10"
+                  style={{ opacity: Math.min(Math.abs(swipeState.offsetX) / 100, 0.8) }}
+                >
+                  <div className="flex items-center justify-center w-10 h-10 rounded-full bg-emerald-600/80 backdrop-blur-sm">
+                    <ChevronRight className="w-6 h-6 text-white" />
+                  </div>
+                </div>
+              )}
+            </>
+          )}
+
           <AnimatePresence mode="wait" custom={state.direction}>
             <motion.div
               key={currentQuestion.id}
@@ -613,10 +685,8 @@ export function ImmersivePlayer({ session, initialQuestion, authHeaders }: Immer
               initial="enter"
               animate="center"
               exit="exit"
-              transition={{
-                x: { type: 'spring', stiffness: 300, damping: 30 },
-                opacity: { duration: 0.2 },
-              }}
+              transition={transitionSettings}
+              className="gpu-accelerated"
             >
               <QuestionCard
                 question={currentQuestion}

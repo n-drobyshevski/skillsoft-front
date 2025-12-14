@@ -189,6 +189,7 @@ export default function CompetencyCardGrid({
             onClick={() =>
               setSortOrder((order) => (order === "asc" ? "desc" : "asc"))
             }
+            aria-label={sortOrder === "asc" ? "Sort descending" : "Sort ascending"}
           >
             <ChevronDown
               className={`h-4 w-4 transition-transform ${

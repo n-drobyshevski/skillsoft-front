@@ -53,8 +53,14 @@ export function QuestionNavigation({
   const showTooltip = !canGoForward && !isSubmitting && validationError;
 
   return (
-    <footer className="sticky bottom-0 bg-neutral-950/95 backdrop-blur-sm border-t border-neutral-800 safe-area-bottom">
-      <div className="max-w-3xl mx-auto px-4 py-4 flex items-center justify-between gap-4">
+    <footer className="sticky bottom-0 bg-neutral-950/95 backdrop-blur-sm border-t border-neutral-800 pb-safe" role="navigation" aria-label="Question navigation">
+      {/* Screen reader announcement for validation errors */}
+      {validationError && (
+        <div className="sr-only" role="alert" aria-live="assertive">
+          {validationError}
+        </div>
+      )}
+      <div className="max-w-3xl mx-auto px-3 sm:px-4 py-3 sm:py-4 flex items-center justify-between gap-2 sm:gap-4">
         {/* Back Button */}
         <Button
           variant="ghost"
@@ -64,8 +70,9 @@ export function QuestionNavigation({
             "text-neutral-400 hover:text-white hover:bg-neutral-800",
             !canGoBack && "opacity-0 pointer-events-none"
           )}
+          aria-label="Go to previous question"
         >
-          <ChevronLeft className="w-4 h-4 mr-1" />
+          <ChevronLeft className="w-4 h-4 mr-1" aria-hidden="true" />
           Back
         </Button>
 
@@ -82,6 +89,8 @@ export function QuestionNavigation({
                 onClick={onNext}
                 disabled={!canGoForward || isSubmitting}
                 size="lg"
+                aria-label={isSubmitting ? "Saving answer" : isLastQuestion ? "Complete assessment" : "Go to next question"}
+                aria-describedby={showTooltip ? "validation-error-tooltip" : undefined}
                 className={cn(
                   "min-w-[140px] font-semibold transition-all duration-200",
                   // Disabled state - clearly grayed out
@@ -97,7 +106,7 @@ export function QuestionNavigation({
               </Button>
             </TooltipTrigger>
             {showTooltip && (
-              <TooltipContent side="top" className="bg-amber-500/10 border-amber-500/20 text-amber-400">
+              <TooltipContent id="validation-error-tooltip" side="top" className="bg-amber-500/10 border-amber-500/20 text-amber-400">
                 <p>{validationError}</p>
               </TooltipContent>
             )}

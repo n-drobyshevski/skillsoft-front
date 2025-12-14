@@ -137,7 +137,7 @@ export class TestPlayerPage extends BasePage {
   // Navigation
   // ==========================================
 
-  async goto(sessionId: string): Promise<void> {
+  async goto(sessionId: string = ''): Promise<void> {
     await this.navigateTo(`/test-templates/take/${sessionId}`);
   }
 

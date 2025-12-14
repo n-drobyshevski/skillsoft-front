@@ -107,14 +107,15 @@ export default function AssessmentQuestionDrawer({
 
     return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent 
+      <SheetContent
         className={`${
-          isMobile 
-            ? "w-full max-w-full sm:max-w-full" 
+          isMobile
+            ? "w-full max-w-full sm:max-w-full"
             : "sm:max-w-lg"
         } p-0 flex flex-col gap-0 border-l border-border/50`}
         style={{
           WebkitOverflowScrolling: 'touch',
+          paddingBottom: 'env(safe-area-inset-bottom)',
         }}
       >
         {/* Clean Header */}
@@ -261,30 +262,30 @@ export default function AssessmentQuestionDrawer({
         {/* Clean Footer */}
         <div className={`${isMobile ? "px-4 py-3" : "px-5 py-4"} border-t border-border/40 bg-muted/20`}>
           <div className="flex items-center gap-2">
-            <Button 
+            <Button
               variant="ghost"
               size="sm"
               onClick={() => setShowDeleteDialog(true)}
-              className="h-8 px-2.5 text-xs text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+              className="h-10 sm:h-8 min-h-[44px] sm:min-h-0 px-3 sm:px-2.5 text-xs text-muted-foreground hover:text-destructive hover:bg-destructive/10 touch-manipulation"
             >
               <Trash2 className="mr-1.5 h-3.5 w-3.5" />
               Delete
             </Button>
             <div className="flex-1" />
-            <Button 
-              variant="ghost" 
+            <Button
+              variant="ghost"
               size="sm"
               onClick={() => handleNavigate(`/hr/assessment-questions/${question.id}`)}
-              className="h-8 px-2.5 text-xs text-muted-foreground hover:text-foreground"
+              className="h-10 sm:h-8 min-h-[44px] sm:min-h-0 px-3 sm:px-2.5 text-xs text-muted-foreground hover:text-foreground touch-manipulation"
             >
               <Layers className="mr-1.5 h-3.5 w-3.5" />
               View
             </Button>
-            <Button 
-              variant="default" 
+            <Button
+              variant="default"
               size="sm"
               onClick={() => handleNavigate(`/hr/assessment-questions/${question.id}/edit`)}
-              className="h-8 px-3 text-xs"
+              className="h-10 sm:h-8 min-h-[44px] sm:min-h-0 px-4 sm:px-3 text-xs touch-manipulation"
             >
               <Pencil className="mr-1.5 h-3.5 w-3.5" />
               Edit

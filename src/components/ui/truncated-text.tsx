@@ -55,7 +55,7 @@ export function TruncatedText({
 	...props
 }: TruncatedTextProps) {
 	const [isTruncated, setIsTruncated] = React.useState(false);
-	const textRef = React.useRef<HTMLSpanElement>(null);
+	const textRef = React.useRef<HTMLElement>(null);
 
 	// Check if text is actually truncated
 	React.useEffect(() => {
@@ -86,7 +86,8 @@ export function TruncatedText({
 
 	const truncatedElement = (
 		<Component
-			ref={textRef as React.Ref<HTMLSpanElement>}
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
+			ref={textRef as any}
 			className={cn(
 				"block overflow-hidden",
 				lines === 1 ? "truncate" : lineClampClasses[lines],

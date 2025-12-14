@@ -6,6 +6,7 @@ import { Trophy, Clock, CheckCircle, TrendingUp, ChevronRight, RotateCcw, ArrowL
 import { TestResult } from '@/types/domain';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { useReducedMotion } from '@/hooks/use-swipe-navigation';
 
 interface CompactTestResultsProps {
   result: TestResult;
@@ -41,6 +42,7 @@ interface CompactTestResultsProps {
  */
 export function CompactTestResults({ result, onRetry, onBack, onViewDetails }: CompactTestResultsProps) {
   const { passed, overallPercentage, percentile, totalTimeSeconds, competencyScores } = result;
+  const prefersReducedMotion = useReducedMotion();
 
   // Calculate display values
   const totalMinutes = Math.floor(totalTimeSeconds / 60);
@@ -62,22 +64,35 @@ export function CompactTestResults({ result, onRetry, onBack, onViewDetails }: C
     return 'text-amber-600 dark:text-amber-400';
   };
 
-  // Animation variants
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1,
-        delayChildren: 0.2,
-      },
-    },
-  };
+  // Animation variants with reduced motion support
+  const containerVariants = prefersReducedMotion
+    ? {
+        hidden: { opacity: 1 },
+        visible: { opacity: 1 },
+      }
+    : {
+        hidden: { opacity: 0 },
+        visible: {
+          opacity: 1,
+          transition: {
+            staggerChildren: 0.1,
+            delayChildren: 0.2,
+          },
+        },
+      };
 
-  const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0 },
-  };
+  const itemVariants = prefersReducedMotion
+    ? {
+        hidden: { opacity: 1 },
+        visible: { opacity: 1 },
+      }
+    : {
+        hidden: { opacity: 0, y: 20 },
+        visible: { opacity: 1, y: 0 },
+      };
+
+  // Progress bar animation duration
+  const progressAnimationDuration = prefersReducedMotion ? 0 : 0.8;
 
   return (
     <motion.div
@@ -216,11 +231,11 @@ export function CompactTestResults({ result, onRetry, onBack, onViewDetails }: C
                   <div className="flex-1 max-w-[200px]">
                     <div className="h-2 bg-muted rounded-full overflow-hidden">
                       <motion.div
-                        initial={{ width: 0 }}
+                        initial={{ width: prefersReducedMotion ? `${comp.percentage}%` : 0 }}
                         animate={{ width: `${comp.percentage}%` }}
-                        transition={{ duration: 0.8, delay: index * 0.1 }}
+                        transition={{ duration: progressAnimationDuration, delay: prefersReducedMotion ? 0 : index * 0.1 }}
                         className={cn(
-                          "h-full rounded-full",
+                          "h-full rounded-full gpu-accelerated",
                           comp.percentage >= 80
                             ? "bg-emerald-500"
                             : comp.percentage >= 60
@@ -258,11 +273,11 @@ export function CompactTestResults({ result, onRetry, onBack, onViewDetails }: C
                   {/* Progress bar */}
                   <div className="h-1.5 bg-muted rounded-full overflow-hidden">
                     <motion.div
-                      initial={{ width: 0 }}
+                      initial={{ width: prefersReducedMotion ? `${comp.percentage}%` : 0 }}
                       animate={{ width: `${comp.percentage}%` }}
-                      transition={{ duration: 0.8, delay: index * 0.1 }}
+                      transition={{ duration: progressAnimationDuration, delay: prefersReducedMotion ? 0 : index * 0.1 }}
                       className={cn(
-                        "h-full rounded-full",
+                        "h-full rounded-full gpu-accelerated",
                         comp.percentage >= 80
                           ? "bg-emerald-500"
                           : comp.percentage >= 60

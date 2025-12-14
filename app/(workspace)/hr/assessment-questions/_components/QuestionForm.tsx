@@ -470,16 +470,16 @@ export function QuestionForm({ question, competencyId, behavioralIndicatorId, on
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           {/* Basic Information Section */}
           <div className="rounded-xl border bg-card shadow-sm overflow-hidden">
-            <div className="flex items-center gap-3 px-5 py-4 bg-muted/40 border-b">
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                <MessageSquare className="h-5 w-5" />
+            <div className="flex items-center gap-3 px-4 sm:px-5 py-3 sm:py-4 bg-muted/40 border-b">
+              <div className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                <MessageSquare className="h-4 w-4 sm:h-5 sm:w-5" />
               </div>
               <div>
-                <h3 className="text-base font-semibold">Question Details</h3>
-                <p className="text-sm text-muted-foreground">Question text and classification</p>
+                <h3 className="text-sm sm:text-base font-semibold">Question Details</h3>
+                <p className="text-xs sm:text-sm text-muted-foreground">Question text and classification</p>
               </div>
             </div>
-            <div className="p-5 space-y-5">
+            <div className="p-4 sm:p-5 space-y-4 sm:space-y-5">
               <FormField
                 control={form.control}
                 name="questionText"
@@ -492,10 +492,10 @@ export function QuestionForm({ question, competencyId, behavioralIndicatorId, on
                         <HelpTooltip content={formHelp.question.questionText} />
                       </FormLabel>
                       <FormControl>
-                        <Textarea 
-                          placeholder="e.g., How do you handle tight deadlines?" 
+                        <Textarea
+                          placeholder="e.g., How do you handle tight deadlines?"
                           className={cn(
-                            "min-h-28 resize-none",
+                            "min-h-28 resize-none touch-manipulation",
                             fieldState.isValid && "border-green-500 focus-visible:ring-green-500",
                             fieldState.hasError && "border-destructive focus-visible:ring-destructive"
                           )}
@@ -512,7 +512,7 @@ export function QuestionForm({ question, competencyId, behavioralIndicatorId, on
                 }}
               />
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
                 <FormField
                   control={form.control}
                   name="questionType"
@@ -522,12 +522,12 @@ export function QuestionForm({ question, competencyId, behavioralIndicatorId, on
                         Question Type
                         <HelpTooltip content={formHelp.question.questionType} />
                       </FormLabel>
-                      <Select 
-                        onValueChange={field.onChange} 
+                      <Select
+                        onValueChange={field.onChange}
                         defaultValue={field.value}
                       >
                         <FormControl>
-                          <SelectTrigger className="h-10">
+                          <SelectTrigger className="h-11 sm:h-10 touch-manipulation">
                             <SelectValue placeholder="Select type" />
                           </SelectTrigger>
                         </FormControl>
@@ -553,12 +553,12 @@ export function QuestionForm({ question, competencyId, behavioralIndicatorId, on
                         Difficulty Level
                         <HelpTooltip content={formHelp.question.difficultyLevel} />
                       </FormLabel>
-                      <Select 
-                        onValueChange={field.onChange} 
+                      <Select
+                        onValueChange={field.onChange}
                         defaultValue={field.value}
                       >
                         <FormControl>
-                          <SelectTrigger className="h-10">
+                          <SelectTrigger className="h-11 sm:h-10 touch-manipulation">
                             <SelectValue placeholder="Select level" />
                           </SelectTrigger>
                         </FormControl>
@@ -694,16 +694,16 @@ export function QuestionForm({ question, competencyId, behavioralIndicatorId, on
 
           {/* Configuration Section */}
           <div className="rounded-xl border bg-card shadow-sm overflow-hidden">
-            <div className="flex items-center gap-3 px-5 py-4 bg-muted/40 border-b">
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-100 text-blue-600 dark:bg-blue-950 dark:text-blue-400">
-                <Settings2 className="h-5 w-5" />
+            <div className="flex items-center gap-3 px-4 sm:px-5 py-3 sm:py-4 bg-muted/40 border-b">
+              <div className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-lg bg-blue-100 text-blue-600 dark:bg-blue-950 dark:text-blue-400">
+                <Settings2 className="h-4 w-4 sm:h-5 sm:w-5" />
               </div>
               <div>
-                <h3 className="text-base font-semibold">Configuration</h3>
-                <p className="text-sm text-muted-foreground">Scoring, timing, and display settings</p>
+                <h3 className="text-sm sm:text-base font-semibold">Configuration</h3>
+                <p className="text-xs sm:text-sm text-muted-foreground">Scoring, timing, and display settings</p>
               </div>
             </div>
-            <div className="p-5 space-y-5">
+            <div className="p-4 sm:p-5 space-y-4 sm:space-y-5">
               <FormField
                 control={form.control}
                 name="scoringRubric"
@@ -714,9 +714,9 @@ export function QuestionForm({ question, competencyId, behavioralIndicatorId, on
                       <HelpTooltip content={formHelp.question.scoringRubric} />
                     </FormLabel>
                     <FormControl>
-                      <Textarea 
-                        placeholder="e.g., Based on clarity and feasibility" 
-                        className="min-h-24 resize-none"
+                      <Textarea
+                        placeholder="e.g., Based on clarity and feasibility"
+                        className="min-h-24 resize-none touch-manipulation"
                         {...field}
                         onBlur={() => {
                           field.onBlur();
@@ -729,7 +729,7 @@ export function QuestionForm({ question, competencyId, behavioralIndicatorId, on
                 )}
               />
               
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-5">
                 <FormField
                   control={form.control}
                   name="orderIndex"
@@ -737,10 +737,10 @@ export function QuestionForm({ question, competencyId, behavioralIndicatorId, on
                     <FormItem>
                       <FormLabel className="text-sm font-medium">Order Index</FormLabel>
                       <FormControl>
-                        <Input 
-                          type="number" 
+                        <Input
+                          type="number"
                           inputMode="numeric"
-                          className="h-10"
+                          className="h-11 sm:h-10 touch-manipulation"
                           {...field}
                           onChange={event => field.onChange(event.target.value === '' ? 0 : Number(event.target.value))}
                         />
@@ -760,10 +760,10 @@ export function QuestionForm({ question, competencyId, behavioralIndicatorId, on
                         <HelpTooltip content={formHelp.question.timeLimit} />
                       </FormLabel>
                       <FormControl>
-                        <Input 
-                          type="number" 
+                        <Input
+                          type="number"
                           inputMode="numeric"
-                          className="h-10"
+                          className="h-11 sm:h-10 touch-manipulation"
                           {...field}
                           onChange={event => field.onChange(event.target.value === '' ? 60 : Number(event.target.value))}
                           onBlur={() => {
@@ -783,7 +783,7 @@ export function QuestionForm({ question, competencyId, behavioralIndicatorId, on
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="text-sm font-medium">Visibility</FormLabel>
-                      <div className="flex items-center gap-3 h-10 px-3 rounded-lg border bg-muted/30">
+                      <div className="flex items-center gap-3 h-11 sm:h-10 px-3 rounded-lg border bg-muted/30 touch-manipulation">
                         <FormControl>
                           <Switch
                             checked={field.value}
@@ -791,6 +791,7 @@ export function QuestionForm({ question, competencyId, behavioralIndicatorId, on
                               field.onChange(checked);
                               handleFieldBlur();
                             }}
+                            className="touch-manipulation"
                           />
                         </FormControl>
                         <span className={`text-sm font-medium ${field.value ? 'text-green-600 dark:text-green-400' : 'text-muted-foreground'}`}>
@@ -809,32 +810,32 @@ export function QuestionForm({ question, competencyId, behavioralIndicatorId, on
 
           {/* Action Buttons */}
           <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 pt-2">
-            <Button 
-              type="button" 
-              variant="outline" 
-              onClick={() => router.back()} 
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => router.back()}
               disabled={isLoading}
-              className="h-10 min-h-11"
+              className="h-11 sm:h-10 min-h-[44px] touch-manipulation"
             >
               <X className="h-4 w-4 mr-2" />
               Cancel
             </Button>
             {onUpdatePreview && (
-              <Button 
-                type="button" 
-                variant="secondary" 
-                onClick={handlePreviewClick} 
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={handlePreviewClick}
                 disabled={isLoading}
-                className="h-10 min-h-11"
+                className="h-11 sm:h-10 min-h-[44px] touch-manipulation"
               >
                 <RefreshCw className="h-4 w-4 mr-2" />
                 Update Preview
               </Button>
             )}
-            <Button 
-              type="submit" 
+            <Button
+              type="submit"
               disabled={isLoading}
-              className="h-10 min-h-11"
+              className="h-11 sm:h-10 min-h-[44px] touch-manipulation"
             >
               {isLoading ? (
                 <>

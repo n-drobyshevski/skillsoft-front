@@ -167,16 +167,16 @@ export function CompetencyForm({
         <form onSubmit={form.handleSubmit(onSubmit, onFormError)} className="space-y-6">
           {/* Basic Information Section */}
           <div className="rounded-xl border bg-card shadow-sm overflow-hidden">
-            <div className="flex items-center gap-3 px-5 py-4 bg-muted/40 border-b">
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                <FileText className="h-5 w-5" />
+            <div className="flex items-center gap-3 px-4 sm:px-5 py-3 sm:py-4 bg-muted/40 border-b">
+              <div className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                <FileText className="h-4 w-4 sm:h-5 sm:w-5" />
               </div>
               <div>
-                <h3 className="text-base font-semibold">Basic Information</h3>
-                <p className="text-sm text-muted-foreground">Name and description for this competency</p>
+                <h3 className="text-sm sm:text-base font-semibold">Basic Information</h3>
+                <p className="text-xs sm:text-sm text-muted-foreground">Name and description for this competency</p>
               </div>
             </div>
-            <div className="p-5 space-y-5">
+            <div className="p-4 sm:p-5 space-y-4 sm:space-y-5">
               <FormField
                 control={form.control}
                 name="name"
@@ -190,10 +190,10 @@ export function CompetencyForm({
                       </FormLabel>
                       <FormControl>
                         <div className="relative">
-                          <Input 
-                            placeholder="e.g., Strategic Leadership" 
+                          <Input
+                            placeholder="e.g., Strategic Leadership"
                             className={cn(
-                              "h-10 pr-8",
+                              "h-11 sm:h-10 pr-8 touch-manipulation",
                               fieldState.isValid && "border-green-500 focus-visible:ring-green-500",
                               fieldState.hasError && "border-destructive focus-visible:ring-destructive"
                             )}
@@ -237,7 +237,7 @@ export function CompetencyForm({
                           <Textarea
                             placeholder="A detailed description of the competency and what it measures..."
                             className={cn(
-                              "min-h-24 resize-none",
+                              "min-h-24 resize-none touch-manipulation",
                               fieldState.isValid && "border-green-500 focus-visible:ring-green-500",
                               fieldState.hasError && "border-destructive focus-visible:ring-destructive"
                             )}
@@ -267,16 +267,16 @@ export function CompetencyForm({
 
           {/* Classification Section */}
           <div className="rounded-xl border bg-card shadow-sm overflow-hidden">
-            <div className="flex items-center gap-3 px-5 py-4 bg-muted/40 border-b">
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-100 text-blue-600 dark:bg-blue-950 dark:text-blue-400">
-                <Tag className="h-5 w-5" />
+            <div className="flex items-center gap-3 px-4 sm:px-5 py-3 sm:py-4 bg-muted/40 border-b">
+              <div className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-lg bg-blue-100 text-blue-600 dark:bg-blue-950 dark:text-blue-400">
+                <Tag className="h-4 w-4 sm:h-5 sm:w-5" />
               </div>
               <div>
-                <h3 className="text-base font-semibold">Classification</h3>
-                <p className="text-sm text-muted-foreground">Category and proficiency level</p>
+                <h3 className="text-sm sm:text-base font-semibold">Classification</h3>
+                <p className="text-xs sm:text-sm text-muted-foreground">Category and proficiency level</p>
               </div>
             </div>
-            <div className="p-5 grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div className="p-4 sm:p-5 grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
               <FormField
                 control={form.control}
                 name="category"
@@ -294,7 +294,7 @@ export function CompetencyForm({
                       defaultValue={field.value}
                     >
                       <FormControl>
-                        <SelectTrigger className="h-10">
+                        <SelectTrigger className="h-11 sm:h-10 touch-manipulation">
                           <SelectValue placeholder="Select category" />
                         </SelectTrigger>
                       </FormControl>
@@ -327,7 +327,7 @@ export function CompetencyForm({
                       defaultValue={field.value}
                     >
                       <FormControl>
-                        <SelectTrigger className="h-10">
+                        <SelectTrigger className="h-11 sm:h-10 touch-manipulation">
                           <SelectValue placeholder="Select level" />
                         </SelectTrigger>
                       </FormControl>
@@ -348,16 +348,16 @@ export function CompetencyForm({
 
           {/* Standard Mapping Section */}
           <div className="rounded-xl border bg-card shadow-sm overflow-hidden">
-            <div className="flex items-center gap-3 px-5 py-4 bg-muted/40 border-b">
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-purple-100 text-purple-600 dark:bg-purple-950 dark:text-purple-400">
-                <Globe2 className="h-5 w-5" />
+            <div className="flex items-center gap-3 px-4 sm:px-5 py-3 sm:py-4 bg-muted/40 border-b">
+              <div className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-lg bg-purple-100 text-purple-600 dark:bg-purple-950 dark:text-purple-400">
+                <Globe2 className="h-4 w-4 sm:h-5 sm:w-5" />
               </div>
               <div>
-                <h3 className="text-base font-semibold">Standard Mapping</h3>
-                <p className="text-sm text-muted-foreground">Link to O*NET, ESCO, or personality frameworks</p>
+                <h3 className="text-sm sm:text-base font-semibold">Standard Mapping</h3>
+                <p className="text-xs sm:text-sm text-muted-foreground">Link to O*NET, ESCO, or personality frameworks</p>
               </div>
             </div>
-            <div className="p-5">
+            <div className="p-4 sm:p-5">
               <FormField
                 control={form.control}
                 name="standardCodes"
@@ -388,16 +388,16 @@ export function CompetencyForm({
 
           {/* Status Section */}
           <div className="rounded-xl border bg-card shadow-sm overflow-hidden">
-            <div className="flex items-center gap-3 px-5 py-4 bg-muted/40 border-b">
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-green-100 text-green-600 dark:bg-green-950 dark:text-green-400">
-                <CheckCircle2 className="h-5 w-5" />
+            <div className="flex items-center gap-3 px-4 sm:px-5 py-3 sm:py-4 bg-muted/40 border-b">
+              <div className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-lg bg-green-100 text-green-600 dark:bg-green-950 dark:text-green-400">
+                <CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5" />
               </div>
               <div>
-                <h3 className="text-base font-semibold">Status & Approval</h3>
-                <p className="text-sm text-muted-foreground">Manage visibility and approval workflow</p>
+                <h3 className="text-sm sm:text-base font-semibold">Status & Approval</h3>
+                <p className="text-xs sm:text-sm text-muted-foreground">Manage visibility and approval workflow</p>
               </div>
             </div>
-            <div className="p-5 grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div className="p-4 sm:p-5 grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
               <FormField
                 control={form.control}
                 name="approvalStatus"
@@ -407,15 +407,15 @@ export function CompetencyForm({
                       Approval Status
                       <HelpTooltip content={formHelp.competency.approvalStatus} />
                     </FormLabel>
-                    <Select 
+                    <Select
                       onValueChange={(value) => {
                         field.onChange(value);
                         handlePreviewClick();
-                      }} 
+                      }}
                       defaultValue={field.value}
                     >
                       <FormControl>
-                        <SelectTrigger className="h-10">
+                        <SelectTrigger className="h-11 sm:h-10 touch-manipulation">
                           <SelectValue placeholder="Select status" />
                         </SelectTrigger>
                       </FormControl>
@@ -440,7 +440,7 @@ export function CompetencyForm({
                       Visibility
                       <HelpTooltip content={formHelp.competency.isActive} />
                     </FormLabel>
-                    <div className="flex items-center gap-3 h-10 px-3 rounded-lg border bg-muted/30">
+                    <div className="flex items-center gap-3 h-11 sm:h-10 px-3 rounded-lg border bg-muted/30 touch-manipulation">
                       <FormControl>
                         <Switch
                           checked={field.value}
@@ -448,6 +448,7 @@ export function CompetencyForm({
                             field.onChange(checked);
                             handlePreviewClick();
                           }}
+                          className="touch-manipulation"
                         />
                       </FormControl>
                       <span className={`text-sm font-medium ${field.value ? 'text-green-600 dark:text-green-400' : 'text-muted-foreground'}`}>

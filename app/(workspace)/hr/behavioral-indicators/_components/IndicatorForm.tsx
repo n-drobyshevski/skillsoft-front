@@ -223,16 +223,16 @@ export function IndicatorForm({ indicator, competencyId, onUpdatePreview }: { in
 
           {/* Core Information Section */}
           <div className="rounded-xl border bg-card shadow-sm overflow-hidden">
-            <div className="flex items-center gap-3 px-5 py-4 bg-muted/40 border-b">
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                <FileText className="h-5 w-5" />
+            <div className="flex items-center gap-3 px-4 sm:px-5 py-3 sm:py-4 bg-muted/40 border-b">
+              <div className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                <FileText className="h-4 w-4 sm:h-5 sm:w-5" />
               </div>
               <div>
-                <h3 className="text-base font-semibold">Core Information</h3>
-                <p className="text-sm text-muted-foreground">Title and description for this indicator</p>
+                <h3 className="text-sm sm:text-base font-semibold">Core Information</h3>
+                <p className="text-xs sm:text-sm text-muted-foreground">Title and description for this indicator</p>
               </div>
             </div>
-            <div className="p-5 space-y-5">
+            <div className="p-4 sm:p-5 space-y-4 sm:space-y-5">
               <FormField
                 control={form.control}
                 name="title"
@@ -246,10 +246,10 @@ export function IndicatorForm({ indicator, competencyId, onUpdatePreview }: { in
                       </FormLabel>
                       <FormControl>
                         <div className="relative">
-                          <Input 
-                            placeholder="e.g., Proactive Communication" 
+                          <Input
+                            placeholder="e.g., Proactive Communication"
                             className={cn(
-                              "h-10 pr-8",
+                              "h-11 sm:h-10 pr-8 touch-manipulation",
                               fieldState.isValid && "border-green-500 focus-visible:ring-green-500",
                               fieldState.hasError && "border-destructive focus-visible:ring-destructive"
                             )}
@@ -290,7 +290,7 @@ export function IndicatorForm({ indicator, competencyId, onUpdatePreview }: { in
                         <Textarea
                           placeholder="Detailed description of what this indicator measures..."
                           className={cn(
-                            "min-h-24 resize-none",
+                            "min-h-24 resize-none touch-manipulation",
                             fieldState.isValid && "border-green-500 focus-visible:ring-green-500",
                             fieldState.hasError && "border-destructive focus-visible:ring-destructive"
                           )}
@@ -311,16 +311,16 @@ export function IndicatorForm({ indicator, competencyId, onUpdatePreview }: { in
 
           {/* Classification Section */}
           <div className="rounded-xl border bg-card shadow-sm overflow-hidden">
-            <div className="flex items-center gap-3 px-5 py-4 bg-muted/40 border-b">
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-100 text-blue-600 dark:bg-blue-950 dark:text-blue-400">
-                <Settings2 className="h-5 w-5" />
+            <div className="flex items-center gap-3 px-4 sm:px-5 py-3 sm:py-4 bg-muted/40 border-b">
+              <div className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-lg bg-blue-100 text-blue-600 dark:bg-blue-950 dark:text-blue-400">
+                <Settings2 className="h-4 w-4 sm:h-5 sm:w-5" />
               </div>
               <div>
-                <h3 className="text-base font-semibold">Classification & Metrics</h3>
-                <p className="text-sm text-muted-foreground">Observability, measurement type, and weight</p>
+                <h3 className="text-sm sm:text-base font-semibold">Classification & Metrics</h3>
+                <p className="text-xs sm:text-sm text-muted-foreground">Observability, measurement type, and weight</p>
               </div>
             </div>
-            <div className="p-5 grid grid-cols-2 md:grid-cols-3 gap-5">
+            <div className="p-4 sm:p-5 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-5">
               <FormField
                 control={form.control}
                 name="observabilityLevel"
@@ -338,7 +338,7 @@ export function IndicatorForm({ indicator, competencyId, onUpdatePreview }: { in
                       defaultValue={field.value}
                     >
                       <FormControl>
-                        <SelectTrigger className="h-10">
+                        <SelectTrigger className="h-11 sm:h-10 touch-manipulation">
                           <SelectValue placeholder="Select level" />
                         </SelectTrigger>
                       </FormControl>
@@ -371,7 +371,7 @@ export function IndicatorForm({ indicator, competencyId, onUpdatePreview }: { in
                       defaultValue={field.value}
                     >
                       <FormControl>
-                        <SelectTrigger className="h-10">
+                        <SelectTrigger className="h-11 sm:h-10 touch-manipulation">
                           <SelectValue placeholder="Select type" />
                         </SelectTrigger>
                       </FormControl>
@@ -399,14 +399,14 @@ export function IndicatorForm({ indicator, competencyId, onUpdatePreview }: { in
                     <div className="relative">
                       <Scale className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                       <FormControl>
-                        <Input 
-                          type="number" 
+                        <Input
+                          type="number"
                           inputMode="decimal"
-                          step="0.01" 
+                          step="0.01"
                           min="0.01"
                           max="1"
-                          placeholder="0.25" 
-                          className="h-10 pl-10"
+                          placeholder="0.25"
+                          className="h-11 sm:h-10 pl-10 touch-manipulation"
                           {...field} 
                           onChange={event => field.onChange(parseFloat(event.target.value) || 0.01)}
                           onBlur={() => {
@@ -432,12 +432,12 @@ export function IndicatorForm({ indicator, competencyId, onUpdatePreview }: { in
                   <FormItem className="md:col-start-1">
                     <FormLabel className="text-sm font-medium">Order Index</FormLabel>
                     <FormControl>
-                      <Input 
-                        type="number" 
+                      <Input
+                        type="number"
                         inputMode="numeric"
-                        placeholder="1" 
-                        className="h-10"
-                        {...field} 
+                        placeholder="1"
+                        className="h-11 sm:h-10 touch-manipulation"
+                        {...field}
                         onChange={event => field.onChange(parseInt(event.target.value))}
                         onBlur={() => {
                           field.onBlur();
@@ -466,7 +466,7 @@ export function IndicatorForm({ indicator, competencyId, onUpdatePreview }: { in
                       defaultValue={field.value || ContextScope.UNIVERSAL}
                     >
                       <FormControl>
-                        <SelectTrigger className="h-10">
+                        <SelectTrigger className="h-11 sm:h-10 touch-manipulation">
                           <SelectValue placeholder="Select context scope" />
                         </SelectTrigger>
                       </FormControl>
@@ -519,16 +519,16 @@ export function IndicatorForm({ indicator, competencyId, onUpdatePreview }: { in
 
           {/* Contextual Examples Section */}
           <div className="rounded-xl border bg-card shadow-sm overflow-hidden">
-            <div className="flex items-center gap-3 px-5 py-4 bg-muted/40 border-b">
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-100 text-amber-600 dark:bg-amber-950 dark:text-amber-400">
-                <ThumbsUp className="h-5 w-5" />
+            <div className="flex items-center gap-3 px-4 sm:px-5 py-3 sm:py-4 bg-muted/40 border-b">
+              <div className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-lg bg-amber-100 text-amber-600 dark:bg-amber-950 dark:text-amber-400">
+                <ThumbsUp className="h-4 w-4 sm:h-5 sm:w-5" />
               </div>
               <div>
-                <h3 className="text-base font-semibold">Contextual Examples</h3>
-                <p className="text-sm text-muted-foreground">Provide examples to clarify the indicator</p>
+                <h3 className="text-sm sm:text-base font-semibold">Contextual Examples</h3>
+                <p className="text-xs sm:text-sm text-muted-foreground">Provide examples to clarify the indicator</p>
               </div>
             </div>
-            <div className="p-5 space-y-5">
+            <div className="p-4 sm:p-5 space-y-4 sm:space-y-5">
               <FormField
                 control={form.control}
                 name="examples"
@@ -540,9 +540,9 @@ export function IndicatorForm({ indicator, competencyId, onUpdatePreview }: { in
                       <HelpTooltip content={formHelp.indicator.examples} variant="tip" />
                     </FormLabel>
                     <FormControl>
-                      <Textarea 
-                        placeholder="List behaviors that demonstrate this indicator..." 
-                        className="min-h-24 resize-none border-green-200 focus-visible:ring-green-500/20 dark:border-green-800"
+                      <Textarea
+                        placeholder="List behaviors that demonstrate this indicator..."
+                        className="min-h-24 resize-none border-green-200 focus-visible:ring-green-500/20 dark:border-green-800 touch-manipulation"
                         {...field} 
                         onBlur={() => {
                           field.onBlur();
@@ -565,9 +565,9 @@ export function IndicatorForm({ indicator, competencyId, onUpdatePreview }: { in
                       <HelpTooltip content={formHelp.indicator.counterExamples} variant="tip" />
                     </FormLabel>
                     <FormControl>
-                      <Textarea 
-                        placeholder="List behaviors that contradict this indicator..." 
-                        className="min-h-24 resize-none border-red-200 focus-visible:ring-red-500/20 dark:border-red-800"
+                      <Textarea
+                        placeholder="List behaviors that contradict this indicator..."
+                        className="min-h-24 resize-none border-red-200 focus-visible:ring-red-500/20 dark:border-red-800 touch-manipulation"
                         {...field} 
                         onBlur={() => {
                           field.onBlur();
@@ -584,16 +584,16 @@ export function IndicatorForm({ indicator, competencyId, onUpdatePreview }: { in
 
           {/* Status Section */}
           <div className="rounded-xl border bg-card shadow-sm overflow-hidden">
-            <div className="flex items-center gap-3 px-5 py-4 bg-muted/40 border-b">
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-green-100 text-green-600 dark:bg-green-950 dark:text-green-400">
-                <CheckCircle2 className="h-5 w-5" />
+            <div className="flex items-center gap-3 px-4 sm:px-5 py-3 sm:py-4 bg-muted/40 border-b">
+              <div className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-lg bg-green-100 text-green-600 dark:bg-green-950 dark:text-green-400">
+                <CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5" />
               </div>
               <div>
-                <h3 className="text-base font-semibold">Status & Approval</h3>
-                <p className="text-sm text-muted-foreground">Manage visibility and workflow</p>
+                <h3 className="text-sm sm:text-base font-semibold">Status & Approval</h3>
+                <p className="text-xs sm:text-sm text-muted-foreground">Manage visibility and workflow</p>
               </div>
             </div>
-            <div className="p-5 grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div className="p-4 sm:p-5 grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
               <FormField
                 control={form.control}
                 name="approvalStatus"
@@ -608,7 +608,7 @@ export function IndicatorForm({ indicator, competencyId, onUpdatePreview }: { in
                       defaultValue={field.value}
                     >
                       <FormControl>
-                        <SelectTrigger className="h-10">
+                        <SelectTrigger className="h-11 sm:h-10 touch-manipulation">
                           <SelectValue placeholder="Select status" />
                         </SelectTrigger>
                       </FormControl>
@@ -630,7 +630,7 @@ export function IndicatorForm({ indicator, competencyId, onUpdatePreview }: { in
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="text-sm font-medium">Visibility</FormLabel>
-                    <div className="flex items-center gap-3 h-10 px-3 rounded-lg border bg-muted/30">
+                    <div className="flex items-center gap-3 h-11 sm:h-10 px-3 rounded-lg border bg-muted/30 touch-manipulation">
                       <FormControl>
                         <Switch
                           checked={field.value}
@@ -638,6 +638,7 @@ export function IndicatorForm({ indicator, competencyId, onUpdatePreview }: { in
                             field.onChange(checked);
                             handleFieldBlur();
                           }}
+                          className="touch-manipulation"
                         />
                       </FormControl>
                       <span className={`text-sm font-medium ${field.value ? 'text-green-600 dark:text-green-400' : 'text-muted-foreground'}`}>
@@ -652,32 +653,32 @@ export function IndicatorForm({ indicator, competencyId, onUpdatePreview }: { in
 
           {/* Action Buttons */}
           <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 pt-2">
-            <Button 
-              type="button" 
-              variant="outline" 
-              onClick={() => router.back()} 
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => router.back()}
               disabled={isLoading}
-              className="h-10 min-h-11"
+              className="h-11 sm:h-10 min-h-[44px] touch-manipulation"
             >
               <X className="h-4 w-4 mr-2" />
               Cancel
             </Button>
             {onUpdatePreview && (
-              <Button 
-                type="button" 
-                variant="secondary" 
-                onClick={handlePreviewClick} 
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={handlePreviewClick}
                 disabled={isLoading}
-                className="h-10 min-h-11"
+                className="h-11 sm:h-10 min-h-[44px] touch-manipulation"
               >
                 <RefreshCw className="h-4 w-4 mr-2" />
                 Update Preview
               </Button>
             )}
-            <Button 
-              type="submit" 
+            <Button
+              type="submit"
               disabled={isLoading || !weightValidation.isValid}
-              className="h-10 min-h-11"
+              className="h-11 sm:h-10 min-h-[44px] touch-manipulation"
             >
               {isLoading ? (
                 <>

@@ -31,30 +31,39 @@ import {
   SlidersHorizontal,
   X,
   Filter,
+  ChevronDown,
+  LayoutList,
+  TableIcon,
 } from "lucide-react";
-import { 
-  DropdownMenu, 
-  DropdownMenuCheckboxItem, 
-  DropdownMenuContent, 
-  DropdownMenuLabel, 
-  DropdownMenuSeparator, 
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { 
+import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 
 interface EntitiesTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
   onRowClick?: (row: TData) => void;
   filterableColumns?: { [key: string]: string[] }; // Column ID to possible filter values
+  /** Primary columns to always show in mobile card view (max 4 recommended) */
+  mobileCardPrimaryColumns?: string[];
+  /** Force table view even on mobile */
+  forceTableView?: boolean;
 }
 
 export default function EntitiesTable<TData, TValue>({
@@ -62,6 +71,8 @@ export default function EntitiesTable<TData, TValue>({
   data,
   onRowClick,
   filterableColumns = {},
+  mobileCardPrimaryColumns,
+  forceTableView = false,
 }: EntitiesTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -69,7 +80,11 @@ export default function EntitiesTable<TData, TValue>({
   const [rowSelection, setRowSelection] = useState({});
   const [globalFilter, setGlobalFilter] = useState("");
   const [selectedFilters, setSelectedFilters] = useState<{ [key: string]: string }>({});
+  const [viewMode, setViewMode] = useState<"table" | "cards">("cards");
   const isMobile = useIsMobile();
+
+  // Determine if we should show cards view
+  const showCardsView = isMobile && !forceTableView && viewMode === "cards";
 
   // Get unique values for filterable columns
   const filterOptions = useMemo(() => {
@@ -242,8 +257,32 @@ export default function EntitiesTable<TData, TValue>({
           )}
         </div>
 
-        {/* Additional Controls (Filters) */}
+        {/* Additional Controls (Filters + View Toggle) */}
         <div className="flex items-center gap-2">
+          {/* Mobile View Toggle */}
+          {isMobile && !forceTableView && (
+            <div className="flex items-center border rounded-md">
+              <Button
+                variant={viewMode === "cards" ? "secondary" : "ghost"}
+                size="sm"
+                className="h-9 w-9 p-0 rounded-r-none"
+                onClick={() => setViewMode("cards")}
+                aria-label="Card view"
+              >
+                <LayoutList className="h-4 w-4" />
+              </Button>
+              <Button
+                variant={viewMode === "table" ? "secondary" : "ghost"}
+                size="sm"
+                className="h-9 w-9 p-0 rounded-l-none border-l"
+                onClick={() => setViewMode("table")}
+                aria-label="Table view"
+              >
+                <TableIcon className="h-4 w-4" />
+              </Button>
+            </div>
+          )}
+
           {/* Column Filters Dropdown */}
           {Object.keys(filterOptions).length > 0 && (
             <DropdownMenu>
@@ -291,82 +330,195 @@ export default function EntitiesTable<TData, TValue>({
         </div>
       </div>
 
-      {/* Modern Table Container */}
-      <div className="overflow-hidden rounded-lg border bg-background shadow-sm">
-        <div className="overflow-x-auto">
-          <Table>
-            <TableHeader>
-              {table.getHeaderGroups().map((headerGroup) => (
-                <TableRow key={headerGroup.id} className="border-b bg-muted/30 hover:bg-muted/30">
-                  {headerGroup.headers.map((header) => {
-                    return (
-                      <TableHead 
-                        key={header.id} 
-                        className="h-10 px-3 text-xs font-semibold text-muted-foreground bg-muted/30 @lg/table:px-4 @lg/table:h-12 @lg/table:text-sm first:pl-4 last:pr-4"
-                      >
-                        {header.isPlaceholder
-                          ? null
-                          : flexRender(
-                              header.column.columnDef.header,
-                              header.getContext()
-                            )}
-                      </TableHead>
-                    );
-                  })}
-                </TableRow>
-              ))}
-            </TableHeader>
-            <TableBody>
-              {table.getRowModel().rows?.length ? (
-                table.getRowModel().rows.map((row, index) => (
-                  <TableRow
-                    key={row.id}
-                    data-state={row.getIsSelected() && "selected"}
-                    onClick={() => onRowClick?.(row.original)}
-                    className={`
-                      group cursor-pointer border-b border-border/40 transition-all duration-150
-                      hover:bg-muted/40 active:bg-muted/50
-                      data-[state=selected]:bg-muted/50
-                      ${index % 2 === 0 ? 'bg-background' : 'bg-muted/10'}
-                    `}
-                  >
-                    {row.getVisibleCells().map((cell) => (
-                      <TableCell 
-                        key={cell.id} 
-                        className="px-3 py-3 text-sm @lg/table:px-4 @lg/table:py-4 first:pl-4 last:pr-4"
-                      >
+      {/* Mobile Card View */}
+      {showCardsView ? (
+        <div className="space-y-3">
+          {table.getRowModel().rows?.length ? (
+            table.getRowModel().rows.map((row) => {
+              const visibleCells = row.getVisibleCells();
+              // Determine which columns to show prominently
+              const primaryColumnIds = mobileCardPrimaryColumns ||
+                visibleCells.slice(0, 4).map(cell => cell.column.id);
+              const primaryCells = visibleCells.filter(cell =>
+                primaryColumnIds.includes(cell.column.id)
+              );
+              const secondaryCells = visibleCells.filter(cell =>
+                !primaryColumnIds.includes(cell.column.id)
+              );
+
+              return (
+                <Card
+                  key={row.id}
+                  onClick={() => onRowClick?.(row.original)}
+                  className={cn(
+                    "transition-all duration-150 active:scale-[0.99]",
+                    onRowClick && "cursor-pointer hover:shadow-md hover:border-primary/30"
+                  )}
+                >
+                  <CardHeader className="p-3 pb-2">
+                    {/* Primary cell as title (first column) */}
+                    {primaryCells[0] && (
+                      <div className="font-medium text-sm line-clamp-2">
                         {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext()
+                          primaryCells[0].column.columnDef.cell,
+                          primaryCells[0].getContext()
                         )}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                ))
-              ) : (
-                <TableRow className="hover:bg-transparent">
-                  <TableCell
-                    colSpan={columns.length}
-                    className="h-32 text-center text-muted-foreground"
-                  >
-                    <div className="flex flex-col items-center gap-2">
-                      <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center">
-                        <Search className="h-4 w-4" />
                       </div>
-                      <div>
-                        <p className="text-sm font-medium">No results found</p>
-                        <p className="text-xs text-muted-foreground">
-                          Try adjusting your search or filter criteria
-                        </p>
+                    )}
+                  </CardHeader>
+                  <CardContent className="p-3 pt-0 space-y-2">
+                    {/* Show other primary cells in a grid */}
+                    {primaryCells.length > 1 && (
+                      <div className="grid grid-cols-2 gap-2 text-xs">
+                        {primaryCells.slice(1).map((cell) => (
+                          <div key={cell.id} className="space-y-0.5">
+                            <div className="text-muted-foreground font-medium uppercase tracking-wide text-[10px]">
+                              {typeof cell.column.columnDef.header === 'string'
+                                ? cell.column.columnDef.header
+                                : cell.column.id.replace(/([A-Z])/g, ' $1').trim()}
+                            </div>
+                            <div className="text-foreground">
+                              {flexRender(
+                                cell.column.columnDef.cell,
+                                cell.getContext()
+                              )}
+                            </div>
+                          </div>
+                        ))}
                       </div>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
+                    )}
+                    {/* Expandable secondary cells */}
+                    {secondaryCells.length > 0 && (
+                      <details className="group">
+                        <summary className="flex items-center gap-1 text-xs text-muted-foreground cursor-pointer hover:text-foreground transition-colors py-1">
+                          <ChevronDown className="h-3 w-3 transition-transform group-open:rotate-180" />
+                          <span>{secondaryCells.length} more fields</span>
+                        </summary>
+                        <div className="grid grid-cols-2 gap-2 text-xs pt-2 border-t mt-2">
+                          {secondaryCells.map((cell) => (
+                            <div key={cell.id} className="space-y-0.5">
+                              <div className="text-muted-foreground font-medium uppercase tracking-wide text-[10px]">
+                                {typeof cell.column.columnDef.header === 'string'
+                                  ? cell.column.columnDef.header
+                                  : cell.column.id.replace(/([A-Z])/g, ' $1').trim()}
+                              </div>
+                              <div className="text-foreground">
+                                {flexRender(
+                                  cell.column.columnDef.cell,
+                                  cell.getContext()
+                                )}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </details>
+                    )}
+                  </CardContent>
+                </Card>
+              );
+            })
+          ) : (
+            <Card className="p-8">
+              <div className="flex flex-col items-center gap-2 text-center">
+                <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center">
+                  <Search className="h-5 w-5 text-muted-foreground" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium">No results found</p>
+                  <p className="text-xs text-muted-foreground">
+                    Try adjusting your search or filter criteria
+                  </p>
+                </div>
+              </div>
+            </Card>
+          )}
         </div>
-      </div>
+      ) : (
+        /* Modern Table Container */
+        <div className="overflow-hidden rounded-lg border bg-background shadow-sm">
+          {/* Mobile scroll hint */}
+          {isMobile && (
+            <div className="flex items-center justify-center gap-1 py-1.5 px-3 bg-muted/30 text-xs text-muted-foreground border-b">
+              <ChevronLeft className="h-3 w-3" />
+              <span>Swipe to see more columns</span>
+              <ChevronRight className="h-3 w-3" />
+            </div>
+          )}
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                {table.getHeaderGroups().map((headerGroup) => (
+                  <TableRow key={headerGroup.id} className="border-b bg-muted/30 hover:bg-muted/30">
+                    {headerGroup.headers.map((header) => {
+                      return (
+                        <TableHead
+                          key={header.id}
+                          className="h-10 px-3 text-xs font-semibold text-muted-foreground bg-muted/30 @lg/table:px-4 @lg/table:h-12 @lg/table:text-sm first:pl-4 last:pr-4"
+                        >
+                          {header.isPlaceholder
+                            ? null
+                            : flexRender(
+                                header.column.columnDef.header,
+                                header.getContext()
+                              )}
+                        </TableHead>
+                      );
+                    })}
+                  </TableRow>
+                ))}
+              </TableHeader>
+              <TableBody>
+                {table.getRowModel().rows?.length ? (
+                  table.getRowModel().rows.map((row, index) => (
+                    <TableRow
+                      key={row.id}
+                      data-state={row.getIsSelected() && "selected"}
+                      onClick={() => onRowClick?.(row.original)}
+                      className={`
+                        group cursor-pointer border-b border-border/40 transition-all duration-150
+                        hover:bg-muted/40 active:bg-muted/50
+                        data-[state=selected]:bg-muted/50
+                        ${index % 2 === 0 ? 'bg-background' : 'bg-muted/10'}
+                      `}
+                    >
+                      {row.getVisibleCells().map((cell) => (
+                        <TableCell
+                          key={cell.id}
+                          className="px-3 py-3 text-sm @lg/table:px-4 @lg/table:py-4 first:pl-4 last:pr-4"
+                        >
+                          {flexRender(
+                            cell.column.columnDef.cell,
+                            cell.getContext()
+                          )}
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow className="hover:bg-transparent">
+                    <TableCell
+                      colSpan={columns.length}
+                      className="h-32 text-center text-muted-foreground"
+                    >
+                      <div className="flex flex-col items-center gap-2">
+                        <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center">
+                          <Search className="h-4 w-4" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium">No results found</p>
+                          <p className="text-xs text-muted-foreground">
+                            Try adjusting your search or filter criteria
+                          </p>
+                        </div>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        </div>
+      )}
 
       {/* Enhanced Pagination */}
       <div className="flex flex-col gap-4 @md/table:flex-row @md/table:items-center @md/table:justify-between">
@@ -415,37 +567,37 @@ export default function EntitiesTable<TData, TValue>({
         {/* Navigation Controls */}
         {table.getPageCount() > 1 && (
           <div className="flex items-center justify-center @md/table:justify-end">
-            {/* Mobile: Simplified navigation */}
-            <div className="flex @lg/table:hidden items-center gap-1">
+            {/* Mobile: Simplified navigation with larger touch targets */}
+            <div className="flex @lg/table:hidden items-center gap-2">
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => table.previousPage()}
                 disabled={!table.getCanPreviousPage()}
-                className="h-8 w-8 p-0"
+                className="h-10 w-10 p-0 min-w-[44px] min-h-[44px]"
               >
-                <ChevronLeft className="h-4 w-4" />
+                <ChevronLeft className="h-5 w-5" />
                 <span className="sr-only">Previous page</span>
               </Button>
-              
-              <div className="flex items-center gap-1 px-2">
-                <span className="text-sm font-medium">
+
+              <div className="flex items-center gap-1.5 px-3 py-2 bg-muted/30 rounded-md min-w-[80px] justify-center">
+                <span className="text-sm font-semibold">
                   {table.getState().pagination.pageIndex + 1}
                 </span>
-                <span className="text-sm text-muted-foreground">of</span>
-                <span className="text-sm font-medium">
+                <span className="text-sm text-muted-foreground">/</span>
+                <span className="text-sm font-medium text-muted-foreground">
                   {table.getPageCount()}
                 </span>
               </div>
-              
+
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => table.nextPage()}
                 disabled={!table.getCanNextPage()}
-                className="h-8 w-8 p-0"
+                className="h-10 w-10 p-0 min-w-[44px] min-h-[44px]"
               >
-                <ChevronRight className="h-4 w-4" />
+                <ChevronRight className="h-5 w-5" />
                 <span className="sr-only">Next page</span>
               </Button>
             </div>

@@ -84,7 +84,7 @@ export class DashboardPage extends BasePage {
     }[statName];
 
     const valueLocator = statCard.locator('.stat-value, [data-testid="stat-value"], .text-2xl, .text-3xl').first();
-    return valueLocator.textContent() ?? '';
+    return (await valueLocator.textContent()) ?? '';
   }
 
   /**

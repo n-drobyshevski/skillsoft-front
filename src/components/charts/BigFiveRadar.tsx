@@ -12,7 +12,8 @@ import {
   Legend
 } from 'recharts';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { BigFiveProfile, bigFiveToArray, getBigFiveLabels } from '@/hooks/useBigFiveProjection';
+import { BigFiveProfile, bigFiveToArray } from '@/hooks/useBigFiveProjection';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface BigFiveRadarProps {
   profile: BigFiveProfile;
@@ -45,27 +46,38 @@ export const BigFiveRadar = React.memo<BigFiveRadarProps>(({
   showLegend = true,
   height = 400
 }) => {
+  const isMobile = useIsMobile();
+
   // Transform profile to array format for Recharts
   const chartData = React.useMemo(() => bigFiveToArray(profile), [profile]);
 
+  // Responsive height: use prop on desktop, reduced on mobile
+  const responsiveHeight = isMobile ? Math.min(height, 280) : height;
+  const fontSize = isMobile ? 10 : 12;
+  const radiusFontSize = isMobile ? 8 : 10;
+
   return (
     <Card className="w-full">
-      <CardHeader>
-        <CardTitle>{title}</CardTitle>
-        {description && <CardDescription>{description}</CardDescription>}
+      <CardHeader className="pb-2 sm:pb-4">
+        <CardTitle className="text-base sm:text-lg">{title}</CardTitle>
+        {description && (
+          <CardDescription className="text-xs sm:text-sm line-clamp-2">
+            {isMobile ? "Big Five personality dimensions" : description}
+          </CardDescription>
+        )}
       </CardHeader>
-      <CardContent>
-        <ResponsiveContainer width="100%" height={height}>
+      <CardContent className="px-2 sm:px-6">
+        <ResponsiveContainer width="100%" height={responsiveHeight}>
           <RadarChart data={chartData}>
             <PolarGrid stroke="hsl(var(--border))" />
             <PolarAngleAxis
               dataKey="trait"
-              tick={{ fill: 'hsl(var(--foreground))', fontSize: 12 }}
+              tick={{ fill: 'hsl(var(--foreground))', fontSize }}
             />
             <PolarRadiusAxis
               angle={90}
               domain={[0, 100]}
-              tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 10 }}
+              tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: radiusFontSize }}
             />
             <Radar
               name="Personality Score"
@@ -78,13 +90,15 @@ export const BigFiveRadar = React.memo<BigFiveRadarProps>(({
               contentStyle={{
                 backgroundColor: 'hsl(var(--card))',
                 border: '1px solid hsl(var(--border))',
-                borderRadius: '6px'
+                borderRadius: '6px',
+                fontSize: isMobile ? '12px' : '14px',
+                padding: isMobile ? '8px' : '12px'
               }}
               labelStyle={{ color: 'hsl(var(--foreground))' }}
             />
-            {showLegend && (
+            {showLegend && !isMobile && (
               <Legend
-                wrapperStyle={{ color: 'hsl(var(--foreground))' }}
+                wrapperStyle={{ color: 'hsl(var(--foreground))', fontSize: '12px' }}
               />
             )}
           </RadarChart>
@@ -115,20 +129,26 @@ export const BigFiveRadarSimple = React.memo<Omit<BigFiveRadarProps, 'title' | '
   showLegend = false,
   height = 300
 }) => {
+  const isMobile = useIsMobile();
   const chartData = React.useMemo(() => bigFiveToArray(profile), [profile]);
 
+  // Responsive sizing
+  const responsiveHeight = isMobile ? Math.min(height, 220) : height;
+  const fontSize = isMobile ? 10 : 12;
+  const radiusFontSize = isMobile ? 8 : 10;
+
   return (
-    <ResponsiveContainer width="100%" height={height}>
+    <ResponsiveContainer width="100%" height={responsiveHeight}>
       <RadarChart data={chartData}>
         <PolarGrid stroke="hsl(var(--border))" />
         <PolarAngleAxis
           dataKey="trait"
-          tick={{ fill: 'hsl(var(--foreground))', fontSize: 12 }}
+          tick={{ fill: 'hsl(var(--foreground))', fontSize }}
         />
         <PolarRadiusAxis
           angle={90}
           domain={[0, 100]}
-          tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 10 }}
+          tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: radiusFontSize }}
         />
         <Radar
           name="Score"
@@ -141,10 +161,12 @@ export const BigFiveRadarSimple = React.memo<Omit<BigFiveRadarProps, 'title' | '
           contentStyle={{
             backgroundColor: 'hsl(var(--card))',
             border: '1px solid hsl(var(--border))',
-            borderRadius: '6px'
+            borderRadius: '6px',
+            fontSize: isMobile ? '12px' : '14px',
+            padding: isMobile ? '8px' : '12px'
           }}
         />
-        {showLegend && <Legend />}
+        {showLegend && !isMobile && <Legend wrapperStyle={{ fontSize: '12px' }} />}
       </RadarChart>
     </ResponsiveContainer>
   );

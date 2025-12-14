@@ -118,7 +118,7 @@ export class TestResultsPage extends BasePage {
   // Navigation
   // ==========================================
 
-  async goto(resultId: string): Promise<void> {
+  async goto(resultId: string = ''): Promise<void> {
     await this.navigateTo(`/test-templates/results/${resultId}`);
   }
 

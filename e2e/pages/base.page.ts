@@ -54,7 +54,7 @@ export abstract class BasePage {
   /**
    * Navigate to this page. Must be implemented by subclasses.
    */
-  abstract goto(): Promise<void>;
+  abstract goto(id?: string): Promise<void>;
 
   // ==========================================
   // Navigation Methods
@@ -185,7 +185,7 @@ export abstract class BasePage {
   /**
    * Confirm a confirmation dialog.
    */
-  async confirmDialog(): Promise<void> {
+  async clickConfirmDialog(): Promise<void> {
     const confirmButton = this.page.getByRole('button', { name: /confirm|yes|delete|remove|ok/i });
     await confirmButton.click();
     await expect(this.confirmDialog).not.toBeVisible();
