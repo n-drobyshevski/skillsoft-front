@@ -174,6 +174,19 @@ export default defineConfig({
         hasTouch: true,
       },
     },
+
+    // ==========================================
+    // Visual regression tests for mobile viewports
+    // ==========================================
+    {
+      name: 'visual-regression',
+      testMatch: /visual\/.*\.spec\.ts/,
+      use: {
+        ...devices['Desktop Chrome'],
+        // Screenshots are taken at specific viewports in the tests
+      },
+      dependencies: ['setup'],
+    },
   ],
 
   // Web server configuration - starts Next.js dev server
