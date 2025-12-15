@@ -8,7 +8,7 @@ import { Competency } from "@/types/domain";
 import { useEffect, useState, useCallback } from "react";
 import { EditCompetencyPageSkeleton } from "../../_components/EditCompetencyPageSkeleton";
 import PageHeader from "@/components/common/PageHeader";
-import { CompetencyCategory, ApprovalStatus, ProficiencyLevel, StandardCodesDto } from "@/types/domain";
+import { CompetencyCategory, ApprovalStatus, StandardCodesDto } from "@/types/domain";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CompetencyIndicatorsManager } from "../../_components/CompetencyIndicatorsManager";
 import { Button } from "@/components/ui/button";
@@ -20,7 +20,6 @@ import Link from "next/link";
 type CompetencyFormData = {
   name: string;
   category: string; // It's a string here, not CompetencyCategory
-  level: string;
   isActive: boolean;
   approvalStatus: string;
   description?: string;
@@ -101,14 +100,13 @@ export default function EditCompetencyPage() {
       ...prev,
       ...data,
       // Explicitly cast the properties that have mismatched types.
-      category: data.category as CompetencyCategory, 
-      level: data.level as ProficiencyLevel,
+      category: data.category as CompetencyCategory,
       // Assuming approvalStatus also needs casting
       approvalStatus: data.approvalStatus as ApprovalStatus,
       // Include standard codes for live preview
       standardCodes: data.standardCodes,
     } as Competency));
-    
+
   };
 
   // Handle not found state

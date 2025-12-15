@@ -11,7 +11,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { useSearchParams, useRouter } from 'next/navigation';
 import { Suspense } from 'react';
 import { BehavioralIndicator } from '@/types/domain';
-import { IndicatorMeasurementType, ProficiencyLevel, ApprovalStatus } from '@/types/domain';
+import { IndicatorMeasurementType, ObservabilityLevel, ApprovalStatus } from '@/types/domain';
 import { Info } from 'lucide-react';
 
 // Constants
@@ -52,7 +52,7 @@ function NewIndicatorPageContent() {
       title: data.title || 'New Behavioral Indicator',
       description: data.description || 'No description provided',
       measurementType: data.measurementType as IndicatorMeasurementType,
-      observabilityLevel: data.observabilityLevel as ProficiencyLevel,
+      observabilityLevel: data.observabilityLevel as ObservabilityLevel,
       weight: data.weight || 1,
       isActive: data.isActive,
       approvalStatus: ApprovalStatus.DRAFT,
@@ -77,7 +77,7 @@ function NewIndicatorPageContent() {
       title: 'New Behavioral Indicator',
       description: 'Preview of question management functionality',
       measurementType: IndicatorMeasurementType.QUALITY,
-      observabilityLevel: ProficiencyLevel.NOVICE,
+      observabilityLevel: ObservabilityLevel.DIRECTLY_OBSERVABLE,
       weight: 1,
       isActive: true,
       approvalStatus: ApprovalStatus.DRAFT,

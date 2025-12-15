@@ -21,7 +21,7 @@ import {
   Binary,
   MessageSquare
 } from "lucide-react";
-import { ProficiencyLevel, DifficultyLevel } from "@/types/domain";
+import { DifficultyLevel } from "@/types/domain";
 
 // ============================================
 // COLOR CONSTANTS
@@ -64,22 +64,6 @@ export function competencyCategoryToIcon(category: string) {
   return React.createElement(IconComponent, { className: "h-4 w-4" });
 }
 
-export function competencyProficiencyLevelToColor(level: ProficiencyLevel): string {
-  switch (level) {
-    case ProficiencyLevel.NOVICE:
-      return COMMON_COLORS.NOVICE;
-    case ProficiencyLevel.DEVELOPING:
-      return COMMON_COLORS.DEVELOPING;
-    case ProficiencyLevel.PROFICIENT:
-      return COMMON_COLORS.PROFICIENT;
-    case ProficiencyLevel.ADVANCED:
-      return COMMON_COLORS.ADVANCED;
-    case ProficiencyLevel.EXPERT:
-      return COMMON_COLORS.EXPERT;
-    default:
-      return COMMON_COLORS.NOVICE;
-  }
-}
 
 export function levelToNumber(level: string): number {
   const levelMap = new Map([

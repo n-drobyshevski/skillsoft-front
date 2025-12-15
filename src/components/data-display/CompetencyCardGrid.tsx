@@ -2,7 +2,6 @@
 import React, { useState, useEffect } from "react";
 import { Competency } from "@/types/domain";
 import CompetencyCard  from "./CompetencyCard";
-import { levelToNumber } from "@/lib/ui-utils";
 import { Skeleton } from "@/components/ui/skeleton";
 import {Card, CardHeader, CardContent, CardFooter} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -28,7 +27,7 @@ export default function CompetencyCardGrid({
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [sortBy, setSortBy] = useState<
-    "name" | "level" | "indicators" | "modified"
+    "name" | "indicators" | "modified"
   >("name");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
   const [currentPage, setCurrentPage] = useState(1);
@@ -51,9 +50,6 @@ export default function CompetencyCardGrid({
       switch (sortBy) {
         case "name":
           comparison = a.name.localeCompare(b.name);
-          break;
-        case "level":
-          comparison = levelToNumber(a.level) - levelToNumber(b.level);
           break;
         case "indicators":
           comparison =
@@ -178,7 +174,6 @@ export default function CompetencyCardGrid({
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="name">Sort by Name</SelectItem>
-              <SelectItem value="level">Sort by Level</SelectItem>
               <SelectItem value="indicators">Sort by Indicators</SelectItem>
               <SelectItem value="modified">Sort by Modified</SelectItem>
             </SelectContent>

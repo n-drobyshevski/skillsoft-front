@@ -21,7 +21,6 @@ import {
 } from "@/components/ui/tooltip";
 import {
   CompetencyCategory,
-  ProficiencyLevel,
   ApprovalStatus,
   BigFiveInfo,
   getEffectiveBigFive,
@@ -48,7 +47,6 @@ import {
 import {
   approvalStatusToColor,
   competencyCategoryToIcon,
-  competencyProficiencyLevelToColor,
 } from "@/lib/ui-utils";
 import EntitiesTable from "@/components/data-display/Table";
 import CompetencyDrawer from "./CompetencyDrawer";
@@ -195,29 +193,6 @@ export default function CompetenciesTable({ competencies }: CompetenciesTablePro
               {category.toLowerCase().replace("_", " ")}
             </span>
           </div>
-        );
-      },
-    },
-    {
-      accessorKey: "level",
-      header: ({ column }) => (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Level
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      ),
-      cell: ({ row }) => {
-        const level = row.getValue("level") as ProficiencyLevel;
-        return (
-          <Badge
-            variant="outline"
-            className={competencyProficiencyLevelToColor(level)}
-          >
-            {level}
-          </Badge>
         );
       },
     },

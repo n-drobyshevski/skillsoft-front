@@ -4,7 +4,7 @@ import React from 'react';
 import { ColumnDef } from '@tanstack/react-table';
 import { Competency } from '@/types/domain';
 import { Button } from '@/components/ui/button';
-import { ArrowUpDown, Target, TrendingUp, CheckCircle2, Clock } from 'lucide-react';
+import { ArrowUpDown, Target, CheckCircle2, Clock } from 'lucide-react';
 import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
 import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card';
@@ -95,14 +95,6 @@ const CompetencyTable: React.FC<CompetencyTableProps> = ({ competencies }) => {
 
                   <div className="space-y-1">
                     <div className="flex items-center gap-1.5">
-                      <TrendingUp className="h-3.5 w-3.5 text-muted-foreground" />
-                      <span className="text-muted-foreground">Level</span>
-                    </div>
-                    <p className="font-medium">{competency.level}</p>
-                  </div>
-
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-1.5">
                       <CheckCircle2 className="h-3.5 w-3.5 text-muted-foreground" />
                       <span className="text-muted-foreground">Indicators</span>
                     </div>
@@ -172,10 +164,6 @@ const CompetencyTable: React.FC<CompetencyTableProps> = ({ competencies }) => {
     {
       accessorKey: 'category',
       header: 'Category',
-    },
-    {
-      accessorKey: 'level',
-      header: 'Level',
     },
     {
       accessorKey: 'behavioralIndicators',

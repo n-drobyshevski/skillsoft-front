@@ -19,7 +19,8 @@ import {
   resetMockStores,
   errorHandlers,
 } from '../mocks/handlers';
-import type { Competency, CompetencyCategory, ProficiencyLevel, ApprovalStatus } from '@/types/domain';
+import type { Competency } from '@/types/domain';
+import { CompetencyCategory, ApprovalStatus } from '@/types/domain';
 
 // API base URL for tests
 const API_BASE = 'http://localhost:8080/api';
@@ -98,7 +99,6 @@ describe('Competencies API', () => {
         expect(first).toHaveProperty('name');
         expect(first).toHaveProperty('description');
         expect(first).toHaveProperty('category');
-        expect(first).toHaveProperty('level');
         expect(first).toHaveProperty('isActive');
         expect(first).toHaveProperty('approvalStatus');
         expect(first).toHaveProperty('standardCodes');
@@ -130,8 +130,8 @@ describe('Competencies API', () => {
         const competencies = await fetchCompetencies();
         const statuses = new Set(competencies.map(c => c.approvalStatus));
 
-        expect(statuses.has('APPROVED')).toBe(true);
-        expect(statuses.has('DRAFT')).toBe(true);
+        expect(statuses.has(ApprovalStatus.APPROVED)).toBe(true);
+        expect(statuses.has(ApprovalStatus.DRAFT)).toBe(true);
       });
     });
 
@@ -165,10 +165,9 @@ describe('Competencies API', () => {
       const newCompetency = await createCompetency({
         name: 'New Competency',
         description: 'A description that is at least 10 characters long',
-        category: 'LEADERSHIP' as CompetencyCategory,
-        level: 'NOVICE' as ProficiencyLevel,
+        category: CompetencyCategory.LEADERSHIP,
         isActive: true,
-        approvalStatus: 'DRAFT' as ApprovalStatus,
+        approvalStatus: ApprovalStatus.DRAFT,
       });
 
       expect(newCompetency).toBeDefined();
@@ -181,10 +180,9 @@ describe('Competencies API', () => {
       const newCompetency = await createCompetency({
         name: 'Competency with Standards',
         description: 'A competency mapped to international standards',
-        category: 'COGNITIVE' as CompetencyCategory,
-        level: 'ADVANCED' as ProficiencyLevel,
+        category: CompetencyCategory.COGNITIVE,
         isActive: true,
-        approvalStatus: 'DRAFT' as ApprovalStatus,
+        approvalStatus: ApprovalStatus.DRAFT,
         standardCodes: {
           onetRef: { code: '2.A.1.b', title: 'Written Comprehension' },
           bigFiveRef: { trait: 'OPENNESS', title: 'Openness' },
@@ -200,10 +198,9 @@ describe('Competencies API', () => {
         createCompetency({
           name: 'Ab', // Too short (< 3 chars)
           description: 'A valid description that is long enough',
-          category: 'LEADERSHIP' as CompetencyCategory,
-          level: 'NOVICE' as ProficiencyLevel,
+          category: CompetencyCategory.LEADERSHIP,
           isActive: true,
-          approvalStatus: 'DRAFT' as ApprovalStatus,
+          approvalStatus: ApprovalStatus.DRAFT,
         })
       ).rejects.toThrow('Name must be at least 3 characters');
     });
@@ -213,10 +210,9 @@ describe('Competencies API', () => {
         createCompetency({
           name: 'Valid Name',
           description: 'Short', // Too short (< 10 chars)
-          category: 'LEADERSHIP' as CompetencyCategory,
-          level: 'NOVICE' as ProficiencyLevel,
+          category: CompetencyCategory.LEADERSHIP,
           isActive: true,
-          approvalStatus: 'DRAFT' as ApprovalStatus,
+          approvalStatus: ApprovalStatus.DRAFT,
         })
       ).rejects.toThrow('Description must be at least 10 characters');
     });
@@ -227,10 +223,9 @@ describe('Competencies API', () => {
       await createCompetency({
         name: 'Persisted Competency',
         description: 'This competency should be persisted to the store',
-        category: 'COMMUNICATION' as CompetencyCategory,
-        level: 'PROFICIENT' as ProficiencyLevel,
+        category: CompetencyCategory.COMMUNICATION,
         isActive: true,
-        approvalStatus: 'DRAFT' as ApprovalStatus,
+        approvalStatus: ApprovalStatus.DRAFT,
       });
 
       const finalCount = (await fetchCompetencies()).length;
@@ -334,7 +329,7 @@ describe('Competencies API', () => {
 
     it('should update approval status', async () => {
       const updated = await updateCompetency('comp-3', {
-        approvalStatus: 'APPROVED' as ApprovalStatus,
+        approvalStatus: ApprovalStatus.APPROVED,
       });
 
       expect(updated.approvalStatus).toBe('APPROVED');
@@ -440,22 +435,14 @@ describe('Competencies API', () => {
       expect(categories.size).toBeGreaterThan(1);
     });
 
-    it('should return competencies with various proficiency levels', async () => {
-      const competencies = await fetchCompetencies();
-      const levels = new Set(competencies.map(c => c.level));
-
-      expect(levels.size).toBeGreaterThan(1);
-    });
-
     it('should have competencies with Russian content support', async () => {
       // Create a competency with Russian content
       const russianCompetency = await createCompetency({
         name: 'Коммуникация', // "Communication" in Russian
         description: 'Эффективные навыки устного и письменного общения', // Russian description
-        category: 'COMMUNICATION' as CompetencyCategory,
-        level: 'PROFICIENT' as ProficiencyLevel,
+        category: CompetencyCategory.COMMUNICATION,
         isActive: true,
-        approvalStatus: 'DRAFT' as ApprovalStatus,
+        approvalStatus: ApprovalStatus.DRAFT,
       });
 
       expect(russianCompetency.name).toBe('Коммуникация');

@@ -41,8 +41,6 @@ async function getDashboardData() {
 		competencies.forEach((comp: Competency) => {
 			stats.competenciesByCategory[comp.category] =
 				(stats.competenciesByCategory[comp.category] || 0) + 1;
-			stats.competenciesByLevel[comp.level] =
-				(stats.competenciesByLevel[comp.level] || 0) + 1;
 		});
 
 		stats.averageIndicatorsPerCompetency =

@@ -5,7 +5,6 @@
 import { describe, it, expect } from 'vitest';
 import {
   competencyCategoryToIcon,
-  competencyProficiencyLevelToColor,
   levelToNumber,
   levelToColor,
   approvalStatusToColor,
@@ -14,7 +13,7 @@ import {
   questionTypeToColor,
   biLevelToColor,
 } from '@/lib/ui-utils';
-import { ProficiencyLevel, DifficultyLevel } from '@/types/domain';
+import { DifficultyLevel } from '@/types/domain';
 
 describe('competencyCategoryToIcon', () => {
   it('should return an icon element for COGNITIVE', () => {
@@ -67,33 +66,6 @@ describe('competencyCategoryToIcon', () => {
       expect(icon).toBeDefined();
       expect(icon).toHaveProperty('props');
     });
-  });
-});
-
-describe('competencyProficiencyLevelToColor', () => {
-  it('should return red-based color for NOVICE', () => {
-    const color = competencyProficiencyLevelToColor(ProficiencyLevel.NOVICE);
-    expect(color).toContain('red');
-  });
-
-  it('should return amber-based color for DEVELOPING', () => {
-    const color = competencyProficiencyLevelToColor(ProficiencyLevel.DEVELOPING);
-    expect(color).toContain('amber');
-  });
-
-  it('should return emerald-based color for PROFICIENT', () => {
-    const color = competencyProficiencyLevelToColor(ProficiencyLevel.PROFICIENT);
-    expect(color).toContain('emerald');
-  });
-
-  it('should return blue-based color for ADVANCED', () => {
-    const color = competencyProficiencyLevelToColor(ProficiencyLevel.ADVANCED);
-    expect(color).toContain('blue');
-  });
-
-  it('should return violet-based color for EXPERT', () => {
-    const color = competencyProficiencyLevelToColor(ProficiencyLevel.EXPERT);
-    expect(color).toContain('violet');
   });
 });
 

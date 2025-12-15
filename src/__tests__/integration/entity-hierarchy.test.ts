@@ -24,6 +24,15 @@ import type {
   BehavioralIndicator,
   AssessmentQuestion,
 } from '@/types/domain';
+import {
+  CompetencyCategory,
+  ApprovalStatus,
+  ObservabilityLevel,
+  IndicatorMeasurementType,
+  ContextScope,
+  QuestionType,
+  DifficultyLevel,
+} from '@/types/domain';
 
 // API base URL for tests
 const API_BASE = 'http://localhost:8080/api';
@@ -117,7 +126,6 @@ describe('Entity Hierarchy', () => {
         expect(comp.name).toBeDefined();
         expect(comp.description).toBeDefined();
         expect(comp.category).toBeDefined();
-        expect(comp.level).toBeDefined();
       });
     });
 
@@ -202,11 +210,11 @@ describe('Entity Hierarchy', () => {
         competencyId: 'comp-1',
         weight: 0.15,
         orderIndex: 10,
-        observabilityLevel: 'NOVICE',
-        measurementType: 'FREQUENCY',
+        observabilityLevel: ObservabilityLevel.DIRECTLY_OBSERVABLE,
+        measurementType: IndicatorMeasurementType.FREQUENCY,
         isActive: true,
-        approvalStatus: 'DRAFT',
-        contextScope: 'UNIVERSAL',
+        approvalStatus: ApprovalStatus.DRAFT,
+        contextScope: ContextScope.UNIVERSAL,
       });
 
       expect(newIndicator.competencyId).toBe('comp-1');
@@ -220,13 +228,13 @@ describe('Entity Hierarchy', () => {
     it('should allow creating a new question under an existing indicator', async () => {
       const newQuestion = await createQuestion('bi-1', {
         questionText: 'This is a new question for testing hierarchy',
-        questionType: 'LIKERT_SCALE',
+        questionType: QuestionType.LIKERT_SCALE,
         answerOptions: [
           { label: '1', value: 1 },
           { label: '5', value: 5 },
         ],
         scoringRubric: 'Test rubric',
-        difficultyLevel: 'FOUNDATIONAL',
+        difficultyLevel: DifficultyLevel.FOUNDATIONAL,
         isActive: true,
         orderIndex: 10,
       });
@@ -370,10 +378,9 @@ describe('Entity Hierarchy', () => {
       const newCompetency = await createCompetency({
         name: 'Integrity Test Competency',
         description: 'A competency for testing data integrity',
-        category: 'LEADERSHIP',
-        level: 'NOVICE',
+        category: CompetencyCategory.LEADERSHIP,
         isActive: true,
-        approvalStatus: 'DRAFT',
+        approvalStatus: ApprovalStatus.DRAFT,
       });
 
       // Create an indicator for it
@@ -383,23 +390,23 @@ describe('Entity Hierarchy', () => {
         competencyId: newCompetency.id,
         weight: 0.5,
         orderIndex: 1,
-        observabilityLevel: 'NOVICE',
-        measurementType: 'FREQUENCY',
+        observabilityLevel: ObservabilityLevel.DIRECTLY_OBSERVABLE,
+        measurementType: IndicatorMeasurementType.FREQUENCY,
         isActive: true,
-        approvalStatus: 'DRAFT',
-        contextScope: 'UNIVERSAL',
+        approvalStatus: ApprovalStatus.DRAFT,
+        contextScope: ContextScope.UNIVERSAL,
       });
 
       // Create a question for the indicator
       const newQuestion = await createQuestion(newIndicator.id, {
         questionText: 'This is an integrity test question',
-        questionType: 'LIKERT_SCALE',
+        questionType: QuestionType.LIKERT_SCALE,
         answerOptions: [
           { label: '1', value: 1 },
           { label: '5', value: 5 },
         ],
         scoringRubric: 'Test',
-        difficultyLevel: 'FOUNDATIONAL',
+        difficultyLevel: DifficultyLevel.FOUNDATIONAL,
         isActive: true,
         orderIndex: 1,
       });
@@ -425,8 +432,8 @@ describe('Entity Hierarchy', () => {
       const competencies = await fetchCompetencies();
       const statuses = new Set(competencies.map(c => c.approvalStatus));
 
-      expect(statuses.has('APPROVED')).toBe(true);
-      expect(statuses.has('DRAFT')).toBe(true);
+      expect(statuses.has(ApprovalStatus.APPROVED)).toBe(true);
+      expect(statuses.has(ApprovalStatus.DRAFT)).toBe(true);
     });
 
     it('should have indicators with various approval statuses', async () => {
@@ -438,12 +445,12 @@ describe('Entity Hierarchy', () => {
 
     it('should follow workflow: DRAFT -> PENDING_REVIEW -> APPROVED', async () => {
       const validStatuses = [
-        'DRAFT',
-        'PENDING_REVIEW',
-        'APPROVED',
-        'REJECTED',
-        'ARCHIVED',
-        'UNDER_REVISION',
+        ApprovalStatus.DRAFT,
+        ApprovalStatus.PENDING_REVIEW,
+        ApprovalStatus.APPROVED,
+        ApprovalStatus.REJECTED,
+        ApprovalStatus.ARCHIVED,
+        ApprovalStatus.UNDER_REVISION,
       ];
 
       const competencies = await fetchCompetencies();
@@ -463,7 +470,7 @@ describe('Entity Hierarchy', () => {
   // ==========================================
   describe('Context Scope Hierarchy', () => {
     it('should have indicators with valid context scopes', async () => {
-      const validScopes = ['UNIVERSAL', 'PROFESSIONAL', 'TECHNICAL', 'MANAGERIAL'];
+      const validScopes = [ContextScope.UNIVERSAL, ContextScope.PROFESSIONAL, ContextScope.TECHNICAL, ContextScope.MANAGERIAL];
       const indicators = await fetchAllIndicators();
 
       indicators.forEach(indicator => {
@@ -476,7 +483,7 @@ describe('Entity Hierarchy', () => {
     it('should have UNIVERSAL scope for context-neutral indicators', async () => {
       const indicators = await fetchAllIndicators();
       const universalIndicators = indicators.filter(
-        i => i.contextScope === 'UNIVERSAL'
+        i => i.contextScope === ContextScope.UNIVERSAL
       );
 
       expect(universalIndicators.length).toBeGreaterThan(0);

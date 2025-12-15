@@ -104,7 +104,6 @@ export default function IndicatorPreview({ indicator }: { indicator: BehavioralI
                   <p className="text-sm font-medium truncate">{competency.name}</p>
                   <div className="flex gap-1.5 mt-1">
                     <Badge variant="secondary" className="text-xs h-5">{competency.category}</Badge>
-                    <Badge variant="outline" className="text-xs h-5">{competency.level}</Badge>
                   </div>
                 </div>
                 <Button variant="ghost" size="sm" className="h-7 w-7 p-0 shrink-0" asChild>

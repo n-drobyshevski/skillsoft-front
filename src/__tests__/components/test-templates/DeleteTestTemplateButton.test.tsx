@@ -342,7 +342,7 @@ describe('DeleteTestTemplateButton', () => {
     it('should disable button during deletion', async () => {
       const user = userEvent.setup();
       // Make deletion slow
-      mockDeleteTestTemplate.mockImplementation(() => new Promise(resolve => setTimeout(resolve, 100)));
+      mockDeleteTestTemplate.mockImplementation(() => new Promise<void>(resolve => setTimeout(() => resolve(), 100)));
 
       render(<DeleteTestTemplateButton {...defaultProps} />);
 
@@ -359,7 +359,7 @@ describe('DeleteTestTemplateButton', () => {
 
     it('should disable cancel button during deletion', async () => {
       const user = userEvent.setup();
-      mockDeleteTestTemplate.mockImplementation(() => new Promise(resolve => setTimeout(resolve, 100)));
+      mockDeleteTestTemplate.mockImplementation(() => new Promise<void>(resolve => setTimeout(() => resolve(), 100)));
 
       render(<DeleteTestTemplateButton {...defaultProps} />);
 
@@ -378,7 +378,7 @@ describe('DeleteTestTemplateButton', () => {
     it('should disable main button during deletion', async () => {
       const user = userEvent.setup();
       let resolveDelete: () => void;
-      mockDeleteTestTemplate.mockImplementation(() => new Promise(resolve => {
+      mockDeleteTestTemplate.mockImplementation(() => new Promise<void>(resolve => {
         resolveDelete = resolve;
       }));
 
@@ -393,7 +393,7 @@ describe('DeleteTestTemplateButton', () => {
 
     it('should show loading spinner during deletion', async () => {
       const user = userEvent.setup();
-      mockDeleteTestTemplate.mockImplementation(() => new Promise(resolve => setTimeout(resolve, 100)));
+      mockDeleteTestTemplate.mockImplementation(() => new Promise<void>(resolve => setTimeout(() => resolve(), 100)));
 
       render(<DeleteTestTemplateButton {...defaultProps} />);
 

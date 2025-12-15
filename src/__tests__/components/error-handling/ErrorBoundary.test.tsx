@@ -100,7 +100,7 @@ function InteractiveThrowingComponent() {
 /**
  * Component that throws with custom error details
  */
-function DetailedErrorComponent({ errorType }: { errorType: 'network' | 'validation' | 'auth' }) {
+function DetailedErrorComponent({ errorType }: { errorType: 'network' | 'validation' | 'auth' }): React.ReactElement {
   const errorMessages = {
     network: 'Network request failed',
     validation: 'Form validation error',

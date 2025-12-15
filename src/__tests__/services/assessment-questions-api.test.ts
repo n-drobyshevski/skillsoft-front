@@ -21,10 +21,12 @@ import {
 } from '../mocks/handlers';
 import type {
   AssessmentQuestion,
-  QuestionType,
-  DifficultyLevel,
   AnswerOption,
   QuestionMetadata,
+} from '@/types/domain';
+import {
+  QuestionType,
+  DifficultyLevel,
 } from '@/types/domain';
 
 // API base URL for tests
@@ -170,7 +172,7 @@ describe('Assessment Questions API', () => {
     it('should create a Likert scale question', async () => {
       const newQuestion = await createQuestion('bi-1', {
         questionText: 'How strongly do you agree with this statement?',
-        questionType: 'LIKERT_SCALE' as QuestionType,
+        questionType: QuestionType.LIKERT_SCALE,
         answerOptions: [
           { id: 'opt-1', label: 'Strongly Disagree', value: 1 },
           { id: 'opt-2', label: 'Disagree', value: 2 },
@@ -180,7 +182,7 @@ describe('Assessment Questions API', () => {
         ],
         scoringRubric: 'Higher scores indicate stronger agreement',
         timeLimit: 30,
-        difficultyLevel: 'FOUNDATIONAL' as DifficultyLevel,
+        difficultyLevel: DifficultyLevel.FOUNDATIONAL,
         isActive: true,
         orderIndex: 1,
       });
@@ -194,7 +196,7 @@ describe('Assessment Questions API', () => {
     it('should create a Situational Judgment question', async () => {
       const newQuestion = await createQuestion('bi-2', {
         questionText: 'A colleague asks for help with a task when you are busy. What do you do?',
-        questionType: 'SITUATIONAL_JUDGMENT' as QuestionType,
+        questionType: QuestionType.SITUATIONAL_JUDGMENT,
         answerOptions: [
           { id: 'opt-1', text: 'Ignore the request', value: 1, effectiveness: 1 },
           { id: 'opt-2', text: 'Explain you are busy and offer to help later', value: 2, effectiveness: 4 },
@@ -203,7 +205,7 @@ describe('Assessment Questions API', () => {
         ],
         scoringRubric: 'Evaluates prioritization and teamwork skills',
         timeLimit: 180,
-        difficultyLevel: 'INTERMEDIATE' as DifficultyLevel,
+        difficultyLevel: DifficultyLevel.INTERMEDIATE,
         isActive: true,
         orderIndex: 2,
         metadata: { tags: ['GENERAL', 'MID'] },
@@ -216,7 +218,7 @@ describe('Assessment Questions API', () => {
     it('should create a Multiple Choice question', async () => {
       const newQuestion = await createQuestion('bi-1', {
         questionText: 'Which of the following is NOT a characteristic of active listening?',
-        questionType: 'MULTIPLE_CHOICE' as QuestionType,
+        questionType: QuestionType.MULTIPLE_CHOICE,
         answerOptions: [
           { id: 'opt-1', text: 'Maintaining eye contact', value: 1, correct: false },
           { id: 'opt-2', text: 'Interrupting to share your thoughts', value: 2, correct: true },
@@ -225,7 +227,7 @@ describe('Assessment Questions API', () => {
         ],
         scoringRubric: 'Correct answer: Option 2 - Interrupting is not active listening',
         timeLimit: 60,
-        difficultyLevel: 'FOUNDATIONAL' as DifficultyLevel,
+        difficultyLevel: DifficultyLevel.FOUNDATIONAL,
         isActive: true,
         orderIndex: 3,
       });
@@ -238,11 +240,11 @@ describe('Assessment Questions API', () => {
     it('should create an Open Text question', async () => {
       const newQuestion = await createQuestion('bi-3', {
         questionText: 'Describe a situation where you demonstrated leadership skills.',
-        questionType: 'OPEN_TEXT' as QuestionType,
+        questionType: QuestionType.OPEN_TEXT,
         answerOptions: [],
         scoringRubric: 'Evaluate for: specific example, actions taken, outcome achieved',
         timeLimit: 300,
-        difficultyLevel: 'ADVANCED' as DifficultyLevel,
+        difficultyLevel: DifficultyLevel.ADVANCED,
         isActive: true,
         orderIndex: 1,
         metadata: { tags: ['GENERAL', 'SENIOR'] },
@@ -257,10 +259,10 @@ describe('Assessment Questions API', () => {
       await expect(
         createQuestion('bi-1', {
           questionText: 'Too short', // Less than 10 characters
-          questionType: 'LIKERT_SCALE' as QuestionType,
+          questionType: QuestionType.LIKERT_SCALE,
           answerOptions: [],
           scoringRubric: 'Test rubric',
-          difficultyLevel: 'FOUNDATIONAL' as DifficultyLevel,
+          difficultyLevel: DifficultyLevel.FOUNDATIONAL,
           isActive: true,
           orderIndex: 1,
         })
@@ -270,7 +272,7 @@ describe('Assessment Questions API', () => {
     it('should create question with metadata tags', async () => {
       const newQuestion = await createQuestion('bi-1', {
         questionText: 'How do you handle constructive criticism in the workplace?',
-        questionType: 'LIKERT_SCALE' as QuestionType,
+        questionType: QuestionType.LIKERT_SCALE,
         answerOptions: [
           { label: 'Very poorly', value: 1 },
           { label: 'Poorly', value: 2 },
@@ -279,7 +281,7 @@ describe('Assessment Questions API', () => {
           { label: 'Very well', value: 5 },
         ],
         scoringRubric: 'Higher scores indicate better handling of criticism',
-        difficultyLevel: 'INTERMEDIATE' as DifficultyLevel,
+        difficultyLevel: DifficultyLevel.INTERMEDIATE,
         isActive: true,
         orderIndex: 1,
         metadata: {
@@ -298,7 +300,7 @@ describe('Assessment Questions API', () => {
 
       await createQuestion('bi-1', {
         questionText: 'This is a persisted question for testing purposes',
-        questionType: 'LIKERT_SCALE' as QuestionType,
+        questionType: QuestionType.LIKERT_SCALE,
         answerOptions: [
           { label: '1', value: 1 },
           { label: '2', value: 2 },
@@ -307,7 +309,7 @@ describe('Assessment Questions API', () => {
           { label: '5', value: 5 },
         ],
         scoringRubric: 'Standard Likert scoring',
-        difficultyLevel: 'FOUNDATIONAL' as DifficultyLevel,
+        difficultyLevel: DifficultyLevel.FOUNDATIONAL,
         isActive: true,
         orderIndex: 10,
       });
@@ -319,7 +321,7 @@ describe('Assessment Questions API', () => {
     it('should create question with SJT vector weights', async () => {
       const newQuestion = await createQuestion('bi-2', {
         questionText: 'Your team member consistently misses deadlines. How do you address this?',
-        questionType: 'SJT' as QuestionType,
+        questionType: QuestionType.SJT,
         answerOptions: [
           {
             id: 'opt-1',
@@ -342,7 +344,7 @@ describe('Assessment Questions API', () => {
         ],
         scoringRubric: 'Uses ipsative scoring with vector weights',
         timeLimit: 180,
-        difficultyLevel: 'ADVANCED' as DifficultyLevel,
+        difficultyLevel: DifficultyLevel.ADVANCED,
         isActive: true,
         orderIndex: 1,
       });
@@ -383,7 +385,7 @@ describe('Assessment Questions API', () => {
 
     it('should update difficulty level', async () => {
       const updated = await updateQuestion('q-1', {
-        difficultyLevel: 'EXPERT' as DifficultyLevel,
+        difficultyLevel: DifficultyLevel.EXPERT,
       });
 
       expect(updated.difficultyLevel).toBe('EXPERT');
@@ -483,7 +485,7 @@ describe('Assessment Questions API', () => {
   // ==========================================
   describe('Question Types', () => {
     it('should support all primary question types', async () => {
-      const types: QuestionType[] = ['LIKERT', 'SJT', 'MCQ'];
+      const types: QuestionType[] = [QuestionType.LIKERT, QuestionType.SJT, QuestionType.MCQ];
 
       for (const type of types) {
         const question = await createQuestion('bi-1', {
@@ -494,7 +496,7 @@ describe('Assessment Questions API', () => {
             { label: 'Option 2', value: 2 },
           ],
           scoringRubric: `Scoring for ${type}`,
-          difficultyLevel: 'INTERMEDIATE' as DifficultyLevel,
+          difficultyLevel: DifficultyLevel.INTERMEDIATE,
           isActive: true,
           orderIndex: 1,
         });
@@ -505,11 +507,11 @@ describe('Assessment Questions API', () => {
 
     it('should support extended question types', async () => {
       const extendedTypes: QuestionType[] = [
-        'LIKERT_SCALE',
-        'SITUATIONAL_JUDGMENT',
-        'MULTIPLE_CHOICE',
-        'OPEN_TEXT',
-        'BEHAVIORAL_EXAMPLE',
+        QuestionType.LIKERT_SCALE,
+        QuestionType.SITUATIONAL_JUDGMENT,
+        QuestionType.MULTIPLE_CHOICE,
+        QuestionType.OPEN_TEXT,
+        QuestionType.BEHAVIORAL_EXAMPLE,
       ];
 
       for (const type of extendedTypes) {
@@ -521,7 +523,7 @@ describe('Assessment Questions API', () => {
             { label: 'Option 2', value: 2 },
           ],
           scoringRubric: `Scoring for ${type}`,
-          difficultyLevel: 'INTERMEDIATE' as DifficultyLevel,
+          difficultyLevel: DifficultyLevel.INTERMEDIATE,
           isActive: true,
           orderIndex: 1,
         });
@@ -537,17 +539,17 @@ describe('Assessment Questions API', () => {
   describe('Difficulty Levels', () => {
     it('should support all difficulty levels', async () => {
       const levels: DifficultyLevel[] = [
-        'FOUNDATIONAL',
-        'INTERMEDIATE',
-        'ADVANCED',
-        'EXPERT',
-        'SPECIALIZED',
+        DifficultyLevel.FOUNDATIONAL,
+        DifficultyLevel.INTERMEDIATE,
+        DifficultyLevel.ADVANCED,
+        DifficultyLevel.EXPERT,
+        DifficultyLevel.SPECIALIZED,
       ];
 
       for (const level of levels) {
         const question = await createQuestion('bi-1', {
           questionText: `Test question for difficulty level ${level}`,
-          questionType: 'LIKERT_SCALE' as QuestionType,
+          questionType: QuestionType.LIKERT_SCALE,
           answerOptions: [
             { label: '1', value: 1 },
             { label: '5', value: 5 },
@@ -598,10 +600,10 @@ describe('Assessment Questions API', () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           questionText: 'Question without indicator ID',
-          questionType: 'LIKERT_SCALE',
+          questionType: QuestionType.LIKERT_SCALE,
           answerOptions: [],
           scoringRubric: 'Test',
-          difficultyLevel: 'FOUNDATIONAL',
+          difficultyLevel: DifficultyLevel.FOUNDATIONAL,
           isActive: true,
           orderIndex: 1,
         }),
@@ -620,7 +622,7 @@ describe('Assessment Questions API', () => {
     it('should support Russian content in questions', async () => {
       const russianQuestion = await createQuestion('bi-1', {
         questionText: 'Как часто вы запрашиваете обратную связь от коллег?', // Russian question
-        questionType: 'LIKERT_SCALE' as QuestionType,
+        questionType: QuestionType.LIKERT_SCALE,
         answerOptions: [
           { label: 'Никогда', value: 1 }, // "Never" in Russian
           { label: 'Редко', value: 2 }, // "Rarely"
@@ -629,7 +631,7 @@ describe('Assessment Questions API', () => {
           { label: 'Всегда', value: 5 }, // "Always"
         ],
         scoringRubric: 'Высокие баллы указывают на проактивность', // Russian rubric
-        difficultyLevel: 'INTERMEDIATE' as DifficultyLevel,
+        difficultyLevel: DifficultyLevel.INTERMEDIATE,
         isActive: true,
         orderIndex: 1,
       });

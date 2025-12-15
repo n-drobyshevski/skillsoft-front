@@ -5,9 +5,11 @@ import { useRouter } from 'next/navigation';
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Clock, FileQuestion, ArrowRight, Target } from "lucide-react";
+import { Clock, FileQuestion, ArrowRight, Target, Loader2 } from "lucide-react";
 import { ExistingSessionDialog } from "@/components/assessment/ExistingSessionDialog";
+import { ReadinessAlert } from "@/components/assessment/ReadinessAlert";
 import { TestTemplate, TestSession } from "@/types/domain";
+import { useTemplateReadiness } from "@/hooks/useTemplateReadiness";
 
 interface StartAssessmentClientProps {
   template: TestTemplate;
@@ -30,6 +32,9 @@ export function StartAssessmentClient({
 }: StartAssessmentClientProps) {
   const router = useRouter();
   const [showDialog, setShowDialog] = useState(!!existingSession);
+
+  // Pre-flight readiness check
+  const { readiness, isReady, isLoading: isCheckingReadiness } = useTemplateReadiness(template.id);
 
   // Handle resume existing session
   const handleResume = () => {
@@ -77,6 +82,16 @@ export function StartAssessmentClient({
               </div>
             </div>
           </Card>
+        )}
+
+        {/* Readiness Alert - Pre-flight check */}
+        {readiness && !isReady && (
+          <ReadinessAlert
+            readiness={readiness}
+            isLoading={isCheckingReadiness}
+            onGoBack={() => router.push('/test-templates')}
+            className="mb-6"
+          />
         )}
 
         {/* Main Card */}
@@ -137,11 +152,25 @@ export function StartAssessmentClient({
               <Button
                 type="submit"
                 size="lg"
+                disabled={isCheckingReadiness || !isReady}
                 aria-label={`Start ${template.name} assessment`}
-                className="w-full h-14 text-lg font-semibold bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg transition-all duration-200 hover:shadow-xl hover:scale-[1.02] active:scale-[0.98]"
+                className="w-full h-14 text-lg font-semibold bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg transition-all duration-200 hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
               >
-                Begin Assessment
-                <ArrowRight className="ml-2 w-5 h-5" aria-hidden="true" />
+                {isCheckingReadiness ? (
+                  <>
+                    <Loader2 className="mr-2 w-5 h-5 animate-spin" aria-hidden="true" />
+                    Checking Readiness...
+                  </>
+                ) : !isReady ? (
+                  <>
+                    Assessment Not Available
+                  </>
+                ) : (
+                  <>
+                    Begin Assessment
+                    <ArrowRight className="ml-2 w-5 h-5" aria-hidden="true" />
+                  </>
+                )}
               </Button>
             </form>
 

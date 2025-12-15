@@ -9,7 +9,9 @@ import { canCreateContent } from "@/services/roleApi";
 import PageHeader from "@/components/common/PageHeader";
 import TestTemplatesGrid from "./_components/TestTemplatesGrid";
 import TestTemplatesGridSkeleton from "./_components/TestTemplatesGridSkeleton";
+import ErrorDisplay from "./_components/ErrorDisplay";
 import { ListFilter, History, Plus } from "lucide-react";
+import { isApiError, getUserFriendlyMessage, ErrorCategory } from "@/types/errors";
 
 export const metadata: Metadata = {
   title: "Шаблоны тестов - SkillSoft",
@@ -20,26 +22,63 @@ export const metadata: Metadata = {
   },
 };
 
-async function getActiveTemplates() {
-  const templates = await testTemplatesApi.getActiveTemplates();
-  if (!Array.isArray(templates)) {
-    return { templates: [], error: "Invalid data format from server." };
+interface FetchResult {
+  templates: Awaited<ReturnType<typeof testTemplatesApi.getActiveTemplates>>;
+  error: string | null;
+  errorCategory?: ErrorCategory;
+  isRetryable?: boolean;
+}
+
+async function getActiveTemplates(): Promise<FetchResult> {
+  try {
+    const templates = await testTemplatesApi.getActiveTemplates();
+
+    if (!Array.isArray(templates)) {
+      return {
+        templates: [],
+        error: "Получены некорректные данные от сервера.",
+        errorCategory: ErrorCategory.SERVER,
+        isRetryable: true,
+      };
+    }
+
+    return { templates, error: null };
+  } catch (err) {
+    // Handle ApiError with rich metadata
+    if (isApiError(err)) {
+      return {
+        templates: [],
+        error: err.message || getUserFriendlyMessage(err.category),
+        errorCategory: err.category,
+        isRetryable: err.isRetryable,
+      };
+    }
+
+    // Handle generic errors
+    const errorMessage = err instanceof Error
+      ? err.message
+      : "Произошла непредвиденная ошибка при загрузке шаблонов.";
+
+    return {
+      templates: [],
+      error: errorMessage,
+      errorCategory: ErrorCategory.UNKNOWN,
+      isRetryable: true,
+    };
   }
-  return { templates, error: null };
 }
 
 // Async component for templates grid - streams after static shell
 async function TemplatesContent({ canCreate }: { canCreate: boolean }) {
-  const { templates, error } = await getActiveTemplates();
-  
+  const { templates, error, errorCategory, isRetryable } = await getActiveTemplates();
+
   if (error) {
     return (
-      <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-4 text-destructive">
-        <p className="text-sm font-medium">{error}</p>
-        <p className="text-xs mt-1 opacity-80">
-          Попробуйте обновить страницу или обратитесь к администратору.
-        </p>
-      </div>
+      <ErrorDisplay
+        message={error}
+        category={errorCategory}
+        isRetryable={isRetryable}
+      />
     );
   }
   

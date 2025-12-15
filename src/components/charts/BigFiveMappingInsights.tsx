@@ -19,6 +19,7 @@ import {
   ContributionType,
   BIG_FIVE_INFO
 } from '@/hooks/useBigFiveProjection';
+import { BIG_FIVE_COLORS } from './BigFiveRadar';
 
 interface BigFiveMappingInsightsProps {
   profile: BigFiveProfile;
@@ -129,6 +130,7 @@ const TraitCard = React.memo<{
 }>(({ trait, score, contributions, isExpanded, onToggle }) => {
   const info = BIG_FIVE_INFO[trait];
   const contributionCount = contributions.length;
+  const traitColor = BIG_FIVE_COLORS[trait];
 
   // Calculate max weighted score for progress bar normalization
   const maxWeightedScore = contributions.length > 0
@@ -150,10 +152,17 @@ const TraitCard = React.memo<{
         <div className="flex items-start justify-between gap-3">
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-1">
+              <div
+                className="w-3 h-3 rounded-full shrink-0"
+                style={{ backgroundColor: traitColor.primary }}
+              />
               <h4 className="font-semibold text-sm sm:text-base">
                 {info.short}
               </h4>
-              <span className="text-sm font-bold text-primary tabular-nums">
+              <span
+                className="text-sm font-bold tabular-nums"
+                style={{ color: traitColor.primary }}
+              >
                 {score}%
               </span>
             </div>

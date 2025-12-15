@@ -80,10 +80,6 @@ export default function CompetencyPreview({ competency }: { competency: Competen
               <Sparkles className="h-3 w-3 mr-1" />
               {competency.isActive ? "Active" : "Inactive"}
             </Badge>
-            <Badge variant="outline" className="font-normal">
-              <Layers className="h-3 w-3 mr-1" />
-              {competency.level}
-            </Badge>
             {competency.category && (
               <Badge variant="outline" className="font-normal bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950 dark:text-blue-300 dark:border-blue-800">
                 <Tag className="h-3 w-3 mr-1" />

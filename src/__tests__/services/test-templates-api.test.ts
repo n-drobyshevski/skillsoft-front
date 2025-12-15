@@ -10,8 +10,8 @@ import type {
   TestTemplateSummary,
   CreateTestTemplateRequest,
   UpdateTestTemplateRequest,
-  AssessmentGoal,
 } from '@/types/domain';
+import { AssessmentGoal } from '@/types/domain';
 
 const API_BASE = 'http://localhost:8080/api';
 
@@ -21,7 +21,7 @@ const mockTemplates: TestTemplateSummary[] = [
     id: 'template-1',
     name: 'Universal Baseline Assessment',
     description: 'General soft skills assessment for universal baseline',
-    goal: 'OVERVIEW' as AssessmentGoal,
+    goal: AssessmentGoal.OVERVIEW,
     competencyCount: 5,
     timeLimitMinutes: 30,
     passingScore: 70,
@@ -32,7 +32,7 @@ const mockTemplates: TestTemplateSummary[] = [
     id: 'template-2',
     name: 'Job Fit Assessment - Developer',
     description: 'Role-specific assessment for software developers',
-    goal: 'JOB_FIT' as AssessmentGoal,
+    goal: AssessmentGoal.JOB_FIT,
     competencyCount: 8,
     timeLimitMinutes: 45,
     passingScore: 75,
@@ -43,7 +43,7 @@ const mockTemplates: TestTemplateSummary[] = [
     id: 'template-3',
     name: 'Team Fit Analysis',
     description: 'Team dynamics and compatibility assessment',
-    goal: 'TEAM_FIT' as AssessmentGoal,
+    goal: AssessmentGoal.TEAM_FIT,
     competencyCount: 4,
     timeLimitMinutes: 25,
     passingScore: 65,
@@ -56,7 +56,7 @@ const mockFullTemplate: TestTemplate = {
   id: 'template-1',
   name: 'Universal Baseline Assessment',
   description: 'General soft skills assessment for universal baseline',
-  goal: 'OVERVIEW' as AssessmentGoal,
+  goal: AssessmentGoal.OVERVIEW,
   blueprint: {
     onet_soc_code: undefined,
     team_id: undefined,
@@ -127,7 +127,7 @@ beforeEach(() => {
         id: `template-${Date.now()}`,
         name: body.name,
         description: body.description,
-        goal: body.goal || 'OVERVIEW',
+        goal: body.goal || AssessmentGoal.OVERVIEW,
         blueprint: body.blueprint || {},
         competencyIds: body.competencyIds || [],
         questionsPerIndicator: body.questionsPerIndicator || 3,
@@ -268,7 +268,7 @@ describe('Test Templates API', () => {
       const newTemplate: CreateTestTemplateRequest = {
         name: 'New Assessment Template',
         description: 'A new test template',
-        goal: 'OVERVIEW',
+        goal: AssessmentGoal.OVERVIEW,
         competencyIds: ['comp-1', 'comp-2'],
         timeLimitMinutes: 45,
         passingScore: 80,
@@ -322,7 +322,7 @@ describe('Test Templates API', () => {
     });
 
     it('should handle different assessment goals', async () => {
-      const goals: AssessmentGoal[] = ['OVERVIEW', 'JOB_FIT', 'TEAM_FIT'];
+      const goals: AssessmentGoal[] = [AssessmentGoal.OVERVIEW, AssessmentGoal.JOB_FIT, AssessmentGoal.TEAM_FIT];
 
       for (const goal of goals) {
         const template: CreateTestTemplateRequest = {
@@ -502,7 +502,7 @@ describe('Test Templates API', () => {
     it('should create template with O*NET blueprint for JOB_FIT', async () => {
       const template: CreateTestTemplateRequest = {
         name: 'Job Fit with Blueprint',
-        goal: 'JOB_FIT',
+        goal: AssessmentGoal.JOB_FIT,
         blueprint: {
           onet_soc_code: '15-1252.00',
         },
@@ -522,7 +522,7 @@ describe('Test Templates API', () => {
     it('should create template with team_id blueprint for TEAM_FIT', async () => {
       const template: CreateTestTemplateRequest = {
         name: 'Team Fit with Blueprint',
-        goal: 'TEAM_FIT',
+        goal: AssessmentGoal.TEAM_FIT,
         blueprint: {
           team_id: 'team-123',
         },

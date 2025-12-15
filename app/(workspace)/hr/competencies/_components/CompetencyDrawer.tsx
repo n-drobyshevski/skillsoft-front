@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/sheet";
 import { Competency, BigFiveInfo, getEffectiveBigFive, getEffectiveDimension } from "@/types/domain";
 import type { BigFiveDimension } from "@/types/domain";
-import { approvalStatusToColor, competencyProficiencyLevelToColor } from "@/lib/ui-utils";
+import { approvalStatusToColor } from "@/lib/ui-utils";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { getBigFiveMapping } from "@/hooks/useBigFiveMapper";
@@ -111,8 +111,8 @@ export default function CompetencyDrawer({
           
           {/* Status Badges */}
           <div className="flex items-center gap-1.5 flex-wrap mt-3">
-            <Badge 
-              variant={competency.isActive ? "default" : "secondary"} 
+            <Badge
+              variant={competency.isActive ? "default" : "secondary"}
               className="h-5 text-[11px] px-1.5 font-medium"
             >
               {competency.isActive ? "Active" : "Inactive"}
@@ -122,12 +122,6 @@ export default function CompetencyDrawer({
               className={`${approvalStatusToColor(competency.approvalStatus)} h-5 text-[11px] px-1.5 font-medium`}
             >
               {competency.approvalStatus.replace("_", " ")}
-            </Badge>
-            <Badge
-              variant="outline"
-              className={`${competencyProficiencyLevelToColor(competency.level)} h-5 text-[11px] px-1.5 font-medium`}
-            >
-              {competency.level}
             </Badge>
           </div>
         </div>

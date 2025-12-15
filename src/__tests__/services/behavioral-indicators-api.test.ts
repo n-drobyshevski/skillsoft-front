@@ -22,7 +22,9 @@ import {
 } from '../mocks/handlers';
 import type {
   BehavioralIndicator,
-  ProficiencyLevel,
+} from '@/types/domain';
+import {
+  ObservabilityLevel,
   ApprovalStatus,
   IndicatorMeasurementType,
   ContextScope,
@@ -187,11 +189,11 @@ describe('Behavioral Indicators API', () => {
         competencyId: 'comp-1',
         weight: 0.25,
         orderIndex: 3,
-        observabilityLevel: 'PROFICIENT' as ProficiencyLevel,
-        measurementType: 'QUALITY' as IndicatorMeasurementType,
+        observabilityLevel: ObservabilityLevel.DIRECTLY_OBSERVABLE,
+        measurementType: IndicatorMeasurementType.QUALITY,
         isActive: true,
-        approvalStatus: 'DRAFT' as ApprovalStatus,
-        contextScope: 'UNIVERSAL' as ContextScope,
+        approvalStatus: ApprovalStatus.DRAFT,
+        contextScope: ContextScope.UNIVERSAL,
       });
 
       expect(newIndicator).toBeDefined();
@@ -207,13 +209,13 @@ describe('Behavioral Indicators API', () => {
         competencyId: 'comp-1',
         weight: 0.2,
         orderIndex: 4,
-        observabilityLevel: 'ADVANCED' as ProficiencyLevel,
-        measurementType: 'IMPACT' as IndicatorMeasurementType,
+        observabilityLevel: ObservabilityLevel.PARTIALLY_OBSERVABLE,
+        measurementType: IndicatorMeasurementType.IMPACT,
         examples: 'Positive example 1, Positive example 2',
         counterExamples: 'Negative example 1, Negative example 2',
         isActive: true,
-        approvalStatus: 'DRAFT' as ApprovalStatus,
-        contextScope: 'PROFESSIONAL' as ContextScope,
+        approvalStatus: ApprovalStatus.DRAFT,
+        contextScope: ContextScope.PROFESSIONAL,
       });
 
       expect(newIndicator.examples).toBe('Positive example 1, Positive example 2');
@@ -228,11 +230,11 @@ describe('Behavioral Indicators API', () => {
           competencyId: 'comp-1',
           weight: 0.2,
           orderIndex: 1,
-          observabilityLevel: 'NOVICE' as ProficiencyLevel,
-          measurementType: 'FREQUENCY' as IndicatorMeasurementType,
+          observabilityLevel: ObservabilityLevel.DIRECTLY_OBSERVABLE,
+          measurementType: IndicatorMeasurementType.FREQUENCY,
           isActive: true,
-          approvalStatus: 'DRAFT' as ApprovalStatus,
-          contextScope: 'UNIVERSAL' as ContextScope,
+          approvalStatus: ApprovalStatus.DRAFT,
+          contextScope: ContextScope.UNIVERSAL,
         })
       ).rejects.toThrow('Title must be at least 5 characters');
     });
@@ -245,11 +247,11 @@ describe('Behavioral Indicators API', () => {
           competencyId: 'comp-1',
           weight: 0.2,
           orderIndex: 1,
-          observabilityLevel: 'NOVICE' as ProficiencyLevel,
-          measurementType: 'FREQUENCY' as IndicatorMeasurementType,
+          observabilityLevel: ObservabilityLevel.DIRECTLY_OBSERVABLE,
+          measurementType: IndicatorMeasurementType.FREQUENCY,
           isActive: true,
-          approvalStatus: 'DRAFT' as ApprovalStatus,
-          contextScope: 'UNIVERSAL' as ContextScope,
+          approvalStatus: ApprovalStatus.DRAFT,
+          contextScope: ContextScope.UNIVERSAL,
         })
       ).rejects.toThrow('Description must be at least 10 characters');
     });
@@ -261,17 +263,17 @@ describe('Behavioral Indicators API', () => {
           description: 'A valid description that is long enough',
           weight: 0.2,
           orderIndex: 1,
-          observabilityLevel: 'NOVICE' as ProficiencyLevel,
-          measurementType: 'FREQUENCY' as IndicatorMeasurementType,
+          observabilityLevel: ObservabilityLevel.DIRECTLY_OBSERVABLE,
+          measurementType: IndicatorMeasurementType.FREQUENCY,
           isActive: true,
-          approvalStatus: 'DRAFT' as ApprovalStatus,
-          contextScope: 'UNIVERSAL' as ContextScope,
+          approvalStatus: ApprovalStatus.DRAFT,
+          contextScope: ContextScope.UNIVERSAL,
         })
       ).rejects.toThrow('Competency ID is required');
     });
 
     it('should create indicator with all context scopes', async () => {
-      const scopes: ContextScope[] = ['UNIVERSAL', 'PROFESSIONAL', 'TECHNICAL', 'MANAGERIAL'];
+      const scopes: ContextScope[] = [ContextScope.UNIVERSAL, ContextScope.PROFESSIONAL, ContextScope.TECHNICAL, ContextScope.MANAGERIAL];
 
       for (const scope of scopes) {
         const indicator = await createIndicator({
@@ -280,10 +282,10 @@ describe('Behavioral Indicators API', () => {
           competencyId: 'comp-1',
           weight: 0.1,
           orderIndex: 1,
-          observabilityLevel: 'NOVICE' as ProficiencyLevel,
-          measurementType: 'FREQUENCY' as IndicatorMeasurementType,
+          observabilityLevel: ObservabilityLevel.DIRECTLY_OBSERVABLE,
+          measurementType: IndicatorMeasurementType.FREQUENCY,
           isActive: true,
-          approvalStatus: 'DRAFT' as ApprovalStatus,
+          approvalStatus: ApprovalStatus.DRAFT,
           contextScope: scope,
         });
 
@@ -300,11 +302,11 @@ describe('Behavioral Indicators API', () => {
         competencyId: 'comp-2',
         weight: 0.3,
         orderIndex: 5,
-        observabilityLevel: 'EXPERT' as ProficiencyLevel,
-        measurementType: 'CONSISTENCY' as IndicatorMeasurementType,
+        observabilityLevel: ObservabilityLevel.INFERRED,
+        measurementType: IndicatorMeasurementType.CONSISTENCY,
         isActive: true,
-        approvalStatus: 'DRAFT' as ApprovalStatus,
-        contextScope: 'TECHNICAL' as ContextScope,
+        approvalStatus: ApprovalStatus.DRAFT,
+        contextScope: ContextScope.TECHNICAL,
       });
 
       const finalCount = (await fetchIndicators()).length;
@@ -364,7 +366,7 @@ describe('Behavioral Indicators API', () => {
 
     it('should update context scope', async () => {
       const updated = await updateIndicator('bi-1', {
-        contextScope: 'MANAGERIAL' as ContextScope,
+        contextScope: ContextScope.MANAGERIAL,
       });
 
       expect(updated.contextScope).toBe('MANAGERIAL');
@@ -372,7 +374,7 @@ describe('Behavioral Indicators API', () => {
 
     it('should update approval status', async () => {
       const updated = await updateIndicator('bi-3', {
-        approvalStatus: 'APPROVED' as ApprovalStatus,
+        approvalStatus: ApprovalStatus.APPROVED,
       });
 
       expect(updated.approvalStatus).toBe('APPROVED');
@@ -388,7 +390,7 @@ describe('Behavioral Indicators API', () => {
 
     it('should update measurement type', async () => {
       const updated = await updateIndicator('bi-1', {
-        measurementType: 'IMPROVEMENT' as IndicatorMeasurementType,
+        measurementType: IndicatorMeasurementType.IMPROVEMENT,
       });
 
       expect(updated.measurementType).toBe('IMPROVEMENT');
@@ -432,7 +434,7 @@ describe('Behavioral Indicators API', () => {
     it('should return only questions belonging to the indicator', async () => {
       const questions = await fetchIndicatorQuestions('bi-1');
 
-      questions.forEach((question: { behavioralIndicatorId: string }) => {
+      (questions as Array<{ behavioralIndicatorId: string }>).forEach((question) => {
         expect(question.behavioralIndicatorId).toBe('bi-1');
       });
     });
@@ -519,13 +521,13 @@ describe('Behavioral Indicators API', () => {
         competencyId: 'comp-1',
         weight: 0.2,
         orderIndex: 10,
-        observabilityLevel: 'PROFICIENT' as ProficiencyLevel,
-        measurementType: 'QUALITY' as IndicatorMeasurementType,
+        observabilityLevel: ObservabilityLevel.DIRECTLY_OBSERVABLE,
+        measurementType: IndicatorMeasurementType.QUALITY,
         examples: 'Поддерживает зрительный контакт',
         counterExamples: 'Часто перебивает',
         isActive: true,
-        approvalStatus: 'DRAFT' as ApprovalStatus,
-        contextScope: 'UNIVERSAL' as ContextScope,
+        approvalStatus: ApprovalStatus.DRAFT,
+        contextScope: ContextScope.UNIVERSAL,
       });
 
       expect(russianIndicator.title).toBe('Активное слушание');

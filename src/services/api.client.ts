@@ -47,6 +47,7 @@ export interface ApiError extends Error {
   code?: string;
   endpoint?: string;
   method?: string;
+  context?: Record<string, unknown>;
 }
 
 interface ErrorResponse {
@@ -54,6 +55,53 @@ interface ErrorResponse {
   code?: string;
   details?: string;
   timestamp?: string;
+  context?: Record<string, unknown>;
+}
+
+/**
+ * Competency issue details returned by TEST_NOT_READY errors
+ */
+export interface CompetencyIssue {
+  competencyId: string;
+  competencyName: string;
+  questionsAvailable: number;
+  questionsRequired: number;
+  healthStatus: 'CRITICAL' | 'WARNING' | 'HEALTHY';
+  issues: string[];
+}
+
+/**
+ * Diagnostic information for template question availability
+ */
+export interface TemplateDiagnostics {
+  templateId: string;
+  templateName: string;
+  goal: string;
+  questionsPerIndicator: number;
+  isActive: boolean;
+  competencyCount: number;
+  competencies: Array<{
+    competencyId: string;
+    competencyName: string;
+    indicatorCount: number;
+    activeQuestionCount: number;
+    scenarioAEligibleCount: number | string;
+    questionsRequired: number;
+    questionsAvailable: number;
+    shortfall: number;
+    indicators: Array<{
+      id: string;
+      title: string;
+      contextScope: string;
+      isActive: boolean;
+      activeQuestionCount: number;
+    }>;
+  }>;
+  totalQuestionsAvailable: number;
+  totalQuestionsRequired: number;
+  canStartSession: boolean;
+  issues: string[];
+  troubleshootingTips?: string[];
 }
 
 /**
@@ -70,9 +118,17 @@ async function handleResponse<T>(response: Response, endpoint: string, method: s
       const errorData = (await response.json()) as ErrorResponse;
       error.message = errorData.message || `HTTP error! status: ${response.status}`;
       error.code = errorData.code;
+      error.context = errorData.context;
 
       // Enhanced error messages for common scenarios
-      if (response.status === 404 && endpoint.includes('/current-question')) {
+      if (errorData.code === 'TEST_NOT_READY') {
+        // Test cannot start due to missing questions - keep original message from backend
+        // The context contains detailed competency issues for display
+        error.message = errorData.message || 'Тест не готов к запуску. Проверьте наличие вопросов для компетенций.';
+      } else if (errorData.code === 'DUPLICATE_SESSION') {
+        // User already has an in-progress session
+        error.message = 'У вас уже есть активная сессия для этого теста. Продолжите её или отмените.';
+      } else if (response.status === 404 && endpoint.includes('/current-question')) {
         error.message = 'Вопрос не найден. Возможно, тест был завершён или удалён.';
       } else if (response.status === 400 && endpoint.includes('/current-question')) {
         // Specific handling for abandoned session errors when getting current question
@@ -81,6 +137,9 @@ async function handleResponse<T>(response: Response, endpoint: string, method: s
         } else {
           error.message = errorData.message || 'Недействительная сессия теста. Она могла быть завершена или отменена.';
         }
+      } else if (response.status === 422) {
+        // Unprocessable Entity - typically validation or business rule failure
+        error.message = errorData.message || 'Невозможно выполнить операцию. Проверьте данные.';
       } else if (response.status === 400 && endpoint.includes('/sessions/')) {
         error.message = errorData.message || 'Недействительная сессия теста. Она могла быть завершена или отменена.';
       } else if (response.status === 403) {
@@ -94,6 +153,8 @@ async function handleResponse<T>(response: Response, endpoint: string, method: s
         error.message = 'Запрошенный ресурс не найден';
       } else if (response.status === 400) {
         error.message = 'Некорректный запрос';
+      } else if (response.status === 422) {
+        error.message = 'Невозможно выполнить операцию';
       } else if (response.status === 500) {
         error.message = 'Внутренняя ошибка сервера';
       } else {
@@ -268,4 +329,78 @@ export const testSessionsClientApi = {
   ): Promise<TestAnswer[]> => {
     return clientFetch(`${TESTS_BASE}/sessions/${sessionId}/answers`, authHeaders);
   },
+
+  /**
+   * Check if a template is ready to start a test session.
+   * This pre-flight check validates that all competencies have sufficient questions.
+   */
+  checkTemplateReadiness: async (
+    templateId: string,
+    authHeaders: Record<string, string>
+  ): Promise<{
+    ready: boolean;
+    templateId: string;
+    templateName: string;
+    totalQuestionsAvailable: number;
+    questionsRequired: number;
+    competencyHealth: Array<{
+      competencyId: string;
+      competencyName: string;
+      questionsAvailable: number;
+      questionsRequired: number;
+      healthStatus: string;
+      issues: string[];
+    }>;
+  }> => {
+    return clientFetch(
+      `${TESTS_BASE}/sessions/templates/${templateId}/readiness`,
+      authHeaders
+    );
+  },
+
+  /**
+   * Get detailed diagnostics for question availability in a template.
+   * Used by HR admins to debug why a test session cannot start.
+   */
+  getTemplateDiagnostics: async (
+    templateId: string,
+    authHeaders: Record<string, string>
+  ): Promise<TemplateDiagnostics> => {
+    return clientFetch(
+      `${TESTS_BASE}/sessions/templates/${templateId}/diagnostics`,
+      authHeaders
+    );
+  },
 };
+
+/**
+ * Helper function to check if an error is a TEST_NOT_READY error
+ */
+export function isTestNotReadyError(error: unknown): error is ApiError & { code: 'TEST_NOT_READY' } {
+  return (
+    error instanceof Error &&
+    'code' in error &&
+    (error as ApiError).code === 'TEST_NOT_READY'
+  );
+}
+
+/**
+ * Helper function to check if an error is a DUPLICATE_SESSION error
+ */
+export function isDuplicateSessionError(error: unknown): error is ApiError & { code: 'DUPLICATE_SESSION' } {
+  return (
+    error instanceof Error &&
+    'code' in error &&
+    (error as ApiError).code === 'DUPLICATE_SESSION'
+  );
+}
+
+/**
+ * Extract competency issues from a TEST_NOT_READY error
+ */
+export function getCompetencyIssuesFromError(error: ApiError): CompetencyIssue[] {
+  if (error.code !== 'TEST_NOT_READY' || !error.context) {
+    return [];
+  }
+  return (error.context.competencyIssues as CompetencyIssue[]) || [];
+}

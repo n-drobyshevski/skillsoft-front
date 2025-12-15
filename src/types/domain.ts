@@ -19,12 +19,12 @@ export enum CompetencyCategory {
   TIME_MANAGEMENT = 'TIME_MANAGEMENT'
 }
 
-export enum ProficiencyLevel {
-  NOVICE = 'NOVICE',
-  DEVELOPING = 'DEVELOPING',
-  PROFICIENT = 'PROFICIENT',
-  ADVANCED = 'ADVANCED',
-  EXPERT = 'EXPERT',
+export enum ObservabilityLevel {
+  DIRECTLY_OBSERVABLE = 'DIRECTLY_OBSERVABLE',
+  PARTIALLY_OBSERVABLE = 'PARTIALLY_OBSERVABLE',
+  INFERRED = 'INFERRED',
+  SELF_REPORTED = 'SELF_REPORTED',
+  REQUIRES_DOCUMENTATION = 'REQUIRES_DOCUMENTATION',
 }
 
 export enum ApprovalStatus {
@@ -361,7 +361,7 @@ export interface BehavioralIndicator {
   id: string;
   title: string;
   description?: string;
-  observabilityLevel: ProficiencyLevel;
+  observabilityLevel: ObservabilityLevel;
   measurementType: IndicatorMeasurementType;
   weight: number;
   examples?: string;
@@ -437,7 +437,6 @@ export interface Competency {
   name: string;
   description: string;
   category: CompetencyCategory;
-  level: ProficiencyLevel;
   standardCodes?: StandardCodesDto;
   isActive: boolean;
   approvalStatus: ApprovalStatus;
@@ -753,4 +752,52 @@ export interface TemplateStatistics {
   averageScore: number;
   passRate: number;
   averageTimeSeconds: number;
+}
+
+// ============================================
+// TEMPLATE READINESS TYPES
+// ============================================
+
+/**
+ * Health status for competency question inventory.
+ * Matches backend HealthStatus enum.
+ */
+export type HealthStatus = 'HEALTHY' | 'MODERATE' | 'CRITICAL';
+
+/**
+ * Readiness status for a single competency.
+ * Shows if the competency has sufficient questions for testing.
+ */
+export interface CompetencyReadiness {
+  competencyId: string;
+  competencyName: string;
+  questionsAvailable: number;
+  questionsRequired: number;
+  healthStatus: HealthStatus;
+  issues: string[];
+}
+
+/**
+ * Response from template readiness check endpoint.
+ * Used for pre-flight validation before starting a test session.
+ */
+export interface TemplateReadinessResponse {
+  ready: boolean;
+  message: string;
+  competencyReadiness: CompetencyReadiness[];
+  totalQuestionsAvailable: number;
+  questionsRequired: number;
+}
+
+/**
+ * Competency issue details from TestNotReadyException.
+ * Provides detailed info about why a test cannot start.
+ */
+export interface CompetencyIssue {
+  competencyId: string;
+  competencyName: string;
+  questionsAvailable: number;
+  questionsRequired: number;
+  healthStatus: HealthStatus;
+  issues: string[];
 }

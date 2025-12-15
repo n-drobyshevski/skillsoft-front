@@ -14,7 +14,7 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"; 
 import { Competency } from "@/types/domain";
-import { levelToColor, competencyCategoryToIcon } from "@/lib/ui-utils";
+import { competencyCategoryToIcon } from "@/lib/ui-utils";
 
 import {
   MoreHorizontal,
@@ -38,12 +38,10 @@ export default function CompetencyCard({ competency }: { competency: Competency 
 						})}
 					</div>
 					<Badge
-						variant="outline"
-						className={`${levelToColor(
-							competency.level,
-						)} mt-2 hidden md:inline-flex`}
+						variant={competency.isActive ? "default" : "secondary"}
+						className="mt-2 hidden md:inline-flex"
 					>
-						{competency.level}
+						{competency.isActive ? "Active" : "Inactive"}
 					</Badge>
 				</div>
 
@@ -59,14 +57,8 @@ export default function CompetencyCard({ competency }: { competency: Competency 
 							</Link>
 							<div className="flex items-center gap-2 mt-1 md:mt-2">
 								<Badge
-									variant="outline"
-									className={`${levelToColor(competency.level)} md:hidden`}
-								>
-									{competency.level}
-								</Badge>
-								<Badge
 									variant={competency.isActive ? "default" : "secondary"}
-									className="text-xs"
+									className="text-xs md:hidden"
 								>
 									{competency.isActive ? "Active" : "Inactive"}
 								</Badge>

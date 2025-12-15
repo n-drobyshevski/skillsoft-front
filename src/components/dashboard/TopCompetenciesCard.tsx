@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Competency } from "@/types/domain";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import Link from "next/link";
-import { competencyCategoryToIcon, levelToColor } from "@/lib/ui-utils";
+import { competencyCategoryToIcon } from "@/lib/ui-utils";
 
 interface TopCompetenciesCardProps {
   competencies: Competency[];
@@ -34,11 +34,11 @@ export default function TopCompetenciesCard({ competencies }: TopCompetenciesCar
               {competency.name}
             </Link>
             <div className="flex items-center gap-2">
-              <Badge 
-                variant="secondary" 
-                className={`text-xs ${levelToColor(competency.level)}`}
+              <Badge
+                variant={competency.isActive ? "default" : "secondary"}
+                className="text-xs"
               >
-                {competency.level}
+                {competency.isActive ? "Active" : "Inactive"}
               </Badge>
               <span className="text-xs text-muted-foreground">
                 {competency.behavioralIndicators?.length || 0} indicators

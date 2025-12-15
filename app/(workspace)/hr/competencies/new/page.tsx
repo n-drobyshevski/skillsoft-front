@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { CompetencyForm } from '../_components/CompetencyForm';
 import PageHeader from '@/components/common/PageHeader';
 import { Competency } from '@/types/domain';
-import { CompetencyCategory, ProficiencyLevel, ApprovalStatus, StandardCodesDto } from '@/types/domain';
+import { CompetencyCategory, ApprovalStatus, StandardCodesDto } from '@/types/domain';
 import CompetencyPreview from '../_components/CompetencyPreview';
 
 // Constants
@@ -14,7 +14,6 @@ const PREVIEW_COMPETENCY_ID = 'preview-id';
 type CompetencyFormData = {
   name: string;
   category: string;
-  level: string;
   isActive: boolean;
   approvalStatus: string;
   description?: string;
@@ -32,7 +31,6 @@ export default function NewCompetencyPage() {
       name: data.name || 'New Competency',
       description: data.description || 'No description provided',
       category: data.category as CompetencyCategory,
-      level: data.level as ProficiencyLevel,
       isActive: data.isActive,
       approvalStatus: data.approvalStatus as ApprovalStatus,
       standardCodes: data.standardCodes,

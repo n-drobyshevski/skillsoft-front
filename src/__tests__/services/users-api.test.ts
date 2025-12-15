@@ -16,7 +16,8 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { http, HttpResponse } from 'msw';
 import { server } from '../mocks/server';
 import { mockUsers, resetMockStores } from '../mocks/handlers';
-import type { User, UserRole, UserCreateInput, UserUpdateInput } from '@/types/user';
+import type { User, UserCreateInput, UserUpdateInput } from '@/types/user';
+import { UserRole } from '@/types/user';
 
 // API base URL for tests
 const API_BASE = 'http://localhost:8080/api';
@@ -31,7 +32,7 @@ const mockUsersList: User[] = [
     email: 'test@example.com',
     firstName: 'Test',
     lastName: 'User',
-    role: 'USER' as UserRole,
+    role: UserRole.USER,
     isActive: true,
     createdAt: new Date().toISOString(),
   },
@@ -41,7 +42,7 @@ const mockUsersList: User[] = [
     email: 'admin@example.com',
     firstName: 'Admin',
     lastName: 'User',
-    role: 'ADMIN' as UserRole,
+    role: UserRole.ADMIN,
     isActive: true,
     createdAt: new Date().toISOString(),
   },
@@ -51,7 +52,7 @@ const mockUsersList: User[] = [
     email: 'editor@example.com',
     firstName: 'Editor',
     lastName: 'User',
-    role: 'EDITOR' as UserRole,
+    role: UserRole.EDITOR,
     isActive: false,
     banned: false,
     locked: true,
@@ -268,7 +269,7 @@ const usersHandlers = [
       email: body.email,
       firstName: body.firstName,
       lastName: body.lastName,
-      role: body.role || 'USER' as UserRole,
+      role: body.role || UserRole.USER,
       isActive: true,
       createdAt: new Date().toISOString(),
     };
@@ -400,9 +401,9 @@ describe('Users API (Admin Functionality)', () => {
         const users = await fetchUsers();
         const roles = new Set(users.map((u) => u.role));
 
-        expect(roles.has('ADMIN')).toBe(true);
-        expect(roles.has('EDITOR')).toBe(true);
-        expect(roles.has('USER')).toBe(true);
+        expect(roles.has(UserRole.ADMIN)).toBe(true);
+        expect(roles.has(UserRole.EDITOR)).toBe(true);
+        expect(roles.has(UserRole.USER)).toBe(true);
       });
 
       it('should return users with different active statuses', async () => {
@@ -454,7 +455,7 @@ describe('Users API (Admin Functionality)', () => {
         email: 'new@example.com',
         firstName: 'New',
         lastName: 'User',
-        role: 'USER' as UserRole,
+        role: UserRole.USER,
       });
 
       expect(newUser).toBeDefined();
@@ -468,7 +469,7 @@ describe('Users API (Admin Functionality)', () => {
       await expect(
         createUser({
           email: 'invalid@example.com',
-          role: 'USER' as UserRole,
+          role: UserRole.USER,
         } as UserCreateInput)
       ).rejects.toThrow('Clerk ID is required');
     });
@@ -477,7 +478,7 @@ describe('Users API (Admin Functionality)', () => {
       const adminUser = await createUser({
         clerkId: 'clerk_admin_new',
         email: 'admin.new@example.com',
-        role: 'ADMIN' as UserRole,
+        role: UserRole.ADMIN,
       });
 
       expect(adminUser.role).toBe('ADMIN');
@@ -519,20 +520,20 @@ describe('Users API (Admin Functionality)', () => {
   // ==========================================
   describe('Role Management', () => {
     it('should update user role', async () => {
-      const updated = await updateUserRole('user-1', 'EDITOR' as UserRole);
+      const updated = await updateUserRole('user-1', UserRole.EDITOR);
 
       expect(updated.role).toBe('EDITOR');
     });
 
     it('should promote user to admin', async () => {
-      const updated = await updateUserRole('user-1', 'ADMIN' as UserRole);
+      const updated = await updateUserRole('user-1', UserRole.ADMIN);
 
       expect(updated.role).toBe('ADMIN');
     });
 
     it('should return 404 when updating role for non-existent user', async () => {
       await expect(
-        updateUserRole('non-existent-id', 'ADMIN' as UserRole)
+        updateUserRole('non-existent-id', UserRole.ADMIN)
       ).rejects.toThrow();
     });
   });
@@ -597,7 +598,7 @@ describe('Users API (Admin Functionality)', () => {
     });
 
     it('should get users by role', async () => {
-      const admins = await getUsersByRole('ADMIN' as UserRole);
+      const admins = await getUsersByRole(UserRole.ADMIN);
 
       expect(admins.length).toBeGreaterThan(0);
       admins.forEach((u) => {
@@ -612,7 +613,7 @@ describe('Users API (Admin Functionality)', () => {
         })
       );
 
-      const results = await getUsersByRole('EDITOR' as UserRole);
+      const results = await getUsersByRole(UserRole.EDITOR);
       expect(results).toEqual([]);
     });
   });

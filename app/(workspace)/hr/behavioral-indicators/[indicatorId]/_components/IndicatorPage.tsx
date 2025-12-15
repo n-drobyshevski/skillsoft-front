@@ -45,23 +45,21 @@ const approvalStatusToColor = (status: string): string => {
     return colors[status] || colors["DRAFT"];
 };
 
-const levelToColor = (level: string): string => {
+const observabilityLevelToColor = (level: string): string => {
     const colors: { [key: string]: string } = {
-        NOVICE: "border-red-500/30 text-red-400 bg-red-500/8 dark:text-red-300",
-        DEVELOPING:
-            "border-orange-500/30 text-orange-500 bg-orange-500/8 dark:text-orange-300",
-        PROFICIENT:
-            "border-yellow-500/30 text-yellow-600 bg-yellow-500/8 dark:text-yellow-300",
-        ADVANCED:
-            "border-emerald-500/30 text-emerald-600 bg-emerald-500/8 dark:text-emerald-300",
-        EXPERT:
-            "border-blue-500/30 text-blue-600 bg-blue-500/8 dark:text-blue-300",
+        DIRECTLY_OBSERVABLE: "border-green-500/30 text-green-600 bg-green-500/8 dark:text-green-300",
+        PARTIALLY_OBSERVABLE: "border-blue-500/30 text-blue-600 bg-blue-500/8 dark:text-blue-300",
+        INFERRED: "border-purple-500/30 text-purple-600 bg-purple-500/8 dark:text-purple-300",
+        SELF_REPORTED: "border-amber-500/30 text-amber-600 bg-amber-500/8 dark:text-amber-300",
+        REQUIRES_DOCUMENTATION: "border-gray-500/30 text-gray-600 bg-gray-500/8 dark:text-gray-300",
     };
-    return colors[level] || colors["NOVICE"];
+    return colors[level] || colors["DIRECTLY_OBSERVABLE"];
 };
 
-const formatProficiencyLevel = (level: string) => {
-    return level.charAt(0) + level.slice(1).toLowerCase().replace("_", " ");
+const formatObservabilityLevel = (level: string) => {
+    return level.replace(/_/g, ' ').split(' ').map(word =>
+        word.charAt(0) + word.slice(1).toLowerCase()
+    ).join(' ');
 };
 
 export default function IndicatorPage({ indicator, assessmentQuestions }: IndicatorPageProps) {
@@ -106,9 +104,9 @@ export default function IndicatorPage({ indicator, assessmentQuestions }: Indica
             <div className="flex items-center gap-2 mt-2">
               <Badge
                 variant="outline"
-                className={levelToColor(indicator.observabilityLevel)}
+                className={observabilityLevelToColor(indicator.observabilityLevel)}
               >
-                {formatProficiencyLevel(indicator.observabilityLevel)}
+                {formatObservabilityLevel(indicator.observabilityLevel)}
               </Badge>
               <Badge variant={indicator.isActive ? "default" : "secondary"}>
                 {indicator.isActive ? "Active" : "Inactive"}
@@ -295,8 +293,8 @@ export default function IndicatorPage({ indicator, assessmentQuestions }: Indica
               </div>
               <div className="grid gap-1">
                 <div className="font-semibold text-muted-foreground">Observability Level</div>
-                <Badge variant="outline" className={levelToColor(indicator.observabilityLevel)}>
-                  {formatProficiencyLevel(indicator.observabilityLevel)}
+                <Badge variant="outline" className={observabilityLevelToColor(indicator.observabilityLevel)}>
+                  {formatObservabilityLevel(indicator.observabilityLevel)}
                 </Badge>
               </div>
               <div className="grid gap-1">

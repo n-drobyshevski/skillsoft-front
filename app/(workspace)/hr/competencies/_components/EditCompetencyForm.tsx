@@ -26,7 +26,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
-import { CompetencyCategory, ProficiencyLevel, ApprovalStatus } from '@/types/domain';
+import { CompetencyCategory, ApprovalStatus } from '@/types/domain';
 import { updateCompetencyAction } from '@/app/actions';
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
@@ -67,7 +67,6 @@ export function EditCompetencyForm({ competency }: { competency: Competency }) {
       name: competency.name,
       description: competency.description || '',
       category: competency.category,
-      level: competency.level,
       isActive: competency.isActive,
       approvalStatus: competency.approvalStatus,
       standardCodes: competency.standardCodes || undefined,
@@ -151,7 +150,7 @@ export function EditCompetencyForm({ competency }: { competency: Competency }) {
             </div>
             <div>
               <h3 className="text-base font-semibold">Classification</h3>
-              <p className="text-sm text-muted-foreground">Category, level, and status</p>
+              <p className="text-sm text-muted-foreground">Category and status</p>
             </div>
           </div>
           <div className="p-5 grid md:grid-cols-2 gap-5">
@@ -171,30 +170,6 @@ export function EditCompetencyForm({ competency }: { competency: Competency }) {
                       {Object.values(CompetencyCategory).map((category) => (
                         <SelectItem key={category} value={category}>
                           {category}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="level"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Proficiency Level</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select a level" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {Object.values(ProficiencyLevel).map((level) => (
-                        <SelectItem key={level} value={level}>
-                          {level}
                         </SelectItem>
                       ))}
                     </SelectContent>

@@ -54,12 +54,6 @@ export function CompetencyHeader({ competency }: CompetencyHeaderProps) {
               {competency.name}
             </h1>
             <div className="flex items-center gap-2 mt-2">
-              <Badge
-                variant="outline"
-                className={levelToColor(competency.level)}
-              >
-                {competency.level}
-              </Badge>
               <Badge variant={competency.isActive ? "default" : "secondary"}>
                 {competency.isActive ? "Active" : "Inactive"}
               </Badge>

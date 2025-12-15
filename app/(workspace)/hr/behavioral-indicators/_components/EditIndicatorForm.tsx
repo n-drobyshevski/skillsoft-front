@@ -24,7 +24,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
-import { ProficiencyLevel, ApprovalStatus, IndicatorMeasurementType, ContextScope } from '@/types/domain';
+import { ObservabilityLevel, ApprovalStatus, IndicatorMeasurementType, ContextScope } from '@/types/domain';
 import { updateIndicatorAction } from '@/app/actions';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
@@ -132,9 +132,9 @@ export function EditIndicatorForm({ indicator }: { indicator: BehavioralIndicato
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {Object.values(ProficiencyLevel).map((level) => (
+                      {Object.values(ObservabilityLevel).map((level) => (
                         <SelectItem key={level} value={level}>
-                          {level}
+                          {level.replace(/_/g, ' ')}
                         </SelectItem>
                       ))}
                     </SelectContent>

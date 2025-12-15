@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { toast } from 'sonner';
 import { EntityDetailHeader } from "@/components/common/EntityDetailHeader";
 import { deleteIndicator } from "@/app/actions";
-import { approvalStatusToColor, levelToColor, formatProficiencyLevel } from "@/components/common/entity-utils";
+import { approvalStatusToColor, observabilityLevelToColor, formatObservabilityLevel } from "@/components/common/entity-utils";
 import { useBreadcrumbContext } from '@/src/context/BreadcrumbContext';
 import type { BehavioralIndicator } from "@/types/domain";
 
@@ -47,16 +47,16 @@ export default function IndicatorDetailClient({ indicator, children }: Indicator
   };
 
   const badges = [
-    { 
-      label: formatProficiencyLevel(indicator.observabilityLevel), 
-      variant: 'outline' as const, 
-      className: levelToColor(indicator.observabilityLevel) 
+    {
+      label: formatObservabilityLevel(indicator.observabilityLevel),
+      variant: 'outline' as const,
+      className: observabilityLevelToColor(indicator.observabilityLevel)
     },
     { label: indicator.isActive ? "Active" : "Inactive", variant: indicator.isActive ? 'default' as const : 'secondary' as const },
-    { 
-      label: indicator.approvalStatus.replace("_", " "), 
-      variant: 'outline' as const, 
-      className: approvalStatusToColor(indicator.approvalStatus) 
+    {
+      label: indicator.approvalStatus.replace("_", " "),
+      variant: 'outline' as const,
+      className: approvalStatusToColor(indicator.approvalStatus)
     },
     { label: `Weight: ${indicator.weight}`, variant: 'outline' as const },
     { label: indicator.measurementType.replace("_", " "), variant: 'secondary' as const },

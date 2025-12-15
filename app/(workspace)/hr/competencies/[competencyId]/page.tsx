@@ -31,7 +31,7 @@ import type {
 	StandardCodesDto,
 	BigFiveDimension,
 } from "@/types/domain";
-import { ProficiencyLevel, BigFiveInfo, getEffectiveBigFive, getEffectiveDimension } from "@/types/domain";
+import { ObservabilityLevel, BigFiveInfo, getEffectiveBigFive, getEffectiveDimension } from "@/types/domain";
 import { levelToColor, approvalStatusToColor } from "@/lib/ui-utils";
 import { getBigFiveMapping } from "@/hooks/useBigFiveMapper";
 
@@ -211,18 +211,7 @@ export default async function CompetencyDetailPage({
 								<span className="text-sm text-muted-foreground font-medium">Category</span>
 								<span className="text-sm font-medium text-foreground">{competency.category}</span>
 							</div>
-							
-							{/* Level */}
-							<div className="flex items-center justify-between py-2 border-b border-border/50 last:border-0">
-								<span className="text-sm text-muted-foreground font-medium">Proficiency Level</span>
-								<Badge 
-									variant="secondary" 
-									className={`${levelToColor(competency.level)} font-medium text-xs px-2.5 py-1`}
-								>
-									{competency.level}
-								</Badge>
-							</div>
-							
+
 							{/* Approval Status */}
 							<div className="flex items-center justify-between py-2 border-b border-border/50 last:border-0">
 								<span className="text-sm text-muted-foreground font-medium">Approval Status</span>
@@ -529,16 +518,17 @@ function IndicatorCard({
 								<h3 className="text-sm font-medium text-foreground line-clamp-1 group-hover:text-primary transition-colors">
 									{indicator.title}
 								</h3>
-								<Badge 
+								<Badge
 									variant="secondary"
 									className={`text-xs px-1.5 py-0.5 font-medium shrink-0 ${
-										indicator.observabilityLevel === ProficiencyLevel.EXPERT ? 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300' : 
-										indicator.observabilityLevel === ProficiencyLevel.ADVANCED ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300' :
-										indicator.observabilityLevel === ProficiencyLevel.PROFICIENT ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300' : 
+										indicator.observabilityLevel === ObservabilityLevel.DIRECTLY_OBSERVABLE ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300' :
+										indicator.observabilityLevel === ObservabilityLevel.PARTIALLY_OBSERVABLE ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300' :
+										indicator.observabilityLevel === ObservabilityLevel.INFERRED ? 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300' :
+										indicator.observabilityLevel === ObservabilityLevel.SELF_REPORTED ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300' :
 										'bg-gray-100 dark:bg-gray-900/30 text-gray-700 dark:text-gray-300'
 									}`}
 								>
-									{indicator.observabilityLevel}
+									{indicator.observabilityLevel.replace(/_/g, ' ')}
 								</Badge>
 							</div>
 							

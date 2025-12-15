@@ -57,10 +57,6 @@ export default async function CompetenciesPage() {
             total: competencies.length,
             withAssessments: competencies.filter(c => c.behavioralIndicators && c.behavioralIndicators.length > 0).length,
             averageWeight: competencies.length > 0 ? 35 : 0,
-            byLevel: {
-              advanced: competencies.filter(c => c.level === "ADVANCED").length,
-              expert: competencies.filter(c => c.level === "EXPERT").length
-            },
             trend: {
               value: "+12%",
               label: "from last month",

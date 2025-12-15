@@ -11,7 +11,6 @@ export interface CompetencyData {
   name: string;
   description: string;
   category: string;
-  level: string;
   standardCodes?: Record<string, unknown>;
 }
 
@@ -112,7 +111,6 @@ export const DataFactory = {
       name: `Test Competency ${generateTestId()}`,
       description: 'A test competency created for E2E testing purposes. This description is long enough to pass validation requirements.',
       category: 'COGNITIVE',
-      level: 'PROFICIENT',
       ...overrides,
     }),
 
@@ -123,7 +121,6 @@ export const DataFactory = {
       name: `Тестовая компетенция ${generateTestId()}`,
       description: 'Описание тестовой компетенции для E2E тестирования. Это описание достаточно длинное для прохождения валидации.',
       category: 'INTERPERSONAL',
-      level: 'ADVANCED',
       ...overrides,
     }),
 
@@ -134,7 +131,6 @@ export const DataFactory = {
       name: `Competency with Standards ${generateTestId()}`,
       description: 'A competency that includes international standard codes for testing standard code functionality.',
       category: 'COGNITIVE',
-      level: 'PROFICIENT',
       standardCodes: {
         onetRef: { code: '2.B.1.a', title: 'Active Listening' },
         escoRef: { uri: 'http://data.europa.eu/esco/skill/test', title: 'Test Skill' },
@@ -151,18 +147,15 @@ export const DataFactory = {
         name: '',
         description: 'Valid description that meets length requirements.',
         category: 'COGNITIVE',
-        level: 'PROFICIENT',
       }),
       shortDescription: (): Partial<CompetencyData> => ({
         name: 'Valid Name',
         description: 'Too short',
         category: 'COGNITIVE',
-        level: 'PROFICIENT',
       }),
       missingCategory: (): Partial<CompetencyData> => ({
         name: 'Valid Name',
         description: 'Valid description that meets length requirements.',
-        level: 'PROFICIENT',
       }),
     },
   },

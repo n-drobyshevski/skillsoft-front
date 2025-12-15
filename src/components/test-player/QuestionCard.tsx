@@ -250,7 +250,7 @@ export function QuestionCard({
                   : "border-neutral-700 bg-neutral-800/30"
               )}
               aria-pressed={isSelected}
-              aria-label={`Option ${String.fromCharCode(65 + index)}: ${option.text}`}
+              aria-label={`Option ${String.fromCharCode(65 + index)}: ${option.text || ''}`}
             >
               <div className="flex items-start gap-3">
                 {/* Option indicator */}
@@ -268,7 +268,7 @@ export function QuestionCard({
                   "text-sm sm:text-base leading-relaxed flex-1",
                   isSelected ? "text-white font-medium" : "text-neutral-300"
                 )}>
-                  {option.text}
+                  {option.text || `Option ${String.fromCharCode(65 + index)}`}
                 </span>
               </div>
             </button>

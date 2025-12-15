@@ -2,8 +2,21 @@ import { cache } from 'react';
 import { revalidateCompetencyTags, revalidateQuestionTags, revalidateUserTags } from '@/app/actions';
 import { getAuthHeaders } from './roleApi';
 
-import { AssessmentQuestion, BehavioralIndicator, Competency } from '@/types/domain';
+import { AssessmentQuestion, BehavioralIndicator, Competency, TemplateReadinessResponse } from '@/types/domain';
 import { User, UserCreateInput, UserUpdateInput, UserRole } from '@/types/user';
+import {
+  ApiError,
+  BackendErrorResponse,
+  ErrorCategory,
+  ErrorCode,
+  createApiError,
+  createNetworkError,
+  getErrorCategory,
+  getUserFriendlyMessage,
+  isBackendErrorResponse,
+  isRetryableError,
+  getSuggestedAction,
+} from '@/types/errors';
 
 const getApiBaseUrl = () => {
     const apiUrl = process.env.NEXT_PUBLIC_API_URL;
@@ -27,7 +40,6 @@ interface CompetencyInput {
     name: string;
     description?: string;
     category: string;
-    level: string;
     isActive: boolean;
     approvalStatus: string;
     standardCodes?: Record<string, unknown>;
@@ -66,69 +78,101 @@ interface QuestionInput {
 }
 
 
-// const API_BASE_URL = "https://localhost:8080/api";
-// Types for API responses and errors
-export interface ApiError extends Error {
-    status?: number;
-    code?: string;
-}
+// Re-export ApiError type for backwards compatibility
+export type { ApiError } from '@/types/errors';
 
-interface ErrorResponse {
-    message?: string;
-    code?: string;
-}
-
-// Helper function to handle responses with proper error typing
-async function handleResponse<T>(response: Response): Promise<T> {
-    if (!response.ok) {
-        const error: ApiError = new Error('API request failed for url: ' + response.url);
-        error.status = response.status;
-
-        try {
-            const errorData = await response.json() as ErrorResponse;
-            error.message = errorData.message || `HTTP error! status: ${response.status}`;
-            error.code = errorData.code;
-
-            // Add specific messaging for common errors
-            if (response.status === 403) {
-                error.message = errorData.message || 'Access denied. Please sign in and try again.';
-            } else if (response.status === 401) {
-                error.message = errorData.message || 'Authentication required. Please sign in.';
-            } else if (response.status === 404) {
-                error.message = errorData.message || 'Resource not found.';
-            } else if (response.status >= 500) {
-                error.message = errorData.message || 'Server error. Please try again later.';
-            }
-        } catch {
-            // Provide more specific error messages based on status code
-            if (response.status === 403) {
-                error.message = 'Access denied. Please sign in and try again.';
-            } else if (response.status === 401) {
-                error.message = 'Authentication required. Please sign in.';
-            } else if (response.status === 404) {
-                error.message = 'Resource not found.';
-            } else if (response.status >= 500) {
-                error.message = 'Server error. Please try again later.';
-            } else {
-                error.message = `HTTP error! status: ${response.status}`;
-            }
+/**
+ * Parse backend error response from JSON.
+ * Handles various response formats gracefully.
+ */
+async function parseErrorResponse(response: Response): Promise<BackendErrorResponse | null> {
+    try {
+        const text = await response.text();
+        if (!text.trim()) {
+            return null;
         }
+        const data = JSON.parse(text);
+        if (isBackendErrorResponse(data)) {
+            return data;
+        }
+        // Handle simple { message: string } responses
+        if (typeof data === 'object' && data !== null && 'message' in data) {
+            return {
+                status: response.status,
+                message: String(data.message),
+                code: data.code,
+                details: data.details,
+            };
+        }
+        return null;
+    } catch {
+        return null;
+    }
+}
+
+/**
+ * Helper function to handle responses with comprehensive error typing.
+ * Creates ApiError with full metadata for proper error handling in UI.
+ * @param response - The fetch Response object
+ * @param silentStatusCodes - Optional array of status codes to suppress error logging for (e.g., [404] for expected "not found" cases)
+ */
+async function handleResponse<T>(response: Response, silentStatusCodes: number[] = []): Promise<T> {
+    if (!response.ok) {
+        const backendError = await parseErrorResponse(response);
+        const category = getErrorCategory(response.status);
+
+        // Determine the user-facing message
+        let message: string;
+        if (backendError?.message) {
+            message = backendError.message;
+        } else {
+            message = getUserFriendlyMessage(category);
+        }
+
+        // Create a rich ApiError with all metadata
+        const error = createApiError(message, response.status, backendError || undefined);
+
+        // Add request URL for debugging
+        if (process.env.NODE_ENV === 'development') {
+            error.context = {
+                ...error.context,
+                url: response.url,
+                method: 'GET', // Will be overridden by caller if needed
+            };
+        }
+
+        // Log error details in development with detailed breakdown
+        // Skip logging for expected status codes (e.g., 404 when checking for optional resources)
+        const shouldLogError = process.env.NODE_ENV === 'development' && !silentStatusCodes.includes(response.status);
+        if (shouldLogError) {
+            console.error('[API Error]',
+                `Status: ${response.status}`,
+                `Category: ${error.category}`,
+                `Message: ${error.message}`,
+                `URL: ${response.url}`
+            );
+            if (error.code) console.error('  Code:', error.code);
+            if (error.correlationId) console.error('  CorrelationId:', error.correlationId);
+            if (error.details) console.error('  Details:', error.details);
+            if (backendError) console.error('  Backend Response:', JSON.stringify(backendError, null, 2));
+        }
+
         throw error;
     }
-    
+
     // Handle empty responses (like successful DELETE operations)
     const contentType = response.headers.get('content-type');
     const contentLength = response.headers.get('content-length');
-    
+
     // If there's no content or it's not JSON, return null or empty object
     if (
         response.status === 204 || // No Content
-        contentLength === '0' || 
+        contentLength === '0' ||
         !contentType?.includes('application/json')
     ) {
         return null as T;
     }
-    
+
     // Try to parse JSON, handle empty responses gracefully
     try {
         const text = await response.text();
@@ -145,7 +189,10 @@ async function handleResponse<T>(response: Response): Promise<T> {
     }
 }
 
-// API fetch wrapper with caching and revalidation
+/**
+ * API fetch wrapper with caching, revalidation, and comprehensive error handling.
+ * Provides consistent error handling across all API calls.
+ */
 export async function fetchApi<T>(
     endpoint: string,
     options: RequestInit & {
@@ -153,9 +200,12 @@ export async function fetchApi<T>(
         revalidate?: false | 0 | number;
         cache?: RequestCache;
         authHeaders?: Record<string, string>;
+        /** Status codes to suppress error logging for (e.g., [404] for expected "not found" cases) */
+        silentStatusCodes?: number[];
     } = {}
 ): Promise<T> {
-    const { tags = [], revalidate, cache = 'force-cache', authHeaders = {}, ...fetchOptions } = options;
+    const { tags = [], revalidate, cache = 'force-cache', authHeaders = {}, silentStatusCodes = [], ...fetchOptions } = options;
+    const method = fetchOptions.method || 'GET';
 
     try {
         // Auth headers can be passed in for RBAC (includes X-User-Id and X-User-Role)
@@ -164,7 +214,7 @@ export async function fetchApi<T>(
 
         // Debug logging for auth headers (only in development)
         if (process.env.NODE_ENV === 'development' && Object.keys(authHeaders).length > 0) {
-            console.log(`[API] ${fetchOptions.method || 'GET'} ${endpoint}`, {
+            console.log(`[API] ${method} ${endpoint}`, {
                 userId: authHeaders['X-User-Id'] ? 'present' : 'missing',
                 role: authHeaders['X-User-Role'] || 'missing'
             });
@@ -186,27 +236,75 @@ export async function fetchApi<T>(
             credentials: 'include',
         });
 
-        return handleResponse<T>(response);
+        return handleResponse<T>(response, silentStatusCodes);
     } catch (error) {
-        // Handle connection errors gracefully during build time
+        // If error is already an ApiError (from handleResponse), re-throw it
+        if (error instanceof Error && 'category' in error) {
+            throw error;
+        }
+
+        // Handle connection/network errors
         if (error instanceof Error) {
             // Handle CORS errors
             if (error.message.includes('CORS') || error.message.includes('NetworkError') || error.message.includes('Failed to fetch')) {
-                const corsError: ApiError = new Error(`CORS error when accessing ${getApiBaseUrl()}${endpoint}. Check backend CORS configuration.`);
-                corsError.code = 'CORS_ERROR';
-                throw corsError;
+                const networkError = createNetworkError(error);
+                networkError.code = ErrorCode.CORS_ERROR;
+                networkError.message = `CORS error when accessing ${getApiBaseUrl()}${endpoint}. Check backend CORS configuration.`;
+
+                // Log in development
+                if (process.env.NODE_ENV === 'development') {
+                    console.error('[API Network Error]', {
+                        type: 'CORS',
+                        endpoint,
+                        method,
+                        originalMessage: error.message,
+                    });
+                }
+
+                throw networkError;
             }
-            
-            // Handle connection errors during build
+
+            // Handle connection errors during build (graceful degradation)
             if (error.message.includes('ECONNREFUSED') || error.message.includes('fetch failed')) {
+                // Log connection error in development
+                if (process.env.NODE_ENV === 'development') {
+                    console.warn(`[API] Connection failed for ${method} ${endpoint} - returning fallback data`);
+                }
+
                 // Return empty array for list endpoints, null for single item endpoints
                 if (LIST_ENDPOINTS.some(path => endpoint.includes(path))) {
                     return [] as T;
                 }
                 return null as T;
             }
+
+            // Handle timeout errors
+            if (error.message.includes('timeout') || error.name === 'AbortError') {
+                const timeoutError = createNetworkError(error);
+                timeoutError.code = ErrorCode.TIMEOUT;
+                timeoutError.message = 'Request timed out. Please try again.';
+                throw timeoutError;
+            }
+
+            // Generic network error
+            const networkError = createNetworkError(error);
+            if (process.env.NODE_ENV === 'development') {
+                console.error('[API Network Error]', {
+                    endpoint,
+                    method,
+                    originalMessage: error.message,
+                });
+            }
+            throw networkError;
         }
-        throw error;
+
+        // Unknown error type - wrap it
+        const unknownError = createApiError(
+            'An unexpected error occurred',
+            0
+        );
+        unknownError.code = ErrorCode.INTERNAL_ERROR;
+        throw unknownError;
     }
 }
 
@@ -796,6 +894,18 @@ export const testTemplatesApi = {
 
 export const testSessionsApi = {
   /**
+   * Check if a template is ready to start a test session.
+   * Pre-flight validation that all competencies have sufficient questions.
+   */
+  checkTemplateReadiness: async (templateId: string): Promise<TemplateReadinessResponse> => {
+    const authHeaders = await getAuthHeaders();
+    return fetchApi(`${TESTS_BASE}/sessions/templates/${templateId}/readiness`, {
+      cache: 'no-store',
+      authHeaders,
+    });
+  },
+
+  /**
    * Start a new test session
    */
   startSession: async (request: StartTestSessionRequest): Promise<TestSession> => {
@@ -846,6 +956,7 @@ export const testSessionsApi = {
       return await fetchApi(`${TESTS_BASE}/sessions/user/${clerkUserId}/in-progress?templateId=${templateId}`, {
         cache: 'no-store',
         authHeaders,
+        silentStatusCodes: [404], // 404 is expected when no in-progress session exists
       });
     } catch (error) {
       // 404 means no in-progress session exists, which is expected

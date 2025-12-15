@@ -26,7 +26,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
-import { ProficiencyLevel, ApprovalStatus, IndicatorMeasurementType, ContextScope } from '@/types/domain';
+import { ObservabilityLevel, ApprovalStatus, IndicatorMeasurementType, ContextScope } from '@/types/domain';
 import { updateIndicatorAction, createIndicatorAction } from '@/app/actions';
 import { useRouter } from 'next/navigation';
 import { useState, useCallback, useEffect } from 'react';
@@ -68,7 +68,7 @@ export function IndicatorForm({ indicator, competencyId, onUpdatePreview }: { in
     defaultValues: {
       title: indicator?.title || '',
       description: indicator?.description || "", // Still empty but will be validated as required
-      observabilityLevel: indicator?.observabilityLevel || ProficiencyLevel.NOVICE,
+      observabilityLevel: indicator?.observabilityLevel || ObservabilityLevel.DIRECTLY_OBSERVABLE,
       measurementType: indicator?.measurementType || IndicatorMeasurementType.QUALITY,
       weight: indicator?.weight || 0.1, // Changed from 0 to 0.1 to match DB constraint
       examples: indicator?.examples || "",
@@ -330,11 +330,11 @@ export function IndicatorForm({ indicator, competencyId, onUpdatePreview }: { in
                       Observability Level
                       <HelpTooltip content={formHelp.indicator.observabilityLevel} />
                     </FormLabel>
-                    <Select 
+                    <Select
                       onValueChange={(value) => {
                         field.onChange(value);
                         handleFieldBlur();
-                      }} 
+                      }}
                       defaultValue={field.value}
                     >
                       <FormControl>
@@ -343,9 +343,9 @@ export function IndicatorForm({ indicator, competencyId, onUpdatePreview }: { in
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {Object.values(ProficiencyLevel).map((level) => (
+                        {Object.values(ObservabilityLevel).map((level) => (
                           <SelectItem key={level} value={level}>
-                            {level}
+                            {level.replace(/_/g, ' ')}
                           </SelectItem>
                         ))}
                       </SelectContent>

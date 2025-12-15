@@ -38,7 +38,6 @@ export default function CompetencyDetailClient({ competency, children }: Compete
 
   const badges = [
     { label: competency.category, variant: 'secondary' as const },
-    { label: competency.level, variant: 'outline' as const, className: levelToColor(competency.level) },
     { label: competency.approvalStatus.replace("_", " "), variant: 'outline' as const, className: approvalStatusToColor(competency.approvalStatus) },
     { label: competency.isActive ? "Active" : "Inactive", variant: competency.isActive ? 'default' as const : 'secondary' as const },
     { label: `v${competency.version}`, variant: 'outline' as const },

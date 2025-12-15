@@ -24,7 +24,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
-import { CompetencyCategory, ProficiencyLevel, ApprovalStatus } from '@/types/domain';
+import { CompetencyCategory, ApprovalStatus } from '@/types/domain';
 import { createCompetencyAction, updateCompetencyAction, type ActionResult } from '@/app/actions';
 import { useRouter } from 'next/navigation';
 import { useState, useCallback, useEffect } from 'react';
@@ -76,7 +76,6 @@ export function CompetencyForm({
       name: competency?.name || '',
       description: competency?.description || '',
       category: competency?.category || CompetencyCategory.LEADERSHIP,
-      level: competency?.level || ProficiencyLevel.NOVICE,
       isActive: competency?.isActive ?? true,
       approvalStatus: competency?.approvalStatus || ApprovalStatus.DRAFT,
       standardCodes: competency?.standardCodes || undefined,
@@ -273,10 +272,10 @@ export function CompetencyForm({
               </div>
               <div>
                 <h3 className="text-sm sm:text-base font-semibold">Classification</h3>
-                <p className="text-xs sm:text-sm text-muted-foreground">Category and proficiency level</p>
+                <p className="text-xs sm:text-sm text-muted-foreground">Category selection</p>
               </div>
             </div>
-            <div className="p-4 sm:p-5 grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
+            <div className="p-4 sm:p-5">
               <FormField
                 control={form.control}
                 name="category"
@@ -286,11 +285,11 @@ export function CompetencyForm({
                       Category
                       <HelpTooltip content={formHelp.competency.category} />
                     </FormLabel>
-                    <Select 
+                    <Select
                       onValueChange={(value) => {
                         field.onChange(value);
                         handlePreviewClick();
-                      }} 
+                      }}
                       defaultValue={field.value}
                     >
                       <FormControl>
@@ -302,39 +301,6 @@ export function CompetencyForm({
                         {Object.values(CompetencyCategory).map((category) => (
                           <SelectItem key={category} value={category}>
                             {category}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="level"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-sm font-medium flex items-center gap-1">
-                      Proficiency Level
-                      <HelpTooltip content={formHelp.competency.level} />
-                    </FormLabel>
-                    <Select 
-                      onValueChange={(value) => {
-                        field.onChange(value);
-                        handlePreviewClick();
-                      }} 
-                      defaultValue={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger className="h-11 sm:h-10 touch-manipulation">
-                          <SelectValue placeholder="Select level" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {Object.values(ProficiencyLevel).map((level) => (
-                          <SelectItem key={level} value={level}>
-                            {level}
                           </SelectItem>
                         ))}
                       </SelectContent>

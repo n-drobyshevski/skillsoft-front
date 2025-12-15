@@ -15,7 +15,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Search, ArrowRight, Loader2, Building2 } from 'lucide-react';
 import { Competency } from '@/types/domain';
-import { CompetencyCategory, ProficiencyLevel } from '@/types/domain';
+import { CompetencyCategory } from '@/types/domain';
 import { competenciesApi } from '@/services/api';
 import { toast } from 'sonner';
 
@@ -31,7 +31,6 @@ export default function CompetencySelector({
   const [competencies, setCompetencies] = useState<Competency[]>([]);
   const [filteredCompetencies, setFilteredCompetencies] = useState<Competency[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
-  const [selectedLevel, setSelectedLevel] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCompetency, setSelectedCompetency] = useState<string>(preselectedCompetencyId || '');
   const [loading, setLoading] = useState(true);
@@ -66,22 +65,17 @@ export default function CompetencySelector({
       filtered = filtered.filter(competency => competency.category === selectedCategory);
     }
 
-    // Filter by level
-    if (selectedLevel !== 'all') {
-      filtered = filtered.filter(competency => competency.level === selectedLevel);
-    }
-
     // Filter by search query
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(competency => 
+      filtered = filtered.filter(competency =>
         competency.name.toLowerCase().includes(query) ||
         (competency.description && competency.description.toLowerCase().includes(query))
       );
     }
 
     setFilteredCompetencies(filtered);
-  }, [competencies, selectedCategory, selectedLevel, searchQuery]);
+  }, [competencies, selectedCategory, searchQuery]);
 
   const handleContinue = () => {
     if (!selectedCompetency) {
@@ -117,22 +111,6 @@ export default function CompetencySelector({
     }
   };
 
-  const getLevelColor = (level: ProficiencyLevel): string => {
-    switch (level) {
-      case ProficiencyLevel.NOVICE:
-        return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300';
-      case ProficiencyLevel.DEVELOPING:
-        return 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300';
-      case ProficiencyLevel.PROFICIENT:
-        return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300';
-      case ProficiencyLevel.ADVANCED:
-        return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300';
-      case ProficiencyLevel.EXPERT:
-        return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300';
-      default:
-        return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300';
-    }
-  };
 
   if (loading) {
     return (
@@ -160,7 +138,7 @@ export default function CompetencySelector({
       </CardHeader>
       <CardContent className="space-y-6">
         {/* Filters */}
-        <div className="grid gap-4 sm:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
             <label htmlFor="category-filter" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
               Filter by Category
@@ -174,25 +152,6 @@ export default function CompetencySelector({
                 {Object.values(CompetencyCategory).map(category => (
                   <SelectItem key={category} value={category}>
                     {category.replace(/_/g, ' ')}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <label htmlFor="level-filter" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-              Filter by Level
-            </label>
-            <Select value={selectedLevel} onValueChange={setSelectedLevel}>
-              <SelectTrigger>
-                <SelectValue placeholder="All levels" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Levels</SelectItem>
-                {Object.values(ProficiencyLevel).map(level => (
-                  <SelectItem key={level} value={level}>
-                    {level.replace(/_/g, ' ')}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -243,9 +202,6 @@ export default function CompetencySelector({
                       <h4 className="font-medium text-sm">{competency.name}</h4>
                       <Badge className={`text-xs ${getCategoryColor(competency.category)}`}>
                         {competency.category.replace(/_/g, ' ')}
-                      </Badge>
-                      <Badge className={`text-xs ${getLevelColor(competency.level)}`}>
-                        {competency.level.replace(/_/g, ' ')}
                       </Badge>
                     </div>
                     <p className="text-sm text-muted-foreground line-clamp-2 mb-2">

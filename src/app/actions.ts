@@ -47,7 +47,6 @@ export type CompetencyFormData = {
   name: string;
   description?: string;
   category: string;
-  level: string;
   isActive: boolean;
   approvalStatus: string;
   standardCodes?: Record<string, unknown>;
