@@ -132,15 +132,16 @@ export interface BigFiveReliability {
 
 export interface FlaggedItemSummary {
   questionId: string;
-  questionTextPreview: string;
-  competencyName: string;
-  indicatorTitle: string;
+  questionText: string | null;
+  competencyName: string | null;
+  indicatorTitle: string | null;
   difficultyIndex: number | null;
   discriminationIndex: number | null;
   responseCount: number;
   validityStatus: ItemValidityStatus;
   difficultyFlag: DifficultyFlag | null;
   discriminationFlag: DiscriminationFlag | null;
+  lastCalculatedAt: string | null;
 }
 
 // ============================================
@@ -148,11 +149,14 @@ export interface FlaggedItemSummary {
 // ============================================
 
 export interface BigFiveReliabilitySummary {
+  totalTraits: number;
   reliableTraits: number;
-  acceptableTraits: number;
   unreliableTraits: number;
   insufficientDataTraits: number;
-  averageAlpha: number | null;
+  acceptableTraits?: number;
+  averageTraitAlpha: number | null;
+  lowestAlphaTrait: string | null;
+  lowestAlphaValue: number | null;
 }
 
 export interface PsychometricHealthReport {
@@ -161,15 +165,17 @@ export interface PsychometricHealthReport {
   probationItems: number;
   flaggedItems: number;
   retiredItems: number;
+  totalCompetencies: number;
   reliableCompetencies: number;
   acceptableCompetencies: number;
   unreliableCompetencies: number;
   insufficientDataCompetencies: number;
-  averageCompetencyAlpha: number | null;
-  averageDiscriminationIndex: number | null;
+  averageAlpha: number | null;
+  averageDiscrimination: number | null;
   topFlaggedItems: FlaggedItemSummary[];
-  bigFiveSummary: BigFiveReliabilitySummary;
+  bigFiveReliabilitySummary: BigFiveReliabilitySummary;
   lastAuditRun: string | null;
+  itemsAnalyzedSinceLastAudit: number;
 }
 
 // ============================================

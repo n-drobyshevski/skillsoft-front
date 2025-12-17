@@ -141,20 +141,24 @@ async function handleResponse<T>(response: Response, silentStatusCodes: number[]
             };
         }
 
-        // Log error details in development with detailed breakdown
+        // Log error details in development with structured output
         // Skip logging for expected status codes (e.g., 404 when checking for optional resources)
         const shouldLogError = process.env.NODE_ENV === 'development' && !silentStatusCodes.includes(response.status);
         if (shouldLogError) {
-            console.error('[API Error]',
-                `Status: ${response.status}`,
-                `Category: ${error.category}`,
-                `Message: ${error.message}`,
-                `URL: ${response.url}`
+            // Use a single structured log for easier debugging
+            console.error(
+                `\n🚨 API Error [${response.status}] ${error.category}\n` +
+                `├─ Message: ${error.message}\n` +
+                `├─ URL: ${response.url}\n` +
+                (error.correlationId ? `├─ Correlation ID: ${error.correlationId}\n` : '') +
+                (error.code ? `├─ Code: ${error.code}\n` : '') +
+                (error.details ? `├─ Details: ${error.details}\n` : '') +
+                `└─ Retryable: ${error.isRetryable ? 'Yes' : 'No'}`
             );
-            if (error.code) console.error('  Code:', error.code);
-            if (error.correlationId) console.error('  CorrelationId:', error.correlationId);
-            if (error.details) console.error('  Details:', error.details);
-            if (backendError) console.error('  Backend Response:', JSON.stringify(backendError, null, 2));
+            // Log full backend response separately for inspection
+            if (backendError) {
+                console.error('Backend Response:', backendError);
+            }
         }
 
         throw error;

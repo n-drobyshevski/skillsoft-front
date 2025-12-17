@@ -4,7 +4,7 @@ import { useEffect, useState, useMemo } from 'react';
 import { cn } from '@/lib/utils';
 
 interface ReliabilityGaugeProps {
-  value: number | null;
+  value: number | null | undefined;
   competencyName?: string;
   sampleSize?: number | null;
   itemCount?: number | null;
@@ -21,8 +21,8 @@ const sizeConfig = {
 };
 
 // Color configuration based on alpha value ranges
-function getColorConfig(value: number | null): { color: string; bgColor: string; label: string; textColor: string } {
-  if (value === null) {
+function getColorConfig(value: number | null | undefined): { color: string; bgColor: string; label: string; textColor: string } {
+  if (value == null) {
     return {
       color: '#9ca3af', // gray-400
       bgColor: '#f3f4f6', // gray-100
@@ -63,8 +63,8 @@ function getColorConfig(value: number | null): { color: string; bgColor: string;
 }
 
 // Get Russian label for status
-function getStatusLabel(value: number | null): string {
-  if (value === null) return 'Insufficient Data';
+function getStatusLabel(value: number | null | undefined): string {
+  if (value == null) return 'Insufficient Data';
   if (value >= 0.8) return 'Excellent';
   if (value >= 0.7) return 'Good';
   if (value >= 0.6) return 'Acceptable';
@@ -95,7 +95,7 @@ export function ReliabilityGauge({
 
   // Animate the value on mount
   useEffect(() => {
-    if (!showAnimation || value === null) {
+    if (!showAnimation || value == null) {
       return;
     }
 
@@ -130,7 +130,7 @@ export function ReliabilityGauge({
   }, [value, showAnimation]);
 
   // Calculate the stroke offset for the progress arc
-  const progressPercentage = value !== null ? Math.min(Math.max(animatedValue, 0), 1) : 0;
+  const progressPercentage = value != null ? Math.min(Math.max(animatedValue, 0), 1) : 0;
   const strokeDashoffset = circumference * (1 - progressPercentage);
 
   // Create arc path
@@ -172,11 +172,11 @@ export function ReliabilityGauge({
           strokeWidth={sizeConfigItem.strokeWidth}
           strokeLinecap="round"
           className="text-muted/30"
-          strokeDasharray={value === null ? '4 4' : 'none'}
+          strokeDasharray={value == null ? '4 4' : 'none'}
         />
 
         {/* Progress arc */}
-        {value !== null && (
+        {value != null && (
           <path
             d={arcPath}
             fill="none"
@@ -207,7 +207,7 @@ export function ReliabilityGauge({
         ))}
 
         {/* Center display */}
-        {value !== null ? (
+        {value != null ? (
           <>
             {/* Value */}
             <text
@@ -305,7 +305,7 @@ export function ReliabilityGauge({
 
 // Mini version for inline display
 interface ReliabilityGaugeMiniProps {
-  value: number | null;
+  value: number | null | undefined;
   className?: string;
 }
 
@@ -321,13 +321,13 @@ export function ReliabilityGaugeMini({ value, className }: ReliabilityGaugeMiniP
         <div
           className="h-full rounded-full transition-all duration-300"
           style={{
-            width: value !== null ? `${value * 100}%` : '0%',
+            width: value != null ? `${value * 100}%` : '0%',
             backgroundColor: colorConfig.color,
           }}
         />
       </div>
       <span className={cn('font-mono text-sm font-medium', colorConfig.textColor)}>
-        {value !== null ? value.toFixed(2) : '-'}
+        {value != null ? value.toFixed(2) : '-'}
       </span>
     </div>
   );

@@ -13,21 +13,29 @@ import {
 } from '@/components/ui/table';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   CompetencyReliability,
   ReliabilityStatus,
-  ReliabilityStatusDisplay,
   Page,
 } from '@/types/psychometrics';
-import { ReliabilityStatusBadge } from '../../_components/ReliabilityStatusBadge';
+import {
+  ReliabilityStatusBadge,
+  ReliabilityFilterPills,
+  TableHeaderWithHelp,
+  NoItemsFound,
+  NoDataYet,
+  ReliabilityGaugeMini,
+  MobileCompetencyCardList,
+} from '../../_components';
 import {
   ChevronLeft,
   ChevronRight,
   ChevronsLeft,
   ChevronsRight,
-  Shield
+  ExternalLink,
 } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface CompetenciesTableClientProps {
   initialData: Page<CompetencyReliability>;
@@ -35,20 +43,53 @@ interface CompetenciesTableClientProps {
   currentPage: number;
 }
 
-const statusTabs: Array<{ value: string; label: string }> = [
-  { value: 'all', label: 'Все' },
-  { value: ReliabilityStatus.RELIABLE, label: ReliabilityStatusDisplay[ReliabilityStatus.RELIABLE].label },
-  { value: ReliabilityStatus.ACCEPTABLE, label: ReliabilityStatusDisplay[ReliabilityStatus.ACCEPTABLE].label },
-  { value: ReliabilityStatus.UNRELIABLE, label: ReliabilityStatusDisplay[ReliabilityStatus.UNRELIABLE].label },
-  { value: ReliabilityStatus.INSUFFICIENT_DATA, label: ReliabilityStatusDisplay[ReliabilityStatus.INSUFFICIENT_DATA].label },
-];
+// Get left border color based on reliability status
+function getStatusBorderColor(status: ReliabilityStatus): string {
+  switch (status) {
+    case ReliabilityStatus.RELIABLE:
+      return 'border-l-emerald-500';
+    case ReliabilityStatus.ACCEPTABLE:
+      return 'border-l-amber-500';
+    case ReliabilityStatus.UNRELIABLE:
+      return 'border-l-red-500';
+    case ReliabilityStatus.INSUFFICIENT_DATA:
+    default:
+      return 'border-l-gray-300 dark:border-l-gray-600';
+  }
+}
 
-// Alpha color helper
-function getAlphaColor(alpha: number | null): string {
-  if (alpha === null) return 'text-gray-500';
-  if (alpha >= 0.7) return 'text-emerald-600';
-  if (alpha >= 0.6) return 'text-amber-600';
-  return 'text-red-600';
+// Alpha color helper for the progress bar
+function getAlphaColorClasses(alpha: number | null): {
+  bar: string;
+  text: string;
+  bg: string;
+} {
+  if (alpha === null) {
+    return {
+      bar: 'bg-gray-300 dark:bg-gray-600',
+      text: 'text-gray-500',
+      bg: 'bg-gray-100 dark:bg-gray-800',
+    };
+  }
+  if (alpha >= 0.7) {
+    return {
+      bar: 'bg-emerald-500',
+      text: 'text-emerald-600 dark:text-emerald-400',
+      bg: 'bg-emerald-100 dark:bg-emerald-900/30',
+    };
+  }
+  if (alpha >= 0.6) {
+    return {
+      bar: 'bg-amber-500',
+      text: 'text-amber-600 dark:text-amber-400',
+      bg: 'bg-amber-100 dark:bg-amber-900/30',
+    };
+  }
+  return {
+    bar: 'bg-red-500',
+    text: 'text-red-600 dark:text-red-400',
+    bg: 'bg-red-100 dark:bg-red-900/30',
+  };
 }
 
 export function CompetenciesTableClient({
@@ -58,6 +99,7 @@ export function CompetenciesTableClient({
 }: CompetenciesTableClientProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const isMobile = useIsMobile();
 
   // Build URL with search params
   const buildUrl = useCallback(
@@ -85,122 +127,205 @@ export function CompetenciesTableClient({
     router.push(buildUrl({ page: page.toString() }));
   };
 
+  const handleClearFilters = () => {
+    router.push('/psychometrics/competencies');
+  };
+
   const { content: competencies, totalElements, totalPages, number: pageNumber, first, last } = initialData;
+
+  // Determine empty state type
+  const isFiltering = !!currentStatus;
+  const hasNoData = totalElements === 0 && !isFiltering;
+  const hasNoResults = competencies.length === 0 && isFiltering;
 
   return (
     <div className="space-y-4">
-      {/* Filters */}
-      <Tabs value={currentStatus || 'all'} onValueChange={handleStatusChange}>
-        <TabsList>
-          {statusTabs.map((tab) => (
-            <TabsTrigger key={tab.value} value={tab.value}>
-              {tab.label}
-            </TabsTrigger>
-          ))}
-        </TabsList>
-      </Tabs>
+      {/* Filters - Colored Pills */}
+      <ReliabilityFilterPills
+        value={currentStatus || 'all'}
+        onChange={handleStatusChange}
+      />
 
       {/* Results count */}
       <div className="text-sm text-muted-foreground">
         Найдено: {totalElements} компетенций
       </div>
 
-      {/* Table */}
-      <Card>
-        <CardContent className="p-0">
-          {competencies.length === 0 ? (
-            <div className="text-center py-12">
-              <Shield className="h-8 w-8 mx-auto mb-2 text-muted-foreground opacity-50" />
-              <p className="text-muted-foreground">Компетенции не найдены</p>
-              <p className="text-sm text-muted-foreground mt-1">
-                Попробуйте изменить фильтры
-              </p>
-            </div>
-          ) : (
+      {/* Table / Mobile Card List */}
+      {hasNoData ? (
+        <Card>
+          <CardContent className="p-0">
+            <NoDataYet entityName="данных о надежности" />
+          </CardContent>
+        </Card>
+      ) : hasNoResults ? (
+        <Card>
+          <CardContent className="p-0">
+            <NoItemsFound onClearFilters={handleClearFilters} />
+          </CardContent>
+        </Card>
+      ) : isMobile ? (
+        /* Mobile: Card List */
+        <MobileCompetencyCardList competencies={competencies} />
+      ) : (
+        /* Desktop: Table */
+        <Card>
+          <CardContent className="p-0">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-[40%]">Компетенция</TableHead>
-                  <TableHead className="text-center">Cronbach's Alpha</TableHead>
-                  <TableHead className="text-center">Выборка</TableHead>
-                  <TableHead className="text-center">Вопросы</TableHead>
+                  <TableHead className="w-[35%]">Компетенция</TableHead>
+                  <TableHead className="text-center w-[20%]">
+                    <TableHeaderWithHelp
+                      label="Cronbach's Alpha"
+                      helpKey="cronbachAlpha"
+                    />
+                  </TableHead>
+                  <TableHead className="text-center">
+                    <TableHeaderWithHelp
+                      label="Выборка"
+                      helpKey="sampleSize"
+                    />
+                  </TableHead>
+                  <TableHead className="text-center">
+                    <TableHeaderWithHelp
+                      label="Вопросы"
+                      helpKey="itemCount"
+                    />
+                  </TableHead>
                   <TableHead>Статус</TableHead>
+                  <TableHead className="w-[80px]">Действия</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {competencies.map((comp) => (
-                  <TableRow
-                    key={comp.id}
-                    className="cursor-pointer hover:bg-muted/50"
-                  >
-                    <TableCell>
-                      <Link
-                        href={`/psychometrics/competencies/${comp.competencyId}`}
-                        className="hover:underline font-medium"
-                      >
-                        {comp.competencyName}
-                      </Link>
-                    </TableCell>
-                    <TableCell className="text-center">
-                      <span className={`font-mono font-bold ${getAlphaColor(comp.cronbachAlpha)}`}>
-                        {comp.cronbachAlpha != null ? comp.cronbachAlpha.toFixed(2) : '-'}
-                      </span>
-                    </TableCell>
-                    <TableCell className="text-center">
-                      {comp.sampleSize ?? '-'}
-                    </TableCell>
-                    <TableCell className="text-center">
-                      {comp.itemCount ?? '-'}
-                    </TableCell>
-                    <TableCell>
-                      <ReliabilityStatusBadge status={comp.reliabilityStatus} />
-                    </TableCell>
-                  </TableRow>
-                ))}
+                {competencies.map((comp) => {
+                  const alphaColors = getAlphaColorClasses(comp.cronbachAlpha);
+
+                  return (
+                    <TableRow
+                      key={comp.id}
+                      className={cn(
+                        'cursor-pointer transition-colors',
+                        'hover:bg-muted/50',
+                        'border-l-4',
+                        getStatusBorderColor(comp.reliabilityStatus)
+                      )}
+                    >
+                      <TableCell>
+                        <Link
+                          href={`/psychometrics/competencies/${comp.competencyId}`}
+                          className="hover:underline font-semibold text-foreground hover:text-primary transition-colors"
+                        >
+                          {comp.competencyName}
+                        </Link>
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <div className="flex flex-col items-center gap-1.5">
+                          {/* Alpha value with gauge */}
+                          <ReliabilityGaugeMini value={comp.cronbachAlpha} />
+                          {/* Progress bar indicator */}
+                          <div className={cn('w-full max-w-[80px] h-1.5 rounded-full', alphaColors.bg)}>
+                            <div
+                              className={cn('h-full rounded-full transition-all', alphaColors.bar)}
+                              style={{
+                                width: comp.cronbachAlpha != null
+                                  ? `${Math.min(comp.cronbachAlpha * 100, 100)}%`
+                                  : '0%',
+                              }}
+                            />
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <span className="font-medium">
+                          {comp.sampleSize?.toLocaleString() ?? '-'}
+                        </span>
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <span className="font-medium">
+                          {comp.itemCount ?? '-'}
+                        </span>
+                      </TableCell>
+                      <TableCell>
+                        <ReliabilityStatusBadge status={comp.reliabilityStatus} />
+                      </TableCell>
+                      <TableCell>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          asChild
+                          className="h-8 px-2 text-muted-foreground hover:text-foreground"
+                        >
+                          <Link
+                            href={`/psychometrics/items?competencyId=${comp.competencyId}`}
+                            title="Просмотреть вопросы этой компетенции"
+                          >
+                            <ExternalLink className="h-4 w-4 mr-1" />
+                            <span className="text-xs">Вопросы</span>
+                          </Link>
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
               </TableBody>
             </Table>
-          )}
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Pagination */}
       {totalPages > 1 && (
         <div className="flex items-center justify-between">
-          <div className="text-sm text-muted-foreground">
+          <div className="text-sm text-muted-foreground hidden sm:block">
             Страница {pageNumber + 1} из {totalPages}
           </div>
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1 w-full sm:w-auto justify-center sm:justify-end">
             <Button
               variant="outline"
               size="icon"
               onClick={() => handlePageChange(0)}
               disabled={first}
+              title="Первая страница"
+              className="h-11 w-11 sm:h-9 sm:w-9"
             >
-              <ChevronsLeft className="h-4 w-4" />
+              <ChevronsLeft className="h-5 w-5 sm:h-4 sm:w-4" />
             </Button>
             <Button
               variant="outline"
               size="icon"
               onClick={() => handlePageChange(pageNumber - 1)}
               disabled={first}
+              title="Предыдущая страница"
+              className="h-11 w-11 sm:h-9 sm:w-9"
             >
-              <ChevronLeft className="h-4 w-4" />
+              <ChevronLeft className="h-5 w-5 sm:h-4 sm:w-4" />
             </Button>
+            {/* Mobile page indicator */}
+            <div className="flex items-center justify-center min-w-[60px] sm:hidden">
+              <span className="text-sm font-medium">
+                {pageNumber + 1} / {totalPages}
+              </span>
+            </div>
             <Button
               variant="outline"
               size="icon"
               onClick={() => handlePageChange(pageNumber + 1)}
               disabled={last}
+              title="Следующая страница"
+              className="h-11 w-11 sm:h-9 sm:w-9"
             >
-              <ChevronRight className="h-4 w-4" />
+              <ChevronRight className="h-5 w-5 sm:h-4 sm:w-4" />
             </Button>
             <Button
               variant="outline"
               size="icon"
               onClick={() => handlePageChange(totalPages - 1)}
               disabled={last}
+              title="Последняя страница"
+              className="h-11 w-11 sm:h-9 sm:w-9"
             >
-              <ChevronsRight className="h-4 w-4" />
+              <ChevronsRight className="h-5 w-5 sm:h-4 sm:w-4" />
             </Button>
           </div>
         </div>

@@ -1,8 +1,9 @@
 import { Metadata } from 'next';
 import { psychometricsApi } from '@/services/api';
-import { Card, CardContent } from '@/components/ui/card';
 import PageHeader from '@/components/common/PageHeader';
-import { ReliabilityStatus } from '@/types/psychometrics';
+import { InlineError } from '@/components/feedback';
+import { ReliabilityStatus, CompetencyReliability, Page } from '@/types/psychometrics';
+import { serverFetchWithRetry, type ServerFetchError } from '@/lib/server-fetch';
 import { CompetenciesTableClient } from './_components/CompetenciesTableClient';
 
 export const metadata: Metadata = {
@@ -18,25 +19,40 @@ interface PageProps {
   }>;
 }
 
-async function getCompetenciesData(searchParams: Awaited<PageProps['searchParams']>) {
-  try {
-    const status = searchParams.status as ReliabilityStatus | undefined;
-    const page = searchParams.page ? parseInt(searchParams.page, 10) : 0;
-    const size = searchParams.size ? parseInt(searchParams.size, 10) : 20;
+// Empty page fallback for graceful degradation
+const EMPTY_PAGE: Page<CompetencyReliability> = {
+  content: [],
+  totalElements: 0,
+  totalPages: 0,
+  size: 20,
+  number: 0,
+  first: true,
+  last: true,
+};
 
-    const competencies = await psychometricsApi.getCompetencies({ status, page, size });
+interface PageData {
+  competencies: Page<CompetencyReliability>;
+  error: ServerFetchError | null;
+}
 
-    return {
-      competencies,
-      error: null,
-    };
-  } catch (err) {
-    const message = err instanceof Error ? err.message : 'Не удалось загрузить данные.';
-    return {
-      competencies: { content: [], totalElements: 0, totalPages: 0, size: 20, number: 0, first: true, last: true },
-      error: message,
-    };
-  }
+async function getCompetenciesData(searchParams: Awaited<PageProps['searchParams']>): Promise<PageData> {
+  const status = searchParams.status as ReliabilityStatus | undefined;
+  const page = searchParams.page ? parseInt(searchParams.page, 10) : 0;
+  const size = searchParams.size ? parseInt(searchParams.size, 10) : 20;
+
+  const { data, error } = await serverFetchWithRetry(
+    () => psychometricsApi.getCompetencies({ status, page, size }),
+    {
+      maxRetries: 2,
+      initialDelayMs: 300,
+      fallbackValue: EMPTY_PAGE,
+    }
+  );
+
+  return {
+    competencies: data ?? EMPTY_PAGE,
+    error,
+  };
 }
 
 export default async function CompetenciesPage({ searchParams }: PageProps) {
@@ -50,14 +66,13 @@ export default async function CompetenciesPage({ searchParams }: PageProps) {
         description="Cronbach's Alpha и статистика по компетенциям"
       />
 
-      {/* Error Display */}
+      {/* Error Display with rich metadata and retry capability */}
       {error && (
-        <Card className="border-destructive/50 bg-destructive/10">
-          <CardContent className="p-4">
-            <div className="text-destructive font-medium mb-1">Ошибка загрузки данных</div>
-            <p className="text-sm text-muted-foreground">{error}</p>
-          </CardContent>
-        </Card>
+        <InlineError
+          error={error}
+          variant="card"
+          title="Ошибка загрузки компетенций"
+        />
       )}
 
       {/* Competencies Table with Filters */}
