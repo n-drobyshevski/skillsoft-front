@@ -130,7 +130,7 @@ export function PsychometricStatsCards({ report }: PsychometricStatsCardsProps) 
       </div>
 
       {/* Big Five Summary */}
-      {report.bigFiveSummary && (
+      {report.bigFiveReliabilitySummary && (
         <div>
           <h3 className="text-sm font-medium text-muted-foreground mb-3">
             Надежность Big Five
@@ -138,7 +138,7 @@ export function PsychometricStatsCards({ report }: PsychometricStatsCardsProps) 
           <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
             <StatCard
               title="Надежные черты"
-              value={report.bigFiveSummary.reliableTraits}
+              value={report.bigFiveReliabilitySummary.reliableTraits}
               description="Alpha >= 0.7"
               icon={Shield}
               iconColor="text-emerald-600"
@@ -146,7 +146,7 @@ export function PsychometricStatsCards({ report }: PsychometricStatsCardsProps) 
             />
             <StatCard
               title="Приемлемые черты"
-              value={report.bigFiveSummary.acceptableTraits}
+              value={report.bigFiveReliabilitySummary.acceptableTraits ?? 0}
               description="Alpha 0.6 - 0.7"
               icon={AlertCircle}
               iconColor="text-amber-600"
@@ -154,7 +154,7 @@ export function PsychometricStatsCards({ report }: PsychometricStatsCardsProps) 
             />
             <StatCard
               title="Ненадежные черты"
-              value={report.bigFiveSummary.unreliableTraits}
+              value={report.bigFiveReliabilitySummary.unreliableTraits}
               description="Alpha < 0.6"
               icon={AlertTriangle}
               iconColor="text-red-600"
@@ -162,7 +162,7 @@ export function PsychometricStatsCards({ report }: PsychometricStatsCardsProps) 
             />
             <StatCard
               title="Недостаточно данных"
-              value={report.bigFiveSummary.insufficientDataTraits}
+              value={report.bigFiveReliabilitySummary.insufficientDataTraits}
               description="Требуется больше данных"
               icon={HelpCircle}
               iconColor="text-gray-600"
@@ -178,8 +178,8 @@ export function PsychometricStatsCards({ report }: PsychometricStatsCardsProps) 
           <CardContent className="pt-6">
             <div className="text-center">
               <div className="text-3xl font-bold">
-                {report.averageCompetencyAlpha != null
-                  ? report.averageCompetencyAlpha.toFixed(2)
+                {report.averageAlpha != null
+                  ? report.averageAlpha.toFixed(2)
                   : '-'}
               </div>
               <p className="text-sm text-muted-foreground mt-1">
@@ -192,8 +192,8 @@ export function PsychometricStatsCards({ report }: PsychometricStatsCardsProps) 
           <CardContent className="pt-6">
             <div className="text-center">
               <div className="text-3xl font-bold">
-                {report.averageDiscriminationIndex != null
-                  ? report.averageDiscriminationIndex.toFixed(2)
+                {report.averageDiscrimination != null
+                  ? report.averageDiscrimination.toFixed(2)
                   : '-'}
               </div>
               <p className="text-sm text-muted-foreground mt-1">
@@ -206,8 +206,8 @@ export function PsychometricStatsCards({ report }: PsychometricStatsCardsProps) 
           <CardContent className="pt-6">
             <div className="text-center">
               <div className="text-3xl font-bold">
-                {report.bigFiveSummary?.averageAlpha != null
-                  ? report.bigFiveSummary?.averageAlpha?.toFixed(2)
+                {report.bigFiveReliabilitySummary?.averageTraitAlpha != null
+                  ? report.bigFiveReliabilitySummary.averageTraitAlpha.toFixed(2)
                   : '-'}
               </div>
               <p className="text-sm text-muted-foreground mt-1">

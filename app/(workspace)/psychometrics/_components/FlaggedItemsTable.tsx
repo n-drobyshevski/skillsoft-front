@@ -81,7 +81,8 @@ function DifficultyBadge({ flag }: { flag: DifficultyFlag | null }) {
   );
 }
 
-function truncateText(text: string, maxLength: number = 50): string {
+function truncateText(text: string | null | undefined, maxLength: number = 50): string {
+  if (!text) return '';
   if (text.length <= maxLength) return text;
   return text.slice(0, maxLength) + '...';
 }
@@ -152,8 +153,8 @@ export function FlaggedItemsTable({
                     href={`/psychometrics/items/${item.questionId}`}
                     className="hover:underline"
                   >
-                    <span title={item.questionTextPreview}>
-                      {truncateText(item.questionTextPreview)}
+                    <span title={item.questionText ?? ''}>
+                      {truncateText(item.questionText)}
                     </span>
                   </Link>
                   {item.difficultyFlag && item.difficultyFlag !== DifficultyFlag.NONE && (
