@@ -24,6 +24,13 @@ import {
 } from '@/types/psychometrics';
 import { cn } from '@/lib/utils';
 import { Target, AlertTriangle } from 'lucide-react';
+import {
+  ItemQualityMapHelp,
+  ZoneOptimalHelp,
+  ZoneTooEasyHelp,
+  ZoneTooHardHelp,
+  ZoneToxicHelp,
+} from '../PsychometricHelpTooltip';
 
 interface ItemQualityScatterProps {
   items: ItemStatistics[];
@@ -217,6 +224,7 @@ export function ItemQualityScatter({ items, className, height = 400 }: ItemQuali
             <CardTitle className="text-lg flex items-center gap-2">
               <Target className="h-5 w-5 text-primary" />
               Item Quality Map
+              <ItemQualityMapHelp />
             </CardTitle>
             <CardDescription className="mt-1">
               Question Difficulty vs Question Effectiveness ({scatterData.length} items)
@@ -371,19 +379,31 @@ export function ItemQualityScatter({ items, className, height = 400 }: ItemQuali
         <div className="flex flex-wrap justify-center gap-4 mt-4 text-xs text-muted-foreground">
           <div className="flex items-center gap-1.5">
             <div className="w-3 h-3 rounded bg-emerald-500/20 border border-emerald-500/40" />
-            <span>Optimal (p: 0.2-0.8, rpb: 0.25+)</span>
+            <span className="flex items-center gap-0.5">
+              Optimal (p: 0.2-0.8, rpb: 0.25+)
+              <ZoneOptimalHelp />
+            </span>
           </div>
           <div className="flex items-center gap-1.5">
             <div className="w-3 h-3 rounded bg-violet-500/20 border border-violet-500/40" />
-            <span>Too Easy (p &gt; 0.9)</span>
+            <span className="flex items-center gap-0.5">
+              Too Easy (p &gt; 0.9)
+              <ZoneTooEasyHelp />
+            </span>
           </div>
           <div className="flex items-center gap-1.5">
             <div className="w-3 h-3 rounded bg-blue-500/20 border border-blue-500/40" />
-            <span>Too Hard (p &lt; 0.2)</span>
+            <span className="flex items-center gap-0.5">
+              Too Hard (p &lt; 0.2)
+              <ZoneTooHardHelp />
+            </span>
           </div>
           <div className="flex items-center gap-1.5">
             <div className="w-3 h-3 rounded bg-red-500/20 border border-red-500/40" />
-            <span>Toxic (rpb &lt; 0)</span>
+            <span className="flex items-center gap-0.5">
+              Toxic (rpb &lt; 0)
+              <ZoneToxicHelp />
+            </span>
           </div>
         </div>
       </CardContent>

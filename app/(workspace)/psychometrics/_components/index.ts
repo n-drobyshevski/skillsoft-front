@@ -66,8 +66,55 @@ export {
   ValidityStatusHelp,
   ResponseCountHelp,
   BigFiveHelp,
+  AverageDiscriminationHelp,
+  AverageAlphaHelp,
+  ActiveItemsHelp,
+  ReliableCompetenciesHelp,
+  FlaggedItemsHelp,
   TableHeaderWithHelp,
   psychometricHelp,
+  // Section header helpers
+  ItemStatusSectionHelp,
+  CompetencyReliabilitySectionHelp,
+  BigFiveReliabilitySectionHelp,
+  // Item status helpers
+  ActiveStatusHelp,
+  ProbationStatusHelp,
+  FlaggedForReviewStatusHelp,
+  RetiredStatusHelp,
+  // Competency reliability helpers
+  ReliableCompetencyStatusHelp,
+  AcceptableCompetencyStatusHelp,
+  UnreliableCompetencyStatusHelp,
+  InsufficientDataCompetencyHelp,
+  // Big Five reliability status helpers
+  ReliableTraitStatusHelp,
+  AcceptableTraitStatusHelp,
+  UnreliableTraitStatusHelp,
+  InsufficientDataTraitHelp,
+  // Big Five trait helpers
+  TraitOpennessHelp,
+  TraitConscientiousnessHelp,
+  TraitExtraversionHelp,
+  TraitAgreeablenessHelp,
+  TraitEmotionalStabilityHelp,
+  // Summary metrics helpers
+  AverageBigFiveAlphaHelp,
+  // Dashboard Hero helpers
+  HealthScoreHelp,
+  HealthScoreBreakdownHelp,
+  ActiveItemsWeightHelp,
+  ReliableCompetenciesWeightHelp,
+  NonFlaggedItemsWeightHelp,
+  HeroTotalItemsHelp,
+  HeroActiveRateHelp,
+  HeroIssuesHelp,
+  // Item Quality Scatter chart helpers
+  ItemQualityMapHelp,
+  ZoneOptimalHelp,
+  ZoneTooEasyHelp,
+  ZoneTooHardHelp,
+  ZoneToxicHelp,
 } from './PsychometricHelpTooltip';
 
 // Chart components

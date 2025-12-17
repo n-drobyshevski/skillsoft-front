@@ -1,15 +1,20 @@
 import { Metadata } from 'next';
 import { Suspense } from 'react';
-import { psychometricsApi, competenciesApi } from '@/services/api';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import PageHeader from '@/components/common/PageHeader';
-import { ItemValidityStatus } from '@/types/psychometrics';
+import { ItemValidityStatus, Page } from '@/types/psychometrics';
 import { ItemsTableClient } from './_components/ItemsTableClient';
+import {
+  getPsychometricsItemsCached,
+} from '@/services/api.cache.psychometrics';
+import { getCompetenciesCached } from '@/services/api.cache';
+import type { ItemStatistics } from '@/types/psychometrics';
+import type { Competency } from '@/types/domain';
 
 export const metadata: Metadata = {
-  title: 'Элементы оценки - Психометрика - SkillSoft',
-  description: 'Психометрическая статистика по элементам оценки.',
+  title: 'Assessment Items - Psychometrics - SkillSoft',
+  description: 'Psychometric statistics for assessment items.',
 };
 
 interface PageProps {
@@ -21,31 +26,34 @@ interface PageProps {
   }>;
 }
 
+// Empty page fallback for graceful degradation
+const EMPTY_PAGE: Page<ItemStatistics> = {
+  content: [],
+  totalElements: 0,
+  totalPages: 0,
+  size: 20,
+  number: 0,
+  first: true,
+  last: true,
+};
+
 async function getItemsData(searchParams: Awaited<PageProps['searchParams']>) {
-  try {
-    const status = searchParams.status as ItemValidityStatus | undefined;
-    const competencyId = searchParams.competencyId;
-    const page = searchParams.page ? parseInt(searchParams.page, 10) : 0;
-    const size = searchParams.size ? parseInt(searchParams.size, 10) : 20;
+  const status = searchParams.status as ItemValidityStatus | undefined;
+  const competencyId = searchParams.competencyId;
+  const page = searchParams.page ? parseInt(searchParams.page, 10) : 0;
+  const size = searchParams.size ? parseInt(searchParams.size, 10) : 20;
 
-    const [itemsResult, competencies] = await Promise.all([
-      psychometricsApi.getItems({ status, competencyId, page, size }),
-      competenciesApi.getAllCompetencies(),
-    ]);
+  // Fetch items and competencies in parallel using cached functions
+  const [itemsResult, competencies] = await Promise.all([
+    getPsychometricsItemsCached({ status, competencyId, page, size }),
+    getCompetenciesCached(),
+  ]);
 
-    return {
-      items: itemsResult,
-      competencies: competencies || [],
-      error: null,
-    };
-  } catch (err) {
-    const message = err instanceof Error ? err.message : 'Не удалось загрузить данные.';
-    return {
-      items: { content: [], totalElements: 0, totalPages: 0, size: 20, number: 0, first: true, last: true },
-      competencies: [],
-      error: message,
-    };
-  }
+  return {
+    items: itemsResult ?? EMPTY_PAGE,
+    competencies: competencies ?? [],
+    error: itemsResult === null ? 'Failed to load items data' : null,
+  };
 }
 
 function TableSkeleton() {
@@ -78,15 +86,15 @@ export default async function ItemsPage({ searchParams }: PageProps) {
   return (
     <div className="flex flex-1 flex-col gap-6 p-4 pt-6 md:gap-8 md:p-6">
       <PageHeader
-        title="Элементы оценки"
-        description="Психометрическая статистика по вопросам: индексы сложности и различения"
+        title="Assessment Items"
+        description="Psychometric statistics for questions: difficulty and discrimination indices"
       />
 
       {/* Error Display */}
       {error && (
         <Card className="border-destructive/50 bg-destructive/10">
           <CardContent className="p-4">
-            <div className="text-destructive font-medium mb-1">Ошибка загрузки данных</div>
+            <div className="text-destructive font-medium mb-1">Data Loading Error</div>
             <p className="text-sm text-muted-foreground">{error}</p>
           </CardContent>
         </Card>

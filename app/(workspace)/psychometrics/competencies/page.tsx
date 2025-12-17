@@ -1,14 +1,14 @@
 import { Metadata } from 'next';
-import { psychometricsApi } from '@/services/api';
 import PageHeader from '@/components/common/PageHeader';
 import { InlineError } from '@/components/feedback';
 import { ReliabilityStatus, CompetencyReliability, Page } from '@/types/psychometrics';
-import { serverFetchWithRetry, type ServerFetchError } from '@/lib/server-fetch';
+import { ErrorCategory, ErrorAction } from '@/types/errors';
 import { CompetenciesTableClient } from './_components/CompetenciesTableClient';
+import { getPsychometricsCompetenciesCached } from '@/services/api.cache.psychometrics';
 
 export const metadata: Metadata = {
-  title: 'Надежность компетенций - Психометрика - SkillSoft',
-  description: 'Анализ надежности измерений компетенций (Cronbach Alpha).',
+  title: 'Competency Reliability - Psychometrics - SkillSoft',
+  description: "Cronbach's Alpha reliability analysis for competencies.",
 };
 
 interface PageProps {
@@ -30,28 +30,16 @@ const EMPTY_PAGE: Page<CompetencyReliability> = {
   last: true,
 };
 
-interface PageData {
-  competencies: Page<CompetencyReliability>;
-  error: ServerFetchError | null;
-}
-
-async function getCompetenciesData(searchParams: Awaited<PageProps['searchParams']>): Promise<PageData> {
+async function getCompetenciesData(searchParams: Awaited<PageProps['searchParams']>) {
   const status = searchParams.status as ReliabilityStatus | undefined;
   const page = searchParams.page ? parseInt(searchParams.page, 10) : 0;
   const size = searchParams.size ? parseInt(searchParams.size, 10) : 20;
 
-  const { data, error } = await serverFetchWithRetry(
-    () => psychometricsApi.getCompetencies({ status, page, size }),
-    {
-      maxRetries: 2,
-      initialDelayMs: 300,
-      fallbackValue: EMPTY_PAGE,
-    }
-  );
+  const data = await getPsychometricsCompetenciesCached({ status, page, size });
 
   return {
     competencies: data ?? EMPTY_PAGE,
-    error,
+    error: data === null ? 'Failed to load competency reliability data' : null,
   };
 }
 
@@ -62,16 +50,22 @@ export default async function CompetenciesPage({ searchParams }: PageProps) {
   return (
     <div className="flex flex-1 flex-col gap-6 p-4 pt-6 md:gap-8 md:p-6">
       <PageHeader
-        title="Надежность компетенций"
-        description="Cronbach's Alpha и статистика по компетенциям"
+        title="Competency Reliability"
+        description="Cronbach's Alpha and reliability statistics for competencies"
       />
 
       {/* Error Display with rich metadata and retry capability */}
       {error && (
         <InlineError
-          error={error}
+          error={{
+            message: error,
+            status: 500,
+            category: ErrorCategory.SERVER,
+            isRetryable: true,
+            suggestedAction: ErrorAction.RETRY,
+          }}
           variant="card"
-          title="Ошибка загрузки компетенций"
+          title="Competency Loading Error"
         />
       )}
 

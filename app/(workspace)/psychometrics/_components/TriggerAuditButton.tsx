@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import {
@@ -17,24 +17,31 @@ import {
 import { toast } from 'sonner';
 import { RefreshCw, Loader2 } from 'lucide-react';
 import { psychometricsApi } from '@/services/api';
+import { revalidatePsychometricsAfterAudit } from '@/app/actions/psychometrics';
 
 export function TriggerAuditButton() {
   const [isLoading, setIsLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const [isPending, startTransition] = useTransition();
   const router = useRouter();
 
   const handleTriggerAudit = async () => {
     setIsLoading(true);
     try {
       const result = await psychometricsApi.triggerAudit();
-      toast.success('Аудит завершен', {
-        description: result.message || `Обработано: ${result.itemsRecalculated} элементов, ${result.competenciesRecalculated} компетенций`,
+      toast.success('Audit completed', {
+        description: result.message || `Processed: ${result.itemsRecalculated} items, ${result.competenciesRecalculated} competencies`,
       });
-      // Refresh the page to show updated data
-      router.refresh();
+
+      // Revalidate all psychometrics cached data using server action
+      startTransition(async () => {
+        await revalidatePsychometricsAfterAudit();
+        // Refresh the page to show updated data
+        router.refresh();
+      });
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Не удалось запустить аудит';
-      toast.error('Ошибка аудита', {
+      const message = error instanceof Error ? error.message : 'Failed to run audit';
+      toast.error('Audit error', {
         description: message,
       });
     } finally {
@@ -43,48 +50,50 @@ export function TriggerAuditButton() {
     }
   };
 
+  const isProcessing = isLoading || isPending;
+
   return (
     <AlertDialog open={isOpen} onOpenChange={setIsOpen}>
       <AlertDialogTrigger asChild>
-        <Button variant="outline" className="gap-2" disabled={isLoading}>
-          {isLoading ? (
+        <Button variant="outline" className="gap-2" disabled={isProcessing}>
+          {isProcessing ? (
             <Loader2 className="h-4 w-4 animate-spin" />
           ) : (
             <RefreshCw className="h-4 w-4" />
           )}
-          Запустить аудит
+          Run Audit
         </Button>
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Запустить психометрический аудит?</AlertDialogTitle>
+          <AlertDialogTitle>Run Psychometric Audit?</AlertDialogTitle>
           <AlertDialogDescription asChild>
             <div className="space-y-2 text-sm text-muted-foreground">
               <p>
-                Аудит выполнит пересчет всех психометрических показателей:
+                The audit will recalculate all psychometric metrics:
               </p>
               <ul className="list-disc list-inside space-y-1">
-                <li>Индексы сложности и различения для всех вопросов</li>
-                <li>Коэффициенты Cronbach's Alpha для компетенций</li>
-                <li>Надежность шкал Big Five</li>
-                <li>Автоматическое обновление статусов элементов</li>
+                <li>Difficulty and discrimination indices for all questions</li>
+                <li>Cronbach's Alpha coefficients for competencies</li>
+                <li>Big Five trait scale reliability</li>
+                <li>Automatic item status updates</li>
               </ul>
               <p className="text-amber-600 dark:text-amber-400">
-                Это может занять несколько минут в зависимости от объема данных.
+                This may take several minutes depending on data volume.
               </p>
             </div>
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={isLoading}>Отмена</AlertDialogCancel>
-          <AlertDialogAction onClick={handleTriggerAudit} disabled={isLoading}>
-            {isLoading ? (
+          <AlertDialogCancel disabled={isProcessing}>Cancel</AlertDialogCancel>
+          <AlertDialogAction onClick={handleTriggerAudit} disabled={isProcessing}>
+            {isProcessing ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                Выполняется...
+                Processing...
               </>
             ) : (
-              'Запустить'
+              'Run Audit'
             )}
           </AlertDialogAction>
         </AlertDialogFooter>

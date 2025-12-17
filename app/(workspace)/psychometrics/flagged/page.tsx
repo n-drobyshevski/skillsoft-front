@@ -1,10 +1,10 @@
 import { Metadata } from 'next';
-import { psychometricsApi } from '@/services/api';
 import { Card, CardContent } from '@/components/ui/card';
 import PageHeader from '@/components/common/PageHeader';
 import { FlaggedItemSummary, DiscriminationFlag } from '@/types/psychometrics';
 import { FlaggedItemsClient } from './_components/FlaggedItemsClient';
 import { AlertTriangle, AlertCircle, XCircle } from 'lucide-react';
+import { getPsychometricsFlaggedItemsCached } from '@/services/api.cache.psychometrics';
 
 export const metadata: Metadata = {
   title: 'Flagged Items - Psychometrics - SkillSoft',
@@ -12,13 +12,12 @@ export const metadata: Metadata = {
 };
 
 async function getFlaggedItems() {
-  try {
-    const items = await psychometricsApi.getFlaggedItems();
-    return { items, error: null };
-  } catch (err) {
-    const message = err instanceof Error ? err.message : 'Failed to load data.';
-    return { items: [], error: message };
-  }
+  const items = await getPsychometricsFlaggedItemsCached();
+
+  return {
+    items: items ?? [],
+    error: items === null ? 'Failed to load flagged items data' : null,
+  };
 }
 
 // Group items by severity for stats

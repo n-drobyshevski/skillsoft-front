@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { psychometricsApi } from '@/services/api';
+import { getPsychometricsCompetencyDetailCached } from '@/services/api.cache.psychometrics';
 import PageHeader from '@/components/common/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -38,13 +38,11 @@ interface PageProps {
 }
 
 async function getCompetencyDetail(competencyId: string) {
-  try {
-    const detail = await psychometricsApi.getCompetencyDetail(competencyId);
-    return { detail, error: null };
-  } catch (err) {
-    const message = err instanceof Error ? err.message : 'Не удалось загрузить данные.';
-    return { detail: null, error: message };
-  }
+  const detail = await getPsychometricsCompetencyDetailCached(competencyId);
+  return {
+    detail,
+    error: detail === null ? 'Не удалось загрузить данные.' : null,
+  };
 }
 
 // Get status-based hero gradient

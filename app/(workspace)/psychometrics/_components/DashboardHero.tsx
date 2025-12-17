@@ -6,6 +6,16 @@ import { cn } from '@/lib/utils';
 import { TrendingUp, TrendingDown, Clock, Activity } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { ru } from 'date-fns/locale';
+import {
+  HealthScoreHelp,
+  HealthScoreBreakdownHelp,
+  ActiveItemsWeightHelp,
+  ReliableCompetenciesWeightHelp,
+  NonFlaggedItemsWeightHelp,
+  HeroTotalItemsHelp,
+  HeroActiveRateHelp,
+  HeroIssuesHelp,
+} from './PsychometricHelpTooltip';
 
 interface DashboardHeroProps {
   report: PsychometricHealthReport;
@@ -133,7 +143,10 @@ function CircularProgress({
       {/* Center content */}
       <div className="absolute inset-0 flex flex-col items-center justify-center">
         <span className={cn('text-3xl font-bold', colors.text)}>{value}</span>
-        <span className="text-xs text-muted-foreground">Health Score</span>
+        <span className="text-xs text-muted-foreground flex items-center gap-0.5">
+          Health Score
+          <HealthScoreHelp />
+        </span>
       </div>
     </div>
   );
@@ -218,13 +231,19 @@ export function DashboardHero({ report, className }: DashboardHeroProps) {
 
           {/* Total Items */}
           <div className="text-center md:text-left">
-            <p className="text-xs text-muted-foreground">Total Items</p>
+            <p className="text-xs text-muted-foreground flex items-center justify-center md:justify-start gap-0.5">
+              Total Items
+              <HeroTotalItemsHelp />
+            </p>
             <p className="text-xl font-bold">{report.totalItems}</p>
           </div>
 
           {/* Active Rate */}
           <div className="text-center md:text-left">
-            <p className="text-xs text-muted-foreground">Active Rate</p>
+            <p className="text-xs text-muted-foreground flex items-center justify-center md:justify-start gap-0.5">
+              Active Rate
+              <HeroActiveRateHelp />
+            </p>
             <p className="text-xl font-bold text-emerald-600">
               {report.totalItems > 0
                 ? Math.round((report.activeItems / report.totalItems) * 100)
@@ -234,7 +253,10 @@ export function DashboardHero({ report, className }: DashboardHeroProps) {
 
           {/* Issues */}
           <div className="text-center md:text-left">
-            <p className="text-xs text-muted-foreground">Issues</p>
+            <p className="text-xs text-muted-foreground flex items-center justify-center md:justify-start gap-0.5">
+              Issues
+              <HeroIssuesHelp />
+            </p>
             <p className={cn(
               'text-xl font-bold',
               report.flaggedItems > 0 ? 'text-orange-600' : 'text-emerald-600'
@@ -247,19 +269,31 @@ export function DashboardHero({ report, className }: DashboardHeroProps) {
 
       {/* Score breakdown bar */}
       <div className="mt-6 pt-4 border-t border-border/50">
-        <div className="flex items-center gap-4 text-xs">
-          <span className="text-muted-foreground">Score Breakdown:</span>
+        <div className="flex flex-wrap items-center gap-4 text-xs">
+          <span className="text-muted-foreground flex items-center gap-0.5">
+            Score Breakdown:
+            <HealthScoreBreakdownHelp />
+          </span>
           <div className="flex items-center gap-2">
             <div className="w-2.5 h-2.5 rounded bg-emerald-500" />
-            <span>Active Items (40%)</span>
+            <span className="flex items-center gap-0.5">
+              Active Items (40%)
+              <ActiveItemsWeightHelp />
+            </span>
           </div>
           <div className="flex items-center gap-2">
             <div className="w-2.5 h-2.5 rounded bg-blue-500" />
-            <span>Reliable Competencies (30%)</span>
+            <span className="flex items-center gap-0.5">
+              Reliable Competencies (30%)
+              <ReliableCompetenciesWeightHelp />
+            </span>
           </div>
           <div className="flex items-center gap-2">
             <div className="w-2.5 h-2.5 rounded bg-amber-500" />
-            <span>Non-Flagged Items (30%)</span>
+            <span className="flex items-center gap-0.5">
+              Non-Flagged Items (30%)
+              <NonFlaggedItemsWeightHelp />
+            </span>
           </div>
         </div>
       </div>

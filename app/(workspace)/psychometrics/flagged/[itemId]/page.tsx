@@ -1,7 +1,10 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { psychometricsApi } from '@/services/api';
+import {
+  getPsychometricsItemDetailCached,
+  getPsychometricsFlaggedItemsCached,
+} from '@/services/api.cache.psychometrics';
 import PageHeader from '@/components/common/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -46,22 +49,16 @@ interface PageProps {
 }
 
 async function getItemDetail(questionId: string) {
-  try {
-    const item = await psychometricsApi.getItemDetail(questionId);
-    return { item, error: null };
-  } catch (err) {
-    const message = err instanceof Error ? err.message : 'Не удалось загрузить данные.';
-    return { item: null, error: message };
-  }
+  const item = await getPsychometricsItemDetailCached(questionId);
+  return {
+    item,
+    error: item === null ? 'Не удалось загрузить данные.' : null,
+  };
 }
 
 async function getSimilarFlaggedItems() {
-  try {
-    const items = await psychometricsApi.getFlaggedItems();
-    return { items, error: null };
-  } catch {
-    return { items: [], error: null };
-  }
+  const items = await getPsychometricsFlaggedItemsCached();
+  return { items: items ?? [], error: null };
 }
 
 // Severity level type

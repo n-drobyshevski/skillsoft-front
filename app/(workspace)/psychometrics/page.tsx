@@ -1,13 +1,11 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { Suspense } from 'react';
-import { psychometricsApi } from '@/services/api';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import PageHeader from '@/components/common/PageHeader';
 import { InlineError } from '@/components/feedback';
-import { serverFetchWithRetry, type ServerFetchError } from '@/lib/server-fetch';
 import {
   ArrowRight,
   RefreshCw,
@@ -17,7 +15,6 @@ import {
   FileText,
   Clock,
   BarChart3,
-  ChevronDown,
 } from 'lucide-react';
 import {
   PsychometricStatsCards,
@@ -29,8 +26,18 @@ import {
   ReliabilityGauge,
   MetricDistributionCharts,
   MobileChartsSection,
+  AverageDiscriminationHelp,
+  AverageAlphaHelp,
+  ActiveItemsHelp,
+  ReliableCompetenciesHelp,
 } from './_components';
+import {
+  getPsychometricsDashboardCached,
+  getPsychometricsItemsCached,
+  getPsychometricsCompetenciesCached,
+} from '@/services/api.cache.psychometrics';
 import type { PsychometricHealthReport, ItemStatistics, CompetencyReliability } from '@/types/psychometrics';
+import { ErrorCategory, ErrorAction } from '@/types/errors';
 
 export const metadata: Metadata = {
   title: 'Psychometrics - SkillSoft',
@@ -40,33 +47,6 @@ export const metadata: Metadata = {
     description: 'Analyze assessment item quality and measurement reliability.',
   },
 };
-
-// Fetch dashboard data with retry
-async function getDashboardData(): Promise<{ report: PsychometricHealthReport | null; error: ServerFetchError | null }> {
-  const { data, error } = await serverFetchWithRetry(
-    () => psychometricsApi.getDashboard(),
-    { maxRetries: 2, initialDelayMs: 300 }
-  );
-  return { report: data, error };
-}
-
-// Fetch all items for charts with retry
-async function getItemsData(): Promise<{ items: ItemStatistics[]; error: ServerFetchError | null }> {
-  const { data, error } = await serverFetchWithRetry(
-    () => psychometricsApi.getItems({ size: 1000 }),
-    { maxRetries: 2, initialDelayMs: 300 }
-  );
-  return { items: data?.content ?? [], error };
-}
-
-// Fetch competencies for reliability gauges with retry
-async function getCompetenciesData(): Promise<{ competencies: CompetencyReliability[]; error: ServerFetchError | null }> {
-  const { data, error } = await serverFetchWithRetry(
-    () => psychometricsApi.getCompetencies({ size: 100 }),
-    { maxRetries: 2, initialDelayMs: 300 }
-  );
-  return { competencies: data?.content ?? [], error };
-}
 
 // Loading skeleton for stats cards
 function StatsCardsSkeleton() {
@@ -90,6 +70,24 @@ function HeroSkeleton() {
 // Loading skeleton for charts
 function ChartSkeleton() {
   return <Skeleton className="h-[400px] rounded-lg" />;
+}
+
+// Loading skeleton for reliability gauges
+function ReliabilityGaugesSkeleton() {
+  return (
+    <Card>
+      <CardHeader className="pb-3">
+        <Skeleton className="h-5 w-40" />
+      </CardHeader>
+      <CardContent>
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <Skeleton key={i} className="h-[100px] rounded-lg" />
+          ))}
+        </div>
+      </CardContent>
+    </Card>
+  );
 }
 
 // Quick navigation card
@@ -131,12 +129,101 @@ function QuickNavCard({
   );
 }
 
+// Async wrapper for ItemQualityScatter chart
+async function ItemQualityScatterWrapper() {
+  const itemsPage = await getPsychometricsItemsCached({ size: 1000 });
+  const items = itemsPage?.content ?? [];
+
+  if (items.length === 0) {
+    return (
+      <Card className="flex items-center justify-center h-[450px]">
+        <p className="text-muted-foreground">No item data available</p>
+      </Card>
+    );
+  }
+
+  return <ItemQualityScatter items={items} height={450} />;
+}
+
+// Async wrapper for MetricDistributionCharts
+async function MetricDistributionWrapper() {
+  const itemsPage = await getPsychometricsItemsCached({ size: 1000 });
+  const items = itemsPage?.content ?? [];
+
+  if (items.length === 0) {
+    return (
+      <Card className="flex items-center justify-center h-[400px]">
+        <p className="text-muted-foreground">No distribution data available</p>
+      </Card>
+    );
+  }
+
+  return <MetricDistributionCharts items={items} />;
+}
+
+// Async wrapper for ReliabilityGauges
+async function ReliabilityGaugesWrapper() {
+  const competenciesPage = await getPsychometricsCompetenciesCached({ size: 100 });
+  const competencies = competenciesPage?.content ?? [];
+
+  if (competencies.length === 0) {
+    return (
+      <Card className="flex items-center justify-center h-[200px]">
+        <p className="text-muted-foreground">No reliability data available</p>
+      </Card>
+    );
+  }
+
+  return (
+    <Card>
+      <CardHeader className="pb-3">
+        <CardTitle className="text-base font-semibold flex items-center gap-2">
+          <Shield className="h-4 w-4 text-muted-foreground" />
+          Test Reliability Scores
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        {/* Mobile: show 4 in 2x2, Desktop: show 6 in 2x3 */}
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+          {/* Show first 4 on mobile (via CSS), 6 on desktop */}
+          {competencies.slice(0, 6).map((comp, index) => (
+            <Link
+              key={comp.competencyId}
+              href={`/psychometrics/competencies/${comp.competencyId}`}
+              className={`hover:opacity-80 transition-opacity ${index >= 4 ? 'hidden md:block' : ''}`}
+            >
+              <ReliabilityGauge
+                value={comp.cronbachAlpha}
+                competencyName={comp.competencyName}
+                sampleSize={comp.sampleSize}
+                itemCount={comp.itemCount}
+                size="sm"
+              />
+            </Link>
+          ))}
+        </div>
+        {/* Show "view all" if more than 4 on mobile, or more than 6 on desktop */}
+        {competencies.length > 4 && (
+          <Link href="/psychometrics/competencies">
+            <Button variant="ghost" size="sm" className="w-full mt-4">
+              <span className="md:hidden">
+                View all {competencies.length} competencies
+              </span>
+              <span className="hidden md:inline">
+                {competencies.length > 6 ? `View all ${competencies.length} competencies` : 'View competencies page'}
+              </span>
+              <ArrowRight className="h-4 w-4 ml-2" />
+            </Button>
+          </Link>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
 export default async function PsychometricsPage() {
-  const [{ report, error }, { items }, { competencies }] = await Promise.all([
-    getDashboardData(),
-    getItemsData(),
-    getCompetenciesData(),
-  ]);
+  // Fetch dashboard report first (fast data for immediate render)
+  const report = await getPsychometricsDashboardCached();
 
   return (
     <div className="flex flex-1 flex-col gap-6 p-4 pt-6 md:gap-8 md:p-6">
@@ -149,16 +236,22 @@ export default async function PsychometricsPage() {
         </div>
       </PageHeader>
 
-      {/* Error Display with retry capability */}
-      {error && (
+      {/* Error Display if no data */}
+      {!report && (
         <InlineError
-          error={error}
+          error={{
+            message: 'Failed to load psychometrics dashboard data',
+            status: 500,
+            category: ErrorCategory.SERVER,
+            isRetryable: true,
+            suggestedAction: ErrorAction.RETRY,
+          }}
           variant="banner"
-          title="Ошибка загрузки данных"
+          title="Data Loading Error"
         />
       )}
 
-      {/* Dashboard Hero */}
+      {/* Dashboard Hero - renders immediately with report data */}
       {report && (
         <Suspense fallback={<HeroSkeleton />}>
           <DashboardHero report={report} />
@@ -207,19 +300,19 @@ export default async function PsychometricsPage() {
           {/* Analytics Zone - 2 Column Layout (collapsible on mobile) */}
           <MobileChartsSection>
             <div className="grid gap-6 lg:grid-cols-[1.5fr_1fr]">
-              {/* Left Column - Item Quality Scatter */}
+              {/* Left Column - Item Quality Scatter (streaming) */}
               <Suspense fallback={<ChartSkeleton />}>
-                <ItemQualityScatter items={items} height={450} />
+                <ItemQualityScatterWrapper />
               </Suspense>
 
-              {/* Right Column - Distribution Charts */}
+              {/* Right Column - Distribution Charts (streaming) */}
               <Suspense fallback={<ChartSkeleton />}>
-                <MetricDistributionCharts items={items} />
+                <MetricDistributionWrapper />
               </Suspense>
             </div>
           </MobileChartsSection>
 
-          {/* Stats Cards */}
+          {/* Stats Cards - renders immediately with report data */}
           <Suspense fallback={<StatsCardsSkeleton />}>
             <PsychometricStatsCards report={report} />
           </Suspense>
@@ -232,54 +325,12 @@ export default async function PsychometricsPage() {
               <ActionableInsightsList report={report} maxInsights={3} compact />
             </div>
 
-            {/* Right - Reliability Gauges + Last Audit Info */}
+            {/* Right - Reliability Gauges (streaming) + Last Audit Info */}
             <div className="space-y-4">
               {/* Reliability Gauges Grid - 2x2 on mobile, 3 columns on tablet+ */}
-              {competencies.length > 0 && (
-                <Card>
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-base font-semibold flex items-center gap-2">
-                      <Shield className="h-4 w-4 text-muted-foreground" />
-                      Test Reliability Scores
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    {/* Mobile: show 4 in 2x2, Desktop: show 6 in 2x3 */}
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                      {/* Show first 4 on mobile (via CSS), 6 on desktop */}
-                      {competencies.slice(0, 6).map((comp, index) => (
-                        <Link
-                          key={comp.competencyId}
-                          href={`/psychometrics/competencies/${comp.competencyId}`}
-                          className={`hover:opacity-80 transition-opacity ${index >= 4 ? 'hidden md:block' : ''}`}
-                        >
-                          <ReliabilityGauge
-                            value={comp.cronbachAlpha}
-                            competencyName={comp.competencyName}
-                            sampleSize={comp.sampleSize}
-                            itemCount={comp.itemCount}
-                            size="sm"
-                          />
-                        </Link>
-                      ))}
-                    </div>
-                    {/* Show "view all" if more than 4 on mobile, or more than 6 on desktop */}
-                    {competencies.length > 4 && (
-                      <Link href="/psychometrics/competencies">
-                        <Button variant="ghost" size="sm" className="w-full mt-4">
-                          <span className="md:hidden">
-                            View all {competencies.length} competencies
-                          </span>
-                          <span className="hidden md:inline">
-                            {competencies.length > 6 ? `View all ${competencies.length} competencies` : 'View competencies page'}
-                          </span>
-                          <ArrowRight className="h-4 w-4 ml-2" />
-                        </Button>
-                      </Link>
-                    )}
-                  </CardContent>
-                </Card>
-              )}
+              <Suspense fallback={<ReliabilityGaugesSkeleton />}>
+                <ReliabilityGaugesWrapper />
+              </Suspense>
 
               {/* Last Audit Info */}
               <Card>
@@ -316,7 +367,7 @@ export default async function PsychometricsPage() {
                 </CardContent>
               </Card>
 
-              {/* Key Metrics Summary */}
+              {/* Key Metrics Summary - with help tooltips */}
               <Card>
                 <CardHeader className="pb-3">
                   <CardTitle className="text-base font-semibold flex items-center gap-2">
@@ -332,8 +383,9 @@ export default async function PsychometricsPage() {
                           ? report.averageDiscrimination.toFixed(2)
                           : '-'}
                       </div>
-                      <p className="text-xs text-muted-foreground mt-1">
+                      <p className="text-xs text-muted-foreground mt-1 flex items-center justify-center gap-1">
                         Avg. Question Effectiveness
+                        <AverageDiscriminationHelp />
                       </p>
                     </div>
                     <div className="p-3 rounded-lg bg-muted/50 text-center">
@@ -342,8 +394,9 @@ export default async function PsychometricsPage() {
                           ? report.averageAlpha.toFixed(2)
                           : '-'}
                       </div>
-                      <p className="text-xs text-muted-foreground mt-1">
+                      <p className="text-xs text-muted-foreground mt-1 flex items-center justify-center gap-1">
                         Avg. Reliability Score
+                        <AverageAlphaHelp />
                       </p>
                     </div>
                     <div className="p-3 rounded-lg bg-muted/50 text-center">
@@ -353,7 +406,10 @@ export default async function PsychometricsPage() {
                           : 0}
                         %
                       </div>
-                      <p className="text-xs text-muted-foreground mt-1">Active Items</p>
+                      <p className="text-xs text-muted-foreground mt-1 flex items-center justify-center gap-1">
+                        Active Items
+                        <ActiveItemsHelp />
+                      </p>
                     </div>
                     <div className="p-3 rounded-lg bg-muted/50 text-center">
                       <div className="text-2xl font-bold">
@@ -367,8 +423,9 @@ export default async function PsychometricsPage() {
                         ).toFixed(0)}
                         %
                       </div>
-                      <p className="text-xs text-muted-foreground mt-1">
+                      <p className="text-xs text-muted-foreground mt-1 flex items-center justify-center gap-1">
                         Reliable Competencies
+                        <ReliableCompetenciesHelp />
                       </p>
                     </div>
                   </div>

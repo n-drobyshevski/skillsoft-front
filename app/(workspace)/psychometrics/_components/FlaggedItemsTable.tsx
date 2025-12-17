@@ -20,6 +20,7 @@ import {
   DifficultyFlagDisplay
 } from '@/types/psychometrics';
 import { ValidityStatusBadge } from './ValidityStatusBadge';
+import { TableHeaderWithHelp } from './PsychometricHelpTooltip';
 import { AlertTriangle, ArrowRight, TrendingDown, TrendingUp } from 'lucide-react';
 
 interface FlaggedItemsTableProps {
@@ -137,9 +138,15 @@ export function FlaggedItemsTable({
             <TableRow>
               <TableHead className="w-[35%]">Вопрос</TableHead>
               <TableHead>Компетенция</TableHead>
-              <TableHead className="text-center">p</TableHead>
-              <TableHead className="text-center">rpb</TableHead>
-              <TableHead>Статус</TableHead>
+              <TableHead className="text-center">
+                <TableHeaderWithHelp label="p" helpKey="difficulty" />
+              </TableHead>
+              <TableHead className="text-center">
+                <TableHeaderWithHelp label="rpb" helpKey="discrimination" />
+              </TableHead>
+              <TableHead>
+                <TableHeaderWithHelp label="Статус" helpKey="validityStatus" />
+              </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
