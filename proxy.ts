@@ -64,6 +64,7 @@ const isPublicRoute = createRouteMatcher([
   '/sign-in(.*)',
   '/sign-up(.*)',
   '/api/webhooks(.*)',
+  '/docs(.*)',  // Documentation is publicly accessible
 ]);
 
 // ============================================================================
