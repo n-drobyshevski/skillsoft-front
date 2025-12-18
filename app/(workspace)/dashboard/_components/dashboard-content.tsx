@@ -11,37 +11,39 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Separator } from "@/components/ui/separator";
-import FlexibleStatsCards from "@/components/data-display/FlexibleStatsCards";
 import {
   ArrowRight,
   BarChart3,
   BookOpen,
   Brain,
   ChevronRight,
-  CircleDot,
-  ClipboardList,
-  Clock,
-  FileText,
   Globe2,
-  GraduationCap,
   LineChart,
   Play,
   Plus,
-  Settings2,
-  Sparkles,
   Target,
   TrendingUp,
-  Users,
-  Zap,
+  Clock,
 } from "lucide-react";
 import Link from "next/link";
-import { DashboardStats, TestTemplateSummary, AssessmentGoal, AssessmentGoalInfo, TestSession } from "@/types/domain";
-import { User, UserStats } from "@/types/user";
+import { TestSession, TestTemplateSummary } from "@/types/domain";
+import { UserStats } from "@/types/user";
 import { ClientOnly } from "@/components/common/ClientOnly";
 import CompetencyByCategoryBarChart from "@/components/data-display/charts/CompetencyByCategoryBarChart";
 import { useActiveLens } from "@/hooks/useLens";
+
+// New unified dashboard components
+import {
+  DashboardGrid,
+  getGridSpanClass,
+  GRID_SPANS,
+  CompactStatsRow,
+  PsychometricHealthWidget,
+  QuickActionsWidget,
+  RecentActivityWidget,
+  TestTemplatesWidget,
+} from "@/components/dashboard";
+import type { DashboardStats, PsychometricSummary, RecentCompletion } from "@/types/dashboard";
 
 // ============================================
 // ANIMATION VARIANTS
@@ -56,14 +58,6 @@ const fadeInUp: Variants = {
   }
 };
 
-const fadeIn: Variants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: { duration: 0.3 }
-  }
-};
-
 const staggerContainer: Variants = {
   hidden: { opacity: 0 },
   visible: {
@@ -75,137 +69,40 @@ const staggerContainer: Variants = {
   }
 };
 
-const scaleIn: Variants = {
-  hidden: { opacity: 0, scale: 0.96 },
-  visible: {
-    opacity: 1,
-    scale: 1,
-    transition: { duration: 0.35, ease: "easeOut" }
-  }
-};
-
 // ============================================
 // PROPS INTERFACE
 // ============================================
 
 interface DashboardContentProps {
-  stats: DashboardStats;
+  /** Dashboard statistics */
+  stats: {
+    totalCompetencies: number;
+    totalBehavioralIndicators: number;
+    totalAssessmentQuestions: number;
+    competenciesByCategory: { [key: string]: number };
+    competenciesByLevel: { [key: string]: number };
+    averageIndicatorsPerCompetency: number;
+  };
+  /** Test templates */
   testTemplates: TestTemplateSummary[];
+  /** Pending test sessions (user lens) */
   pendingSessions?: TestSession[];
+  /** User statistics (admin only) */
   userStats: UserStats | null;
-  recentUsers: User[];
+  /** Current user info */
   currentUser?: {
     firstName?: string;
     role: 'ADMIN' | 'EDITOR' | 'USER';
   };
+  /** Psychometric summary (editor/admin) */
+  psychometrics?: PsychometricSummary | null;
+  /** Recent completions (editor/admin) */
+  recentCompletions?: RecentCompletion[];
 }
 
 // ============================================
 // HELPER COMPONENTS
 // ============================================
-
-// Action row for quick navigation
-function ActionRow({ 
-  icon: Icon, 
-  title, 
-  subtitle,
-  href 
-}: { 
-  icon: React.ElementType; 
-  title: string;
-  subtitle?: string;
-  href: string;
-}) {
-  return (
-    <Link href={href}>
-      <motion.div
-        whileHover={{ x: 2 }}
-        whileTap={{ scale: 0.99 }}
-        className="flex items-center gap-3 p-3 -mx-3 rounded-lg hover:bg-muted/50 transition-colors group cursor-pointer"
-      >
-        <div className="w-9 h-9 rounded-lg bg-muted flex items-center justify-center shrink-0">
-          <Icon className="w-4 h-4 text-muted-foreground" />
-        </div>
-        <div className="flex-1 min-w-0">
-          <p className="text-sm font-medium">{title}</p>
-          {subtitle && <p className="text-xs text-muted-foreground truncate">{subtitle}</p>}
-        </div>
-        <ChevronRight className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
-      </motion.div>
-    </Link>
-  );
-}
-
-// Template preview card
-function TemplatePreview({ template }: { template: TestTemplateSummary }) {
-  const goalInfo = AssessmentGoalInfo[template.goal as AssessmentGoal] || {
-    displayName: template.goal,
-    description: 'Assessment'
-  };
-
-  return (
-    <Link href={`/test-templates/${template.id}`}>
-      <motion.div
-        whileHover={{ y: -1 }}
-        className="p-3 rounded-lg border border-border/60 hover:border-border hover:shadow-sm transition-all cursor-pointer group"
-      >
-        <div className="flex items-start justify-between gap-2">
-          <div className="min-w-0 flex-1">
-            <p className="text-sm font-medium truncate">{template.name}</p>
-            <p className="text-xs text-muted-foreground mt-0.5">{goalInfo.displayName}</p>
-          </div>
-          <Badge variant="outline" className="text-xs shrink-0">
-            {template.competencyCount}
-          </Badge>
-        </div>
-      </motion.div>
-    </Link>
-  );
-}
-
-// Activity feed item
-function ActivityFeedItem({
-  initials,
-  name,
-  action,
-  target,
-  time,
-  variant = "default"
-}: {
-  initials: string;
-  name: string;
-  action: string;
-  target: string;
-  time: string;
-  variant?: "default" | "success" | "info";
-}) {
-  const dotColors = {
-    default: "bg-muted-foreground/40",
-    success: "bg-emerald-500",
-    info: "bg-blue-500"
-  };
-
-  return (
-    <div className="flex items-start gap-3 py-2.5">
-      <div className="relative">
-        <Avatar className="h-7 w-7">
-          <AvatarFallback className="text-[10px] bg-muted font-medium">
-            {initials}
-          </AvatarFallback>
-        </Avatar>
-        <div className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full ${dotColors[variant]} ring-2 ring-background`} />
-      </div>
-      <div className="flex-1 min-w-0">
-        <p className="text-sm leading-snug">
-          <span className="font-medium">{name}</span>
-          <span className="text-muted-foreground"> {action} </span>
-          <span className="font-medium">{target}</span>
-        </p>
-        <p className="text-xs text-muted-foreground mt-0.5">{time}</p>
-      </div>
-    </div>
-  );
-}
 
 // Standard badge with icon
 function StandardBadge({ icon: Icon, label }: { icon: React.ElementType; label: string }) {
@@ -225,13 +122,14 @@ export default function DashboardContent({
   testTemplates,
   pendingSessions = [],
   userStats,
-  recentUsers,
   currentUser,
+  psychometrics,
+  recentCompletions = [],
 }: DashboardContentProps) {
   const prefersReducedMotion = useReducedMotion();
   const activeLens = useActiveLens();
   const isUserLens = activeLens === 'user';
-  
+
   const motionProps = prefersReducedMotion
     ? { initial: "visible", animate: "visible" }
     : { initial: "hidden", whileInView: "visible", viewport: { once: true, margin: "-40px" } };
@@ -248,20 +146,30 @@ export default function DashboardContent({
 
   // Calculate progress metrics
   const targetIndicators = stats.totalCompetencies * 5;
-  const indicatorProgress = targetIndicators > 0 
-    ? Math.min((stats.totalBehavioralIndicators / targetIndicators) * 100, 100) 
+  const indicatorProgress = targetIndicators > 0
+    ? Math.min((stats.totalBehavioralIndicators / targetIndicators) * 100, 100)
     : 0;
 
   const targetQuestions = stats.totalBehavioralIndicators * 3;
-  const questionProgress = targetQuestions > 0 
+  const questionProgress = targetQuestions > 0
     ? Math.min((stats.totalAssessmentQuestions / targetQuestions) * 100, 100)
     : 0;
 
   const activeTemplates = testTemplates.filter(t => t.isActive);
 
+  // Transform stats to new format
+  const dashboardStats: DashboardStats = {
+    totalCompetencies: stats.totalCompetencies,
+    totalIndicators: stats.totalBehavioralIndicators,
+    totalQuestions: stats.totalAssessmentQuestions,
+    activeTemplates: activeTemplates.length,
+    competenciesByCategory: stats.competenciesByCategory,
+    averageIndicatorsPerCompetency: stats.averageIndicatorsPerCompetency,
+  };
+
   return (
     <div className="flex flex-1 flex-col gap-6 sm:gap-8 p-4 sm:p-6 lg:p-8 max-w-[1600px] mx-auto w-full">
-      
+
       {/* ===== HEADER ===== */}
       <motion.header
         initial={{ opacity: 0, y: -8 }}
@@ -274,7 +182,7 @@ export default function DashboardContent({
             {greeting()}{currentUser?.firstName ? `, ${currentUser.firstName}` : ''}
           </h1>
           <p className="text-sm sm:text-base text-muted-foreground">
-            {isUserLens 
+            {isUserLens
               ? "Here's your personal progress and pending assessments."
               : "Overview of your competency framework and assessments"}
           </p>
@@ -336,7 +244,7 @@ export default function DashboardContent({
                       {session.status === 'IN_PROGRESS' ? 'Active' : 'New'}
                     </Badge>
                   </div>
-                  
+
                   {session.status === 'IN_PROGRESS' && (
                     <div className="space-y-1">
                       <div className="flex items-center justify-between text-xs text-muted-foreground">
@@ -346,7 +254,7 @@ export default function DashboardContent({
                       <Progress value={((session.currentQuestionIndex || 0) / (session.questionOrder?.length || 1)) * 100} className="h-1.5" />
                     </div>
                   )}
-                  
+
                   <Button size="sm" className="w-full mt-auto" asChild>
                     <Link href={`/test-templates/take/${session.id}`}>
                       {session.status === 'IN_PROGRESS' ? 'Resume Assessment' : 'Start Assessment'}
@@ -360,143 +268,43 @@ export default function DashboardContent({
         </motion.div>
       )}
 
-      {/* ===== BENTO GRID - Stats Cards ===== */}
-      {/* ===== BENTO GRID - Stats Cards ===== */}
-      <FlexibleStatsCards
-        data={{
-          type: "dashboard",
-          stats: {
-            totalCompetencies: stats.totalCompetencies,
-            totalBehavioralIndicators: stats.totalBehavioralIndicators,
-            totalAssessmentQuestions: stats.totalAssessmentQuestions,
-            totalTestTemplates: testTemplates.length,
-            activeTestTemplates: activeTemplates.length,
-            competenciesByCategory: stats.competenciesByCategory,
-            averageIndicatorsPerCompetency: stats.averageIndicatorsPerCompetency,
-          }
-        }}
-      />
+      {/* ===== COMPACT STATS ROW ===== */}
+      <CompactStatsRow stats={dashboardStats} />
 
       {/* ===== MAIN CONTENT GRID ===== */}
-      <div className="grid gap-4 sm:gap-6 lg:grid-cols-12">
-        
-        {/* LEFT COLUMN - Charts & Standards */}
-        <motion.div 
+      <DashboardGrid>
+
+        {/* LEFT COLUMN - Psychometric Health, Charts & Standards */}
+        <motion.div
           {...motionProps}
           variants={staggerContainer}
-          className="lg:col-span-8 space-y-6"
+          className={getGridSpanClass(GRID_SPANS.xlarge)}
         >
-          {/* Category Distribution Chart */}
-          <motion.div variants={fadeInUp}>
-            <Card>
-              <CardHeader className="pb-2">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-lg bg-muted flex items-center justify-center">
-                      <BarChart3 className="w-4 h-4 text-muted-foreground" />
-                    </div>
-                    <div>
-                      <CardTitle className="text-base">Competency Distribution</CardTitle>
-                      <CardDescription className="text-xs">By category</CardDescription>
-                    </div>
-                  </div>
-                  <Link href="/hr/competencies">
-                    <Button variant="ghost" size="sm" className="text-xs gap-1.5">
-                      View All
-                      <ArrowRight className="w-3 h-3" />
-                    </Button>
-                  </Link>
-                </div>
-              </CardHeader>
-              <CardContent className="pt-2">
-                <ClientOnly fallback={
-                  <div className="h-[260px] flex items-center justify-center text-muted-foreground">
-                    <div className="flex items-center gap-2">
-                      <LineChart className="w-4 h-4 animate-pulse" />
-                      <span className="text-sm">Loading chart...</span>
-                    </div>
-                  </div>
-                }>
-                  <CompetencyByCategoryBarChart
-                    data={Object.entries(stats.competenciesByCategory).map(([name, value]) => ({ name, value }))}
-                  />
-                </ClientOnly>
-              </CardContent>
-            </Card>
-          </motion.div>
+          <div className="space-y-6">
+            {/* Psychometric Health Widget (Editor/Admin only) - Main Content Area */}
+            {isEditor && !isUserLens && (
+              <motion.div variants={fadeInUp}>
+                <PsychometricHealthWidget
+                  data={psychometrics || null}
+                />
+              </motion.div>
+            )}
 
-          {/* Progress & Standards Row */}
-          <motion.div variants={fadeInUp} className="grid sm:grid-cols-2 gap-4">
-            {/* Framework Progress */}
-            <Card>
-              <CardHeader className="pb-3">
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-lg bg-muted flex items-center justify-center">
-                    <TrendingUp className="w-4 h-4 text-muted-foreground" />
-                  </div>
-                  <CardTitle className="text-base">Framework Progress</CardTitle>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-muted-foreground">Indicator coverage</span>
-                    <span className="font-medium">{Math.round(indicatorProgress)}%</span>
-                  </div>
-                  <Progress value={indicatorProgress} className="h-1.5" />
-                </div>
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-muted-foreground">Question coverage</span>
-                    <span className="font-medium">{Math.round(questionProgress)}%</span>
-                  </div>
-                  <Progress value={questionProgress} className="h-1.5" />
-                </div>
-                <p className="text-xs text-muted-foreground pt-1">
-                  Target: 5 indicators & 15 questions per competency
-                </p>
-              </CardContent>
-            </Card>
-
-            {/* International Standards */}
-            <Card>
-              <CardHeader className="pb-3">
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-lg bg-muted flex items-center justify-center">
-                    <Globe2 className="w-4 h-4 text-muted-foreground" />
-                  </div>
-                  <div>
-                    <CardTitle className="text-base">Standards Mapping</CardTitle>
-                    <CardDescription className="text-xs">Global compatibility</CardDescription>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  <StandardBadge icon={Target} label="O*NET SOC Codes" />
-                  <StandardBadge icon={BookOpen} label="ESCO Skills Framework" />
-                  <StandardBadge icon={Brain} label="Big Five Personality Traits" />
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
-
-          {/* Active Test Templates (if any) */}
-          {activeTemplates.length > 0 && (
+            {/* Category Distribution Chart */}
             <motion.div variants={fadeInUp}>
               <Card>
-                <CardHeader className="pb-3">
+                <CardHeader className="pb-2">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <div className="w-9 h-9 rounded-lg bg-muted flex items-center justify-center">
-                        <GraduationCap className="w-4 h-4 text-muted-foreground" />
+                        <BarChart3 className="w-4 h-4 text-muted-foreground" />
                       </div>
                       <div>
-                        <CardTitle className="text-base">Active Assessments</CardTitle>
-                        <CardDescription className="text-xs">{activeTemplates.length} templates available</CardDescription>
+                        <CardTitle className="text-base">Competency Distribution</CardTitle>
+                        <CardDescription className="text-xs">By category</CardDescription>
                       </div>
                     </div>
-                    <Link href="/test-templates">
+                    <Link href="/hr/competencies">
                       <Button variant="ghost" size="sm" className="text-xs gap-1.5">
                         View All
                         <ArrowRight className="w-3 h-3" />
@@ -504,191 +312,194 @@ export default function DashboardContent({
                     </Link>
                   </div>
                 </CardHeader>
-                <CardContent>
-                  <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                    {activeTemplates.slice(0, 6).map((template) => (
-                      <TemplatePreview key={template.id} template={template} />
-                    ))}
-                  </div>
+                <CardContent className="pt-2">
+                  <ClientOnly fallback={
+                    <div className="h-[260px] flex items-center justify-center text-muted-foreground">
+                      <div className="flex items-center gap-2">
+                        <LineChart className="w-4 h-4 animate-pulse" />
+                        <span className="text-sm">Loading chart...</span>
+                      </div>
+                    </div>
+                  }>
+                    <CompetencyByCategoryBarChart
+                      data={Object.entries(stats.competenciesByCategory).map(([name, value]) => ({ name, value }))}
+                    />
+                  </ClientOnly>
                 </CardContent>
               </Card>
             </motion.div>
-          )}
-        </motion.div>
 
-        {/* RIGHT COLUMN - Actions & Activity */}
-        <motion.div 
-          {...motionProps}
-          variants={staggerContainer}
-          className="lg:col-span-4 space-y-6"
-        >
-          {/* Quick Actions */}
-          <motion.div variants={fadeInUp}>
-            <Card>
-              <CardHeader className="pb-2">
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-lg bg-muted flex items-center justify-center">
-                    <Zap className="w-4 h-4 text-muted-foreground" />
-                  </div>
-                  <CardTitle className="text-base">Quick Actions</CardTitle>
-                </div>
-              </CardHeader>
-              <CardContent className="pt-1">
-                <div className="space-y-0.5">
-                  <ActionRow 
-                    icon={Plus} 
-                    title="New Competency" 
-                    subtitle="Define skills and behaviors"
-                    href="/hr/competencies/new" 
-                  />
-                  <ActionRow 
-                    icon={Brain} 
-                    title="Add Indicator" 
-                    subtitle="Create behavioral markers"
-                    href="/hr/behavioral-indicators/new" 
-                  />
-                  <ActionRow 
-                    icon={ClipboardList} 
-                    title="Create Question" 
-                    subtitle="Build assessment items"
-                    href="/hr/assessment-questions/new" 
-                  />
-                  <ActionRow 
-                    icon={FileText} 
-                    title="New Template" 
-                    subtitle="Design an assessment"
-                    href="/test-templates/new" 
-                  />
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
-
-          {/* Recent Activity */}
-          <motion.div variants={fadeInUp}>
-            <Card>
-              <CardHeader className="pb-2">
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-lg bg-muted flex items-center justify-center">
-                    <Clock className="w-4 h-4 text-muted-foreground" />
-                  </div>
-                  <CardTitle className="text-base">Recent Activity</CardTitle>
-                </div>
-              </CardHeader>
-              <CardContent className="pt-1">
-                <div className="space-y-0.5 divide-y divide-border/50">
-                  <ActivityFeedItem
-                    initials="AJ"
-                    name="Alex Johnson"
-                    action="updated"
-                    target="Team Leadership"
-                    time="2 hours ago"
-                    variant="info"
-                  />
-                  <ActivityFeedItem
-                    initials="SC"
-                    name="Sarah Chen"
-                    action="created"
-                    target="Digital Communication"
-                    time="5 hours ago"
-                    variant="success"
-                  />
-                  <ActivityFeedItem
-                    initials="JM"
-                    name="John Miller"
-                    action="completed"
-                    target="Skills Assessment"
-                    time="1 day ago"
-                  />
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
-
-          {/* Admin: User Stats */}
-          {isAdmin && userStats && (
-            <motion.div variants={fadeInUp}>
+            {/* Progress & Standards Row */}
+            <motion.div variants={fadeInUp} className="grid sm:grid-cols-2 gap-4">
+              {/* Framework Progress */}
               <Card>
                 <CardHeader className="pb-3">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-lg bg-muted flex items-center justify-center">
-                        <Users className="w-4 h-4 text-muted-foreground" />
-                      </div>
-                      <CardTitle className="text-base">Users</CardTitle>
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-lg bg-muted flex items-center justify-center">
+                      <TrendingUp className="w-4 h-4 text-muted-foreground" />
                     </div>
-                    <Link href="/admin/users">
-                      <Button variant="ghost" size="sm" className="h-7 px-2">
-                        <Settings2 className="w-4 h-4" />
-                      </Button>
-                    </Link>
+                    <CardTitle className="text-base">Framework Progress</CardTitle>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-muted-foreground">Indicator coverage</span>
+                      <span className="font-medium">{Math.round(indicatorProgress)}%</span>
+                    </div>
+                    <Progress value={indicatorProgress} className="h-1.5" />
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-muted-foreground">Question coverage</span>
+                      <span className="font-medium">{Math.round(questionProgress)}%</span>
+                    </div>
+                    <Progress value={questionProgress} className="h-1.5" />
+                  </div>
+                  <p className="text-xs text-muted-foreground pt-1">
+                    Target: 5 indicators & 15 questions per competency
+                  </p>
+                </CardContent>
+              </Card>
+
+              {/* International Standards */}
+              <Card>
+                <CardHeader className="pb-3">
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-lg bg-muted flex items-center justify-center">
+                      <Globe2 className="w-4 h-4 text-muted-foreground" />
+                    </div>
+                    <div>
+                      <CardTitle className="text-base">Standards Mapping</CardTitle>
+                      <CardDescription className="text-xs">Global compatibility</CardDescription>
+                    </div>
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-2 gap-3 mb-4">
-                    <div className="text-center p-3 rounded-lg bg-muted/50">
-                      <p className="text-xl font-semibold">{userStats.totalUsers}</p>
-                      <p className="text-xs text-muted-foreground">Total</p>
-                    </div>
-                    <div className="text-center p-3 rounded-lg bg-muted/50">
-                      <p className="text-xl font-semibold">{userStats.activeUsers}</p>
-                      <p className="text-xs text-muted-foreground">Active</p>
-                    </div>
+                  <div className="space-y-2">
+                    <StandardBadge icon={Target} label="O*NET SOC Codes" />
+                    <StandardBadge icon={BookOpen} label="ESCO Skills Framework" />
+                    <StandardBadge icon={Brain} label="Big Five Personality Traits" />
                   </div>
-                  <Separator className="my-3" />
-                  <div className="space-y-2 text-sm">
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground flex items-center gap-2">
-                        <CircleDot className="w-3 h-3" /> Admins
-                      </span>
-                      <span className="font-medium">{userStats.byRole.admin}</span>
+                </CardContent>
+              </Card>
+            </motion.div>
+
+            {/* Active Test Templates */}
+            {activeTemplates.length > 0 && (
+              <motion.div variants={fadeInUp}>
+                <TestTemplatesWidget
+                  templates={testTemplates}
+                  maxItems={6}
+                />
+              </motion.div>
+            )}
+          </div>
+        </motion.div>
+
+        {/* RIGHT COLUMN - Actions, Activity */}
+        <motion.div
+          {...motionProps}
+          variants={staggerContainer}
+          className={getGridSpanClass(GRID_SPANS.sidebar)}
+        >
+          <div className="space-y-6">
+            {/* Quick Actions */}
+            {!isUserLens && (
+              <motion.div variants={fadeInUp}>
+                <QuickActionsWidget maxActions={5} />
+              </motion.div>
+            )}
+
+            {/* Recent Activity */}
+            <motion.div variants={fadeInUp}>
+              <RecentActivityWidget
+                completions={recentCompletions}
+              />
+            </motion.div>
+
+            {/* Admin: User Stats */}
+            {isAdmin && userStats && (
+              <motion.div variants={fadeInUp}>
+                <Card>
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-lg bg-muted flex items-center justify-center">
+                          <svg className="w-4 h-4 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                          </svg>
+                        </div>
+                        <CardTitle className="text-base">Users</CardTitle>
+                      </div>
+                      <Link href="/admin/users">
+                        <Button variant="ghost" size="sm" className="h-7 px-2">
+                          <ChevronRight className="w-4 h-4" />
+                        </Button>
+                      </Link>
                     </div>
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground flex items-center gap-2">
-                        <CircleDot className="w-3 h-3" /> Editors
-                      </span>
-                      <span className="font-medium">{userStats.byRole.editor}</span>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-2 gap-3 mb-4">
+                      <div className="text-center p-3 rounded-lg bg-muted/50">
+                        <p className="text-xl font-semibold">{userStats.totalUsers}</p>
+                        <p className="text-xs text-muted-foreground">Total</p>
+                      </div>
+                      <div className="text-center p-3 rounded-lg bg-muted/50">
+                        <p className="text-xl font-semibold">{userStats.activeUsers}</p>
+                        <p className="text-xs text-muted-foreground">Active</p>
+                      </div>
                     </div>
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground flex items-center gap-2">
-                        <CircleDot className="w-3 h-3" /> Users
-                      </span>
-                      <span className="font-medium">{userStats.byRole.user}</span>
+                    <div className="border-t pt-3 space-y-2 text-sm">
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Admins</span>
+                        <span className="font-medium">{userStats.byRole.admin}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Editors</span>
+                        <span className="font-medium">{userStats.byRole.editor}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Users</span>
+                        <span className="font-medium">{userStats.byRole.user}</span>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            )}
+
+            {/* Assessment CTA */}
+            <motion.div variants={fadeInUp}>
+              <Card className="bg-gradient-to-br from-primary/5 via-transparent to-purple-500/5 border-primary/20">
+                <CardContent className="p-5">
+                  <div className="flex items-start gap-4">
+                    <div className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                      <svg className="w-5 h-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                      </svg>
+                    </div>
+                    <div className="space-y-3">
+                      <div>
+                        <h4 className="font-semibold">Ready to assess?</h4>
+                        <p className="text-sm text-muted-foreground mt-0.5">
+                          Discover your strengths and growth areas.
+                        </p>
+                      </div>
+                      <Link href="/test-templates">
+                        <Button size="sm" className="gap-2">
+                          <Play className="w-3.5 h-3.5" />
+                          Start Assessment
+                        </Button>
+                      </Link>
                     </div>
                   </div>
                 </CardContent>
               </Card>
             </motion.div>
-          )}
-
-          {/* Assessment CTA */}
-          <motion.div variants={fadeInUp}>
-            <Card className="bg-gradient-to-br from-primary/5 via-transparent to-purple-500/5 border-primary/20">
-              <CardContent className="p-5">
-                <div className="flex items-start gap-4">
-                  <div className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-                    <Sparkles className="w-5 h-5 text-primary" />
-                  </div>
-                  <div className="space-y-3">
-                    <div>
-                      <h4 className="font-semibold">Ready to assess?</h4>
-                      <p className="text-sm text-muted-foreground mt-0.5">
-                        Discover your strengths and growth areas.
-                      </p>
-                    </div>
-                    <Link href="/test-templates">
-                      <Button size="sm" className="gap-2">
-                        <Play className="w-3.5 h-3.5" />
-                        Start Assessment
-                      </Button>
-                    </Link>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
+          </div>
         </motion.div>
-      </div>
+      </DashboardGrid>
     </div>
   );
 }

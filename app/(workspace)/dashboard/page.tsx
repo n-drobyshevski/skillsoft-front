@@ -1,10 +1,12 @@
 import { Metadata } from "next";
 import { competenciesApi, testTemplatesApi, usersApi, assessmentQuestionsApi } from "@/services/api";
 import { Competency, DashboardStats, TestTemplateSummary } from "@/types/domain";
-import { UserStats, User, UserRole } from "@/types/user";
+import { UserStats, User } from "@/types/user";
 import ErrorCard from "@/components/feedback/ErrorCard";
 import DashboardContent from "./_components/dashboard-content";
-import { auth, currentUser } from "@clerk/nextjs/server";
+import { currentUser } from "@clerk/nextjs/server";
+import { getPsychometricsDashboardCached } from "@/services/api.cache.psychometrics";
+import { calculatePsychometricSummary, type PsychometricSummary } from "@/types/dashboard";
 
 export const metadata: Metadata = {
   title: "Dashboard - SkillSoft",
@@ -19,11 +21,11 @@ async function getDashboardData() {
 			testTemplatesApi.getActiveTemplates().catch(() => []),
 			assessmentQuestionsApi.getAllQuestions().catch(() => []),
 		]);
-		
+
 		const competencies = Array.isArray(competenciesData) ? competenciesData : [];
 		const templates = Array.isArray(templatesData) ? templatesData : [];
 		const questions = Array.isArray(questionsData) ? questionsData : [];
-		
+
 		// Calculate stats
 		const stats: DashboardStats = {
 			totalCompetencies: competencies.length,
@@ -48,16 +50,16 @@ async function getDashboardData() {
 				? stats.totalBehavioralIndicators / stats.totalCompetencies
 				: 0;
 
-		return { 
-			stats, 
+		return {
+			stats,
 			testTemplates: templates,
-			error: null 
+			error: null
 		};
 	} catch {
-		return { 
-			stats: null, 
+		return {
+			stats: null,
 			testTemplates: [],
-			error: "Failed to load dashboard data. Please try again." 
+			error: "Failed to load dashboard data. Please try again."
 		};
 	}
 }
@@ -68,7 +70,7 @@ async function getUserData(): Promise<{ userStats: UserStats | null; recentUsers
 			usersApi.getUserStats().catch(() => null),
 			usersApi.getAllUsers().catch(() => []),
 		]);
-		
+
 		// Map the API response to our UserStats type
 		const userStats: UserStats | null = statsData ? {
 			totalUsers: statsData.totalUsers,
@@ -80,7 +82,7 @@ async function getUserData(): Promise<{ userStats: UserStats | null; recentUsers
 			},
 			recentlyActive: statsData.activeUsers,
 		} : null;
-		
+
 		return {
 			userStats,
 			recentUsers: Array.isArray(usersData) ? usersData.slice(0, 5) : [],
@@ -94,15 +96,34 @@ async function getCurrentUserInfo() {
 	try {
 		const user = await currentUser();
 		if (!user) return null;
-		
+
 		// Get role from metadata or default to USER
 		const role = (user.publicMetadata?.role as 'ADMIN' | 'EDITOR' | 'USER') || 'USER';
-		
+
 		return {
 			firstName: user.firstName || undefined,
 			role,
 		};
 	} catch {
+		return null;
+	}
+}
+
+/**
+ * Fetch psychometric data for editors/admins.
+ * Returns null if user doesn't have permission or if fetch fails.
+ */
+async function getPsychometricData(role: string | undefined): Promise<PsychometricSummary | null> {
+	// Only fetch for editors and admins
+	if (!role || role === 'USER') return null;
+
+	try {
+		const report = await getPsychometricsDashboardCached();
+		if (!report) return null;
+
+		return calculatePsychometricSummary(report);
+	} catch {
+		// Silently fail - psychometrics widget will show empty state
 		return null;
 	}
 }
@@ -117,7 +138,10 @@ export default async function DashboardPage() {
 	]);
 
 	const { stats, testTemplates, error } = dashboardData;
-	const { userStats, recentUsers } = userData;
+	const { userStats } = userData;
+
+	// Fetch psychometric data based on user role
+	const psychometrics = await getPsychometricData(userInfo?.role);
 
 	if (error || !stats) {
 		return <ErrorCard error={error || "Failed to load dashboard"} />;
@@ -128,8 +152,8 @@ export default async function DashboardPage() {
 			stats={stats}
 			testTemplates={testTemplates}
 			userStats={userStats}
-			recentUsers={recentUsers}
 			currentUser={userInfo || undefined}
+			psychometrics={psychometrics}
 		/>
 	);
 }
