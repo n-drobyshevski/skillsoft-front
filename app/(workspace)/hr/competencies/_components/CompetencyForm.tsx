@@ -116,6 +116,28 @@ export function CompetencyForm({
 
   async function onSubmit(data: CompetencyFormValues) {
     setIsLoading(true);
+
+    // Clean up standardCodes - if it's an empty object, set to undefined
+    if (data.standardCodes && Object.keys(data.standardCodes).length === 0) {
+      data.standardCodes = undefined;
+    }
+    // Also clean nested empty objects
+    if (data.standardCodes) {
+      if (data.standardCodes.onetRef && !data.standardCodes.onetRef.code) {
+        delete data.standardCodes.onetRef;
+      }
+      if (data.standardCodes.escoRef && !data.standardCodes.escoRef.uri) {
+        delete data.standardCodes.escoRef;
+      }
+      if (data.standardCodes.bigFiveRef && !data.standardCodes.bigFiveRef.trait) {
+        delete data.standardCodes.bigFiveRef;
+      }
+      // If all refs were removed, set standardCodes to undefined
+      if (Object.keys(data.standardCodes).length === 0) {
+        data.standardCodes = undefined;
+      }
+    }
+
     console.log('[CompetencyForm] onSubmit data:', JSON.stringify(data, null, 2));
     try {
       if (isEditMode && competency) {
@@ -155,9 +177,38 @@ export function CompetencyForm({
   };
 
   // Handle form validation errors
-  const onFormError = (errors: Record<string, unknown>) => {
-    console.error('Form validation errors:', errors);
-    toast.error('Please fix the validation errors before submitting.');
+  const onFormError = (formErrors: Record<string, unknown>) => {
+    // Extract actual error messages from react-hook-form errors
+    const errorMessages: string[] = [];
+    const extractErrors = (obj: Record<string, unknown>, prefix = ''): void => {
+      for (const key of Object.keys(obj)) {
+        const value = obj[key];
+        if (value && typeof value === 'object') {
+          const errorObj = value as Record<string, unknown>;
+          if ('message' in errorObj && typeof errorObj.message === 'string') {
+            const fieldName = prefix ? `${prefix}.${key}` : key;
+            errorMessages.push(`${fieldName}: ${errorObj.message}`);
+          } else {
+            // Recurse for nested errors
+            extractErrors(errorObj, prefix ? `${prefix}.${key}` : key);
+          }
+        }
+      }
+    };
+
+    extractErrors(formErrors);
+
+    console.error('Form validation errors:', {
+      raw: formErrors,
+      messages: errorMessages,
+      formValues: form.getValues(),
+    });
+
+    if (errorMessages.length > 0) {
+      toast.error(`Validation errors: ${errorMessages.join(', ')}`);
+    } else {
+      toast.error('Please fix the validation errors before submitting.');
+    }
   };
 
   return (
@@ -224,7 +275,7 @@ export function CompetencyForm({
                 render={({ field }) => {
                   const fieldState = getFieldState('description');
                   const charCount = field.value?.length || 0;
-                  const minChars = 10;
+                  const minChars = 50; // Backend: @Size(min = 50, max = 1000)
                   return (
                     <FormItem>
                       <FormLabel className="text-sm font-medium flex items-center gap-1">

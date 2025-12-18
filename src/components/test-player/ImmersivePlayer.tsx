@@ -762,8 +762,11 @@ export function ImmersivePlayer({ session, initialQuestion, authHeaders, testDri
 
   /**
    * Handle test completion
+   * Includes session status validation and graceful error handling
    */
   const handleComplete = useCallback(async () => {
+    if (state.isSubmitting) return;
+
     setState(prev => ({ ...prev, isSubmitting: true }));
 
     try {
@@ -778,10 +781,37 @@ export function ImmersivePlayer({ session, initialQuestion, authHeaders, testDri
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error('Failed to complete session:', error);
+      const apiError = error as ApiError;
+      const errorMessage = apiError.message?.toLowerCase() || '';
+
+      // Handle "session not in progress" - session state changed
+      if (errorMessage.includes('not in progress') || errorMessage.includes('cannot complete')) {
+        try {
+          const currentSession = await testSessionsClientApi.getSessionById(session.id, authHeaders);
+          if (currentSession?.status === 'COMPLETED') {
+            toast.info('Тест уже завершён');
+            // Redirect to test templates - user can find their results in history
+            router.push('/test-templates');
+            return;
+          }
+        } catch {
+          // Ignore fetch error
+        }
+        toast.error('Тест не может быть завершён');
+        router.push('/test-templates');
+        return;
+      }
+
+      if (errorMessage.includes('abandon')) {
+        toast.error('Сессия была отменена');
+        router.push('/test-templates');
+        return;
+      }
+
       toast.error('Не удалось завершить тест');
       setState(prev => ({ ...prev, isSubmitting: false }));
     }
-  }, [session.id, router, currentQuestion, currentAnswer, buildAnswerRequest, authHeaders]);
+  }, [session.id, router, currentQuestion, currentAnswer, buildAnswerRequest, authHeaders, state.isSubmitting]);
 
   /**
    * Handle exit/abandon
@@ -963,19 +993,94 @@ export function ImmersivePlayer({ session, initialQuestion, authHeaders, testDri
 
   /**
    * Handle submission from the summary screen
+   * Includes pre-flight session status check and graceful error handling
    */
   const handleSubmitFromSummary = useCallback(async () => {
+    // Prevent double-submission
+    if (isSummarySubmitting) {
+      return;
+    }
+
     setIsSummarySubmitting(true);
     startSubmission();
 
     try {
+      // Pre-flight check: verify session is still in a completable state
+      const currentSession = await testSessionsClientApi.getSessionById(session.id, authHeaders);
+
+      if (!currentSession) {
+        // Session was deleted
+        toast.error('Сессия не найдена. Возможно, она была удалена.');
+        router.push('/test-templates');
+        return;
+      }
+
+      // Check session status before attempting completion
+      if (currentSession.status === 'COMPLETED') {
+        // Session was already completed (maybe in another tab or timeout auto-complete)
+        toast.info('Тест уже был завершён');
+        router.push('/test-templates');
+        return;
+      }
+
+      if (currentSession.status === 'ABANDONED') {
+        toast.error('Сессия была отменена');
+        router.push('/test-templates');
+        return;
+      }
+
+      if (currentSession.status === 'TIMED_OUT') {
+        toast.warning('Время выполнения теста истекло');
+        router.push('/test-templates');
+        return;
+      }
+
+      if (currentSession.status !== 'IN_PROGRESS' && currentSession.status !== 'NOT_STARTED') {
+        toast.error(`Невозможно завершить тест в статусе: ${currentSession.status}`);
+        router.push('/test-templates');
+        return;
+      }
+
+      // Session is in valid state - proceed with completion
       const result = await testSessionsClientApi.completeSession(session.id, authHeaders);
       completeSubmission();
       router.push(`/test-templates/results/${result.id}`);
     } catch (error) {
       console.error('Failed to complete session from summary:', error);
       const apiError = error as ApiError;
+      const errorMessage = apiError.message?.toLowerCase() || '';
 
+      // Handle specific error cases with user-friendly messages and appropriate actions
+      if (errorMessage.includes('not in progress') || errorMessage.includes('cannot complete')) {
+        // Session state changed - try to determine what happened
+        try {
+          const currentSession = await testSessionsClientApi.getSessionById(session.id, authHeaders);
+          if (currentSession?.status === 'COMPLETED') {
+            toast.info('Тест уже завершён');
+            router.push('/test-templates');
+            return;
+          }
+        } catch {
+          // Ignore secondary fetch error
+        }
+        toast.error('Тест не может быть завершён. Возможно, он уже был завершён или отменён.');
+        router.push('/test-templates');
+        return;
+      }
+
+      if (errorMessage.includes('abandon')) {
+        toast.error('Сессия была отменена');
+        router.push('/test-templates');
+        return;
+      }
+
+      if (errorMessage.includes('timed out') || errorMessage.includes('expired')) {
+        toast.warning('Время выполнения теста истекло');
+        router.push('/test-templates');
+        return;
+      }
+
+      // Generic error - allow retry for server errors
       failSubmission({
         code: apiError.code,
         message: apiError.message || 'Не удалось завершить тест',
@@ -983,11 +1088,16 @@ export function ImmersivePlayer({ session, initialQuestion, authHeaders, testDri
         timestamp: Date.now(),
       });
 
-      toast.error('Не удалось завершить тест');
+      // Only show toast for non-handled errors
+      if (apiError.status && apiError.status >= 500) {
+        toast.error('Ошибка сервера. Попробуйте ещё раз.');
+      } else {
+        toast.error('Не удалось завершить тест');
+      }
+    } finally {
+      setIsSummarySubmitting(false);
     }
-
-    setIsSummarySubmitting(false);
-  }, [session.id, authHeaders, router, startSubmission, completeSubmission, failSubmission]);
+  }, [session.id, authHeaders, router, startSubmission, completeSubmission, failSubmission, isSummarySubmitting]);
 
   // Check if skip is available (not last question and allowSkip is enabled)
   const canSkip = state.allowSkip && state.questionIndex + 1 < state.totalQuestions;

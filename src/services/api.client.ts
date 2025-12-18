@@ -31,16 +31,21 @@ import {
   TestResult,
 } from '@/types/domain';
 
+// API Version - defaults to v1
+const API_VERSION = process.env.NEXT_PUBLIC_API_VERSION || 'v1';
+
 const getApiBaseUrl = () => {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
   if (!apiUrl) {
-    return 'http://localhost:8080/api';
+    return `http://localhost:8080/api/${API_VERSION}`;
   }
   const protocol = apiUrl.includes('localhost') || apiUrl.includes('127.0.0.1') ? 'http' : 'https';
-  return `${protocol}://${apiUrl}/api`;
+  return `${protocol}://${apiUrl}/api/${API_VERSION}`;
 };
 
-const TESTS_BASE = '/v1/tests';
+// Test endpoints - paths are relative to the v1 base URL
+// Note: Backend uses /tests/sessions (plural 'tests', then 'sessions')
+const TEST_SESSIONS_BASE = '/tests/sessions';
 
 export interface ApiError extends Error {
   status?: number;
@@ -185,23 +190,37 @@ async function handleResponse<T>(response: Response, endpoint: string, method: s
   }
 }
 
+interface ClientFetchOptions extends RequestInit {
+  /**
+   * HTTP status codes that should return null instead of throwing.
+   * Use for expected "not found" scenarios where 404 is a valid response.
+   */
+  silentStatusCodes?: number[];
+}
+
 async function clientFetch<T>(
   endpoint: string,
   authHeaders: Record<string, string>,
-  options: RequestInit = {}
+  options: ClientFetchOptions = {}
 ): Promise<T> {
-  const method = (options.method || 'GET').toUpperCase();
+  const { silentStatusCodes, ...fetchOptions } = options;
+  const method = (fetchOptions.method || 'GET').toUpperCase();
 
   const response = await fetch(`${getApiBaseUrl()}${endpoint}`, {
-    ...options,
+    ...fetchOptions,
     headers: {
       'Content-Type': 'application/json',
       ...authHeaders,
-      ...options.headers,
+      ...fetchOptions.headers,
     },
     mode: 'cors',
     credentials: 'include',
   });
+
+  // Return null for expected "not found" status codes without throwing
+  if (silentStatusCodes?.includes(response.status)) {
+    return null as T;
+  }
 
   return handleResponse<T>(response, endpoint, method);
 }
@@ -218,7 +237,7 @@ export const testSessionsClientApi = {
     request: StartTestSessionRequest,
     authHeaders: Record<string, string>
   ): Promise<TestSession> => {
-    return clientFetch(`${TESTS_BASE}/sessions`, authHeaders, {
+    return clientFetch(`${TEST_SESSIONS_BASE}`, authHeaders, {
       method: 'POST',
       body: JSON.stringify(request),
     });
@@ -226,35 +245,31 @@ export const testSessionsClientApi = {
 
   /**
    * Get a session by ID
+   * Returns null if the session is not found (handles 404 silently)
    */
   getSessionById: async (
     sessionId: string,
     authHeaders: Record<string, string>
   ): Promise<TestSession | null> => {
-    return clientFetch(`${TESTS_BASE}/sessions/${sessionId}`, authHeaders);
+    return clientFetch(`${TEST_SESSIONS_BASE}/${sessionId}`, authHeaders, {
+      silentStatusCodes: [404],
+    });
   },
 
   /**
    * Check for in-progress session for a user and template
-   * Returns null if no in-progress session exists (handles 404 from backend)
+   * Returns null if no in-progress session exists (handles 404 silently)
    */
   getInProgressSession: async (
     clerkUserId: string,
     templateId: string,
     authHeaders: Record<string, string>
   ): Promise<TestSession | null> => {
-    try {
-      return await clientFetch(
-        `${TESTS_BASE}/sessions/user/${clerkUserId}/in-progress?templateId=${templateId}`,
-        authHeaders
-      );
-    } catch (error) {
-      // 404 means no in-progress session exists, which is expected
-      if (error instanceof Error && 'status' in error && (error as ApiError).status === 404) {
-        return null;
-      }
-      throw error;
-    }
+    return clientFetch(
+      `${TEST_SESSIONS_BASE}/user/${clerkUserId}/in-progress?templateId=${templateId}`,
+      authHeaders,
+      { silentStatusCodes: [404] }
+    );
   },
 
   /**
@@ -264,7 +279,7 @@ export const testSessionsClientApi = {
     sessionId: string,
     authHeaders: Record<string, string>
   ): Promise<CurrentQuestionResponse | null> => {
-    return clientFetch(`${TESTS_BASE}/sessions/${sessionId}/current-question`, authHeaders);
+    return clientFetch(`${TEST_SESSIONS_BASE}/${sessionId}/current-question`, authHeaders);
   },
 
   /**
@@ -275,7 +290,7 @@ export const testSessionsClientApi = {
     request: SubmitAnswerRequest,
     authHeaders: Record<string, string>
   ): Promise<TestAnswer> => {
-    return clientFetch(`${TESTS_BASE}/sessions/${sessionId}/answers`, authHeaders, {
+    return clientFetch(`${TEST_SESSIONS_BASE}/${sessionId}/answers`, authHeaders, {
       method: 'POST',
       body: JSON.stringify(request),
     });
@@ -290,7 +305,7 @@ export const testSessionsClientApi = {
     authHeaders: Record<string, string>
   ): Promise<TestSession> => {
     return clientFetch(
-      `${TESTS_BASE}/sessions/${sessionId}/navigate?questionIndex=${questionIndex}`,
+      `${TEST_SESSIONS_BASE}/${sessionId}/navigate?questionIndex=${questionIndex}`,
       authHeaders,
       { method: 'POST' }
     );
@@ -303,7 +318,7 @@ export const testSessionsClientApi = {
     sessionId: string,
     authHeaders: Record<string, string>
   ): Promise<TestResult> => {
-    return clientFetch(`${TESTS_BASE}/sessions/${sessionId}/complete`, authHeaders, {
+    return clientFetch(`${TEST_SESSIONS_BASE}/${sessionId}/complete`, authHeaders, {
       method: 'POST',
     });
   },
@@ -315,7 +330,7 @@ export const testSessionsClientApi = {
     sessionId: string,
     authHeaders: Record<string, string>
   ): Promise<TestSession> => {
-    return clientFetch(`${TESTS_BASE}/sessions/${sessionId}/abandon`, authHeaders, {
+    return clientFetch(`${TEST_SESSIONS_BASE}/${sessionId}/abandon`, authHeaders, {
       method: 'POST',
     });
   },
@@ -327,7 +342,7 @@ export const testSessionsClientApi = {
     sessionId: string,
     authHeaders: Record<string, string>
   ): Promise<TestAnswer[]> => {
-    return clientFetch(`${TESTS_BASE}/sessions/${sessionId}/answers`, authHeaders);
+    return clientFetch(`${TEST_SESSIONS_BASE}/${sessionId}/answers`, authHeaders);
   },
 
   /**
@@ -353,7 +368,7 @@ export const testSessionsClientApi = {
     }>;
   }> => {
     return clientFetch(
-      `${TESTS_BASE}/sessions/templates/${templateId}/readiness`,
+      `${TEST_SESSIONS_BASE}/templates/${templateId}/readiness`,
       authHeaders
     );
   },
@@ -367,7 +382,7 @@ export const testSessionsClientApi = {
     authHeaders: Record<string, string>
   ): Promise<TemplateDiagnostics> => {
     return clientFetch(
-      `${TESTS_BASE}/sessions/templates/${templateId}/diagnostics`,
+      `${TEST_SESSIONS_BASE}/templates/${templateId}/diagnostics`,
       authHeaders
     );
   },

@@ -44,7 +44,10 @@ describe('QuestionCard', () => {
         />
       );
 
-      expect(screen.getByText('Test question text')).toBeInTheDocument();
+      // Component renders question text twice for responsive design (mobile/desktop)
+      const questionTexts = screen.getAllByText('Test question text');
+      expect(questionTexts.length).toBeGreaterThanOrEqual(1);
+      expect(questionTexts[0]).toBeInTheDocument();
     });
 
     it('should render all answer options', () => {
@@ -107,8 +110,10 @@ describe('QuestionCard', () => {
         />
       );
 
-      // Likert scales typically show labels
-      expect(screen.getByText('Test question text')).toBeInTheDocument();
+      // Component renders question text twice for responsive design (mobile/desktop)
+      const questionTexts = screen.getAllByText('Test question text');
+      expect(questionTexts.length).toBeGreaterThanOrEqual(1);
+      expect(questionTexts[0]).toBeInTheDocument();
     });
 
     it('should handle LIKERT type', () => {
@@ -133,7 +138,10 @@ describe('QuestionCard', () => {
         />
       );
 
-      expect(screen.getByText('Test question text')).toBeInTheDocument();
+      // Component renders question text twice for responsive design (mobile/desktop)
+      const questionTexts = screen.getAllByText('Test question text');
+      expect(questionTexts.length).toBeGreaterThanOrEqual(1);
+      expect(questionTexts[0]).toBeInTheDocument();
     });
   });
 
@@ -158,7 +166,10 @@ describe('QuestionCard', () => {
         />
       );
 
-      expect(screen.getByText('Test question text')).toBeInTheDocument();
+      // Component renders question text twice for responsive design (mobile/desktop)
+      const questionTexts = screen.getAllByText('Test question text');
+      expect(questionTexts.length).toBeGreaterThanOrEqual(1);
+      expect(questionTexts[0]).toBeInTheDocument();
     });
 
     it('should handle SJT type alias', () => {
@@ -180,7 +191,10 @@ describe('QuestionCard', () => {
         />
       );
 
-      expect(screen.getByText('Test question text')).toBeInTheDocument();
+      // Component renders question text twice for responsive design (mobile/desktop)
+      const questionTexts = screen.getAllByText('Test question text');
+      expect(questionTexts.length).toBeGreaterThanOrEqual(1);
+      expect(questionTexts[0]).toBeInTheDocument();
     });
   });
 

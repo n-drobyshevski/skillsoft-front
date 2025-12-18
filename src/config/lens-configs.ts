@@ -31,15 +31,25 @@ export interface LensConfig {
 // Common routes - note: route groups (auth), (workspace) are not part of URL path
 const ROUTE_DASHBOARD = "/dashboard";
 const ROUTE_TESTS = "/test-templates";
+const ROUTE_TESTS_NEW = "/test-templates/new";
+const ROUTE_TESTS_HISTORY = "/test-templates/history";
 const ROUTE_MY_TESTS = "/my-tests";
+const ROUTE_PROFILE = "/profile";
 // HR Library routes (under (workspace)/hr/ in file system, but /hr/ in URL)
 const ROUTE_HR_COMPETENCIES = "/hr/competencies";
 const ROUTE_HR_INDICATORS = "/hr/behavioral-indicators";
 const ROUTE_HR_QUESTIONS = "/hr/assessment-questions";
 // Admin routes (under (workspace)/admin/ in file system, but /admin/ in URL)
 const ROUTE_ADMIN_USERS = "/admin/users";
+const ROUTE_SETTINGS = "/settings";
 // Tools
 const ROUTE_SKILL_MAPPER = "/skill-mapper";
+// Psychometrics routes
+const ROUTE_PSYCHOMETRICS = "/psychometrics";
+const ROUTE_PSYCHOMETRICS_ITEMS = "/psychometrics/items";
+const ROUTE_PSYCHOMETRICS_COMPETENCIES = "/psychometrics/competencies";
+const ROUTE_PSYCHOMETRICS_FLAGGED = "/psychometrics/flagged";
+const ROUTE_PSYCHOMETRICS_BIG_FIVE = "/psychometrics/big-five";
 
 // Common features shared across multiple lenses
 const FEATURE_VIEW_COMPETENCIES = "view-competencies";
@@ -63,6 +73,15 @@ const HR_ROUTES: string[] = [
 /**
  * Lens configurations defining what each role-based view can access
  */
+// Psychometrics routes (admin only)
+const PSYCHOMETRICS_ROUTES: string[] = [
+  ROUTE_PSYCHOMETRICS,
+  ROUTE_PSYCHOMETRICS_ITEMS,
+  ROUTE_PSYCHOMETRICS_COMPETENCIES,
+  ROUTE_PSYCHOMETRICS_FLAGGED,
+  ROUTE_PSYCHOMETRICS_BIG_FIVE,
+];
+
 export const LENS_CONFIGS: Record<LensType, LensConfig> = {
   user: {
     id: "user",
@@ -76,6 +95,7 @@ export const LENS_CONFIGS: Record<LensType, LensConfig> = {
       ROUTE_DASHBOARD,
       ROUTE_MY_TESTS,
       ROUTE_TESTS,
+      ROUTE_PROFILE,
     ],
     dashboardWidgets: ["my-progress", "recent-activity"],
     features: ["view-profile", "take-tests"],
@@ -91,6 +111,8 @@ export const LENS_CONFIGS: Record<LensType, LensConfig> = {
     visibleRoutes: [
       ROUTE_DASHBOARD,
       ROUTE_TESTS,
+      ROUTE_TESTS_NEW,
+      ROUTE_TESTS_HISTORY,
       ...HR_ROUTES,
       ROUTE_SKILL_MAPPER,
     ],
@@ -121,9 +143,13 @@ export const LENS_CONFIGS: Record<LensType, LensConfig> = {
     visibleRoutes: [
       ROUTE_DASHBOARD,
       ROUTE_TESTS,
+      ROUTE_TESTS_NEW,
+      ROUTE_TESTS_HISTORY,
       ...HR_ROUTES,
       ROUTE_SKILL_MAPPER,
+      ...PSYCHOMETRICS_ROUTES,
       ROUTE_ADMIN_USERS,
+      ROUTE_SETTINGS,
     ],
     dashboardWidgets: [
       "overview",

@@ -2,24 +2,28 @@
 
 import { usePathname } from "next/navigation";
 import { useUser } from "@clerk/nextjs";
-import { useEffect, useState, useRef, useMemo, useCallback } from "react";
+import { useEffect, useState, useRef, useMemo } from "react";
 import {
-  BookOpen,
-  UsersRound,
-  ClipboardCheck,
-  HelpCircle,
-  Settings,
   ChevronDown,
+  ChevronRight,
+  User,
+  LogOut,
+  UserCircle,
+  // Icons used in navigation config - imported for dynamic lookup
+  LayoutDashboard,
+  ClipboardCheck,
+  FileStack,
   BarChart3,
+  Layers,
   Target,
   Lightbulb,
   FileQuestion,
-  User,
-  LogOut,
-  LayoutDashboard,
-  UserCircle,
-  FileText,
   Network,
+  Activity,
+  UsersRound,
+  Settings,
+  HelpCircle,
+  type LucideIcon,
 } from "lucide-react";
 
 import {
@@ -32,6 +36,9 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarMenuSub,
+  SidebarMenuSubButton,
+  SidebarMenuSubItem,
   SidebarRail,
   SidebarSeparator,
   useSidebar,
@@ -43,15 +50,40 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { SignOutButton } from "@clerk/nextjs";
 import { ClientOnly } from "@/components/common/ClientOnly";
 import { LensSwitcher } from "@/components/layout/lens-switcher";
-import { useActiveLens, useLensReady } from "@/hooks/useLens";
-import { useFilterVisibleRoutes } from "@/hooks/useIsRouteVisible";
+import { useNavigation, useNavigationBadgeCounts, isNavigationItemActive } from "@/hooks/useNavigation";
 import { cn } from "@/lib/utils";
 import { useIsImmersive } from "@/store/ui-store";
+import type { NavigationItem, NavigationGroup, BadgeConfig } from "@/config/navigation-config";
+
+// Icon lookup map - maps icon names from config to Lucide components
+const ICON_MAP: Record<string, LucideIcon> = {
+  LayoutDashboard,
+  ClipboardCheck,
+  FileStack,
+  BarChart3,
+  Layers,
+  Target,
+  Lightbulb,
+  FileQuestion,
+  Network,
+  Activity,
+  UsersRound,
+  Settings,
+  HelpCircle,
+  User,
+  UserCircle,
+};
 
 // Lens glow animation classes for ring/glow highlight on lens switch
 const LENS_GLOW_CLASSES = {
@@ -73,12 +105,8 @@ function getLensGlowClass(lens: keyof typeof LENS_GLOW_CLASSES): string {
   }
 }
 
-// Base navigation data
+// Base data for header
 const baseData = {
-  user: {
-    name: "Admin User",
-    email: "admin@skillsoft.com",
-  },
   teams: [
     {
       name: "SkillSoft",
@@ -86,13 +114,210 @@ const baseData = {
       plan: "Enterprise",
     },
   ],
+  user: {
+    name: "Admin User",
+    email: "admin@skillsoft.com",
+  },
 };
+
+/**
+ * Navigation Badge Component
+ */
+function NavigationBadge({ config }: { config: BadgeConfig }) {
+  const counts = useNavigationBadgeCounts();
+
+  // Static text badge
+  if (typeof config.content === "string") {
+    return (
+      <Badge variant={config.variant} className="ml-auto">
+        {config.content}
+      </Badge>
+    );
+  }
+
+  // Dynamic count badge
+  const count = counts[config.content.key as keyof typeof counts] ?? 0;
+
+  if (config.hideWhenZero && count === 0) {
+    return null;
+  }
+
+  return (
+    <Badge variant={config.variant} className="ml-auto">
+      {count}
+    </Badge>
+  );
+}
+
+/**
+ * Navigation Item Component with optional children (collapsible)
+ */
+function NavItem({
+  item,
+  isActive,
+  isLensChanging,
+  animationDelay,
+}: {
+  item: NavigationItem;
+  isActive: boolean;
+  isLensChanging: boolean;
+  animationDelay: number;
+}) {
+  const pathname = usePathname();
+
+  // Check if any child is active
+  const hasActiveChild = item.children?.some((child) =>
+    isNavigationItemActive(child.path, pathname)
+  );
+
+  // Use initial state based on hasActiveChild to avoid effect
+  const [isOpen, setIsOpen] = useState(() => hasActiveChild ?? false);
+
+  // Get icon component - stable reference since ICON_MAP is constant
+  const IconComponent = ICON_MAP[item.icon] ?? LayoutDashboard;
+
+  // Simple item without children
+  if (!item.children || item.children.length === 0) {
+    return (
+      <SidebarMenuItem
+        className={cn(
+          "transition-all duration-300",
+          isLensChanging &&
+            "animate-in fade-in-0 slide-in-from-left-3 duration-300"
+        )}
+        style={
+          isLensChanging
+            ? {
+                animationDelay: `${animationDelay}ms`,
+                animationDuration: "300ms",
+                animationFillMode: "both",
+              }
+            : undefined
+        }
+      >
+        <SidebarMenuButton asChild isActive={isActive}>
+          <Link href={item.path}>
+            <IconComponent />
+            <span>{item.label}</span>
+            {item.isNew && (
+              <Badge variant="secondary" className="ml-auto text-xs">
+                NEW
+              </Badge>
+            )}
+            {item.badge && <NavigationBadge config={item.badge} />}
+          </Link>
+        </SidebarMenuButton>
+      </SidebarMenuItem>
+    );
+  }
+
+  // Item with collapsible children
+  return (
+    <Collapsible open={isOpen} onOpenChange={setIsOpen} asChild>
+      <SidebarMenuItem
+        className={cn(
+          "transition-all duration-300",
+          isLensChanging &&
+            "animate-in fade-in-0 slide-in-from-left-3 duration-300"
+        )}
+        style={
+          isLensChanging
+            ? {
+                animationDelay: `${animationDelay}ms`,
+                animationDuration: "300ms",
+                animationFillMode: "both",
+              }
+            : undefined
+        }
+      >
+        <CollapsibleTrigger asChild>
+          <SidebarMenuButton isActive={isActive || hasActiveChild}>
+            <IconComponent />
+            <span>{item.label}</span>
+            {item.badge && <NavigationBadge config={item.badge} />}
+            <ChevronRight
+              className={cn(
+                "ml-auto transition-transform duration-200",
+                isOpen && "rotate-90"
+              )}
+            />
+          </SidebarMenuButton>
+        </CollapsibleTrigger>
+        <CollapsibleContent>
+          <SidebarMenuSub>
+            {item.children.map((child) => {
+              const isChildActive = isNavigationItemActive(child.path, pathname);
+              const ChildIconComponent = child.icon ? (ICON_MAP[child.icon] ?? null) : null;
+
+              return (
+                <SidebarMenuSubItem key={child.id}>
+                  <SidebarMenuSubButton asChild isActive={isChildActive}>
+                    <Link href={child.path}>
+                      {ChildIconComponent && <ChildIconComponent />}
+                      <span>{child.label}</span>
+                      {child.badge && <NavigationBadge config={child.badge} />}
+                    </Link>
+                  </SidebarMenuSubButton>
+                </SidebarMenuSubItem>
+              );
+            })}
+          </SidebarMenuSub>
+        </CollapsibleContent>
+      </SidebarMenuItem>
+    </Collapsible>
+  );
+}
+
+/**
+ * Navigation Group Component
+ */
+function NavGroup({
+  group,
+  isLensChanging,
+  itemStartIndex,
+}: {
+  group: NavigationGroup;
+  isLensChanging: boolean;
+  itemStartIndex: number;
+}) {
+  const pathname = usePathname();
+
+  return (
+    <>
+      <SidebarGroup>
+        <SidebarGroupLabel
+          className={cn(
+            "transition-all duration-300",
+            isLensChanging &&
+              "animate-in fade-in-0 slide-in-from-left-2 duration-200"
+          )}
+        >
+          {group.label}
+        </SidebarGroupLabel>
+        <SidebarMenu>
+          {group.items.map((item, index) => {
+            const isActive = isNavigationItemActive(item.path, pathname);
+            return (
+              <NavItem
+                key={item.id}
+                item={item}
+                isActive={isActive}
+                isLensChanging={isLensChanging}
+                animationDelay={(itemStartIndex + index) * 50}
+              />
+            );
+          })}
+        </SidebarMenu>
+      </SidebarGroup>
+      {group.hasSeparator && <SidebarSeparator />}
+    </>
+  );
+}
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname();
   const { user: clerkUser } = useUser();
-  const activeLens = useActiveLens();
-  const lensReady = useLensReady();
+  const { groups, activeLens, isReady } = useNavigation();
   const { setOpenMobile } = useSidebar();
   const isImmersive = useIsImmersive();
   const TeamLogo = baseData.teams[0].logo;
@@ -105,9 +330,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const [isLensChanging, setIsLensChanging] = useState(false);
   const prevLensRef = useRef(activeLens);
 
-  // Check if we're in Personal view (user lens)
-  const isPersonalView = activeLens === "user";
-
   // Close mobile sidebar when entering immersive mode
   useEffect(() => {
     if (isImmersive) {
@@ -115,74 +337,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     }
   }, [isImmersive, setOpenMobile]);
 
-  // Dynamic Navigation Data based on Lens
-  // Memoize to prevent recreating arrays on every render (causes hook dependency changes)
-  const navData = useMemo(() => ({
-    ...baseData,
-    navMain: isPersonalView
-      ? [
-          {
-            title: "My Hub",
-            url: "/dashboard",
-            icon: BarChart3,
-          },
-          {
-            title: "Мои тесты",
-            url: "/my-tests",
-            icon: ClipboardCheck,
-          }
-        ]
-      : [
-          {
-            title: "Hiring Overview",
-            url: "/dashboard",
-            icon: BarChart3,
-          },
-          {
-            title: "Studio",
-            url: "/test-templates",
-            icon: ClipboardCheck,
-          },
-        ],
-    navLibrary: [
-      {
-        title: "Компетенции",
-        url: "/hr/competencies",
-        icon: Target,
-      },
-      {
-        title: "Индикаторы",
-        url: "/hr/behavioral-indicators",
-        icon: Lightbulb,
-      },
-      {
-        title: "Вопросы",
-        url: "/hr/assessment-questions",
-        icon: FileQuestion,
-      },
-      {
-        title: "Skill Mapper",
-        url: "/skill-mapper",
-        icon: Network,
-      },
-    ],
-    navAdmin: [
-      {
-        title: "Пользователи",
-        url: "/admin/users",
-        icon: UsersRound,
-      },
-      {
-        title: "Настройки",
-        url: "/settings",
-        icon: Settings,
-      },
-    ],
-  }), [isPersonalView]);
-
   // Get user display info
-  const userName = clerkUser?.fullName || clerkUser?.username || baseData.user.name;
-  const userEmail = clerkUser?.primaryEmailAddress?.emailAddress || baseData.user.email;
+  const userName =
+    clerkUser?.fullName || clerkUser?.username || baseData.user.name;
+  const userEmail =
+    clerkUser?.primaryEmailAddress?.emailAddress || baseData.user.email;
   const userImage = clerkUser?.imageUrl;
   const userInitials = userName
     .split(" ")
@@ -192,12 +351,14 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     .slice(0, 2);
 
   // Trigger flash animation on lens change (skip initial render)
+  // This effect intentionally sets state to trigger visual feedback animation
   useEffect(() => {
     if (isInitialRenderRef.current) {
       isInitialRenderRef.current = false;
       return;
     }
     if (prevLensRef.current !== activeLens) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setShowFlash(true);
       setIsLensChanging(true);
       const flashTimer = setTimeout(() => setShowFlash(false), 700);
@@ -210,14 +371,16 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     }
   }, [activeLens]);
 
-  // Stable getRoute function to prevent hook dependency changes
-  const getRoute = useCallback((item: { url: string }) => item.url, []);
-
-  // Filter visible navigation items based on lens permissions
-  // useFilterVisibleRoutes hook handles route visibility checks with optimal performance
-  const visibleNavItems = useFilterVisibleRoutes(navData.navMain, getRoute);
-  const visibleLibraryItems = useFilterVisibleRoutes(navData.navLibrary, getRoute);
-  const visibleAdminItems = useFilterVisibleRoutes(navData.navAdmin, getRoute);
+  // Calculate item indices for staggered animations
+  const groupItemCounts = useMemo(() => {
+    const result: number[] = [];
+    let runningCount = 0;
+    for (const group of groups) {
+      result.push(runningCount);
+      runningCount += group.items.length;
+    }
+    return result;
+  }, [groups]);
 
   // Don't render sidebar in immersive mode
   if (isImmersive) {
@@ -225,11 +388,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   }
 
   return (
-    <Sidebar 
-      collapsible="icon" 
+    <Sidebar
+      collapsible="icon"
       className={cn(
         "transition-all duration-300 ease-in-out",
-        showFlash && getLensGlowClass(activeLens as keyof typeof LENS_GLOW_CLASSES)
+        showFlash &&
+          getLensGlowClass(activeLens as keyof typeof LENS_GLOW_CLASSES)
       )}
       {...props}
     >
@@ -255,53 +419,48 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </SidebarMenu>
       </SidebarHeader>
 
-      <SidebarContent suppressHydrationWarning>
-        {!lensReady ? (
+      <SidebarContent suppressHydrationWarning role="navigation" aria-label="Main navigation">
+        {!isReady ? (
           /* Loading skeleton while lens system initializes */
           <SidebarGroup>
             <SidebarGroupLabel>Loading...</SidebarGroupLabel>
           </SidebarGroup>
-        ) : isPersonalView ? (
-          /* Personal View - Only My Profile and Tests */
+        ) : (
+          /* Render filtered navigation groups */
+          groups.map((group, index) => {
+            // eslint-disable-next-line security/detect-object-injection
+            const startIndex = groupItemCounts[index] ?? 0;
+            return (
+              <NavGroup
+                key={group.id}
+                group={group}
+                isLensChanging={isLensChanging}
+                itemStartIndex={startIndex}
+              />
+            );
+          })
+        )}
+
+        {/* User Profile link in Personal view */}
+        {isReady && activeLens === "user" && (
           <SidebarGroup>
-            <SidebarGroupLabel
-              className={cn(
-                "transition-all duration-300",
-                isLensChanging && "animate-in fade-in-0 slide-in-from-left-2 duration-200"
-              )}
-            >
-              Личное
-            </SidebarGroupLabel>
             <SidebarMenu>
-              {visibleNavItems.map((item, index) => (
-                <SidebarMenuItem
-                  key={item.title}
-                  className={cn(
-                    "transition-all duration-300",
-                    isLensChanging && "animate-in fade-in-0 slide-in-from-left-3 duration-300"
-                  )}
-                  style={isLensChanging ? { 
-                    animationDelay: `${index * 50}ms`,
-                    animationDuration: "300ms",
-                    animationFillMode: "both"
-                  } : undefined}
-                >
-                  <SidebarMenuButton asChild isActive={pathname === item.url || pathname.startsWith(item.url + "/")}>
-                    <Link href={item.url}>
-                      <item.icon />
-                      <span>{item.title}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
               <SidebarMenuItem
                 className={cn(
                   "transition-all duration-300",
-                  isLensChanging && "animate-in fade-in-0 slide-in-from-left-3 duration-300"
+                  isLensChanging &&
+                    "animate-in fade-in-0 slide-in-from-left-3 duration-300"
                 )}
               >
-                <SidebarMenuButton asChild isActive={pathname.startsWith("/admin/users/")}>
-                  <Link href={clerkUser ? `/admin/users/${clerkUser.id}` : "/dashboard"}>
+                <SidebarMenuButton
+                  asChild
+                  isActive={pathname.startsWith("/admin/users/")}
+                >
+                  <Link
+                    href={
+                      clerkUser ? `/admin/users/${clerkUser.id}` : "/dashboard"
+                    }
+                  >
                     <UserCircle />
                     <span>Мой профиль</span>
                   </Link>
@@ -309,118 +468,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroup>
-        ) : (
-          /* Content/Admin View - Full Navigation */
-          <>
-            {/* Main Platform Routes */}
-            <SidebarGroup>
-              <SidebarGroupLabel
-                className={cn(
-                  "transition-all duration-300",
-                  isLensChanging && "animate-in fade-in-0 slide-in-from-left-2 duration-200"
-                )}
-              >
-                Платформа
-              </SidebarGroupLabel>
-              <SidebarMenu>
-                {visibleNavItems.map((item, index) => (
-                  <SidebarMenuItem
-                    key={item.title}
-                    className={cn(
-                      "transition-all duration-300",
-                      isLensChanging && "animate-in fade-in-0 slide-in-from-left-3 duration-300"
-                    )}
-                    style={isLensChanging ? {
-                      animationDelay: `${index * 50}ms`,
-                      animationDuration: "300ms",
-                      animationFillMode: "both"
-                    } : undefined}
-                  >
-                    <SidebarMenuButton asChild isActive={pathname === item.url || pathname.startsWith(item.url + "/")}>
-                      <Link href={item.url}>
-                        <item.icon />
-                        <span>{item.title}</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))}
-              </SidebarMenu>
-            </SidebarGroup>
-
-            {/* Library Section */}
-            {visibleLibraryItems.length > 0 && (
-              <SidebarGroup>
-                <SidebarGroupLabel
-                  className={cn(
-                    "transition-all duration-300",
-                    isLensChanging && "animate-in fade-in-0 slide-in-from-left-2 duration-200"
-                  )}
-                >
-                  Библиотека
-                </SidebarGroupLabel>
-                <SidebarMenu>
-                  {visibleLibraryItems.map((item, index) => (
-                    <SidebarMenuItem
-                      key={item.title}
-                      className={cn(
-                        "transition-all duration-300",
-                        isLensChanging && "animate-in fade-in-0 slide-in-from-left-3 duration-300"
-                      )}
-                      style={isLensChanging ? {
-                        animationDelay: `${(visibleNavItems.length + index) * 50}ms`,
-                        animationDuration: "300ms",
-                        animationFillMode: "both"
-                      } : undefined}
-                    >
-                      <SidebarMenuButton asChild isActive={pathname === item.url || pathname.startsWith(item.url + "/")}>
-                        <Link href={item.url}>
-                          <item.icon />
-                          <span>{item.title}</span>
-                        </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  ))}
-                </SidebarMenu>
-              </SidebarGroup>
-            )}
-
-            {/* Admin Section */}
-            {visibleAdminItems.length > 0 && (
-              <SidebarGroup>
-                <SidebarGroupLabel
-                  className={cn(
-                    "transition-all duration-300",
-                    isLensChanging && "animate-in fade-in-0 slide-in-from-left-2 duration-200"
-                  )}
-                >
-                  Администрирование
-                </SidebarGroupLabel>
-                <SidebarMenu>
-                  {visibleAdminItems.map((item, index) => (
-                    <SidebarMenuItem
-                      key={item.title}
-                      className={cn(
-                        "transition-all duration-300",
-                        isLensChanging && "animate-in fade-in-0 slide-in-from-left-3 duration-300"
-                      )}
-                      style={isLensChanging ? {
-                        animationDelay: `${(visibleNavItems.length + visibleLibraryItems.length + index) * 50}ms`,
-                        animationDuration: "300ms",
-                        animationFillMode: "both"
-                      } : undefined}
-                    >
-                      <SidebarMenuButton asChild isActive={pathname === item.url || pathname.startsWith(item.url + "/")}>
-                        <Link href={item.url}>
-                          <item.icon />
-                          <span>{item.title}</span>
-                        </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  ))}
-                </SidebarMenu>
-              </SidebarGroup>
-            )}
-          </>
         )}
       </SidebarContent>
 
@@ -433,32 +480,30 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             </ClientOnly>
           </SidebarMenuItem>
         </SidebarMenu>
-        
+
         <SidebarSeparator className="mx-0" />
-        
+
         {/* User Profile Menu */}
         <SidebarMenu>
           <SidebarMenuItem>
-            <ClientOnly fallback={
-              <SidebarMenuButton
-                size="lg"
-                className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground opacity-75"
-              >
-                <Avatar className="h-8 w-8 rounded-lg">
-                  <AvatarFallback className="rounded-lg">
-                    {userInitials}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold">
-                    {userName}
-                  </span>
-                  <span className="truncate text-xs">
-                    {userEmail}
-                  </span>
-                </div>
-              </SidebarMenuButton>
-            }>
+            <ClientOnly
+              fallback={
+                <SidebarMenuButton
+                  size="lg"
+                  className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground opacity-75"
+                >
+                  <Avatar className="h-8 w-8 rounded-lg">
+                    <AvatarFallback className="rounded-lg">
+                      {userInitials}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="grid flex-1 text-left text-sm leading-tight">
+                    <span className="truncate font-semibold">{userName}</span>
+                    <span className="truncate text-xs">{userEmail}</span>
+                  </div>
+                </SidebarMenuButton>
+              }
+            >
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <SidebarMenuButton
@@ -472,12 +517,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                       </AvatarFallback>
                     </Avatar>
                     <div className="grid flex-1 text-left text-sm leading-tight">
-                      <span className="truncate font-semibold">
-                        {userName}
-                      </span>
-                      <span className="truncate text-xs">
-                        {userEmail}
-                      </span>
+                      <span className="truncate font-semibold">{userName}</span>
+                      <span className="truncate text-xs">{userEmail}</span>
                     </div>
                     <ChevronDown className="ml-auto size-4" />
                   </SidebarMenuButton>
@@ -489,7 +530,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   sideOffset={4}
                 >
                   <DropdownMenuItem asChild>
-                    <Link href={clerkUser ? `/admin/users/${clerkUser.id}` : "/dashboard"}>
+                    <Link
+                      href={
+                        clerkUser
+                          ? `/admin/users/${clerkUser.id}`
+                          : "/dashboard"
+                      }
+                    >
                       <User className="mr-2 h-4 w-4" />
                       Профиль
                     </Link>

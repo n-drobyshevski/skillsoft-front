@@ -42,8 +42,10 @@ const standardCodesSchema = z.object({
 }).optional();
 
 export const competencySchema = z.object({
-  name: z.string().min(3, 'Name must be at least 3 characters'),
-  description: z.string().min(10, 'Description must be at least 10 characters'),
+  // Backend: @Size(min = 2, max = 100)
+  name: z.string().min(2, 'Name must be at least 2 characters').max(100, 'Name must be at most 100 characters'),
+  // Backend: @Size(min = 50, max = 1000)
+  description: z.string().min(50, 'Description must be at least 50 characters').max(1000, 'Description must be at most 1000 characters'),
   category: z.enum(Object.values(CompetencyCategory) as [string, ...string[]]),
   isActive: z.boolean(),
   approvalStatus: z.enum(Object.values(ApprovalStatus) as [string, ...string[]]),

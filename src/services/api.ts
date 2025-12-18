@@ -18,14 +18,20 @@ import {
   getSuggestedAction,
 } from '@/types/errors';
 
+// API Version configuration
+// Default: v1 (current production version)
+// Set NEXT_PUBLIC_API_VERSION to override if needed
+const API_VERSION = process.env.NEXT_PUBLIC_API_VERSION || 'v1';
+
 const getApiBaseUrl = () => {
     const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+    const versionPath = API_VERSION ? `/${API_VERSION}` : '';
     if (!apiUrl) {
-        return "http://localhost:8080/api";
+        return `http://localhost:8080/api${versionPath}`;
     }
     // For localhost, use http; for production domains, use https
     const protocol = apiUrl.includes('localhost') || apiUrl.includes('127.0.0.1') ? 'http' : 'https';
-    return `${protocol}://${apiUrl}/api`;
+    return `${protocol}://${apiUrl}/api${versionPath}`;
 };
 
 // List of API endpoints that return arrays
@@ -770,7 +776,10 @@ import {
   TemplateStatistics,
 } from '@/types/domain';
 
-const TESTS_BASE = '/v1/tests';
+// Test endpoints - paths are relative to the v1 base URL
+const TEST_TEMPLATES_BASE = '/tests/templates';
+const TEST_SESSIONS_BASE = '/tests/sessions';
+const TEST_RESULTS_BASE = '/tests/results';
 
 export const testTemplatesApi = {
   /**
@@ -782,7 +791,7 @@ export const testTemplatesApi = {
     totalPages: number;
   }> => {
     const authHeaders = await getAuthHeaders();
-    return fetchApi(`${TESTS_BASE}/templates?page=${page}&size=${size}`, {
+    return fetchApi(`${TEST_TEMPLATES_BASE}?page=${page}&size=${size}`, {
       tags: ['test-templates'],
       revalidate: 60,
       authHeaders,
@@ -794,7 +803,7 @@ export const testTemplatesApi = {
    */
   getActiveTemplates: async (): Promise<TestTemplateSummary[]> => {
     const authHeaders = await getAuthHeaders();
-    return fetchApi(`${TESTS_BASE}/templates/active`, {
+    return fetchApi(`${TEST_TEMPLATES_BASE}/active`, {
       tags: ['test-templates-active'],
       revalidate: 60,
       authHeaders,
@@ -806,7 +815,7 @@ export const testTemplatesApi = {
    */
   getTemplateById: async (id: string): Promise<TestTemplate | null> => {
     const authHeaders = await getAuthHeaders();
-    return fetchApi(`${TESTS_BASE}/templates/${id}`, {
+    return fetchApi(`${TEST_TEMPLATES_BASE}/${id}`, {
       tags: [`test-template-${id}`],
       revalidate: 60,
       authHeaders,
@@ -818,7 +827,7 @@ export const testTemplatesApi = {
    */
   createTemplate: async (data: CreateTestTemplateRequest): Promise<TestTemplate> => {
     const authHeaders = await getAuthHeaders();
-    return fetchApi(`${TESTS_BASE}/templates`, {
+    return fetchApi(`${TEST_TEMPLATES_BASE}`, {
       method: 'POST',
       body: JSON.stringify(data),
       cache: 'no-store',
@@ -831,7 +840,7 @@ export const testTemplatesApi = {
    */
   updateTemplate: async (id: string, data: UpdateTestTemplateRequest): Promise<TestTemplate> => {
     const authHeaders = await getAuthHeaders();
-    return fetchApi(`${TESTS_BASE}/templates/${id}`, {
+    return fetchApi(`${TEST_TEMPLATES_BASE}/${id}`, {
       method: 'PUT',
       body: JSON.stringify(data),
       cache: 'no-store',
@@ -844,7 +853,7 @@ export const testTemplatesApi = {
    */
   searchByName: async (name: string): Promise<TestTemplateSummary[]> => {
     const authHeaders = await getAuthHeaders();
-    return fetchApi(`${TESTS_BASE}/templates/search?name=${encodeURIComponent(name)}`, {
+    return fetchApi(`${TEST_TEMPLATES_BASE}/search?name=${encodeURIComponent(name)}`, {
       tags: ['test-templates-search'],
       revalidate: 30,
       authHeaders,
@@ -856,7 +865,7 @@ export const testTemplatesApi = {
    */
   getByCompetency: async (competencyId: string): Promise<TestTemplateSummary[]> => {
     const authHeaders = await getAuthHeaders();
-    return fetchApi(`${TESTS_BASE}/templates/by-competency/${competencyId}`, {
+    return fetchApi(`${TEST_TEMPLATES_BASE}/by-competency/${competencyId}`, {
       tags: [`test-templates-competency-${competencyId}`],
       revalidate: 60,
       authHeaders,
@@ -872,7 +881,7 @@ export const testTemplatesApi = {
     inactiveTemplates: number;
   }> => {
     const authHeaders = await getAuthHeaders();
-    return fetchApi(`${TESTS_BASE}/templates/statistics`, {
+    return fetchApi(`${TEST_TEMPLATES_BASE}/statistics`, {
       tags: ['test-templates-stats'],
       revalidate: 60,
       authHeaders,
@@ -884,7 +893,7 @@ export const testTemplatesApi = {
    */
   deleteTemplate: async (id: string): Promise<void> => {
     const authHeaders = await getAuthHeaders();
-    await fetchApi(`${TESTS_BASE}/templates/${id}`, {
+    await fetchApi(`${TEST_TEMPLATES_BASE}/${id}`, {
       method: 'DELETE',
       cache: 'no-store',
       authHeaders,
@@ -903,7 +912,7 @@ export const testSessionsApi = {
    */
   checkTemplateReadiness: async (templateId: string): Promise<TemplateReadinessResponse> => {
     const authHeaders = await getAuthHeaders();
-    return fetchApi(`${TESTS_BASE}/sessions/templates/${templateId}/readiness`, {
+    return fetchApi(`${TEST_SESSIONS_BASE}/templates/${templateId}/readiness`, {
       cache: 'no-store',
       authHeaders,
     });
@@ -914,7 +923,7 @@ export const testSessionsApi = {
    */
   startSession: async (request: StartTestSessionRequest): Promise<TestSession> => {
     const authHeaders = await getAuthHeaders();
-    return fetchApi(`${TESTS_BASE}/sessions`, {
+    return fetchApi(`${TEST_SESSIONS_BASE}`, {
       method: 'POST',
       body: JSON.stringify(request),
       cache: 'no-store',
@@ -927,7 +936,7 @@ export const testSessionsApi = {
    */
   getSessionById: async (sessionId: string): Promise<TestSession | null> => {
     const authHeaders = await getAuthHeaders();
-    return fetchApi(`${TESTS_BASE}/sessions/${sessionId}`, {
+    return fetchApi(`${TEST_SESSIONS_BASE}/${sessionId}`, {
       tags: [`test-session-${sessionId}`],
       cache: 'no-store',
       authHeaders,
@@ -943,7 +952,7 @@ export const testSessionsApi = {
     totalPages: number;
   }> => {
     const authHeaders = await getAuthHeaders();
-    return fetchApi(`${TESTS_BASE}/sessions/user/${clerkUserId}?page=${page}&size=${size}`, {
+    return fetchApi(`${TEST_SESSIONS_BASE}/user/${clerkUserId}?page=${page}&size=${size}`, {
       tags: [`user-sessions-${clerkUserId}`],
       cache: 'no-store',
       authHeaders,
@@ -957,7 +966,7 @@ export const testSessionsApi = {
   getInProgressSession: async (clerkUserId: string, templateId: string): Promise<TestSession | null> => {
     const authHeaders = await getAuthHeaders();
     try {
-      return await fetchApi(`${TESTS_BASE}/sessions/user/${clerkUserId}/in-progress?templateId=${templateId}`, {
+      return await fetchApi(`${TEST_SESSIONS_BASE}/user/${clerkUserId}/in-progress?templateId=${templateId}`, {
         cache: 'no-store',
         authHeaders,
         silentStatusCodes: [404], // 404 is expected when no in-progress session exists
@@ -976,7 +985,7 @@ export const testSessionsApi = {
    */
   getCurrentQuestion: async (sessionId: string): Promise<CurrentQuestionResponse | null> => {
     const authHeaders = await getAuthHeaders();
-    return fetchApi(`${TESTS_BASE}/sessions/${sessionId}/current-question`, {
+    return fetchApi(`${TEST_SESSIONS_BASE}/${sessionId}/current-question`, {
       cache: 'no-store',
       authHeaders,
     });
@@ -987,7 +996,7 @@ export const testSessionsApi = {
    */
   submitAnswer: async (sessionId: string, request: SubmitAnswerRequest): Promise<TestAnswer> => {
     const authHeaders = await getAuthHeaders();
-    return fetchApi(`${TESTS_BASE}/sessions/${sessionId}/answers`, {
+    return fetchApi(`${TEST_SESSIONS_BASE}/${sessionId}/answers`, {
       method: 'POST',
       body: JSON.stringify(request),
       cache: 'no-store',
@@ -1000,7 +1009,7 @@ export const testSessionsApi = {
    */
   navigateToQuestion: async (sessionId: string, questionIndex: number): Promise<TestSession> => {
     const authHeaders = await getAuthHeaders();
-    return fetchApi(`${TESTS_BASE}/sessions/${sessionId}/navigate?questionIndex=${questionIndex}`, {
+    return fetchApi(`${TEST_SESSIONS_BASE}/${sessionId}/navigate?questionIndex=${questionIndex}`, {
       method: 'POST',
       cache: 'no-store',
       authHeaders,
@@ -1012,7 +1021,7 @@ export const testSessionsApi = {
    */
   updateTime: async (sessionId: string, timeRemainingSeconds: number): Promise<TestSession> => {
     const authHeaders = await getAuthHeaders();
-    return fetchApi(`${TESTS_BASE}/sessions/${sessionId}/time?timeRemainingSeconds=${timeRemainingSeconds}`, {
+    return fetchApi(`${TEST_SESSIONS_BASE}/${sessionId}/time?timeRemainingSeconds=${timeRemainingSeconds}`, {
       method: 'PUT',
       cache: 'no-store',
       authHeaders,
@@ -1024,7 +1033,7 @@ export const testSessionsApi = {
    */
   completeSession: async (sessionId: string): Promise<TestResult> => {
     const authHeaders = await getAuthHeaders();
-    return fetchApi(`${TESTS_BASE}/sessions/${sessionId}/complete`, {
+    return fetchApi(`${TEST_SESSIONS_BASE}/${sessionId}/complete`, {
       method: 'POST',
       cache: 'no-store',
       authHeaders,
@@ -1036,7 +1045,7 @@ export const testSessionsApi = {
    */
   abandonSession: async (sessionId: string): Promise<TestSession> => {
     const authHeaders = await getAuthHeaders();
-    return fetchApi(`${TESTS_BASE}/sessions/${sessionId}/abandon`, {
+    return fetchApi(`${TEST_SESSIONS_BASE}/${sessionId}/abandon`, {
       method: 'POST',
       cache: 'no-store',
       authHeaders,
@@ -1048,7 +1057,7 @@ export const testSessionsApi = {
    */
   getSessionAnswers: async (sessionId: string): Promise<TestAnswer[]> => {
     const authHeaders = await getAuthHeaders();
-    return fetchApi(`${TESTS_BASE}/sessions/${sessionId}/answers`, {
+    return fetchApi(`${TEST_SESSIONS_BASE}/${sessionId}/answers`, {
       cache: 'no-store',
       authHeaders,
     });
@@ -1065,7 +1074,7 @@ export const testResultsApi = {
    */
   getResultById: async (resultId: string): Promise<TestResult | null> => {
     const authHeaders = await getAuthHeaders();
-    return fetchApi(`${TESTS_BASE}/results/${resultId}`, {
+    return fetchApi(`${TEST_RESULTS_BASE}/${resultId}`, {
       tags: [`test-result-${resultId}`],
       cache: 'no-store',
       authHeaders,
@@ -1077,7 +1086,7 @@ export const testResultsApi = {
    */
   getResultBySession: async (sessionId: string): Promise<TestResult | null> => {
     const authHeaders = await getAuthHeaders();
-    return fetchApi(`${TESTS_BASE}/results/session/${sessionId}`, {
+    return fetchApi(`${TEST_RESULTS_BASE}/session/${sessionId}`, {
       tags: [`test-result-session-${sessionId}`],
       cache: 'no-store',
       authHeaders,
@@ -1093,7 +1102,7 @@ export const testResultsApi = {
     totalPages: number;
   }> => {
     const authHeaders = await getAuthHeaders();
-    return fetchApi(`${TESTS_BASE}/results/user/${clerkUserId}?page=${page}&size=${size}`, {
+    return fetchApi(`${TEST_RESULTS_BASE}/user/${clerkUserId}?page=${page}&size=${size}`, {
       tags: [`user-results-${clerkUserId}`],
       cache: 'no-store',
       authHeaders,
@@ -1105,7 +1114,7 @@ export const testResultsApi = {
    */
   getUserStatistics: async (clerkUserId: string): Promise<UserStatistics> => {
     const authHeaders = await getAuthHeaders();
-    return fetchApi(`${TESTS_BASE}/results/user/${clerkUserId}/statistics`, {
+    return fetchApi(`${TEST_RESULTS_BASE}/user/${clerkUserId}/statistics`, {
       tags: [`user-statistics-${clerkUserId}`],
       revalidate: 60,
       authHeaders,
@@ -1117,7 +1126,7 @@ export const testResultsApi = {
    */
   getUserPassedResults: async (clerkUserId: string): Promise<TestResult[]> => {
     const authHeaders = await getAuthHeaders();
-    return fetchApi(`${TESTS_BASE}/results/user/${clerkUserId}/passed`, {
+    return fetchApi(`${TEST_RESULTS_BASE}/user/${clerkUserId}/passed`, {
       tags: [`user-passed-${clerkUserId}`],
       cache: 'no-store',
       authHeaders,
@@ -1129,7 +1138,7 @@ export const testResultsApi = {
    */
   getTemplateStatistics: async (templateId: string): Promise<TemplateStatistics> => {
     const authHeaders = await getAuthHeaders();
-    return fetchApi(`${TESTS_BASE}/results/template/${templateId}/statistics`, {
+    return fetchApi(`${TEST_RESULTS_BASE}/template/${templateId}/statistics`, {
       tags: [`template-statistics-${templateId}`],
       revalidate: 60,
       authHeaders,
@@ -1157,7 +1166,7 @@ import type {
   ItemValidityStatus,
 } from '@/types/psychometrics';
 
-const PSYCHOMETRICS_BASE = '/v1/psychometrics';
+const PSYCHOMETRICS_BASE = '/psychometrics';
 
 export const psychometricsApi = {
   /**

@@ -456,9 +456,11 @@ describe('Screen Reader Compatibility', () => {
         />
       );
 
-      const scenario = screen.getByRole('note');
-      expect(scenario).toBeInTheDocument();
-      expect(scenario).toHaveAttribute('aria-label', 'Scenario context');
+      // Component renders scenario twice for responsive design (mobile/desktop)
+      const scenarios = screen.getAllByRole('note');
+      expect(scenarios.length).toBeGreaterThanOrEqual(1);
+      expect(scenarios[0]).toBeInTheDocument();
+      expect(scenarios[0]).toHaveAttribute('aria-label', 'Scenario context');
     });
 
     it('should have aria-label on question number indicator', () => {
@@ -474,8 +476,10 @@ describe('Screen Reader Compatibility', () => {
         />
       );
 
-      const questionIndicator = screen.getByLabelText('Question 5');
-      expect(questionIndicator).toBeInTheDocument();
+      // Component renders question indicator twice for responsive design (mobile/desktop)
+      const questionIndicators = screen.getAllByLabelText('Question 5');
+      expect(questionIndicators.length).toBeGreaterThanOrEqual(1);
+      expect(questionIndicators[0]).toBeInTheDocument();
     });
   });
 

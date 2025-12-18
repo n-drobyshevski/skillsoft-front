@@ -68,6 +68,19 @@ const isPublicRoute = createRouteMatcher([
 ]);
 
 // ============================================================================
+// Zombie Route Redirects (SEO Preservation)
+// ============================================================================
+
+/**
+ * Deprecated route mappings for 301 permanent redirects.
+ * Key: deprecated path prefix
+ * Value: new path prefix
+ */
+const ROUTE_REDIRECTS: Record<string, string> = {
+  '/test-results': '/test-templates/results',
+};
+
+// ============================================================================
 // Constants
 // ============================================================================
 
@@ -127,6 +140,20 @@ function createUnauthorizedRedirect(baseUrl: string, message: string): URL {
   return url;
 }
 
+/**
+ * Check if request is for a deprecated route and return redirect URL if so.
+ * Returns null if no redirect is needed.
+ */
+function getZombieRouteRedirect(pathname: string, baseUrl: string): URL | null {
+  for (const [oldPath, newPath] of Object.entries(ROUTE_REDIRECTS)) {
+    if (pathname.startsWith(oldPath)) {
+      const newPathname = pathname.replace(oldPath, newPath);
+      return new URL(newPathname, baseUrl);
+    }
+  }
+  return null;
+}
+
 // ============================================================================
 // Proxy Function (Next.js 16)
 // ============================================================================
@@ -141,12 +168,18 @@ function createUnauthorizedRedirect(baseUrl: string, message: string): URL {
  * Pattern: Optimistic checks in proxy, secure checks in DAL
  */
 export default clerkMiddleware(async (auth, req) => {
+  // Check for zombie route redirects first (301 for SEO preservation)
+  const zombieRedirect = getZombieRouteRedirect(req.nextUrl.pathname, req.url);
+  if (zombieRedirect) {
+    return NextResponse.redirect(zombieRedirect, 301);
+  }
+
   const authObject = await auth();
   const { userId, sessionClaims, orgRole } = authObject;
-  
+
   // Get user's role from auth object (optimistic check from cookie/session)
   const userRole = getUserRoleFromAuthObject(
-    orgRole as string | undefined, 
+    orgRole as string | undefined,
     sessionClaims as Record<string, unknown> | null
   );
 
