@@ -1,0 +1,87 @@
+import { Badge } from '@/components/ui/badge';
+import { Activity, BarChart3, Target, ArrowRight } from 'lucide-react';
+import { ReliabilityGauge } from './ReliabilityGauge';
+import { ScrollReveal } from './ScrollReveal';
+import { cn } from '@/lib/utils';
+
+export function PsychometricsShowcase() {
+  return (
+    <section id="features" className="py-16 md:py-32 bg-muted/30">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6">
+        <ScrollReveal className="text-center space-y-4 mb-12 md:mb-20">
+          <Badge variant="outline" className="mb-4">Психометрика</Badge>
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight">Построено на <span className="text-primary">научном фундаменте</span></h2>
+          <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto">Классическая теория тестов обеспечивает статистическую валидность и надёжность каждой оценки.</p>
+        </ScrollReveal>
+        <div className="grid md:grid-cols-3 gap-6">
+          <ScrollReveal delay={0}><FeatureCard icon={Activity} color="bg-emerald-500" title="Мониторинг надёжности" desc="Альфа Кронбаха рассчитывается в реальном времени. Автоматические оповещения при снижении надёжности."><ReliabilityGauge value={0.87} /></FeatureCard></ScrollReveal>
+          <ScrollReveal delay={100}><FeatureCard icon={BarChart3} color="bg-blue-500" title="Метрики валидности" desc="Показатели дискриминативности и сложности обеспечивают различение уровней компетенций."><ValidityBars /></FeatureCard></ScrollReveal>
+          <ScrollReveal delay={200}><FeatureCard icon={Target} color="bg-violet-500" title="Контроль качества" desc="Автоматическая маркировка и отключение неэффективных вопросов."><QualityStats /></FeatureCard></ScrollReveal>
+        </div>
+        <ScrollReveal delay={300} className="mt-8"><StatusPipeline /></ScrollReveal>
+      </div>
+    </section>
+  );
+}
+
+function FeatureCard({ icon: Icon, color, title, desc, children }: { icon: React.ComponentType<{ className?: string }>; color: string; title: string; desc: string; children: React.ReactNode }) {
+  return (
+    <div className="h-full p-6 md:p-8 rounded-2xl bg-background border border-border/50 hover:border-border hover:shadow-lg transition-all">
+      <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-4" style={{ backgroundColor: color.includes('emerald') ? '#10b981' : color.includes('blue') ? '#3b82f6' : '#8b5cf6' }}><Icon className="w-6 h-6 text-white" /></div>
+      <h3 className="text-lg font-semibold mb-2">{title}</h3>
+      <p className="text-sm text-muted-foreground leading-relaxed mb-4">{desc}</p>
+      <div className="pt-4 border-t border-border/50">{children}</div>
+    </div>
+  );
+}
+
+function ValidityBars() {
+  return (
+    <div className="space-y-3">
+      <ValidityBar label="Дискриминативность" value={0.42} threshold={0.25} />
+      <ValidityBar label="Сложность" value={0.65} threshold={0.2} max={0.9} />
+    </div>
+  );
+}
+
+function ValidityBar({ label, value, threshold, max = 1 }: { label: string; value: number; threshold: number; max?: number }) {
+  const pct = (value / max) * 100;
+  const good = value >= threshold;
+  return (
+    <div>
+      <div className="flex items-center justify-between text-xs mb-1"><span className="text-muted-foreground">{label}</span><span className="font-medium">{value.toFixed(2)}</span></div>
+      <div className="h-2 rounded-full bg-muted/30 overflow-hidden relative">
+        <div className="absolute top-0 bottom-0 w-0.5 bg-muted-foreground/50" style={{ left: `${(threshold / max) * 100}%` }} />
+        <div className={cn('h-full rounded-full', good ? 'bg-emerald-500' : 'bg-amber-500')} style={{ width: `${pct}%` }} />
+      </div>
+    </div>
+  );
+}
+
+function QualityStats() {
+  const stats = [{ v: '2 500+', l: 'Валидировано', c: 'emerald' }, { v: '98%', l: 'Проходят', c: 'blue' }, { v: '<3%', l: 'На проверке', c: 'amber' }, { v: '0', l: 'Критичных', c: 'emerald' }];
+  return (
+    <div className="grid grid-cols-2 gap-4 text-center">
+      {stats.map((s) => (
+        <div key={s.l}><div className={cn('text-lg font-bold', s.c === 'emerald' ? 'text-emerald-600' : s.c === 'blue' ? 'text-blue-600' : 'text-amber-600')}>{s.v}</div><div className="text-xs text-muted-foreground">{s.l}</div></div>
+      ))}
+    </div>
+  );
+}
+
+function StatusPipeline() {
+  const items = [{ l: 'ОЖИДАЕТ', n: 45, c: 'muted' }, { l: 'ВАЛИДНЫЙ', n: 2312, c: 'emerald' }, { l: 'НА ПРОВЕРКЕ', n: 28, c: 'amber' }, { l: 'ОТКЛЮЧЁН', n: 115, c: 'slate' }];
+  return (
+    <div className="p-6 rounded-2xl bg-background border border-border/50">
+      <h4 className="text-sm font-medium mb-4 text-center">Конвейер валидации вопросов</h4>
+      <div className="flex flex-wrap items-center justify-center gap-2 md:gap-4">
+        {items.map((i, idx) => (
+          <div key={i.l} className="flex items-center gap-2">
+            <span className={cn('px-3 py-1.5 rounded-full text-xs font-medium border', i.c === 'emerald' ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20' : i.c === 'amber' ? 'bg-amber-500/10 text-amber-600 border-amber-500/20' : i.c === 'slate' ? 'bg-slate-500/10 text-slate-600 border-slate-500/20' : 'bg-muted text-muted-foreground border-border')}>{i.l} ({i.n.toLocaleString()})</span>
+            {idx < items.length - 1 && <ArrowRight className="w-4 h-4 text-muted-foreground/50 hidden md:block" />}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
