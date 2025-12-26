@@ -1,8 +1,9 @@
 'use client';
 
-import * as React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { PsychometricHealthReport } from '@/types/psychometrics';
+import { cn } from '@/lib/utils';
+import { useIsMobile } from '@/hooks/use-mobile';
 import {
   CheckCircle,
   Clock,
@@ -10,7 +11,8 @@ import {
   XCircle,
   Shield,
   AlertCircle,
-  HelpCircle
+  HelpCircle,
+  FileText,
 } from 'lucide-react';
 import {
   ItemStatusSectionHelp,
@@ -67,7 +69,142 @@ function StatCard({ title, value, description, icon: Icon, iconColor, bgColor, h
   );
 }
 
+// Compact mobile stat card - fits 2 per row with touch-friendly sizing
+function MobileStatCard({
+  title,
+  value,
+  icon: Icon,
+  iconColor,
+  bgColor,
+}: {
+  title: string;
+  value: number;
+  icon: React.ElementType;
+  iconColor: string;
+  bgColor: string;
+}) {
+  return (
+    <div className={cn('flex flex-col p-2 rounded-md min-h-[48px]', bgColor)}>
+      <div className="flex items-center justify-between gap-1 mb-0.5">
+        <Icon className={cn('h-3 w-3 shrink-0', iconColor)} />
+        <span className="text-base font-bold tabular-nums leading-none">{value}</span>
+      </div>
+      <span className="text-xs text-muted-foreground truncate">{title}</span>
+    </div>
+  );
+}
+
 export function PsychometricStatsCards({ report }: PsychometricStatsCardsProps) {
+  const isMobile = useIsMobile();
+
+  // Mobile Compact Grid Layout - optimized 2-column full width
+  if (isMobile) {
+    return (
+      <div className="space-y-2">
+        {/* Item Status - 2x2 grid */}
+        <div className="space-y-1">
+          <h3 className="text-xs font-medium text-muted-foreground flex items-center gap-1 px-0.5 uppercase tracking-wide">
+            <FileText className="h-3 w-3 text-blue-600" />
+            Item Status
+          </h3>
+          <div className="grid grid-cols-2 gap-1.5">
+            <MobileStatCard
+              title="Active"
+              value={report.activeItems}
+              icon={CheckCircle}
+              iconColor="text-emerald-600"
+              bgColor="bg-emerald-50 dark:bg-emerald-950/20"
+            />
+            <MobileStatCard
+              title="Probation"
+              value={report.probationItems}
+              icon={Clock}
+              iconColor="text-amber-600"
+              bgColor="bg-amber-50 dark:bg-amber-950/20"
+            />
+            <MobileStatCard
+              title="Flagged"
+              value={report.flaggedItems}
+              icon={AlertTriangle}
+              iconColor="text-orange-600"
+              bgColor="bg-orange-50 dark:bg-orange-950/20"
+            />
+            <MobileStatCard
+              title="Retired"
+              value={report.retiredItems}
+              icon={XCircle}
+              iconColor="text-red-600"
+              bgColor="bg-red-50 dark:bg-red-950/20"
+            />
+          </div>
+        </div>
+
+        {/* Competency Reliability - 2x2 grid */}
+        <div className="space-y-1">
+          <h3 className="text-xs font-medium text-muted-foreground flex items-center gap-1 px-0.5 uppercase tracking-wide">
+            <Shield className="h-3 w-3 text-emerald-600" />
+            Reliability
+          </h3>
+          <div className="grid grid-cols-2 gap-1.5">
+            <MobileStatCard
+              title="Reliable"
+              value={report.reliableCompetencies}
+              icon={Shield}
+              iconColor="text-emerald-600"
+              bgColor="bg-emerald-50 dark:bg-emerald-950/20"
+            />
+            <MobileStatCard
+              title="Acceptable"
+              value={report.acceptableCompetencies}
+              icon={AlertCircle}
+              iconColor="text-amber-600"
+              bgColor="bg-amber-50 dark:bg-amber-950/20"
+            />
+            <MobileStatCard
+              title="Unreliable"
+              value={report.unreliableCompetencies}
+              icon={AlertTriangle}
+              iconColor="text-red-600"
+              bgColor="bg-red-50 dark:bg-red-950/20"
+            />
+            <MobileStatCard
+              title="No Data"
+              value={report.insufficientDataCompetencies}
+              icon={HelpCircle}
+              iconColor="text-gray-600"
+              bgColor="bg-gray-50 dark:bg-gray-950/20"
+            />
+          </div>
+        </div>
+
+        {/* Summary Metrics - compact 3-column grid */}
+        <div className="grid grid-cols-3 gap-1.5">
+          <div className="p-2 rounded-md bg-muted/40 text-center">
+            <div className="text-sm font-bold tabular-nums leading-none">
+              {report.averageAlpha != null ? report.averageAlpha.toFixed(2) : '-'}
+            </div>
+            <p className="text-xs text-muted-foreground mt-0.5">Avg Alpha</p>
+          </div>
+          <div className="p-2 rounded-md bg-muted/40 text-center">
+            <div className="text-sm font-bold tabular-nums leading-none">
+              {report.averageDiscrimination != null ? report.averageDiscrimination.toFixed(2) : '-'}
+            </div>
+            <p className="text-xs text-muted-foreground mt-0.5">Avg rpb</p>
+          </div>
+          <div className="p-2 rounded-md bg-muted/40 text-center">
+            <div className="text-sm font-bold tabular-nums leading-none">
+              {report.bigFiveReliabilitySummary?.averageTraitAlpha != null
+                ? report.bigFiveReliabilitySummary.averageTraitAlpha.toFixed(2)
+                : '-'}
+            </div>
+            <p className="text-xs text-muted-foreground mt-0.5">Big5 Alpha</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Desktop Layout (unchanged)
   return (
     <div className="space-y-4">
       {/* Item Status Distribution */}

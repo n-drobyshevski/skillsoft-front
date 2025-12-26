@@ -3,6 +3,23 @@ import { notFound } from "next/navigation";
 import { testTemplatesApi, competenciesApi } from "@/services/api";
 import { BlueprintWorkspaceProvider } from "./_components/BlueprintWorkspaceProvider";
 
+/**
+ * Route Segment Config - Next.js 16 hybrid caching strategy
+ *
+ * - dynamic: 'force-dynamic' - Required for auth-protected API calls
+ * - fetchCache: 'default-cache' - Allow individual fetch() calls to specify caching
+ * - runtime: 'nodejs' - Use Node.js runtime for server-side data fetching
+ *
+ * Individual fetch calls in actions.ts use granular cache tags for surgical invalidation:
+ * - template:{id}:blueprint - Blueprint structure changes
+ * - template:{id}:settings - Template settings changes
+ * - template:{id}:simulation - Simulation cache
+ * - competency:inventory - Global competency health heatmap
+ */
+export const dynamic = 'force-dynamic';
+export const fetchCache = 'default-cache';
+export const runtime = 'nodejs';
+
 interface BuilderLayoutProps {
   children: React.ReactNode;
   params: Promise<{ id: string }>;

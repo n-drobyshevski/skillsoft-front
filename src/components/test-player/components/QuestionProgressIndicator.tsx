@@ -55,14 +55,9 @@ export function QuestionProgressIndicator({
     }
   };
 
-  // Get dot styling based on state
-  const getDotClasses = (state: QuestionState, index: number): string => {
-    const isNavigable = allowNavigation && state !== 'pending' && index !== currentIndex;
-
-    const baseClasses = cn(
-      "w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full transition-all duration-200",
-      isNavigable && "cursor-pointer hover:scale-125"
-    );
+  // Get dot styling based on state (visual appearance only)
+  const getDotClasses = (state: QuestionState): string => {
+    const baseClasses = "w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full transition-all duration-200";
 
     switch (state) {
       case 'answered':
@@ -75,6 +70,19 @@ export function QuestionProgressIndicator({
       default:
         return cn(baseClasses, "bg-neutral-700");
     }
+  };
+
+  // Get button wrapper classes (includes touch target)
+  const getButtonClasses = (state: QuestionState, index: number): string => {
+    const isNavigable = allowNavigation && state !== 'pending' && index !== currentIndex;
+    return cn(
+      // Touch target wrapper - minimum 44x44px for WCAG AAA compliance
+      // Uses relative positioning so the visual dot is centered
+      "relative flex items-center justify-center",
+      // Negative margins to maintain visual spacing while having larger hit areas
+      "min-w-[28px] min-h-[28px] sm:min-w-[32px] sm:min-h-[32px] -mx-2 sm:-mx-1.5",
+      isNavigable && "cursor-pointer group"
+    );
   };
 
   const handleClick = (index: number) => {
@@ -128,10 +136,16 @@ export function QuestionProgressIndicator({
                 type="button"
                 onClick={() => handleClick(index)}
                 disabled={!allowNavigation || state === 'pending' || index === currentIndex}
-                className={getDotClasses(state, index)}
+                className={getButtonClasses(state, index)}
                 aria-label={getStatusLabel(state, index)}
                 aria-current={index === currentIndex ? 'step' : undefined}
-              />
+              >
+                {/* Visual dot - centered within touch target */}
+                <span className={cn(
+                  getDotClasses(state),
+                  allowNavigation && state !== 'pending' && index !== currentIndex && "group-hover:scale-125"
+                )} />
+              </button>
             </TooltipTrigger>
             <TooltipContent
               side="top"

@@ -164,87 +164,86 @@ export function TestCard({ session, style, compact = false }: TestCardProps) {
       className={cn(
         'relative overflow-hidden rounded-lg border bg-card transition-all duration-200',
         'hover:shadow-md hover:-translate-y-0.5',
-        'border-l-4',
+        'border-l-4 max-w-full',
         config.borderClass
       )}
       style={style}
     >
-      <div className="p-4">
+      <div className="p-2.5 sm:p-4 min-w-0">
         {/* Header Row: Status Badge + Action Button */}
-        <div className="flex items-center justify-between gap-3 mb-3">
-          <Badge variant="outline" className={cn('gap-1.5 text-xs font-medium', config.badgeClassName)}>
-            <StatusIcon className="size-3.5" />
-            {config.label}
+        <div className="flex items-center justify-between gap-2 sm:gap-3 mb-2 sm:mb-3">
+          <Badge variant="outline" className={cn('gap-1 sm:gap-1.5 text-xs font-medium', config.badgeClassName)}>
+            <StatusIcon className="size-3 sm:size-3.5" />
+            <span className="hidden xs:inline">{config.label}</span>
           </Badge>
 
           <Button
             asChild
             variant={actionConfig.variant}
             size="sm"
-            className="shrink-0 group h-8 px-3"
+            className="shrink-0 group h-7 sm:h-8 px-2 sm:px-3"
           >
             <Link
               href={actionConfig.href}
               aria-label={`${actionConfig.labelFull} - ${session.templateName}`}
             >
-              <ActionIcon className="size-3.5 mr-1.5 transition-transform group-hover:scale-110" />
-              <span className="hidden xs:inline">{actionConfig.label}</span>
-              <span className="xs:hidden">{actionConfig.label}</span>
+              <ActionIcon className="size-3.5 sm:mr-1.5 transition-transform group-hover:scale-110" />
+              <span className="hidden sm:inline">{actionConfig.label}</span>
             </Link>
           </Button>
         </div>
 
         {/* Template Name (only in non-compact mode) */}
         {!compact && (
-          <h3 className="font-semibold text-base line-clamp-1 mb-2">{session.templateName}</h3>
+          <h3 className="font-semibold text-sm sm:text-base line-clamp-2 sm:line-clamp-1 mb-2">{session.templateName}</h3>
         )}
 
-        {/* Content Row: Progress/Score + Metadata */}
-        <div className="flex items-center gap-4">
-          {/* IN_PROGRESS: Circular Progress */}
+        {/* Content Row: Progress/Score + Metadata - Stack on mobile for complex content */}
+        <div className="flex flex-wrap items-center gap-2 sm:gap-4 min-w-0">
+          {/* IN_PROGRESS: Circular Progress - uses CSS to adjust visual density */}
           {session.status === SessionStatus.IN_PROGRESS && progress && (
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 sm:gap-3">
               <CircularProgress
                 value={progress.percentage}
-                size={44}
-                strokeWidth={4}
+                size={40}
+                strokeWidth={3}
                 progressClassName={config.progressColor}
                 trackClassName={config.progressTrack}
               />
               <div>
-                <p className="text-sm font-medium tabular-nums">
+                <p className="text-xs sm:text-sm font-medium tabular-nums">
                   {progress.answeredCount} из {session.totalQuestions}
                 </p>
-                <p className="text-xs text-muted-foreground">вопросов</p>
+                <p className="text-xs text-muted-foreground hidden sm:block">вопросов</p>
               </div>
             </div>
           )}
 
-          {/* COMPLETED: Score Gauge */}
+          {/* COMPLETED: Score Gauge - uses responsive sizing internally */}
           {session.status === SessionStatus.COMPLETED && session.result && (
             <ScoreGauge
               score={session.result.overallPercentage}
               passed={session.result.passed}
-              size={44}
+              size={40}
               showLabel={true}
             />
           )}
 
-          {/* NOT_STARTED: Question count */}
+          {/* NOT_STARTED: Question count - simplified on mobile */}
           {session.status === SessionStatus.NOT_STARTED && session.totalQuestions && (
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <span className="tabular-nums">{session.totalQuestions} вопросов</span>
-              <span className="text-muted-foreground/50">•</span>
-              <span>{formatRelativeDate(session.createdAt)}</span>
+            <div className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground">
+              <span className="tabular-nums">{session.totalQuestions} вопр.</span>
+              <span className="text-muted-foreground/50 hidden xs:inline">|</span>
+              <span className="hidden xs:inline">{formatRelativeDate(session.createdAt)}</span>
             </div>
           )}
 
-          {/* ABANDONED/TIMED_OUT: Show date */}
+          {/* ABANDONED/TIMED_OUT: Show date - shorter on mobile */}
           {(session.status === SessionStatus.ABANDONED ||
             session.status === SessionStatus.TIMED_OUT) && (
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <span>
-                {session.status === SessionStatus.ABANDONED ? 'Прерван' : 'Истекло'}:{' '}
+            <div className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground">
+              <span className="truncate">
+                <span className="hidden xs:inline">{session.status === SessionStatus.ABANDONED ? 'Прерван' : 'Истекло'}: </span>
                 {formatRelativeDate(session.completedAt || session.createdAt)}
               </span>
             </div>

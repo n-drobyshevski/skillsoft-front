@@ -3,9 +3,10 @@
 import { useMemo } from 'react';
 import { PsychometricHealthReport } from '@/types/psychometrics';
 import { cn } from '@/lib/utils';
-import { TrendingUp, TrendingDown, Clock, Activity } from 'lucide-react';
+import { TrendingUp, TrendingDown, Clock, Activity, FileText, Percent, AlertTriangle } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { ru } from 'date-fns/locale';
+import { useIsMobile } from '@/hooks/use-mobile';
 import {
   HealthScoreHelp,
   HealthScoreBreakdownHelp,
@@ -93,44 +94,59 @@ function getStatusLabel(score: number): string {
   return 'Critical';
 }
 
-// Circular progress component
+// Circular progress component - responsive sizing
 function CircularProgress({
   value,
   size = 120,
+  mobileSize = 100,
   strokeWidth = 8,
+  mobileStrokeWidth = 6,
   className,
+  isMobile = false,
 }: {
   value: number;
   size?: number;
+  mobileSize?: number;
   strokeWidth?: number;
+  mobileStrokeWidth?: number;
   className?: string;
+  isMobile?: boolean;
 }) {
-  const radius = (size - strokeWidth) / 2;
+  const actualSize = isMobile ? mobileSize : size;
+  const actualStroke = isMobile ? mobileStrokeWidth : strokeWidth;
+  const radius = (actualSize - actualStroke) / 2;
   const circumference = 2 * Math.PI * radius;
   const progress = Math.min(Math.max(value, 0), 100);
   const offset = circumference - (progress / 100) * circumference;
   const colors = getScoreColor(value);
 
   return (
-    <div className={cn('relative inline-flex items-center justify-center', className)}>
-      <svg width={size} height={size} className="-rotate-90">
+    <div
+      className={cn('relative inline-flex items-center justify-center shrink-0', className)}
+      role="progressbar"
+      aria-valuenow={value}
+      aria-valuemin={0}
+      aria-valuemax={100}
+      aria-label={`Оценка здоровья психометрики: ${value} из 100`}
+    >
+      <svg width={actualSize} height={actualSize} className="-rotate-90" aria-hidden="true">
         {/* Background circle */}
         <circle
-          cx={size / 2}
-          cy={size / 2}
+          cx={actualSize / 2}
+          cy={actualSize / 2}
           r={radius}
           fill="none"
           stroke="currentColor"
-          strokeWidth={strokeWidth}
+          strokeWidth={actualStroke}
           className="text-muted/20"
         />
         {/* Progress circle */}
         <circle
-          cx={size / 2}
-          cy={size / 2}
+          cx={actualSize / 2}
+          cy={actualSize / 2}
           r={radius}
           fill="none"
-          strokeWidth={strokeWidth}
+          strokeWidth={actualStroke}
           strokeLinecap="round"
           strokeDasharray={circumference}
           strokeDashoffset={offset}
@@ -141,18 +157,111 @@ function CircularProgress({
         />
       </svg>
       {/* Center content */}
-      <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className={cn('text-3xl font-bold', colors.text)}>{value}</span>
-        <span className="text-xs text-muted-foreground flex items-center gap-0.5">
-          Health Score
-          <HealthScoreHelp />
+      <div className="absolute inset-0 flex flex-col items-center justify-center" aria-hidden="true">
+        <span className={cn(isMobile ? 'text-2xl' : 'text-3xl', 'font-bold', colors.text)}>{value}</span>
+        <span className={cn(isMobile ? 'text-xs' : 'text-xs', 'text-muted-foreground flex items-center gap-0.5')}>
+          Health
+          {!isMobile && <HealthScoreHelp />}
         </span>
       </div>
     </div>
   );
 }
 
+// Compact horizontal health score for mobile - slimmer single-row design
+function CompactHealthScore({
+  score,
+  statusLabel,
+  trendValue,
+}: {
+  score: number;
+  statusLabel: string;
+  trendValue: number;
+}) {
+  const colors = getScoreColor(score);
+  const TrendIcon = trendValue >= 0 ? TrendingUp : TrendingDown;
+
+  return (
+    <div className="flex items-center gap-2.5">
+      {/* Score + Status */}
+      <div className="flex items-center gap-2 flex-1 min-w-0">
+        <Activity className={cn('h-3.5 w-3.5 shrink-0', colors.text)} />
+        <div className="flex items-baseline gap-1.5">
+          <span className={cn('text-lg font-bold tabular-nums', colors.text)}>{score}</span>
+          <span className={cn(
+            'text-xs font-medium px-1.5 py-0.5 rounded',
+            colors.text,
+            score >= 80 ? 'bg-emerald-100 dark:bg-emerald-900/30' :
+            score >= 60 ? 'bg-amber-100 dark:bg-amber-900/30' :
+            score >= 40 ? 'bg-orange-100 dark:bg-orange-900/30' :
+            'bg-red-100 dark:bg-red-900/30'
+          )}>
+            {statusLabel}
+          </span>
+        </div>
+      </div>
+
+      {/* Progress bar - slim */}
+      <div
+        className="flex-1 max-w-[80px]"
+        role="progressbar"
+        aria-valuenow={score}
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-label={`Здоровье: ${score}%`}
+      >
+        <div className="h-1 w-full rounded-full bg-muted/50 overflow-hidden" aria-hidden="true">
+          <div
+            className={cn('h-full rounded-full transition-all', colors.bg)}
+            style={{ width: `${score}%` }}
+          />
+        </div>
+      </div>
+
+      {/* Trend - micro */}
+      <div className="flex items-center gap-0.5 text-xs shrink-0">
+        <TrendIcon className={cn('h-3 w-3', trendValue >= 0 ? 'text-emerald-600' : 'text-red-600')} />
+        <span className={trendValue >= 0 ? 'text-emerald-600' : 'text-red-600'}>
+          {trendValue >= 0 ? '+' : ''}{trendValue.toFixed(0)}%
+        </span>
+      </div>
+    </div>
+  );
+}
+
+// Mobile stat pill component - ultra-compact for 4-column grid
+function MobileStatPill({
+  icon: Icon,
+  label,
+  value,
+  valueColor,
+  ariaLabel,
+}: {
+  icon: React.ElementType;
+  label: string;
+  value: string | number;
+  valueColor?: string;
+  ariaLabel?: string;
+}) {
+  return (
+    <div
+      className="flex flex-col items-center p-1.5 rounded-md bg-muted/40 min-w-0"
+      role="group"
+      aria-label={ariaLabel ?? `${label}: ${value}`}
+    >
+      <div className="flex items-center gap-1">
+        <Icon className="h-3 w-3 text-muted-foreground shrink-0" aria-hidden="true" />
+        <span className={cn('text-sm font-bold tabular-nums leading-none', valueColor)}>{value}</span>
+      </div>
+      <span className="text-xs text-muted-foreground uppercase tracking-wide truncate w-full text-center mt-0.5" aria-hidden="true">
+        {label}
+      </span>
+    </div>
+  );
+}
+
 export function DashboardHero({ report, className }: DashboardHeroProps) {
+  const isMobile = useIsMobile();
   const healthScore = useMemo(() => calculateHealthScore(report), [report]);
   const colors = getScoreColor(healthScore);
   const statusLabel = getStatusLabel(healthScore);
@@ -173,6 +282,81 @@ export function DashboardHero({ report, className }: DashboardHeroProps) {
   const TrendIcon = trendValue >= 0 ? TrendingUp : TrendingDown;
   const trendColor = trendValue >= 0 ? 'text-emerald-600' : 'text-red-600';
 
+  // Calculate active rate
+  const activeRate = report.totalItems > 0
+    ? Math.round((report.activeItems / report.totalItems) * 100)
+    : 0;
+
+  // Mobile Layout - Ultra-compact design, no redundant legend
+  if (isMobile) {
+    return (
+      <section
+        className={cn(
+          'relative overflow-hidden rounded-lg border bg-gradient-to-br from-card to-muted/20',
+          'p-2.5',
+          className
+        )}
+        aria-labelledby="psychometric-health-heading"
+        aria-describedby="psychometric-health-status"
+      >
+        {/* Screen reader heading */}
+        <h2 id="psychometric-health-heading" className="sr-only">Здоровье психометрики</h2>
+        <p id="psychometric-health-status" className="sr-only">
+          Оценка: {healthScore} из 100, статус: {statusLabel}
+        </p>
+
+        {/* Background decoration - smaller on mobile */}
+        <div
+          className={cn(
+            'absolute -right-6 -top-6 h-20 w-20 rounded-full opacity-10 blur-xl',
+            colors.bg
+          )}
+          aria-hidden="true"
+        />
+
+        <div className="relative space-y-2">
+          {/* Compact Health Score - replaces circular gauge */}
+          <CompactHealthScore
+            score={healthScore}
+            statusLabel={statusLabel}
+            trendValue={trendValue}
+          />
+
+          {/* Stats: Compact 4-column grid */}
+          <div className="grid grid-cols-4 gap-1.5" role="group" aria-label="Статистика психометрики">
+            <MobileStatPill
+              icon={Clock}
+              label="audit"
+              value={lastAuditDisplay ? lastAuditDisplay.split(' ')[0] : '—'}
+              ariaLabel={`Последний аудит: ${lastAuditDisplay ?? 'не проводился'}`}
+            />
+            <MobileStatPill
+              icon={FileText}
+              label="items"
+              value={report.totalItems}
+              ariaLabel={`Всего элементов: ${report.totalItems}`}
+            />
+            <MobileStatPill
+              icon={Percent}
+              label="active"
+              value={`${activeRate}%`}
+              valueColor="text-emerald-600"
+              ariaLabel={`Активных элементов: ${activeRate}%`}
+            />
+            <MobileStatPill
+              icon={AlertTriangle}
+              label="issues"
+              value={report.flaggedItems}
+              valueColor={report.flaggedItems > 0 ? 'text-orange-600' : undefined}
+              ariaLabel={`Проблемных элементов: ${report.flaggedItems}`}
+            />
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  // Desktop Layout (unchanged)
   return (
     <div
       className={cn(
@@ -244,11 +428,7 @@ export function DashboardHero({ report, className }: DashboardHeroProps) {
               Active Rate
               <HeroActiveRateHelp />
             </p>
-            <p className="text-xl font-bold text-emerald-600">
-              {report.totalItems > 0
-                ? Math.round((report.activeItems / report.totalItems) * 100)
-                : 0}%
-            </p>
+            <p className="text-xl font-bold text-emerald-600">{activeRate}%</p>
           </div>
 
           {/* Issues */}

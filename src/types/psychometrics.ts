@@ -217,6 +217,7 @@ export interface ItemStatisticsFilterParams {
   status?: ItemValidityStatus;
   competencyId?: string;
   discriminationFlag?: DiscriminationFlag;
+  search?: string;
   page?: number;
   size?: number;
   sort?: string;

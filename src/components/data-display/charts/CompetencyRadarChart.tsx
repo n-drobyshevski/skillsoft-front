@@ -102,9 +102,9 @@ interface CompetencyRadarChartProps {
 /** Minimum items required for a meaningful radar chart */
 const MIN_DATA_POINTS = 3;
 
-/** Maximum label length before truncation */
-const MAX_LABEL_LENGTH_MOBILE = 12;
-const MAX_LABEL_LENGTH_DESKTOP = 20;
+/** Maximum label length before truncation - aggressive on mobile for cleaner layout */
+const MAX_LABEL_LENGTH_MOBILE = 8;
+const MAX_LABEL_LENGTH_DESKTOP = 18;
 
 /**
  * Truncates text with ellipsis if it exceeds max length
@@ -159,12 +159,16 @@ function CompetencyRadarChartComponent({
   const isMobile = useIsMobile();
   const colors = useComputedColors();
 
-  // Responsive configuration
+  // Responsive configuration - optimized for mobile readability
   const config = useMemo(() => ({
-    height: isMobile ? 280 : 340,
-    fontSize: isMobile ? 11 : 13,
-    outerRadius: isMobile ? "75%" : "80%",
+    height: isMobile ? 260 : 340,
+    fontSize: isMobile ? 10 : 13,
+    outerRadius: isMobile ? "65%" : "78%", // Smaller on mobile = more label space
+    innerRadius: isMobile ? 15 : 25,
     maxLabelLength: isMobile ? MAX_LABEL_LENGTH_MOBILE : MAX_LABEL_LENGTH_DESKTOP,
+    gridStrokeWidth: isMobile ? 0.5 : 1,
+    radarStrokeWidth: isMobile ? 1.5 : 2,
+    tickFontSize: isMobile ? 8 : 11,
   }), [isMobile]);
 
   // Calculate stats for accessibility (must be called before early returns to follow hooks rules)
@@ -210,71 +214,96 @@ function CompetencyRadarChartComponent({
           cy="50%"
           outerRadius={config.outerRadius}
           data={data}
+          margin={isMobile ? { top: 8, right: 8, bottom: 8, left: 8 } : { top: 16, right: 16, bottom: 16, left: 16 }}
         >
           {/* Gradient definition for filled area - using computed colors for SVG compatibility */}
           <defs>
             <radialGradient id="competencyRadarGradient" cx="50%" cy="50%" r="50%">
-              <stop offset="0%" stopColor={colors.primary} stopOpacity={0.6} />
-              <stop offset="100%" stopColor={colors.primary} stopOpacity={0.15} />
+              <stop offset="0%" stopColor={colors.primary} stopOpacity={0.5} />
+              <stop offset="100%" stopColor={colors.primary} stopOpacity={0.1} />
             </radialGradient>
+            {/* Subtle glow effect */}
+            <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+              <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+              <feMerge>
+                <feMergeNode in="coloredBlur"/>
+                <feMergeNode in="SourceGraphic"/>
+              </feMerge>
+            </filter>
           </defs>
 
-          {/* Background grid */}
+          {/* Background grid - cleaner polygon style */}
           <PolarGrid
             stroke={colors.border}
-            strokeOpacity={0.6}
+            strokeOpacity={0.4}
+            strokeWidth={config.gridStrokeWidth}
             gridType="polygon"
           />
 
-          {/* Competency labels */}
+          {/* Competency labels - with improved mobile styling */}
           <PolarAngleAxis
             dataKey="subject"
-            tick={{
-              fill: colors.foreground,
-              fontSize: config.fontSize,
-              fontWeight: 500,
+            tick={({ x, y, payload, textAnchor }) => {
+              const label = truncateLabel(payload.value, config.maxLabelLength);
+              return (
+                <text
+                  x={x}
+                  y={y}
+                  textAnchor={textAnchor}
+                  fill={colors.foreground}
+                  fontSize={config.fontSize}
+                  fontWeight={500}
+                  className="select-none"
+                >
+                  {label}
+                </text>
+              );
             }}
-            tickFormatter={(value: string) => truncateLabel(value, config.maxLabelLength)}
             tickLine={false}
           />
 
-          {/* Score axis with reference ticks */}
+          {/* Score axis - simplified for mobile */}
           <PolarRadiusAxis
             angle={90}
             domain={[0, 100]}
             tick={{
               fill: colors.mutedForeground,
-              fontSize: config.fontSize - 2,
+              fontSize: config.tickFontSize,
             }}
-            tickCount={5}
+            tickCount={isMobile ? 3 : 5}
             tickFormatter={(value) => {
               const numValue = Number(value);
-              return numValue === passingScore ? `${numValue}%✓` : `${numValue}`;
+              // On mobile, only show key values
+              if (isMobile && numValue !== 0 && numValue !== 50 && numValue !== 100) {
+                return '';
+              }
+              return `${numValue}`;
             }}
             axisLine={false}
           />
 
-          {/* Data area */}
+          {/* Data area with subtle glow */}
           <Radar
             name="Оценка"
             dataKey="A"
             stroke={colors.primary}
-            strokeWidth={2}
+            strokeWidth={config.radarStrokeWidth}
             fill="url(#competencyRadarGradient)"
             fillOpacity={1}
             isAnimationActive={animated}
-            animationDuration={800}
+            animationDuration={600}
             animationEasing="ease-out"
+            filter={isMobile ? undefined : "url(#glow)"}
           />
 
           {/* Interactive tooltip */}
           <Tooltip
             cursor={{
               stroke: colors.primary,
-              strokeWidth: 2,
-              strokeDasharray: "4 4",
+              strokeWidth: 1.5,
+              strokeDasharray: "3 3",
               fill: colors.primary,
-              fillOpacity: 0.1,
+              fillOpacity: 0.05,
             }}
             content={({ active, payload }) => {
               if (!active || !payload || !payload[0]) return null;
@@ -283,24 +312,24 @@ function CompetencyRadarChartComponent({
               const isPassing = score >= passingScore;
 
               return (
-                <div className="bg-popover border border-border rounded-lg shadow-lg p-3 min-w-[160px]">
-                  <p className="font-medium text-sm text-foreground mb-1 line-clamp-2">
+                <div className="bg-popover/95 backdrop-blur-sm border border-border rounded-xl shadow-xl p-3 min-w-[140px] sm:min-w-[160px]">
+                  <p className="font-medium text-xs sm:text-sm text-foreground mb-1.5 line-clamp-2">
                     {item.subject}
                   </p>
-                  <div className="flex items-center justify-between gap-4">
-                    <span className="text-xs text-muted-foreground">Результат:</span>
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="text-[10px] sm:text-xs text-muted-foreground">Результат:</span>
                     <span className={cn(
-                      "text-lg font-bold tabular-nums",
+                      "text-base sm:text-lg font-bold tabular-nums",
                       isPassing
-                        ? "text-green-600 dark:text-green-400"
+                        ? "text-emerald-600 dark:text-emerald-400"
                         : "text-amber-600 dark:text-amber-400"
                     )}>
                       {score}%
                     </span>
                   </div>
-                  {!isPassing && (
-                    <p className="text-xs text-muted-foreground mt-1 pt-1 border-t">
-                      До прохождения: {passingScore - score}%
+                  {!isPassing && passingScore > 0 && (
+                    <p className="text-[10px] sm:text-xs text-muted-foreground mt-1.5 pt-1.5 border-t border-border/50">
+                      До цели: +{passingScore - score}%
                     </p>
                   )}
                 </div>

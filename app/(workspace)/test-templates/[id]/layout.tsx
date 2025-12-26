@@ -82,8 +82,8 @@ export default async function TemplateLayout({
         templateName={template.name}
       />
 
-      {/* Tab Content */}
-      <main className="flex-1">
+      {/* Tab Content - min-h-0 allows shrinking in flex, overflow-hidden contains scroll */}
+      <main className="flex-1 min-h-0 overflow-hidden">
         {children}
       </main>
     </>

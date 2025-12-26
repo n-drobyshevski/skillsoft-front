@@ -1,4 +1,6 @@
+import { Suspense } from "react";
 import { DocsNavServer } from "./_components/DocsNavServer";
+import { DocsNavSkeleton } from "./_components/DocsNavSkeleton";
 import { MobileDocsNavWrapper } from "./_components/DocsNavWrapper";
 
 // Route segment configuration for ISR
@@ -15,10 +17,12 @@ export const metadata = {
 /**
  * Documentation Layout
  *
- * Three-column layout for the documentation hub:
+ * Two-column base layout for the documentation hub:
  * - Left: Sidebar navigation (server-rendered, hidden on mobile)
- * - Center: Main content (max-w-3xl for optimal reading)
- * - Right: Table of contents (hidden on tablet and below)
+ * - Center: Main content area (max-w-6xl container)
+ *
+ * Individual pages manage their own TOC layout using a grid structure
+ * with DocsToc component for desktop and MobileTocDrawer for mobile.
  *
  * Mobile: FAB for navigation drawer (client-side only)
  *
@@ -31,24 +35,21 @@ export default function DocsLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="relative flex min-h-[calc(100vh-3.5rem)]">
-      {/* Left Sidebar - Server-rendered navigation */}
+    <div className="relative flex min-h-[calc(100vh-3.5rem)] max-w-[100vw] overflow-x-hidden">
+      {/* Left Sidebar - Server-rendered navigation with streaming */}
       <aside className="hidden md:flex w-64 shrink-0 flex-col border-r bg-muted/30">
-        <DocsNavServer />
+        <Suspense fallback={<DocsNavSkeleton />}>
+          <DocsNavServer />
+        </Suspense>
       </aside>
 
       {/* Main Content Area */}
-      <div className="flex flex-1 flex-col min-w-0">
-        <main className="flex-1 overflow-y-auto">
-          <div className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 lg:px-8">
-            <div className="lg:grid lg:grid-cols-[1fr_220px] lg:gap-8">
-              {/* Content Column */}
-              <div className="min-w-0">{children}</div>
-
-              {/* Right TOC Column - Hidden on tablet and below */}
-              {/* TOC is rendered by individual pages using DocsToc component */}
-              <div className="hidden lg:block" id="docs-toc-container" />
-            </div>
+      <div className="flex flex-1 flex-col min-w-0 overflow-x-hidden">
+        <main className="flex-1 overflow-y-auto overflow-x-hidden">
+          <div className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 lg:px-8 overflow-x-hidden pb-20 lg:pb-6">
+            {/* Content - TOC is managed by individual pages */}
+            {/* pb-20 on mobile accounts for sticky MobileTocDrawer bottom bar */}
+            <div className="min-w-0 overflow-x-hidden">{children}</div>
           </div>
         </main>
       </div>

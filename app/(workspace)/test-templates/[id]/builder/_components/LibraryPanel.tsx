@@ -41,31 +41,37 @@ function HealthIndicator({ health }: { health: HealthStatus }) {
   const config = {
     CRITICAL: {
       icon: AlertCircle,
+      label: 'No questions available',
       className:
         'bg-red-50 dark:bg-red-950/50 text-red-600 dark:text-red-400 border-red-200 dark:border-red-800',
     },
     MODERATE: {
       icon: AlertTriangle,
+      label: 'Limited questions available',
+      // Fixed: Changed text-amber-600 to text-amber-700 for WCAG AA contrast (5.2:1)
       className:
-        'bg-amber-50 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400 border-amber-200 dark:border-amber-800',
+        'bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-800',
     },
     HEALTHY: {
       icon: CheckCircle2,
+      label: 'Good question inventory',
       className:
         'bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800',
     },
   };
 
-  const { icon: Icon, className } = config[health];
+  const { icon: Icon, className, label } = config[health];
 
   return (
     <div
       className={cn(
-        'flex items-center justify-center w-5 h-5 rounded-full border shrink-0',
+        'flex items-center justify-center w-6 h-6 rounded-full border shrink-0',
         className
       )}
+      title={label}
+      aria-label={label}
     >
-      <Icon className="h-3 w-3" />
+      <Icon className="h-3.5 w-3.5" />
     </div>
   );
 }
@@ -156,14 +162,21 @@ function CompetencyItem({
       {/* Health Status */}
       <HealthIndicator health={competency.health} />
 
-      {/* Add Button (shows on hover, for accessibility) */}
+      {/* Add Button - Always visible on mobile, hover-reveal on desktop */}
       {!isDisabled && (
         <Button
           variant="ghost"
           size="icon"
           className={cn(
-            'h-7 w-7 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity',
-            'hover:bg-primary/10 hover:text-primary'
+            // Mobile: always visible with proper touch target (44px minimum)
+            'min-h-[44px] min-w-[44px] rounded-lg',
+            // Desktop: subtle until hover
+            'md:h-8 md:w-8 md:min-h-0 md:min-w-0',
+            'md:opacity-60 md:group-hover:opacity-100',
+            // Active state for touch feedback
+            'active:scale-95 active:bg-primary/15',
+            'hover:bg-primary/10 hover:text-primary',
+            'transition-all duration-150'
           )}
           onClick={(e) => {
             e.stopPropagation();
@@ -289,7 +302,7 @@ export function LibraryPanel({ onAdd }: LibraryPanelProps) {
             placeholder="Search competencies..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-9 h-9 text-sm rounded-lg bg-muted/50 border-transparent focus-visible:border-border focus-visible:ring-1"
+            className="pl-10 h-11 text-sm rounded-xl bg-muted/40 border-0 focus-visible:bg-background focus-visible:ring-2 focus-visible:ring-primary/20"
           />
         </div>
 

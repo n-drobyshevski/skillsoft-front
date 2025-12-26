@@ -6,6 +6,9 @@ import { FlaggedItemsClient } from './_components/FlaggedItemsClient';
 import { AlertTriangle, AlertCircle, XCircle } from 'lucide-react';
 import { getPsychometricsFlaggedItemsCached } from '@/services/api.cache.psychometrics';
 
+// PPR disabled - requires cacheComponents which is incompatible with Clerk
+// export const experimental_ppr = true;
+
 export const metadata: Metadata = {
   title: 'Flagged Items - Psychometrics - SkillSoft',
   description: 'Assessment items requiring attention and review.',

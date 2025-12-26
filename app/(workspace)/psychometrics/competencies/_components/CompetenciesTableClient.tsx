@@ -1,8 +1,9 @@
 'use client';
 
-import { useCallback } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useCallback, useState, useTransition } from 'react';
+import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import Link from 'next/link';
+import { UiLink } from '@/components/ui/ui-link';
 import {
   Table,
   TableBody,
@@ -13,6 +14,9 @@ import {
 } from '@/components/ui/table';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import {
   CompetencyReliability,
   ReliabilityStatus,
@@ -20,7 +24,6 @@ import {
 } from '@/types/psychometrics';
 import {
   ReliabilityStatusBadge,
-  ReliabilityFilterPills,
   TableHeaderWithHelp,
   NoItemsFound,
   NoDataYet,
@@ -33,9 +36,45 @@ import {
   ChevronsLeft,
   ChevronsRight,
   ExternalLink,
+  Loader2,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
+
+// Tab configuration for reliability status filtering
+type StatusTabValue = 'all' | ReliabilityStatus;
+
+interface TabConfig {
+  value: StatusTabValue;
+  label: string;
+  shortLabel: string; // For mobile
+}
+
+const STATUS_TABS: TabConfig[] = [
+  { value: 'all', label: 'Все', shortLabel: 'Все' },
+  { value: ReliabilityStatus.RELIABLE, label: 'Надежные', shortLabel: 'Надеж.' },
+  { value: ReliabilityStatus.ACCEPTABLE, label: 'Приемлемые', shortLabel: 'Приемл.' },
+  { value: ReliabilityStatus.UNRELIABLE, label: 'Ненадежные', shortLabel: 'Ненад.' },
+  { value: ReliabilityStatus.INSUFFICIENT_DATA, label: 'Недостаточно данных', shortLabel: 'Нет дан.' },
+];
+
+// Get tab badge color based on status
+function getTabBadgeClass(value: StatusTabValue, isActive: boolean): string {
+  if (isActive) return 'bg-primary text-primary-foreground';
+
+  switch (value) {
+    case ReliabilityStatus.RELIABLE:
+      return 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400';
+    case ReliabilityStatus.ACCEPTABLE:
+      return 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400';
+    case ReliabilityStatus.UNRELIABLE:
+      return 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400';
+    case ReliabilityStatus.INSUFFICIENT_DATA:
+      return 'bg-gray-100 text-gray-700 dark:bg-gray-800/50 dark:text-gray-400';
+    default:
+      return 'bg-muted text-muted-foreground';
+  }
+}
 
 interface CompetenciesTableClientProps {
   initialData: Page<CompetencyReliability>;
@@ -98,8 +137,15 @@ export function CompetenciesTableClient({
   currentPage,
 }: CompetenciesTableClientProps) {
   const router = useRouter();
+  const pathname = usePathname();
   const searchParams = useSearchParams();
   const isMobile = useIsMobile();
+  const [isPending, startTransition] = useTransition();
+
+  // Optimistic tab state for instant UI feedback
+  const urlTab: StatusTabValue = (currentStatus as StatusTabValue) || 'all';
+  const [optimisticTab, setOptimisticTab] = useState<StatusTabValue>(urlTab);
+  const activeTab = optimisticTab;
 
   // Build URL with search params
   const buildUrl = useCallback(
@@ -114,21 +160,50 @@ export function CompetenciesTableClient({
         }
       });
 
-      return `/psychometrics/competencies?${newParams.toString()}`;
+      const queryString = newParams.toString();
+      return `${pathname}${queryString ? `?${queryString}` : ''}`;
     },
-    [searchParams]
+    [searchParams, pathname]
   );
 
-  const handleStatusChange = (value: string) => {
-    router.push(buildUrl({ status: value === 'all' ? undefined : value, page: '0' }));
-  };
+  // Handle tab change with optimistic update
+  const handleTabChange = useCallback(
+    (value: string) => {
+      const newTab = value as StatusTabValue;
+
+      // Optimistic UI update
+      setOptimisticTab(newTab);
+
+      // Background URL sync
+      startTransition(() => {
+        router.push(buildUrl({
+          status: newTab === 'all' ? undefined : newTab,
+          page: '0'
+        }), { scroll: false });
+      });
+    },
+    [router, buildUrl]
+  );
+
+  // Prefetch tab routes on hover
+  const handleTabHover = useCallback(
+    (tabValue: StatusTabValue) => {
+      if (tabValue === activeTab) return;
+      router.prefetch(buildUrl({
+        status: tabValue === 'all' ? undefined : tabValue,
+        page: '0'
+      }));
+    },
+    [router, buildUrl, activeTab]
+  );
 
   const handlePageChange = (page: number) => {
     router.push(buildUrl({ page: page.toString() }));
   };
 
   const handleClearFilters = () => {
-    router.push('/psychometrics/competencies');
+    setOptimisticTab('all');
+    router.push(pathname);
   };
 
   const { content: competencies, totalElements, totalPages, number: pageNumber, first, last } = initialData;
@@ -140,19 +215,61 @@ export function CompetenciesTableClient({
 
   return (
     <div className="space-y-4">
-      {/* Filters - Colored Pills */}
-      <ReliabilityFilterPills
-        value={currentStatus || 'all'}
-        onChange={handleStatusChange}
-      />
+      {/* Status Tabs - Similar to items page */}
+      <Tabs value={activeTab} onValueChange={handleTabChange}>
+        <ScrollArea className="w-full">
+          <TabsList className="inline-flex w-max h-11 sm:h-10 p-1 bg-muted/50 rounded-lg gap-1">
+            {STATUS_TABS.map((tab) => (
+              <TabsTrigger
+                key={tab.value}
+                value={tab.value}
+                disabled={isPending}
+                onMouseEnter={() => handleTabHover(tab.value)}
+                onFocus={() => handleTabHover(tab.value)}
+                className={cn(
+                  'inline-flex flex-none items-center gap-1.5 px-3 sm:px-4 py-2 sm:py-1.5',
+                  'min-h-[40px] sm:min-h-[36px]',
+                  'data-[state=active]:bg-background data-[state=active]:shadow-sm',
+                  'text-xs sm:text-sm font-medium transition-all whitespace-nowrap rounded-md',
+                  isPending && 'opacity-70'
+                )}
+              >
+                <span className="hidden sm:inline">{tab.label}</span>
+                <span className="sm:hidden">{tab.shortLabel}</span>
+                <Badge
+                  variant="secondary"
+                  className={cn(
+                    'min-w-5 sm:min-w-6 h-5 justify-center text-[10px] sm:text-xs px-1 sm:px-1.5 rounded-sm',
+                    getTabBadgeClass(tab.value, activeTab === tab.value)
+                  )}
+                >
+                  {tab.value === 'all' ? totalElements : '•'}
+                </Badge>
+              </TabsTrigger>
+            ))}
+          </TabsList>
+          <ScrollBar orientation="horizontal" className="hidden" />
+        </ScrollArea>
+      </Tabs>
 
       {/* Results count */}
-      <div className="text-sm text-muted-foreground">
+      <div className="text-sm text-muted-foreground" role="status" aria-live="polite">
         Найдено: {totalElements} компетенций
       </div>
 
-      {/* Table / Mobile Card List */}
-      {hasNoData ? (
+      {/* Loading overlay */}
+      <div className="relative">
+        {isPending && (
+          <div className="absolute inset-0 z-10 flex items-center justify-center bg-background/60 backdrop-blur-[1px] rounded-lg">
+            <div className="flex items-center gap-2 bg-background/90 px-4 py-2 rounded-full shadow-sm border">
+              <Loader2 className="h-4 w-4 animate-spin text-primary" />
+              <span className="text-sm text-muted-foreground">Загрузка...</span>
+            </div>
+          </div>
+        )}
+
+        {/* Table / Mobile Card List */}
+        {hasNoData ? (
         <Card>
           <CardContent className="p-0">
             <NoDataYet entityName="данных о надежности" />
@@ -212,12 +329,13 @@ export function CompetenciesTableClient({
                       )}
                     >
                       <TableCell>
-                        <Link
+                        <UiLink
                           href={`/psychometrics/competencies/${comp.competencyId}`}
-                          className="hover:underline font-semibold text-foreground hover:text-primary transition-colors"
+                          variant="primary"
+                          className="font-semibold"
                         >
                           {comp.competencyName}
-                        </Link>
+                        </UiLink>
                       </TableCell>
                       <TableCell className="text-center">
                         <div className="flex flex-col items-center gap-1.5">
@@ -273,6 +391,7 @@ export function CompetenciesTableClient({
           </CardContent>
         </Card>
       )}
+      </div>
 
       {/* Pagination */}
       {totalPages > 1 && (

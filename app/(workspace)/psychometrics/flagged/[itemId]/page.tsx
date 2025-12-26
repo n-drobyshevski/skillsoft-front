@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
+import { UiLink } from '@/components/ui/ui-link';
 import {
   getPsychometricsItemDetailCached,
   getPsychometricsFlaggedItemsCached,
@@ -19,6 +20,7 @@ import {
   SimilarItemsCard,
 } from '../../_components';
 import { FlaggedItemDetailClient } from './_components/FlaggedItemDetailClient';
+import { MobileFlaggedItemLayoutWrapper } from './_components/MobileFlaggedItemLayoutWrapper';
 import {
   AlertTriangle,
   AlertOctagon,
@@ -273,15 +275,17 @@ export default async function FlaggedItemDetailPage({ params }: PageProps) {
   }));
 
   return (
-    <div className="flex flex-1 flex-col gap-6 p-4 pt-6 md:gap-8 md:p-6">
-      {/* Back navigation */}
-      <Link
-        href="/psychometrics/flagged"
-        className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors w-fit"
-      >
-        <ArrowLeft className="h-4 w-4" />
-        Вернуться к списку
-      </Link>
+    <MobileFlaggedItemLayoutWrapper item={item!} similarItems={flaggedItems}>
+      {/* Desktop Layout - hidden on mobile by wrapper */}
+      <div className="flex flex-1 flex-col gap-6 p-4 pt-6 md:gap-8 md:p-6">
+        {/* Back navigation */}
+        <UiLink
+          href="/psychometrics/flagged"
+          variant="muted"
+          leadingIcon={<ArrowLeft className="h-4 w-4" />}
+        >
+          Вернуться к списку
+        </UiLink>
 
       <PageHeader
         title="Проблемный элемент"
@@ -533,6 +537,7 @@ export default async function FlaggedItemDetailPage({ params }: PageProps) {
           </Button>
         </Link>
       </div>
-    </div>
+      </div>
+    </MobileFlaggedItemLayoutWrapper>
   );
 }

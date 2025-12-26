@@ -84,15 +84,15 @@ export function HistoryTestCard({ session }: HistoryTestCardProps) {
   return (
     <div
       className={cn(
-        'flex items-center gap-3 py-2.5 px-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors',
-        'border-l-2',
+        'flex items-center gap-2 py-1.5 sm:py-2.5 px-2 sm:px-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors',
+        'border-l-2 max-w-full overflow-hidden min-w-0',
         config.borderClass
       )}
     >
-      {/* Status Badge */}
+      {/* Status Badge - icon only on mobile */}
       <Badge variant="outline" className={cn('gap-1 shrink-0 text-xs', config.badgeClassName)}>
         <StatusIcon className="size-3" />
-        <span className="hidden xs:inline">{config.label}</span>
+        <span className="hidden sm:inline">{config.label}</span>
       </Badge>
 
       {/* Date */}
@@ -105,7 +105,7 @@ export function HistoryTestCard({ session }: HistoryTestCardProps) {
         <Badge
           variant="outline"
           className={cn(
-            "gap-1 shrink-0 text-xs ml-auto",
+            "gap-1 shrink-0 text-xs sm:ml-auto",
             session.result.passed
               ? "border-emerald-500/30 bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400"
               : "border-red-500/30 bg-red-50 dark:bg-red-950/30 text-red-700 dark:text-red-400"
@@ -122,22 +122,21 @@ export function HistoryTestCard({ session }: HistoryTestCardProps) {
 
       {/* Progress (if in progress) */}
       {session.status === SessionStatus.IN_PROGRESS && session.totalQuestions && (
-        <span className="text-xs text-muted-foreground ml-auto">
+        <span className="text-xs text-muted-foreground sm:ml-auto tabular-nums">
           {session.answeredQuestions || 0}/{session.totalQuestions}
         </span>
       )}
 
-      {/* Spacer for non-completed/non-in-progress */}
-      {session.status !== SessionStatus.COMPLETED && session.status !== SessionStatus.IN_PROGRESS && (
-        <span className="flex-1" />
-      )}
+      {/* Spacer - hidden on mobile with flex-wrap, shown on sm+ */}
+      <span className="hidden sm:flex flex-1" />
 
-      {/* Action Button */}
+      {/* Action Button - pushed to end on mobile via ml-auto */}
       <Button
         asChild
         variant="ghost"
         size="sm"
-        className="shrink-0 h-8 px-2 gap-1"
+        className="shrink-0 h-8 w-8 sm:h-8 sm:w-auto px-0 sm:px-2 gap-1 ml-auto sm:ml-0 touch-manipulation"
+        aria-label={`${actionConfig.label} - ${session.templateName}`}
       >
         <Link href={actionConfig.href}>
           <actionConfig.icon className="size-3.5" />

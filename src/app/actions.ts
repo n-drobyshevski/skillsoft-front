@@ -14,6 +14,9 @@ const COMPETENCIES_PATH = '/competencies';
 const BEHAVIORAL_INDICATORS_PATH = '/behavioral-indicators';
 const USERS_PATH = '/users';
 const HOME_PATH = '/';
+const PSYCHOMETRICS_PATH = '/psychometrics';
+const DOCS_PATH = '/docs';
+const SITEMAP_PATH = '/api/sitemap';
 
 export async function revalidateCompetencyTags(competencyId?: string) {
   try {
@@ -26,7 +29,7 @@ export async function revalidateCompetencyTags(competencyId?: string) {
       revalidatePath(`${COMPETENCIES_PATH}/${competencyId}`);
       revalidatePath(`/hr/competencies/${competencyId}`);
     }
-    
+
     // Invalidate cache tags used by 'use cache' functions
     // Using 'max' profile for stale-while-revalidate semantics (Next.js 16)
     revalidateTag('competencies', 'max');
@@ -35,6 +38,85 @@ export async function revalidateCompetencyTags(competencyId?: string) {
     }
   } catch {
     // Error revalidating competency paths - silently fail in production
+  }
+}
+
+/**
+ * Revalidate documentation pages cache
+ * Инвалидирует кеш страниц документации
+ *
+ * @param slug - Optional documentation page slug to invalidate specific page
+ *               Опциональный slug страницы для инвалидации конкретной страницы
+ *
+ * @example
+ * // Invalidate all docs pages / Инвалидировать все страницы документации
+ * await revalidateDocsTags();
+ *
+ * // Invalidate specific page / Инвалидировать конкретную страницу
+ * await revalidateDocsTags('getting-started');
+ */
+export async function revalidateDocsTags(slug?: string): Promise<{ success: boolean; message: string }> {
+  try {
+    // Invalidate the entire docs section
+    // Инвалидируем всю секцию документации
+    revalidatePath(DOCS_PATH);
+
+    // If slug provided, also invalidate the specific page
+    // Если указан slug, также инвалидируем конкретную страницу
+    if (slug) {
+      revalidatePath(`${DOCS_PATH}/${slug}`);
+    }
+
+    // Invalidate sitemap as docs content affects it
+    // Инвалидируем sitemap, так как контент документации влияет на него
+    revalidatePath(SITEMAP_PATH);
+
+    // Invalidate cache tags (using 'max' profile for stale-while-revalidate in Next.js 16)
+    // Инвалидируем теги кеша (используем профиль 'max' для stale-while-revalidate в Next.js 16)
+    revalidateTag('docs', 'max');
+    if (slug) {
+      revalidateTag(`docs-${slug}`, 'max');
+    }
+
+    return {
+      success: true,
+      message: slug
+        ? `Successfully revalidated docs page: ${slug}`
+        : 'Successfully revalidated all docs pages'
+    };
+  } catch (error) {
+    // Log error but don't throw to prevent cascading failures
+    // Логируем ошибку, но не выбрасываем исключение, чтобы предотвратить каскадные сбои
+    const errorMessage = error instanceof Error ? error.message : UNKNOWN_ERROR_MESSAGE;
+    console.error('[revalidateDocsTags] Error:', errorMessage);
+    return { success: false, message: `Revalidation failed: ${errorMessage}` };
+  }
+}
+
+/**
+ * Revalidate psychometrics cache after item status updates
+ */
+export async function revalidatePsychometricsTags(questionId?: string) {
+  try {
+    // Invalidate paths
+    revalidatePath(PSYCHOMETRICS_PATH);
+    revalidatePath(`${PSYCHOMETRICS_PATH}/items`);
+    revalidatePath(`${PSYCHOMETRICS_PATH}/flagged`);
+    revalidatePath(`${PSYCHOMETRICS_PATH}/dashboard`);
+    if (questionId) {
+      revalidatePath(`${PSYCHOMETRICS_PATH}/items/${questionId}`);
+      revalidatePath(`${PSYCHOMETRICS_PATH}/flagged/${questionId}`);
+    }
+
+    // Invalidate cache tags (using 'max' profile for stale-while-revalidate)
+    revalidateTag('psychometrics-items', 'max');
+    revalidateTag('psychometrics-dashboard', 'max');
+    revalidateTag('psychometrics-flagged', 'max');
+    if (questionId) {
+      revalidateTag(`psychometrics-item-${questionId}`, 'max');
+    }
+  } catch {
+    // Silently fail in production
   }
 }
 

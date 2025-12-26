@@ -17,6 +17,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { ItemStatistics } from '@/types/psychometrics';
 import { cn } from '@/lib/utils';
 import { BarChart3, TrendingUp } from 'lucide-react';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface MetricDistributionChartProps {
   items: ItemStatistics[];
@@ -134,6 +135,8 @@ function StatsSummaryDisplay({ stats }: { stats: StatsSummary | null }) {
 }
 
 export function DifficultyDistributionChart({ items, className }: MetricDistributionChartProps) {
+  const isMobile = useIsMobile();
+
   const { chartData, stats } = useMemo(() => {
     const values = items
       .filter(item => item.difficultyIndex != null)
@@ -143,6 +146,8 @@ export function DifficultyDistributionChart({ items, className }: MetricDistribu
       const count = values.filter(v => v >= bin.min && v < bin.max).length;
       return {
         label: bin.label,
+        // Shortened label for mobile
+        shortLabel: bin.label.split('-')[0],
         count,
         zone: bin.zone,
       };
@@ -155,21 +160,30 @@ export function DifficultyDistributionChart({ items, className }: MetricDistribu
   }, [items]);
 
   const maxCount = Math.max(...chartData.map(d => d.count), 1);
+  const chartHeight = isMobile ? 140 : 160;
 
   return (
     <Card className={className}>
       <CardHeader className="pb-2">
         <CardTitle className="text-sm flex items-center gap-2">
           <BarChart3 className="h-4 w-4 text-primary" />
-          Question Difficulty Distribution
+          <span className="hidden sm:inline">Question Difficulty Distribution</span>
+          <span className="sm:hidden">Распределение сложности</span>
         </CardTitle>
         <CardDescription className="text-xs">
-          p-value distribution (0.2-0.8 is optimal)
+          <span className="hidden sm:inline">p-value distribution (0.2-0.8 is optimal)</span>
+          <span className="sm:hidden">p-значения (0.2-0.8 оптимально)</span>
         </CardDescription>
       </CardHeader>
-      <CardContent>
-        <ResponsiveContainer width="100%" height={160}>
-          <BarChart data={chartData} margin={{ top: 10, right: 10, bottom: 20, left: 10 }}>
+      <CardContent className="px-2 sm:px-6">
+        <ResponsiveContainer width="100%" height={chartHeight}>
+          <BarChart
+            data={chartData}
+            margin={isMobile
+              ? { top: 8, right: 4, bottom: 24, left: 4 }
+              : { top: 10, right: 10, bottom: 20, left: 10 }
+            }
+          >
             <CartesianGrid strokeDasharray="3 3" vertical={false} className="stroke-muted" />
 
             {/* Optimal zone highlight */}
@@ -181,20 +195,20 @@ export function DifficultyDistributionChart({ items, className }: MetricDistribu
             />
 
             <XAxis
-              dataKey="label"
-              tick={{ fontSize: 10 }}
+              dataKey={isMobile ? 'shortLabel' : 'label'}
+              tick={{ fontSize: isMobile ? 9 : 10 }}
               tickLine={false}
               axisLine={false}
-              interval={0}
-              angle={-45}
-              textAnchor="end"
-              height={40}
+              interval={isMobile ? 1 : 0}
+              angle={isMobile ? 0 : -45}
+              textAnchor={isMobile ? 'middle' : 'end'}
+              height={isMobile ? 24 : 40}
             />
             <YAxis
-              tick={{ fontSize: 10 }}
+              tick={{ fontSize: isMobile ? 9 : 10 }}
               tickLine={false}
               axisLine={false}
-              width={30}
+              width={isMobile ? 20 : 30}
               domain={[0, maxCount]}
             />
             <Tooltip content={<CustomTooltip />} />
@@ -212,19 +226,22 @@ export function DifficultyDistributionChart({ items, className }: MetricDistribu
           </BarChart>
         </ResponsiveContainer>
 
-        {/* Legend */}
-        <div className="flex justify-center gap-4 text-xs text-muted-foreground mt-2">
+        {/* Legend - compact on mobile */}
+        <div className="flex justify-center gap-2 sm:gap-4 text-[10px] sm:text-xs text-muted-foreground mt-2 flex-wrap">
           <div className="flex items-center gap-1">
-            <div className="w-2.5 h-2.5 rounded bg-blue-500" />
-            <span>Too Hard</span>
+            <div className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded bg-blue-500" />
+            <span className="hidden sm:inline">Too Hard</span>
+            <span className="sm:hidden">Сложн.</span>
           </div>
           <div className="flex items-center gap-1">
-            <div className="w-2.5 h-2.5 rounded bg-emerald-500" />
-            <span>Optimal</span>
+            <div className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded bg-emerald-500" />
+            <span className="hidden sm:inline">Optimal</span>
+            <span className="sm:hidden">Оптим.</span>
           </div>
           <div className="flex items-center gap-1">
-            <div className="w-2.5 h-2.5 rounded bg-violet-500" />
-            <span>Too Easy</span>
+            <div className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded bg-violet-500" />
+            <span className="hidden sm:inline">Too Easy</span>
+            <span className="sm:hidden">Легко</span>
           </div>
         </div>
 
@@ -235,6 +252,8 @@ export function DifficultyDistributionChart({ items, className }: MetricDistribu
 }
 
 export function DiscriminationDistributionChart({ items, className }: MetricDistributionChartProps) {
+  const isMobile = useIsMobile();
+
   const { chartData, stats } = useMemo(() => {
     const values = items
       .filter(item => item.discriminationIndex != null)
@@ -261,21 +280,30 @@ export function DiscriminationDistributionChart({ items, className }: MetricDist
   }, [items]);
 
   const maxCount = Math.max(...chartData.map(d => d.count), 1);
+  const chartHeight = isMobile ? 140 : 160;
 
   return (
     <Card className={className}>
       <CardHeader className="pb-2">
         <CardTitle className="text-sm flex items-center gap-2">
           <TrendingUp className="h-4 w-4 text-primary" />
-          Question Effectiveness Distribution
+          <span className="hidden sm:inline">Question Effectiveness Distribution</span>
+          <span className="sm:hidden">Распределение эффективности</span>
         </CardTitle>
         <CardDescription className="text-xs">
-          rpb distribution (0.25+ is good)
+          <span className="hidden sm:inline">rpb distribution (0.25+ is good)</span>
+          <span className="sm:hidden">rpb-значения (0.25+ хорошо)</span>
         </CardDescription>
       </CardHeader>
-      <CardContent>
-        <ResponsiveContainer width="100%" height={160}>
-          <BarChart data={chartData} margin={{ top: 10, right: 10, bottom: 20, left: 10 }}>
+      <CardContent className="px-2 sm:px-6">
+        <ResponsiveContainer width="100%" height={chartHeight}>
+          <BarChart
+            data={chartData}
+            margin={isMobile
+              ? { top: 8, right: 4, bottom: 24, left: 4 }
+              : { top: 10, right: 10, bottom: 20, left: 10 }
+            }
+          >
             <CartesianGrid strokeDasharray="3 3" vertical={false} className="stroke-muted" />
 
             {/* Reference line at 0.25 threshold */}
@@ -288,19 +316,19 @@ export function DiscriminationDistributionChart({ items, className }: MetricDist
 
             <XAxis
               dataKey="label"
-              tick={{ fontSize: 10 }}
+              tick={{ fontSize: isMobile ? 9 : 10 }}
               tickLine={false}
               axisLine={false}
               interval={0}
-              angle={-45}
-              textAnchor="end"
-              height={40}
+              angle={isMobile ? 0 : -45}
+              textAnchor={isMobile ? 'middle' : 'end'}
+              height={isMobile ? 24 : 40}
             />
             <YAxis
-              tick={{ fontSize: 10 }}
+              tick={{ fontSize: isMobile ? 9 : 10 }}
               tickLine={false}
               axisLine={false}
-              width={30}
+              width={isMobile ? 20 : 30}
               domain={[0, maxCount]}
             />
             <Tooltip content={<CustomTooltip />} />
@@ -318,23 +346,27 @@ export function DiscriminationDistributionChart({ items, className }: MetricDist
           </BarChart>
         </ResponsiveContainer>
 
-        {/* Legend */}
-        <div className="flex justify-center gap-3 text-xs text-muted-foreground mt-2 flex-wrap">
+        {/* Legend - compact on mobile */}
+        <div className="flex justify-center gap-2 sm:gap-3 text-[10px] sm:text-xs text-muted-foreground mt-2 flex-wrap">
           <div className="flex items-center gap-1">
-            <div className="w-2.5 h-2.5 rounded bg-red-500" />
-            <span>Negative</span>
+            <div className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded bg-red-500" />
+            <span className="hidden sm:inline">Negative</span>
+            <span className="sm:hidden">Негат.</span>
           </div>
           <div className="flex items-center gap-1">
-            <div className="w-2.5 h-2.5 rounded bg-orange-500" />
-            <span>Critical</span>
+            <div className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded bg-orange-500" />
+            <span className="hidden sm:inline">Critical</span>
+            <span className="sm:hidden">Крит.</span>
           </div>
           <div className="flex items-center gap-1">
-            <div className="w-2.5 h-2.5 rounded bg-amber-500" />
-            <span>Warning</span>
+            <div className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded bg-amber-500" />
+            <span className="hidden sm:inline">Warning</span>
+            <span className="sm:hidden">Внимание</span>
           </div>
           <div className="flex items-center gap-1">
-            <div className="w-2.5 h-2.5 rounded bg-emerald-500" />
-            <span>Good</span>
+            <div className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded bg-emerald-500" />
+            <span className="hidden sm:inline">Good</span>
+            <span className="sm:hidden">Хорошо</span>
           </div>
         </div>
 

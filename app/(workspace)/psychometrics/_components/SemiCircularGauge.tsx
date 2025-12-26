@@ -2,7 +2,7 @@
 
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'framer-motion';
 
 export interface GaugeZone {
   min: number;
@@ -169,6 +169,7 @@ export function SemiCircularGauge({
 
   const activeZone = getActiveZone(value, zones);
   const displayValue = formatGaugeValue(value, format);
+  const prefersReducedMotion = useReducedMotion();
 
   // Calculate the end angle for the filled portion
   const endAngle = value != null ? valueToAngle(value, minValue, maxValue) : 180;
@@ -190,6 +191,11 @@ export function SemiCircularGauge({
         }))
     : [];
 
+  // Create accessible label for screen readers
+  const ariaLabel = value != null && activeZone
+    ? `${label}: ${displayValue}. Status: ${activeZone.label}`
+    : `${label}: No data available`;
+
   return (
     <div className={cn('flex flex-col items-center', className)}>
       <svg
@@ -197,6 +203,8 @@ export function SemiCircularGauge({
         height={config.height}
         viewBox={`0 0 ${config.width} ${config.height}`}
         className="overflow-visible"
+        role="img"
+        aria-label={ariaLabel}
       >
         {/* Background track */}
         <path
@@ -240,9 +248,9 @@ export function SemiCircularGauge({
             stroke={activeZone?.color || 'currentColor'}
             strokeWidth={strokeWidth}
             strokeLinecap="round"
-            initial={{ pathLength: 0, opacity: 0 }}
+            initial={prefersReducedMotion ? false : { pathLength: 0, opacity: 0 }}
             animate={{ pathLength: 1, opacity: 1 }}
-            transition={{ duration: 0.8, ease: 'easeOut' }}
+            transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.8, ease: 'easeOut' }}
           />
         )}
 
@@ -271,9 +279,9 @@ export function SemiCircularGauge({
             className="fill-background"
             stroke={activeZone?.color || 'currentColor'}
             strokeWidth={2}
-            initial={{ scale: 0 }}
+            initial={prefersReducedMotion ? false : { scale: 0 }}
             animate={{ scale: 1 }}
-            transition={{ delay: 0.6, duration: 0.3 }}
+            transition={prefersReducedMotion ? { duration: 0 } : { delay: 0.6, duration: 0.3 }}
           />
         )}
       </svg>

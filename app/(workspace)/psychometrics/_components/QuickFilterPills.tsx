@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef } from 'react';
+import { useRef, useState, useEffect, useCallback } from 'react';
 import { cn } from '@/lib/utils';
 
 export interface FilterOption<T extends string = string> {
@@ -71,8 +71,8 @@ const defaultColors = {
 
 const sizeStyles = {
   sm: {
-    pill: 'px-2 py-1 text-xs gap-1 min-h-[36px]',
-    count: 'text-[10px] px-1.5 py-0.5',
+    pill: 'px-2.5 py-1.5 text-xs gap-1 min-h-[44px]',
+    count: 'text-xs px-1.5 py-0.5',
   },
   md: {
     pill: 'px-3 py-1.5 text-sm gap-1.5 min-h-[44px]',
@@ -83,7 +83,7 @@ const sizeStyles = {
 /**
  * QuickFilterPills - Pill-style filter selector for status/category filtering
  * Supports colored pills with optional count badges.
- * Mobile-optimized with horizontal scroll and snap behavior.
+ * Mobile-optimized with horizontal scroll, snap behavior, and scroll indicators.
  */
 export function QuickFilterPills<T extends string>({
   options,
@@ -96,6 +96,38 @@ export function QuickFilterPills<T extends string>({
 }: QuickFilterPillsProps<T>) {
   const styles = sizeStyles[size];
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const [showLeftFade, setShowLeftFade] = useState(false);
+  const [showRightFade, setShowRightFade] = useState(false);
+
+  // Check scroll position for fade indicators
+  const updateScrollFades = useCallback(() => {
+    const container = scrollContainerRef.current;
+    if (!container || !mobileScroll) return;
+
+    const { scrollLeft, scrollWidth, clientWidth } = container;
+    const hasOverflow = scrollWidth > clientWidth;
+
+    setShowLeftFade(hasOverflow && scrollLeft > 8);
+    setShowRightFade(hasOverflow && scrollLeft < scrollWidth - clientWidth - 8);
+  }, [mobileScroll]);
+
+  // Update fades on mount and scroll - using layout effect for sync updates
+  useEffect(() => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+
+    // Schedule initial check after DOM paint
+    const timeoutId = setTimeout(updateScrollFades, 0);
+
+    container.addEventListener('scroll', updateScrollFades, { passive: true });
+    window.addEventListener('resize', updateScrollFades);
+
+    return () => {
+      clearTimeout(timeoutId);
+      container.removeEventListener('scroll', updateScrollFades);
+      window.removeEventListener('resize', updateScrollFades);
+    };
+  }, [updateScrollFades]);
 
   // Add "all" option if not present
   const allOptions: FilterOption<T>[] = options.some(opt => opt.value === 'all')
@@ -108,72 +140,90 @@ export function QuickFilterPills<T extends string>({
   };
 
   return (
-    <div
-      ref={scrollContainerRef}
-      className={cn(
-        // Base styles
-        'flex items-center gap-2',
-        // Mobile scroll behavior
-        mobileScroll && [
-          '-mx-4 px-4 sm:mx-0 sm:px-0', // Extend to edges on mobile
-          'overflow-x-auto',
-          'scrollbar-none', // Hide scrollbar
-          'snap-x snap-mandatory', // Snap behavior
-          'scroll-smooth',
-          // Flex wrap on desktop only
-          'sm:flex-wrap sm:overflow-visible',
-        ],
-        className
+    <div className="relative sm:static">
+      {/* Left fade indicator */}
+      {mobileScroll && showLeftFade && (
+        <div
+          className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-background to-transparent pointer-events-none z-10 sm:hidden"
+          aria-hidden="true"
+        />
       )}
-      role="group"
-      aria-label="Filter options"
-      style={{
-        // Hide scrollbar cross-browser
-        scrollbarWidth: 'none',
-        msOverflowStyle: 'none',
-      }}
-    >
-      {allOptions.map((option) => {
-        const isActive = value === option.value;
-        const colors = option.color ? colorStyles[option.color] : defaultColors;
 
-        return (
-          <button
-            key={option.value}
-            type="button"
-            onClick={() => handleChange(option.value)}
-            className={cn(
-              'inline-flex items-center rounded-full border font-medium transition-colors',
-              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
-              'whitespace-nowrap shrink-0', // Prevent wrapping on mobile
-              'snap-start', // Snap alignment
-              styles.pill,
-              isActive
-                ? colors.active
-                : cn(
-                    'bg-background border-border text-muted-foreground',
-                    colors.inactive
-                  )
-            )}
-            aria-pressed={isActive}
-          >
-            <span>{option.label}</span>
-            {option.count !== undefined && (
-              <span
-                className={cn(
-                  'inline-flex items-center justify-center rounded-full font-medium',
-                  styles.count,
-                  isActive ? colors.count : 'bg-muted text-muted-foreground'
-                )}
-              >
-                {option.count}
-              </span>
-            )}
-          </button>
-        );
-      })}
-      {/* Spacer for scroll padding on mobile */}
-      {mobileScroll && <div className="w-4 shrink-0 sm:hidden" aria-hidden="true" />}
+      {/* Right fade indicator */}
+      {mobileScroll && showRightFade && (
+        <div
+          className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-background to-transparent pointer-events-none z-10 sm:hidden"
+          aria-hidden="true"
+        />
+      )}
+
+      <div
+        ref={scrollContainerRef}
+        className={cn(
+          // Base styles
+          'flex items-center gap-2',
+          // Mobile scroll behavior
+          mobileScroll && [
+            '-mx-4 px-4 sm:mx-0 sm:px-0', // Extend to edges on mobile
+            'overflow-x-auto',
+            'scrollbar-none', // Hide scrollbar
+            'snap-x snap-mandatory', // Snap behavior
+            'scroll-smooth',
+            // Flex wrap on desktop only
+            'sm:flex-wrap sm:overflow-visible',
+          ],
+          className
+        )}
+        role="group"
+        aria-label="Фильтры"
+        style={{
+          // Hide scrollbar cross-browser
+          scrollbarWidth: 'none',
+          msOverflowStyle: 'none',
+        }}
+      >
+        {allOptions.map((option) => {
+          const isActive = value === option.value;
+          const colors = option.color ? colorStyles[option.color] : defaultColors;
+
+          return (
+            <button
+              key={option.value}
+              type="button"
+              onClick={() => handleChange(option.value)}
+              className={cn(
+                'inline-flex items-center rounded-full border font-medium transition-colors',
+                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+                'whitespace-nowrap shrink-0', // Prevent wrapping on mobile
+                'snap-start', // Snap alignment
+                styles.pill,
+                isActive
+                  ? colors.active
+                  : cn(
+                      'bg-background border-border text-muted-foreground',
+                      colors.inactive
+                    )
+              )}
+              aria-pressed={isActive}
+            >
+              <span>{option.label}</span>
+              {option.count !== undefined && (
+                <span
+                  className={cn(
+                    'inline-flex items-center justify-center rounded-full font-medium',
+                    styles.count,
+                    isActive ? colors.count : 'bg-muted text-muted-foreground'
+                  )}
+                >
+                  {option.count}
+                </span>
+              )}
+            </button>
+          );
+        })}
+        {/* Spacer for scroll padding on mobile */}
+        {mobileScroll && <div className="w-4 shrink-0 sm:hidden" aria-hidden="true" />}
+      </div>
     </div>
   );
 }

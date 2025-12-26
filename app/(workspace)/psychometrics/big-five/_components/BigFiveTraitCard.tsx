@@ -124,7 +124,7 @@ export function BigFiveTraitCard({ reliability, className }: BigFiveTraitCardPro
             <div className={cn('text-sm font-semibold tabular-nums', colors.text)}>
               {reliability.contributingCompetencies ?? '-'}
             </div>
-            <div className="text-[10px] text-muted-foreground">
+            <div className="text-[11px] text-muted-foreground">
               Компетенций
             </div>
           </div>
@@ -136,7 +136,7 @@ export function BigFiveTraitCard({ reliability, className }: BigFiveTraitCardPro
             <div className={cn('text-sm font-semibold tabular-nums', colors.text)}>
               {reliability.totalItems ?? '-'}
             </div>
-            <div className="text-[10px] text-muted-foreground">
+            <div className="text-[11px] text-muted-foreground">
               Вопросов
             </div>
           </div>
@@ -148,7 +148,7 @@ export function BigFiveTraitCard({ reliability, className }: BigFiveTraitCardPro
             <div className={cn('text-sm font-semibold tabular-nums', colors.text)}>
               {reliability.sampleSize?.toLocaleString() ?? '-'}
             </div>
-            <div className="text-[10px] text-muted-foreground">
+            <div className="text-[11px] text-muted-foreground">
               Ответов
             </div>
           </div>

@@ -1,21 +1,12 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { Suspense } from 'react';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import PageHeader from '@/components/common/PageHeader';
+import { ChartErrorBoundary, SectionErrorBoundary } from '@/components/common';
 import { InlineError } from '@/components/feedback';
-import {
-  ArrowRight,
-  RefreshCw,
-  Shield,
-  AlertTriangle,
-  Brain,
-  FileText,
-  Clock,
-  BarChart3,
-} from 'lucide-react';
+import { RefreshCw, Clock, BarChart3 } from 'lucide-react';
 import {
   PsychometricStatsCards,
   FlaggedItemsTable,
@@ -23,21 +14,25 @@ import {
   DashboardHero,
   ActionableInsightsList,
   ItemQualityScatter,
-  ReliabilityGauge,
   MetricDistributionCharts,
-  MobileChartsSection,
+  MobileAnalyticsAccordion,
   AverageDiscriminationHelp,
   AverageAlphaHelp,
   ActiveItemsHelp,
   ReliableCompetenciesHelp,
+  QuickNavCard,
 } from './_components';
+import { ReliabilityGaugesGrid } from './_components/ReliabilityGaugesGrid';
 import {
   getPsychometricsDashboardCached,
   getPsychometricsItemsCached,
   getPsychometricsCompetenciesCached,
 } from '@/services/api.cache.psychometrics';
-import type { PsychometricHealthReport, ItemStatistics, CompetencyReliability } from '@/types/psychometrics';
 import { ErrorCategory, ErrorAction } from '@/types/errors';
+
+// PPR disabled - requires cacheComponents which is incompatible with Clerk
+// TODO: Re-enable when Clerk supports Next.js 16 cacheComponents
+// export const experimental_ppr = true;
 
 export const metadata: Metadata = {
   title: 'Psychometrics - SkillSoft',
@@ -90,48 +85,11 @@ function ReliabilityGaugesSkeleton() {
   );
 }
 
-// Quick navigation card
-function QuickNavCard({
-  href,
-  icon: Icon,
-  title,
-  description,
-  count,
-  iconColor,
-}: {
-  href: string;
-  icon: React.ElementType;
-  title: string;
-  description: string;
-  count?: number;
-  iconColor: string;
-}) {
-  return (
-    <Link href={href}>
-      <Card className="hover:shadow-md transition-all hover:border-primary/20 cursor-pointer group h-full">
-        <CardContent className="p-4 flex items-start gap-4">
-          <div className={`p-2 rounded-lg ${iconColor} shrink-0`}>
-            <Icon className="h-5 w-5" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center justify-between">
-              <h3 className="font-medium">{title}</h3>
-              {count !== undefined && (
-                <span className="text-lg font-bold text-muted-foreground">{count}</span>
-              )}
-            </div>
-            <p className="text-sm text-muted-foreground mt-0.5">{description}</p>
-          </div>
-          <ArrowRight className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity shrink-0 self-center" />
-        </CardContent>
-      </Card>
-    </Link>
-  );
-}
 
 // Async wrapper for ItemQualityScatter chart
+// Uses sample of 300 items for efficient visualization (statistically representative)
 async function ItemQualityScatterWrapper() {
-  const itemsPage = await getPsychometricsItemsCached({ size: 1000 });
+  const itemsPage = await getPsychometricsItemsCached({ size: 300 });
   const items = itemsPage?.content ?? [];
 
   if (items.length === 0) {
@@ -142,12 +100,21 @@ async function ItemQualityScatterWrapper() {
     );
   }
 
-  return <ItemQualityScatter items={items} height={450} />;
+  return (
+    <ChartErrorBoundary
+      height={450}
+      title="Chart Error"
+      description="Unable to render the item quality scatter chart. Try refreshing."
+    >
+      <ItemQualityScatter items={items} height={450} />
+    </ChartErrorBoundary>
+  );
 }
 
 // Async wrapper for MetricDistributionCharts
+// Uses sample of 300 items for efficient distribution histograms
 async function MetricDistributionWrapper() {
-  const itemsPage = await getPsychometricsItemsCached({ size: 1000 });
+  const itemsPage = await getPsychometricsItemsCached({ size: 300 });
   const items = itemsPage?.content ?? [];
 
   if (items.length === 0) {
@@ -158,66 +125,46 @@ async function MetricDistributionWrapper() {
     );
   }
 
-  return <MetricDistributionCharts items={items} />;
+  return (
+    <ChartErrorBoundary
+      height={400}
+      title="Distribution Chart Error"
+      description="Unable to render the metric distribution charts. Try refreshing."
+    >
+      <MetricDistributionCharts items={items} />
+    </ChartErrorBoundary>
+  );
 }
 
-// Async wrapper for ReliabilityGauges
+// Async wrapper for ReliabilityGauges - uses client component for mobile detection
 async function ReliabilityGaugesWrapper() {
   const competenciesPage = await getPsychometricsCompetenciesCached({ size: 100 });
   const competencies = competenciesPage?.content ?? [];
 
-  if (competencies.length === 0) {
-    return (
-      <Card className="flex items-center justify-center h-[200px]">
-        <p className="text-muted-foreground">No reliability data available</p>
-      </Card>
-    );
-  }
+  return (
+    <SectionErrorBoundary
+      title="Reliability Gauges Error"
+      description="Unable to render reliability gauges. Try refreshing."
+    >
+      <ReliabilityGaugesGrid competencies={competencies} />
+    </SectionErrorBoundary>
+  );
+}
+
+// Async wrapper for MobileAnalyticsAccordion - fetches items and provides to accordion
+// Uses sample of 300 items for mobile summary calculations (same as charts)
+async function AnalyticsZoneWrapper({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const itemsPage = await getPsychometricsItemsCached({ size: 300 });
+  const items = itemsPage?.content ?? [];
 
   return (
-    <Card>
-      <CardHeader className="pb-3">
-        <CardTitle className="text-base font-semibold flex items-center gap-2">
-          <Shield className="h-4 w-4 text-muted-foreground" />
-          Test Reliability Scores
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        {/* Mobile: show 4 in 2x2, Desktop: show 6 in 2x3 */}
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-          {/* Show first 4 on mobile (via CSS), 6 on desktop */}
-          {competencies.slice(0, 6).map((comp, index) => (
-            <Link
-              key={comp.competencyId}
-              href={`/psychometrics/competencies/${comp.competencyId}`}
-              className={`hover:opacity-80 transition-opacity ${index >= 4 ? 'hidden md:block' : ''}`}
-            >
-              <ReliabilityGauge
-                value={comp.cronbachAlpha}
-                competencyName={comp.competencyName}
-                sampleSize={comp.sampleSize}
-                itemCount={comp.itemCount}
-                size="sm"
-              />
-            </Link>
-          ))}
-        </div>
-        {/* Show "view all" if more than 4 on mobile, or more than 6 on desktop */}
-        {competencies.length > 4 && (
-          <Link href="/psychometrics/competencies">
-            <Button variant="ghost" size="sm" className="w-full mt-4">
-              <span className="md:hidden">
-                View all {competencies.length} competencies
-              </span>
-              <span className="hidden md:inline">
-                {competencies.length > 6 ? `View all ${competencies.length} competencies` : 'View competencies page'}
-              </span>
-              <ArrowRight className="h-4 w-4 ml-2" />
-            </Button>
-          </Link>
-        )}
-      </CardContent>
-    </Card>
+    <MobileAnalyticsAccordion items={items}>
+      {children}
+    </MobileAnalyticsAccordion>
   );
 }
 
@@ -226,7 +173,7 @@ export default async function PsychometricsPage() {
   const report = await getPsychometricsDashboardCached();
 
   return (
-    <div className="flex flex-1 flex-col gap-6 p-4 pt-6 md:gap-8 md:p-6">
+    <div className="flex flex-1 flex-col gap-3 p-2.5 pt-3 sm:gap-4 sm:p-3 sm:pt-4 md:gap-6 md:p-6 min-w-0 overflow-x-hidden">
       <PageHeader
         title="Psychometrics"
         description="Analyze assessment item quality, competency reliability, and personality trait measurements"
@@ -258,37 +205,33 @@ export default async function PsychometricsPage() {
         </Suspense>
       )}
 
-      {/* Quick Navigation */}
-      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+      {/* Quick Navigation - 2x2 full-width on mobile, 4 across on desktop */}
+      <div className="grid gap-2 sm:gap-4 grid-cols-2 lg:grid-cols-4">
         <QuickNavCard
           href="/psychometrics/items"
-          icon={FileText}
-          title="Assessment Items"
-          description="Question statistics"
+          icon="FileText"
+          title="Items"
           count={report?.totalItems}
           iconColor="bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400"
         />
         <QuickNavCard
           href="/psychometrics/competencies"
-          icon={Shield}
+          icon="Shield"
           title="Competencies"
-          description="Measurement reliability"
           count={report?.reliableCompetencies}
           iconColor="bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400"
         />
         <QuickNavCard
           href="/psychometrics/flagged"
-          icon={AlertTriangle}
-          title="Flagged Items"
-          description="Items needing attention"
+          icon="AlertTriangle"
+          title="Flagged"
           count={report?.flaggedItems}
           iconColor="bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400"
         />
         <QuickNavCard
           href="/psychometrics/big-five"
-          icon={Brain}
+          icon="Brain"
           title="Big Five"
-          description="Trait reliability"
           count={report?.bigFiveReliabilitySummary?.reliableTraits}
           iconColor="bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400"
         />
@@ -297,20 +240,26 @@ export default async function PsychometricsPage() {
       {/* Main Dashboard Content */}
       {report && (
         <>
-          {/* Analytics Zone - 2 Column Layout (collapsible on mobile) */}
-          <MobileChartsSection>
-            <div className="grid gap-6 lg:grid-cols-[1.5fr_1fr]">
-              {/* Left Column - Item Quality Scatter (streaming) */}
-              <Suspense fallback={<ChartSkeleton />}>
-                <ItemQualityScatterWrapper />
-              </Suspense>
+          {/* Analytics Zone - Accordion on mobile, 2 Column Layout on desktop */}
+          <Suspense fallback={<ChartSkeleton />}>
+            <AnalyticsZoneWrapper>
+              <div className="grid gap-6 lg:grid-cols-[1.5fr_1fr]">
+                {/* Left Column - Item Quality Scatter (streaming) */}
+                <div className="min-w-0">
+                  <Suspense fallback={<ChartSkeleton />}>
+                    <ItemQualityScatterWrapper />
+                  </Suspense>
+                </div>
 
-              {/* Right Column - Distribution Charts (streaming) */}
-              <Suspense fallback={<ChartSkeleton />}>
-                <MetricDistributionWrapper />
-              </Suspense>
-            </div>
-          </MobileChartsSection>
+                {/* Right Column - Distribution Charts (streaming) */}
+                <div className="min-w-0">
+                  <Suspense fallback={<ChartSkeleton />}>
+                    <MetricDistributionWrapper />
+                  </Suspense>
+                </div>
+              </div>
+            </AnalyticsZoneWrapper>
+          </Suspense>
 
           {/* Stats Cards - renders immediately with report data */}
           <Suspense fallback={<StatsCardsSkeleton />}>
@@ -318,57 +267,57 @@ export default async function PsychometricsPage() {
           </Suspense>
 
           {/* Bottom Zone - Insights and Reliability Gauges */}
-          <div className="grid gap-6 lg:grid-cols-2">
+          <div className="grid gap-2 sm:gap-3 md:gap-6 lg:grid-cols-2">
             {/* Left - Flagged Items Table + Insights */}
-            <div className="space-y-4">
+            <div className="space-y-2 sm:space-y-3 md:space-y-4 min-w-0">
               <FlaggedItemsTable items={report.topFlaggedItems} maxItems={5} />
-              <ActionableInsightsList report={report} maxInsights={3} compact />
+              {/* Hide insights on mobile - already shown in accordion */}
+              <div className="hidden md:block">
+                <ActionableInsightsList report={report} maxInsights={3} compact />
+              </div>
             </div>
 
             {/* Right - Reliability Gauges (streaming) + Last Audit Info */}
-            <div className="space-y-4">
+            <div className="space-y-2 sm:space-y-3 md:space-y-4 min-w-0">
               {/* Reliability Gauges Grid - 2x2 on mobile, 3 columns on tablet+ */}
               <Suspense fallback={<ReliabilityGaugesSkeleton />}>
                 <ReliabilityGaugesWrapper />
               </Suspense>
 
-              {/* Last Audit Info */}
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-base font-semibold flex items-center gap-2">
+              {/* Last Audit Info - compact on mobile */}
+              <Card className="hidden md:block">
+                <CardHeader className="pb-2 md:pb-3">
+                  <CardTitle className="text-sm md:text-base font-semibold flex items-center gap-2">
                     <Clock className="h-4 w-4 text-muted-foreground" />
                     Last Audit
                   </CardTitle>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="pt-0 md:pt-1">
                   {report.lastAuditRun ? (
-                    <div className="space-y-2">
-                      <p className="text-2xl font-bold">
+                    <div className="space-y-1 md:space-y-2">
+                      <p className="text-lg md:text-2xl font-bold">
                         {new Date(report.lastAuditRun).toLocaleString('en-US', {
                           day: 'numeric',
-                          month: 'long',
+                          month: 'short',
                           hour: '2-digit',
                           minute: '2-digit',
                         })}
                       </p>
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-xs md:text-sm text-muted-foreground hidden md:block">
                         Recommended to run audit after significant new response data
                       </p>
                     </div>
                   ) : (
-                    <div className="text-center py-4">
-                      <RefreshCw className="h-8 w-8 mx-auto mb-2 text-muted-foreground opacity-50" />
-                      <p className="text-muted-foreground">Audit not yet run</p>
-                      <p className="text-sm text-muted-foreground mt-1">
-                        Click &quot;Run Audit&quot; to start analysis
-                      </p>
+                    <div className="text-center py-2 md:py-4">
+                      <RefreshCw className="h-6 w-6 md:h-8 md:w-8 mx-auto mb-2 text-muted-foreground opacity-50" />
+                      <p className="text-sm text-muted-foreground">Audit not yet run</p>
                     </div>
                   )}
                 </CardContent>
               </Card>
 
-              {/* Key Metrics Summary - with help tooltips */}
-              <Card>
+              {/* Key Metrics Summary - hidden on mobile (already in hero scroll) */}
+              <Card className="hidden md:block">
                 <CardHeader className="pb-3">
                   <CardTitle className="text-base font-semibold flex items-center gap-2">
                     <BarChart3 className="h-4 w-4 text-muted-foreground" />

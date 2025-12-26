@@ -19,6 +19,7 @@
 
 import { cache } from 'react';
 import { psychometricsApi } from './api';
+import { loggers } from '@/lib/logger';
 import type {
   PsychometricHealthReport,
   ItemStatistics,
@@ -31,6 +32,9 @@ import type {
   BigFiveReliability,
   Page,
 } from '@/types/psychometrics';
+
+// Create module-specific logger
+const log = loggers.psychometrics.withContext('Cache');
 
 // ============================================================================
 // Dashboard - Request-deduplicated fetchers using React cache()
@@ -45,7 +49,7 @@ export const getPsychometricsDashboardCached = cache(
     try {
       return await psychometricsApi.getDashboard();
     } catch (error) {
-      console.error('[Psychometrics Cache] Dashboard fetch error:', error);
+      log.error('Dashboard fetch error', error instanceof Error ? error : undefined);
       return null;
     }
   }
@@ -64,7 +68,7 @@ export const getPsychometricsItemsCached = cache(
     try {
       return await psychometricsApi.getItems(params);
     } catch (error) {
-      console.error('[Psychometrics Cache] Items fetch error:', error);
+      log.error('Items fetch error', error instanceof Error ? error : undefined, { params });
       return null;
     }
   }
@@ -78,7 +82,7 @@ export const getPsychometricsItemDetailCached = cache(
     try {
       return await psychometricsApi.getItemDetail(questionId);
     } catch (error) {
-      console.error('[Psychometrics Cache] Item detail fetch error:', error);
+      log.error('Item detail fetch error', error instanceof Error ? error : undefined, { questionId });
       return null;
     }
   }
@@ -96,7 +100,7 @@ export const getPsychometricsCompetenciesCached = cache(
     try {
       return await psychometricsApi.getCompetencies(params);
     } catch (error) {
-      console.error('[Psychometrics Cache] Competencies fetch error:', error);
+      log.error('Competencies fetch error', error instanceof Error ? error : undefined, { params });
       return null;
     }
   }
@@ -110,7 +114,7 @@ export const getPsychometricsCompetencyDetailCached = cache(
     try {
       return await psychometricsApi.getCompetencyDetail(competencyId);
     } catch (error) {
-      console.error('[Psychometrics Cache] Competency detail fetch error:', error);
+      log.error('Competency detail fetch error', error instanceof Error ? error : undefined, { competencyId });
       return null;
     }
   }
@@ -129,7 +133,7 @@ export const getPsychometricsFlaggedItemsCached = cache(
     try {
       return await psychometricsApi.getFlaggedItems();
     } catch (error) {
-      console.error('[Psychometrics Cache] Flagged items fetch error:', error);
+      log.error('Flagged items fetch error', error instanceof Error ? error : undefined);
       return null;
     }
   }
@@ -147,7 +151,7 @@ export const getPsychometricsBigFiveCached = cache(
     try {
       return await psychometricsApi.getBigFiveReliability();
     } catch (error) {
-      console.error('[Psychometrics Cache] Big Five fetch error:', error);
+      log.error('Big Five fetch error', error instanceof Error ? error : undefined);
       return null;
     }
   }

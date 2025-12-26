@@ -28,6 +28,7 @@ export const docsNavigation: NavSection[] = [
   {
     title: "Как работает система",
     items: [
+      { title: "Обзор системы", href: "/docs/how-it-works" },
       { title: "Сборка тестов", href: "/docs/test-building" },
       { title: "Система оценивания", href: "/docs/scoring" },
       { title: "Психометрика", href: "/docs/psychometrics" },

@@ -122,10 +122,26 @@ export {
   ItemQualityScatter,
   ReliabilityGauge,
   ReliabilityGaugeMini,
+  ReliabilityGaugeCompact,
+  RadialReliabilityChart,
+  RadialReliabilityMini,
+  getReliabilityStatusConfig,
   DifficultyDistributionChart,
   DiscriminationDistributionChart,
   MetricDistributionCharts,
+  // Lazy-loaded chart variants (for code splitting)
+  ItemQualityScatterLazy,
+  MetricDistributionChartsLazy,
+  DifficultyDistributionChartLazy,
+  DiscriminationDistributionChartLazy,
+  ReliabilityGaugeLazy,
+  RadialReliabilityChartLazy,
 } from './charts';
+
+// New reliability components (mobile-first, exception-first design)
+export { ReliabilityQuickStats, categorizeReliability, type StatusCategory } from './ReliabilityQuickStats';
+export { CompactReliabilityCard, CompactReliabilityCardSkeleton } from './CompactReliabilityCard';
+export { CompactReliabilityList, CompactReliabilityListSkeleton } from './CompactReliabilityList';
 
 // Mobile card components
 export { MobileItemCard, MobileItemCardList } from './MobileItemCard';
@@ -133,6 +149,7 @@ export { MobileCompetencyCard, MobileCompetencyCardList } from './MobileCompeten
 
 // Mobile-responsive utility components
 export { MobileChartsSection } from './MobileChartsSection';
+export { MobileAnalyticsAccordion } from './MobileAnalyticsAccordion';
 
 // Semi-circular gauge components
 export {
@@ -168,3 +185,12 @@ export {
 
 // Re-export ValidityStatusIcon
 export { ValidityStatusIcon } from './ValidityStatusBadge';
+
+// Navigation components with prefetching
+export { QuickNavCard } from './QuickNavCard';
+
+// Alpha-if-deleted analysis components
+export {
+  AlphaIfDeletedList,
+  AlphaIfDeletedCompact,
+} from './AlphaIfDeletedList';

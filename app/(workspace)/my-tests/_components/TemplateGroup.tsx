@@ -43,12 +43,14 @@ export function TemplateGroup({ group, defaultExpanded = false }: TemplateGroupP
   const showBestScore = group.stats.bestScore !== null && group.stats.completedAttempts > 0;
 
   return (
-    <div className="space-y-2">
-      {/* Simplified Header: Template Name + Key Stats */}
-      <div className="flex items-center justify-between gap-3 px-1">
-        <h3 className="font-semibold text-base truncate">{group.templateName}</h3>
+    <div className="space-y-2 max-w-full overflow-hidden">
+      {/* Simplified Header: Template Name + Key Stats - stacks on very narrow screens */}
+      <div className="flex items-center justify-between gap-2 px-1 min-w-0">
+        <h3 className="font-semibold text-sm sm:text-base truncate min-w-0 flex-1">
+          {group.templateName}
+        </h3>
 
-        <div className="flex items-center gap-2 shrink-0">
+        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
           {/* Best Score (if any completed) */}
           {showBestScore && (
             <Badge
@@ -59,16 +61,18 @@ export function TemplateGroup({ group, defaultExpanded = false }: TemplateGroupP
                   ? 'border-emerald-500/30 bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400'
                   : 'border-amber-500/30 bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-400'
               )}
+              aria-label={`Лучший результат: ${Math.round(group.stats.bestScore!)}%`}
             >
               <Trophy className="size-3" />
               {Math.round(group.stats.bestScore!)}%
             </Badge>
           )}
 
-          {/* Attempts count (only if multiple) */}
+          {/* Attempts count (only if multiple) - simplified on mobile */}
           {group.stats.totalAttempts > 1 && (
             <Badge variant="secondary" className="text-xs">
-              {group.stats.totalAttempts} {getAttemptsLabel(group.stats.totalAttempts)}
+              <span className="sm:hidden">{group.stats.totalAttempts}x</span>
+              <span className="hidden sm:inline">{group.stats.totalAttempts} {getAttemptsLabel(group.stats.totalAttempts)}</span>
             </Badge>
           )}
         </div>
@@ -84,15 +88,16 @@ export function TemplateGroup({ group, defaultExpanded = false }: TemplateGroupP
             <Button
               variant="ghost"
               size="sm"
-              className="w-full justify-between h-8 px-3 text-muted-foreground hover:text-foreground hover:bg-muted/50"
+              className="w-full justify-between h-7 sm:h-8 px-2 sm:px-3 text-muted-foreground hover:text-foreground hover:bg-muted/50"
             >
-              <span className="flex items-center gap-2 text-xs">
-                <History className="size-3.5" />
-                {getPreviousAttemptsLabel(group.previousSessions.length)}
+              <span className="flex items-center gap-1.5 sm:gap-2 text-xs">
+                <History className="size-3 sm:size-3.5" />
+                <span className="sm:hidden">{group.previousSessions.length} ранее</span>
+                <span className="hidden sm:inline">{getPreviousAttemptsLabel(group.previousSessions.length)}</span>
               </span>
               <ChevronDown
                 className={cn(
-                  'size-4 transition-transform duration-200',
+                  'size-3.5 sm:size-4 transition-transform duration-200',
                   isOpen && 'rotate-180'
                 )}
               />

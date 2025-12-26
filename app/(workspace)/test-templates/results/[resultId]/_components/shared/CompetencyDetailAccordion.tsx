@@ -72,7 +72,7 @@ function getNeutralTierConfig(percentage: number) {
 }
 
 /**
- * Competency details shown in accordion
+ * Competency details shown in accordion - mobile optimized
  */
 function CompetencyDetails({
   competency,
@@ -85,44 +85,44 @@ function CompetencyDetails({
   const config = showPassFail ? getTierConfig(percentage) : getNeutralTierConfig(percentage);
 
   return (
-    <div className="pl-4 space-y-3">
+    <div className="pl-2 sm:pl-4 space-y-2 sm:space-y-3">
       {/* Score summary */}
-      <div className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
-        <div className="flex items-center gap-2">
-          <span className="text-lg">{config.icon}</span>
-          <span className="text-sm font-medium">{config.label}</span>
+      <div className="flex items-center justify-between p-2 sm:p-3 bg-muted/30 rounded-lg gap-2">
+        <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
+          <span className="text-base sm:text-lg shrink-0">{config.icon}</span>
+          <span className="text-xs sm:text-sm font-medium truncate">{config.label}</span>
         </div>
-        <div className="text-right">
-          <div className={cn("text-xl font-bold", config.color)}>
+        <div className="text-right shrink-0">
+          <div className={cn("text-lg sm:text-xl font-bold", config.color)}>
             {percentage}%
           </div>
-          <div className="text-xs text-muted-foreground">
-            {competency.score.toFixed(1)} / {competency.maxScore.toFixed(1)} points
+          <div className="text-[10px] sm:text-xs text-muted-foreground">
+            {competency.score.toFixed(1)} / {competency.maxScore.toFixed(1)}
           </div>
         </div>
       </div>
 
       {/* Indicator breakdown */}
       {competency.indicatorScores && competency.indicatorScores.length > 0 && (
-        <div className="space-y-2">
-          <h5 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-            Behavioral Indicators ({competency.indicatorScores.length})
+        <div className="space-y-1.5 sm:space-y-2">
+          <h5 className="text-[10px] sm:text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+            Indicators ({competency.indicatorScores.length})
           </h5>
-          <div className="space-y-2">
+          <div className="space-y-1.5 sm:space-y-2">
             {competency.indicatorScores.map(indicator => {
               const indicatorConfig = showPassFail
                 ? getTierConfig(indicator.percentage)
                 : getNeutralTierConfig(indicator.percentage);
 
               return (
-                <div key={indicator.indicatorId} className="flex items-center gap-3 text-sm">
+                <div key={indicator.indicatorId} className="flex items-center gap-2 text-xs sm:text-sm">
                   <div className="flex-1 min-w-0">
-                    <p className="text-xs text-muted-foreground truncate" title={indicator.indicatorTitle}>
+                    <p className="text-[10px] sm:text-xs text-muted-foreground truncate" title={indicator.indicatorTitle}>
                       {indicator.indicatorTitle}
                     </p>
                   </div>
-                  <div className="flex items-center gap-2 shrink-0">
-                    <div className="w-20 h-1.5 bg-muted/30 rounded-full overflow-hidden">
+                  <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+                    <div className="w-12 sm:w-20 h-1 sm:h-1.5 bg-muted/30 rounded-full overflow-hidden">
                       <div
                         className={cn(
                           "h-full rounded-full transition-all",
@@ -135,7 +135,7 @@ function CompetencyDetails({
                       />
                     </div>
                     <span className={cn(
-                      "text-xs font-semibold tabular-nums w-10 text-right",
+                      "text-[10px] sm:text-xs font-semibold tabular-nums w-8 sm:w-10 text-right",
                       showPassFail ? indicatorConfig.color : 'text-primary'
                     )}>
                       {Math.round(indicator.percentage)}%
@@ -175,16 +175,16 @@ export function CompetencyDetailAccordion({
 
   return (
     <Card className="animate-fadeInUp-3">
-      <CardHeader className="pb-3">
-        <CardTitle className="text-base flex items-center gap-2">
-          <FileText className="h-4 w-4" />
-          Detailed Competency Breakdown
+      <CardHeader className="pb-2 sm:pb-3 px-3 sm:px-6">
+        <CardTitle className="text-sm sm:text-base flex items-center gap-2">
+          <FileText className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
+          <span className="truncate">Detailed Breakdown</span>
         </CardTitle>
-        <CardDescription className="text-xs">
-          Expand to view detailed results
+        <CardDescription className="text-[10px] sm:text-xs">
+          Expand to view details
         </CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="px-2 sm:px-6">
         <Accordion type="single" collapsible className="w-full">
           {sortedCompetencies.map((competency, index) => {
             const percentage = Math.round(competency.percentage);
@@ -194,20 +194,50 @@ export function CompetencyDetailAccordion({
 
             return (
               <AccordionItem key={competency.competencyId} value={`item-${index}`}>
-                <AccordionTrigger className="hover:no-underline py-3">
-                  <div className="flex items-center justify-between w-full pr-4">
-                    <div className="flex items-center gap-3 flex-1 min-w-0">
-                      <span className="text-sm font-medium truncate">
+                <AccordionTrigger className="hover:no-underline py-2 sm:py-3 px-1 sm:px-0">
+                  {/* Mobile: 3-row layout | Desktop: 1-row layout */}
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between w-full pr-2 sm:pr-4 gap-1 sm:gap-2">
+                    {/* Mobile Row 1: Name only | Desktop: Name + Badge */}
+                    <div className="flex items-center gap-2 sm:gap-3 sm:flex-1 min-w-0">
+                      <span className="text-xs sm:text-sm font-medium truncate text-left">
                         {competency.competencyName}
                       </span>
+                      {/* Category badge - desktop only */}
                       {competency.competencyCategory && (
-                        <Badge variant="outline" className="text-xs shrink-0">
+                        <Badge variant="outline" className="text-[9px] sm:text-xs shrink-0 hidden sm:inline-flex">
                           {competency.competencyCategory}
                         </Badge>
                       )}
                     </div>
-                    <div className="flex items-center gap-3 shrink-0">
-                      <div className="w-24 sm:w-32 h-2 bg-muted/30 rounded-full overflow-hidden">
+
+                    {/* Mobile Row 2: Score + Tier label */}
+                    <div className="flex items-center justify-between sm:hidden">
+                      <span className={cn(
+                        "text-xs font-bold tabular-nums",
+                        config.color
+                      )}>
+                        {percentage}%
+                      </span>
+                      <span className={cn(
+                        "text-[10px] font-medium px-1.5 py-0.5 rounded",
+                        config.bgColor,
+                        config.color
+                      )}>
+                        {config.label}
+                      </span>
+                    </div>
+
+                    {/* Mobile Row 3: Full-width progress bar */}
+                    <div className="w-full sm:hidden h-1.5 bg-muted/30 rounded-full overflow-hidden">
+                      <div
+                        className={cn("h-full rounded-full transition-all", config.barColor)}
+                        style={{ width: `${competency.percentage}%` }}
+                      />
+                    </div>
+
+                    {/* Desktop: Progress bar + Score */}
+                    <div className="hidden sm:flex items-center gap-3 shrink-0">
+                      <div className="w-24 md:w-32 h-2 bg-muted/30 rounded-full overflow-hidden">
                         <div
                           className={cn("h-full rounded-full transition-all", config.barColor)}
                           style={{ width: `${competency.percentage}%` }}
@@ -222,7 +252,7 @@ export function CompetencyDetailAccordion({
                     </div>
                   </div>
                 </AccordionTrigger>
-                <AccordionContent className="pt-2 pb-4">
+                <AccordionContent className="pt-1 sm:pt-2 pb-2 sm:pb-4">
                   <CompetencyDetails
                     competency={competency}
                     showPassFail={showPassFail}

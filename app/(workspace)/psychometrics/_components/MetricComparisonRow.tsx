@@ -10,7 +10,7 @@ interface MetricComparisonRowProps {
   /** Label for the metric */
   label: string;
   /** Current value */
-  currentValue: number | null;
+  currentValue: number | null | undefined;
   /** Threshold value(s) */
   threshold: {
     /** Lower bound (optional) */
@@ -36,10 +36,10 @@ type ComparisonStatus = 'pass' | 'fail' | 'warning' | 'unknown';
  * Determines the comparison status based on value and thresholds
  */
 function getComparisonStatus(
-  value: number | null,
+  value: number | null | undefined,
   threshold: MetricComparisonRowProps['threshold']
 ): ComparisonStatus {
-  if (value === null) return 'unknown';
+  if (value == null) return 'unknown'; // Handles both null and undefined
 
   const { min, max, ideal } = threshold;
 
@@ -97,8 +97,8 @@ const statusConfig: Record<
 };
 
 /** Format value based on format type */
-function formatValue(value: number | null, format: FormatType): string {
-  if (value === null) return '-';
+function formatValue(value: number | null | undefined, format: FormatType): string {
+  if (value == null) return '-'; // Handles both null and undefined
   switch (format) {
     case 'decimal2':
       return value.toFixed(2);
@@ -134,9 +134,9 @@ export function MetricComparisonRow({
 
   // Calculate bar position (0-100%)
   const barPosition =
-    currentValue !== null && threshold.min !== undefined && threshold.max !== undefined
+    currentValue != null && threshold.min !== undefined && threshold.max !== undefined
       ? Math.max(0, Math.min(100, ((currentValue - threshold.min) / (threshold.max - threshold.min)) * 100))
-      : currentValue !== null
+      : currentValue != null
         ? Math.max(0, Math.min(100, currentValue * 100))
         : 0;
 
@@ -182,7 +182,7 @@ export function MetricComparisonRow({
             />
           )}
           {/* Current value indicator */}
-          {currentValue !== null && (
+          {currentValue != null && (
             <div
               className={cn(
                 'absolute top-1/2 -translate-y-1/2 h-3 w-1 rounded-full transition-all',

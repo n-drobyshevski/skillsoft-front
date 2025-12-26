@@ -2,13 +2,17 @@ import { Metadata } from 'next';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import PageHeader from '@/components/common/PageHeader';
 import { BigFiveReliability, ReliabilityStatus } from '@/types/psychometrics';
-import { Brain, TrendingUp, AlertTriangle, HelpCircle } from 'lucide-react';
+import { Brain, TrendingUp, AlertTriangle, HelpCircle, CheckCircle2, XCircle } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 import { TriggerAuditButton } from '../_components/TriggerAuditButton';
 import {
   BigFiveTraitCard,
-  BigFiveComparisonChart,
+  BigFiveComparisonChartLazy,
   TraitDetailAccordion,
+  MobileTraitCarouselEnhanced,
+  MobileVerticalBarChart,
+  BigFiveClientWrapper,
 } from './_components';
 import { getPsychometricsBigFiveCached } from '@/services/api.cache.psychometrics';
 
@@ -94,6 +98,93 @@ function calculateSummaryStats(data: BigFiveReliability[]) {
 }
 
 /**
+ * Hero Banner - Quick health summary visible above the fold on mobile
+ * Answers "Is there a problem?" in < 3 seconds
+ */
+function HeroBanner({ data }: { data: BigFiveReliability[] }) {
+  const stats = calculateSummaryStats(data);
+  const totalWithData = stats.reliableCount + stats.acceptableCount + stats.unreliableCount;
+  const hasIssues = stats.unreliableCount > 0 || stats.acceptableCount > 0;
+  const allReliable = stats.reliableCount === totalWithData && totalWithData > 0;
+
+  // Determine overall status
+  const getOverallStatus = () => {
+    if (stats.unreliableCount > 0) {
+      return {
+        text: `${stats.unreliableCount} trait${stats.unreliableCount > 1 ? 's' : ''} need attention`,
+        color: 'red',
+        icon: XCircle
+      };
+    }
+    if (stats.acceptableCount > 0) {
+      return {
+        text: `${stats.acceptableCount} trait${stats.acceptableCount > 1 ? 's' : ''} could improve`,
+        color: 'amber',
+        icon: AlertTriangle
+      };
+    }
+    if (allReliable) {
+      return {
+        text: 'All traits are reliable',
+        color: 'emerald',
+        icon: CheckCircle2
+      };
+    }
+    return {
+      text: 'Awaiting more data',
+      color: 'gray',
+      icon: HelpCircle
+    };
+  };
+
+  const status = getOverallStatus();
+  const StatusIcon = status.icon;
+
+  const colorClasses = {
+    emerald: 'from-emerald-50 to-emerald-100 dark:from-emerald-950/30 dark:to-emerald-900/20 border-emerald-200 dark:border-emerald-800',
+    amber: 'from-amber-50 to-amber-100 dark:from-amber-950/30 dark:to-amber-900/20 border-amber-200 dark:border-amber-800',
+    red: 'from-red-50 to-red-100 dark:from-red-950/30 dark:to-red-900/20 border-red-200 dark:border-red-800',
+    gray: 'from-gray-50 to-gray-100 dark:from-gray-950/30 dark:to-gray-900/20 border-gray-200 dark:border-gray-800',
+  };
+
+  const iconColorClasses = {
+    emerald: 'text-emerald-600 dark:text-emerald-400',
+    amber: 'text-amber-600 dark:text-amber-400',
+    red: 'text-red-600 dark:text-red-400',
+    gray: 'text-gray-600 dark:text-gray-400',
+  };
+
+  return (
+    <div className={cn(
+      'rounded-lg border p-4 bg-gradient-to-r',
+      colorClasses[status.color as keyof typeof colorClasses]
+    )}>
+      <div className="flex items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <StatusIcon className={cn('h-6 w-6 shrink-0', iconColorClasses[status.color as keyof typeof iconColorClasses])} />
+          <div>
+            <div className="font-semibold">
+              {stats.reliableCount}/{totalWithData} Traits Reliable
+            </div>
+            <div className={cn('text-sm', iconColorClasses[status.color as keyof typeof iconColorClasses])}>
+              {status.text}
+            </div>
+          </div>
+        </div>
+        {stats.averageAlpha !== null && (
+          <div className="text-right hidden sm:block">
+            <div className="text-xs text-muted-foreground">Average</div>
+            <div className="text-2xl font-bold tabular-nums">
+              {stats.averageAlpha.toFixed(2)}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/**
  * Summary statistics card component
  */
 function SummaryStatsCard({ data }: { data: BigFiveReliability[] }) {
@@ -113,7 +204,7 @@ function SummaryStatsCard({ data }: { data: BigFiveReliability[] }) {
           {/* Reliable */}
           <div className="text-center p-3 rounded-lg bg-emerald-50 dark:bg-emerald-950/20">
             <div className="flex items-center justify-center mb-1">
-              <TrendingUp className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+              <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
             </div>
             <div className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
               {stats.reliableCount}
@@ -124,7 +215,7 @@ function SummaryStatsCard({ data }: { data: BigFiveReliability[] }) {
           {/* Acceptable */}
           <div className="text-center p-3 rounded-lg bg-amber-50 dark:bg-amber-950/20">
             <div className="flex items-center justify-center mb-1">
-              <TrendingUp className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+              <AlertTriangle className="h-4 w-4 text-amber-600 dark:text-amber-400" />
             </div>
             <div className="text-2xl font-bold text-amber-600 dark:text-amber-400">
               {stats.acceptableCount}
@@ -135,7 +226,7 @@ function SummaryStatsCard({ data }: { data: BigFiveReliability[] }) {
           {/* Unreliable */}
           <div className="text-center p-3 rounded-lg bg-red-50 dark:bg-red-950/20">
             <div className="flex items-center justify-center mb-1">
-              <AlertTriangle className="h-4 w-4 text-red-600 dark:text-red-400" />
+              <XCircle className="h-4 w-4 text-red-600 dark:text-red-400" />
             </div>
             <div className="text-2xl font-bold text-red-600 dark:text-red-400">
               {stats.unreliableCount}
@@ -169,7 +260,7 @@ function SummaryStatsCard({ data }: { data: BigFiveReliability[] }) {
               {stats.highestAlpha !== null ? stats.highestAlpha.value.toFixed(2) : '-'}
             </div>
             {stats.highestAlpha && (
-              <div className="text-[10px] text-muted-foreground truncate">
+              <div className="text-[11px] text-muted-foreground truncate">
                 {stats.highestAlpha.trait}
               </div>
             )}
@@ -180,7 +271,7 @@ function SummaryStatsCard({ data }: { data: BigFiveReliability[] }) {
               {stats.lowestAlpha !== null ? stats.lowestAlpha.value.toFixed(2) : '-'}
             </div>
             {stats.lowestAlpha && (
-              <div className="text-[10px] text-muted-foreground truncate">
+              <div className="text-[11px] text-muted-foreground truncate">
                 {stats.lowestAlpha.trait}
               </div>
             )}
@@ -237,36 +328,49 @@ export default async function BigFivePage() {
       {/* Empty State */}
       {!error && reliabilityData.length === 0 && <EmptyState />}
 
-      {/* Main Content */}
+      {/* Main Content - Mobile-First Layout */}
       {reliabilityData.length > 0 && (
         <>
-          {/* Hero Section: 5 Trait Cards - Horizontal scroll on mobile */}
-          <div className="
-            flex gap-4 overflow-x-auto snap-x snap-mandatory scroll-smooth pb-2
-            -mx-4 px-4 sm:mx-0 sm:px-0
-            sm:grid sm:grid-cols-2 sm:overflow-visible
-            lg:grid-cols-3 xl:grid-cols-5
-          " style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+          {/* SECTION 1: Hero Banner - Quick health summary (visible above fold on mobile) */}
+          <HeroBanner data={reliabilityData} />
+
+          {/* SECTION 2: Summary Stats - Most important info for quick assessment */}
+          <SummaryStatsCard data={reliabilityData} />
+
+          {/* SECTION 3: Comparison Chart */}
+          <div>
+            {/* Mobile: Vertical bar chart (portrait-friendly) */}
+            <div className="lg:hidden">
+              <MobileVerticalBarChart reliabilityData={reliabilityData} />
+            </div>
+
+            {/* Desktop: Horizontal bar chart (lazy-loaded to reduce bundle size) */}
+            <div className="hidden lg:block">
+              <BigFiveComparisonChartLazy reliabilityData={reliabilityData} />
+            </div>
+          </div>
+
+          {/* SECTION 4: Trait Cards - Detailed view per trait */}
+          {/* Mobile: Enhanced carousel with simplified cards and bottom sheet details */}
+          {/* Wrapped in BigFiveClientWrapper to handle Zustand hydration */}
+          <div className="sm:hidden">
+            <BigFiveClientWrapper>
+              <MobileTraitCarouselEnhanced reliabilityData={reliabilityData} />
+            </BigFiveClientWrapper>
+          </div>
+
+          {/* Desktop: Grid layout */}
+          <div className="hidden sm:grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
             {reliabilityData.map((reliability) => (
-              <div key={reliability.id} className="snap-start shrink-0 w-[280px] sm:w-auto">
-                <BigFiveTraitCard reliability={reliability} />
-              </div>
+              <BigFiveTraitCard key={reliability.id} reliability={reliability} />
             ))}
-            {/* Spacer for scroll padding on mobile */}
-            <div className="w-4 shrink-0 sm:hidden" aria-hidden="true" />
           </div>
 
-          {/* Charts Section: 2-column grid, stacked on mobile */}
-          <div className="grid gap-6 lg:grid-cols-2">
-            {/* Left: Horizontal bar chart */}
-            <BigFiveComparisonChart reliabilityData={reliabilityData} />
-
-            {/* Right: Summary stats */}
-            <SummaryStatsCard data={reliabilityData} />
-          </div>
-
-          {/* Trait Detail Accordion - collapsed by default on mobile via defaultValue */}
-          <TraitDetailAccordion reliabilityData={reliabilityData} />
+          {/* SECTION 5: Trait Detail Accordion - Deep dive analysis */}
+          {/* Wrapped in BigFiveClientWrapper to handle Zustand hydration */}
+          <BigFiveClientWrapper>
+            <TraitDetailAccordion reliabilityData={reliabilityData} />
+          </BigFiveClientWrapper>
         </>
       )}
     </div>

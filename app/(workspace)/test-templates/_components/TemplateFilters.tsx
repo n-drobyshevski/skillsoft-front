@@ -1,83 +1,92 @@
 'use client';
 /* eslint-disable security/detect-object-injection -- Safe: accessing typed Record with enum keys */
 
-import React, { useState, useCallback, useMemo } from "react";
+import React, { useState, useCallback, useMemo, useRef, useEffect, useTransition } from "react";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { TestTemplateSummary, AssessmentGoal } from "@/types/domain";
 import {
   Search,
-  Filter,
   X,
-  Crosshair,
-  Briefcase,
-  Users,
-  LayoutGrid,
 } from "lucide-react";
 import { useDebounce } from "@/hooks/use-debounce";
+import { cn } from "@/lib/utils";
 
 export type GoalFilter = 'ALL' | AssessmentGoal;
+
+// Valid tab values for URL state
+const VALID_TABS: GoalFilter[] = ['ALL', AssessmentGoal.OVERVIEW, AssessmentGoal.JOB_FIT, AssessmentGoal.TEAM_FIT];
 
 interface TemplateFiltersProps {
   templates: TestTemplateSummary[];
   onFilteredTemplatesChange: (filtered: TestTemplateSummary[]) => void;
   className?: string;
+  initialTab?: GoalFilter;
 }
 
 /**
- * Goal filter configuration with icons and colors
+ * Goal filter configuration with labels
  */
 const goalFilterConfig: Record<GoalFilter, {
   label: string;
-  icon: React.ComponentType<{ className?: string }>;
-  color: string;
+  shortLabel: string;
 }> = {
   ALL: {
-    label: 'All',
-    icon: LayoutGrid,
-    color: 'text-foreground',
+    label: 'Все',
+    shortLabel: 'Все',
   },
   [AssessmentGoal.OVERVIEW]: {
-    label: 'Overview',
-    icon: Crosshair,
-    color: 'text-emerald-600',
+    label: 'Обзор',
+    shortLabel: 'Обзор',
   },
   [AssessmentGoal.JOB_FIT]: {
-    label: 'Job Fit',
-    icon: Briefcase,
-    color: 'text-blue-600',
+    label: 'Для работы',
+    shortLabel: 'Работа',
   },
   [AssessmentGoal.TEAM_FIT]: {
-    label: 'Team Fit',
-    icon: Users,
-    color: 'text-violet-600',
+    label: 'Для команды',
+    shortLabel: 'Команда',
   },
 };
 
 /**
  * TemplateFilters - Search and filter interface for test templates
  *
- * Features:
- * - Debounced search input (300ms)
- * - Goal-based tab filtering
- * - Results count display
- * - Mobile-responsive collapsible filters
+ * Mobile-first design with:
+ * - Clean search input
+ * - Horizontal scrolling tabs (matching my-tests pattern)
+ * - URL-based tab state for bookmarkable/shareable links
+ * - Optimistic tab switching with prefetch on hover
  */
 export default function TemplateFilters({
   templates,
   onFilteredTemplatesChange,
   className = '',
+  initialTab = 'ALL',
 }: TemplateFiltersProps) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const [isPending, startTransition] = useTransition();
+
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedGoal, setSelectedGoal] = useState<GoalFilter>('ALL');
-  const [isFilterOpen, setIsFilterOpen] = useState(false);
+
+  // URL-based tab state with optimistic updates
+  const urlTab = searchParams.get('goal') as GoalFilter | null;
+  const [optimisticTab, setOptimisticTab] = useState<GoalFilter>(
+    urlTab && VALID_TABS.includes(urlTab) ? urlTab : initialTab
+  );
+  const activeTab = optimisticTab;
+
+  // Use ref to store callback to avoid infinite loop
+  const onFilteredTemplatesChangeRef = useRef(onFilteredTemplatesChange);
+  useEffect(() => {
+    onFilteredTemplatesChangeRef.current = onFilteredTemplatesChange;
+  }, [onFilteredTemplatesChange]);
 
   // Debounce search query for performance
   const debouncedSearch = useDebounce(searchQuery, 300);
@@ -105,8 +114,8 @@ export default function TemplateFilters({
     let result = templates;
 
     // Filter by goal
-    if (selectedGoal !== 'ALL') {
-      result = result.filter(t => t.goal === selectedGoal);
+    if (activeTab !== 'ALL') {
+      result = result.filter(t => t.goal === activeTab);
     }
 
     // Filter by search query (name and description)
@@ -119,12 +128,12 @@ export default function TemplateFilters({
     }
 
     return result;
-  }, [templates, selectedGoal, debouncedSearch]);
+  }, [templates, activeTab, debouncedSearch]);
 
-  // Notify parent of filtered results
-  React.useEffect(() => {
-    onFilteredTemplatesChange(filteredTemplates);
-  }, [filteredTemplates, onFilteredTemplatesChange]);
+  // Notify parent of filtered results - use ref to avoid dependency on callback
+  useEffect(() => {
+    onFilteredTemplatesChangeRef.current(filteredTemplates);
+  }, [filteredTemplates]);
 
   const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
@@ -134,71 +143,112 @@ export default function TemplateFilters({
     setSearchQuery('');
   }, []);
 
-  const handleGoalChange = useCallback((value: string) => {
-    setSelectedGoal(value as GoalFilter);
-  }, []);
+  // Handle tab change - instant UI update, background URL sync
+  const handleTabChange = useCallback(
+    (value: string) => {
+      const newTab = value as GoalFilter;
 
-  const hasActiveFilters = searchQuery.trim() || selectedGoal !== 'ALL';
+      // Immediate UI update (optimistic)
+      setOptimisticTab(newTab);
+
+      // Background URL sync using transition (non-blocking)
+      startTransition(() => {
+        const params = new URLSearchParams(searchParams.toString());
+        if (newTab === 'ALL') {
+          params.delete('goal'); // Clean URL for default tab
+        } else {
+          params.set('goal', newTab);
+        }
+        const queryString = params.toString();
+        router.push(`${pathname}${queryString ? `?${queryString}` : ''}`, {
+          scroll: false,
+        });
+      });
+    },
+    [router, pathname, searchParams]
+  );
+
+  // Prefetch tab routes on hover/focus for faster navigation
+  const handleTabHover = useCallback(
+    (tabValue: GoalFilter) => {
+      if (tabValue === activeTab) return; // Skip current tab
+
+      const params = new URLSearchParams(searchParams.toString());
+      if (tabValue === 'ALL') {
+        params.delete('goal');
+      } else {
+        params.set('goal', tabValue);
+      }
+      const queryString = params.toString();
+      router.prefetch(`${pathname}${queryString ? `?${queryString}` : ''}`);
+    },
+    [router, pathname, searchParams, activeTab]
+  );
 
   return (
-    <div className={`space-y-3 ${className}`}>
-      {/* Desktop Filters - Always visible on larger screens */}
-      <div className="hidden sm:flex sm:flex-col sm:gap-3">
-        {/* Search and Results Row */}
-        <div className="flex items-center gap-3">
-          <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              type="text"
-              placeholder="Search templates..."
-              value={searchQuery}
-              onChange={handleSearchChange}
-              className="pl-9 pr-9"
-              aria-label="Search templates"
-            />
-            {searchQuery && (
-              <Button
-                variant="ghost"
-                size="icon"
-                className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 hover:bg-muted"
-                onClick={handleClearSearch}
-                aria-label="Clear search"
-              >
-                <X className="h-3.5 w-3.5" />
-              </Button>
-            )}
-          </div>
-
-          {/* Results Count */}
-          <div className="text-sm text-muted-foreground whitespace-nowrap" role="status" aria-live="polite">
-            <span className="font-medium text-foreground">{filteredTemplates.length}</span>
-            {' '}of{' '}
-            <span>{templates.length}</span>
-            {' '}templates
-          </div>
+    <div className={cn("space-y-3", className)}>
+      {/* Search Row */}
+      <div className="flex items-center gap-2">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+          <Input
+            type="text"
+            placeholder="Поиск шаблонов..."
+            value={searchQuery}
+            onChange={handleSearchChange}
+            className="pl-9 pr-8 h-9 text-sm"
+            aria-label="Поиск шаблонов"
+          />
+          {searchQuery && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="absolute right-1 top-1/2 -translate-y-1/2 h-6 w-6"
+              onClick={handleClearSearch}
+              aria-label="Очистить поиск"
+            >
+              <X className="h-3 w-3" />
+            </Button>
+          )}
         </div>
 
-        {/* Goal Filter Tabs */}
-        <Tabs value={selectedGoal} onValueChange={handleGoalChange} className="w-full">
-          <TabsList className="w-full justify-start h-10 p-1" aria-label="Filter by assessment goal">
-            {(Object.keys(goalFilterConfig) as GoalFilter[]).map((goal) => {
-               
-              const config = goalFilterConfig[goal];
-              const Icon = config.icon;
-              const count = goalCounts[goal];
+        {/* Results Count - Desktop */}
+        <span className="hidden sm:block text-xs text-muted-foreground whitespace-nowrap">
+          {filteredTemplates.length} из {templates.length}
+        </span>
+      </div>
+
+      {/* Tabs with URL-synced state - matching my-tests pattern */}
+      <Tabs value={activeTab} onValueChange={handleTabChange}>
+        <ScrollArea className="w-full">
+          <TabsList className="inline-flex w-max h-11 sm:h-10 p-1 bg-muted/50 rounded-lg gap-1">
+            {VALID_TABS.map((tab) => {
+              const config = goalFilterConfig[tab];
+              const count = goalCounts[tab];
 
               return (
                 <TabsTrigger
-                  key={goal}
-                  value={goal}
-                  className="gap-2 data-[state=active]:shadow-sm px-3"
-                  aria-label={`${config.label} (${count} templates)`}
+                  key={tab}
+                  value={tab}
+                  disabled={isPending}
+                  onMouseEnter={() => handleTabHover(tab)}
+                  onFocus={() => handleTabHover(tab)}
+                  className={cn(
+                    'inline-flex flex-none items-center gap-1.5 px-3 sm:px-4 py-2 sm:py-1.5',
+                    'min-h-[40px] sm:min-h-[36px]',
+                    'data-[state=active]:bg-background data-[state=active]:shadow-sm',
+                    'text-xs sm:text-sm font-medium transition-all whitespace-nowrap rounded-md',
+                    isPending && 'opacity-70'
+                  )}
                 >
-                  <Icon className={`h-4 w-4 ${selectedGoal === goal ? config.color : ''}`} />
-                  <span className="hidden md:inline">{config.label}</span>
+                  <span className="hidden sm:inline">{config.label}</span>
+                  <span className="sm:hidden">{config.shortLabel}</span>
                   <Badge
                     variant="secondary"
-                    className="h-5 min-w-5 px-1.5 text-xs font-medium bg-muted-foreground/10"
+                    className={cn(
+                      'min-w-5 sm:min-w-6 h-5 justify-center text-[11px] sm:text-xs px-1 sm:px-1.5 rounded-sm',
+                      activeTab === tab && 'bg-primary text-primary-foreground'
+                    )}
                   >
                     {count}
                   </Badge>
@@ -206,110 +256,13 @@ export default function TemplateFilters({
               );
             })}
           </TabsList>
-        </Tabs>
-      </div>
+          <ScrollBar orientation="horizontal" className="hidden" />
+        </ScrollArea>
+      </Tabs>
 
-      {/* Mobile Filters - Collapsible on small screens */}
-      <div className="sm:hidden">
-        <Collapsible open={isFilterOpen} onOpenChange={setIsFilterOpen}>
-          <div className="flex items-center gap-2">
-            {/* Mobile Search */}
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                type="text"
-                placeholder="Search..."
-                value={searchQuery}
-                onChange={handleSearchChange}
-                className="pl-9 pr-9 h-10"
-                aria-label="Search templates"
-              />
-              {searchQuery && (
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7"
-                  onClick={handleClearSearch}
-                  aria-label="Clear search"
-                >
-                  <X className="h-3.5 w-3.5" />
-                </Button>
-              )}
-            </div>
-
-            {/* Filter Toggle Button */}
-            <CollapsibleTrigger asChild>
-              <Button
-                variant={hasActiveFilters ? "default" : "outline"}
-                size="icon"
-                className="h-10 w-10 shrink-0"
-                aria-expanded={isFilterOpen}
-                aria-label="Toggle filters"
-              >
-                <Filter className="h-4 w-4" />
-                {hasActiveFilters && (
-                  <span className="absolute -top-1 -right-1 h-2.5 w-2.5 rounded-full bg-primary" />
-                )}
-              </Button>
-            </CollapsibleTrigger>
-          </div>
-
-          <CollapsibleContent className="mt-3 space-y-3">
-            {/* Results Count - Mobile */}
-            <div className="text-sm text-muted-foreground px-1" role="status" aria-live="polite">
-              Showing <span className="font-medium text-foreground">{filteredTemplates.length}</span>
-              {' '}of {templates.length} templates
-            </div>
-
-            {/* Goal Filter Buttons - Mobile Grid */}
-            <div className="grid grid-cols-2 gap-2" role="group" aria-label="Filter by assessment goal">
-              {(Object.keys(goalFilterConfig) as GoalFilter[]).map((goal) => {
-                 
-              const config = goalFilterConfig[goal];
-                const Icon = config.icon;
-                const count = goalCounts[goal];
-                const isActive = selectedGoal === goal;
-
-                return (
-                  <Button
-                    key={goal}
-                    variant={isActive ? "default" : "outline"}
-                    size="sm"
-                    className="h-11 justify-start gap-2 text-sm"
-                    onClick={() => handleGoalChange(goal)}
-                    aria-pressed={isActive}
-                    aria-label={`${config.label} (${count} templates)`}
-                  >
-                    <Icon className={`h-4 w-4 ${isActive ? '' : config.color}`} />
-                    <span className="flex-1 text-left">{config.label}</span>
-                    <Badge
-                      variant={isActive ? "secondary" : "outline"}
-                      className="h-5 min-w-5 px-1.5 text-xs"
-                    >
-                      {count}
-                    </Badge>
-                  </Button>
-                );
-              })}
-            </div>
-
-            {/* Clear Filters Button */}
-            {hasActiveFilters && (
-              <Button
-                variant="ghost"
-                size="sm"
-                className="w-full text-muted-foreground hover:text-foreground"
-                onClick={() => {
-                  setSearchQuery('');
-                  setSelectedGoal('ALL');
-                }}
-              >
-                <X className="h-4 w-4 mr-2" />
-                Clear all filters
-              </Button>
-            )}
-          </CollapsibleContent>
-        </Collapsible>
+      {/* Results Count - Mobile */}
+      <div className="sm:hidden text-xs text-muted-foreground">
+        Показано {filteredTemplates.length} из {templates.length}
       </div>
     </div>
   );

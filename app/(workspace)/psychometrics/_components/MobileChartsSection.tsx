@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { ChevronDown, BarChart3 } from 'lucide-react';
@@ -35,7 +34,7 @@ export function MobileChartsSection({
       {/* Collapsed state - show button */}
       {!isExpanded && (
         <Card
-          className="cursor-pointer transition-all hover:bg-muted/50"
+          className="cursor-pointer transition-all hover:bg-muted/50 active:scale-[0.98]"
           onClick={() => setIsExpanded(true)}
         >
           <CardContent className="p-4">

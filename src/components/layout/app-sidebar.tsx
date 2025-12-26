@@ -23,6 +23,8 @@ import {
   UsersRound,
   Settings,
   HelpCircle,
+  BookOpen,
+  ExternalLink,
   type LucideIcon,
 } from "lucide-react";
 
@@ -83,6 +85,8 @@ const ICON_MAP: Record<string, LucideIcon> = {
   HelpCircle,
   User,
   UserCircle,
+  BookOpen,
+  ExternalLink,
 };
 
 // Lens glow animation classes for ring/glow highlight on lens switch
@@ -317,7 +321,7 @@ function NavGroup({
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname();
   const { user: clerkUser } = useUser();
-  const { groups, activeLens, isReady } = useNavigation();
+  const { groups, footer, activeLens, isReady } = useNavigation();
   const { setOpenMobile } = useSidebar();
   const isImmersive = useIsImmersive();
   const TeamLogo = baseData.teams[0].logo;
@@ -454,13 +458,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               >
                 <SidebarMenuButton
                   asChild
-                  isActive={pathname.startsWith("/admin/users/")}
+                  isActive={pathname === "/profile"}
                 >
-                  <Link
-                    href={
-                      clerkUser ? `/admin/users/${clerkUser.id}` : "/dashboard"
-                    }
-                  >
+                  <Link href="/profile">
                     <UserCircle />
                     <span>Мой профиль</span>
                   </Link>
@@ -468,6 +468,51 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroup>
+        )}
+
+        {/* Footer Navigation Items - Always visible in all lenses */}
+        {isReady && footer.length > 0 && (
+          <>
+            <div className="mt-auto" />
+            <SidebarSeparator />
+            <SidebarGroup>
+              <SidebarMenu>
+                {footer.map((item) => {
+                  const IconComponent = ICON_MAP[item.icon] ?? HelpCircle;
+                  const isActive = isNavigationItemActive(item.path, pathname);
+
+                  if (item.isExternal) {
+                    return (
+                      <SidebarMenuItem key={item.id}>
+                        <SidebarMenuButton asChild isActive={isActive}>
+                          <a
+                            href={item.path}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            <IconComponent />
+                            <span>{item.label}</span>
+                            <ExternalLink className="ml-auto h-3 w-3 opacity-50" />
+                          </a>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    );
+                  }
+
+                  return (
+                    <SidebarMenuItem key={item.id}>
+                      <SidebarMenuButton asChild isActive={isActive}>
+                        <Link href={item.path}>
+                          <IconComponent />
+                          <span>{item.label}</span>
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  );
+                })}
+              </SidebarMenu>
+            </SidebarGroup>
+          </>
         )}
       </SidebarContent>
 

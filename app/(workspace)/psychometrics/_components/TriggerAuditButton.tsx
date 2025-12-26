@@ -55,7 +55,7 @@ export function TriggerAuditButton() {
   return (
     <AlertDialog open={isOpen} onOpenChange={setIsOpen}>
       <AlertDialogTrigger asChild>
-        <Button variant="outline" className="gap-2" disabled={isProcessing}>
+        <Button variant="outline" className="gap-2 min-h-[44px]" disabled={isProcessing}>
           {isProcessing ? (
             <Loader2 className="h-4 w-4 animate-spin" />
           ) : (
@@ -85,8 +85,8 @@ export function TriggerAuditButton() {
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={isProcessing}>Cancel</AlertDialogCancel>
-          <AlertDialogAction onClick={handleTriggerAudit} disabled={isProcessing}>
+          <AlertDialogCancel disabled={isProcessing} className="min-h-[44px]">Cancel</AlertDialogCancel>
+          <AlertDialogAction onClick={handleTriggerAudit} disabled={isProcessing} className="min-h-[44px]">
             {isProcessing ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin mr-2" />

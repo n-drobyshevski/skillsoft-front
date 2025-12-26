@@ -84,24 +84,19 @@ async function TemplatesContent({ canCreate }: { canCreate: boolean }) {
   
   if (templates.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
-        <div className="relative">
-          {/* Decorative background circle */}
-          <div className="absolute inset-0 -m-4 rounded-full bg-gradient-to-br from-muted/40 to-muted/10 blur-2xl" />
-          <div className="relative rounded-2xl bg-muted/30 p-6 backdrop-blur-sm border border-border/50">
-            <ListFilter className="h-12 w-12 text-muted-foreground/60 mx-auto" strokeWidth={1.5} />
-          </div>
+      <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
+        <div className="rounded-full bg-muted/50 p-4">
+          <ListFilter className="h-8 w-8 text-muted-foreground" strokeWidth={1.5} />
         </div>
-        <h3 className="text-lg sm:text-xl font-semibold mt-6 mb-2">Нет доступных шаблонов</h3>
-        <p className="text-sm sm:text-base text-muted-foreground max-w-md leading-relaxed">
-          В данный момент нет активных шаблонов тестов. Пожалуйста, проверьте позже или
-          обратитесь к администратору.
+        <h3 className="text-base font-medium mt-4 mb-1">Нет доступных шаблонов</h3>
+        <p className="text-sm text-muted-foreground max-w-sm">
+          Шаблоны тестов пока не добавлены. Проверьте позже или обратитесь к администратору.
         </p>
         {canCreate && (
-          <Button asChild className="mt-6 shadow-sm hover:shadow-md transition-all" size="lg">
+          <Button asChild className="mt-4" size="sm">
             <Link href="/test-templates/new">
-              <Plus className="mr-2 h-4 w-4" />
-              Создать первый шаблон
+              <Plus className="mr-1.5 h-4 w-4" />
+              Создать шаблон
             </Link>
           </Button>
         )}
@@ -124,31 +119,33 @@ export default async function TestsPage() {
   const canCreate = await canCreateContent();
 
   return (
-    <div className="flex flex-1 flex-col gap-4 p-3 pt-4 sm:p-4 sm:pt-6 md:gap-6 md:p-6">
+    <div className="flex flex-1 flex-col gap-3 sm:gap-4 p-2 sm:p-4 md:p-6">
       {/* Static header - part of static shell */}
       <PageHeader
         title="Шаблоны тестов"
-        description="Выберите шаблон для оценки ваших компетенций. Каждый тест помогает определить ваш уровень владения определёнными навыками."
+        description="Выберите шаблон для оценки компетенций"
       >
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 w-full sm:w-auto">
-          <Link href="/test-templates/history" className="w-full sm:w-auto">
+        <div className="flex items-center gap-2 w-full sm:w-auto">
+          <Link href="/test-templates/history" className="flex-1 sm:flex-none">
             <Button
               variant="outline"
               size="sm"
-              className="w-full sm:w-auto min-h-10 sm:min-h-0 gap-2 hover:bg-accent/50 transition-colors"
+              className="w-full sm:w-auto h-9 gap-1.5"
             >
               <History className="h-4 w-4" />
-              <span>Мои результаты</span>
+              <span className="hidden sm:inline">Мои результаты</span>
+              <span className="sm:hidden">Результаты</span>
             </Button>
           </Link>
           {canCreate && (
-            <Link href="/test-templates/new" className="w-full sm:w-auto">
+            <Link href="/test-templates/new" className="flex-1 sm:flex-none">
               <Button
                 size="sm"
-                className="w-full sm:w-auto min-h-10 sm:min-h-0 gap-2 shadow-sm hover:shadow-md transition-all"
+                className="w-full sm:w-auto h-9 gap-1.5"
               >
                 <Plus className="h-4 w-4" />
-                <span>Новый шаблон</span>
+                <span className="hidden sm:inline">Новый шаблон</span>
+                <span className="sm:hidden">Создать</span>
               </Button>
             </Link>
           )}

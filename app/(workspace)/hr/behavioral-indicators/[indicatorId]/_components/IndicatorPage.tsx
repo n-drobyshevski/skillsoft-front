@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { UiLink } from "@/components/ui/ui-link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -312,10 +313,13 @@ export default function IndicatorPage({ indicator, assessmentQuestions }: Indica
               <div className="grid gap-1">
                 <div className="font-semibold text-muted-foreground">Competency</div>
                 <CompetencyHoverCard competencyId={indicator.competencyId}>
-                  <Link href={`/hr/competencies/${indicator.competencyId}`} className="text-primary hover:underline inline-flex items-center gap-1">
+                  <UiLink
+                    href={`/hr/competencies/${indicator.competencyId}`}
+                    variant="underline"
+                    trailingIcon={<Info className="h-3 w-3 opacity-60" />}
+                  >
                     View Competency
-                    <Info className="h-3 w-3 opacity-60" />
-                  </Link>
+                  </UiLink>
                 </CompetencyHoverCard>
               </div>
             </CardContent>

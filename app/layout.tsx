@@ -4,9 +4,12 @@ import * as React from "react";
 import { Suspense } from "react";
 import { Metadata, Viewport } from "next";
 import { ClerkProvider } from '@clerk/nextjs';
+import { Analytics } from '@vercel/analytics/next';
 import { LayoutProvider } from "@/components/layout/layout-provider";
+import { QueryProvider } from "@/components/providers/QueryProvider";
 import { Toaster } from "@/components/ui/sonner";
 import { shadcn } from '@clerk/themes';
+import { SkipLinks, MainContentAnchor } from "@/components/accessibility";
 
 export const metadata: Metadata = {
 	title: "SkillSoft - Competency Management",
@@ -16,17 +19,27 @@ export const metadata: Metadata = {
 		statusBarStyle: 'default',
 		title: 'SkillSoft',
 	},
+	// Prevent Dark Reader extension from modifying the DOM (causes hydration mismatches)
+	other: {
+		'darkreader-lock': '',
+	},
 };
 
 export const viewport: Viewport = {
 	width: 'device-width',
 	initialScale: 1,
-	maximumScale: 1,
-	userScalable: false,
+	// Allow users to zoom for accessibility (WCAG 1.4.4)
+	maximumScale: 5,
+	userScalable: true,
+	// Cover mode for safe area insets on notched devices
+	viewportFit: 'cover',
+	// Theme color for browser chrome
 	themeColor: [
 		{ media: '(prefers-color-scheme: light)', color: 'oklch(0.98 0.003 90)' },
 		{ media: '(prefers-color-scheme: dark)', color: 'oklch(0.1 0.005 264)' }
 	],
+	// Color scheme for system-level UI
+	colorScheme: 'light dark',
 };
 
 /**
@@ -48,8 +61,14 @@ function AuthLoadingFallback() {
 async function LayoutContent({ children }: { children: React.ReactNode }) {
 	return (
 		<LayoutProvider>
-			{children}
-			<Toaster richColors />
+			<QueryProvider>
+				{/* Skip links for keyboard navigation (WCAG 2.4.1) */}
+				<SkipLinks />
+				{/* Main content anchor for skip link target */}
+				<MainContentAnchor />
+				{children}
+				<Toaster richColors />
+			</QueryProvider>
 		</LayoutProvider>
 	);
 }
@@ -92,6 +111,7 @@ export default function RootLayout({
 						<Suspense fallback={<AuthLoadingFallback />}>
 							<LayoutContent>{children}</LayoutContent>
 						</Suspense>
+						<Analytics />
 					</body>
 				</html>
 			</ClerkProvider>
@@ -103,9 +123,16 @@ export default function RootLayout({
 		<html lang="en" suppressHydrationWarning className="mobile-container">
 			<body className="mobile-container" suppressHydrationWarning>
 				<LayoutProvider>
-					{children}
-					<Toaster richColors />
+					<QueryProvider>
+						{/* Skip links for keyboard navigation (WCAG 2.4.1) */}
+						<SkipLinks />
+						{/* Main content anchor for skip link target */}
+						<MainContentAnchor />
+						{children}
+						<Toaster richColors />
+					</QueryProvider>
 				</LayoutProvider>
+				<Analytics />
 			</body>
 		</html>
 	);

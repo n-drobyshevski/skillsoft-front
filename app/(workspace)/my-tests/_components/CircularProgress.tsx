@@ -104,11 +104,13 @@ interface ScoreGaugeProps {
   passed: boolean;
   size?: number;
   showLabel?: boolean;
+  /** Additional class names */
+  className?: string;
 }
 
-export function ScoreGauge({ score, passed, size = 52, showLabel = true }: ScoreGaugeProps) {
+export function ScoreGauge({ score, passed, size = 52, showLabel = true, className }: ScoreGaugeProps) {
   return (
-    <div className="flex items-center gap-3">
+    <div className={cn('flex items-center gap-2 sm:gap-3', className)}>
       <CircularProgress
         value={score}
         size={size}
@@ -119,7 +121,7 @@ export function ScoreGauge({ score, passed, size = 52, showLabel = true }: Score
       >
         <span
           className={cn(
-            'text-sm font-bold tabular-nums',
+            'text-xs sm:text-sm font-bold tabular-nums',
             passed ? 'text-emerald-700 dark:text-emerald-400' : 'text-red-700 dark:text-red-400'
           )}
         >
@@ -131,13 +133,13 @@ export function ScoreGauge({ score, passed, size = 52, showLabel = true }: Score
         <div className="flex flex-col">
           <span
             className={cn(
-              'text-sm font-medium',
+              'text-xs sm:text-sm font-medium',
               passed ? 'text-emerald-700 dark:text-emerald-400' : 'text-red-700 dark:text-red-400'
             )}
           >
             {passed ? 'Пройден' : 'Не пройден'}
           </span>
-          <span className="text-xs text-muted-foreground">Результат</span>
+          <span className="text-xs text-muted-foreground hidden sm:block">Результат</span>
         </div>
       )}
     </div>

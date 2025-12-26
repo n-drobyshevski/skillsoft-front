@@ -40,7 +40,7 @@ export interface NavigationChildItem {
 export interface NavigationItem {
   /** Unique identifier */
   id: string;
-  /** URL path */
+  /** URL path or external URL */
   path: string;
   /** Display label (Russian) */
   label: string;
@@ -58,6 +58,8 @@ export interface NavigationItem {
   isNew?: boolean;
   /** Keyboard shortcut hint */
   shortcut?: string;
+  /** Whether link opens in new tab (external URL) */
+  isExternal?: boolean;
 }
 
 /**

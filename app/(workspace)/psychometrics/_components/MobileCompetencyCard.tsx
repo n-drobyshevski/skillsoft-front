@@ -74,16 +74,16 @@ export function MobileCompetencyCard({
   competency,
   className,
 }: MobileCompetencyCardProps) {
-  const alphaColors = getAlphaColorClasses(competency.cronbachAlpha);
-  const alphaDisplay = competency.cronbachAlpha !== null
-    ? competency.cronbachAlpha.toFixed(2)
-    : '-';
+  // Handle both null and undefined for cronbachAlpha
+  const alpha = competency.cronbachAlpha ?? null;
+  const alphaColors = getAlphaColorClasses(alpha);
+  const alphaDisplay = alpha !== null ? alpha.toFixed(2) : '-';
 
   return (
-    <Link href={`/psychometrics/competencies/${competency.competencyId}`}>
+    <Link href={`/psychometrics/competencies/${competency.competencyId}`} className="block w-full">
       <Card
         className={cn(
-          'relative transition-all border-l-4 hover:shadow-md',
+          'relative w-full transition-all border-l-4 hover:shadow-md',
           getStatusBorderColor(competency.reliabilityStatus),
           'hover:bg-muted/30 cursor-pointer group',
           className
@@ -103,7 +103,7 @@ export function MobileCompetencyCard({
               <span className={cn('text-lg font-bold tabular-nums', alphaColors.text)}>
                 {alphaDisplay}
               </span>
-              <span className="text-[10px] text-muted-foreground">alpha</span>
+              <span className="text-xs text-muted-foreground">alpha</span>
             </div>
 
             {/* Main content */}
@@ -161,7 +161,7 @@ export function MobileCompetencyCardList({
   className,
 }: MobileCompetencyCardListProps) {
   return (
-    <div className={cn('space-y-2', className)}>
+    <div className={cn('w-full space-y-2', className)}>
       {competencies.map((competency) => (
         <MobileCompetencyCard
           key={competency.id}

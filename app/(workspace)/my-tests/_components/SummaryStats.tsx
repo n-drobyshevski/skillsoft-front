@@ -83,7 +83,7 @@ const STAT_CARDS: StatCardConfig[] = [
  */
 export function SummaryStats({ counts, activeTab, onTabChange }: SummaryStatsProps) {
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
       {STAT_CARDS.map(config => {
         const Icon = config.icon;
         const count = counts[config.tab];
@@ -95,31 +95,36 @@ export function SummaryStats({ counts, activeTab, onTabChange }: SummaryStatsPro
             key={config.tab}
             onClick={() => onTabChange(config.tab)}
             className={cn(
-              'flex items-center gap-3 p-3 rounded-lg border transition-all duration-200',
+              // Mobile: vertical centered layout, Desktop: horizontal row
+              'flex flex-col items-center justify-center gap-1.5 p-3',
+              'sm:flex-row sm:items-center sm:gap-3 sm:justify-start',
+              'min-h-[72px] sm:min-h-0',
+              'rounded-lg border transition-all duration-200',
               'hover:shadow-md hover:-translate-y-0.5 focus-visible:outline-none',
+              'touch-manipulation active:scale-[0.98]',
               config.bgClass,
               isActive && `ring-2 ${config.activeRingClass}`
             )}
             aria-pressed={isActive}
             aria-label={`${config.label}: ${count}. Нажмите для фильтрации.`}
           >
-            <div className={cn('relative p-2.5 rounded-lg', config.iconBgClass)}>
-              <Icon className={cn('size-5', config.iconClass)} />
+            <div className={cn('relative p-2 sm:p-2.5 rounded-lg', config.iconBgClass)}>
+              <Icon className={cn('size-4 sm:size-5', config.iconClass)} />
               {showPulse && (
                 <span
                   className={cn(
-                    'absolute -top-0.5 -right-0.5 size-2.5 rounded-full',
+                    'absolute -top-0.5 -right-0.5 size-2 sm:size-2.5 rounded-full',
                     'bg-amber-500 animate-pulse'
                   )}
                   aria-hidden="true"
                 />
               )}
             </div>
-            <div className="text-left">
-              <p className={cn('text-2xl font-bold tabular-nums', config.textClass)}>
+            <div className="text-center sm:text-left min-w-0">
+              <p className={cn('text-xl sm:text-2xl font-bold tabular-nums leading-none', config.textClass)}>
                 {count}
               </p>
-              <p className={cn('text-xs font-medium', config.labelClass)}>{config.label}</p>
+              <p className={cn('text-[10px] sm:text-xs font-medium mt-0.5 truncate', config.labelClass)}>{config.label}</p>
             </div>
           </button>
         );

@@ -141,7 +141,7 @@ export function NavTabs({ baseUrl, status, templateId, templateName }: NavTabsPr
         "w-full overflow-x-auto scrollbar-hide", // Mobile: Full width, scrollable
         "md:w-auto md:flex-1 md:flex md:justify-center md:overflow-visible md:order-2" // Desktop: Centered, flexible
       )}>
-        <div className="flex px-4 md:px-0 w-max md:w-auto min-w-full md:min-w-0">
+        <div className="flex px-4 md:px-0 w-max md:w-auto">
           {tabs.map((tab) => {
             const isActive = segment === tab.segment;
             const Icon = tab.icon;

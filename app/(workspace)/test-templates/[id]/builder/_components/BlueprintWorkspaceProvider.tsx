@@ -3,14 +3,13 @@
 import React, {
   createContext,
   useContext,
-  useOptimistic,
-  useTransition,
   useState,
   useCallback,
   useEffect,
   type ReactNode,
 } from 'react';
 import { toast } from 'sonner';
+import { useAutoSave, type SaveStatus } from '@/hooks/useAutoSave';
 import {
   BlueprintState,
   BlueprintCompetency,
@@ -27,14 +26,6 @@ import {
 // TYPES
 // ============================================
 
-type OptimisticAction =
-  | { type: 'add'; competency: BlueprintCompetency }
-  | { type: 'remove'; competencyId: string }
-  | { type: 'reorder'; fromIndex: number; toIndex: number }
-  | { type: 'update'; competencyId: string; updates: Partial<BlueprintCompetency> }
-  | { type: 'setCompetencies'; competencies: BlueprintCompetency[] }
-  | { type: 'updateSettings'; settings: Partial<BlueprintState> };
-
 interface BlueprintWorkspaceContextValue {
   // State
   state: BlueprintState;
@@ -49,6 +40,13 @@ interface BlueprintWorkspaceContextValue {
   isSaving: boolean;
   isSimulating: boolean;
   simulationResult: SimulationResult | null;
+
+  // Auto-save state
+  saveStatus: SaveStatus;
+  lastSaved: Date | null;
+  hasUnsavedChanges: boolean;
+  retryAttempt: number;
+  isOffline: boolean;
 
   // Actions
   addCompetency: (competency: LibraryCompetency) => void;
@@ -81,69 +79,6 @@ export function useBlueprintWorkspace() {
 }
 
 // ============================================
-// REDUCER
-// ============================================
-
-function blueprintReducer(
-  state: BlueprintState,
-  action: OptimisticAction
-): BlueprintState {
-  switch (action.type) {
-    case 'add':
-      // Prevent duplicates
-      if (state.competencies.some((c) => c.id === action.competency.id)) {
-        return state;
-      }
-      return {
-        ...state,
-        competencies: [...state.competencies, action.competency],
-      };
-
-    case 'remove':
-      return {
-        ...state,
-        competencies: state.competencies.filter(
-          (c) => c.id !== action.competencyId
-        ),
-      };
-
-    case 'reorder': {
-      const { fromIndex, toIndex } = action;
-      const newCompetencies = [...state.competencies];
-      const [moved] = newCompetencies.splice(fromIndex, 1);
-      newCompetencies.splice(toIndex, 0, moved);
-      return {
-        ...state,
-        competencies: newCompetencies,
-      };
-    }
-
-    case 'update':
-      return {
-        ...state,
-        competencies: state.competencies.map((c) =>
-          c.id === action.competencyId ? { ...c, ...action.updates } : c
-        ),
-      };
-
-    case 'setCompetencies':
-      return {
-        ...state,
-        competencies: action.competencies,
-      };
-
-    case 'updateSettings':
-      return {
-        ...state,
-        ...action.settings,
-      };
-
-    default:
-      return state;
-  }
-}
-
-// ============================================
 // PROVIDER
 // ============================================
 
@@ -164,22 +99,55 @@ export function BlueprintWorkspaceProvider({
   templateName,
   isReadOnly = false,
 }: BlueprintWorkspaceProviderProps) {
-  const [isPending, startTransition] = useTransition();
-  const [isSaving, setIsSaving] = useState(false);
   const [isSimulating, setIsSimulating] = useState(false);
   const [simulationResult, setSimulationResult] = useState<SimulationResult | null>(null);
-  
-  // Optimistic state for instant UI updates
-  const [optimisticState, dispatchOptimistic] = useOptimistic(
-    initialState,
-    blueprintReducer
-  );
 
-  // Server-confirmed state for rollback
+  // Local state - updates trigger auto-save
+  const [localState, setLocalState] = useState(initialState);
+
+  // Server-confirmed state for rollback on error
   const [serverState, setServerState] = useState(initialState);
 
   // Library with health status (updated from inventory)
   const [libraryCompetencies, setLibraryCompetencies] = useState(initialLibrary);
+
+  // Auto-save with debounce and retry
+  const {
+    status: saveStatus,
+    lastSaved,
+    hasUnsavedChanges,
+    saveNow,
+    isSaving,
+    retryAttempt,
+    isOffline,
+  } = useAutoSave({
+    data: localState,
+    onSave: async (state) => {
+      const result = await updateBlueprint(state);
+      if (result.success) {
+        setServerState(result.data);
+        return true;
+      }
+      // Don't toast on each retry - only final failure
+      return false;
+    },
+    onError: (error) => {
+      // Show error toast only after all retries exhausted
+      const message = error instanceof Error ? error.message : 'Failed to save';
+      toast.error(message);
+    },
+    debounceMs: 2000,  // Wait 2s after last change
+    maxWaitMs: 10000,  // Force save every 10s max
+    enabled: !isReadOnly,
+    compareKey: (s) => JSON.stringify({ competencies: s.competencies, settings: s }),
+    retry: {
+      maxAttempts: 3,
+      baseDelayMs: 1000,
+      multiplier: 2,
+      maxDelayMs: 8000,
+    },
+    warnOnLeave: true,
+  });
 
   // Fetch inventory health on mount
   useEffect(() => {
@@ -201,7 +169,7 @@ export function BlueprintWorkspaceProvider({
   const addCompetency = useCallback(
     (competency: LibraryCompetency) => {
       // Check if already added
-      if (optimisticState.competencies.some((c) => c.id === competency.id)) {
+      if (localState.competencies.some((c) => c.id === competency.id)) {
         toast.warning('Competency already added');
         return;
       }
@@ -221,146 +189,105 @@ export function BlueprintWorkspaceProvider({
         difficulty: 'INTERMEDIATE',
       };
 
-      startTransition(async () => {
-        dispatchOptimistic({ type: 'add', competency: blueprintCompetency });
+      // Update local state (triggers auto-save)
+      setLocalState((prev) => ({
+        ...prev,
+        competencies: [...prev.competencies, blueprintCompetency],
+      }));
 
-        const result = await updateBlueprint({
-          ...optimisticState,
-          competencies: [...optimisticState.competencies, blueprintCompetency],
-        });
-
-        if (result.success) {
-          setServerState(result.data);
-          toast.success(`Added ${competency.name}`);
-        } else {
-          toast.error(result.error);
-          // State will rollback automatically with useOptimistic
-        }
-      });
+      toast.success(`Added ${competency.name}`);
     },
-    [optimisticState, dispatchOptimistic]
+    [localState.competencies]
   );
 
-  // Remove competency from canvas
+  // Remove competency from canvas (auto-saved) with undo capability
   const removeCompetency = useCallback(
     (competencyId: string) => {
-      const competency = optimisticState.competencies.find(
+      const competencyIndex = localState.competencies.findIndex(
         (c) => c.id === competencyId
       );
+      const competency = localState.competencies[competencyIndex];
 
-      startTransition(async () => {
-        dispatchOptimistic({ type: 'remove', competencyId });
+      if (!competency) return;
 
-        const result = await updateBlueprint({
-          ...optimisticState,
-          competencies: optimisticState.competencies.filter(
-            (c) => c.id !== competencyId
-          ),
-        });
+      // Store the competency and its position for potential undo
+      const removedCompetency = { ...competency };
+      const originalPosition = competencyIndex;
 
-        if (result.success) {
-          setServerState(result.data);
-          if (competency) {
-            toast.success(`Removed ${competency.name}`);
-          }
-        } else {
-          toast.error(result.error);
-        }
+      // Update local state (triggers auto-save)
+      setLocalState((prev) => ({
+        ...prev,
+        competencies: prev.competencies.filter((c) => c.id !== competencyId),
+      }));
+
+      // Show toast with undo action
+      toast.success(`Removed ${competency.name}`, {
+        action: {
+          label: 'Undo',
+          onClick: () => {
+            // Restore the competency at its original position
+            setLocalState((prev) => {
+              const newCompetencies = [...prev.competencies];
+              // Insert at original position, or at end if position is now invalid
+              const insertIndex = Math.min(originalPosition, newCompetencies.length);
+              newCompetencies.splice(insertIndex, 0, removedCompetency);
+              return { ...prev, competencies: newCompetencies };
+            });
+            toast.success(`Restored ${removedCompetency.name}`);
+          },
+        },
+        duration: 5000, // Give user 5 seconds to undo
       });
     },
-    [optimisticState, dispatchOptimistic]
+    [localState.competencies]
   );
 
-  // Reorder competencies via drag-drop
+  // Reorder competencies via drag-drop (auto-saved)
   const reorderCompetencies = useCallback(
     (fromIndex: number, toIndex: number) => {
       if (fromIndex === toIndex) return;
 
-      startTransition(async () => {
-        dispatchOptimistic({ type: 'reorder', fromIndex, toIndex });
-
-        const newCompetencies = [...optimisticState.competencies];
+      // Update local state (triggers auto-save)
+      setLocalState((prev) => {
+        const newCompetencies = [...prev.competencies];
         const [moved] = newCompetencies.splice(fromIndex, 1);
         newCompetencies.splice(toIndex, 0, moved);
-
-        const result = await updateBlueprint({
-          ...optimisticState,
-          competencies: newCompetencies,
-        });
-
-        if (result.success) {
-          setServerState(result.data);
-        } else {
-          toast.error(result.error);
-        }
+        return { ...prev, competencies: newCompetencies };
       });
     },
-    [optimisticState, dispatchOptimistic]
+    []
   );
 
-  // Update single competency properties
+  // Update single competency properties (auto-saved)
   const updateCompetency = useCallback(
     (competencyId: string, updates: Partial<BlueprintCompetency>) => {
-      startTransition(async () => {
-        dispatchOptimistic({ type: 'update', competencyId, updates });
-
-        const result = await updateBlueprint({
-          ...optimisticState,
-          competencies: optimisticState.competencies.map((c) =>
-            c.id === competencyId ? { ...c, ...updates } : c
-          ),
-        });
-
-        if (result.success) {
-          setServerState(result.data);
-        } else {
-          toast.error(result.error);
-        }
-      });
+      // Update local state (triggers auto-save)
+      setLocalState((prev) => ({
+        ...prev,
+        competencies: prev.competencies.map((c) =>
+          c.id === competencyId ? { ...c, ...updates } : c
+        ),
+      }));
     },
-    [optimisticState, dispatchOptimistic]
+    []
   );
 
-  // Replace full competency list (used for undo/redo)
+  // Replace full competency list - used for undo/redo (auto-saved)
   const setCompetencies = useCallback(
     (competencies: BlueprintCompetency[]) => {
-      startTransition(async () => {
-        dispatchOptimistic({ type: 'setCompetencies', competencies });
-
-        const result = await updateBlueprint({
-          ...optimisticState,
-          competencies,
-        });
-
-        if (result.success) {
-          setServerState(result.data);
-        } else {
-          toast.error(result.error);
-        }
-      });
+      // Update local state (triggers auto-save)
+      setLocalState((prev) => ({ ...prev, competencies }));
     },
-    [optimisticState, dispatchOptimistic]
+    []
   );
 
-  // Update blueprint settings (strategy, time limit, etc.)
+  // Update blueprint settings - strategy, time limit, etc. (auto-saved)
   const updateSettings = useCallback(
     (settings: Partial<BlueprintState>) => {
-      startTransition(async () => {
-        dispatchOptimistic({ type: 'updateSettings', settings });
-
-        const result = await updateBlueprint({
-          ...optimisticState,
-          ...settings,
-        });
-
-        if (result.success) {
-          setServerState(result.data);
-        } else {
-          toast.error(result.error);
-        }
-      });
+      // Update local state (triggers auto-save)
+      setLocalState((prev) => ({ ...prev, ...settings }));
     },
-    [optimisticState, dispatchOptimistic]
+    []
   );
 
   // Run simulation with persona
@@ -368,7 +295,7 @@ export function BlueprintWorkspaceProvider({
     async (profile: SimulationProfile) => {
       setIsSimulating(true);
       try {
-        const result = await simulateTest(optimisticState, profile);
+        const result = await simulateTest(localState, profile);
         if (result.success) {
           setSimulationResult(result.data);
         } else {
@@ -380,38 +307,41 @@ export function BlueprintWorkspaceProvider({
         setIsSimulating(false);
       }
     },
-    [optimisticState]
+    [localState]
   );
 
-  // Manual save (for explicit save button)
+  // Manual save (for explicit save button - uses the auto-save hook)
   const saveBlueprint = useCallback(async () => {
-    setIsSaving(true);
-    try {
-      const result = await updateBlueprint(optimisticState);
-      if (result.success) {
-        setServerState(result.data);
-        toast.success('Blueprint saved');
-        return true;
-      } else {
-        toast.error(result.error);
-        return false;
-      }
-    } finally {
-      setIsSaving(false);
+    const success = await saveNow();
+    if (success) {
+      toast.success('Blueprint saved');
     }
-  }, [optimisticState]);
+    return success;
+  }, [saveNow]);
+
+  // Derive isPending from save status (for UI disabled states)
+  const isPending = saveStatus === 'saving';
 
   const value: BlueprintWorkspaceContextValue = {
-    state: optimisticState,
+    // State
+    state: localState,
     serverState,
     libraryCompetencies,
     templateId,
     templateName,
     isReadOnly,
+    // UI State
     isPending,
     isSaving,
     isSimulating,
     simulationResult,
+    // Auto-save state
+    saveStatus,
+    lastSaved,
+    hasUnsavedChanges,
+    retryAttempt,
+    isOffline,
+    // Actions
     addCompetency,
     removeCompetency,
     reorderCompetencies,

@@ -1,7 +1,7 @@
 import { Suspense } from 'react';
 import { currentUser } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
-import { testSessionsApi, testResultsApi } from '@/services/api';
+import { getMyTestsDataCached } from '@/services/api.cache.my-tests';
 import { MyTestsContent } from './_components/MyTestsContent';
 import { ContentSkeleton } from './_components/ContentSkeleton';
 import { ClipboardList } from 'lucide-react';
@@ -73,7 +73,8 @@ export default async function MyTestsPage({ searchParams }: PageProps) {
 
 /**
  * Server component that fetches test data
- * Fetches sessions and results in parallel for optimal performance
+ * Uses cached API functions for optimal performance with 30s session / 60s result revalidation.
+ * Cache keys are user-specific for data isolation.
  */
 async function TestsDataLoader({
   userId,
@@ -82,17 +83,8 @@ async function TestsDataLoader({
   userId: string;
   initialTab: TabValue;
 }) {
-  // Fetch user sessions and results in parallel
-  const [sessionsResponse, resultsResponse] = await Promise.all([
-    testSessionsApi.getUserSessions(userId, 0, 100),
-    testResultsApi.getUserResults(userId, 0, 100),
-  ]);
-
-  const sessions = sessionsResponse?.content || [];
-  const results = resultsResponse?.content || [];
-
-  // Create a map of session ID to result for quick lookup
-  const resultsBySessionId = new Map(results.map(r => [r.sessionId, r]));
+  // Fetch user sessions and results in parallel using cached functions
+  const { sessions, resultsBySessionId } = await getMyTestsDataCached(userId);
 
   // Enrich sessions with their results
   const enrichedSessions = sessions.map(session => ({

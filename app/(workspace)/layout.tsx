@@ -6,11 +6,13 @@ import { Suspense } from "react";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/layout/app-sidebar";
 import { SiteHeader } from "@/components/layout/site-header";
+import { MobileBottomNav } from "@/components/layout/mobile-bottom-nav";
 import { HeaderProvider } from "@/src/context/HeaderContext";
 import { BreadcrumbProvider } from "@/src/context/BreadcrumbContext";
 import { LensInitializer } from "@/components/providers/LensInitializer";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ViewModeProvider, useViewMode } from "@/src/context/ViewModeContext";
+import { ViewModeProvider, useViewMode, shouldBeFocused } from "@/src/context/ViewModeContext";
+import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 
 /**
@@ -65,14 +67,17 @@ function ContentSkeleton() {
 
 /**
  * Inner layout component that consumes ViewModeContext
- * Handles the "Zen Mode" transitions
+ * Handles the "Zen Mode" transitions and "Focused Mode" for IDE-like pages
  */
 function WorkspaceLayoutContent({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
   const { viewMode, isTransitioning } = useViewMode();
   const isImmersive = viewMode === "immersive";
+  // Focused mode: keeps sidebar visible but constrains height (e.g., builder page)
+  const isFocused = shouldBeFocused(pathname);
 
   return (
-    <SidebarProvider 
+    <SidebarProvider
       defaultOpen={false}
       style={{
         "--sidebar-width": "15rem",
@@ -89,32 +94,35 @@ function WorkspaceLayoutContent({ children }: { children: React.ReactNode }) {
       >
         {!isImmersive && <AppSidebar />}
       </div>
-      
-      <SidebarInset 
+
+      <SidebarInset
         className={cn(
-          "flex flex-col min-h-screen bg-background mobile-container",
+          "flex flex-col bg-background mobile-container",
           "transition-all duration-300 ease-in-out",
-          isImmersive && "ml-0 p-0",
+          // Immersive: full viewport, no sidebar
+          // Focused: constrained height for scroll containment (builder, etc.)
+          // Default: min-height allows natural document flow
+          isImmersive ? "ml-0 p-0 h-dvh" : isFocused ? "h-dvh overflow-hidden" : "min-h-screen",
           isTransitioning && "will-change-transform"
         )}
       >
         {/* Header - hidden in immersive mode */}
         <div
           className={cn(
-            "transition-all duration-300 ease-in-out",
+            "transition-all duration-300 ease-in-out shrink-0",
             isImmersive && "opacity-0 h-0 overflow-hidden pointer-events-none"
           )}
           aria-hidden={isImmersive}
         >
           {!isImmersive && <SiteHeader />}
         </div>
-        
-        <main 
-          id="main-content" 
+
+        <main
+          id="main-content"
           className={cn(
-            "flex flex-1 flex-col focus:outline-none overflow-hidden mobile-container",
+            "flex flex-1 flex-col focus:outline-none overflow-hidden mobile-container min-h-0",
             "transition-all duration-300 ease-in-out",
-            isImmersive && "max-w-full"
+            (isImmersive || isFocused) && "max-w-full h-full"
           )}
           tabIndex={-1}
           role="main"
@@ -123,6 +131,9 @@ function WorkspaceLayoutContent({ children }: { children: React.ReactNode }) {
             {children}
           </Suspense>
         </main>
+
+        {/* Mobile bottom navigation - hidden in immersive mode (also auto-hides on focused paths) */}
+        <MobileBottomNav hidden={isImmersive} />
       </SidebarInset>
     </SidebarProvider>
   );

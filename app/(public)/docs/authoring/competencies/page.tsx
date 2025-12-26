@@ -27,8 +27,12 @@ export default function CompetenciesPage() {
     <div className="docs-content">
       <DocsBreadcrumb />
 
-      {/* Page Header */}
-      <div className="mb-8">
+      {/* Two-column layout: Content + Desktop TOC */}
+      <div className="lg:grid lg:grid-cols-[1fr_220px] lg:gap-8">
+        {/* Main content column */}
+        <div className="min-w-0">
+          {/* Page Header */}
+          <div className="mb-8">
         <h1 className="text-3xl font-bold tracking-tight text-foreground mb-3">
           Компетенции
         </h1>
@@ -205,13 +209,17 @@ export default function CompetenciesPage() {
         </section>
       </div>
 
-      {/* Footer Navigation */}
-      <DocsFooterNav />
+          {/* Footer Navigation */}
+          <DocsFooterNav />
+        </div>
 
-      {/* Table of Contents */}
-      <aside className="hidden lg:block absolute right-8 top-6 w-56">
-        <DocsToc items={tocItems} />
-      </aside>
+        {/* Desktop TOC column - sticky sidebar */}
+        <aside className="hidden lg:block">
+          <div className="sticky top-20">
+            <DocsToc items={tocItems} />
+          </div>
+        </aside>
+      </div>
     </div>
   );
 }

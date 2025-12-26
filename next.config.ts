@@ -42,13 +42,21 @@ const nextConfig: NextConfig = {
 	},
 	experimental: {
 		// ========================================================================
+		// Partial Prerendering (PPR) - DISABLED
+		// ========================================================================
+		// PPR requires cacheComponents which is incompatible with Clerk
+		// TODO: Re-enable when Clerk supports Next.js 16 cacheComponents
+		// See: https://github.com/clerk/javascript/pull/7119
+		// ppr: 'incremental',
+
+		// ========================================================================
 		// Turbopack Filesystem Cache (Beta) - Speeds up dev restarts
 		// ========================================================================
 		// Enable filesystem caching for Turbopack in development
 		// Persists cache across dev server restarts for faster startup
 		turbopackFileSystemCacheForDev: true,
 		// Note: turbopackFileSystemCacheForBuild requires Next.js canary
-		
+
 		// Control client-side router cache staleness
 		staleTimes: {
 			dynamic: 30, // Cache dynamic pages for 30s on client
@@ -56,9 +64,9 @@ const nextConfig: NextConfig = {
 		},
 		// Enable optimized imports for better tree-shaking and path resolution
 		optimizePackageImports: [
-			"@/components", 
-			"@/lib", 
-			"@/services", 
+			"@/components",
+			"@/lib",
+			"@/services",
 			"@/context",
 			"lucide-react",
 			"@clerk/nextjs",
@@ -66,6 +74,14 @@ const nextConfig: NextConfig = {
 			"@radix-ui/react-icons",
 			"@tanstack/react-table",
 			"framer-motion",
+			// Added for better bundle optimization
+			"date-fns",
+			"sonner",
+			"@dnd-kit/core",
+			"@dnd-kit/sortable",
+			"fuse.js",
+			"zod",
+			"react-hook-form",
 		],
 		// Enable server source maps for better debugging (disable in production)
 		serverSourceMaps: false,
@@ -91,6 +107,17 @@ const nextConfig: NextConfig = {
 		imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
 		// Disable blur placeholders in development for faster builds
 		disableStaticImages: false,
+		// Remote patterns for external images (Clerk avatars)
+		remotePatterns: [
+			{
+				protocol: 'https',
+				hostname: 'img.clerk.com',
+			},
+			{
+				protocol: 'https',
+				hostname: '*.clerk.com',
+			},
+		],
 	},
 	// Skip type checking during build (run separately with npm run type-check)
 	typescript: {

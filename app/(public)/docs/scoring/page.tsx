@@ -10,6 +10,7 @@ import {
   Calculator,
   User,
   ChevronRight,
+  ChevronDown,
   Briefcase,
   Users,
 } from "lucide-react";
@@ -17,6 +18,7 @@ import {
 import { DocsBreadcrumb } from "../_components/DocsBreadcrumb";
 import { DocsFooterNav } from "../_components/DocsFooterNav";
 import { DocsToc } from "../_components/DocsToc";
+import { MobileTocDrawer } from "../_components/MobileTocDrawer";
 import {
   Callout,
   FlowDiagram,
@@ -26,6 +28,8 @@ import {
   MermaidDiagram,
   MathBlock,
   InlineMath,
+  ScrollableTable,
+  ResponsiveDiagram,
 } from "../_components/mdx";
 
 // Route segment configuration for static generation
@@ -60,12 +64,19 @@ export default function ScoringPage() {
     <div className="docs-content">
       <DocsBreadcrumb />
 
-      {/* Page Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold tracking-tight text-foreground mb-3">
+      {/* Mobile TOC Drawer */}
+      <MobileTocDrawer items={tocItems} />
+
+      {/* Two-column layout: Content + Desktop TOC */}
+      <div className="lg:grid lg:grid-cols-[1fr_220px] lg:gap-8">
+        {/* Main content column */}
+        <div className="min-w-0">
+          {/* Page Header */}
+          <div className="mb-6 sm:mb-8">
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground mb-2 sm:mb-3">
           Система оценивания
         </h1>
-        <p className="text-lg text-muted-foreground max-w-2xl">
+        <p className="text-base sm:text-lg text-muted-foreground max-w-2xl">
           Полное руководство по расчету баллов, агрегации результатов и
           формированию итоговых оценок в SkillSoft. Узнайте, как работает
           система оценивания для разных сценариев тестирования.
@@ -76,40 +87,43 @@ export default function ScoringPage() {
       <div className="docs-prose">
         {/* ===== TL;DR Section ===== */}
         <section id="tldr">
-          <h2 className="text-xl font-semibold text-foreground mt-8 mb-4">
+          <h2 className="text-lg sm:text-xl font-semibold text-foreground mt-6 sm:mt-8 mb-3 sm:mb-4">
             TL;DR — Краткая справка
           </h2>
 
           {/* Core Principle */}
-          <div className="rounded-xl border bg-gradient-to-br from-neutral-900 to-neutral-800 p-5 mb-6">
+          <div className="rounded-xl border bg-gradient-to-br from-neutral-900 to-neutral-800 p-4 sm:p-5 mb-6">
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center">
+              <div className="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center shrink-0">
                 <Zap className="w-5 h-5 text-emerald-400" />
               </div>
               <div>
-                <h3 className="font-semibold text-neutral-100">Главный принцип</h3>
-                <p className="text-sm text-neutral-400">Все оценки нормализуются в [0, 1] перед агрегацией</p>
+                <h3 className="font-semibold text-neutral-100 text-sm sm:text-base">Главный принцип</h3>
+                <p className="text-xs sm:text-sm text-neutral-400">Все оценки нормализуются в [0, 1] перед агрегацией</p>
               </div>
             </div>
 
-            {/* Flow Diagram */}
-            <div className="flex items-center justify-center gap-2 text-sm flex-wrap">
-              <div className="px-3 py-1.5 rounded-lg bg-blue-900/50 border border-blue-700 text-blue-300 flex items-center gap-1.5">
+            {/* Flow Diagram - Vertical on mobile, horizontal on desktop */}
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-2 text-sm">
+              <div className="px-3 py-2 sm:py-1.5 rounded-lg bg-blue-900/50 border border-blue-700 text-blue-300 flex items-center gap-1.5 w-full sm:w-auto justify-center">
                 <FileText className="w-3.5 h-3.5" />
                 <span>Ответы</span>
               </div>
-              <ChevronRight className="w-4 h-4 text-neutral-500" />
-              <div className="px-3 py-1.5 rounded-lg bg-amber-900/50 border border-amber-700 text-amber-300 flex items-center gap-1.5">
+              <ChevronDown className="w-4 h-4 text-neutral-500 sm:hidden" />
+              <ChevronRight className="w-4 h-4 text-neutral-500 hidden sm:block" />
+              <div className="px-3 py-2 sm:py-1.5 rounded-lg bg-amber-900/50 border border-amber-700 text-amber-300 flex items-center gap-1.5 w-full sm:w-auto justify-center">
                 <Scale className="w-3.5 h-3.5" />
                 <span>Нормализация</span>
               </div>
-              <ChevronRight className="w-4 h-4 text-neutral-500" />
-              <div className="px-3 py-1.5 rounded-lg bg-purple-900/50 border border-purple-700 text-purple-300 flex items-center gap-1.5">
+              <ChevronDown className="w-4 h-4 text-neutral-500 sm:hidden" />
+              <ChevronRight className="w-4 h-4 text-neutral-500 hidden sm:block" />
+              <div className="px-3 py-2 sm:py-1.5 rounded-lg bg-purple-900/50 border border-purple-700 text-purple-300 flex items-center gap-1.5 w-full sm:w-auto justify-center">
                 <BarChart3 className="w-3.5 h-3.5" />
                 <span>Агрегация</span>
               </div>
-              <ChevronRight className="w-4 h-4 text-neutral-500" />
-              <div className="px-3 py-1.5 rounded-lg bg-emerald-900/50 border border-emerald-700 text-emerald-300 flex items-center gap-1.5">
+              <ChevronDown className="w-4 h-4 text-neutral-500 sm:hidden" />
+              <ChevronRight className="w-4 h-4 text-neutral-500 hidden sm:block" />
+              <div className="px-3 py-2 sm:py-1.5 rounded-lg bg-emerald-900/50 border border-emerald-700 text-emerald-300 flex items-center gap-1.5 w-full sm:w-auto justify-center">
                 <CheckCircle className="w-3.5 h-3.5" />
                 <span>Результат</span>
               </div>
@@ -212,28 +226,28 @@ export default function ScoringPage() {
           <div className="rounded-xl border bg-neutral-900/50 p-4 mb-6">
             <h4 className="font-semibold text-neutral-200 mb-3 flex items-center gap-2">
               <Scale className="w-4 h-4 text-emerald-400" />
-              <span>Множители весов</span>
+              <span className="text-sm sm:text-base">Множители весов</span>
             </h4>
-            <div className="flex flex-wrap gap-3 justify-center">
-              <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-emerald-900/30 border border-emerald-800">
-                <span className="text-xs text-neutral-400">O*NET:</span>
-                <span className="font-mono font-bold text-emerald-400">1.2×</span>
+            <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-2 sm:gap-3 justify-center">
+              <div className="flex items-center gap-2 px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg bg-emerald-900/30 border border-emerald-800">
+                <span className="text-[10px] sm:text-xs text-neutral-400">O*NET:</span>
+                <span className="font-mono font-bold text-emerald-400 text-sm sm:text-base">1.2×</span>
               </div>
-              <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-blue-900/30 border border-blue-800">
-                <span className="text-xs text-neutral-400">ESCO:</span>
-                <span className="font-mono font-bold text-blue-400">1.15×</span>
+              <div className="flex items-center gap-2 px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg bg-blue-900/30 border border-blue-800">
+                <span className="text-[10px] sm:text-xs text-neutral-400">ESCO:</span>
+                <span className="font-mono font-bold text-blue-400 text-sm sm:text-base">1.15×</span>
               </div>
-              <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-purple-900/30 border border-purple-800">
-                <span className="text-xs text-neutral-400">Big Five:</span>
-                <span className="font-mono font-bold text-purple-400">1.1×</span>
+              <div className="flex items-center gap-2 px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg bg-purple-900/30 border border-purple-800">
+                <span className="text-[10px] sm:text-xs text-neutral-400">Big Five:</span>
+                <span className="font-mono font-bold text-purple-400 text-sm sm:text-base">1.1×</span>
               </div>
-              <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-indigo-900/30 border border-indigo-800">
-                <span className="text-xs text-neutral-400">ESCO + Big5:</span>
-                <span className="font-mono font-bold text-indigo-400">1.265×</span>
+              <div className="flex items-center gap-2 px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg bg-indigo-900/30 border border-indigo-800">
+                <span className="text-[10px] sm:text-xs text-neutral-400">ESCO+Big5:</span>
+                <span className="font-mono font-bold text-indigo-400 text-sm sm:text-base">1.265×</span>
               </div>
-              <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-neutral-800 border border-neutral-700">
-                <span className="text-xs text-neutral-400">Базовый:</span>
-                <span className="font-mono font-bold text-neutral-400">1.0×</span>
+              <div className="flex items-center gap-2 px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg bg-neutral-800 border border-neutral-700 col-span-2 sm:col-span-1 justify-center">
+                <span className="text-[10px] sm:text-xs text-neutral-400">Базовый:</span>
+                <span className="font-mono font-bold text-neutral-400 text-sm sm:text-base">1.0×</span>
               </div>
             </div>
           </div>
@@ -242,65 +256,65 @@ export default function ScoringPage() {
           <div className="rounded-xl border bg-neutral-900/50 p-4 mb-6">
             <h4 className="font-semibold text-neutral-200 mb-3 flex items-center gap-2">
               <BarChart3 className="w-4 h-4 text-purple-400" />
-              <span>Иерархия агрегации</span>
+              <span className="text-sm sm:text-base">Иерархия агрегации</span>
             </h4>
-            <div className="flex items-center justify-center gap-3 text-sm flex-wrap">
+            <div className="grid grid-cols-2 sm:flex sm:flex-row items-center justify-center gap-2 sm:gap-3 text-sm">
               <div className="text-center">
-                <div className="w-16 h-16 rounded-lg bg-blue-900/50 border border-blue-700 flex items-center justify-center mb-1">
-                  <FileText className="w-6 h-6 text-blue-400" />
+                <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-lg bg-blue-900/50 border border-blue-700 flex items-center justify-center mb-1 mx-auto">
+                  <FileText className="w-5 h-5 sm:w-6 sm:h-6 text-blue-400" />
                 </div>
-                <div className="text-xs text-neutral-400">Вопросы</div>
-                <div className="text-xs text-blue-400 font-mono">avg()</div>
+                <div className="text-[10px] sm:text-xs text-neutral-400">Вопросы</div>
+                <div className="text-[10px] sm:text-xs text-blue-400 font-mono">avg()</div>
               </div>
-              <ChevronRight className="w-5 h-5 text-neutral-500" />
+              <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-neutral-500 hidden sm:block" />
               <div className="text-center">
-                <div className="w-16 h-16 rounded-lg bg-purple-900/50 border border-purple-700 flex items-center justify-center mb-1">
-                  <ClipboardList className="w-6 h-6 text-purple-400" />
+                <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-lg bg-purple-900/50 border border-purple-700 flex items-center justify-center mb-1 mx-auto">
+                  <ClipboardList className="w-5 h-5 sm:w-6 sm:h-6 text-purple-400" />
                 </div>
-                <div className="text-xs text-neutral-400">Индикаторы</div>
-                <div className="text-xs text-purple-400 font-mono">Σ(I×W)</div>
+                <div className="text-[10px] sm:text-xs text-neutral-400">Индикаторы</div>
+                <div className="text-[10px] sm:text-xs text-purple-400 font-mono">Σ(I×W)</div>
               </div>
-              <ChevronRight className="w-5 h-5 text-neutral-500" />
+              <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-neutral-500 hidden sm:block" />
               <div className="text-center">
-                <div className="w-16 h-16 rounded-lg bg-amber-900/50 border border-amber-700 flex items-center justify-center mb-1">
-                  <Target className="w-6 h-6 text-amber-400" />
+                <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-lg bg-amber-900/50 border border-amber-700 flex items-center justify-center mb-1 mx-auto">
+                  <Target className="w-5 h-5 sm:w-6 sm:h-6 text-amber-400" />
                 </div>
-                <div className="text-xs text-neutral-400">Компетенции</div>
-                <div className="text-xs text-amber-400 font-mono">Σ(C×W)/ΣW</div>
+                <div className="text-[10px] sm:text-xs text-neutral-400">Компетенции</div>
+                <div className="text-[10px] sm:text-xs text-amber-400 font-mono">Σ(C×W)/ΣW</div>
               </div>
-              <ChevronRight className="w-5 h-5 text-neutral-500" />
+              <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-neutral-500 hidden sm:block" />
               <div className="text-center">
-                <div className="w-16 h-16 rounded-lg bg-emerald-900/50 border border-emerald-700 flex items-center justify-center mb-1">
-                  <User className="w-6 h-6 text-emerald-400" />
+                <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-lg bg-emerald-900/50 border border-emerald-700 flex items-center justify-center mb-1 mx-auto">
+                  <User className="w-5 h-5 sm:w-6 sm:h-6 text-emerald-400" />
                 </div>
-                <div className="text-xs text-neutral-400">Профиль</div>
-                <div className="text-xs text-emerald-400 font-mono">final%</div>
+                <div className="text-[10px] sm:text-xs text-neutral-400">Профиль</div>
+                <div className="text-[10px] sm:text-xs text-emerald-400 font-mono">final%</div>
               </div>
             </div>
           </div>
 
           {/* Threshold Quick Reference */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-            <div className="rounded-lg border bg-neutral-800/50 p-4 text-center">
-              <div className="text-xs text-neutral-500 mb-2">Overview порог</div>
-              <div className="text-2xl font-mono font-bold text-neutral-300">
+          <div className="grid grid-cols-3 gap-2 sm:gap-4 mb-6">
+            <div className="rounded-lg border bg-neutral-800/50 p-2 sm:p-4 text-center">
+              <div className="text-[10px] sm:text-xs text-neutral-500 mb-1 sm:mb-2">Overview</div>
+              <div className="text-lg sm:text-2xl font-mono font-bold text-neutral-300">
                 60-70%
               </div>
-              <div className="text-xs text-neutral-500 mt-1">из шаблона</div>
+              <div className="text-[10px] sm:text-xs text-neutral-500 mt-0.5 sm:mt-1">шаблон</div>
             </div>
-            <div className="rounded-lg border bg-emerald-900/20 border-emerald-800/50 p-4 text-center">
-              <div className="text-xs text-neutral-500 mb-2">Job Fit порог</div>
-              <div className="text-2xl font-mono font-bold text-emerald-400">
+            <div className="rounded-lg border bg-emerald-900/20 border-emerald-800/50 p-2 sm:p-4 text-center">
+              <div className="text-[10px] sm:text-xs text-neutral-500 mb-1 sm:mb-2">Job Fit</div>
+              <div className="text-lg sm:text-2xl font-mono font-bold text-emerald-400">
                 50-80%
               </div>
-              <div className="text-xs text-neutral-500 mt-1">динамический</div>
+              <div className="text-[10px] sm:text-xs text-neutral-500 mt-0.5 sm:mt-1">динам.</div>
             </div>
-            <div className="rounded-lg border bg-blue-900/20 border-blue-800/50 p-4 text-center">
-              <div className="text-xs text-neutral-500 mb-2">Team Fit порог</div>
-              <div className="text-2xl font-mono font-bold text-blue-400">
-                60% + div
+            <div className="rounded-lg border bg-blue-900/20 border-blue-800/50 p-2 sm:p-4 text-center">
+              <div className="text-[10px] sm:text-xs text-neutral-500 mb-1 sm:mb-2">Team Fit</div>
+              <div className="text-lg sm:text-2xl font-mono font-bold text-blue-400">
+                60%+div
               </div>
-              <div className="text-xs text-neutral-500 mt-1">два условия</div>
+              <div className="text-[10px] sm:text-xs text-neutral-500 mt-0.5 sm:mt-1">2 условия</div>
             </div>
           </div>
 
@@ -314,7 +328,7 @@ export default function ScoringPage() {
 
         {/* ===== SECTION 1: Overview ===== */}
         <section id="overview">
-          <h2 className="text-xl font-semibold text-foreground mt-8 mb-4">
+          <h2 className="text-lg sm:text-xl font-semibold text-foreground mt-6 sm:mt-8 mb-3 sm:mb-4">
             Обзор системы
           </h2>
           <p className="text-muted-foreground mb-4">
@@ -324,9 +338,13 @@ export default function ScoringPage() {
             наконец формируют общий профиль сотрудника.
           </p>
 
-          <MermaidDiagram
+          <ResponsiveDiagram
             title="Конвейер обработки результатов"
-            chart={`
+            caption="Нажмите для увеличения"
+            maxHeight={350}
+          >
+            <MermaidDiagram
+              chart={`
 flowchart LR
     subgraph input["📝 ОТВЕТЫ"]
         A["Ответы<br/>сотрудника"]
@@ -365,7 +383,8 @@ flowchart LR
     style scenario fill:#581c87,stroke:#a855f7,color:#f3e8ff
     style result fill:#14532d,stroke:#22c55e,color:#dcfce7
 `}
-          />
+            />
+          </ResponsiveDiagram>
 
           <Callout type="info" title="Ключевой принцип">
             <p>
@@ -389,7 +408,7 @@ flowchart LR
 
         {/* ===== SECTION 2: Question Types ===== */}
         <section id="question-types">
-          <h2 className="text-xl font-semibold text-foreground mt-8 mb-4">
+          <h2 className="text-lg sm:text-xl font-semibold text-foreground mt-6 sm:mt-8 mb-3 sm:mb-4">
             Типы вопросов и оценка
           </h2>
           <p className="text-muted-foreground mb-4">
@@ -399,58 +418,58 @@ flowchart LR
           </p>
 
           {/* Comparison Table */}
-          <div className="my-6 overflow-x-auto">
-            <table className="w-full border-collapse text-sm">
+          <ScrollableTable className="my-6">
+            <table className="w-full border-collapse text-sm min-w-[500px]">
               <thead>
                 <tr className="border-b bg-muted/50">
-                  <th className="text-left p-3 font-semibold">Тип вопроса</th>
-                  <th className="text-left p-3 font-semibold">
+                  <th className="text-left p-2 sm:p-3 font-semibold whitespace-nowrap">Тип вопроса</th>
+                  <th className="text-left p-2 sm:p-3 font-semibold whitespace-nowrap">
                     Исходная шкала
                   </th>
-                  <th className="text-left p-3 font-semibold">
-                    Формула нормализации
+                  <th className="text-left p-2 sm:p-3 font-semibold whitespace-nowrap">
+                    Формула
                   </th>
-                  <th className="text-left p-3 font-semibold">Результат</th>
+                  <th className="text-left p-2 sm:p-3 font-semibold whitespace-nowrap">Результат</th>
                 </tr>
               </thead>
               <tbody>
                 <tr className="border-b">
-                  <td className="p-3 font-medium">Шкала Лайкерта</td>
-                  <td className="p-3 text-muted-foreground">1 - 5</td>
-                  <td className="p-3">
+                  <td className="p-2 sm:p-3 font-medium whitespace-nowrap">Шкала Лайкерта</td>
+                  <td className="p-2 sm:p-3 text-muted-foreground">1 - 5</td>
+                  <td className="p-2 sm:p-3">
                     <code className="text-xs bg-muted px-1.5 py-0.5 rounded">
                       (value - 1) / 4
                     </code>
                   </td>
-                  <td className="p-3 text-muted-foreground">[0, 1]</td>
+                  <td className="p-2 sm:p-3 text-muted-foreground">[0, 1]</td>
                 </tr>
                 <tr className="border-b">
-                  <td className="p-3 font-medium">Ситуационные суждения</td>
-                  <td className="p-3 text-muted-foreground">0 - maxScore</td>
-                  <td className="p-3">
+                  <td className="p-2 sm:p-3 font-medium whitespace-nowrap">Ситуационные суждения</td>
+                  <td className="p-2 sm:p-3 text-muted-foreground">0 - max</td>
+                  <td className="p-2 sm:p-3">
                     <code className="text-xs bg-muted px-1.5 py-0.5 rounded">
                       score / maxScore
                     </code>
                   </td>
-                  <td className="p-3 text-muted-foreground">[0, 1]</td>
+                  <td className="p-2 sm:p-3 text-muted-foreground">[0, 1]</td>
                 </tr>
                 <tr className="border-b">
-                  <td className="p-3 font-medium">Множественный выбор</td>
-                  <td className="p-3 text-muted-foreground">верно / неверно</td>
-                  <td className="p-3">
+                  <td className="p-2 sm:p-3 font-medium whitespace-nowrap">Множественный выбор</td>
+                  <td className="p-2 sm:p-3 text-muted-foreground">верно / неверно</td>
+                  <td className="p-2 sm:p-3">
                     <code className="text-xs bg-muted px-1.5 py-0.5 rounded">
-                      correct ? 1.0 : 0.0
+                      correct ? 1 : 0
                     </code>
                   </td>
-                  <td className="p-3 text-muted-foreground">{"{0, 1}"}</td>
+                  <td className="p-2 sm:p-3 text-muted-foreground">{"{0, 1}"}</td>
                 </tr>
               </tbody>
             </table>
-          </div>
+          </ScrollableTable>
 
           {/* Likert Scale */}
-          <div id="likert" className="mt-6">
-            <h3 className="text-lg font-semibold text-foreground mb-3">
+          <div id="likert" className="mt-5 sm:mt-6">
+            <h3 className="text-base sm:text-lg font-semibold text-foreground mb-2 sm:mb-3">
               Шкала Лайкерта (Likert Scale)
             </h3>
             <p className="text-muted-foreground mb-4">
@@ -458,13 +477,13 @@ flowchart LR
               выбирает степень согласия с утверждением по 5-балльной шкале.
             </p>
 
-            <div className="rounded-lg border p-4 mb-4">
+            <div className="rounded-lg border p-3 sm:p-4 mb-4">
               <div className="flex items-center justify-between mb-3">
-                <span className="text-sm text-muted-foreground">
-                  Полностью не согласен
+                <span className="text-xs sm:text-sm text-muted-foreground">
+                  Не согласен
                 </span>
-                <span className="text-sm text-muted-foreground">
-                  Полностью согласен
+                <span className="text-xs sm:text-sm text-muted-foreground">
+                  Согласен
                 </span>
               </div>
               <div className="flex justify-between">
@@ -473,10 +492,10 @@ flowchart LR
                     key={n}
                     className="flex flex-col items-center gap-1"
                   >
-                    <div className="w-8 h-8 rounded-full border-2 flex items-center justify-center text-sm font-medium">
+                    <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full border-2 flex items-center justify-center text-xs sm:text-sm font-medium">
                       {n}
                     </div>
-                    <span className="text-xs text-muted-foreground">
+                    <span className="text-[10px] sm:text-xs text-muted-foreground font-mono">
                       {((n - 1) / 4).toFixed(2)}
                     </span>
                   </div>
@@ -546,8 +565,8 @@ flowchart LR
           </div>
 
           {/* SJT */}
-          <div id="sjt" className="mt-6">
-            <h3 className="text-lg font-semibold text-foreground mb-3">
+          <div id="sjt" className="mt-5 sm:mt-6">
+            <h3 className="text-base sm:text-lg font-semibold text-foreground mb-2 sm:mb-3">
               Ситуационные суждения (SJT)
             </h3>
             <p className="text-muted-foreground mb-4">
@@ -660,8 +679,8 @@ flowchart LR
           </div>
 
           {/* MCQ */}
-          <div id="mcq" className="mt-6">
-            <h3 className="text-lg font-semibold text-foreground mb-3">
+          <div id="mcq" className="mt-5 sm:mt-6">
+            <h3 className="text-base sm:text-lg font-semibold text-foreground mb-2 sm:mb-3">
               Множественный выбор (MCQ)
             </h3>
             <p className="text-muted-foreground mb-4">
@@ -708,7 +727,7 @@ flowchart LR
 
         {/* ===== SECTION 3: Aggregation ===== */}
         <section id="aggregation" aria-labelledby="aggregation-heading">
-          <h2 id="aggregation-heading" className="text-xl font-semibold text-foreground mt-8 mb-4">
+          <h2 id="aggregation-heading" className="text-lg sm:text-xl font-semibold text-foreground mt-6 sm:mt-8 mb-3 sm:mb-4">
             Иерархия агрегации
           </h2>
           <p className="text-muted-foreground mb-6">
@@ -928,9 +947,13 @@ flowchart LR
             </article>
           </div>
 
-          <MermaidDiagram
+          <ResponsiveDiagram
             title="Пример расчета с весами: Компетенция «Коммуникация»"
-            chart={`
+            caption="Нажмите для увеличения"
+            maxHeight={400}
+          >
+            <MermaidDiagram
+              chart={`
 flowchart TB
     subgraph questions["📋 ВОПРОСЫ"]
         Q1["Q1.1: 0.75"]
@@ -961,7 +984,8 @@ flowchart TB
     style indicators fill:#581c87,stroke:#a855f7,color:#f3e8ff
     style result fill:#14532d,stroke:#22c55e,color:#dcfce7
 `}
-          />
+            />
+          </ResponsiveDiagram>
 
           <Callout type="warning" title="Важно: Сумма весов">
             <p>
@@ -974,7 +998,7 @@ flowchart TB
 
         {/* ===== SECTION 4: Scenarios ===== */}
         <section id="scenarios">
-          <h2 className="text-xl font-semibold text-foreground mt-8 mb-4">
+          <h2 className="text-lg sm:text-xl font-semibold text-foreground mt-6 sm:mt-8 mb-3 sm:mb-4">
             Сценарии оценивания
           </h2>
           <p className="text-muted-foreground mb-4">
@@ -983,55 +1007,55 @@ flowchart TB
           </p>
 
           {/* Scenarios Comparison Table */}
-          <div className="my-6 overflow-x-auto">
-            <table className="w-full border-collapse text-sm">
+          <ScrollableTable className="my-6">
+            <table className="w-full border-collapse text-sm min-w-[480px]">
               <thead>
                 <tr className="border-b bg-muted/50">
-                  <th className="text-left p-3 font-semibold">Сценарий</th>
-                  <th className="text-left p-3 font-semibold">Цель</th>
-                  <th className="text-left p-3 font-semibold">Взвешивание</th>
-                  <th className="text-left p-3 font-semibold">Порог</th>
+                  <th className="text-left p-2 sm:p-3 font-semibold whitespace-nowrap">Сценарий</th>
+                  <th className="text-left p-2 sm:p-3 font-semibold">Цель</th>
+                  <th className="text-left p-2 sm:p-3 font-semibold whitespace-nowrap">Взвешивание</th>
+                  <th className="text-left p-2 sm:p-3 font-semibold">Порог</th>
                 </tr>
               </thead>
               <tbody>
                 <tr className="border-b">
-                  <td className="p-3 font-medium">A: Обзор</td>
-                  <td className="p-3 text-muted-foreground">
+                  <td className="p-2 sm:p-3 font-medium whitespace-nowrap">A: Обзор</td>
+                  <td className="p-2 sm:p-3 text-muted-foreground">
                     Паспорт компетенций
                   </td>
-                  <td className="p-3">Равные веса</td>
-                  <td className="p-3 text-muted-foreground">
-                    По шаблону (напр. 70%)
+                  <td className="p-2 sm:p-3 whitespace-nowrap">Равные веса</td>
+                  <td className="p-2 sm:p-3 text-muted-foreground whitespace-nowrap">
+                    По шаблону (70%)
                   </td>
                 </tr>
                 <tr className="border-b">
-                  <td className="p-3 font-medium">B: Соответствие должности</td>
-                  <td className="p-3 text-muted-foreground">
+                  <td className="p-2 sm:p-3 font-medium whitespace-nowrap">B: Job Fit</td>
+                  <td className="p-2 sm:p-3 text-muted-foreground">
                     Оценка для позиции
                   </td>
-                  <td className="p-3">O*NET (1.2x)</td>
-                  <td className="p-3 text-muted-foreground">
+                  <td className="p-2 sm:p-3 whitespace-nowrap">O*NET (1.2x)</td>
+                  <td className="p-2 sm:p-3 text-muted-foreground whitespace-nowrap">
                     50% + строгость
                   </td>
                 </tr>
                 <tr className="border-b">
-                  <td className="p-3 font-medium">C: Совместимость с командой</td>
-                  <td className="p-3 text-muted-foreground">
+                  <td className="p-2 sm:p-3 font-medium whitespace-nowrap">C: Team Fit</td>
+                  <td className="p-2 sm:p-3 text-muted-foreground">
                     Командный fit
                   </td>
-                  <td className="p-3">ESCO + Big Five</td>
-                  <td className="p-3 text-muted-foreground">
+                  <td className="p-2 sm:p-3 whitespace-nowrap">ESCO + Big5</td>
+                  <td className="p-2 sm:p-3 text-muted-foreground whitespace-nowrap">
                     60% + разнообразие
                   </td>
                 </tr>
               </tbody>
             </table>
-          </div>
+          </ScrollableTable>
 
           {/* Scenario A: Overview */}
-          <div id="scenario-overview" className="mt-6">
-            <h3 className="text-lg font-semibold text-foreground mb-3">
-              Сценарий A: Обзор компетенций (Overview)
+          <div id="scenario-overview" className="mt-5 sm:mt-6">
+            <h3 className="text-base sm:text-lg font-semibold text-foreground mb-2 sm:mb-3">
+              Сценарий A: Обзор компетенций
             </h3>
             <p className="text-muted-foreground mb-4">
               Базовый сценарий для создания профиля компетенций сотрудника.
@@ -1085,9 +1109,9 @@ flowchart TB
           </div>
 
           {/* Scenario B: Job Fit */}
-          <div id="scenario-jobfit" className="mt-6">
-            <h3 className="text-lg font-semibold text-foreground mb-3">
-              Сценарий B: Соответствие должности (Job Fit)
+          <div id="scenario-jobfit" className="mt-5 sm:mt-6">
+            <h3 className="text-base sm:text-lg font-semibold text-foreground mb-2 sm:mb-3">
+              Сценарий B: Job Fit
             </h3>
             <p className="text-muted-foreground mb-4">
               Сценарий для оценки соответствия кандидата требованиям конкретной
@@ -1192,9 +1216,9 @@ flowchart TB
           </div>
 
           {/* Scenario C: Team Fit */}
-          <div id="scenario-teamfit" className="mt-6">
-            <h3 className="text-lg font-semibold text-foreground mb-3">
-              Сценарий C: Совместимость с командой (Team Fit)
+          <div id="scenario-teamfit" className="mt-5 sm:mt-6">
+            <h3 className="text-base sm:text-lg font-semibold text-foreground mb-2 sm:mb-3">
+              Сценарий C: Team Fit
             </h3>
             <p className="text-muted-foreground mb-4">
               Сценарий для оценки того, насколько кандидат дополнит существующую
@@ -2214,13 +2238,17 @@ flowchart TB
         </section>
       </div>
 
-      {/* Footer Navigation */}
-      <DocsFooterNav />
+          {/* Footer Navigation */}
+          <DocsFooterNav />
+        </div>
 
-      {/* Table of Contents */}
-      <aside className="hidden lg:block absolute right-8 top-6 w-56">
-        <DocsToc items={tocItems} />
-      </aside>
+        {/* Desktop TOC column - sticky sidebar */}
+        <aside className="hidden lg:block">
+          <div className="sticky top-20">
+            <DocsToc items={tocItems} />
+          </div>
+        </aside>
+      </div>
     </div>
   );
 }

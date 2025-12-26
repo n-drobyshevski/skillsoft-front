@@ -119,7 +119,7 @@ function ActionItem({
             <Button
               variant="link"
               size="sm"
-              className="h-auto p-0 mt-2 text-xs"
+              className="h-11 min-h-[44px] px-2 -mx-2 mt-2 text-xs rounded-lg"
               onClick={action.onAction}
               disabled={action.disabled}
             >

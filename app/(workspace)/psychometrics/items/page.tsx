@@ -21,6 +21,7 @@ interface PageProps {
   searchParams: Promise<{
     status?: string;
     competencyId?: string;
+    search?: string;
     page?: string;
     size?: string;
   }>;
@@ -40,12 +41,13 @@ const EMPTY_PAGE: Page<ItemStatistics> = {
 async function getItemsData(searchParams: Awaited<PageProps['searchParams']>) {
   const status = searchParams.status as ItemValidityStatus | undefined;
   const competencyId = searchParams.competencyId;
+  const search = searchParams.search;
   const page = searchParams.page ? parseInt(searchParams.page, 10) : 0;
   const size = searchParams.size ? parseInt(searchParams.size, 10) : 20;
 
   // Fetch items and competencies in parallel using cached functions
   const [itemsResult, competencies] = await Promise.all([
-    getPsychometricsItemsCached({ status, competencyId, page, size }),
+    getPsychometricsItemsCached({ status, competencyId, search, page, size }),
     getCompetenciesCached(),
   ]);
 
@@ -107,7 +109,7 @@ export default async function ItemsPage({ searchParams }: PageProps) {
           competencies={competencies}
           currentStatus={resolvedParams.status as ItemValidityStatus | undefined}
           currentCompetencyId={resolvedParams.competencyId}
-          currentPage={resolvedParams.page ? parseInt(resolvedParams.page, 10) : 0}
+          currentSearch={resolvedParams.search}
         />
       </Suspense>
     </div>

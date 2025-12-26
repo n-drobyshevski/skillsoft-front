@@ -152,6 +152,7 @@ export function CompactStatCard({
 
 /**
  * Mobile variant of CompactStatCard - stacked layout with title under value
+ * Designed to fill available width in a 2-column grid
  */
 export function CompactStatCardMobile({
   title,
@@ -166,16 +167,16 @@ export function CompactStatCardMobile({
     return (
       <div
         className={cn(
-          'flex flex-col items-start gap-2 px-3 py-3 rounded-lg border bg-card',
-          'h-[72px] min-h-[72px]',
+          'flex flex-col items-start gap-1.5 p-3 rounded-xl border bg-card w-full',
+          'min-h-[76px]',
           className
         )}
       >
-        <div className="flex items-center gap-2">
-          <Skeleton className="w-7 h-7 rounded-lg" />
-          <Skeleton className="h-5 w-10" />
+        <div className="flex items-center gap-2 w-full">
+          <Skeleton className="w-8 h-8 rounded-lg shrink-0" />
+          <Skeleton className="h-6 flex-1 max-w-[60px]" />
         </div>
-        <Skeleton className="h-3 w-16" />
+        <Skeleton className="h-3.5 w-20" />
       </div>
     );
   }
@@ -183,37 +184,40 @@ export function CompactStatCardMobile({
   const content = (
     <div
       className={cn(
-        'flex flex-col gap-1 px-3 py-3 rounded-lg border bg-card',
-        'h-[72px] min-h-[72px]',
-        'transition-all duration-200 group',
+        // Layout - fill width, stack vertically
+        'flex flex-col gap-1 p-3 rounded-xl border bg-card w-full',
+        // Minimum height for consistency
+        'min-h-[76px]',
+        // Interactive states
+        'transition-all duration-200 group touch-manipulation',
         getBorderStyles(variant),
-        href && 'cursor-pointer hover:shadow-md hover:border-primary/30 active:scale-[0.99]',
+        href && 'cursor-pointer hover:shadow-md hover:border-primary/30 active:scale-[0.98]',
         className
       )}
     >
       {/* Top row: icon + value */}
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2.5">
         <div
           className={cn(
-            'w-7 h-7 rounded-md flex items-center justify-center shrink-0',
+            'w-8 h-8 rounded-lg flex items-center justify-center shrink-0',
             getIconStyles(variant)
           )}
         >
-          <Icon className="w-3.5 h-3.5" aria-hidden="true" />
+          <Icon className="w-4 h-4" aria-hidden="true" />
         </div>
-        <span className="text-xl font-bold tracking-tight tabular-nums">
+        <span className="text-2xl font-bold tracking-tight tabular-nums">
           {value}
         </span>
         {href && (
           <ArrowUpRight
-            className="w-3.5 h-3.5 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity ml-auto shrink-0"
+            className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity ml-auto shrink-0"
             aria-hidden="true"
           />
         )}
       </div>
 
       {/* Title below */}
-      <span className="text-xs text-muted-foreground truncate pl-0.5">
+      <span className="text-xs text-muted-foreground truncate font-medium">
         {title}
         <span className="sr-only">, value is {value}</span>
       </span>
@@ -221,7 +225,7 @@ export function CompactStatCardMobile({
   );
 
   if (href) {
-    return <Link href={href}>{content}</Link>;
+    return <Link href={href} className="w-full block">{content}</Link>;
   }
 
   return content;
@@ -301,8 +305,8 @@ export function CompactStatsRow({
             />
           ))}
         </div>
-        {/* Mobile: 2x2 grid */}
-        <div className="grid grid-cols-2 gap-2 md:hidden">
+        {/* Mobile: 2x2 grid - cards fill available width */}
+        <div className="grid grid-cols-2 gap-2.5 md:hidden">
           {cards.map((card, i) => (
             <CompactStatCardMobile
               key={i}
@@ -332,8 +336,8 @@ export function CompactStatsRow({
           />
         ))}
       </div>
-      {/* Mobile: 2x2 grid with stacked layout */}
-      <div className="grid grid-cols-2 gap-2 md:hidden">
+      {/* Mobile: 2x2 grid with stacked layout - cards fill available width */}
+      <div className="grid grid-cols-2 gap-2.5 md:hidden">
         {cards.map((card) => (
           <CompactStatCardMobile
             key={card.title}

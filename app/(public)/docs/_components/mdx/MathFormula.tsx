@@ -156,7 +156,7 @@ export function MathBlock({
   return (
     <div
       className={cn(
-        "rounded-lg border p-4 my-4",
+        "rounded-lg border p-4 my-4 overflow-x-auto",
         variantStyles[variant],
         className
       )}
@@ -164,7 +164,7 @@ export function MathBlock({
       {title && (
         <div className="text-xs text-neutral-500 mb-2 font-medium">{title}</div>
       )}
-      <div className={cn("text-center", variantTextStyles[variant])}>
+      <div className={cn("text-center min-w-fit", variantTextStyles[variant])}>
         <MathFormula
           tex={tex}
           display

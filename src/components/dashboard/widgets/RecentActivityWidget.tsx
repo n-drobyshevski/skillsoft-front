@@ -89,6 +89,8 @@ export function RecentActivityWidget({
 
 /**
  * Individual activity item
+ * Mobile: Multi-row stacked layout for better readability
+ * Desktop: Compact horizontal layout
  */
 function ActivityItem({ completion }: { completion: RecentCompletion }) {
   const initials = getInitials(completion.userName);
@@ -100,7 +102,7 @@ function ActivityItem({ completion }: { completion: RecentCompletion }) {
 
   return (
     <div className="flex items-start gap-3 py-2.5">
-      <div className="relative">
+      <div className="relative shrink-0">
         <Avatar className="h-7 w-7">
           <AvatarFallback className="text-[10px] bg-muted font-medium">
             {initials}
@@ -116,29 +118,63 @@ function ActivityItem({ completion }: { completion: RecentCompletion }) {
         />
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-sm leading-snug">
-          <span className="font-medium">{completion.userName}</span>
-          <span className="text-muted-foreground"> completed </span>
-          <span className="font-medium">{completion.templateName}</span>
-        </p>
-        <div className="flex items-center gap-2 mt-0.5">
-          <Badge variant="outline" className="text-[10px] px-1.5 py-0">
-            {goalInfo.displayName}
-          </Badge>
-          {completion.score !== undefined && (
-            <Badge
-              variant={completion.passed ? 'default' : 'secondary'}
-              className={cn(
-                'text-[10px] px-1.5 py-0',
-                completion.passed && 'bg-emerald-600'
-              )}
-            >
-              {completion.score}%
+        {/* Mobile layout: stacked rows */}
+        <div className="sm:hidden">
+          {/* Row 1: Username */}
+          <span className="text-sm font-medium line-clamp-1">{completion.userName}</span>
+          {/* Row 2: Template name */}
+          <p className="text-sm text-muted-foreground mt-0.5">
+            <span>completed </span>
+            <span className="font-medium text-foreground">{completion.templateName}</span>
+          </p>
+          {/* Row 3: Badges + Time */}
+          <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
+            <Badge variant="outline" className="text-[10px] px-1.5 py-0">
+              {goalInfo.displayName}
             </Badge>
-          )}
-          <span className="text-xs text-muted-foreground">
-            {formatTimeAgo(new Date(completion.completedAt))}
-          </span>
+            {completion.score !== undefined && (
+              <Badge
+                variant={completion.passed ? 'default' : 'secondary'}
+                className={cn(
+                  'text-[10px] px-1.5 py-0',
+                  completion.passed && 'bg-emerald-600'
+                )}
+              >
+                {completion.score}%
+              </Badge>
+            )}
+            <span className="text-[10px] text-muted-foreground">
+              • {formatTimeAgo(new Date(completion.completedAt))}
+            </span>
+          </div>
+        </div>
+
+        {/* Desktop layout: compact horizontal */}
+        <div className="hidden sm:block">
+          <p className="text-sm leading-snug">
+            <span className="font-medium">{completion.userName}</span>
+            <span className="text-muted-foreground"> completed </span>
+            <span className="font-medium">{completion.templateName}</span>
+          </p>
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mt-0.5">
+            <Badge variant="outline" className="text-[10px] px-1.5 py-0 shrink-0">
+              {goalInfo.displayName}
+            </Badge>
+            {completion.score !== undefined && (
+              <Badge
+                variant={completion.passed ? 'default' : 'secondary'}
+                className={cn(
+                  'text-[10px] px-1.5 py-0 shrink-0',
+                  completion.passed && 'bg-emerald-600'
+                )}
+              >
+                {completion.score}%
+              </Badge>
+            )}
+            <span className="text-xs text-muted-foreground whitespace-nowrap">
+              {formatTimeAgo(new Date(completion.completedAt))}
+            </span>
+          </div>
         </div>
       </div>
     </div>

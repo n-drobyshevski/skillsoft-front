@@ -1,28 +1,26 @@
 'use client';
 
-import React from "react";
+import {
+  Eye,
+  Pencil,
+  Settings,
+  Clock,
+  Target,
+  BookOpen,
+} from "lucide-react";
 import Link from "next/link";
+
+import { Button } from "@/components/ui/button";
 import {
   Drawer,
-  DrawerClose,
   DrawerContent,
   DrawerDescription,
-  DrawerFooter,
   DrawerHeader,
   DrawerTitle,
 } from "@/components/ui/drawer";
-import { Button } from "@/components/ui/button";
-import { TestTemplateSummary, AssessmentGoal, AssessmentGoalInfo } from "@/types/domain";
-import {
-  Eye,
-  Settings,
-  Pencil,
-  X,
-  Crosshair,
-  Users,
-  Briefcase,
-} from "lucide-react";
+import { AssessmentGoal, AssessmentGoalInfo, TestTemplateSummary } from "@/types/domain";
 import StartTestDriveButton from "./StartTestDriveButton";
+import StartTestSessionButton from "./StartTestSessionButton";
 
 interface MobileTemplateActionsProps {
   template: TestTemplateSummary;
@@ -32,28 +30,23 @@ interface MobileTemplateActionsProps {
 }
 
 /**
- * Render goal icon component based on assessment goal
+ * Format duration for display
  */
-function GoalIconDisplay({ goal, className }: { goal: AssessmentGoal | undefined; className?: string }) {
-  switch (goal) {
-    case AssessmentGoal.JOB_FIT:
-      return <Briefcase className={className} />;
-    case AssessmentGoal.TEAM_FIT:
-      return <Users className={className} />;
-    case AssessmentGoal.OVERVIEW:
-    default:
-      return <Crosshair className={className} />;
-  }
+function formatDuration(minutes: number): string {
+  if (minutes < 60) return `${minutes} мин`;
+  const hours = Math.floor(minutes / 60);
+  const mins = minutes % 60;
+  return mins > 0 ? `${hours}ч ${mins}м` : `${hours}ч`;
 }
 
 /**
  * MobileTemplateActions - Bottom sheet drawer for template actions on mobile
  *
  * Features:
+ * - Template info with stats
+ * - Primary CTA: Start Test
+ * - Secondary actions: View Details, Edit (if canEdit), Test Drive (if canEdit)
  * - Full-width action buttons (48px height for touch targets)
- * - Template info header
- * - Grouped actions: View, Edit (if canEdit), Test Drive (if canEdit)
- * - Proper accessibility with ARIA labels
  */
 export default function MobileTemplateActions({
   template,
@@ -68,86 +61,103 @@ export default function MobileTemplateActions({
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
       <DrawerContent className="max-h-[85vh]">
-        <DrawerHeader className="text-left pb-2">
-          <div className="flex items-start gap-3">
-            <div className="p-2 rounded-lg bg-muted shrink-0">
-              <GoalIconDisplay goal={template.goal} className="h-5 w-5 text-muted-foreground" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <DrawerTitle className="text-base line-clamp-2">
-                {template.name}
-              </DrawerTitle>
-              <DrawerDescription className="mt-1">
-                {goalInfo.displayName}
-              </DrawerDescription>
-            </div>
+        {/* Header */}
+        <DrawerHeader className="text-center pb-2 pt-2">
+          <DrawerTitle className="text-base font-semibold line-clamp-2">
+            {template.name}
+          </DrawerTitle>
+          <DrawerDescription className="mt-1 text-sm">
+            {goalInfo.displayName}
+          </DrawerDescription>
+
+          {/* Stats Row */}
+          <div className="flex items-center justify-center gap-3 mt-2 text-xs text-muted-foreground">
+            <span className="inline-flex items-center gap-1">
+              <Clock className="size-3" />
+              {formatDuration(template.timeLimitMinutes)}
+            </span>
+            <span className="text-muted-foreground/40">•</span>
+            <span className="inline-flex items-center gap-1">
+              <Target className="size-3" />
+              {template.passingScore}%
+            </span>
+            <span className="text-muted-foreground/40">•</span>
+            <span className="inline-flex items-center gap-1">
+              <BookOpen className="size-3" />
+              {template.competencyCount} навыков
+            </span>
           </div>
         </DrawerHeader>
 
-        <div className="px-4 py-2 space-y-2">
-          {/* View Details */}
-          <Link href={`/test-templates/${template.id}`} className="block">
-            <Button
-              variant="outline"
-              className="w-full h-12 justify-start gap-3 text-base font-medium"
-              onClick={() => onOpenChange(false)}
-            >
-              <Eye className="h-5 w-5 text-muted-foreground" />
-              View Details
-            </Button>
-          </Link>
+        {/* Actions */}
+        <div className="px-4 pb-6 space-y-3">
+          {/* Primary Action: Start Test */}
+          <StartTestSessionButton
+            templateId={template.id}
+            templateName={template.name}
+            fullWidth
+            variant="hero"
+          />
+
+          {/* Secondary Actions Row */}
+          <div className="grid grid-cols-2 gap-2">
+            <Link href={`/test-templates/${template.id}`} className="block no-underline">
+              <Button
+                variant="outline"
+                className="w-full h-11 justify-center gap-2 text-sm font-medium"
+                onClick={() => onOpenChange(false)}
+              >
+                <Eye className="h-4 w-4" />
+                Подробнее
+              </Button>
+            </Link>
+
+            {canEdit ? (
+              <StartTestDriveButton
+                templateId={template.id}
+                templateName={template.name}
+                fullWidth
+                className="h-11"
+              />
+            ) : (
+              <Button
+                variant="outline"
+                className="w-full h-11 justify-center gap-2 text-sm font-medium"
+                onClick={() => onOpenChange(false)}
+              >
+                Отмена
+              </Button>
+            )}
+          </div>
 
           {/* Edit Actions - Only for editors */}
           {canEdit && (
-            <>
-              <div className="pt-2 pb-1">
-                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide px-1">
-                  Admin Actions
-                </p>
-              </div>
-
-              <Link href={`/test-templates/${template.id}/settings`} className="block">
+            <div className="grid grid-cols-2 gap-2">
+              <Link href={`/test-templates/${template.id}/settings`} className="block no-underline">
                 <Button
                   variant="outline"
-                  className="w-full h-12 justify-start gap-3 text-base font-medium"
+                  className="w-full h-11 justify-center gap-2 text-sm font-medium"
                   onClick={() => onOpenChange(false)}
                 >
-                  <Settings className="h-5 w-5 text-muted-foreground" />
-                  Settings
+                  <Settings className="h-4 w-4" />
+                  Настройки
                 </Button>
               </Link>
 
-              <Link href={`/test-templates/${template.id}/edit`} className="block">
+              <Link href={`/test-templates/${template.id}/builder`} className="block no-underline">
                 <Button
                   variant="outline"
-                  className="w-full h-12 justify-start gap-3 text-base font-medium"
+                  className="w-full h-11 justify-center gap-2 text-sm font-medium"
                   onClick={() => onOpenChange(false)}
                 >
-                  <Pencil className="h-5 w-5 text-muted-foreground" />
-                  Edit Template
+                  <Pencil className="h-4 w-4" />
+                  Изменить
                 </Button>
               </Link>
-
-              {/* Test Drive */}
-              <div className="pt-2">
-                <StartTestDriveButton
-                  templateId={template.id}
-                  templateName={template.name}
-                  fullWidth
-                />
-              </div>
-            </>
+            </div>
           )}
         </div>
 
-        <DrawerFooter className="pt-2">
-          <DrawerClose asChild>
-            <Button variant="ghost" className="w-full h-12">
-              <X className="h-4 w-4 mr-2" />
-              Cancel
-            </Button>
-          </DrawerClose>
-        </DrawerFooter>
       </DrawerContent>
     </Drawer>
   );

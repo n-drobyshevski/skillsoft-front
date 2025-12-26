@@ -181,7 +181,7 @@ function ActionRow({
       <motion.div
         whileHover={{ x: 2 }}
         whileTap={{ scale: 0.99 }}
-        className="flex items-center gap-3 p-3 -mx-3 rounded-lg hover:bg-muted/50 transition-colors group cursor-pointer"
+        className="flex items-center gap-3 p-3 -mx-3 rounded-lg hover:bg-muted/50 transition-colors group cursor-pointer min-h-[48px] touch-manipulation"
       >
         <div className="w-9 h-9 rounded-lg bg-muted flex items-center justify-center shrink-0">
           <Icon className="w-4 h-4 text-muted-foreground" />

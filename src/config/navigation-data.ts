@@ -238,6 +238,14 @@ export const NAVIGATION_CONFIG: NavigationConfig = {
 
   footer: [
     {
+      id: "docs",
+      path: "https://skillsoft.app/docs",
+      label: "Документация",
+      labelEn: "Documentation",
+      icon: "BookOpen",
+      isExternal: true,
+    },
+    {
       id: "help",
       path: "/help",
       label: "Помощь",

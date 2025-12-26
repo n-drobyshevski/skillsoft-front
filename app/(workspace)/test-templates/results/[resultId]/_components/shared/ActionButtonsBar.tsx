@@ -92,29 +92,30 @@ export function ActionButtonsBar({ templateId, resultId, actions }: ActionButton
   };
 
   return (
-    <div className="flex flex-col sm:flex-row gap-2 pt-6 border-t">
+    <div className="flex flex-col sm:flex-row gap-1.5 sm:gap-2 pt-4 sm:pt-6 border-t">
       {/* Back to list - always first */}
-      <Button asChild variant="outline" size="sm" className="flex-1 sm:flex-initial">
+      <Button asChild variant="outline" size="sm" className="flex-1 sm:flex-initial h-9 sm:h-10">
         <Link href="/test-templates">
-          <Home className="h-4 w-4 mr-2" />
-          Back to Tests
+          <Home className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2 shrink-0" />
+          <span className="truncate">Back</span>
         </Link>
       </Button>
 
       {/* Retake button - always second if present */}
       {actions.includes('retake') && (
-        <Button asChild size="sm" className="flex-1 sm:flex-initial">
+        <Button asChild size="sm" className="flex-1 sm:flex-initial h-9 sm:h-10">
           <Link href={`/test-templates/${templateId}/start`}>
-            <RotateCcw className="h-4 w-4 mr-2" />
-            Retake Test
+            <RotateCcw className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2 shrink-0" />
+            <span className="truncate">Retake</span>
           </Link>
         </Button>
       )}
 
-      {/* Other actions */}
+      {/* Other actions - only show first action on mobile */}
       {actions
         .filter(action => action !== 'retake' && action !== 'back_to_list')
-        .map(action => {
+        .slice(0, 2)
+        .map((action, idx) => {
           const config = ACTION_CONFIG[action];
           if (!config) return null;
 
@@ -125,11 +126,11 @@ export function ActionButtonsBar({ templateId, resultId, actions }: ActionButton
               key={action}
               variant={config.variant}
               size="sm"
-              className="flex-1 sm:flex-initial sm:ml-auto"
+              className={`flex-1 sm:flex-initial h-9 sm:h-10 ${idx > 0 ? 'hidden sm:flex' : ''} ${idx === 0 ? 'sm:ml-auto' : ''}`}
               onClick={() => handleAction(action)}
             >
-              <Icon className="h-4 w-4 mr-2" />
-              {config.label}
+              <Icon className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2 shrink-0" />
+              <span className="truncate text-xs sm:text-sm">{config.label}</span>
             </Button>
           );
         })}

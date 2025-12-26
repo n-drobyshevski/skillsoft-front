@@ -1191,6 +1191,7 @@ export const psychometricsApi = {
     if (params.status) searchParams.append('status', params.status);
     if (params.competencyId) searchParams.append('competencyId', params.competencyId);
     if (params.discriminationFlag) searchParams.append('discriminationFlag', params.discriminationFlag);
+    if (params.search) searchParams.append('search', params.search);
     if (params.page !== undefined) searchParams.append('page', params.page.toString());
     if (params.size !== undefined) searchParams.append('size', params.size.toString());
     if (params.sort) searchParams.append('sort', params.sort);
@@ -1200,7 +1201,7 @@ export const psychometricsApi = {
 
     return fetchApi(url, {
       tags: ['psychometrics-items'],
-      cache: 'no-store',
+      revalidate: 60, // 1 minute cache for better performance
       authHeaders,
     });
   },
@@ -1211,8 +1212,8 @@ export const psychometricsApi = {
   getItemDetail: async (questionId: string): Promise<ItemStatisticsDetail> => {
     const authHeaders = await getAuthHeaders();
     return fetchApi(`${PSYCHOMETRICS_BASE}/items/${questionId}`, {
-      tags: [`psychometrics-item-${questionId}`],
-      cache: 'no-store',
+      tags: [`psychometrics-item-${questionId}`, 'psychometrics-items'],
+      revalidate: 60, // 1 minute cache
       authHeaders,
     });
   },
@@ -1307,6 +1308,34 @@ export const psychometricsApi = {
     return fetchApi(`${PSYCHOMETRICS_BASE}/audit/trigger`, {
       method: 'POST',
       authHeaders,
+    });
+  },
+
+  /**
+   * Batch update item statuses (calls individual updates in parallel)
+   * Returns results for each item: { questionId, success, error? }
+   */
+  batchUpdateItemStatus: async (
+    questionIds: string[],
+    newStatus: ItemValidityStatus,
+    reason: string
+  ): Promise<{ questionId: string; success: boolean; error?: string }[]> => {
+    const results = await Promise.allSettled(
+      questionIds.map(async (questionId) => {
+        await psychometricsApi.updateItemStatus(questionId, { newStatus, reason });
+        return { questionId, success: true };
+      })
+    );
+
+    return results.map((result, index) => {
+      if (result.status === 'fulfilled') {
+        return result.value;
+      }
+      return {
+        questionId: questionIds[index],
+        success: false,
+        error: result.reason instanceof Error ? result.reason.message : 'Unknown error',
+      };
     });
   },
 };

@@ -17,11 +17,13 @@ import {
 import { testSessionsApi } from "@/services/api";
 import { Loader2, AlertTriangle, Eye, Sparkles } from "lucide-react";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 
 interface StartTestDriveButtonProps {
   templateId: string;
   templateName: string;
   fullWidth?: boolean;
+  className?: string;
 }
 
 /**
@@ -39,6 +41,7 @@ export default function StartTestDriveButton({
   templateId,
   templateName,
   fullWidth = false,
+  className,
 }: StartTestDriveButtonProps) {
   const router = useRouter();
   const { userId, isSignedIn } = useAuth();
@@ -139,19 +142,23 @@ export default function StartTestDriveButton({
         onClick={handleStartTestDrive}
         disabled={isLoading}
         variant="outline"
-        className={`${fullWidth ? "w-full" : ""} border-amber-500/30 text-amber-600 hover:bg-amber-500/10 hover:text-amber-500 hover:border-amber-500/50 transition-all group`}
+        className={cn(
+          "border-amber-500/30 text-amber-600 hover:bg-amber-500/10 hover:text-amber-500 hover:border-amber-500/50 transition-all group",
+          fullWidth && "w-full",
+          className
+        )}
         size="sm"
       >
         {isLoading ? (
           <>
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            Загрузка...
+            <Loader2 className="h-4 w-4 animate-spin mr-1.5" />
+            <span className="hidden sm:inline">Загрузка...</span>
           </>
         ) : (
           <>
-            <Eye className="mr-2 h-4 w-4 transition-transform group-hover:scale-110" />
-            <span className="font-medium">HR Тест-драйв</span>
-            <Sparkles className="ml-1.5 h-3 w-3 text-amber-500" />
+            <Eye className="h-3.5 w-3.5 sm:mr-1.5 transition-transform group-hover:scale-110" />
+            <span className="hidden sm:inline font-medium">Тест-драйв</span>
+            <span className="sm:hidden font-medium">Тест</span>
           </>
         )}
       </Button>

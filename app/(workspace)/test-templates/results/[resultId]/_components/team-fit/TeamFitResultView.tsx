@@ -7,15 +7,13 @@ import {
   Users,
   UserCheck,
   AlertTriangle,
-  TrendingUp,
-  TrendingDown,
   Lightbulb,
   Target
 } from 'lucide-react';
 import CompetencyRadarChart from '@/components/data-display/charts/CompetencyRadarChart';
-import { useBigFiveProjection, getBigFiveLabels, bigFiveToArray } from '@/hooks/useBigFiveProjection';
+import { useBigFiveProjection, bigFiveToArray } from '@/hooks/useBigFiveProjection';
 import { TeamFitHero } from './TeamFitHero';
-import { CompetencyDetailAccordion } from '../shared/CompetencyDetailAccordion';
+import { CompetencyProfile } from '../shared/CompetencyProfile';
 import { ActionButtonsBar } from '../shared/ActionButtonsBar';
 import { BaseResultViewProps } from '../shared/types';
 
@@ -36,7 +34,6 @@ export function TeamFitResultView({ result, template }: BaseResultViewProps) {
 
   // Project competencies to Big Five for personality fit visualization
   const bigFiveProfile = useBigFiveProjection(result.competencyScores);
-  const bigFiveLabels = getBigFiveLabels();
   const bigFiveData = bigFiveToArray(bigFiveProfile);
 
   // Prepare data for radar chart
@@ -70,8 +67,8 @@ export function TeamFitResultView({ result, template }: BaseResultViewProps) {
   }, [bigFiveProfile]);
 
   return (
-    <div className="min-h-screen bg-muted/30 py-4 md:py-8">
-      <div className="container max-w-7xl mx-auto px-4 space-y-4">
+    <div className="min-h-screen bg-muted/30 py-3 sm:py-4 md:py-8">
+      <div className="container max-w-7xl mx-auto px-2 sm:px-4 space-y-3 sm:space-y-4">
         {/* Hero with team context and compatibility score */}
         <TeamFitHero
           templateName={result.templateName}
@@ -85,59 +82,59 @@ export function TeamFitResultView({ result, template }: BaseResultViewProps) {
         />
 
         {/* Main content grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 animate-fadeInUp-2">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 animate-fadeInUp-2">
           {/* Competency Profile */}
           <Card className="h-full">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-lg font-semibold flex items-center gap-2">
-                <BarChart3 className="h-5 w-5" />
-                Your Skills Profile
+            <CardHeader className="pb-2 sm:pb-3 px-3 sm:px-6">
+              <CardTitle className="text-sm sm:text-lg font-semibold flex items-center gap-2">
+                <BarChart3 className="h-4 w-4 sm:h-5 sm:w-5 shrink-0" />
+                Skills Profile
               </CardTitle>
-              <CardDescription className="text-sm">
-                How your competencies contribute to the team
+              <CardDescription className="text-[10px] sm:text-sm">
+                Team contribution
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-3 sm:space-y-4 px-2 sm:px-6">
               {/* Radar chart */}
               {radarData.length >= 3 ? (
-                <div className="flex justify-center items-center min-h-[280px] md:min-h-[320px]">
+                <div className="flex justify-center items-center min-h-[200px] sm:min-h-[280px] md:min-h-[320px]">
                   <CompetencyRadarChart
                     data={radarData}
                     passingScore={passingScore}
                   />
                 </div>
               ) : (
-                <div className="flex flex-col items-center justify-center min-h-[280px] text-center">
-                  <Lightbulb className="h-12 w-12 text-muted-foreground/50 mb-3" />
-                  <p className="text-sm text-muted-foreground">
-                    Need at least 3 competencies for radar visualization
+                <div className="flex flex-col items-center justify-center min-h-[200px] sm:min-h-[280px] text-center p-4 sm:p-6">
+                  <Lightbulb className="h-8 w-8 sm:h-12 sm:w-12 text-muted-foreground/50 mb-2 sm:mb-3" />
+                  <p className="text-xs sm:text-sm text-muted-foreground">
+                    Need 3+ competencies for radar.
                   </p>
                 </div>
               )}
 
               {/* Profile stats */}
-              <div className="grid grid-cols-3 gap-2 pt-3 border-t">
-                <div className="text-center p-2.5 bg-muted/40 rounded-lg">
-                  <div className="text-[10px] uppercase tracking-wide text-muted-foreground mb-0.5">
-                    Average
+              <div className="grid grid-cols-3 gap-1.5 sm:gap-2 pt-2 sm:pt-3 border-t">
+                <div className="text-center p-2 sm:p-2.5 bg-muted/40 rounded-lg min-w-0">
+                  <div className="text-[9px] sm:text-[10px] uppercase tracking-wide text-muted-foreground mb-0.5">
+                    Avg
                   </div>
-                  <div className="text-base font-bold tabular-nums">
+                  <div className="text-sm sm:text-base font-bold tabular-nums">
                     {insights.avgScore}%
                   </div>
                 </div>
-                <div className="text-center p-2.5 bg-blue-500/10 rounded-lg">
-                  <div className="text-[10px] uppercase tracking-wide text-muted-foreground mb-0.5">
-                    Strengths
+                <div className="text-center p-2 sm:p-2.5 bg-blue-500/10 rounded-lg min-w-0">
+                  <div className="text-[9px] sm:text-[10px] uppercase tracking-wide text-muted-foreground mb-0.5">
+                    Strong
                   </div>
-                  <div className="text-base font-bold tabular-nums text-blue-600 dark:text-blue-400">
+                  <div className="text-sm sm:text-base font-bold tabular-nums text-blue-600 dark:text-blue-400">
                     {insights.strengths.length}
                   </div>
                 </div>
-                <div className="text-center p-2.5 bg-muted/40 rounded-lg">
-                  <div className="text-[10px] uppercase tracking-wide text-muted-foreground mb-0.5">
-                    Developing
+                <div className="text-center p-2 sm:p-2.5 bg-muted/40 rounded-lg min-w-0">
+                  <div className="text-[9px] sm:text-[10px] uppercase tracking-wide text-muted-foreground mb-0.5">
+                    Grow
                   </div>
-                  <div className="text-base font-bold tabular-nums text-muted-foreground">
+                  <div className="text-sm sm:text-base font-bold tabular-nums text-muted-foreground">
                     {insights.developing.length}
                   </div>
                 </div>
@@ -145,68 +142,86 @@ export function TeamFitResultView({ result, template }: BaseResultViewProps) {
             </CardContent>
           </Card>
 
-          {/* Team Insights */}
-          <Card className="h-full">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base flex items-center gap-2">
-                <Users className="h-4 w-4" />
-                Team Contribution Insights
+          {/* Team Insights - Enhanced Visual Hierarchy */}
+          <Card className="h-full flex flex-col">
+            <CardHeader className="pb-3 sm:pb-4 px-4 sm:px-6">
+              <CardTitle className="text-base sm:text-lg font-semibold flex items-center gap-2.5">
+                <div className="p-1.5 sm:p-2 rounded-lg bg-blue-500/10">
+                  <Users className="h-4 w-4 sm:h-5 sm:w-5 text-blue-500" />
+                </div>
+                Team Insights
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-3">
-              {/* Team context */}
+            <CardContent className="flex-1 space-y-4 sm:space-y-5 px-4 sm:px-6">
+              {/* Team context - Primary context */}
               {teamId && (
-                <div className="p-3 bg-blue-500/5 rounded-lg border border-blue-500/10">
-                  <div className="flex items-center gap-2 mb-1">
-                    <Users className="h-4 w-4 text-blue-500" />
-                    <span className="text-sm font-medium">Team Analysis</span>
+                <div className="p-3 sm:p-4 bg-blue-500/5 rounded-xl border border-blue-500/15">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-lg bg-blue-500/15 shrink-0">
+                      <Users className="h-4 w-4 sm:h-5 sm:w-5 text-blue-500" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <span className="text-sm sm:text-base font-medium text-foreground">Team Analysis</span>
+                      <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
+                        Team: <code className="text-blue-600 dark:text-blue-400 font-mono">{teamId}</code>
+                      </p>
+                    </div>
                   </div>
-                  <p className="text-xs text-muted-foreground">
-                    Evaluating compatibility with team: <code className="text-blue-600 dark:text-blue-400">{teamId}</code>
-                  </p>
                 </div>
               )}
 
-              {/* Fit summary */}
+              {/* Fit summary - Primary focal point */}
               {isGoodFit ? (
-                <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-100 dark:border-blue-900/30">
-                  <h4 className="font-semibold text-sm text-blue-800 dark:text-blue-300 mb-1.5 flex items-center gap-2">
-                    <UserCheck className="h-3.5 w-3.5" />
-                    Strong Team Fit
-                  </h4>
-                  <p className="text-xs text-blue-700 dark:text-blue-400 leading-relaxed">
-                    Your skills complement the team well. You bring valuable strengths that enhance team capabilities.
-                  </p>
+                <div className="p-3 sm:p-4 bg-linear-to-br from-blue-500/10 to-blue-500/5 rounded-xl border border-blue-500/20">
+                  <div className="flex items-start gap-3">
+                    <div className="p-2 rounded-lg bg-blue-500/15 shrink-0">
+                      <UserCheck className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600 dark:text-blue-400" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <h4 className="font-semibold text-sm sm:text-base text-blue-800 dark:text-blue-300 mb-1">
+                        Strong Team Fit
+                      </h4>
+                      <p className="text-xs sm:text-sm text-blue-700 dark:text-blue-400 leading-relaxed">
+                        Your skills complement the team well.
+                      </p>
+                    </div>
+                  </div>
                 </div>
               ) : (
-                <div className="p-3 bg-slate-50 dark:bg-slate-900/20 rounded-lg border border-slate-100 dark:border-slate-900/30">
-                  <h4 className="font-semibold text-sm text-slate-800 dark:text-slate-300 mb-1.5 flex items-center gap-2">
-                    <AlertTriangle className="h-3.5 w-3.5" />
-                    Alignment Opportunities
-                  </h4>
-                  <p className="text-xs text-slate-700 dark:text-slate-400 leading-relaxed">
-                    Some skill areas could benefit from development to better complement the team dynamics.
-                  </p>
+                <div className="p-3 sm:p-4 bg-linear-to-br from-slate-500/10 to-slate-500/5 rounded-xl border border-slate-500/20">
+                  <div className="flex items-start gap-3">
+                    <div className="p-2 rounded-lg bg-slate-500/15 shrink-0">
+                      <AlertTriangle className="h-4 w-4 sm:h-5 sm:w-5 text-slate-600 dark:text-slate-400" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <h4 className="font-semibold text-sm sm:text-base text-slate-800 dark:text-slate-300 mb-1">
+                        Alignment Needed
+                      </h4>
+                      <p className="text-xs sm:text-sm text-slate-700 dark:text-slate-400 leading-relaxed">
+                        Some skills need development for team fit.
+                      </p>
+                    </div>
+                  </div>
                 </div>
               )}
 
-              {/* Complementary skills you bring */}
+              {/* Complementary skills - Secondary importance */}
               {insights.complementary.length > 0 && (
-                <div className="space-y-2">
-                  <h5 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide flex items-center gap-1">
-                    <TrendingUp className="h-3 w-3 text-blue-500" />
-                    You Bring to the Team
+                <div className="space-y-3">
+                  <h5 className="text-xs sm:text-sm font-semibold text-foreground uppercase tracking-wider flex items-center gap-2">
+                    <span className="w-1 h-4 bg-blue-500/60 rounded-full" />
+                    You Bring
                   </h5>
-                  <div className="space-y-1.5">
+                  <div className="space-y-2 sm:space-y-2.5">
                     {insights.complementary.map(c => (
                       <div
                         key={c.competencyId}
-                        className="flex items-center justify-between p-2 bg-blue-500/5 rounded-lg"
+                        className="flex items-center justify-between p-2.5 sm:p-3 bg-blue-500/5 hover:bg-blue-500/10 rounded-xl border border-blue-500/15 gap-3 transition-colors"
                       >
-                        <span className="text-xs font-medium text-foreground">
+                        <span className="text-xs sm:text-sm font-medium text-foreground">
                           {c.competencyName}
                         </span>
-                        <span className="text-xs font-bold text-blue-600 dark:text-blue-400 tabular-nums">
+                        <span className="text-sm sm:text-base font-bold text-blue-600 dark:text-blue-400 tabular-nums shrink-0">
                           {Math.round(c.percentage)}%
                         </span>
                       </div>
@@ -215,23 +230,23 @@ export function TeamFitResultView({ result, template }: BaseResultViewProps) {
                 </div>
               )}
 
-              {/* Development areas for team alignment */}
+              {/* Development areas - Tertiary */}
               {insights.gapAreas.length > 0 && (
-                <div className="space-y-2">
-                  <h5 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide flex items-center gap-1">
-                    <TrendingDown className="h-3 w-3 text-slate-500" />
-                    Team Alignment Areas
+                <div className="space-y-3">
+                  <h5 className="text-xs sm:text-sm font-semibold text-foreground uppercase tracking-wider flex items-center gap-2">
+                    <span className="w-1 h-4 bg-slate-400/60 rounded-full" />
+                    Growth Areas
                   </h5>
-                  <div className="space-y-1.5">
+                  <div className="space-y-2 sm:space-y-2.5">
                     {insights.gapAreas.map(c => (
                       <div
                         key={c.competencyId}
-                        className="flex items-center justify-between p-2 bg-muted/30 rounded-lg"
+                        className="flex items-center justify-between p-2.5 sm:p-3 bg-muted/40 hover:bg-muted/60 rounded-xl border border-border/50 gap-3 transition-colors"
                       >
-                        <span className="text-xs font-medium text-muted-foreground">
+                        <span className="text-xs sm:text-sm font-medium text-muted-foreground">
                           {c.competencyName}
                         </span>
-                        <span className="text-xs font-bold text-muted-foreground tabular-nums">
+                        <span className="text-sm sm:text-base font-bold text-muted-foreground tabular-nums shrink-0">
                           {Math.round(c.percentage)}%
                         </span>
                       </div>
@@ -240,10 +255,12 @@ export function TeamFitResultView({ result, template }: BaseResultViewProps) {
                 </div>
               )}
 
-              {/* Collaboration note */}
-              <p className="text-xs text-muted-foreground leading-relaxed pt-2 border-t">
-                Team fit assessments help identify how individual skills complement team dynamics and where collaborative growth opportunities exist.
-              </p>
+              {/* Collaboration note - Footer */}
+              <div className="pt-3 sm:pt-4 border-t border-border/50 mt-auto">
+                <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed text-center">
+                  Team fit shows how your skills complement the group.
+                </p>
+              </div>
             </CardContent>
           </Card>
         </div>
@@ -251,27 +268,27 @@ export function TeamFitResultView({ result, template }: BaseResultViewProps) {
         {/* Personality Fit Section (if Big Five data available) */}
         {hasBigFiveData && (
           <Card className="animate-fadeInUp-3">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-lg font-semibold flex items-center gap-2">
-                <Target className="h-5 w-5" />
-                Personality Profile for Team Dynamics
+            <CardHeader className="pb-2 sm:pb-3 px-3 sm:px-6">
+              <CardTitle className="text-sm sm:text-lg font-semibold flex items-center gap-2">
+                <Target className="h-4 w-4 sm:h-5 sm:w-5 shrink-0" />
+                <span className="truncate">Personality Profile</span>
               </CardTitle>
-              <CardDescription className="text-sm">
-                Big Five dimensions relevant to team collaboration
+              <CardDescription className="text-[10px] sm:text-sm">
+                Big Five for team dynamics
               </CardDescription>
             </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+            <CardContent className="px-2 sm:px-6">
+              <div className="grid grid-cols-5 gap-1 sm:gap-4">
                 {bigFiveData.map(({ trait, value }) => (
                   <div
                     key={trait}
-                    className="text-center p-4 bg-muted/30 rounded-lg border"
+                    className="text-center p-1.5 sm:p-4 bg-muted/30 rounded-lg border min-w-0"
                   >
-                    <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">
-                      {trait}
+                    <div className="text-[8px] sm:text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1 sm:mb-2 truncate">
+                      {trait.slice(0, 4)}
                     </div>
-                    <div className="relative w-16 h-16 mx-auto mb-2">
-                      <svg className="w-16 h-16 transform -rotate-90" viewBox="0 0 64 64">
+                    <div className="relative w-10 h-10 sm:w-16 sm:h-16 mx-auto mb-1 sm:mb-2">
+                      <svg className="w-10 h-10 sm:w-16 sm:h-16 transform -rotate-90" viewBox="0 0 64 64">
                         <circle
                           cx="32"
                           cy="32"
@@ -295,12 +312,12 @@ export function TeamFitResultView({ result, template }: BaseResultViewProps) {
                         />
                       </svg>
                       <div className="absolute inset-0 flex items-center justify-center">
-                        <span className="text-lg font-bold text-blue-600 dark:text-blue-400 tabular-nums">
+                        <span className="text-xs sm:text-lg font-bold text-blue-600 dark:text-blue-400 tabular-nums">
                           {value}
                         </span>
                       </div>
                     </div>
-                    <div className="text-xs text-muted-foreground">
+                    <div className="text-[8px] sm:text-xs text-muted-foreground hidden sm:block">
                       {value >= 70 ? 'High' : value >= 40 ? 'Moderate' : 'Low'}
                     </div>
                   </div>
@@ -310,8 +327,8 @@ export function TeamFitResultView({ result, template }: BaseResultViewProps) {
           </Card>
         )}
 
-        {/* Detailed competency breakdown */}
-        <CompetencyDetailAccordion
+        {/* Detailed competency breakdown - Mobile-First */}
+        <CompetencyProfile
           competencies={result.competencyScores}
           showPassFail={true}
           passingScore={passingScore}

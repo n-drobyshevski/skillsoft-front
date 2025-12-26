@@ -332,3 +332,81 @@ export function ReliabilityGaugeMini({ value, className }: ReliabilityGaugeMiniP
     </div>
   );
 }
+
+// Status border color mapping
+function getStatusBorderColor(value: number | null | undefined): string {
+  if (value == null) return 'border-l-gray-400 dark:border-l-gray-500';
+  if (value >= 0.8) return 'border-l-emerald-500 dark:border-l-emerald-400';
+  if (value >= 0.7) return 'border-l-blue-500 dark:border-l-blue-400';
+  if (value >= 0.6) return 'border-l-amber-500 dark:border-l-amber-400';
+  return 'border-l-red-500 dark:border-l-red-400';
+}
+
+// Status dot color mapping
+function getStatusDotColor(value: number | null | undefined): string {
+  if (value == null) return 'bg-gray-400 dark:bg-gray-500';
+  if (value >= 0.8) return 'bg-emerald-500 dark:bg-emerald-400';
+  if (value >= 0.7) return 'bg-blue-500 dark:bg-blue-400';
+  if (value >= 0.6) return 'bg-amber-500 dark:bg-amber-400';
+  return 'bg-red-500 dark:bg-red-400';
+}
+
+// Compact mobile card version - value-first design for 2-column grid
+interface ReliabilityGaugeCompactProps {
+  value: number | null | undefined;
+  competencyName?: string;
+  sampleSize?: number | null;
+  itemCount?: number | null;
+  className?: string;
+}
+
+export function ReliabilityGaugeCompact({
+  value,
+  competencyName,
+  sampleSize,
+  itemCount,
+  className,
+}: ReliabilityGaugeCompactProps) {
+  const colorConfig = getColorConfig(value);
+
+  return (
+    <div
+      className={cn(
+        'flex flex-col p-2 rounded-md border border-l-2 bg-card min-w-0 min-h-[56px] overflow-hidden',
+        getStatusBorderColor(value),
+        className
+      )}
+    >
+      {/* Row 1: Name + Value */}
+      <div className="flex items-start gap-1.5 mb-auto">
+        <span
+          className="text-xs font-medium leading-snug line-clamp-2 min-w-0 flex-1"
+          title={competencyName}
+        >
+          {competencyName || 'Competency'}
+        </span>
+        <div className="flex items-center gap-1 shrink-0">
+          <div className={cn('size-1.5 rounded-full', getStatusDotColor(value))} />
+          <span className={cn('text-sm font-bold tabular-nums', colorConfig.textColor)}>
+            {value != null ? value.toFixed(2) : '--'}
+          </span>
+        </div>
+      </div>
+
+      {/* Row 2: Status + Meta */}
+      <div className="flex items-center justify-between gap-1 text-[10px] mt-1">
+        <span className={cn('font-medium', colorConfig.textColor)}>
+          {colorConfig.label}
+        </span>
+        <span className="text-muted-foreground tabular-nums shrink-0">
+          {[
+            itemCount != null && `${itemCount}q`,
+            sampleSize != null && `${sampleSize}r`,
+          ]
+            .filter(Boolean)
+            .join(' ')}
+        </span>
+      </div>
+    </div>
+  );
+}

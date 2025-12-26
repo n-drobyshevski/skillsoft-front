@@ -2,6 +2,7 @@
 
 import { useMemo } from 'react';
 import Link from 'next/link';
+import { UiLink } from '@/components/ui/ui-link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -258,13 +259,15 @@ export function ActionableInsightCard({
             {insight.message}
           </p>
           {insight.link && (
-            <Link
+            <UiLink
               href={insight.link}
-              className="inline-flex items-center gap-1 text-xs text-primary hover:underline mt-1"
+              variant="underline"
+              size="sm"
+              trailingIcon={<ChevronRight className="h-3 w-3" />}
+              className="mt-1"
             >
               {insight.linkText || 'View details'}
-              <ChevronRight className="h-3 w-3" />
-            </Link>
+            </UiLink>
           )}
         </div>
       </div>
@@ -288,7 +291,7 @@ export function ActionableInsightCard({
           </div>
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-6 w-6">
+              <Button variant="ghost" size="icon" className="h-11 w-11 min-h-[44px] min-w-[44px] -mr-2 -mt-2">
                 <HelpCircle className="h-4 w-4 text-muted-foreground" />
               </Button>
             </TooltipTrigger>
@@ -319,7 +322,7 @@ export function ActionableInsightCard({
         {/* Action link */}
         {insight.link && (
           <Link href={insight.link}>
-            <Button variant="outline" size="sm" className="w-full mt-2">
+            <Button variant="outline" size="sm" className="w-full mt-2 min-h-[44px]">
               {insight.linkText || 'View details'}
               <ArrowRight className="h-4 w-4 ml-2" />
             </Button>

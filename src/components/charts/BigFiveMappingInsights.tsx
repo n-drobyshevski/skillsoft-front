@@ -1,16 +1,13 @@
 "use client";
 
-import React, { useState } from 'react';
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
+import React from 'react';
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
-import { ChevronDown, ChevronUp, Info, ExternalLink } from 'lucide-react';
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion';
+import { Info } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
   BigFiveProfile,
@@ -28,233 +25,229 @@ interface BigFiveMappingInsightsProps {
 }
 
 /**
- * Get badge styling based on contribution type
+ * Get contribution type color for visual indicator
  */
-function getContributionBadgeStyle(type: ContributionType): string {
+function getContributionTypeColor(type: ContributionType): string {
   switch (type) {
     case 'primary':
-      return 'bg-primary/15 text-primary border-primary/30';
+      return 'bg-primary';
     case 'secondary':
-      return 'bg-muted text-muted-foreground border-muted-foreground/30';
+      return 'bg-muted-foreground/60';
     case 'tertiary':
-      return 'bg-muted/50 text-muted-foreground/80 border-muted-foreground/20';
+      return 'bg-muted-foreground/30';
     default:
-      return 'bg-muted text-muted-foreground';
+      return 'bg-muted-foreground/40';
   }
 }
 
 /**
- * Format weight as percentage
+ * Contribution Card Component - Ultra-compact mobile design
+ * No overflow possible - all text truncates
  */
-function formatWeight(weight: number): string {
-  return `${Math.round(weight * 100)}%`;
-}
-
-/**
- * Individual contribution row component
- */
-const ContributionRow = React.memo<{
+const ContributionCard = React.memo<{
   contribution: CompetencyContribution;
-  maxWeightedScore: number;
-}>(({ contribution, maxWeightedScore }) => {
-  const progressValue = maxWeightedScore > 0
-    ? (contribution.weightedScore / maxWeightedScore) * 100
+  maxScore: number;
+}>(({ contribution, maxScore }) => {
+  const progressPercent = maxScore > 0
+    ? (contribution.weightedScore / maxScore) * 100
     : 0;
+  const score = Math.round(contribution.competencyScore);
 
   return (
-    <div className="py-2.5 border-b border-border/50 last:border-b-0">
-      <div className="flex items-start justify-between gap-2 mb-1.5">
-        <div className="flex-1 min-w-0">
-          <span className="text-sm font-medium truncate block">
-            {contribution.competencyName}
-          </span>
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <span className="text-xs text-muted-foreground flex items-center gap-1 cursor-help">
-                  <ExternalLink className="h-3 w-3" />
-                  {contribution.onetElement}
-                </span>
-              </TooltipTrigger>
-              <TooltipContent side="bottom" className="max-w-xs">
-                <p className="text-xs">
-                  <span className="font-medium">O*NET Code:</span> {contribution.onetCode}
-                </p>
-                {contribution.facet && (
-                  <p className="text-xs mt-1">
-                    <span className="font-medium">Facet:</span> {contribution.facet}
-                  </p>
-                )}
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        </div>
-        <Badge
-          variant="outline"
+    <div className="py-1.5 sm:py-2">
+      {/* Single row: dot + name + score */}
+      <div className="flex items-center gap-1.5 sm:gap-2 w-full overflow-hidden">
+        <div
           className={cn(
-            "text-[10px] capitalize shrink-0",
-            getContributionBadgeStyle(contribution.contributionType)
+            "w-1.5 h-1.5 rounded-full shrink-0",
+            getContributionTypeColor(contribution.contributionType)
           )}
-        >
-          {contribution.contributionType}
-        </Badge>
+        />
+        <span className="flex-1 text-xs font-medium truncate min-w-0">
+          {contribution.competencyName}
+        </span>
+        <span className="text-xs font-bold tabular-nums text-primary whitespace-nowrap">
+          {score}%
+        </span>
       </div>
 
-      <div className="flex items-center gap-2">
-        <Progress value={progressValue} className="h-1.5 flex-1" />
-        <div className="flex items-center gap-2 text-xs shrink-0">
-          <span className="text-muted-foreground">
-            {Math.round(contribution.competencyScore)}%
-          </span>
-          <span className="text-muted-foreground/60">x</span>
-          <span className="font-medium tabular-nums">
-            {formatWeight(contribution.weight)}
-          </span>
+      {/* Progress bar - full width under the row */}
+      <div className="mt-1 ml-3">
+        <div className="h-1 w-full bg-muted/40 rounded-full overflow-hidden">
+          <div
+            className={cn(
+              "h-full rounded-full",
+              contribution.contributionType === 'primary'
+                ? "bg-primary"
+                : "bg-muted-foreground/50"
+            )}
+            style={{ width: `${Math.min(progressPercent, 100)}%` }}
+          />
         </div>
       </div>
     </div>
   );
 });
 
-ContributionRow.displayName = 'ContributionRow';
+ContributionCard.displayName = 'ContributionCard';
 
 /**
- * Expandable trait card component
+ * Trait Header - Simplified, no overflow
  */
-const TraitCard = React.memo<{
+const TraitHeader = React.memo<{
   trait: keyof BigFiveProfile;
   score: number;
-  contributions: CompetencyContribution[];
-  isExpanded: boolean;
-  onToggle: () => void;
-}>(({ trait, score, contributions, isExpanded, onToggle }) => {
+  contributionCount: number;
+}>(({ trait, score, contributionCount }) => {
   const info = BIG_FIVE_INFO[trait];
-  const contributionCount = contributions.length;
   const traitColor = BIG_FIVE_COLORS[trait];
 
-  // Calculate max weighted score for progress bar normalization
-  const maxWeightedScore = contributions.length > 0
-    ? Math.max(...contributions.map(c => c.weightedScore))
-    : 0;
-
   return (
-    <Card className={cn(
-      "transition-all duration-200",
-      isExpanded && "ring-1 ring-primary/20"
-    )}>
-      <button
-        type="button"
-        onClick={onToggle}
-        className="w-full text-left p-3 sm:p-4 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-lg"
-        aria-expanded={isExpanded}
-        aria-controls={`trait-content-${trait}`}
-      >
-        <div className="flex items-start justify-between gap-3">
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 mb-1">
-              <div
-                className="w-3 h-3 rounded-full shrink-0"
-                style={{ backgroundColor: traitColor.primary }}
-              />
-              <h4 className="font-semibold text-sm sm:text-base">
-                {info.short}
-              </h4>
-              <span
-                className="text-sm font-bold tabular-nums"
-                style={{ color: traitColor.primary }}
-              >
-                {score}%
-              </span>
-            </div>
-            <p className="text-xs text-muted-foreground line-clamp-2">
-              {info.description}
-            </p>
-            <p className="text-xs text-muted-foreground mt-1">
-              {contributionCount} contributing {contributionCount === 1 ? 'competency' : 'competencies'}
-            </p>
-          </div>
-          <div className="shrink-0 mt-1">
-            {isExpanded ? (
-              <ChevronUp className="h-5 w-5 text-muted-foreground" />
-            ) : (
-              <ChevronDown className="h-5 w-5 text-muted-foreground" />
-            )}
-          </div>
-        </div>
-      </button>
+    <div className="flex items-center gap-2 w-full min-w-0 overflow-hidden pr-1">
+      {/* Color dot */}
+      <div
+        className="w-2.5 h-2.5 rounded-full shrink-0"
+        style={{ backgroundColor: traitColor.primary }}
+      />
 
-      {isExpanded && (
-        <CardContent
-          id={`trait-content-${trait}`}
-          className="pt-0 pb-3 px-3 sm:px-4"
-        >
-          <div className="border-t pt-3">
-            {contributions.length === 0 ? (
-              <div className="text-center py-4">
-                <Info className="h-8 w-8 mx-auto text-muted-foreground/50 mb-2" />
-                <p className="text-sm text-muted-foreground">
-                  No competencies mapped to this trait
-                </p>
-              </div>
-            ) : (
-              <div className="space-y-0">
-                {contributions.map((contribution, index) => (
-                  <ContributionRow
-                    key={`${contribution.competencyId}-${contribution.contributionType}-${index}`}
-                    contribution={contribution}
-                    maxWeightedScore={maxWeightedScore}
-                  />
-                ))}
-              </div>
-            )}
-          </div>
-        </CardContent>
-      )}
-    </Card>
+      {/* Name + count - truncated */}
+      <div className="flex-1 min-w-0 overflow-hidden">
+        <div className="flex items-center gap-1.5">
+          <span className="font-semibold text-sm truncate">
+            {info.short}
+          </span>
+          <span className="text-[10px] text-muted-foreground whitespace-nowrap">
+            ({contributionCount})
+          </span>
+        </div>
+      </div>
+
+      {/* Score - fixed */}
+      <span
+        className="text-sm font-bold tabular-nums shrink-0"
+        style={{ color: traitColor.primary }}
+      >
+        {score}%
+      </span>
+    </div>
   );
 });
 
-TraitCard.displayName = 'TraitCard';
+TraitHeader.displayName = 'TraitHeader';
 
 /**
- * Big Five Mapping Insights Component
- *
- * Displays expandable cards for each Big Five personality trait,
- * showing how competencies contribute to each trait score.
- *
- * Features:
- * - Only one trait expanded at a time to save space
- * - Shows contribution type badges (Primary/Secondary/Tertiary)
- * - Progress bars for weighted contributions
- * - O*NET element references with tooltips
- * - Mobile responsive design
+ * Trait Content - Simple list, no badges that could wrap poorly
+ */
+const TraitContent = React.memo<{
+  contributions: CompetencyContribution[];
+}>(({ contributions }) => {
+  const maxScore = contributions.length > 0
+    ? Math.max(...contributions.map(c => c.weightedScore))
+    : 0;
+
+  if (contributions.length === 0) {
+    return (
+      <div className="flex items-center justify-center py-4 text-center">
+        <Info className="h-4 w-4 text-muted-foreground/40 mr-2" />
+        <span className="text-xs text-muted-foreground">No mappings</span>
+      </div>
+    );
+  }
+
+  // Sort: primary first, then secondary, then tertiary
+  const sorted = [...contributions].sort((a, b) => {
+    const order = { primary: 0, secondary: 1, tertiary: 2 };
+    return (order[a.contributionType] ?? 3) - (order[b.contributionType] ?? 3);
+  });
+
+  // Count by type for simple summary
+  const counts = {
+    primary: contributions.filter(c => c.contributionType === 'primary').length,
+    secondary: contributions.filter(c => c.contributionType === 'secondary').length,
+    tertiary: contributions.filter(c => c.contributionType === 'tertiary').length,
+  };
+
+  return (
+    <div className="w-full overflow-hidden">
+      {/* Simple count summary - single line */}
+      <div className="flex items-center gap-2 text-[10px] text-muted-foreground mb-2 overflow-hidden">
+        {counts.primary > 0 && (
+          <span className="flex items-center gap-1 shrink-0">
+            <span className="w-1.5 h-1.5 rounded-full bg-primary" />
+            {counts.primary}
+          </span>
+        )}
+        {counts.secondary > 0 && (
+          <span className="flex items-center gap-1 shrink-0">
+            <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground/60" />
+            {counts.secondary}
+          </span>
+        )}
+        {counts.tertiary > 0 && (
+          <span className="flex items-center gap-1 shrink-0">
+            <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground/30" />
+            {counts.tertiary}
+          </span>
+        )}
+      </div>
+
+      {/* Contribution list */}
+      <div className="divide-y divide-border/20">
+        {sorted.map((contribution, index) => (
+          <ContributionCard
+            key={`${contribution.competencyId}-${index}`}
+            contribution={contribution}
+            maxScore={maxScore}
+          />
+        ))}
+      </div>
+    </div>
+  );
+});
+
+TraitContent.displayName = 'TraitContent';
+
+/**
+ * Big Five Mapping Insights - Strict overflow control
  */
 export const BigFiveMappingInsights = React.memo<BigFiveMappingInsightsProps>(({
   profile,
   contributions,
   className
 }) => {
-  const [expandedTrait, setExpandedTrait] = useState<keyof BigFiveProfile | null>(null);
-
   const traits = Object.keys(profile) as Array<keyof BigFiveProfile>;
 
-  const handleToggle = (trait: keyof BigFiveProfile) => {
-    setExpandedTrait(current => current === trait ? null : trait);
-  };
-
   return (
-    <div className={cn("space-y-3", className)}>
+    <Accordion
+      type="single"
+      collapsible
+      className={cn("w-full overflow-hidden", className)}
+    >
       {traits.map(trait => (
-        <TraitCard
+        <AccordionItem
           key={trait}
-          trait={trait}
-          score={profile[trait]}
-          contributions={contributions[trait]}
-          isExpanded={expandedTrait === trait}
-          onToggle={() => handleToggle(trait)}
-        />
+          value={trait}
+          className="border-b border-border/30 last:border-b-0 overflow-hidden"
+        >
+          <AccordionTrigger
+            className={cn(
+              "py-2 sm:py-2.5 px-0 hover:no-underline gap-2",
+              "touch-manipulation overflow-hidden",
+              "[&>svg]:h-3.5 [&>svg]:w-3.5 [&>svg]:shrink-0 [&>svg]:text-muted-foreground/50"
+            )}
+          >
+            <TraitHeader
+              trait={trait}
+              score={profile[trait]}
+              contributionCount={contributions[trait].length}
+            />
+          </AccordionTrigger>
+          <AccordionContent className="pb-2 overflow-hidden">
+            <TraitContent contributions={contributions[trait]} />
+          </AccordionContent>
+        </AccordionItem>
       ))}
-    </div>
+    </Accordion>
   );
 });
 

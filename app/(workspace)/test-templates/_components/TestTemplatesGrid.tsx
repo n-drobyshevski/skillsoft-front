@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useCallback, useRef, useEffect, useState } from "react";
-import { motion, AnimatePresence, type Variants } from "framer-motion";
 import { TestTemplateSummary } from "@/types/domain";
 import TestTemplateCard from "./TestTemplateCard";
 import TemplateFilters from "./TemplateFilters";
@@ -12,50 +11,9 @@ interface TestTemplatesGridProps {
 }
 
 /**
- * Animation variants for staggered grid load
- */
-const containerVariants: Variants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.05,
-      delayChildren: 0.1,
-    },
-  },
-};
-
-const itemVariants: Variants = {
-  hidden: {
-    opacity: 0,
-    y: 20,
-    scale: 0.95,
-  },
-  visible: {
-    opacity: 1,
-    y: 0,
-    scale: 1,
-    transition: {
-      type: "spring" as const,
-      stiffness: 300,
-      damping: 24,
-    },
-  },
-  exit: {
-    opacity: 0,
-    y: -10,
-    scale: 0.95,
-    transition: {
-      duration: 0.2,
-    },
-  },
-};
-
-/**
- * TestTemplatesGrid - Animated grid with filters and keyboard navigation
+ * TestTemplatesGrid - Grid with filters and keyboard navigation
  *
  * Features:
- * - Staggered load animation using framer-motion
  * - Integrated search and filter controls
  * - Keyboard navigation between cards (arrow keys)
  * - Focus management with visible focus indicators
@@ -154,7 +112,7 @@ export default function TestTemplatesGrid({
   }
 
   return (
-    <div className="space-y-4 sm:space-y-5 md:space-y-6">
+    <div className="space-y-4">
       {/* Skip Link for Accessibility */}
       <a
         href="#templates-grid"
@@ -170,74 +128,56 @@ export default function TestTemplatesGrid({
       />
 
       {/* Grid */}
-      <AnimatePresence mode="wait">
-        {filteredTemplates.length === 0 ? (
-          <motion.div
-            key="empty"
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.2 }}
-            className="flex flex-col items-center justify-center py-12 px-4 text-center"
-          >
-            <div className="relative">
-              <div className="absolute inset-0 -m-4 rounded-full bg-gradient-to-br from-muted/40 to-muted/10 blur-2xl" />
-              <div className="relative rounded-2xl bg-muted/30 p-6 backdrop-blur-sm border border-border/50">
-                <svg
-                  className="h-12 w-12 text-muted-foreground/60 mx-auto animate-pulse"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth={1.5}
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"
-                  />
-                </svg>
-              </div>
+      {filteredTemplates.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
+          <div className="rounded-full bg-muted/50 p-4">
+            <svg
+              className="h-8 w-8 text-muted-foreground"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={1.5}
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"
+              />
+            </svg>
+          </div>
+          <h3 className="text-base font-medium mt-4 mb-1">
+            Шаблоны не найдены
+          </h3>
+          <p className="text-sm text-muted-foreground max-w-sm">
+            Попробуйте изменить параметры поиска или фильтрации.
+          </p>
+        </div>
+      ) : (
+        <div
+          ref={gridRef}
+          id="templates-grid"
+          className="grid gap-2 sm:gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+          role="grid"
+          aria-label={`${filteredTemplates.length} шаблонов тестов`}
+        >
+          {filteredTemplates.map((template, index) => (
+            <div
+              key={template.id}
+              ref={(el) => setCardRef(template.id, el)}
+              onFocus={() => handleCardFocus(index)}
+              className="w-full outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:rounded-md sm:focus-visible:rounded-xl"
+              role="gridcell"
+              tabIndex={focusedIndex === index ? 0 : -1}
+            >
+              <TestTemplateCard
+                template={template}
+                canEdit={canEdit}
+                isRecommended={template.id === recommendedTemplateId}
+              />
             </div>
-            <h3 className="text-lg sm:text-xl font-semibold mt-6 mb-2">
-              No templates found
-            </h3>
-            <p className="text-sm sm:text-base text-muted-foreground max-w-md leading-relaxed">
-              Try adjusting your search or filter criteria to find what you&apos;re looking for.
-            </p>
-          </motion.div>
-        ) : (
-          <motion.div
-            key="grid"
-            ref={gridRef}
-            id="templates-grid"
-            variants={containerVariants}
-            initial="hidden"
-            animate="visible"
-            className="grid gap-4 sm:gap-5 md:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 auto-rows-fr"
-            role="grid"
-            aria-label={`${filteredTemplates.length} test templates`}
-          >
-            {filteredTemplates.map((template, index) => (
-              <motion.div
-                key={template.id}
-                variants={itemVariants}
-                layout
-                ref={(el) => setCardRef(template.id, el)}
-                onFocus={() => handleCardFocus(index)}
-                className="outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:rounded-lg"
-                role="gridcell"
-                tabIndex={focusedIndex === index ? 0 : -1}
-              >
-                <TestTemplateCard
-                  template={template}
-                  canEdit={canEdit}
-                  isRecommended={template.id === recommendedTemplateId}
-                />
-              </motion.div>
-            ))}
-          </motion.div>
-        )}
-      </AnimatePresence>
+          ))}
+        </div>
+      )}
 
       {/* Screen Reader Announcement */}
       <div
@@ -247,8 +187,8 @@ export default function TestTemplatesGrid({
         className="sr-only"
       >
         {filteredTemplates.length === 0
-          ? 'No templates match your current filters'
-          : `Showing ${filteredTemplates.length} of ${templates.length} templates`}
+          ? 'Шаблоны по заданным фильтрам не найдены'
+          : `Показано ${filteredTemplates.length} из ${templates.length} шаблонов`}
       </div>
     </div>
   );

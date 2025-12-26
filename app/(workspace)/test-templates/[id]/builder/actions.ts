@@ -4,6 +4,28 @@ import { revalidatePath, revalidateTag } from 'next/cache';
 import { getAuthHeaders } from '@/services/roleApi';
 
 // ============================================
+// CACHE TAG HELPERS - Granular invalidation
+// ============================================
+
+/**
+ * Cache tag naming convention for surgical invalidation:
+ * - template:{id} - Entire template data
+ * - template:{id}:blueprint - Blueprint structure (competencies, weights)
+ * - template:{id}:settings - Template settings (time limit, passing score)
+ * - template:{id}:simulation - Simulation results
+ * - competency:inventory - Global competency inventory health
+ *
+ * Note: Not exported because "use server" files can only export async functions
+ */
+const CacheTags = {
+  template: (id: string) => `template:${id}`,
+  blueprint: (id: string) => `template:${id}:blueprint`,
+  settings: (id: string) => `template:${id}:settings`,
+  simulation: (id: string) => `template:${id}:simulation`,
+  competencyInventory: 'competency:inventory',
+} as const;
+
+// ============================================
 // TYPE DEFINITIONS
 // ============================================
 
@@ -178,19 +200,18 @@ export async function updateBlueprint(
       throw new Error(errorData.message || `Failed to save: ${response.status}`);
     }
 
-    // Revalidate caches
-    revalidateTag(`test-template-${state.templateId}`, 'max');
-    revalidatePath(`/test-templates/${state.templateId}`);
+    // Revalidate caches with granular tags - Next.js 16 requires profile/config
+    // Only invalidate blueprint-specific cache, not entire template
+    revalidateTag(CacheTags.blueprint(state.templateId), { expire: 0 });
+    revalidateTag(CacheTags.settings(state.templateId), { expire: 0 });
+    // Also invalidate simulation cache since blueprint changed
+    revalidateTag(CacheTags.simulation(state.templateId), { expire: 0 });
+    // Path revalidation for page-level cache
     revalidatePath(`/test-templates/${state.templateId}/builder`);
 
     return { success: true, data: state };
   } catch (error) {
     console.error('updateBlueprint error:', error);
-    // Allow optimistic UI to persist in dev mode
-    if (process.env.NODE_ENV === 'development') {
-      console.log('[DEV] Save failed but optimistic UI preserved');
-      return { success: true, data: state };
-    }
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Failed to save blueprint',
@@ -390,11 +411,17 @@ export async function simulateTest(
     return { success: true, data: result };
   } catch (error) {
     console.error('simulateTest error:', error);
-    // Return mock data in development
-    console.log('[DEV] Using mock simulation data');
+    // Return mock data only in development
+    if (process.env.NODE_ENV === 'development') {
+      console.warn('[DEV] Using mock simulation data');
+      return {
+        success: true,
+        data: generateMockSimulation(state, profile),
+      };
+    }
     return {
-      success: true,
-      data: generateMockSimulation(state, profile),
+      success: false,
+      error: error instanceof Error ? error.message : 'Simulation failed',
     };
   }
 }
@@ -415,8 +442,8 @@ export async function fetchInventoryHealth(): Promise<
         ...authHeaders,
       },
       next: {
-        revalidate: 60,
-        tags: ['inventory-heatmap'],
+        revalidate: 60, // Stale-while-revalidate: refresh every 60s
+        tags: [CacheTags.competencyInventory],
       },
     });
 
@@ -472,7 +499,11 @@ export async function publishBlueprint(
 
     const result = await response.json();
 
-    revalidateTag(`test-template-${templateId}`, 'max');
+    // Invalidate all template-related caches on publish
+    revalidateTag(CacheTags.template(templateId), { expire: 0 });
+    revalidateTag(CacheTags.blueprint(templateId), { expire: 0 });
+    revalidateTag(CacheTags.settings(templateId), { expire: 0 });
+    revalidateTag(CacheTags.simulation(templateId), { expire: 0 });
     revalidatePath(`/test-templates/${templateId}`);
 
     return { success: true, data: { published: true, version: result.version ?? 1 } };

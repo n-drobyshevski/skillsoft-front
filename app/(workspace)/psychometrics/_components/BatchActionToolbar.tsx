@@ -9,7 +9,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { X, Check, AlertTriangle, type LucideIcon } from 'lucide-react';
+import { X, Check, AlertTriangle, Loader2, type LucideIcon } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 interface BatchAction {
@@ -30,6 +30,7 @@ interface BatchActionToolbarProps {
   className?: string;
   entityName?: string;
   position?: 'sticky' | 'fixed' | 'static';
+  isLoading?: boolean;
 }
 
 /**
@@ -44,6 +45,7 @@ export function BatchActionToolbar({
   className,
   entityName = 'элементов',
   position = 'sticky',
+  isLoading = false,
 }: BatchActionToolbarProps) {
   const [confirmingAction, setConfirmingAction] = React.useState<string | null>(null);
   const isMobile = useIsMobile();
@@ -120,8 +122,8 @@ export function BatchActionToolbar({
 
         {!isMobile && <Separator orientation="vertical" className="h-6" />}
 
-        {/* Action buttons */}
-        <div className="flex items-center gap-1">
+        {/* Action buttons - with labels on mobile for clarity */}
+        <div className="flex items-center gap-1.5">
           {actions.map((action) => {
             const isConfirming = confirmingAction === action.id;
             const Icon = action.icon;
@@ -130,30 +132,35 @@ export function BatchActionToolbar({
               <Button
                 key={action.id}
                 variant={isConfirming ? 'destructive' : (action.variant || 'outline')}
-                size={isMobile ? 'default' : 'sm'}
+                size={isMobile ? 'sm' : 'sm'}
                 onClick={() => handleActionClick(action)}
-                disabled={action.disabled}
+                disabled={action.disabled || isLoading}
                 className={cn(
                   'gap-1.5',
-                  isMobile ? 'h-11 min-w-[44px]' : 'h-8',
+                  isMobile ? 'h-11 min-h-[44px] px-3' : 'h-8',
                   isConfirming && 'animate-pulse'
                 )}
               >
-                {isConfirming ? (
+                {isLoading ? (
                   <>
-                    <AlertTriangle className={isMobile ? 'h-4 w-4' : 'h-3.5 w-3.5'} />
-                    {!isMobile && <span>Подтвердить?</span>}
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <span className="text-xs">Обработка...</span>
+                  </>
+                ) : isConfirming ? (
+                  <>
+                    <AlertTriangle className="h-4 w-4" />
+                    <span className="text-xs">Да?</span>
                   </>
                 ) : (
                   <>
-                    {Icon && <Icon className={isMobile ? 'h-4 w-4' : 'h-3.5 w-3.5'} />}
-                    <span className={isMobile ? 'sr-only' : 'hidden sm:inline'}>{action.label}</span>
+                    {Icon && <Icon className="h-4 w-4" />}
+                    <span className="text-xs">{action.label}</span>
                   </>
                 )}
               </Button>
             );
 
-            if (action.tooltip && !isConfirming) {
+            if (action.tooltip && !isConfirming && !isMobile) {
               return (
                 <Tooltip key={action.id}>
                   <TooltipTrigger asChild>{button}</TooltipTrigger>
@@ -228,6 +235,7 @@ interface PsychometricBatchToolbarProps {
   onExport?: () => void;
   canRetire?: boolean;
   canActivate?: boolean;
+  isLoading?: boolean;
   className?: string;
 }
 
@@ -239,6 +247,7 @@ export function PsychometricBatchToolbar({
   onExport,
   canRetire = true,
   canActivate = true,
+  isLoading = false,
   className,
 }: PsychometricBatchToolbarProps) {
   const actions: BatchAction[] = [];
@@ -282,6 +291,7 @@ export function PsychometricBatchToolbar({
       onClearSelection={onClearSelection}
       actions={actions}
       entityName="элементов"
+      isLoading={isLoading}
       className={className}
     />
   );

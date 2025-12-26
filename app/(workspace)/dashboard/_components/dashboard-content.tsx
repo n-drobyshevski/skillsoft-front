@@ -230,9 +230,9 @@ export default function DashboardContent({
                 </Button>
               </div>
             </CardHeader>
-            <CardContent className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            <CardContent className="grid grid-cols-1 gap-3 sm:gap-4 md:grid-cols-2 lg:grid-cols-3">
               {pendingSessions.map((session) => (
-                <div key={session.id} className="flex flex-col gap-3 rounded-lg border bg-card p-4 shadow-sm transition-all hover:shadow-md">
+                <div key={session.id} className="flex flex-col gap-3 rounded-lg border bg-card p-3 sm:p-4 shadow-sm transition-all hover:shadow-md min-h-[120px]">
                   <div className="flex items-start justify-between">
                     <div className="space-y-1">
                       <h4 className="font-medium leading-none">{session.templateName || "Assessment"}</h4>

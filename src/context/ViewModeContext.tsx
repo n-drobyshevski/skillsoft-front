@@ -16,10 +16,18 @@ interface ViewModeContextValue {
 const ViewModeContext = createContext<ViewModeContextValue | null>(null);
 
 /**
- * Paths that should automatically trigger immersive mode
+ * Paths that should automatically trigger immersive mode (hides sidebar + header)
  */
 const IMMERSIVE_PATHS = [
   '/test-templates/take/',
+] as const;
+
+/**
+ * Paths that should use "focused" mode (keeps sidebar, constrains height, hides mobile nav)
+ * Used for IDE-like experiences that need viewport height constraint
+ */
+const FOCUSED_PATH_PATTERNS = [
+  /^\/test-templates\/[^/]+\/builder$/,
 ] as const;
 
 /**
@@ -27,6 +35,13 @@ const IMMERSIVE_PATHS = [
  */
 function shouldBeImmersive(pathname: string): boolean {
   return IMMERSIVE_PATHS.some(path => pathname.startsWith(path));
+}
+
+/**
+ * Check if a pathname should use focused mode (height-constrained, no mobile nav)
+ */
+export function shouldBeFocused(pathname: string): boolean {
+  return FOCUSED_PATH_PATTERNS.some(pattern => pattern.test(pathname));
 }
 
 /**

@@ -88,28 +88,93 @@ function getScoreColors(score: number): {
 }
 
 /**
- * Animated circular gauge component
- * Size: 140px diameter, 8px stroke
+ * Animated circular gauge component (Desktop only)
  */
 function CircularGauge({
   value,
-  size = 140,
-  strokeWidth = 8,
   className,
 }: {
   value: number;
-  size?: number;
-  strokeWidth?: number;
   className?: string;
+}) {
+  const colors = getScoreColors(value);
+
+  return (
+    <div className={cn('relative inline-flex items-center justify-center', className)}>
+      <GaugeSVG value={value} size={140} strokeWidth={8} colors={colors} />
+    </div>
+  );
+}
+
+/**
+ * Compact horizontal health indicator for mobile
+ * Shows score badge + progress bar in a space-efficient layout
+ */
+function CompactHealthBar({
+  value,
+  className,
+}: {
+  value: number;
+  className?: string;
+}) {
+  const colors = getScoreColors(value);
+
+  return (
+    <div className={cn('flex items-center gap-3 w-full', className)}>
+      {/* Score badge circle */}
+      <motion.div
+        className={cn(
+          'flex-shrink-0 w-14 h-14 rounded-full flex flex-col items-center justify-center',
+          'bg-gradient-to-br',
+          colors.gradient
+        )}
+        initial={{ scale: 0.8, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ duration: 0.4, delay: 0.2 }}
+      >
+        <span className="text-xl font-bold text-white tabular-nums">{value}</span>
+        <span className="text-[8px] text-white/80 -mt-0.5">score</span>
+      </motion.div>
+
+      {/* Progress bar section */}
+      <div className="flex-1 min-w-0 overflow-hidden">
+        {/* Label */}
+        <span className="text-sm font-medium">Health Score</span>
+        {/* Animated progress bar - fixed width constraints */}
+        <div className="h-2 bg-muted/50 rounded-full overflow-hidden mt-1.5 w-full max-w-full">
+          <motion.div
+            className={cn('h-full rounded-full', colors.bg)}
+            initial={{ width: 0 }}
+            animate={{ width: `${value}%` }}
+            transition={{ duration: 0.8, ease: 'easeOut', delay: 0.3 }}
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Inner SVG component for the gauge
+ */
+function GaugeSVG({
+  value,
+  size,
+  strokeWidth,
+  colors,
+}: {
+  value: number;
+  size: number;
+  strokeWidth: number;
+  colors: ReturnType<typeof getScoreColors>;
 }) {
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
   const progress = Math.min(Math.max(value, 0), 100);
   const offset = circumference - (progress / 100) * circumference;
-  const colors = getScoreColors(value);
 
   return (
-    <div className={cn('relative inline-flex items-center justify-center', className)}>
+    <div className="relative inline-flex items-center justify-center">
       <svg width={size} height={size} className="-rotate-90">
         {/* Background circle */}
         <circle
@@ -139,7 +204,12 @@ function CircularGauge({
       {/* Center content */}
       <div className="absolute inset-0 flex flex-col items-center justify-center">
         <motion.span
-          className={cn('text-4xl font-bold tabular-nums', colors.text)}
+          className={cn(
+            'font-bold tabular-nums',
+            // Responsive text size
+            size <= 110 ? 'text-3xl' : 'text-4xl',
+            colors.text
+          )}
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.4, delay: 0.3 }}
@@ -178,16 +248,18 @@ function MetricCard({
   value,
   icon: Icon,
   variant = 'default',
+  hideIcon = false,
 }: {
   label: string;
   value: string | number;
   icon: React.ElementType;
   variant?: MetricVariant;
+  hideIcon?: boolean;
 }) {
   return (
     <div className="flex flex-col items-center p-2 rounded-lg bg-muted/30">
       <div className="flex items-center gap-1 mb-0.5">
-        <Icon className="w-3 h-3 text-muted-foreground" />
+        {!hideIcon && <Icon className="w-3 h-3 text-muted-foreground" />}
         <span className={cn('text-lg font-bold tabular-nums', getMetricVariantStyle(variant))}>
           {value}
         </span>
@@ -438,11 +510,50 @@ export function PsychometricHealthWidget({
       </CardHeader>
 
       <CardContent className="relative space-y-4">
-        {/* Main content: Gauge + Metrics side by side */}
-        <div className="flex flex-col md:flex-row items-center gap-4">
+        {/* Mobile layout: Compact bar + metrics below */}
+        <div className="md:hidden space-y-3">
+          {/* Compact health bar */}
+          <CompactHealthBar value={data.healthScore} />
+
+          {/* 4-metric grid - no icons on mobile */}
+          {metrics && (
+            <div className="grid grid-cols-4 gap-1.5">
+              <MetricCard
+                label="Items"
+                value={metrics.totalItems}
+                icon={Sparkles}
+                hideIcon
+              />
+              <MetricCard
+                label="Active"
+                value={`${metrics.activeRate}%`}
+                icon={CheckCircle2}
+                variant="success"
+                hideIcon
+              />
+              <MetricCard
+                label="Issues"
+                value={metrics.issues}
+                icon={FileWarning}
+                variant={metrics.issues > 0 ? 'warning' : 'success'}
+                hideIcon
+              />
+              <MetricCard
+                label="Reliable"
+                value={`${metrics.reliablePercent}%`}
+                icon={BarChart3}
+                variant="info"
+                hideIcon
+              />
+            </div>
+          )}
+        </div>
+
+        {/* Desktop layout: Gauge + Metrics side by side */}
+        <div className="hidden md:flex items-center gap-4">
           {/* Left: Circular Gauge */}
           <div className="shrink-0">
-            <CircularGauge value={data.healthScore} size={140} strokeWidth={8} />
+            <CircularGauge value={data.healthScore} />
           </div>
 
           {/* Right: 4-metric grid */}
@@ -514,7 +625,28 @@ function PsychometricHealthWidgetSkeleton({
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="flex flex-col md:flex-row items-center gap-4">
+        {/* Mobile skeleton */}
+        <div className="md:hidden space-y-3">
+          <div className="flex items-center gap-3">
+            <Skeleton className="w-14 h-14 rounded-full shrink-0" />
+            <div className="flex-1 space-y-2">
+              <div className="flex justify-between">
+                <Skeleton className="h-4 w-24" />
+                <Skeleton className="h-4 w-12" />
+              </div>
+              <Skeleton className="h-2 w-full rounded-full" />
+            </div>
+          </div>
+          <div className="grid grid-cols-4 gap-1.5">
+            <Skeleton className="h-12 rounded-lg" />
+            <Skeleton className="h-12 rounded-lg" />
+            <Skeleton className="h-12 rounded-lg" />
+            <Skeleton className="h-12 rounded-lg" />
+          </div>
+        </div>
+
+        {/* Desktop skeleton */}
+        <div className="hidden md:flex items-center gap-4">
           <Skeleton className="w-[140px] h-[140px] rounded-full shrink-0" />
           <div className="grid grid-cols-2 gap-2 flex-1 w-full">
             <Skeleton className="h-14 rounded-lg" />
@@ -523,6 +655,7 @@ function PsychometricHealthWidgetSkeleton({
             <Skeleton className="h-14 rounded-lg" />
           </div>
         </div>
+
         <div className="space-y-2">
           <Skeleton className="h-3 w-24" />
           <Skeleton className="h-2 w-full rounded-full" />

@@ -231,6 +231,8 @@
 @media (max-width: 767px) {
   .docs-content {
     padding: var(--doc-space-6) var(--doc-space-4);
+    max-width: 100vw;
+    overflow-x: hidden;
   }
 }
 
@@ -238,6 +240,13 @@
 .docs-article {
   word-break: normal;
   overflow-wrap: break-word;
+  max-width: 100%;
+}
+
+@media (max-width: 767px) {
+  .docs-article {
+    overflow-x: hidden;
+  }
 }
 
 .docs-article > * + * {
@@ -1349,5 +1358,61 @@
   .docs-code-copy {
     min-height: 36px;
     min-width: 36px;
+  }
+}
+
+
+/* ===== MOBILE OVERFLOW PREVENTION ===== */
+
+@media (max-width: 767px) {
+  /* Prevent horizontal overflow at the document level */
+  html, body {
+    overflow-x: hidden;
+    max-width: 100vw;
+  }
+  
+  /* Ensure all wide elements respect viewport bounds */
+  .docs-article img,
+  .docs-article video,
+  .docs-article iframe,
+  .docs-article svg {
+    max-width: 100%;
+    height: auto;
+  }
+  
+  /* Code blocks - allow horizontal scroll within container */
+  .docs-article pre,
+  .docs-code-block {
+    max-width: calc(100vw - 2rem);
+  }
+  
+  /* Tables - ensure wrapper handles overflow */
+  .docs-table-wrapper {
+    max-width: calc(100vw - 2rem);
+  }
+  
+  /* Grid and flex containers - prevent child overflow */
+  .docs-article > div {
+    max-width: 100%;
+    overflow-x: auto;
+  }
+  
+  /* Inline code - allow wrapping */
+  .docs-article code:not(pre code) {
+    word-break: break-word;
+  }
+  
+  /* Mermaid diagrams */
+  .mermaid-wrapper,
+  .mermaid {
+    max-width: 100%;
+    overflow-x: auto;
+  }
+  
+  /* Math blocks */
+  .math-block-wrapper {
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
   }
 }

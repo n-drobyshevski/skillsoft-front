@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useRef } from 'react';
 import {
   Accordion,
   AccordionContent,
@@ -25,6 +26,7 @@ import {
   CheckCircle2,
   Info,
 } from 'lucide-react';
+import { useAccordionState } from '@/stores/useBigFivePageStore';
 
 interface TraitDetailAccordionProps {
   reliabilityData: BigFiveReliability[];
@@ -160,9 +162,19 @@ const recommendationStyles = {
 
 /**
  * Expandable accordion section for each Big Five trait
- * showing detailed descriptions, statistics, and recommendations
+ * showing detailed descriptions, statistics, and recommendations.
+ *
+ * Features:
+ * - Auto-expands traits with UNRELIABLE or ACCEPTABLE status on mount
+ * - State persisted via Zustand store (sessionStorage)
+ * - Supports multiple expanded items simultaneously
  */
 export function TraitDetailAccordion({ reliabilityData, className }: TraitDetailAccordionProps) {
+  const hasAutoExpandedRef = useRef(false);
+
+  // Use Zustand store for accordion state
+  const { expandedItems, toggle, expandProblematic } = useAccordionState();
+
   // Sort by trait order for consistent display
   const sortedData = [...reliabilityData].sort((a, b) => {
     const order = [
@@ -175,6 +187,43 @@ export function TraitDetailAccordion({ reliabilityData, className }: TraitDetail
     return order.indexOf(a.trait) - order.indexOf(b.trait);
   });
 
+  // Auto-expand problematic traits on initial mount
+  useEffect(() => {
+    // Only auto-expand once per session, and only if no items are already expanded
+    if (hasAutoExpandedRef.current || expandedItems.length > 0) return;
+
+    const traitStatuses = reliabilityData.map((r) => ({
+      trait: r.trait,
+      status: r.reliabilityStatus,
+    }));
+
+    expandProblematic(traitStatuses);
+    hasAutoExpandedRef.current = true;
+  }, [reliabilityData, expandProblematic, expandedItems.length]);
+
+  // Handle accordion value changes (toggle)
+  const handleValueChange = (values: string[]) => {
+    // Find the difference to determine which item was toggled
+    const currentSet = new Set(expandedItems);
+    const newSet = new Set(values);
+
+    // Find newly added items
+    for (const trait of values) {
+      if (!currentSet.has(trait as BigFiveTrait)) {
+        toggle(trait as BigFiveTrait);
+        return;
+      }
+    }
+
+    // Find removed items
+    for (const trait of expandedItems) {
+      if (!newSet.has(trait)) {
+        toggle(trait);
+        return;
+      }
+    }
+  };
+
   return (
     <Card className={className}>
       <CardHeader className="pb-3">
@@ -183,7 +232,12 @@ export function TraitDetailAccordion({ reliabilityData, className }: TraitDetail
         </CardTitle>
       </CardHeader>
       <CardContent className="pt-0">
-        <Accordion type="single" collapsible className="w-full">
+        <Accordion
+          type="multiple"
+          value={expandedItems}
+          onValueChange={handleValueChange}
+          className="w-full"
+        >
           {sortedData.map((reliability) => {
             const colors = TRAIT_COLORS[reliability.trait];
             const traitInfo = BigFiveTraitDisplay[reliability.trait];
@@ -200,7 +254,7 @@ export function TraitDetailAccordion({ reliabilityData, className }: TraitDetail
                 value={reliability.trait}
                 className={cn('border rounded-lg mb-2 last:mb-0', colors.border)}
               >
-                <AccordionTrigger className="px-4 hover:no-underline">
+                <AccordionTrigger className="px-4 min-h-[52px] hover:no-underline">
                   <div className="flex items-center gap-3 flex-1">
                     <div
                       className="w-3 h-3 rounded-full shrink-0"
@@ -253,31 +307,31 @@ export function TraitDetailAccordion({ reliabilityData, className }: TraitDetail
                       {interpretation.importance}
                     </div>
 
-                    {/* Statistics */}
-                    <div className="grid grid-cols-4 gap-2 text-center">
-                      <div className="rounded-lg border p-2">
-                        <div className="text-lg font-bold tabular-nums">
+                    {/* Statistics - 2x2 on mobile, 4 columns on desktop */}
+                    <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-2 text-center">
+                      <div className="rounded-lg border p-3 sm:p-2">
+                        <div className="text-xl sm:text-lg font-bold tabular-nums">
                           {reliability.cronbachAlpha?.toFixed(2) ?? '-'}
                         </div>
-                        <div className="text-[10px] text-muted-foreground">Alpha</div>
+                        <div className="text-[11px] text-muted-foreground">Alpha</div>
                       </div>
-                      <div className="rounded-lg border p-2">
-                        <div className="text-lg font-bold tabular-nums">
+                      <div className="rounded-lg border p-3 sm:p-2">
+                        <div className="text-xl sm:text-lg font-bold tabular-nums">
                           {reliability.contributingCompetencies ?? '-'}
                         </div>
-                        <div className="text-[10px] text-muted-foreground">Компетенций</div>
+                        <div className="text-[11px] text-muted-foreground">Competencies</div>
                       </div>
-                      <div className="rounded-lg border p-2">
-                        <div className="text-lg font-bold tabular-nums">
+                      <div className="rounded-lg border p-3 sm:p-2">
+                        <div className="text-xl sm:text-lg font-bold tabular-nums">
                           {reliability.totalItems ?? '-'}
                         </div>
-                        <div className="text-[10px] text-muted-foreground">Вопросов</div>
+                        <div className="text-[11px] text-muted-foreground">Items</div>
                       </div>
-                      <div className="rounded-lg border p-2">
-                        <div className="text-lg font-bold tabular-nums">
+                      <div className="rounded-lg border p-3 sm:p-2">
+                        <div className="text-xl sm:text-lg font-bold tabular-nums">
                           {reliability.sampleSize?.toLocaleString() ?? '-'}
                         </div>
-                        <div className="text-[10px] text-muted-foreground">Ответов</div>
+                        <div className="text-[11px] text-muted-foreground">Responses</div>
                       </div>
                     </div>
 

@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { UiLink } from '@/components/ui/ui-link';
 import { cn } from '@/lib/utils';
 import { Files, ExternalLink } from 'lucide-react';
 import { ValidityStatusBadge } from './ValidityStatusBadge';
@@ -166,12 +167,15 @@ export function SimilarItemsCard({
           ))}
         </div>
         {items.length > maxItems && (
-          <Link
-            href={`${basePath}?status=FLAGGED_FOR_REVIEW`}
-            className="block text-center text-xs text-muted-foreground hover:text-primary mt-4 transition-colors"
-          >
-            Показать все ({items.length - maxItems} еще)
-          </Link>
+          <div className="mt-4 text-center">
+            <UiLink
+              href={`${basePath}?status=FLAGGED_FOR_REVIEW`}
+              variant="muted"
+              size="sm"
+            >
+              Показать все ({items.length - maxItems} еще)
+            </UiLink>
+          </div>
         )}
       </CardContent>
     </Card>

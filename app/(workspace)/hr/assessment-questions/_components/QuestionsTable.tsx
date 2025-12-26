@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
+import { UiLink } from "@/components/ui/ui-link";
 import {
 	MoreHorizontal,
 	Settings2,
@@ -70,12 +70,12 @@ export default function QuestionsTable({ questions }: QuestionsTableProps) {
                 <div className="text-sm text-muted-foreground">
                   {question.behavioralIndicatorId ? (
                     <IndicatorHoverCard indicatorId={question.behavioralIndicatorId}>
-                      <Link
+                      <UiLink
                         href={`/hr/behavioral-indicators/${question.behavioralIndicatorId}`}
-                        className="text-primary hover:underline"
+                        variant="underline"
                       >
                         View Indicator
-                      </Link>
+                      </UiLink>
                     </IndicatorHoverCard>
                   ) : (
                     <span className="text-muted-foreground">No indicator assigned</span>
