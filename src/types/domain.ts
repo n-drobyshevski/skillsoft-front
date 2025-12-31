@@ -304,6 +304,214 @@ export interface StandardCodesDto {
   escoRef?: EscoRefDto;
 }
 
+// ============================================
+// O*NET OCCUPATION TYPES (Goal-Aware Blueprint)
+// ============================================
+
+/**
+ * O*NET Job Title for occupation search/selection.
+ * Used in JOB_FIT goal configuration to select the target job.
+ * Different from skills.ts ONetOccupation which is for O*NET element relationships.
+ */
+export interface ONetJobTitle {
+  /** O*NET SOC code (e.g., "15-1252.00") */
+  socCode: string;
+  /** Job title (e.g., "Software Developers") */
+  title: string;
+  /** Job description */
+  description: string;
+}
+
+/**
+ * Single competency benchmark from O*NET occupation profile.
+ */
+export interface ONetBenchmark {
+  /** Internal competency code */
+  competencyCode: string;
+  /** Human-readable competency name */
+  competencyName: string;
+  /** Required proficiency level (1-7 scale) */
+  requiredLevel: number;
+  /** Importance rating (1-5 scale) */
+  importance: number;
+}
+
+/**
+ * Complete O*NET occupation profile with benchmarks.
+ * Fetched after selecting an occupation for JOB_FIT assessment.
+ */
+export interface ONetProfile {
+  /** O*NET SOC code */
+  socCode: string;
+  /** Full occupation title */
+  occupationTitle: string;
+  /** Competency benchmarks for this occupation */
+  benchmarks: ONetBenchmark[];
+  /** Knowledge areas required */
+  knowledgeAreas: string[];
+  /** Skills required */
+  skills: string[];
+}
+
+// ============================================
+// TEAM TYPES (Goal-Aware Blueprint)
+// ============================================
+
+/**
+ * Team summary for selection dropdown.
+ */
+export interface Team {
+  id: string;
+  name: string;
+  memberCount: number;
+  createdAt: string;
+}
+
+/**
+ * Individual team member's skill data.
+ */
+export interface TeamMemberSkill {
+  memberId: string;
+  memberName: string;
+  competencyId: string;
+  score: number;
+}
+
+/**
+ * Team profile with saturation analysis.
+ * Used for TEAM_FIT goal configuration.
+ */
+export interface TeamProfile {
+  teamId: string;
+  teamName: string;
+  /** Saturation per competency (competencyId -> 0.0-1.0) */
+  saturation: Record<string, number>;
+  /** Competency names that are undersaturated */
+  undersaturatedCompetencies: string[];
+  /** Individual member skill breakdown */
+  memberSkills: TeamMemberSkill[];
+}
+
+// ============================================
+// PASSPORT TYPES (Delta Testing)
+// ============================================
+
+/**
+ * Big Five personality profile scores.
+ * OCEAN model dimensions normalized to 0-100.
+ */
+export interface BigFiveProfileScores {
+  openness: number;
+  conscientiousness: number;
+  extraversion: number;
+  agreeableness: number;
+  emotionalStability: number;
+}
+
+/**
+ * Competency Passport - candidate's comprehensive skill profile.
+ * Generated from OVERVIEW assessments, used for Delta Testing in JOB_FIT.
+ */
+export interface CompetencyPassport {
+  id: string;
+  candidateId: string;
+  clerkUserId: string;
+  lastUpdated: string;
+  /** Competency scores (competencyId -> score 0-100) */
+  scores: Record<string, number>;
+  /** Big Five personality profile (if assessed) */
+  bigFiveProfile?: BigFiveProfileScores;
+  /** Whether passport is still valid */
+  isValid: boolean;
+  /** Expiration date if applicable */
+  expiresAt?: string;
+}
+
+// ============================================
+// GOAL-SPECIFIC BLUEPRINT CONFIG TYPES
+// ============================================
+
+/**
+ * OVERVIEW goal blueprint configuration.
+ * Generates comprehensive Competency Passport.
+ */
+export interface OverviewBlueprintConfig {
+  competencyIds: string[];
+  questionsPerIndicator: number;
+  includeBigFive: boolean;
+  preferredDifficulty?: 'BASIC' | 'INTERMEDIATE' | 'ADVANCED';
+}
+
+/**
+ * JOB_FIT goal blueprint configuration.
+ * Evaluates candidate against O*NET occupation benchmarks.
+ */
+export interface JobFitBlueprintConfig {
+  /** O*NET SOC code for target occupation */
+  onetSocCode: string;
+  /** Strictness level 0-100 (how closely to match benchmarks) */
+  strictnessLevel: number;
+  /** Candidate's Clerk user ID for delta testing */
+  candidateClerkUserId?: string;
+  /** Enable delta testing (skip already-measured competencies) */
+  enableDeltaTesting?: boolean;
+  /** Optional competency override (instead of O*NET defaults) */
+  competencyOverride?: string[];
+}
+
+/**
+ * TEAM_FIT goal blueprint configuration.
+ * Analyzes candidate's fit within existing team composition.
+ */
+export interface TeamFitBlueprintConfig {
+  /** Target team ID */
+  teamId: string;
+  /** Saturation threshold 0.0-1.0 (defines what's "undersaturated") */
+  saturationThreshold: number;
+  /** Optional competency override */
+  competencyOverride?: string[];
+}
+
+/**
+ * Union type for goal-specific configurations.
+ */
+export type GoalSpecificConfig =
+  | { goal: 'OVERVIEW'; config: OverviewBlueprintConfig }
+  | { goal: 'JOB_FIT'; config: JobFitBlueprintConfig }
+  | { goal: 'TEAM_FIT'; config: TeamFitBlueprintConfig };
+
+// ============================================
+// ASSEMBLY PROGRESS TYPES
+// ============================================
+
+/**
+ * Assembly phase during test preparation.
+ */
+export type AssemblyPhase =
+  | 'INITIALIZING'
+  | 'SELECTING'
+  | 'VALIDATING'
+  | 'SHUFFLING'
+  | 'COMPLETE'
+  | 'FAILED';
+
+/**
+ * Real-time progress during test assembly.
+ * Used for progress modal during test start.
+ */
+export interface AssemblyProgress {
+  sessionId: string;
+  templateId: string;
+  phase: AssemblyPhase;
+  totalCompetencies: number;
+  processedCompetencies: number;
+  questionsSelected: number;
+  percentComplete: number;
+  elapsedMillis: number;
+  message: string;
+  inProgress: boolean;
+}
+
 // Legacy interfaces for backwards compatibility
 /** @deprecated Use OnetRefDto instead */
 export interface OnetReference {

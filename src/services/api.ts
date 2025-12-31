@@ -1339,3 +1339,332 @@ export const psychometricsApi = {
     });
   },
 };
+
+// ============================================
+// O*NET API (Goal-Aware Blueprint)
+// ============================================
+
+import type {
+  ONetJobTitle,
+  ONetProfile,
+  Team,
+  TeamProfile,
+  CompetencyPassport,
+  AssemblyProgress,
+} from '@/types/domain';
+
+const ONET_BASE = '/onet';
+
+/**
+ * Mock O*NET job titles for development when backend is not available.
+ * Can be enabled via NEXT_PUBLIC_USE_MOCK_API=true
+ */
+const MOCK_JOB_TITLES: ONetJobTitle[] = [
+  { socCode: '15-1252.00', title: 'Software Developers', description: 'Research, design, and develop computer and network software or specialized utility programs.' },
+  { socCode: '15-1211.00', title: 'Computer Systems Analysts', description: 'Analyze science, engineering, business, and other data processing problems.' },
+  { socCode: '15-1299.08', title: 'Computer Systems Engineers/Architects', description: 'Design and develop solutions to complex applications problems.' },
+  { socCode: '13-1111.00', title: 'Management Analysts', description: 'Conduct organizational studies and evaluations.' },
+  { socCode: '11-1021.00', title: 'General and Operations Managers', description: 'Plan, direct, or coordinate the operations of public or private sector organizations.' },
+  { socCode: '11-3031.00', title: 'Financial Managers', description: 'Plan, direct, or coordinate accounting, investing, banking activities.' },
+  { socCode: '13-2011.00', title: 'Accountants and Auditors', description: 'Examine, analyze, and interpret accounting records.' },
+  { socCode: '17-2199.00', title: 'Engineers, All Other', description: 'Design and develop engineering solutions to technical problems.' },
+  { socCode: '13-1161.00', title: 'Market Research Analysts', description: 'Research market conditions in local, regional, or national areas.' },
+  { socCode: '15-1244.00', title: 'Network and Computer Systems Administrators', description: 'Install, configure, and support computer networks.' },
+];
+
+const USE_MOCK_API = process.env.NEXT_PUBLIC_USE_MOCK_API === 'true';
+
+export const onetApi = {
+  /**
+   * Search O*NET job titles by title or keyword.
+   * Returns matching job titles for the job search combobox.
+   */
+  searchJobTitles: async (query: string, limit = 15): Promise<ONetJobTitle[]> => {
+    if (USE_MOCK_API || !query.trim()) {
+      // Mock mode or empty query: filter mock data
+      const filtered = MOCK_JOB_TITLES.filter(o =>
+        o.title.toLowerCase().includes(query.toLowerCase()) ||
+        o.description.toLowerCase().includes(query.toLowerCase())
+      );
+      return filtered.slice(0, limit);
+    }
+
+    try {
+      const authHeaders = await getAuthHeaders();
+      return await fetchApi(`${ONET_BASE}/search?q=${encodeURIComponent(query)}&limit=${limit}`, {
+        tags: ['onet-search'],
+        revalidate: 300, // Cache for 5 minutes
+        authHeaders,
+      });
+    } catch (error) {
+      console.warn('O*NET API not available, using mock data:', error);
+      // Fallback to mock data if API fails
+      const filtered = MOCK_JOB_TITLES.filter(o =>
+        o.title.toLowerCase().includes(query.toLowerCase())
+      );
+      return filtered.slice(0, limit);
+    }
+  },
+
+  /**
+   * Get detailed O*NET profile for an occupation.
+   * Includes benchmarks, knowledge areas, and skills.
+   */
+  getProfile: async (socCode: string): Promise<ONetProfile> => {
+    if (USE_MOCK_API) {
+      // Return mock profile
+      const jobTitle = MOCK_JOB_TITLES.find(o => o.socCode === socCode);
+      return {
+        socCode,
+        occupationTitle: jobTitle?.title || 'Unknown Occupation',
+        benchmarks: [
+          { competencyCode: 'PS01', competencyName: 'Problem Solving', requiredLevel: 4.2, importance: 4.5 },
+          { competencyCode: 'CT01', competencyName: 'Critical Thinking', requiredLevel: 4.0, importance: 4.3 },
+          { competencyCode: 'CM01', competencyName: 'Communication', requiredLevel: 3.8, importance: 4.0 },
+          { competencyCode: 'TW01', competencyName: 'Teamwork', requiredLevel: 3.5, importance: 3.8 },
+          { competencyCode: 'AD01', competencyName: 'Adaptability', requiredLevel: 3.7, importance: 3.5 },
+        ],
+        knowledgeAreas: ['Computers and Electronics', 'Engineering and Technology', 'Mathematics'],
+        skills: ['Programming', 'Systems Analysis', 'Complex Problem Solving'],
+      };
+    }
+
+    try {
+      const authHeaders = await getAuthHeaders();
+      return await fetchApi(`${ONET_BASE}/profiles/${encodeURIComponent(socCode)}`, {
+        tags: [`onet-profile-${socCode}`],
+        revalidate: 3600, // Cache for 1 hour
+        authHeaders,
+      });
+    } catch (error) {
+      console.warn('O*NET profile API not available, using mock data:', error);
+      const jobTitle = MOCK_JOB_TITLES.find(o => o.socCode === socCode);
+      return {
+        socCode,
+        occupationTitle: jobTitle?.title || 'Unknown Occupation',
+        benchmarks: [
+          { competencyCode: 'PS01', competencyName: 'Problem Solving', requiredLevel: 4.2, importance: 4.5 },
+          { competencyCode: 'CT01', competencyName: 'Critical Thinking', requiredLevel: 4.0, importance: 4.3 },
+          { competencyCode: 'CM01', competencyName: 'Communication', requiredLevel: 3.8, importance: 4.0 },
+        ],
+        knowledgeAreas: ['General'],
+        skills: ['General Skills'],
+      };
+    }
+  },
+
+  /**
+   * Get popular/common job titles for quick selection.
+   * Shows when search input is empty.
+   */
+  getPopularJobTitles: async (): Promise<ONetJobTitle[]> => {
+    if (USE_MOCK_API) {
+      return MOCK_JOB_TITLES.slice(0, 8);
+    }
+
+    try {
+      const authHeaders = await getAuthHeaders();
+      return await fetchApi(`${ONET_BASE}/popular`, {
+        tags: ['onet-popular'],
+        revalidate: 3600, // Cache for 1 hour
+        authHeaders,
+      });
+    } catch {
+      return MOCK_JOB_TITLES.slice(0, 8);
+    }
+  },
+};
+
+// ============================================
+// TEAMS API (Goal-Aware Blueprint)
+// ============================================
+
+const TEAMS_BASE = '/teams';
+
+/**
+ * Mock teams for development when backend is not available.
+ */
+const MOCK_TEAMS: Team[] = [
+  { id: 'team-1', name: 'Engineering Team', memberCount: 8, createdAt: '2024-01-15' },
+  { id: 'team-2', name: 'Product Team', memberCount: 5, createdAt: '2024-02-20' },
+  { id: 'team-3', name: 'Design Team', memberCount: 4, createdAt: '2024-03-10' },
+  { id: 'team-4', name: 'Marketing Team', memberCount: 6, createdAt: '2024-01-25' },
+  { id: 'team-5', name: 'Sales Team', memberCount: 10, createdAt: '2024-04-05' },
+];
+
+export const teamsApi = {
+  /**
+   * Get all teams for the current organization.
+   * Used for team selection dropdown in TEAM_FIT configuration.
+   */
+  getAllTeams: async (): Promise<Team[]> => {
+    if (USE_MOCK_API) {
+      return MOCK_TEAMS;
+    }
+
+    try {
+      const authHeaders = await getAuthHeaders();
+      return await fetchApi(TEAMS_BASE, {
+        tags: ['teams'],
+        revalidate: 60, // Cache for 1 minute
+        authHeaders,
+      });
+    } catch (error) {
+      console.warn('Teams API not available, using mock data:', error);
+      return MOCK_TEAMS;
+    }
+  },
+
+  /**
+   * Get team profile with saturation analysis.
+   * Shows which competencies are under-represented in the team.
+   */
+  getTeamProfile: async (teamId: string): Promise<TeamProfile> => {
+    if (USE_MOCK_API) {
+      const team = MOCK_TEAMS.find(t => t.id === teamId);
+      return {
+        teamId,
+        teamName: team?.name || 'Unknown Team',
+        saturation: {
+          'Problem Solving': 0.85,
+          'Communication': 0.60,
+          'Leadership': 0.40,
+          'Technical Skills': 0.95,
+          'Adaptability': 0.55,
+          'Teamwork': 0.75,
+        },
+        undersaturatedCompetencies: ['Leadership', 'Adaptability', 'Communication'],
+        memberSkills: [],
+      };
+    }
+
+    try {
+      const authHeaders = await getAuthHeaders();
+      return await fetchApi(`${TEAMS_BASE}/${teamId}/profile`, {
+        tags: [`team-profile-${teamId}`],
+        revalidate: 60, // Cache for 1 minute
+        authHeaders,
+      });
+    } catch (error) {
+      console.warn('Team profile API not available, using mock data:', error);
+      const team = MOCK_TEAMS.find(t => t.id === teamId);
+      return {
+        teamId,
+        teamName: team?.name || 'Unknown Team',
+        saturation: {
+          'Problem Solving': 0.85,
+          'Leadership': 0.40,
+          'Adaptability': 0.55,
+        },
+        undersaturatedCompetencies: ['Leadership', 'Adaptability'],
+        memberSkills: [],
+      };
+    }
+  },
+};
+
+// ============================================
+// PASSPORT API (Delta Testing)
+// ============================================
+
+const PASSPORT_BASE = '/passports';
+
+export const passportApi = {
+  /**
+   * Get competency passport for a specific user.
+   * Returns null if user doesn't have a passport yet.
+   */
+  getPassport: async (clerkUserId: string): Promise<CompetencyPassport | null> => {
+    if (USE_MOCK_API) {
+      // Return mock passport for demo purposes
+      return {
+        id: 'passport-1',
+        candidateId: 'candidate-1',
+        clerkUserId,
+        lastUpdated: new Date().toISOString(),
+        scores: {
+          'Problem Solving': 78,
+          'Communication': 82,
+          'Leadership': 65,
+          'Teamwork': 88,
+          'Adaptability': 75,
+        },
+        bigFiveProfile: {
+          openness: 72,
+          conscientiousness: 85,
+          extraversion: 60,
+          agreeableness: 78,
+          emotionalStability: 70,
+        },
+        isValid: true,
+        expiresAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
+      };
+    }
+
+    try {
+      const authHeaders = await getAuthHeaders();
+      return await fetchApi(`${PASSPORT_BASE}/user/${clerkUserId}`, {
+        tags: [`passport-${clerkUserId}`],
+        cache: 'no-store',
+        authHeaders,
+        silentStatusCodes: [404],
+      });
+    } catch (error) {
+      // Return null if passport doesn't exist (404)
+      if (error instanceof Error && 'status' in error && (error as ApiError).status === 404) {
+        return null;
+      }
+      throw error;
+    }
+  },
+
+  /**
+   * Check if user has a valid (non-expired) passport.
+   * Used to determine if delta testing is available.
+   */
+  hasValidPassport: async (clerkUserId: string): Promise<boolean> => {
+    if (USE_MOCK_API) {
+      return true; // Mock: always has passport
+    }
+
+    try {
+      const authHeaders = await getAuthHeaders();
+      const result = await fetchApi<{ valid: boolean }>(
+        `${PASSPORT_BASE}/user/${clerkUserId}/valid`,
+        {
+          cache: 'no-store',
+          authHeaders,
+          silentStatusCodes: [404],
+        }
+      );
+      return result?.valid ?? false;
+    } catch {
+      return false;
+    }
+  },
+};
+
+// ============================================
+// ASSEMBLY PROGRESS API
+// ============================================
+
+const ASSEMBLY_BASE = '/tests/sessions/templates';
+
+export const assemblyApi = {
+  /**
+   * Get real-time assembly progress for a template.
+   * Used for progress modal during test session creation.
+   */
+  getProgress: async (templateId: string): Promise<AssemblyProgress | null> => {
+    try {
+      const authHeaders = await getAuthHeaders();
+      return await fetchApi(`${ASSEMBLY_BASE}/${templateId}/assembly-progress`, {
+        cache: 'no-store',
+        authHeaders,
+        silentStatusCodes: [404],
+      });
+    } catch {
+      return null;
+    }
+  },
+};

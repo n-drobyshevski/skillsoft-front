@@ -32,8 +32,14 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { testTemplatesApi } from '@/services/api';
-import { CreateTestTemplateRequest } from '@/types/domain';
+import { CreateTestTemplateRequest, TestTemplateBlueprint } from '@/types/domain';
 import { AssessmentGoal, AssessmentGoalInfo } from '@/types/domain';
+import {
+  GoalSelector,
+  OverviewConfigPanel,
+  JobFitConfigPanel,
+  TeamFitConfigPanel,
+} from '@/components/blueprint-config';
 import { toast } from 'sonner';
 import { 
   Loader2, 
@@ -106,6 +112,16 @@ const formSchema = z.object({
   allowSkip: z.boolean(),
   allowBackNavigation: z.boolean(),
   showResultsImmediately: z.boolean(),
+  // Goal-specific fields (OVERVIEW)
+  includeBigFive: z.boolean().optional(),
+  preferredDifficulty: z.enum(['BASIC', 'INTERMEDIATE', 'ADVANCED']).optional(),
+  // Goal-specific fields (JOB_FIT)
+  onetSocCode: z.string().optional(),
+  strictnessLevel: z.number().min(0).max(100).optional(),
+  enableDeltaTesting: z.boolean().optional(),
+  // Goal-specific fields (TEAM_FIT)
+  teamId: z.string().optional(),
+  saturationThreshold: z.number().min(0.3).max(0.9).optional(),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -207,7 +223,9 @@ const GOAL_OPTIONS = [
 
 function BasicInfoStep({ form }: { form: ReturnType<typeof useForm<FormValues>> }) {
   const description = form.watch('description') || '';
-  
+  const selectedGoal = form.watch('goal');
+  const selectedCompetencyCount = form.watch('competencyIds')?.length || 0;
+
   return (
     <div className="space-y-6 md:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div className="space-y-6">
@@ -218,10 +236,10 @@ function BasicInfoStep({ form }: { form: ReturnType<typeof useForm<FormValues>> 
             <FormItem>
               <FormLabel className="text-base font-medium">Название теста</FormLabel>
               <FormControl>
-                <Input 
-                  placeholder="Например: Оценка лидерских качеств" 
+                <Input
+                  placeholder="Например: Оценка лидерских качеств"
                   {...field}
-                  className="h-14 md:h-12 text-base rounded-xl" 
+                  className="h-14 md:h-12 text-base rounded-xl"
                 />
               </FormControl>
               <FormMessage />
@@ -236,55 +254,54 @@ function BasicInfoStep({ form }: { form: ReturnType<typeof useForm<FormValues>> 
             <FormItem>
               <FormLabel className="text-base font-medium">Цель оценки</FormLabel>
               <FormControl>
-                <RadioGroup
+                <GoalSelector
                   value={field.value}
-                  onValueChange={field.onChange}
-                  className="grid gap-3 sm:grid-cols-3"
-                >
-                  {GOAL_OPTIONS.map((option) => {
-                    const Icon = option.icon;
-                    const info = AssessmentGoalInfo[option.value];
-                    const isSelected = field.value === option.value;
-                    
-                    return (
-                      <div key={option.value} className="relative group">
-                        <RadioGroupItem value={option.value} id={`goal-${option.value}`} className="sr-only" />
-                        <Label
-                          htmlFor={`goal-${option.value}`}
-                          className={cn(
-                            "flex sm:flex-col items-center gap-4 sm:gap-3 rounded-2xl border p-4 cursor-pointer transition-all duration-200 w-full h-full relative overflow-hidden active:scale-[0.98]",
-                            isSelected ? option.selectedClassName : option.className
-                          )}
-                        >
-                          {isSelected && (
-                            <div className="absolute top-2 right-2 sm:top-3 sm:right-3 animate-in zoom-in duration-200">
-                                <CheckCircle2 className="h-5 w-5 text-primary fill-background" />
-                            </div>
-                          )}
-                          <div className={cn(
-                            "p-2.5 rounded-full transition-colors shrink-0",
-                            isSelected ? "bg-background" : "bg-muted group-hover:bg-background"
-                          )}>
-                             <Icon className={cn("h-6 w-6 sm:h-8 sm:w-8", isSelected ? "text-primary" : "text-muted-foreground")} />
-                          </div>
-                          <div className="flex-1 sm:text-center min-w-0">
-                            <p className={cn("font-bold text-sm sm:text-base", isSelected && "text-primary")}>
-                              {info.displayName}
-                            </p>
-                            <p className="text-xs text-muted-foreground mt-0.5 sm:mt-2 line-clamp-2 leading-relaxed">
-                              {info.description}
-                            </p>
-                          </div>
-                        </Label>
-                      </div>
-                    );
-                  })}
-                </RadioGroup>
+                  onChange={field.onChange}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
+
+        {/* Goal-Specific Configuration Panels */}
+        <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
+          {selectedGoal === AssessmentGoal.OVERVIEW && (
+            <Card className="border-dashed border-primary/30 bg-primary/5 dark:bg-primary/10">
+              <CardContent className="pt-5">
+                <div className="flex items-center gap-2 mb-4">
+                  <Crosshair className="h-4 w-4 text-primary" />
+                  <span className="text-sm font-semibold">Настройки Universal Baseline</span>
+                </div>
+                <OverviewConfigPanel selectedCompetencyCount={selectedCompetencyCount} />
+              </CardContent>
+            </Card>
+          )}
+
+          {selectedGoal === AssessmentGoal.JOB_FIT && (
+            <Card className="border-dashed border-blue-500/30 bg-blue-500/5 dark:bg-blue-500/10">
+              <CardContent className="pt-5">
+                <div className="flex items-center gap-2 mb-4">
+                  <Briefcase className="h-4 w-4 text-blue-500" />
+                  <span className="text-sm font-semibold">Настройки Job Fit</span>
+                </div>
+                <JobFitConfigPanel />
+              </CardContent>
+            </Card>
+          )}
+
+          {selectedGoal === AssessmentGoal.TEAM_FIT && (
+            <Card className="border-dashed border-purple-500/30 bg-purple-500/5 dark:bg-purple-500/10">
+              <CardContent className="pt-5">
+                <div className="flex items-center gap-2 mb-4">
+                  <Users className="h-4 w-4 text-purple-500" />
+                  <span className="text-sm font-semibold">Настройки Team Fit</span>
+                </div>
+                <TeamFitConfigPanel />
+              </CardContent>
+            </Card>
+          )}
+        </div>
 
         <FormField
           control={form.control}
@@ -293,8 +310,8 @@ function BasicInfoStep({ form }: { form: ReturnType<typeof useForm<FormValues>> 
             <FormItem>
               <FormLabel className="text-base font-medium">Описание</FormLabel>
               <FormControl>
-                <Textarea 
-                  placeholder="Опишите цель и содержание теста..." 
+                <Textarea
+                  placeholder="Опишите цель и содержание теста..."
                   className="min-h-32 rounded-xl resize-none text-base"
                   {...field}
                 />
@@ -836,6 +853,14 @@ export default function NewTestForm({ competencies }: NewTestFormProps) {
       name: '', description: '', goal: AssessmentGoal.OVERVIEW, competencyIds: [],
       questionsPerIndicator: 2, timeLimitMinutes: 30, passingScore: 70,
       shuffleQuestions: true, shuffleOptions: true, allowSkip: false, allowBackNavigation: true, showResultsImmediately: true,
+      // Goal-specific defaults
+      includeBigFive: true,
+      preferredDifficulty: 'INTERMEDIATE',
+      onetSocCode: '',
+      strictnessLevel: 60,
+      enableDeltaTesting: false,
+      teamId: '',
+      saturationThreshold: 0.7,
     },
     mode: 'onBlur',
   });
@@ -858,7 +883,39 @@ export default function NewTestForm({ competencies }: NewTestFormProps) {
   const handleSubmit = async (values: FormValues) => {
     startTransition(async () => {
       try {
-        const template = await testTemplatesApi.createTemplate(values) as { id: string };
+        // Build goal-specific blueprint
+        const blueprint: TestTemplateBlueprint = {};
+
+        if (values.goal === AssessmentGoal.OVERVIEW) {
+          blueprint.include_big_five = values.includeBigFive;
+          blueprint.preferred_difficulty = values.preferredDifficulty;
+        } else if (values.goal === AssessmentGoal.JOB_FIT) {
+          blueprint.onet_soc_code = values.onetSocCode;
+          blueprint.strictness_level = values.strictnessLevel;
+          blueprint.enable_delta_testing = values.enableDeltaTesting;
+        } else if (values.goal === AssessmentGoal.TEAM_FIT) {
+          blueprint.team_id = values.teamId;
+          blueprint.saturation_threshold = values.saturationThreshold;
+        }
+
+        // Create template request with blueprint
+        const request: CreateTestTemplateRequest = {
+          name: values.name,
+          description: values.description,
+          goal: values.goal,
+          blueprint,
+          competencyIds: values.competencyIds,
+          questionsPerIndicator: values.questionsPerIndicator,
+          timeLimitMinutes: values.timeLimitMinutes,
+          passingScore: values.passingScore,
+          shuffleQuestions: values.shuffleQuestions,
+          shuffleOptions: values.shuffleOptions,
+          allowSkip: values.allowSkip,
+          allowBackNavigation: values.allowBackNavigation,
+          showResultsImmediately: values.showResultsImmediately,
+        };
+
+        const template = await testTemplatesApi.createTemplate(request) as { id: string };
         toast.success('Тест создан!');
         router.push(`/test-templates/${template.id}`);
       } catch (e: any) {
