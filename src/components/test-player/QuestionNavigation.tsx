@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { useTranslations } from 'next-intl';
 import { ChevronLeft, ChevronRight, CheckCircle, Loader2, SkipForward } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -44,19 +45,21 @@ export function QuestionNavigation({
   onSkip,
   validationError,
 }: QuestionNavigationProps) {
+  const t = useTranslations('assessment');
+
   const nextButtonContent = isSubmitting ? (
     <>
       <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-      Saving...
+      {t('saving')}
     </>
   ) : isLastQuestion ? (
     <>
       <CheckCircle className="w-4 h-4 mr-2" />
-      Complete
+      {t('complete')}
     </>
   ) : (
     <>
-      Next
+      {t('nextQuestion')}
       <ChevronRight className="w-4 h-4 ml-1" />
     </>
   );
@@ -84,7 +87,7 @@ export function QuestionNavigation({
           aria-label="Go to previous question"
         >
           <ChevronLeft className="w-4 h-4 mr-1" aria-hidden="true" />
-          Back
+          {t('back')}
         </Button>
 
         {/* Center section with keyboard hints and skip button */}
@@ -108,7 +111,7 @@ export function QuestionNavigation({
             >
               <SkipForward className="w-4 h-4 sm:mr-1" aria-hidden="true" />
               {/* Hide label on very small screens, show only icon */}
-              <span className="hidden sm:inline">Пропустить</span>
+              <span className="hidden sm:inline">{t('skipQuestion')}</span>
             </Button>
           )}
         </div>

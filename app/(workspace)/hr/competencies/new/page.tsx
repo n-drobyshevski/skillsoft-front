@@ -7,6 +7,7 @@ import PageHeader from '@/components/common/PageHeader';
 import { Competency } from '@/types/domain';
 import { CompetencyCategory, ApprovalStatus, StandardCodesDto } from '@/types/domain';
 import CompetencyPreview from '../_components/CompetencyPreview';
+import { useTranslations } from 'next-intl';
 
 // Constants
 const PREVIEW_COMPETENCY_ID = 'preview-id';
@@ -22,14 +23,15 @@ type CompetencyFormData = {
 
 export default function NewCompetencyPage() {
   const router = useRouter();
+  const t = useTranslations('competency');
   const [previewCompetency, setPreviewCompetency] = useState<Competency | null>(null);
 
   const handleUpdatePreview = (data: CompetencyFormData) => {
     // Create a preview competency object for the preview component
     const preview: Competency = {
       id: PREVIEW_COMPETENCY_ID,
-      name: data.name || 'New Competency',
-      description: data.description || 'No description provided',
+      name: data.name || t('competencyName'),
+      description: data.description || t('noDescriptionYet'),
       category: data.category as CompetencyCategory,
       isActive: data.isActive,
       approvalStatus: data.approvalStatus as ApprovalStatus,
@@ -51,7 +53,7 @@ export default function NewCompetencyPage() {
     <div className="container mx-auto p-4">
       <PageHeader
         className="pl-0! py-4"
-        title="Create New Competency"
+        title={t('createNew')}
       />
       
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-4">

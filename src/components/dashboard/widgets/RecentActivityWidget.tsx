@@ -10,6 +10,7 @@ import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import type { RecentCompletion } from '@/types/dashboard';
 import { AssessmentGoal, AssessmentGoalInfo } from '@/types/domain';
+import { useTranslations } from 'next-intl';
 
 /**
  * Props for RecentActivityWidget
@@ -45,6 +46,8 @@ export function RecentActivityWidget({
   className,
   maxItems = 5,
 }: RecentActivityWidgetProps) {
+  const t = useTranslations('dashboard');
+
   if (loading) {
     return <RecentActivityWidgetSkeleton className={className} />;
   }
@@ -60,20 +63,20 @@ export function RecentActivityWidget({
           <div className="w-9 h-9 rounded-lg bg-muted flex items-center justify-center">
             <Clock className="w-4 h-4 text-muted-foreground" />
           </div>
-          <CardTitle className="text-base">Recent Activity</CardTitle>
+          <CardTitle className="text-base">{t('recentActivity')}</CardTitle>
         </div>
         <Link href="/test-results">
           <Button variant="ghost" size="sm" className="h-7 px-2">
             <ChevronRight className="w-4 h-4" />
-            <span className="sr-only">View all activity</span>
+            <span className="sr-only">{t('viewAllActivity')}</span>
           </Button>
         </Link>
       </CardHeader>
       <CardContent className="pt-1">
         {displayCompletions.length === 0 ? (
           <div className="text-center py-6 text-muted-foreground">
-            <p className="text-sm">No recent activity</p>
-            <p className="text-xs mt-1">Completions will appear here</p>
+            <p className="text-sm">{t('noRecentActivity')}</p>
+            <p className="text-xs mt-1">{t('completionsAppearHere')}</p>
           </div>
         ) : (
           <div className="space-y-0.5 divide-y divide-border/50">

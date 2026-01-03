@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { Button } from "@/components/ui/button";
 import { AlertCircle, RefreshCw, LogIn } from "lucide-react";
 import Link from "next/link";
@@ -16,19 +17,21 @@ interface ErrorDisplayProps {
  * Used within server components that need to display errors with action buttons.
  */
 export function ErrorDisplay({ message, category, isRetryable }: ErrorDisplayProps) {
+  const t = useTranslations('template.errorDisplay');
+
   // Determine appropriate help text based on error category
   const getHelpText = () => {
     switch (category) {
       case ErrorCategory.NETWORK:
-        return "Проверьте подключение к интернету и попробуйте снова.";
+        return t('networkHelp');
       case ErrorCategory.AUTHENTICATION:
-        return "Пожалуйста, войдите в систему заново.";
+        return t('authHelp');
       case ErrorCategory.AUTHORIZATION:
-        return "У вас нет прав для просмотра шаблонов тестов.";
+        return t('authorizationHelp');
       case ErrorCategory.SERVER:
-        return "Сервер временно недоступен. Попробуйте позже.";
+        return t('serverHelp');
       default:
-        return "Попробуйте обновить страницу или обратитесь к администратору.";
+        return t('defaultHelp');
     }
   };
 
@@ -56,7 +59,7 @@ export function ErrorDisplay({ message, category, isRetryable }: ErrorDisplayPro
                 onClick={handleRefresh}
               >
                 <RefreshCw className="h-3.5 w-3.5 mr-1.5" />
-                Обновить страницу
+                {t('refreshPage')}
               </Button>
             )}
             {showSignIn && (
@@ -67,7 +70,7 @@ export function ErrorDisplay({ message, category, isRetryable }: ErrorDisplayPro
               >
                 <Link href="/sign-in">
                   <LogIn className="h-3.5 w-3.5 mr-1.5" />
-                  Войти
+                  {t('signIn')}
                 </Link>
               </Button>
             )}

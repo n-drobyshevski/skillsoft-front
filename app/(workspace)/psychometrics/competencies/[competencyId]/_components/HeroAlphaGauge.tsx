@@ -15,6 +15,7 @@
  */
 
 import { memo, useMemo } from 'react';
+import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 import { getAlphaQuality } from '../_lib/competency-detail.utils';
 
@@ -48,6 +49,7 @@ export const HeroAlphaGauge = memo(function HeroAlphaGauge({
   className,
   showLabel = true,
 }: HeroAlphaGaugeProps) {
+  const t = useTranslations('psychometrics');
   const config = SIZE_CONFIG[size];
   const dimension = config.dimension;
   const strokeWidth = config.stroke;
@@ -66,8 +68,12 @@ export const HeroAlphaGauge = memo(function HeroAlphaGauge({
 
   // Create descriptive label for screen readers
   const ariaLabel = alpha !== null
-    ? `Cronbach's Alpha: ${alpha.toFixed(3)}. Качество: ${quality.label}. ${quality.description}`
-    : 'Cronbach\'s Alpha: данные отсутствуют';
+    ? t('competencyDetail.gauge.ariaLabel', {
+        value: alpha.toFixed(3),
+        label: quality.label,
+        description: quality.description
+      })
+    : t('competencyDetail.gauge.ariaLabelNoData');
 
   return (
     <div
@@ -124,7 +130,7 @@ export const HeroAlphaGauge = memo(function HeroAlphaGauge({
           {alpha !== null ? alpha.toFixed(3) : '-'}
         </span>
         {showLabel && (
-          <span className="text-sm text-muted-foreground">Alpha</span>
+          <span className="text-sm text-muted-foreground">{t('competencyDetail.gauge.label')}</span>
         )}
       </div>
     </div>

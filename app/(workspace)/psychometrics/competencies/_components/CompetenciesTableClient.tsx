@@ -2,6 +2,7 @@
 
 import { useCallback, useState, useTransition } from 'react';
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { UiLink } from '@/components/ui/ui-link';
 import {
@@ -46,16 +47,16 @@ type StatusTabValue = 'all' | ReliabilityStatus;
 
 interface TabConfig {
   value: StatusTabValue;
-  label: string;
-  shortLabel: string; // For mobile
+  labelKey: string;
+  shortLabelKey: string;
 }
 
 const STATUS_TABS: TabConfig[] = [
-  { value: 'all', label: 'Все', shortLabel: 'Все' },
-  { value: ReliabilityStatus.RELIABLE, label: 'Надежные', shortLabel: 'Надеж.' },
-  { value: ReliabilityStatus.ACCEPTABLE, label: 'Приемлемые', shortLabel: 'Приемл.' },
-  { value: ReliabilityStatus.UNRELIABLE, label: 'Ненадежные', shortLabel: 'Ненад.' },
-  { value: ReliabilityStatus.INSUFFICIENT_DATA, label: 'Недостаточно данных', shortLabel: 'Нет дан.' },
+  { value: 'all', labelKey: 'all', shortLabelKey: 'allShort' },
+  { value: ReliabilityStatus.RELIABLE, labelKey: 'reliable', shortLabelKey: 'reliableShort' },
+  { value: ReliabilityStatus.ACCEPTABLE, labelKey: 'acceptable', shortLabelKey: 'acceptableShort' },
+  { value: ReliabilityStatus.UNRELIABLE, labelKey: 'unreliable', shortLabelKey: 'unreliableShort' },
+  { value: ReliabilityStatus.INSUFFICIENT_DATA, labelKey: 'insufficientData', shortLabelKey: 'insufficientDataShort' },
 ];
 
 // Get tab badge color based on status
@@ -141,6 +142,7 @@ export function CompetenciesTableClient({
   const searchParams = useSearchParams();
   const isMobile = useIsMobile();
   const [isPending, startTransition] = useTransition();
+  const t = useTranslations('psychometrics');
 
   // Optimistic tab state for instant UI feedback
   const urlTab: StatusTabValue = (currentStatus as StatusTabValue) || 'all';
@@ -234,8 +236,8 @@ export function CompetenciesTableClient({
                   isPending && 'opacity-70'
                 )}
               >
-                <span className="hidden sm:inline">{tab.label}</span>
-                <span className="sm:hidden">{tab.shortLabel}</span>
+                <span className="hidden sm:inline">{t(`competencyDetail.table.tabs.${tab.labelKey}`)}</span>
+                <span className="sm:hidden">{t(`competencyDetail.table.tabs.${tab.shortLabelKey}`)}</span>
                 <Badge
                   variant="secondary"
                   className={cn(
@@ -254,7 +256,7 @@ export function CompetenciesTableClient({
 
       {/* Results count */}
       <div className="text-sm text-muted-foreground" role="status" aria-live="polite">
-        Найдено: {totalElements} компетенций
+        {t('competencyDetail.table.resultsFound', { count: totalElements })}
       </div>
 
       {/* Loading overlay */}
@@ -263,7 +265,7 @@ export function CompetenciesTableClient({
           <div className="absolute inset-0 z-10 flex items-center justify-center bg-background/60 backdrop-blur-[1px] rounded-lg">
             <div className="flex items-center gap-2 bg-background/90 px-4 py-2 rounded-full shadow-sm border">
               <Loader2 className="h-4 w-4 animate-spin text-primary" />
-              <span className="text-sm text-muted-foreground">Загрузка...</span>
+              <span className="text-sm text-muted-foreground">{t('competencyDetail.loading')}</span>
             </div>
           </div>
         )}
@@ -291,27 +293,27 @@ export function CompetenciesTableClient({
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-[35%]">Компетенция</TableHead>
+                  <TableHead className="w-[35%]">{t('competencyDetail.table.columns.competency')}</TableHead>
                   <TableHead className="text-center w-[20%]">
                     <TableHeaderWithHelp
-                      label="Cronbach's Alpha"
+                      label={t('competencyDetail.table.columns.cronbachAlpha')}
                       helpKey="cronbachAlpha"
                     />
                   </TableHead>
                   <TableHead className="text-center">
                     <TableHeaderWithHelp
-                      label="Выборка"
+                      label={t('competencyDetail.table.columns.sample')}
                       helpKey="sampleSize"
                     />
                   </TableHead>
                   <TableHead className="text-center">
                     <TableHeaderWithHelp
-                      label="Вопросы"
+                      label={t('competencyDetail.table.columns.questions')}
                       helpKey="itemCount"
                     />
                   </TableHead>
-                  <TableHead>Статус</TableHead>
-                  <TableHead className="w-[80px]">Действия</TableHead>
+                  <TableHead>{t('competencyDetail.table.columns.status')}</TableHead>
+                  <TableHead className="w-[80px]">{t('competencyDetail.table.columns.actions')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -376,10 +378,10 @@ export function CompetenciesTableClient({
                         >
                           <Link
                             href={`/psychometrics/items?competencyId=${comp.competencyId}`}
-                            title="Просмотреть вопросы этой компетенции"
+                            title={t('competencyDetail.table.viewQuestions')}
                           >
                             <ExternalLink className="h-4 w-4 mr-1" />
-                            <span className="text-xs">Вопросы</span>
+                            <span className="text-xs">{t('competencyDetail.table.columns.questions')}</span>
                           </Link>
                         </Button>
                       </TableCell>
@@ -397,7 +399,7 @@ export function CompetenciesTableClient({
       {totalPages > 1 && (
         <div className="flex items-center justify-between">
           <div className="text-sm text-muted-foreground hidden sm:block">
-            Страница {pageNumber + 1} из {totalPages}
+            {t('competencyDetail.table.pagination.page')} {pageNumber + 1} / {totalPages}
           </div>
           <div className="flex items-center gap-1 w-full sm:w-auto justify-center sm:justify-end">
             <Button
@@ -405,7 +407,7 @@ export function CompetenciesTableClient({
               size="icon"
               onClick={() => handlePageChange(0)}
               disabled={first}
-              title="Первая страница"
+              title={t('competencyDetail.table.pagination.firstPage')}
               className="h-11 w-11 sm:h-9 sm:w-9"
             >
               <ChevronsLeft className="h-5 w-5 sm:h-4 sm:w-4" />
@@ -415,7 +417,7 @@ export function CompetenciesTableClient({
               size="icon"
               onClick={() => handlePageChange(pageNumber - 1)}
               disabled={first}
-              title="Предыдущая страница"
+              title={t('competencyDetail.table.pagination.prevPage')}
               className="h-11 w-11 sm:h-9 sm:w-9"
             >
               <ChevronLeft className="h-5 w-5 sm:h-4 sm:w-4" />
@@ -431,7 +433,7 @@ export function CompetenciesTableClient({
               size="icon"
               onClick={() => handlePageChange(pageNumber + 1)}
               disabled={last}
-              title="Следующая страница"
+              title={t('competencyDetail.table.pagination.nextPage')}
               className="h-11 w-11 sm:h-9 sm:w-9"
             >
               <ChevronRight className="h-5 w-5 sm:h-4 sm:w-4" />
@@ -441,7 +443,7 @@ export function CompetenciesTableClient({
               size="icon"
               onClick={() => handlePageChange(totalPages - 1)}
               disabled={last}
-              title="Последняя страница"
+              title={t('competencyDetail.table.pagination.lastPage')}
               className="h-11 w-11 sm:h-9 sm:w-9"
             >
               <ChevronsRight className="h-5 w-5 sm:h-4 sm:w-4" />

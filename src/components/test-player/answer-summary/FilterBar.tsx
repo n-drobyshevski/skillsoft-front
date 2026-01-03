@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 import {
   Select,
@@ -26,13 +27,6 @@ interface FilterBarProps {
   };
 }
 
-const filters: Array<{ id: FilterType; label: string }> = [
-  { id: 'all', label: 'Все' },
-  { id: 'answered', label: 'Отвечено' },
-  { id: 'skipped', label: 'Пропущено' },
-  { id: 'flagged', label: 'Отмечено' },
-];
-
 /**
  * FilterBar - Filter tabs and sort dropdown for answer list
  *
@@ -47,6 +41,16 @@ export function FilterBar({
   onSortChange,
   counts,
 }: FilterBarProps) {
+  const tFilter = useTranslations('filter');
+  const tSort = useTranslations('sort');
+
+  const filters: Array<{ id: FilterType; labelKey: 'all' | 'answered' | 'unanswered' | 'flagged' }> = [
+    { id: 'all', labelKey: 'all' },
+    { id: 'answered', labelKey: 'answered' },
+    { id: 'skipped', labelKey: 'unanswered' },
+    { id: 'flagged', labelKey: 'flagged' },
+  ];
+
   return (
     <div className="sticky top-0 z-10 bg-neutral-950/95 backdrop-blur-sm border-b border-neutral-800 px-3 sm:px-4 py-2.5">
       <div className="max-w-3xl mx-auto flex items-center justify-between gap-2">
@@ -72,7 +76,7 @@ export function FilterBar({
                       : "text-neutral-500 hover:text-neutral-300 hover:bg-neutral-800/50"
                 )}
               >
-                {filter.label}
+                {tFilter(filter.labelKey)}
                 <span
                   className={cn(
                     "px-1.5 py-0.5 rounded-full text-[10px] tabular-nums min-w-[20px] text-center",
@@ -95,9 +99,9 @@ export function FilterBar({
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="order">По порядку</SelectItem>
-              <SelectItem value="status">По статусу</SelectItem>
-              <SelectItem value="competency">По компетенции</SelectItem>
+              <SelectItem value="order">{tSort('byOrder')}</SelectItem>
+              <SelectItem value="status">{tSort('byStatus')}</SelectItem>
+              <SelectItem value="competency">{tSort('byCompetency')}</SelectItem>
             </SelectContent>
           </Select>
         </div>

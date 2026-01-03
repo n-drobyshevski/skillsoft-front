@@ -2,8 +2,8 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
-import { z } from 'zod';
-import { competencySchema } from '../validation';
+import { useMemo } from 'react';
+import { createCompetencySchema, CompetencyFormValues } from '@/lib/schemas';
 import { Competency } from '@/types/domain';
 import { Button } from '@/components/ui/button';
 import {
@@ -30,28 +30,39 @@ import { useRouter } from 'next/navigation';
 import { useState, useCallback, useEffect } from 'react';
 import { toast } from "sonner";
 import { FileText, Tag, CheckCircle2, Loader2, X, Save, RefreshCw, Check, AlertCircle, Globe2, Layers } from "lucide-react";
-import { HelpTooltip, formHelp } from '@/components/ui/help-tooltip';
+import { HelpTooltip } from '@/components/ui/help-tooltip';
 import { cn } from '@/lib/utils';
 import { StandardsSearchCombobox } from '@/components/common/standards-search-combobox';
 import { getAllSkills } from '@/lib/skill-data-loader';
 import type { UnifiedSkill } from '@/types/skills';
+import { useTranslations } from 'next-intl';
+import { useEnumTranslation } from '@/hooks/useEnumTranslation';
+import { useHelpTranslation } from '@/hooks/useHelpTranslation';
 
-type CompetencyFormValues = z.infer<typeof competencySchema>;
-
-export function CompetencyForm({ 
-  competency, 
+export function CompetencyForm({
+  competency,
   onUpdatePreview,
-  onCompetencyCreated 
-}: { 
-  competency?: Competency, 
+  onCompetencyCreated
+}: {
+  competency?: Competency,
   onUpdatePreview?: (data: CompetencyFormValues) => void,
   onCompetencyCreated?: (competency: Competency) => void
 }) {
   const router = useRouter();
+  const t = useTranslations('competency');
+  const tForms = useTranslations('forms');
+  const tCommon = useTranslations('common');
+  const tAll = useTranslations();
+  const { getOptions: getCategoryOptions } = useEnumTranslation<CompetencyCategory>('competencyCategory');
+  const { getOptions: getApprovalOptions } = useEnumTranslation<ApprovalStatus>('approvalStatus');
+  const { getHelp } = useHelpTranslation('competency');
   const [isLoading, setIsLoading] = useState(false);
   const [skills, setSkills] = useState<UnifiedSkill[]>([]);
   const [isLoadingSkills, setIsLoadingSkills] = useState(true);
   const isEditMode = !!competency;
+
+  // Create i18n-aware schema with translated error messages
+  const competencySchema = useMemo(() => createCompetencySchema(tAll), [tAll]);
 
   // Load skills on mount
   useEffect(() => {
@@ -98,7 +109,7 @@ export function CompetencyForm({
 
   // Helper to handle successful competency creation
   const handleCreateSuccess = (createdCompetency: Competency) => {
-    toast.success("Competency created successfully!");
+    toast.success(t('createdSuccess'));
     if (onCompetencyCreated) {
       onCompetencyCreated(createdCompetency);
     } else {
@@ -108,7 +119,7 @@ export function CompetencyForm({
 
   // Helper to handle successful competency update
   const handleUpdateSuccess = () => {
-    toast.success("Competency updated successfully!");
+    toast.success(t('updatedSuccess'));
     if (competency) {
       router.push(`/hr/competencies/${competency.id}`);
     }
@@ -157,7 +168,7 @@ export function CompetencyForm({
         if (result.success && result.data && result.data.id) {
           handleCreateSuccess(result.data);
         } else if (result.success && (!result.data || !result.data.id)) {
-          toast.error('Competency was created but no valid ID was returned. Please refresh and try again.');
+          toast.error(t('createdNoId'));
         } else if (!result.success) {
           toast.error(result.message);
         }
@@ -222,8 +233,8 @@ export function CompetencyForm({
                 <FileText className="h-4 w-4 sm:h-5 sm:w-5" />
               </div>
               <div>
-                <h3 className="text-sm sm:text-base font-semibold">Basic Information</h3>
-                <p className="text-xs sm:text-sm text-muted-foreground">Name and description for this competency</p>
+                <h3 className="text-sm sm:text-base font-semibold">{t('basicInformation')}</h3>
+                <p className="text-xs sm:text-sm text-muted-foreground">{t('basicInformationDescription')}</p>
               </div>
             </div>
             <div className="p-4 sm:p-5 space-y-4 sm:space-y-5">
@@ -235,13 +246,13 @@ export function CompetencyForm({
                   return (
                     <FormItem>
                       <FormLabel className="text-sm font-medium flex items-center gap-1">
-                        Name <span className="text-destructive">*</span>
-                        <HelpTooltip content={formHelp.competency.name} />
+                        {t('name')} <span className="text-destructive">*</span>
+                        <HelpTooltip content={getHelp('name')} />
                       </FormLabel>
                       <FormControl>
                         <div className="relative">
                           <Input
-                            placeholder="e.g., Strategic Leadership"
+                            placeholder={tForms('competency.placeholders.name')}
                             className={cn(
                               "h-11 sm:h-10 pr-8 touch-manipulation",
                               fieldState.isValid && "border-green-500 focus-visible:ring-green-500",
@@ -279,13 +290,13 @@ export function CompetencyForm({
                   return (
                     <FormItem>
                       <FormLabel className="text-sm font-medium flex items-center gap-1">
-                        Description <span className="text-destructive">*</span>
-                        <HelpTooltip content={formHelp.competency.description} />
+                        {t('description')} <span className="text-destructive">*</span>
+                        <HelpTooltip content={getHelp('description')} />
                       </FormLabel>
                       <FormControl>
                         <div className="relative">
                           <Textarea
-                            placeholder="A detailed description of the competency and what it measures..."
+                            placeholder={tForms('competency.placeholders.description')}
                             className={cn(
                               "min-h-24 resize-none touch-manipulation",
                               fieldState.isValid && "border-green-500 focus-visible:ring-green-500",
@@ -305,7 +316,7 @@ export function CompetencyForm({
                           "text-xs",
                           charCount < minChars ? "text-muted-foreground" : "text-green-600"
                         )}>
-                          {charCount}/{minChars}+ characters
+                          {charCount}/{minChars}+ {t('characters')}
                         </span>
                       </div>
                     </FormItem>
@@ -322,8 +333,8 @@ export function CompetencyForm({
                 <Tag className="h-4 w-4 sm:h-5 sm:w-5" />
               </div>
               <div>
-                <h3 className="text-sm sm:text-base font-semibold">Classification</h3>
-                <p className="text-xs sm:text-sm text-muted-foreground">Category selection</p>
+                <h3 className="text-sm sm:text-base font-semibold">{t('classification')}</h3>
+                <p className="text-xs sm:text-sm text-muted-foreground">{t('classificationDescription')}</p>
               </div>
             </div>
             <div className="p-4 sm:p-5">
@@ -333,8 +344,8 @@ export function CompetencyForm({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="text-sm font-medium flex items-center gap-1">
-                      Category
-                      <HelpTooltip content={formHelp.competency.category} />
+                      {t('category')}
+                      <HelpTooltip content={getHelp('category')} />
                     </FormLabel>
                     <Select
                       onValueChange={(value) => {
@@ -345,13 +356,13 @@ export function CompetencyForm({
                     >
                       <FormControl>
                         <SelectTrigger className="h-11 sm:h-10 touch-manipulation">
-                          <SelectValue placeholder="Select category" />
+                          <SelectValue placeholder={t('selectCategory')} />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {Object.values(CompetencyCategory).map((category) => (
-                          <SelectItem key={category} value={category}>
-                            {category}
+                        {getCategoryOptions(Object.values(CompetencyCategory)).map((option) => (
+                          <SelectItem key={option.value} value={option.value}>
+                            {option.label}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -370,8 +381,8 @@ export function CompetencyForm({
                 <Globe2 className="h-4 w-4 sm:h-5 sm:w-5" />
               </div>
               <div>
-                <h3 className="text-sm sm:text-base font-semibold">Standard Mapping</h3>
-                <p className="text-xs sm:text-sm text-muted-foreground">Link to O*NET, ESCO, or personality frameworks</p>
+                <h3 className="text-sm sm:text-base font-semibold">{t('standardMapping')}</h3>
+                <p className="text-xs sm:text-sm text-muted-foreground">{t('standardMappingDescription')}</p>
               </div>
             </div>
             <div className="p-4 sm:p-5">
@@ -382,8 +393,8 @@ export function CompetencyForm({
                   <FormItem>
                     <FormLabel className="text-sm font-medium flex items-center gap-1">
                       <Layers className="h-4 w-4 mr-1" />
-                      Standards Reference
-                      <HelpTooltip content="Map this competency to established frameworks like O*NET occupational skills, ESCO European skills taxonomy, or Big Five personality traits for standardized assessment alignment." />
+                      {t('standardsReference')}
+                      <HelpTooltip content={t('standardsReferenceHelp')} />
                     </FormLabel>
                     <FormControl>
                       <StandardsSearchCombobox
@@ -410,8 +421,8 @@ export function CompetencyForm({
                 <CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5" />
               </div>
               <div>
-                <h3 className="text-sm sm:text-base font-semibold">Status & Approval</h3>
-                <p className="text-xs sm:text-sm text-muted-foreground">Manage visibility and approval workflow</p>
+                <h3 className="text-sm sm:text-base font-semibold">{t('statusApproval')}</h3>
+                <p className="text-xs sm:text-sm text-muted-foreground">{t('statusApprovalDescription')}</p>
               </div>
             </div>
             <div className="p-4 sm:p-5 grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
@@ -421,8 +432,8 @@ export function CompetencyForm({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="text-sm font-medium flex items-center gap-1">
-                      Approval Status
-                      <HelpTooltip content={formHelp.competency.approvalStatus} />
+                      {t('approvalStatus')}
+                      <HelpTooltip content={getHelp('approvalStatus')} />
                     </FormLabel>
                     <Select
                       onValueChange={(value) => {
@@ -433,13 +444,13 @@ export function CompetencyForm({
                     >
                       <FormControl>
                         <SelectTrigger className="h-11 sm:h-10 touch-manipulation">
-                          <SelectValue placeholder="Select status" />
+                          <SelectValue placeholder={t('selectStatus')} />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {Object.values(ApprovalStatus).map((status) => (
-                          <SelectItem key={status} value={status}>
-                            {status.replace(/_/g, ' ')}
+                        {getApprovalOptions(Object.values(ApprovalStatus)).map((option) => (
+                          <SelectItem key={option.value} value={option.value}>
+                            {option.label}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -454,8 +465,8 @@ export function CompetencyForm({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="text-sm font-medium flex items-center gap-1">
-                      Visibility
-                      <HelpTooltip content={formHelp.competency.isActive} />
+                      {t('visibility')}
+                      <HelpTooltip content={getHelp('isActive')} />
                     </FormLabel>
                     <div className="flex items-center gap-3 h-11 sm:h-10 px-3 rounded-lg border bg-muted/30 touch-manipulation">
                       <FormControl>
@@ -469,7 +480,7 @@ export function CompetencyForm({
                         />
                       </FormControl>
                       <span className={`text-sm font-medium ${field.value ? 'text-green-600 dark:text-green-400' : 'text-muted-foreground'}`}>
-                        {field.value ? 'Active' : 'Inactive'}
+                        {field.value ? t('active') : t('inactive')}
                       </span>
                     </div>
                   </FormItem>
@@ -480,42 +491,42 @@ export function CompetencyForm({
 
           {/* Action Buttons */}
           <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 pt-2">
-            <Button 
-              type="button" 
-              variant="outline" 
-              onClick={() => router.back()} 
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => router.back()}
               disabled={isLoading}
               className="h-11 sm:h-10 min-h-11"
             >
               <X className="h-4 w-4 mr-2" />
-              Cancel
+              {tCommon('cancel')}
             </Button>
             {onUpdatePreview && (
-              <Button 
-                type="button" 
-                variant="secondary" 
-                onClick={handlePreviewClick} 
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={handlePreviewClick}
                 disabled={isLoading}
                 className="h-11 sm:h-10 min-h-11"
               >
                 <RefreshCw className="h-4 w-4 mr-2" />
-                Update Preview
+                {t('updatePreview')}
               </Button>
             )}
-            <Button 
-              type="submit" 
+            <Button
+              type="submit"
               disabled={isLoading}
               className="h-11 sm:h-10 min-h-11"
             >
               {isLoading ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  {isEditMode ? 'Saving...' : 'Creating...'}
+                  {isEditMode ? t('saving') : t('creating')}
                 </>
               ) : (
                 <>
                   <Save className="h-4 w-4 mr-2" />
-                  {isEditMode ? 'Save Changes' : 'Create Competency'}
+                  {isEditMode ? t('saveChanges') : t('create')}
                 </>
               )}
             </Button>

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
@@ -22,34 +23,26 @@ interface MobileSeverityBannerProps {
   className?: string;
 }
 
-const severityConfig = {
+const severityStyles = {
   critical: {
-    title: 'Критическая проблема',
-    label: 'Критично',
     color: 'text-red-600 dark:text-red-400',
     bgClass: 'bg-red-50 dark:bg-red-950/30',
     borderClass: 'border-l-red-500',
     Icon: AlertOctagon,
   },
   high: {
-    title: 'Серьезная проблема',
-    label: 'Высокий',
     color: 'text-orange-600 dark:text-orange-400',
     bgClass: 'bg-orange-50 dark:bg-orange-950/30',
     borderClass: 'border-l-orange-500',
     Icon: AlertTriangle,
   },
   medium: {
-    title: 'Требует внимания',
-    label: 'Средний',
     color: 'text-amber-600 dark:text-amber-400',
     bgClass: 'bg-amber-50 dark:bg-amber-950/30',
     borderClass: 'border-l-amber-500',
     Icon: AlertTriangle,
   },
   low: {
-    title: 'Незначительная проблема',
-    label: 'Низкий',
     color: 'text-blue-600 dark:text-blue-400',
     bgClass: 'bg-blue-50 dark:bg-blue-950/30',
     borderClass: 'border-l-blue-500',
@@ -71,12 +64,17 @@ export function MobileSeverityBanner({
 }: MobileSeverityBannerProps) {
   const [isExpanded, setIsExpanded] = useState(defaultExpanded);
   const prefersReducedMotion = useReducedMotion();
+  const t = useTranslations('psychometrics.flaggedDetail');
 
-  const config = severityConfig[severity];
-  const { Icon, title, label, color, bgClass, borderClass } = config;
+  const styles = severityStyles[severity];
+  const { Icon, color, bgClass, borderClass } = styles;
+
+  // Get translated title and label based on severity
+  const title = t(`severity.${severity}.title`);
+  const label = t(`severity.${severity}.label`);
 
   // Show first reason as summary when collapsed
-  const summaryReason = reasons[0] || 'Элемент помечен для проверки';
+  const summaryReason = reasons[0] || t('itemFlaggedForReview');
   const hasMoreReasons = reasons.length > 1;
 
   return (
@@ -125,7 +123,7 @@ export function MobileSeverityBanner({
                 {summaryReason}
                 {hasMoreReasons && (
                   <span className="text-xs ml-1 opacity-70">
-                    (+{reasons.length - 1} еще)
+                    (+{reasons.length - 1} {t('moreReasons')})
                   </span>
                 )}
               </p>

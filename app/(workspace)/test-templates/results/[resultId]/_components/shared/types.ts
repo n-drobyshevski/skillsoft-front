@@ -1,16 +1,38 @@
 /**
  * Shared types and interfaces for test results views.
  * Supports three assessment scenarios: OVERVIEW, JOB_FIT, TEAM_FIT
+ *
+ * Result Status Handling:
+ * - PENDING: Use ScoringPendingView (polling for completion)
+ * - FAILED: Use ScoringFailedView (error recovery)
+ * - COMPLETED: Use goal-specific view (Overview/JobFit/TeamFit)
  */
 
-import { TestResult, TestTemplate, CompetencyScore } from '@/types/domain';
+import { TestResult, TestTemplate, CompetencyScore, ResultStatus } from '@/types/domain';
 
 /**
- * Base props for all result view components
+ * Base props for all result view components.
+ *
+ * Note: The result.status field determines which view is rendered:
+ * - PENDING: ScoringPendingView with polling
+ * - FAILED: ScoringFailedView with retry
+ * - COMPLETED: Goal-based view with full data
+ *
+ * When status is COMPLETED, score fields (overallScore, overallPercentage,
+ * competencyScores) are guaranteed to be non-null.
  */
 export interface BaseResultViewProps {
   result: TestResult;
   template: TestTemplate;
+}
+
+/**
+ * Props for status-aware views (PENDING/FAILED).
+ * Same as BaseResultViewProps but with explicit status context.
+ */
+export interface StatusViewProps extends BaseResultViewProps {
+  /** Callback when result transitions to a new status */
+  onStatusChange?: (newStatus: ResultStatus) => void;
 }
 
 /**

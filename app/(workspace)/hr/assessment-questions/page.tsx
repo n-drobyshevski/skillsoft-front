@@ -1,18 +1,22 @@
 import React, { Suspense } from "react";
 import Link from "next/link";
-import { Metadata } from "next";
-import {
-  Plus,
-} from "lucide-react";
+import type { Metadata } from "next";
+import { Plus } from "lucide-react";
+import { getTranslations } from "next-intl/server";
 
-export const metadata: Metadata = {
-  title: "Assessment Questions - SkillSoft",
-  description: "Create and manage assessment questions for competency evaluation. Design questions to measure behavioral indicators effectively.",
-  openGraph: {
-    title: "Assessment Questions - SkillSoft",
-    description: "Create and manage assessment questions for competency evaluation.",
-  },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("metadata.questions");
+  const siteName = "SkillSoft";
+
+  return {
+    title: `${t("title")} - ${siteName}`,
+    description: t("description"),
+    openGraph: {
+      title: `${t("title")} - ${siteName}`,
+      description: t("description"),
+    },
+  };
+}
 
 import { AssessmentQuestion } from "@/types/domain";
 import { assessmentQuestionsApi } from "@/services/api";
@@ -42,19 +46,20 @@ async function getQuestionsData() {
 }
 
 export default async function AssessmentQuestionsPage() {
-	const { questions, error } = await getQuestionsData();
+  const { questions, error } = await getQuestionsData();
+  const t = await getTranslations("question");
 
-	return (
+  return (
     <div className="flex flex-1 flex-col gap-4 p-4 pt-6 md:gap-6 md:p-6">
-      <PageHeader 
-        title="Assessment Questions"
-        description="Create and manage assessment questions for competency evaluation"
+      <PageHeader
+        title={t("title")}
+        description={t("pageDescription")}
       >
         <div className="flex items-center gap-2">
           <Link href="/hr/assessment-questions/new">
             <Button variant="outline">
               <Plus className="mr-2 h-4 w-4" />
-              Create Question
+              {t("create")}
             </Button>
           </Link>
         </div>

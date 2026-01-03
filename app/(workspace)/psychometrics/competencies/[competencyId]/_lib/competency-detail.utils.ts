@@ -76,6 +76,40 @@ export function deriveReliabilitySubState(status: ReliabilityStatus): Reliabilit
 // ALPHA QUALITY ASSESSMENT
 // ============================================
 
+/**
+ * Locale-agnostic keys for alpha quality zones
+ */
+export type AlphaQualityKey =
+  | 'insufficient'
+  | 'unacceptable'
+  | 'poor'
+  | 'acceptable'
+  | 'good'
+  | 'excellent'
+  | 'exceptional';
+
+/**
+ * Non-localized alpha quality data (colors and styling only)
+ */
+export interface AlphaQualityData {
+  key: AlphaQualityKey;
+  color: string;
+  textClass: string;
+  bgClass: string;
+}
+
+/**
+ * Localized alpha quality with translated labels and descriptions
+ */
+export interface LocalizedAlphaQuality extends AlphaQualityData {
+  label: string;
+  description: string;
+}
+
+/**
+ * Legacy interface for backward compatibility
+ * @deprecated Use LocalizedAlphaQuality instead
+ */
 export interface AlphaQuality {
   label: string;
   labelEn: string;
@@ -87,11 +121,116 @@ export interface AlphaQuality {
 }
 
 /**
- * Assessment of Cronbach's Alpha quality based on psychometric standards
+ * Non-localized alpha quality data by key
+ * Contains only styling information, no text
+ */
+export const ALPHA_QUALITY_DATA: Record<AlphaQualityKey, Omit<AlphaQualityData, 'key'>> = {
+  insufficient: {
+    color: 'gray',
+    textClass: 'text-muted-foreground',
+    bgClass: 'bg-muted/50',
+  },
+  unacceptable: {
+    color: 'red',
+    textClass: 'text-red-600 dark:text-red-400',
+    bgClass: 'bg-red-50 dark:bg-red-950/30',
+  },
+  poor: {
+    color: 'orange',
+    textClass: 'text-orange-600 dark:text-orange-400',
+    bgClass: 'bg-orange-50 dark:bg-orange-950/30',
+  },
+  acceptable: {
+    color: 'amber',
+    textClass: 'text-amber-600 dark:text-amber-400',
+    bgClass: 'bg-amber-50 dark:bg-amber-950/30',
+  },
+  good: {
+    color: 'green',
+    textClass: 'text-green-600 dark:text-green-400',
+    bgClass: 'bg-green-50 dark:bg-green-950/30',
+  },
+  excellent: {
+    color: 'emerald',
+    textClass: 'text-emerald-600 dark:text-emerald-400',
+    bgClass: 'bg-emerald-50 dark:bg-emerald-950/30',
+  },
+  exceptional: {
+    color: 'emerald',
+    textClass: 'text-emerald-600 dark:text-emerald-400',
+    bgClass: 'bg-emerald-50 dark:bg-emerald-950/30',
+  },
+};
+
+/**
+ * Get the alpha quality key based on the alpha value
+ * Uses psychometric standards for thresholds
  *
  * Thresholds based on:
- * - Nunnally (1978): α ≥ 0.7 for research, ≥ 0.8 for applied settings
- * - George & Mallery (2003): α ≥ 0.9 excellent, ≥ 0.8 good, ≥ 0.7 acceptable
+ * - Nunnally (1978): alpha >= 0.7 for research, >= 0.8 for applied settings
+ * - George & Mallery (2003): alpha >= 0.9 excellent, >= 0.8 good, >= 0.7 acceptable
+ */
+export function getAlphaQualityKey(alpha: number | null): AlphaQualityKey {
+  if (alpha === null) return 'insufficient';
+  if (alpha >= 0.9) return 'exceptional';
+  if (alpha >= 0.8) return 'excellent';
+  if (alpha >= 0.7) return 'good';
+  if (alpha >= 0.6) return 'acceptable';
+  if (alpha >= 0.5) return 'poor';
+  return 'unacceptable';
+}
+
+/**
+ * Get non-localized alpha quality data (styling only)
+ */
+export function getAlphaQualityData(alpha: number | null): AlphaQualityData {
+  const key = getAlphaQualityKey(alpha);
+  return {
+    key,
+    ...ALPHA_QUALITY_DATA[key],
+  };
+}
+
+/**
+ * Translation function type for localization
+ */
+export type TranslationFunction = (key: string) => string;
+
+/**
+ * Get localized alpha quality information
+ * Uses translation function to resolve label and description
+ *
+ * Translation keys:
+ * - psychometrics.competencyDetail.quality.{key}.label
+ * - psychometrics.competencyDetail.quality.{key}.description
+ *
+ * @param alpha - Cronbach's alpha value (null if insufficient data)
+ * @param t - Translation function from i18n library
+ * @returns Localized alpha quality with label, description, and styling
+ */
+export function getLocalizedAlphaQuality(
+  alpha: number | null,
+  t: TranslationFunction
+): LocalizedAlphaQuality {
+  const data = getAlphaQualityData(alpha);
+  const baseKey = `psychometrics.competencyDetail.quality.${data.key}`;
+
+  return {
+    ...data,
+    label: t(`${baseKey}.label`),
+    description: t(`${baseKey}.description`),
+  };
+}
+
+/**
+ * Assessment of Cronbach's Alpha quality based on psychometric standards
+ *
+ * @deprecated Use getLocalizedAlphaQuality with a translation function instead.
+ * This function is kept for backward compatibility but returns hardcoded strings.
+ *
+ * Thresholds based on:
+ * - Nunnally (1978): alpha >= 0.7 for research, >= 0.8 for applied settings
+ * - George & Mallery (2003): alpha >= 0.9 excellent, >= 0.8 good, >= 0.7 acceptable
  */
 export function getAlphaQuality(alpha: number | null): AlphaQuality {
   if (alpha === null) {
@@ -109,7 +248,7 @@ export function getAlphaQuality(alpha: number | null): AlphaQuality {
   if (alpha >= 0.9) {
     return {
       label: 'Превосходный',
-      labelEn: 'Excellent',
+      labelEn: 'Exceptional',
       color: 'emerald',
       textClass: 'text-emerald-600 dark:text-emerald-400',
       bgClass: 'bg-emerald-50 dark:bg-emerald-950/30',
@@ -121,7 +260,7 @@ export function getAlphaQuality(alpha: number | null): AlphaQuality {
   if (alpha >= 0.8) {
     return {
       label: 'Отличный',
-      labelEn: 'Good',
+      labelEn: 'Excellent',
       color: 'emerald',
       textClass: 'text-emerald-600 dark:text-emerald-400',
       bgClass: 'bg-emerald-50 dark:bg-emerald-950/30',
@@ -133,7 +272,7 @@ export function getAlphaQuality(alpha: number | null): AlphaQuality {
   if (alpha >= 0.7) {
     return {
       label: 'Хороший',
-      labelEn: 'Acceptable',
+      labelEn: 'Good',
       color: 'green',
       textClass: 'text-green-600 dark:text-green-400',
       bgClass: 'bg-green-50 dark:bg-green-950/30',
@@ -145,7 +284,7 @@ export function getAlphaQuality(alpha: number | null): AlphaQuality {
   if (alpha >= 0.6) {
     return {
       label: 'Приемлемый',
-      labelEn: 'Questionable',
+      labelEn: 'Acceptable',
       color: 'amber',
       textClass: 'text-amber-600 dark:text-amber-400',
       bgClass: 'bg-amber-50 dark:bg-amber-950/30',
@@ -225,6 +364,29 @@ export function getStatusGradient(status: ReliabilityStatus): StatusGradientConf
 // ALPHA INTERPRETATION ZONES
 // ============================================
 
+/**
+ * Non-localized zone data (styling and thresholds only)
+ */
+export interface AlphaZoneData {
+  key: AlphaQualityKey;
+  min: number;
+  max: number;
+  rangeLabel: string;
+  color: string;
+  bgColor: string;
+}
+
+/**
+ * Localized zone with description
+ */
+export interface LocalizedAlphaZone extends AlphaZoneData {
+  description: string;
+}
+
+/**
+ * Legacy interface for backward compatibility
+ * @deprecated Use LocalizedAlphaZone instead
+ */
 export interface AlphaZone {
   min: number;
   max: number;
@@ -235,8 +397,82 @@ export interface AlphaZone {
 }
 
 /**
+ * Non-localized alpha interpretation zone data
+ * Contains thresholds and styling, no text descriptions
+ */
+export const ALPHA_ZONE_DATA: AlphaZoneData[] = [
+  {
+    key: 'unacceptable',
+    min: 0,
+    max: 0.5,
+    rangeLabel: '<0.5',
+    color: 'bg-red-500',
+    bgColor: 'bg-red-100 dark:bg-red-900/30',
+  },
+  {
+    key: 'poor',
+    min: 0.5,
+    max: 0.6,
+    rangeLabel: '0.5-0.6',
+    color: 'bg-orange-500',
+    bgColor: 'bg-orange-100 dark:bg-orange-900/30',
+  },
+  {
+    key: 'acceptable',
+    min: 0.6,
+    max: 0.7,
+    rangeLabel: '0.6-0.7',
+    color: 'bg-amber-500',
+    bgColor: 'bg-amber-100 dark:bg-amber-900/30',
+  },
+  {
+    key: 'good',
+    min: 0.7,
+    max: 0.8,
+    rangeLabel: '0.7-0.8',
+    color: 'bg-green-500',
+    bgColor: 'bg-green-100 dark:bg-green-900/30',
+  },
+  {
+    key: 'excellent',
+    min: 0.8,
+    max: 0.9,
+    rangeLabel: '0.8-0.9',
+    color: 'bg-emerald-500',
+    bgColor: 'bg-emerald-100 dark:bg-emerald-900/30',
+  },
+  {
+    key: 'exceptional',
+    min: 0.9,
+    max: 1.0,
+    rangeLabel: '>0.9',
+    color: 'bg-emerald-600',
+    bgColor: 'bg-emerald-100 dark:bg-emerald-900/30',
+  },
+];
+
+/**
+ * Get localized alpha interpretation zones
+ * Uses translation function to resolve descriptions
+ *
+ * Translation keys use: psychometrics.competencyDetail.quality.{key}.label
+ *
+ * @param t - Translation function from i18n library
+ * @returns Array of localized alpha zones
+ */
+export function getLocalizedAlphaZones(t: TranslationFunction): LocalizedAlphaZone[] {
+  return ALPHA_ZONE_DATA.map((zone) => ({
+    ...zone,
+    description: t(`psychometrics.competencyDetail.quality.${zone.key}.label`),
+  }));
+}
+
+/**
  * Standard Cronbach's Alpha interpretation zones
  * Used for scale visualization
+ *
+ * @deprecated Use ALPHA_ZONE_DATA with getLocalizedAlphaZones instead.
+ * This constant is kept for backward compatibility but contains hardcoded Russian strings.
  */
 export const ALPHA_INTERPRETATION_ZONES: AlphaZone[] = [
   {
@@ -290,7 +526,27 @@ export const ALPHA_INTERPRETATION_ZONES: AlphaZone[] = [
 ];
 
 /**
+ * Find the active zone data for a given alpha value (non-localized)
+ */
+export function getActiveAlphaZoneData(alpha: number | null): AlphaZoneData | null {
+  if (alpha === null) return null;
+
+  const zone = ALPHA_ZONE_DATA.find(
+    (z) => alpha >= z.min && alpha < z.max
+  );
+
+  // Handle edge case where alpha === 1.0
+  if (!zone && alpha >= 0.9 && alpha <= 1.0) {
+    return ALPHA_ZONE_DATA[ALPHA_ZONE_DATA.length - 1];
+  }
+
+  return zone || null;
+}
+
+/**
  * Find the active zone for a given alpha value
+ *
+ * @deprecated Use getActiveAlphaZoneData with getLocalizedAlphaZones instead.
  */
 export function getActiveAlphaZone(alpha: number | null): AlphaZone | null {
   if (alpha === null) return null;

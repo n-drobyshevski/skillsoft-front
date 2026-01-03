@@ -22,6 +22,7 @@ import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { useScrollDirection } from "@/hooks/use-scroll-direction";
 import { timing } from "@/lib/animation-config";
+import { LanguageSwitcher, LanguageToggle } from "@/components/language-switcher";
 
 interface SiteHeaderProps {
   title?: string;
@@ -148,7 +149,7 @@ export function SiteHeader({ title = "Dashboard", breadcrumbs }: SiteHeaderProps
       <div className="flex w-full items-center gap-2 px-3 @md/header:px-4 mobile-container">
         {/* Mobile Layout: Sidebar trigger, title, actions */}
         <div className="flex items-center gap-2 @md/header:hidden w-full min-w-0">
-          <SidebarTrigger className="-ml-1 touch-target focus-mobile shrink-0" />
+          <SidebarTrigger className="-ml-1 touch-target focus-mobile" />
 
           {/* Truncated title with smaller font */}
           <h1 className="text-sm font-semibold truncate flex-1 min-w-0 px-1">
@@ -157,6 +158,11 @@ export function SiteHeader({ title = "Dashboard", breadcrumbs }: SiteHeaderProps
 
           {/* Mobile Actions - tighter spacing, smaller buttons */}
           <div className="flex items-center gap-0.5 shrink-0">
+            {/* Language Toggle - compact for mobile */}
+            <ClientOnly>
+              <LanguageToggle />
+            </ClientOnly>
+
             {/* Notifications - 36px touch target */}
             <Button
               variant="ghost"
@@ -251,6 +257,11 @@ export function SiteHeader({ title = "Dashboard", breadcrumbs }: SiteHeaderProps
               <Bell className="h-4 w-4" />
               <span className="sr-only">Notifications</span>
             </Button>
+
+            {/* Language Switcher */}
+            <ClientOnly>
+              <LanguageSwitcher />
+            </ClientOnly>
 
             {/* Theme Toggle */}
             <ClientOnly>

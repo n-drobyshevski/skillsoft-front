@@ -2,8 +2,8 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm, useFieldArray } from 'react-hook-form';
-import { z } from 'zod';
-import { questionSchema } from '../validation';
+import { useMemo } from 'react';
+import { createQuestionSchema, QuestionFormValues, QUESTION_TAG_OPTIONS, QuestionTag } from '@/lib/schemas';
 import { AssessmentQuestion } from '@/types/domain';
 import { Button } from '@/components/ui/button';
 import {
@@ -43,40 +43,38 @@ import {
   Tag as TagIcon
 } from 'lucide-react';
 import { toast } from "sonner";
-import { HelpTooltip, formHelp } from '@/components/ui/help-tooltip';
+import { HelpTooltip } from '@/components/ui/help-tooltip';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
+import { useTranslations } from 'next-intl';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from '@/components/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { QUESTION_TAG_OPTIONS, QuestionTag } from '../validation';
-
-type QuestionFormValues = z.infer<typeof questionSchema>;
+import { useEnumTranslation } from '@/hooks/useEnumTranslation';
+import { useHelpTranslation } from '@/hooks/useHelpTranslation';
 
 const questionTypes = Object.values(QuestionType);
 
-// Tag options with descriptions for the multi-select
-const TAG_METADATA = [
-  { value: 'GENERAL', label: 'General', description: 'Context-neutral, no industry jargon (Scenario A)' },
-  { value: 'IT', label: 'IT', description: 'Information technology context' },
-  { value: 'SALES', label: 'Sales', description: 'Sales and marketing context' },
-  { value: 'FINANCE', label: 'Finance', description: 'Financial industry context' },
-  { value: 'MEDICAL', label: 'Medical', description: 'Healthcare context' },
-  { value: 'ENGINEERING', label: 'Engineering', description: 'Engineering context' },
-  { value: 'JUNIOR', label: 'Junior', description: 'Entry-level complexity' },
-  { value: 'MID', label: 'Mid', description: 'Mid-career complexity' },
-  { value: 'SENIOR', label: 'Senior', description: 'Senior-level complexity' },
-] as const;
+// Tag values for the multi-select (labels/descriptions come from translations)
+const TAG_VALUES = ['GENERAL', 'IT', 'SALES', 'FINANCE', 'MEDICAL', 'ENGINEERING', 'JUNIOR', 'MID', 'SENIOR'] as const;
 
-export function QuestionForm({ question, competencyId, behavioralIndicatorId, onUpdatePreview }: { 
-  question?: AssessmentQuestion; 
-  competencyId: string; 
-  behavioralIndicatorId: string; 
-  onUpdatePreview?: (data: QuestionFormValues) => void; 
+export function QuestionForm({ question, competencyId, behavioralIndicatorId, onUpdatePreview }: {
+  question?: AssessmentQuestion;
+  competencyId: string;
+  behavioralIndicatorId: string;
+  onUpdatePreview?: (data: QuestionFormValues) => void;
 }) {
   const router = useRouter();
+  const t = useTranslations('forms');
+  const tAll = useTranslations();
+  const { getOptions: getQuestionTypeOptions } = useEnumTranslation<QuestionType>('questionType');
+  const { getOptions: getDifficultyOptions } = useEnumTranslation<DifficultyLevel>('difficultyLevel');
+  const { getHelp } = useHelpTranslation('question');
   const [isLoading, setIsLoading] = useState(false);
   const isEditMode = !!question;
+
+  // Create i18n-aware schema with translated error messages
+  const questionSchema = useMemo(() => createQuestionSchema(tAll), [tAll]);
 
   const form = useForm<QuestionFormValues>({
     resolver: zodResolver(questionSchema),
@@ -155,15 +153,15 @@ export function QuestionForm({ question, competencyId, behavioralIndicatorId, on
     try {
       if (isEditMode) {
         await assessmentQuestionsApi.updateQuestion(question.id, data, competencyId, behavioralIndicatorId);
-        toast.success("Question updated successfully!");
+        toast.success(t('updateSuccess'));
         router.push(`/hr/assessment-questions/${question.id}`);
       } else {
         const newQuestion = await assessmentQuestionsApi.createQuestion(competencyId, behavioralIndicatorId, data);
-        toast.success("Question created successfully!");
-        router.push(`/hr/ assessment-questions/${newQuestion.id}`);
+        toast.success(t('createSuccess'));
+        router.push(`/hr/assessment-questions/${newQuestion.id}`);
       }
     } catch (e: unknown) {
-      const errorMessage = e instanceof Error ? e.message : "An error occurred.";
+      const errorMessage = e instanceof Error ? e.message : t('errorOccurred');
       toast.error(errorMessage);
     } finally {
       setIsLoading(false);
@@ -195,8 +193,8 @@ export function QuestionForm({ question, competencyId, behavioralIndicatorId, on
                   <ListChecks className="h-5 w-5" />
                 </div>
                 <div>
-                  <h3 className="text-base font-semibold">Answer Options</h3>
-                  <p className="text-sm text-muted-foreground">Configure multiple choice answers</p>
+                  <h3 className="text-base font-semibold">{t('question.sections.answerOptions')}</h3>
+                  <p className="text-sm text-muted-foreground">{t('question.sections.answerOptionsDesc')}</p>
                 </div>
               </div>
               <Button
@@ -207,7 +205,7 @@ export function QuestionForm({ question, competencyId, behavioralIndicatorId, on
                 className="h-9"
               >
                 <Plus className="h-4 w-4 mr-1" />
-                Add Option
+                {t('question.buttons.addOption')}
               </Button>
             </div>
             <div className="p-5 space-y-3">
@@ -216,7 +214,7 @@ export function QuestionForm({ question, competencyId, behavioralIndicatorId, on
                   <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary text-sm font-semibold">
                     {String.fromCharCode(65 + index)}
                   </div>
-                  
+
                   <div className="flex-1 space-y-3">
                     <FormField
                       control={form.control}
@@ -224,9 +222,9 @@ export function QuestionForm({ question, competencyId, behavioralIndicatorId, on
                       render={({ field }) => (
                         <FormItem>
                           <FormControl>
-                            <Input 
-                              {...field} 
-                              placeholder="Enter answer option"
+                            <Input
+                              {...field}
+                              placeholder={t('question.placeholders.answerOption')}
                               className="h-9"
                               onBlur={() => {
                                 field.onBlur();
@@ -237,7 +235,7 @@ export function QuestionForm({ question, competencyId, behavioralIndicatorId, on
                         </FormItem>
                       )}
                     />
-                    
+
                     <div className="flex items-center gap-3">
                       <FormField
                         control={form.control}
@@ -247,7 +245,7 @@ export function QuestionForm({ question, competencyId, behavioralIndicatorId, on
                             <FormControl>
                               <Input
                                 type="number"
-                                placeholder="Score"
+                                placeholder={t('question.placeholders.score')}
                                 className="h-9"
                                 {...field}
                                 onChange={event => field.onChange(event.target.value === '' ? null : Number(event.target.value))}
@@ -260,31 +258,31 @@ export function QuestionForm({ question, competencyId, behavioralIndicatorId, on
                           </FormItem>
                         )}
                       />
-                      
+
                       <FormField
                         control={form.control}
                         name={`answerOptions.${index}.correct`}
                         render={({ field }) => (
                           <FormItem className="flex items-center space-x-2">
                             <FormControl>
-                              <Switch 
-                                checked={field.value} 
+                              <Switch
+                                checked={field.value}
                                 onCheckedChange={(checked) => {
                                   field.onChange(checked);
                                   handleFieldBlur();
                                 }}
                               />
                             </FormControl>
-                            <span className="text-xs text-muted-foreground">Correct</span>
+                            <span className="text-xs text-muted-foreground">{t('question.labels.correct')}</span>
                           </FormItem>
                         )}
                       />
-                      
-                      <Button 
-                        type="button" 
-                        variant="ghost" 
+
+                      <Button
+                        type="button"
+                        variant="ghost"
                         size="sm"
-                        onClick={() => remove(index)} 
+                        onClick={() => remove(index)}
                         className="h-8 w-8 p-0 hover:bg-destructive/10 hover:text-destructive"
                       >
                         <TrashIcon className="h-3 w-3" />
@@ -301,7 +299,7 @@ export function QuestionForm({ question, competencyId, behavioralIndicatorId, on
         return (
           <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
             <div className="p-4 pb-3 flex items-center justify-between">
-              <h3 className="text-lg font-semibold leading-none tracking-tight">Answer Options</h3>
+              <h3 className="text-lg font-semibold leading-none tracking-tight">{t('question.sections.answerOptions')}</h3>
               <Button
                 type="button"
                 variant="outline"
@@ -309,7 +307,7 @@ export function QuestionForm({ question, competencyId, behavioralIndicatorId, on
                 onClick={() => append({ text: "", score: fields.length + 1, correct: false })}
                 className="h-8 text-xs"
               >
-                Add Option
+                {t('question.buttons.addOption')}
               </Button>
             </div>
             <div className="px-4 pb-4 space-y-3">
@@ -318,7 +316,7 @@ export function QuestionForm({ question, competencyId, behavioralIndicatorId, on
                   <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary text-sm font-medium">
                     {index + 1}
                   </div>
-                  
+
                   <div className="flex-1 space-y-2">
                     <FormField
                       control={form.control}
@@ -326,9 +324,9 @@ export function QuestionForm({ question, competencyId, behavioralIndicatorId, on
                       render={({ field }) => (
                         <FormItem>
                           <FormControl>
-                            <Textarea 
-                              {...field} 
-                              placeholder="Describe the action you would take"
+                            <Textarea
+                              {...field}
+                              placeholder={t('question.placeholders.sjtAction')}
                               className="min-h-[60px] resize-none text-sm"
                               onBlur={() => {
                                 field.onBlur();
@@ -339,7 +337,7 @@ export function QuestionForm({ question, competencyId, behavioralIndicatorId, on
                         </FormItem>
                       )}
                     />
-                    
+
                     <div className="flex items-center gap-3">
                       <FormField
                         control={form.control}
@@ -349,7 +347,7 @@ export function QuestionForm({ question, competencyId, behavioralIndicatorId, on
                             <FormControl>
                               <Input
                                 type="number"
-                                placeholder="Score"
+                                placeholder={t('question.placeholders.score')}
                                 className="h-8 text-sm"
                                 {...field}
                                 onChange={event => field.onChange(event.target.value === '' ? null : Number(event.target.value))}
@@ -362,31 +360,31 @@ export function QuestionForm({ question, competencyId, behavioralIndicatorId, on
                           </FormItem>
                         )}
                       />
-                      
+
                       <FormField
                         control={form.control}
                         name={`answerOptions.${index}.correct`}
                         render={({ field }) => (
                           <FormItem className="flex items-center space-x-2">
                             <FormControl>
-                              <Switch 
-                                checked={field.value} 
+                              <Switch
+                                checked={field.value}
                                 onCheckedChange={(checked) => {
                                   field.onChange(checked);
                                   handleFieldBlur();
                                 }}
                               />
                             </FormControl>
-                            <span className="text-xs text-muted-foreground">Correct</span>
+                            <span className="text-xs text-muted-foreground">{t('question.labels.correct')}</span>
                           </FormItem>
                         )}
                       />
-                      
-                      <Button 
-                        type="button" 
-                        variant="ghost" 
+
+                      <Button
+                        type="button"
+                        variant="ghost"
                         size="sm"
-                        onClick={() => remove(index)} 
+                        onClick={() => remove(index)}
                         className="h-8 w-8 p-0 hover:bg-destructive/10 hover:text-destructive"
                       >
                         <TrashIcon className="h-3 w-3" />
@@ -403,8 +401,8 @@ export function QuestionForm({ question, competencyId, behavioralIndicatorId, on
         return (
           <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
             <div className="p-4 pb-3">
-              <h3 className="text-lg font-semibold leading-none tracking-tight">Likert Scale Options</h3>
-              <p className="text-sm text-muted-foreground mt-1">Configure the scale points and their labels</p>
+              <h3 className="text-lg font-semibold leading-none tracking-tight">{t('question.sections.likertOptions')}</h3>
+              <p className="text-sm text-muted-foreground mt-1">{t('question.sections.likertOptionsDesc')}</p>
             </div>
             <div className="px-4 pb-4 space-y-3">
               {fields.map((field, index) => (
@@ -412,16 +410,16 @@ export function QuestionForm({ question, competencyId, behavioralIndicatorId, on
                   <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary text-sm font-medium">
                     {index + 1}
                   </div>
-                  
+
                   <FormField
                     control={form.control}
                     name={`answerOptions.${index}.text`}
                     render={({ field }) => (
                       <FormItem className="flex-1">
                         <FormControl>
-                          <Input 
+                          <Input
                             {...field}
-                            placeholder={`Label for point ${index + 1}`}
+                            placeholder={t('question.placeholders.likertLabel', { index: index + 1 })}
                             className="h-8 text-sm"
                             onBlur={() => {
                               field.onBlur();
@@ -432,7 +430,7 @@ export function QuestionForm({ question, competencyId, behavioralIndicatorId, on
                       </FormItem>
                     )}
                   />
-                  
+
                   <FormField
                     control={form.control}
                     name={`answerOptions.${index}.score`}
@@ -441,7 +439,7 @@ export function QuestionForm({ question, competencyId, behavioralIndicatorId, on
                         <FormControl>
                           <Input
                             type="number"
-                            placeholder="Score"
+                            placeholder={t('question.placeholders.score')}
                             className="h-8 text-sm"
                             {...field}
                             onChange={event => field.onChange(event.target.value === '' ? null : Number(event.target.value))}
@@ -475,8 +473,8 @@ export function QuestionForm({ question, competencyId, behavioralIndicatorId, on
                 <MessageSquare className="h-4 w-4 sm:h-5 sm:w-5" />
               </div>
               <div>
-                <h3 className="text-sm sm:text-base font-semibold">Question Details</h3>
-                <p className="text-xs sm:text-sm text-muted-foreground">Question text and classification</p>
+                <h3 className="text-sm sm:text-base font-semibold">{t('question.sections.questionDetails')}</h3>
+                <p className="text-xs sm:text-sm text-muted-foreground">{t('question.sections.questionDetailsDesc')}</p>
               </div>
             </div>
             <div className="p-4 sm:p-5 space-y-4 sm:space-y-5">
@@ -488,12 +486,12 @@ export function QuestionForm({ question, competencyId, behavioralIndicatorId, on
                   return (
                     <FormItem>
                       <FormLabel className="text-sm font-medium flex items-center gap-1">
-                        Question Text <span className="text-destructive">*</span>
-                        <HelpTooltip content={formHelp.question.questionText} />
+                        {t('question.fields.questionText')} <span className="text-destructive">*</span>
+                        <HelpTooltip content={getHelp('questionText')} />
                       </FormLabel>
                       <FormControl>
                         <Textarea
-                          placeholder="e.g., How do you handle tight deadlines?"
+                          placeholder={t('question.placeholders.questionText')}
                           className={cn(
                             "min-h-28 resize-none touch-manipulation",
                             fieldState.isValid && "border-green-500 focus-visible:ring-green-500",
@@ -519,8 +517,8 @@ export function QuestionForm({ question, competencyId, behavioralIndicatorId, on
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="text-sm font-medium flex items-center gap-1">
-                        Question Type
-                        <HelpTooltip content={formHelp.question.questionType} />
+                        {t('question.fields.questionType')}
+                        <HelpTooltip content={getHelp('questionType')} />
                       </FormLabel>
                       <Select
                         onValueChange={field.onChange}
@@ -528,13 +526,13 @@ export function QuestionForm({ question, competencyId, behavioralIndicatorId, on
                       >
                         <FormControl>
                           <SelectTrigger className="h-11 sm:h-10 touch-manipulation">
-                            <SelectValue placeholder="Select type" />
+                            <SelectValue placeholder={t('question.placeholders.selectType')} />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {questionTypes.map((type) => (
-                            <SelectItem key={type} value={type}>
-                              {type.replace(/_/g, ' ')}
+                          {getQuestionTypeOptions(questionTypes).map((option) => (
+                            <SelectItem key={option.value} value={option.value}>
+                              {option.label}
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -543,15 +541,15 @@ export function QuestionForm({ question, competencyId, behavioralIndicatorId, on
                     </FormItem>
                   )}
                 />
-                
+
                 <FormField
                   control={form.control}
                   name="difficultyLevel"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="text-sm font-medium flex items-center gap-1">
-                        Difficulty Level
-                        <HelpTooltip content={formHelp.question.difficultyLevel} />
+                        {t('question.fields.difficultyLevel')}
+                        <HelpTooltip content={getHelp('difficultyLevel')} />
                       </FormLabel>
                       <Select
                         onValueChange={field.onChange}
@@ -559,13 +557,13 @@ export function QuestionForm({ question, competencyId, behavioralIndicatorId, on
                       >
                         <FormControl>
                           <SelectTrigger className="h-11 sm:h-10 touch-manipulation">
-                            <SelectValue placeholder="Select level" />
+                            <SelectValue placeholder={t('question.placeholders.selectLevel')} />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {Object.values(DifficultyLevel).map((level) => (
-                            <SelectItem key={level} value={level}>
-                              {level}
+                          {getDifficultyOptions(Object.values(DifficultyLevel)).map((option) => (
+                            <SelectItem key={option.value} value={option.value}>
+                              {option.label}
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -582,12 +580,12 @@ export function QuestionForm({ question, competencyId, behavioralIndicatorId, on
                 name="metadata.tags"
                 render={({ field }) => {
                   const selectedTags = field.value || [];
-                  
+
                   return (
                     <FormItem>
                       <FormLabel className="text-sm font-medium flex items-center gap-1">
-                        Context Tags
-                        <HelpTooltip content="Tags enable context filtering for different assessment scenarios. Add 'GENERAL' for Universal Baseline (Scenario A) assessments." />
+                        {t('question.fields.contextTags')}
+                        <HelpTooltip content={getHelp('contextTags')} />
                       </FormLabel>
                       <Popover>
                         <PopoverTrigger asChild>
@@ -610,7 +608,7 @@ export function QuestionForm({ question, competencyId, behavioralIndicatorId, on
                                       variant="secondary"
                                       className="text-xs px-2 py-0.5"
                                     >
-                                      {TAG_METADATA.find(t => t.value === tag)?.label || tag}
+                                      {t(`question.tags.${tag}`)}
                                       <X
                                         className="ml-1 h-3 w-3 cursor-pointer hover:text-destructive"
                                         onClick={(e) => {
@@ -622,26 +620,26 @@ export function QuestionForm({ question, competencyId, behavioralIndicatorId, on
                                   ))}
                                 </div>
                               ) : (
-                                <span>Select tags...</span>
+                                <span>{t('question.placeholders.selectTags')}</span>
                               )}
                             </Button>
                           </FormControl>
                         </PopoverTrigger>
                         <PopoverContent className="w-[400px] p-0" align="start">
                           <Command>
-                            <CommandInput placeholder="Search tags..." />
-                            <CommandEmpty>No tag found.</CommandEmpty>
+                            <CommandInput placeholder={t('question.placeholders.searchTags')} />
+                            <CommandEmpty>{t('question.labels.noTagFound')}</CommandEmpty>
                             <CommandGroup>
-                              {TAG_METADATA.map((tag) => {
-                                const isSelected = selectedTags.includes(tag.value);
+                              {TAG_VALUES.map((tagValue) => {
+                                const isSelected = selectedTags.includes(tagValue);
                                 return (
                                   <CommandItem
-                                    key={tag.value}
+                                    key={tagValue}
                                     onSelect={() => {
                                       if (isSelected) {
-                                        field.onChange(selectedTags.filter((t: string) => t !== tag.value));
+                                        field.onChange(selectedTags.filter((t: string) => t !== tagValue));
                                       } else {
-                                        field.onChange([...selectedTags, tag.value]);
+                                        field.onChange([...selectedTags, tagValue]);
                                       }
                                     }}
                                     className="cursor-pointer"
@@ -653,8 +651,8 @@ export function QuestionForm({ question, competencyId, behavioralIndicatorId, on
                                       )}
                                     />
                                     <div className="flex flex-col">
-                                      <span className="font-medium">{tag.label}</span>
-                                      <span className="text-xs text-muted-foreground">{tag.description}</span>
+                                      <span className="font-medium">{t(`question.tags.${tagValue}`)}</span>
+                                      <span className="text-xs text-muted-foreground">{t(`question.tags.${tagValue}_DESC`)}</span>
                                     </div>
                                   </CommandItem>
                                 );
@@ -673,16 +671,14 @@ export function QuestionForm({ question, competencyId, behavioralIndicatorId, on
               {(() => {
                 const selectedTags = form.watch('metadata.tags') || [];
                 const hasGeneralTag = selectedTags.includes('GENERAL');
-                
+
                 if (!hasGeneralTag && selectedTags.length > 0) {
                   return (
                     <Alert variant="default" className="border-amber-500/50 bg-amber-50 dark:bg-amber-950/20">
                       <AlertCircle className="h-4 w-4 text-amber-600 dark:text-amber-500" />
-                      <AlertTitle className="text-amber-900 dark:text-amber-300">Scenario A Incompatible</AlertTitle>
+                      <AlertTitle className="text-amber-900 dark:text-amber-300">{t('question.alerts.scenarioAIncompatibleTitle')}</AlertTitle>
                       <AlertDescription className="text-amber-800 dark:text-amber-400 text-sm">
-                        This question does not have the "GENERAL" tag and will not be included in
-                        Universal Baseline assessments (Competency Passport). Add the "GENERAL" tag
-                        if the scenario is context-neutral and applies to all roles.
+                        {t('question.alerts.scenarioAIncompatibleDesc')}
                       </AlertDescription>
                     </Alert>
                   );
@@ -699,8 +695,8 @@ export function QuestionForm({ question, competencyId, behavioralIndicatorId, on
                 <Settings2 className="h-4 w-4 sm:h-5 sm:w-5" />
               </div>
               <div>
-                <h3 className="text-sm sm:text-base font-semibold">Configuration</h3>
-                <p className="text-xs sm:text-sm text-muted-foreground">Scoring, timing, and display settings</p>
+                <h3 className="text-sm sm:text-base font-semibold">{t('question.sections.configuration')}</h3>
+                <p className="text-xs sm:text-sm text-muted-foreground">{t('question.sections.configurationDesc')}</p>
               </div>
             </div>
             <div className="p-4 sm:p-5 space-y-4 sm:space-y-5">
@@ -710,12 +706,12 @@ export function QuestionForm({ question, competencyId, behavioralIndicatorId, on
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="text-sm font-medium flex items-center gap-1">
-                      Scoring Rubric
-                      <HelpTooltip content={formHelp.question.scoringRubric} />
+                      {t('question.fields.scoringRubric')}
+                      <HelpTooltip content={getHelp('scoringRubric')} />
                     </FormLabel>
                     <FormControl>
                       <Textarea
-                        placeholder="e.g., Based on clarity and feasibility"
+                        placeholder={t('question.placeholders.scoringRubric')}
                         className="min-h-24 resize-none touch-manipulation"
                         {...field}
                         onBlur={() => {
@@ -735,7 +731,7 @@ export function QuestionForm({ question, competencyId, behavioralIndicatorId, on
                   name="orderIndex"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm font-medium">Order Index</FormLabel>
+                      <FormLabel className="text-sm font-medium">{t('question.fields.orderIndex')}</FormLabel>
                       <FormControl>
                         <Input
                           type="number"
@@ -756,8 +752,8 @@ export function QuestionForm({ question, competencyId, behavioralIndicatorId, on
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="text-sm font-medium flex items-center gap-1">
-                        Time Limit (s)
-                        <HelpTooltip content={formHelp.question.timeLimit} />
+                        {t('question.fields.timeLimit')}
+                        <HelpTooltip content={getHelp('timeLimit')} />
                       </FormLabel>
                       <FormControl>
                         <Input
@@ -782,7 +778,7 @@ export function QuestionForm({ question, competencyId, behavioralIndicatorId, on
                   name="isActive"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm font-medium">Visibility</FormLabel>
+                      <FormLabel className="text-sm font-medium">{t('question.fields.visibility')}</FormLabel>
                       <div className="flex items-center gap-3 h-11 sm:h-10 px-3 rounded-lg border bg-muted/30 touch-manipulation">
                         <FormControl>
                           <Switch
@@ -795,7 +791,7 @@ export function QuestionForm({ question, competencyId, behavioralIndicatorId, on
                           />
                         </FormControl>
                         <span className={`text-sm font-medium ${field.value ? 'text-green-600 dark:text-green-400' : 'text-muted-foreground'}`}>
-                          {field.value ? 'Active' : 'Inactive'}
+                          {field.value ? t('active') : t('inactive')}
                         </span>
                       </div>
                     </FormItem>
@@ -818,7 +814,7 @@ export function QuestionForm({ question, competencyId, behavioralIndicatorId, on
               className="h-11 sm:h-10 min-h-[44px] touch-manipulation"
             >
               <X className="h-4 w-4 mr-2" />
-              Cancel
+              {t('cancel')}
             </Button>
             {onUpdatePreview && (
               <Button
@@ -829,7 +825,7 @@ export function QuestionForm({ question, competencyId, behavioralIndicatorId, on
                 className="h-11 sm:h-10 min-h-[44px] touch-manipulation"
               >
                 <RefreshCw className="h-4 w-4 mr-2" />
-                Update Preview
+                {t('question.buttons.updatePreview')}
               </Button>
             )}
             <Button
@@ -840,12 +836,12 @@ export function QuestionForm({ question, competencyId, behavioralIndicatorId, on
               {isLoading ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  {isEditMode ? 'Saving...' : 'Creating...'}
+                  {isEditMode ? t('saving') : t('creating')}
                 </>
               ) : (
                 <>
                   <Save className="h-4 w-4 mr-2" />
-                  {isEditMode ? 'Save Changes' : 'Create Question'}
+                  {isEditMode ? t('saveChanges') : t('question.buttons.createQuestion')}
                 </>
               )}
             </Button>

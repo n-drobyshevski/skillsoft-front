@@ -3,6 +3,7 @@
 import React, { useState, useMemo } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import {
   type ColumnDef,
   type ColumnFiltersState,
@@ -46,10 +47,11 @@ import {
   getUserInitials,
   getUserFullName,
   getRoleBadgeColor,
-  getRoleDisplayName,
-  getUserStatus,
-  canUserAccess,
+  getUserStatusKey,
+  getStatusBadgeVariant,
 } from "@/types/user";
+import { useUserRoleTranslation, useUserStatusTranslation } from "@/hooks/useUserEnums";
+import { useFormattedDates } from "@/hooks/useFormattedDates";
 import {
   ArrowUpDown,
   Eye,
@@ -87,6 +89,10 @@ type RoleFilter = "all" | UserRole;
 
 export default function UsersTable({ users }: UsersTableProps) {
   const router = useRouter();
+  const t = useTranslations('users');
+  const { formatDate, formatRelativeTime } = useFormattedDates();
+  const { getLabel: getRoleLabel } = useUserRoleTranslation();
+  const { getLabel: getStatusLabel } = useUserStatusTranslation();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [sorting, setSorting] = useState<SortingState>([]);
@@ -115,30 +121,7 @@ export default function UsersTable({ users }: UsersTableProps) {
     }
   };
 
-  const formatDate = (dateString?: string) => {
-    if (!dateString) return "—";
-    const date = new Date(dateString);
-    return new Intl.DateTimeFormat("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    }).format(date);
-  };
 
-  const formatRelativeTime = (dateString?: string) => {
-    if (!dateString) return "Never";
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffMs = now.getTime() - date.getTime();
-    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-    
-    if (diffDays === 0) return "Today";
-    if (diffDays === 1) return "Yesterday";
-    if (diffDays < 7) return `${diffDays} days ago`;
-    if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`;
-    if (diffDays < 365) return `${Math.floor(diffDays / 30)} months ago`;
-    return `${Math.floor(diffDays / 365)} years ago`;
-  };
 
   // Filter data by role
   const filteredData = useMemo(() => {
@@ -188,7 +171,7 @@ export default function UsersTable({ users }: UsersTableProps) {
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           className="-ml-4"
         >
-          User
+          {t('table.columns.user')}
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       ),
@@ -241,7 +224,7 @@ export default function UsersTable({ users }: UsersTableProps) {
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
-          Role
+          {t('table.columns.role')}
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       ),
@@ -253,7 +236,7 @@ export default function UsersTable({ users }: UsersTableProps) {
             className={`gap-1.5 font-medium px-2.5 py-0.5 ${getRoleBadgeColor(role)}`}
           >
             {getRoleIcon(role)}
-            <span>{getRoleDisplayName(role)}</span>
+            <span>{getRoleLabel(role)}</span>
           </Badge>
         );
       },
@@ -268,16 +251,17 @@ export default function UsersTable({ users }: UsersTableProps) {
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
-          Status
+          {t('table.columns.status')}
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       ),
       cell: ({ row }) => {
         const user = row.original;
-        const status = getUserStatus(user);
-        
+        const statusKey = getUserStatusKey(user);
+        const variant = getStatusBadgeVariant(statusKey);
+
         const getStatusStyles = () => {
-          switch (status.variant) {
+          switch (variant) {
             case 'success':
               return "bg-emerald-100 text-emerald-700 hover:bg-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-400";
             case 'warning':
@@ -290,7 +274,7 @@ export default function UsersTable({ users }: UsersTableProps) {
         };
 
         const getDotColor = () => {
-          switch (status.variant) {
+          switch (variant) {
             case 'success': return 'bg-emerald-500';
             case 'warning': return 'bg-amber-500';
             case 'destructive': return 'bg-red-500';
@@ -304,7 +288,7 @@ export default function UsersTable({ users }: UsersTableProps) {
             className={`font-medium ${getStatusStyles()}`}
           >
             <span className={`mr-1.5 h-1.5 w-1.5 rounded-full ${getDotColor()}`} />
-            {status.label}
+            {getStatusLabel(statusKey)}
           </Badge>
         );
       },
@@ -317,7 +301,7 @@ export default function UsersTable({ users }: UsersTableProps) {
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           className="hidden md:flex"
         >
-          Last Sign In
+          {t('table.columns.lastSignIn')}
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       ),
@@ -339,7 +323,7 @@ export default function UsersTable({ users }: UsersTableProps) {
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           className="hidden lg:flex"
         >
-          Joined
+          {t('table.columns.joined')}
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       ),
@@ -371,14 +355,14 @@ export default function UsersTable({ users }: UsersTableProps) {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-[180px]">
-              <DropdownMenuLabel>Actions</DropdownMenuLabel>
+              <DropdownMenuLabel>{t('table.columns.actions')}</DropdownMenuLabel>
               <DropdownMenuItem
                 onClick={(e) => {
                   e.stopPropagation();
                   navigator.clipboard.writeText(user.id);
                 }}
               >
-                Copy User ID
+                {t('table.menu.copyUserId')}
               </DropdownMenuItem>
               {user.email && (
                 <DropdownMenuItem
@@ -387,7 +371,7 @@ export default function UsersTable({ users }: UsersTableProps) {
                     navigator.clipboard.writeText(user.email!);
                   }}
                 >
-                  Copy Email
+                  {t('table.menu.copyEmail')}
                 </DropdownMenuItem>
               )}
               <DropdownMenuSeparator />
@@ -396,42 +380,42 @@ export default function UsersTable({ users }: UsersTableProps) {
                 handleViewDetails(user);
               }}>
                 <Eye className="mr-2 h-4 w-4" />
-                Quick View
+                {t('table.menu.quickView')}
               </DropdownMenuItem>
-              <DropdownMenuItem 
+              <DropdownMenuItem
                 onClick={(e) => {
                   e.stopPropagation();
                   router.push(`/admin/users/${user.id}`);
                 }}
               >
                 <ExternalLink className="mr-2 h-4 w-4" />
-                View Profile
+                {t('table.menu.viewProfile')}
               </DropdownMenuItem>
-              <DropdownMenuItem 
+              <DropdownMenuItem
                 onClick={(e) => {
                   e.stopPropagation();
                   router.push(`/admin/users/${user.id}/edit`);
                 }}
               >
                 <UserCog className="mr-2 h-4 w-4" />
-                Edit User
+                {t('table.menu.editUser')}
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               {user.isActive ? (
-                <DropdownMenuItem 
+                <DropdownMenuItem
                   className="text-orange-600 dark:text-orange-400 focus:text-orange-600"
                   onClick={(e) => e.stopPropagation()}
                 >
                   <UserX className="mr-2 h-4 w-4" />
-                  Deactivate
+                  {t('table.menu.deactivate')}
                 </DropdownMenuItem>
               ) : (
-                <DropdownMenuItem 
+                <DropdownMenuItem
                   className="text-emerald-600 dark:text-emerald-400 focus:text-emerald-600"
                   onClick={(e) => e.stopPropagation()}
                 >
                   <UserCheck className="mr-2 h-4 w-4" />
-                  Activate
+                  {t('table.menu.activate')}
                 </DropdownMenuItem>
               )}
             </DropdownMenuContent>
@@ -482,42 +466,42 @@ export default function UsersTable({ users }: UsersTableProps) {
           className="w-full"
         >
           <TabsList className="h-auto p-1 bg-muted/50 w-full grid grid-cols-4 gap-1">
-            <TabsTrigger 
-              value="all" 
+            <TabsTrigger
+              value="all"
               className="data-[state=active]:bg-background data-[state=active]:shadow-sm gap-2 text-xs sm:text-sm"
             >
               <Users className="h-3.5 w-3.5 hidden sm:inline" />
-              All
+              {t('table.filters.all')}
               <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-xs">
                 {roleCounts.all}
               </Badge>
             </TabsTrigger>
-            <TabsTrigger 
+            <TabsTrigger
               value={UserRole.ADMIN}
               className="data-[state=active]:bg-background data-[state=active]:shadow-sm gap-2 text-xs sm:text-sm"
             >
               <ShieldAlert className="h-3.5 w-3.5 hidden sm:inline text-red-500" />
-              Admin
+              {t('table.filters.admin')}
               <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-xs">
                 {roleCounts[UserRole.ADMIN]}
               </Badge>
             </TabsTrigger>
-            <TabsTrigger 
+            <TabsTrigger
               value={UserRole.EDITOR}
               className="data-[state=active]:bg-background data-[state=active]:shadow-sm gap-2 text-xs sm:text-sm"
             >
               <ShieldCheck className="h-3.5 w-3.5 hidden sm:inline text-blue-500" />
-              Editor
+              {t('table.filters.editor')}
               <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-xs">
                 {roleCounts[UserRole.EDITOR]}
               </Badge>
             </TabsTrigger>
-            <TabsTrigger 
+            <TabsTrigger
               value={UserRole.USER}
               className="data-[state=active]:bg-background data-[state=active]:shadow-sm gap-2 text-xs sm:text-sm"
             >
               <Shield className="h-3.5 w-3.5 hidden sm:inline text-green-500" />
-              User
+              {t('table.filters.user')}
               <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-xs">
                 {roleCounts[UserRole.USER]}
               </Badge>
@@ -531,7 +515,7 @@ export default function UsersTable({ users }: UsersTableProps) {
           <div className="relative flex-1 w-full sm:max-w-sm">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
-              placeholder="Search users by name or email..."
+              placeholder={t('table.search.placeholder')}
               value={globalFilter}
               onChange={(e) => setGlobalFilter(e.target.value)}
               className="pl-9 h-9 w-full"
@@ -542,15 +526,15 @@ export default function UsersTable({ users }: UsersTableProps) {
           {selectedCount > 0 ? (
             <div className="flex items-center gap-2 ml-auto">
               <span className="text-sm text-muted-foreground">
-                {selectedCount} selected
+                {t('table.bulk.selected', { count: selectedCount })}
               </span>
               <Button variant="outline" size="sm" className="h-9 gap-2">
                 <Download className="h-4 w-4" />
-                <span className="hidden sm:inline">Export</span>
+                <span className="hidden sm:inline">{t('table.bulk.export')}</span>
               </Button>
               <Button variant="outline" size="sm" className="h-9 gap-2 text-destructive hover:text-destructive">
                 <Trash2 className="h-4 w-4" />
-                <span className="hidden sm:inline">Delete</span>
+                <span className="hidden sm:inline">{t('table.bulk.delete')}</span>
               </Button>
             </div>
           ) : (
@@ -558,11 +542,11 @@ export default function UsersTable({ users }: UsersTableProps) {
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" size="sm" className="h-9 gap-2 ml-auto">
                   <SlidersHorizontal className="h-4 w-4" />
-                  <span className="hidden sm:inline">View</span>
+                  <span className="hidden sm:inline">{t('table.view.toggleColumns')}</span>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-[180px]">
-                <DropdownMenuLabel>Toggle columns</DropdownMenuLabel>
+                <DropdownMenuLabel>{t('table.view.toggleColumns')}</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 {table
                   .getAllColumns()
@@ -574,7 +558,7 @@ export default function UsersTable({ users }: UsersTableProps) {
                       checked={column.getIsVisible()}
                       onCheckedChange={(value) => column.toggleVisibility(!!value)}
                     >
-                      {column.id === "isActive" ? "Status" : column.id}
+                      {column.id === "isActive" ? t('table.columns.status') : column.id}
                     </DropdownMenuCheckboxItem>
                   ))}
               </DropdownMenuContent>
@@ -635,11 +619,11 @@ export default function UsersTable({ users }: UsersTableProps) {
                       <Users className="h-6 w-6 text-muted-foreground" />
                     </div>
                     <div className="space-y-1">
-                      <p className="text-sm font-medium">No users found</p>
+                      <p className="text-sm font-medium">{t('table.empty.noUsers')}</p>
                       <p className="text-xs text-muted-foreground">
-                        {globalFilter 
-                          ? "Try adjusting your search query" 
-                          : "No users match the current filter"}
+                        {globalFilter
+                          ? t('table.empty.adjustSearch')
+                          : t('table.empty.noMatch')}
                       </p>
                     </div>
                   </div>
@@ -654,7 +638,7 @@ export default function UsersTable({ users }: UsersTableProps) {
       {table.getPageCount() > 0 && (
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="text-sm text-muted-foreground order-2 sm:order-1">
-            Showing{" "}
+            {t('table.pagination.showing')}{" "}
             <span className="font-medium text-foreground">
               {table.getState().pagination.pageIndex * table.getState().pagination.pageSize + 1}
             </span>
@@ -665,11 +649,11 @@ export default function UsersTable({ users }: UsersTableProps) {
                 table.getFilteredRowModel().rows.length
               )}
             </span>
-            {" "}of{" "}
+            {" "}{t('table.pagination.of')}{" "}
             <span className="font-medium text-foreground">
               {table.getFilteredRowModel().rows.length}
             </span>
-            {" "}users
+            {" "}{t('table.pagination.users')}
           </div>
 
           <div className="flex items-center gap-2 order-1 sm:order-2">

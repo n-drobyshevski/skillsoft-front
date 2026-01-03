@@ -1,4 +1,3 @@
-// app/behavioral-indicators/error.tsx
 'use client';
 
 import { useEffect } from 'react';
@@ -6,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { AlertCircle, Home, RefreshCw } from 'lucide-react';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 
 export default function Error({
   error,
@@ -14,11 +14,10 @@ export default function Error({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  const t = useTranslations('errors');
+
   useEffect(() => {
-    // Log the error to an error reporting service
-    // In production, this would be sent to a service like Sentry
     if (typeof window !== 'undefined') {
-      // Client-side error logging
       window.dispatchEvent(new CustomEvent('app-error', { detail: error }));
     }
   }, [error]);
@@ -30,27 +29,27 @@ export default function Error({
           <div className="mx-auto mb-4 h-12 w-12 rounded-full bg-destructive/10 flex items-center justify-center">
             <AlertCircle className="h-6 w-6 text-destructive" />
           </div>
-          <CardTitle className="text-destructive">Something went wrong!</CardTitle>
+          <CardTitle className="text-destructive">{t('somethingWentWrong')}</CardTitle>
           <CardDescription>
-            We encountered an error while loading the behavioral indicators page.
+            {t('errorLoadingPage')}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           {error.digest && (
             <div className="text-xs text-muted-foreground bg-muted p-2 rounded">
-              Error ID: {error.digest}
+              {t('errorId')}: {error.digest}
             </div>
           )}
-          
+
           <div className="flex flex-col gap-2">
             <Button onClick={reset} className="w-full">
               <RefreshCw className="w-4 h-4 mr-2" />
-              Try again
+              {t('tryAgain')}
             </Button>
             <Button variant="outline" asChild className="w-full">
               <Link href="/">
                 <Home className="w-4 h-4 mr-2" />
-                Go home
+                {t('goHome')}
               </Link>
             </Button>
           </div>

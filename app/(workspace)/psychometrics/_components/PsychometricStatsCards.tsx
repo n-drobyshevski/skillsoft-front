@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { PsychometricHealthReport } from '@/types/psychometrics';
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useTranslations } from 'next-intl';
 import {
   CheckCircle,
   Clock,
@@ -96,6 +97,7 @@ function MobileStatCard({
 
 export function PsychometricStatsCards({ report }: PsychometricStatsCardsProps) {
   const isMobile = useIsMobile();
+  const t = useTranslations('psychometrics');
 
   // Mobile Compact Grid Layout - optimized 2-column full width
   if (isMobile) {
@@ -105,32 +107,32 @@ export function PsychometricStatsCards({ report }: PsychometricStatsCardsProps) 
         <div className="space-y-1">
           <h3 className="text-xs font-medium text-muted-foreground flex items-center gap-1 px-0.5 uppercase tracking-wide">
             <FileText className="h-3 w-3 text-blue-600" />
-            Item Status
+            {t('itemStatus')}
           </h3>
           <div className="grid grid-cols-2 gap-1.5">
             <MobileStatCard
-              title="Active"
+              title={t('active')}
               value={report.activeItems}
               icon={CheckCircle}
               iconColor="text-emerald-600"
               bgColor="bg-emerald-50 dark:bg-emerald-950/20"
             />
             <MobileStatCard
-              title="Probation"
+              title={t('probation')}
               value={report.probationItems}
               icon={Clock}
               iconColor="text-amber-600"
               bgColor="bg-amber-50 dark:bg-amber-950/20"
             />
             <MobileStatCard
-              title="Flagged"
+              title={t('flagged')}
               value={report.flaggedItems}
               icon={AlertTriangle}
               iconColor="text-orange-600"
               bgColor="bg-orange-50 dark:bg-orange-950/20"
             />
             <MobileStatCard
-              title="Retired"
+              title={t('retired')}
               value={report.retiredItems}
               icon={XCircle}
               iconColor="text-red-600"
@@ -143,32 +145,32 @@ export function PsychometricStatsCards({ report }: PsychometricStatsCardsProps) 
         <div className="space-y-1">
           <h3 className="text-xs font-medium text-muted-foreground flex items-center gap-1 px-0.5 uppercase tracking-wide">
             <Shield className="h-3 w-3 text-emerald-600" />
-            Reliability
+            {t('reliability')}
           </h3>
           <div className="grid grid-cols-2 gap-1.5">
             <MobileStatCard
-              title="Reliable"
+              title={t('reliable')}
               value={report.reliableCompetencies}
               icon={Shield}
               iconColor="text-emerald-600"
               bgColor="bg-emerald-50 dark:bg-emerald-950/20"
             />
             <MobileStatCard
-              title="Acceptable"
+              title={t('acceptable')}
               value={report.acceptableCompetencies}
               icon={AlertCircle}
               iconColor="text-amber-600"
               bgColor="bg-amber-50 dark:bg-amber-950/20"
             />
             <MobileStatCard
-              title="Unreliable"
+              title={t('unreliable')}
               value={report.unreliableCompetencies}
               icon={AlertTriangle}
               iconColor="text-red-600"
               bgColor="bg-red-50 dark:bg-red-950/20"
             />
             <MobileStatCard
-              title="No Data"
+              title={t('noDataShort')}
               value={report.insufficientDataCompetencies}
               icon={HelpCircle}
               iconColor="text-gray-600"
@@ -183,13 +185,13 @@ export function PsychometricStatsCards({ report }: PsychometricStatsCardsProps) 
             <div className="text-sm font-bold tabular-nums leading-none">
               {report.averageAlpha != null ? report.averageAlpha.toFixed(2) : '-'}
             </div>
-            <p className="text-xs text-muted-foreground mt-0.5">Avg Alpha</p>
+            <p className="text-xs text-muted-foreground mt-0.5">{t('avgAlpha')}</p>
           </div>
           <div className="p-2 rounded-md bg-muted/40 text-center">
             <div className="text-sm font-bold tabular-nums leading-none">
               {report.averageDiscrimination != null ? report.averageDiscrimination.toFixed(2) : '-'}
             </div>
-            <p className="text-xs text-muted-foreground mt-0.5">Avg rpb</p>
+            <p className="text-xs text-muted-foreground mt-0.5">{t('avgRpb')}</p>
           </div>
           <div className="p-2 rounded-md bg-muted/40 text-center">
             <div className="text-sm font-bold tabular-nums leading-none">
@@ -197,54 +199,54 @@ export function PsychometricStatsCards({ report }: PsychometricStatsCardsProps) 
                 ? report.bigFiveReliabilitySummary.averageTraitAlpha.toFixed(2)
                 : '-'}
             </div>
-            <p className="text-xs text-muted-foreground mt-0.5">Big5 Alpha</p>
+            <p className="text-xs text-muted-foreground mt-0.5">{t('bigFiveAlpha')}</p>
           </div>
         </div>
       </div>
     );
   }
 
-  // Desktop Layout (unchanged)
+  // Desktop Layout
   return (
     <div className="space-y-4">
       {/* Item Status Distribution */}
       <div>
         <h3 className="text-sm font-medium text-muted-foreground mb-3 flex items-center gap-1">
-          Статус элементов оценки
+          {t('itemStatusSection')}
           <ItemStatusSectionHelp />
         </h3>
         <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
           <StatCard
-            title="Активные"
+            title={t('active')}
             value={report.activeItems}
-            description={`${Math.round((report.activeItems / report.totalItems) * 100)}% от всех`}
+            description={t('fromTotal', { percentage: Math.round((report.activeItems / report.totalItems) * 100) })}
             icon={CheckCircle}
             iconColor="text-emerald-600"
             bgColor="bg-emerald-50 dark:bg-emerald-950/20"
             helpComponent={<ActiveStatusHelp />}
           />
           <StatCard
-            title="Пробационные"
+            title={t('probation')}
             value={report.probationItems}
-            description="Собирают данные"
+            description={t('collectingData')}
             icon={Clock}
             iconColor="text-amber-600"
             bgColor="bg-amber-50 dark:bg-amber-950/20"
             helpComponent={<ProbationStatusHelp />}
           />
           <StatCard
-            title="На проверке"
+            title={t('flagged')}
             value={report.flaggedItems}
-            description="Требуют внимания"
+            description={t('needsAttention')}
             icon={AlertTriangle}
             iconColor="text-orange-600"
             bgColor="bg-orange-50 dark:bg-orange-950/20"
             helpComponent={<FlaggedForReviewStatusHelp />}
           />
           <StatCard
-            title="Отключены"
+            title={t('retired')}
             value={report.retiredItems}
-            description="Исключены из использования"
+            description={t('excludedFromUse')}
             icon={XCircle}
             iconColor="text-red-600"
             bgColor="bg-red-50 dark:bg-red-950/20"
@@ -256,12 +258,12 @@ export function PsychometricStatsCards({ report }: PsychometricStatsCardsProps) 
       {/* Competency Reliability Summary */}
       <div>
         <h3 className="text-sm font-medium text-muted-foreground mb-3 flex items-center gap-1">
-          Надежность компетенций
+          {t('competencyReliability')}
           <CompetencyReliabilitySectionHelp />
         </h3>
         <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
           <StatCard
-            title="Надежные"
+            title={t('reliable')}
             value={report.reliableCompetencies}
             description="Alpha >= 0.7"
             icon={Shield}
@@ -270,7 +272,7 @@ export function PsychometricStatsCards({ report }: PsychometricStatsCardsProps) 
             helpComponent={<ReliableCompetencyStatusHelp />}
           />
           <StatCard
-            title="Приемлемые"
+            title={t('acceptable')}
             value={report.acceptableCompetencies}
             description="Alpha 0.6 - 0.7"
             icon={AlertCircle}
@@ -279,7 +281,7 @@ export function PsychometricStatsCards({ report }: PsychometricStatsCardsProps) 
             helpComponent={<AcceptableCompetencyStatusHelp />}
           />
           <StatCard
-            title="Ненадежные"
+            title={t('unreliable')}
             value={report.unreliableCompetencies}
             description="Alpha < 0.6"
             icon={AlertTriangle}
@@ -288,9 +290,9 @@ export function PsychometricStatsCards({ report }: PsychometricStatsCardsProps) 
             helpComponent={<UnreliableCompetencyStatusHelp />}
           />
           <StatCard
-            title="Недостаточно данных"
+            title={t('insufficientData')}
             value={report.insufficientDataCompetencies}
-            description="Требуется больше ответов"
+            description={t('moreDataNeeded')}
             icon={HelpCircle}
             iconColor="text-gray-600"
             bgColor="bg-gray-50 dark:bg-gray-950/20"
@@ -303,12 +305,12 @@ export function PsychometricStatsCards({ report }: PsychometricStatsCardsProps) 
       {report.bigFiveReliabilitySummary && (
         <div>
           <h3 className="text-sm font-medium text-muted-foreground mb-3 flex items-center gap-1">
-            Надежность Big Five
+            {t('bigFiveReliability')}
             <BigFiveReliabilitySectionHelp />
           </h3>
           <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
             <StatCard
-              title="Надежные черты"
+              title={t('reliableTraits')}
               value={report.bigFiveReliabilitySummary.reliableTraits}
               description="Alpha >= 0.7"
               icon={Shield}
@@ -317,7 +319,7 @@ export function PsychometricStatsCards({ report }: PsychometricStatsCardsProps) 
               helpComponent={<ReliableTraitStatusHelp />}
             />
             <StatCard
-              title="Приемлемые черты"
+              title={t('acceptableTraits')}
               value={report.bigFiveReliabilitySummary.acceptableTraits ?? 0}
               description="Alpha 0.6 - 0.7"
               icon={AlertCircle}
@@ -326,7 +328,7 @@ export function PsychometricStatsCards({ report }: PsychometricStatsCardsProps) 
               helpComponent={<AcceptableTraitStatusHelp />}
             />
             <StatCard
-              title="Ненадежные черты"
+              title={t('unreliableTraits')}
               value={report.bigFiveReliabilitySummary.unreliableTraits}
               description="Alpha < 0.6"
               icon={AlertTriangle}
@@ -335,9 +337,9 @@ export function PsychometricStatsCards({ report }: PsychometricStatsCardsProps) 
               helpComponent={<UnreliableTraitStatusHelp />}
             />
             <StatCard
-              title="Недостаточно данных"
+              title={t('insufficientDataTraits')}
               value={report.bigFiveReliabilitySummary.insufficientDataTraits}
-              description="Требуется больше данных"
+              description={t('moreDataNeeded')}
               icon={HelpCircle}
               iconColor="text-gray-600"
               bgColor="bg-gray-50 dark:bg-gray-950/20"
@@ -358,7 +360,7 @@ export function PsychometricStatsCards({ report }: PsychometricStatsCardsProps) 
                   : '-'}
               </div>
               <p className="text-sm text-muted-foreground mt-1 flex items-center justify-center gap-1">
-                Средний Alpha компетенций
+                {t('avgAlphaCompetencies')}
                 <AverageAlphaHelp />
               </p>
             </div>
@@ -373,7 +375,7 @@ export function PsychometricStatsCards({ report }: PsychometricStatsCardsProps) 
                   : '-'}
               </div>
               <p className="text-sm text-muted-foreground mt-1 flex items-center justify-center gap-1">
-                Средний индекс различения
+                {t('avgDiscriminationIndex')}
                 <AverageDiscriminationHelp />
               </p>
             </div>
@@ -388,7 +390,7 @@ export function PsychometricStatsCards({ report }: PsychometricStatsCardsProps) 
                   : '-'}
               </div>
               <p className="text-sm text-muted-foreground mt-1 flex items-center justify-center gap-1">
-                Средний Alpha Big Five
+                {t('avgAlphaBigFive')}
                 <AverageBigFiveAlphaHelp />
               </p>
             </div>

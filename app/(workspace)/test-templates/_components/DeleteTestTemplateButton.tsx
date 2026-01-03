@@ -17,6 +17,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { toast } from 'sonner';
 import { deleteTestTemplate } from '@/app/actions';
+import { useTranslations } from 'next-intl';
 
 interface DeleteTestTemplateButtonProps {
   templateId: string;
@@ -38,22 +39,24 @@ export default function DeleteTestTemplateButton({
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
+  const t = useTranslations('template');
+  const tCommon = useTranslations('common');
 
   const handleDelete = async () => {
     startTransition(async () => {
       try {
         await deleteTestTemplate(templateId);
-        toast.success('Тест удалён', {
-          description: `Тест "${templateName}" был успешно удалён.`,
+        toast.success(t('testDeleted'), {
+          description: t('testDeletedDescription', { name: templateName }),
         });
         setOpen(false);
         router.push('/test-templates');
         router.refresh();
       } catch (error) {
-        toast.error('Ошибка удаления', {
-          description: error instanceof Error 
-            ? error.message 
-            : 'Не удалось удалить тест. Попробуйте позже.',
+        toast.error(t('deleteError'), {
+          description: error instanceof Error
+            ? error.message
+            : t('deleteErrorDescription'),
         });
       }
     });
@@ -73,24 +76,23 @@ export default function DeleteTestTemplateButton({
           ) : showIcon ? (
             <Trash2 className="h-4 w-4" />
           ) : null}
-          <span className={showIcon ? 'ml-2' : ''}>Удалить</span>
+          <span className={showIcon ? 'ml-2' : ''}>{tCommon('delete')}</span>
         </Button>
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Удалить тест?</AlertDialogTitle>
+          <AlertDialogTitle>{t('deleteTest')}</AlertDialogTitle>
           <AlertDialogDescription className="space-y-2">
             <p>
-              Вы уверены, что хотите удалить тест <strong>&quot;{templateName}&quot;</strong>?
+              {t('deleteConfirmation')} <strong>&quot;{templateName}&quot;</strong>?
             </p>
             <p className="text-sm text-muted-foreground">
-              Это действие нельзя отменить. Все данные, связанные с этим шаблоном теста, 
-              будут безвозвратно удалены.
+              {t('deleteWarning')}
             </p>
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={isPending}>Отмена</AlertDialogCancel>
+          <AlertDialogCancel disabled={isPending}>{tCommon('cancel')}</AlertDialogCancel>
           <AlertDialogAction
             onClick={handleDelete}
             disabled={isPending}
@@ -99,10 +101,10 @@ export default function DeleteTestTemplateButton({
             {isPending ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                Удаление...
+                {t('deleting')}
               </>
             ) : (
-              'Удалить тест'
+              t('delete')
             )}
           </AlertDialogAction>
         </AlertDialogFooter>

@@ -1,6 +1,8 @@
 import { Suspense } from 'react';
+import type { Metadata } from 'next';
 import { currentUser } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
+import { getTranslations } from 'next-intl/server';
 import { getMyTestsDataCached } from '@/services/api.cache.my-tests';
 import { MyTestsContent } from './_components/MyTestsContent';
 import { ContentSkeleton } from './_components/ContentSkeleton';
@@ -9,11 +11,20 @@ import { ClipboardList } from 'lucide-react';
 // ISR: Revalidate every 60 seconds
 export const revalidate = 60;
 
-// Page metadata
-export const metadata = {
-  title: 'Мои тесты | SkillSoft',
-  description: 'Просматривайте назначенные тесты и отслеживайте прогресс',
-};
+// Dynamic page metadata with i18n
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("metadata.myTests");
+  const siteName = "SkillSoft";
+
+  return {
+    title: `${t("title")} | ${siteName}`,
+    description: t("description"),
+    openGraph: {
+      title: `${t("title")} | ${siteName}`,
+      description: t("description"),
+    },
+  };
+}
 
 // Valid tab values for URL state
 type TabValue = 'all' | 'pending' | 'in_progress' | 'completed';
@@ -32,6 +43,7 @@ interface PageProps {
  */
 export default async function MyTestsPage({ searchParams }: PageProps) {
   const user = await currentUser();
+  const t = await getTranslations('myTests');
 
   if (!user) {
     redirect('/sign-in');
@@ -54,11 +66,11 @@ export default async function MyTestsPage({ searchParams }: PageProps) {
               <ClipboardList className="size-6 text-primary" />
             </div>
             <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
-              Мои тесты
+              {t('title')}
             </h1>
           </div>
           <p className="text-muted-foreground text-sm sm:text-base">
-            Просматривайте назначенные тесты и отслеживайте прогресс
+            {t('description')}
           </p>
         </header>
 

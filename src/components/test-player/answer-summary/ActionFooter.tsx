@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { useTranslations } from 'next-intl';
 import { ChevronLeft, CheckCircle, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -31,12 +32,14 @@ export function ActionFooter({
   hasSkipped,
   canSubmit,
 }: ActionFooterProps) {
+  const t = useTranslations('assessment');
+
   // Determine button label
   const getSubmitLabel = () => {
-    if (isSubmitting) return 'Отправка...';
-    if (isAllAnswered && !hasSkipped) return 'Отправить оценку';
-    if (hasSkipped) return 'Отправить с пропусками';
-    return 'Отправить неполный';
+    if (isSubmitting) return t('submitting');
+    if (isAllAnswered && !hasSkipped) return t('submitAssessment');
+    if (hasSkipped) return t('submitWithSkipped');
+    return t('submitIncompleteShort');
   };
 
   return (
@@ -50,8 +53,8 @@ export function ActionFooter({
           className="text-neutral-400 hover:text-white hover:bg-neutral-800"
         >
           <ChevronLeft className="w-4 h-4 mr-1" />
-          <span className="hidden sm:inline">Вернуться к тесту</span>
-          <span className="sm:hidden">Назад</span>
+          <span className="hidden sm:inline">{t('backToTest')}</span>
+          <span className="sm:hidden">{t('back')}</span>
         </Button>
 
         {/* Submit Button */}

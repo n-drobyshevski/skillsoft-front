@@ -16,6 +16,7 @@ import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import type { TestTemplateSummary, AssessmentGoal } from '@/types/domain';
 import { AssessmentGoalInfo } from '@/types/domain';
+import { useTranslations } from 'next-intl';
 
 /**
  * Props for TestTemplatesWidget
@@ -54,9 +55,12 @@ export function TestTemplatesWidget({
   loading = false,
   className,
   maxItems = 6,
-  title = 'Active Assessments',
+  title,
   compact = false,
 }: TestTemplatesWidgetProps) {
+  const t = useTranslations('dashboard');
+  const displayTitle = title ?? t('activeAssessments');
+
   if (loading) {
     return (
       <TestTemplatesWidgetSkeleton
@@ -67,7 +71,7 @@ export function TestTemplatesWidget({
     );
   }
 
-  const activeTemplates = templates.filter((t) => t.isActive).slice(0, maxItems);
+  const activeTemplates = templates.filter((tmpl) => tmpl.isActive).slice(0, maxItems);
 
   return (
     <Card className={cn('h-full', className)}>
@@ -77,15 +81,15 @@ export function TestTemplatesWidget({
             <GraduationCap className="w-4 h-4 text-muted-foreground" />
           </div>
           <div>
-            <CardTitle className="text-base">{title}</CardTitle>
+            <CardTitle className="text-base">{displayTitle}</CardTitle>
             <p className="text-xs text-muted-foreground">
-              {activeTemplates.length} template{activeTemplates.length !== 1 && 's'} available
+              {t('templatesAvailable', { count: activeTemplates.length })}
             </p>
           </div>
         </div>
         <Link href="/test-templates">
           <Button variant="ghost" size="sm" className="h-7 px-2">
-            <span className="text-xs mr-1 hidden sm:inline">View All</span>
+            <span className="text-xs mr-1 hidden sm:inline">{t('viewAll')}</span>
             <ChevronRight className="w-4 h-4" />
           </Button>
         </Link>
@@ -93,11 +97,11 @@ export function TestTemplatesWidget({
       <CardContent className="pt-2">
         {activeTemplates.length === 0 ? (
           <div className="text-center py-6 text-muted-foreground">
-            <p className="text-sm">No active assessments</p>
-            <p className="text-xs mt-1">Create a template to get started</p>
+            <p className="text-sm">{t('noActiveAssessments')}</p>
+            <p className="text-xs mt-1">{t('createTemplateToStart')}</p>
             <Link href="/test-templates/new">
               <Button variant="outline" size="sm" className="mt-3">
-                Create Template
+                {t('createTemplate')}
               </Button>
             </Link>
           </div>

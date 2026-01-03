@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { AlertCircle, Home, RefreshCw } from 'lucide-react';
@@ -19,12 +20,14 @@ export default function GlobalError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  const t = useTranslations('errors');
+
   useEffect(() => {
     // Log the error to an error reporting service
     // In production, this would be sent to a service like Sentry
     // eslint-disable-next-line no-console
     console.error('Global error caught:', error);
-    
+
     if (typeof window !== 'undefined') {
       // Client-side error logging event
       window.dispatchEvent(new CustomEvent('app-error', { detail: error }));
@@ -38,34 +41,34 @@ export default function GlobalError({
           <div className="mx-auto mb-4 h-12 w-12 rounded-full bg-destructive/10 flex items-center justify-center">
             <AlertCircle className="h-6 w-6 text-destructive" />
           </div>
-          <CardTitle className="text-destructive">Что-то пошло не так</CardTitle>
+          <CardTitle className="text-destructive">{t('somethingWentWrong')}</CardTitle>
           <CardDescription>
-            Произошла непредвиденная ошибка. Пожалуйста, попробуйте ещё раз.
+            {t('unexpectedError')}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           {error.digest && (
             <div className="text-xs text-muted-foreground bg-muted p-2 rounded font-mono">
-              Error ID: {error.digest}
+              {t('errorId')}: {error.digest}
             </div>
           )}
-          
+
           {process.env.NODE_ENV === 'development' && error.message && (
             <div className="text-xs text-muted-foreground bg-muted p-2 rounded overflow-auto max-h-32">
-              <p className="font-medium mb-1">Dev Info:</p>
+              <p className="font-medium mb-1">{t('devInfo')}:</p>
               <pre className="whitespace-pre-wrap">{error.message}</pre>
             </div>
           )}
-          
+
           <div className="flex flex-col gap-2">
             <Button onClick={reset} className="w-full">
               <RefreshCw className="w-4 h-4 mr-2" />
-              Попробовать снова
+              {t('tryAgain')}
             </Button>
             <Button variant="outline" asChild className="w-full">
               <Link href="/">
                 <Home className="w-4 h-4 mr-2" />
-                На главную
+                {t('backToHome')}
               </Link>
             </Button>
           </div>

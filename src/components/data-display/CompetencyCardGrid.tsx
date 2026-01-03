@@ -15,6 +15,7 @@ import {
   ChevronRight,
   ArrowUpDown,
 } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 // Card Grid Component
 export default function CompetencyCardGrid({
@@ -24,6 +25,12 @@ export default function CompetencyCardGrid({
   data: Competency[];
   loading: boolean;
 }) {
+  const t = useTranslations("table");
+  const tSort = useTranslations("sort");
+  const tEmpty = useTranslations("empty");
+  const tFilter = useTranslations("filter");
+  const tCompetency = useTranslations("competency");
+
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [sortBy, setSortBy] = useState<
@@ -125,7 +132,7 @@ export default function CompetencyCardGrid({
           <div className="relative" suppressHydrationWarning>
             <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search competencies..."
+              placeholder={t("searchPlaceholderShort")}
               value={searchTerm}
               onChange={(e) => {
                 setSearchTerm(e.target.value);
@@ -143,10 +150,10 @@ export default function CompetencyCardGrid({
           >
             <SelectTrigger className="w-[180px]">
               <Filter className="mr-2 h-4 w-4" />
-              <SelectValue placeholder="Category" />
+              <SelectValue placeholder={tCompetency("category")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Categories</SelectItem>
+              <SelectItem value="all">{tFilter("all")}</SelectItem>
               <SelectItem value="COGNITIVE">Cognitive</SelectItem>
               <SelectItem value="INTERPERSONAL">Interpersonal</SelectItem>
               <SelectItem value="LEADERSHIP">Leadership</SelectItem>
@@ -170,12 +177,12 @@ export default function CompetencyCardGrid({
           >
             <SelectTrigger className="w-[160px]">
               <ArrowUpDown className="mr-2 h-4 w-4" />
-              <SelectValue placeholder="Sort by" />
+              <SelectValue placeholder={tSort("sortBy")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="name">Sort by Name</SelectItem>
-              <SelectItem value="indicators">Sort by Indicators</SelectItem>
-              <SelectItem value="modified">Sort by Modified</SelectItem>
+              <SelectItem value="name">{tSort("sortByName")}</SelectItem>
+              <SelectItem value="indicators">{tSort("sortByIndicators")}</SelectItem>
+              <SelectItem value="modified">{tSort("sortByModified")}</SelectItem>
             </SelectContent>
           </Select>
           <Button
@@ -184,7 +191,7 @@ export default function CompetencyCardGrid({
             onClick={() =>
               setSortOrder((order) => (order === "asc" ? "desc" : "asc"))
             }
-            aria-label={sortOrder === "asc" ? "Sort descending" : "Sort ascending"}
+            aria-label={sortOrder === "asc" ? tSort("sortDescending") : tSort("sortAscending")}
           >
             <ChevronDown
               className={`h-4 w-4 transition-transform ${
@@ -207,22 +214,19 @@ export default function CompetencyCardGrid({
           <CardContent>
             <Search className="mx-auto h-12 w-12 text-muted-foreground/50" />
             <h3 className="mt-4 text-lg font-semibold">
-              No competencies found
+              {tEmpty("noCompetenciesFound")}
             </h3>
             <p className="mt-2 text-sm text-muted-foreground">
               {searchTerm
-                ? `No competencies match your search for "${searchTerm}"`
+                ? tEmpty("noMatchSearch", { term: searchTerm })
                 : selectedCategory !== "all"
-                ? `No competencies found in ${selectedCategory.replace(
-                    "_",
-                    " "
-                  )} category`
-                : "Try adjusting your search terms or filters"}
+                ? tEmpty("noMatchCategory", { category: selectedCategory.replace("_", " ") })
+                : tEmpty("tryAdjusting")}
             </p>
             <div className="mt-6 flex gap-2 justify-center">
               {searchTerm && (
                 <Button onClick={() => setSearchTerm("")} variant="default">
-                  Clear Search
+                  {tEmpty("clearSearch")}
                 </Button>
               )}
               {selectedCategory !== "all" && (
@@ -230,7 +234,7 @@ export default function CompetencyCardGrid({
                   onClick={() => setSelectedCategory("all")}
                   variant="outline"
                 >
-                  Show All Categories
+                  {tEmpty("showAllCategories")}
                 </Button>
               )}
             </div>
@@ -242,12 +246,11 @@ export default function CompetencyCardGrid({
       {filteredAndSortedCompetencies.length > itemsPerPage && (
         <div className="flex items-center justify-between pt-4">
           <p className="text-sm text-muted-foreground">
-            Showing {(currentPage - 1) * itemsPerPage + 1} to{" "}
-            {Math.min(
-              currentPage * itemsPerPage,
-              filteredAndSortedCompetencies.length
-            )}{" "}
-            of {filteredAndSortedCompetencies.length} competencies
+            {t("showing", {
+              from: (currentPage - 1) * itemsPerPage + 1,
+              to: Math.min(currentPage * itemsPerPage, filteredAndSortedCompetencies.length),
+              total: filteredAndSortedCompetencies.length
+            })}
           </p>
           <div className="flex items-center space-x-2">
             <Button
@@ -258,7 +261,7 @@ export default function CompetencyCardGrid({
             >
               <ChevronLeft className="h-4 w-4 -rotate-180" />
               <ChevronLeft className="h-4 w-4 -rotate-180 -ml-2" />
-              <span className="sr-only">First page</span>
+              <span className="sr-only">{t("firstPage")}</span>
             </Button>
             <Button
               variant="outline"
@@ -267,10 +270,10 @@ export default function CompetencyCardGrid({
               disabled={currentPage === 1}
             >
               <ChevronLeft className="h-4 w-4" />
-              <span className="sr-only">Previous page</span>
+              <span className="sr-only">{t("previousPage")}</span>
             </Button>
             <div className="flex items-center justify-center text-sm font-medium min-w-[100px]">
-              Page {currentPage} of {totalPages}
+              {t("pageOf", { current: currentPage, total: totalPages })}
             </div>
             <Button
               variant="outline"
@@ -279,7 +282,7 @@ export default function CompetencyCardGrid({
               disabled={currentPage === totalPages}
             >
               <ChevronRight className="h-4 w-4" />
-              <span className="sr-only">Next page</span>
+              <span className="sr-only">{t("nextPage")}</span>
             </Button>
             <Button
               variant="outline"
@@ -289,7 +292,7 @@ export default function CompetencyCardGrid({
             >
               <ChevronRight className="h-4 w-4 rotate-180" />
               <ChevronRight className="h-4 w-4 rotate-180 -ml-2" />
-              <span className="sr-only">Last page</span>
+              <span className="sr-only">{t("lastPage")}</span>
             </Button>
           </div>
         </div>

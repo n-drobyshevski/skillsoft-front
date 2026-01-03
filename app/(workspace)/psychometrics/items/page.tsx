@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
 import { Suspense } from 'react';
+import { getTranslations } from 'next-intl/server';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import PageHeader from '@/components/common/PageHeader';
@@ -12,10 +13,13 @@ import { getCompetenciesCached } from '@/services/api.cache';
 import type { ItemStatistics } from '@/types/psychometrics';
 import type { Competency } from '@/types/domain';
 
-export const metadata: Metadata = {
-  title: 'Assessment Items - Psychometrics - SkillSoft',
-  description: 'Psychometric statistics for assessment items.',
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('psychometrics.itemsTable');
+  return {
+    title: `${t('title')} - SkillSoft`,
+    description: t('description'),
+  };
+}
 
 interface PageProps {
   searchParams: Promise<{
@@ -83,20 +87,22 @@ function TableSkeleton() {
 
 export default async function ItemsPage({ searchParams }: PageProps) {
   const resolvedParams = await searchParams;
+  const t = await getTranslations('psychometrics');
+  const tTable = await getTranslations('psychometrics.itemsTable');
   const { items, competencies, error } = await getItemsData(resolvedParams);
 
   return (
     <div className="flex flex-1 flex-col gap-6 p-4 pt-6 md:gap-8 md:p-6">
       <PageHeader
-        title="Assessment Items"
-        description="Psychometric statistics for questions: difficulty and discrimination indices"
+        title={tTable('title')}
+        description={tTable('description')}
       />
 
       {/* Error Display */}
       {error && (
         <Card className="border-destructive/50 bg-destructive/10">
           <CardContent className="p-4">
-            <div className="text-destructive font-medium mb-1">Data Loading Error</div>
+            <div className="text-destructive font-medium mb-1">{t('dataLoadingError')}</div>
             <p className="text-sm text-muted-foreground">{error}</p>
           </CardContent>
         </Card>

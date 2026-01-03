@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 import { TestAnswer } from '@/types/domain';
 
@@ -12,25 +13,30 @@ interface LikertAnswerExpandedProps {
   answer: TestAnswer | null;
 }
 
-// Default Likert scale labels (Russian)
-const LIKERT_LABELS = [
-  'Категорически не согласен',
-  'Не согласен',
-  'Нейтрально',
-  'Согласен',
-  'Полностью согласен',
-];
+// Hook to get translated Likert scale labels
+function useLikertLabels() {
+  const t = useTranslations('likert');
+
+  return [
+    t('stronglyDisagree'),
+    t('disagree'),
+    t('neutral'),
+    t('agree'),
+    t('stronglyAgree'),
+  ];
+}
 
 /**
  * LikertAnswerPreview - Compact dot visualization for collapsed card
  */
 export function LikertAnswerPreview({ answer }: LikertAnswerPreviewProps) {
+  const t = useTranslations('assessment');
   const selectedValue = answer?.likertValue;
   const isSkipped = answer?.isSkipped;
 
   if (isSkipped || selectedValue === undefined) {
     return (
-      <span className="text-xs text-amber-400">Пропущено</span>
+      <span className="text-xs text-amber-400">{t('skipped')}</span>
     );
   }
 
@@ -58,13 +64,15 @@ export function LikertAnswerPreview({ answer }: LikertAnswerPreviewProps) {
  * LikertAnswerExpanded - Full scale visualization for expanded card
  */
 export function LikertAnswerExpanded({ answer }: LikertAnswerExpandedProps) {
+  const t = useTranslations('assessment');
+  const likertLabels = useLikertLabels();
   const selectedValue = answer?.likertValue;
   const isSkipped = answer?.isSkipped;
 
   if (isSkipped || selectedValue === undefined) {
     return (
       <div className="text-center py-4">
-        <span className="text-sm text-amber-400">Вопрос был пропущен</span>
+        <span className="text-sm text-amber-400">{t('questionWasSkipped')}</span>
       </div>
     );
   }
@@ -74,7 +82,7 @@ export function LikertAnswerExpanded({ answer }: LikertAnswerExpandedProps) {
       <div className="flex justify-between items-end gap-2">
         {[1, 2, 3, 4, 5].map((value) => {
           const isSelected = selectedValue === value;
-          const label = LIKERT_LABELS[value - 1];
+          const label = likertLabels[value - 1];
 
           return (
             <div
@@ -105,7 +113,7 @@ export function LikertAnswerExpanded({ answer }: LikertAnswerExpandedProps) {
       {/* Selected value label - mobile */}
       <div className="sm:hidden mt-3 text-center">
         <span className="text-sm text-emerald-400">
-          {LIKERT_LABELS[selectedValue - 1]}
+          {likertLabels[selectedValue - 1]}
         </span>
       </div>
     </div>

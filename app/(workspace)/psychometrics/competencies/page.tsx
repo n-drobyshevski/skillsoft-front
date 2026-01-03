@@ -1,4 +1,5 @@
 import { Metadata } from 'next';
+import { getTranslations } from 'next-intl/server';
 import PageHeader from '@/components/common/PageHeader';
 import { InlineError } from '@/components/feedback';
 import { ReliabilityStatus, CompetencyReliability, Page } from '@/types/psychometrics';
@@ -46,12 +47,13 @@ async function getCompetenciesData(searchParams: Awaited<PageProps['searchParams
 export default async function CompetenciesPage({ searchParams }: PageProps) {
   const resolvedParams = await searchParams;
   const { competencies, error } = await getCompetenciesData(resolvedParams);
+  const t = await getTranslations('psychometrics');
 
   return (
     <div className="flex flex-1 flex-col gap-6 p-4 pt-6 md:gap-8 md:p-6">
       <PageHeader
-        title="Competency Reliability"
-        description="Cronbach's Alpha and reliability statistics for competencies"
+        title={t('competenciesTable.title')}
+        description={t('competenciesTable.description')}
       />
 
       {/* Error Display with rich metadata and retry capability */}

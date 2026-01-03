@@ -54,6 +54,7 @@ import {
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
+import { useTranslations } from "next-intl";
 
 interface EntitiesTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -74,6 +75,8 @@ export default function EntitiesTable<TData, TValue>({
   mobileCardPrimaryColumns,
   forceTableView = false,
 }: EntitiesTableProps<TData, TValue>) {
+  const t = useTranslations("table");
+  const tFilter = useTranslations("filter");
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
@@ -164,7 +167,7 @@ export default function EntitiesTable<TData, TValue>({
             <div className="relative flex-grow max-w-lg ">
               <Search className="absolute left-3 top-1/2 h-4 max-w-2xl -translate-y-1/2 text-muted-foreground" />
               <Input
-                placeholder={!isMobile ? "Search across all columns..." : "Search..."}
+                placeholder={!isMobile ? t("searchPlaceholder") : t("searchPlaceholderShort")}
                 value={globalFilter}
                 onChange={(event) => handleSearch(event.target.value)}
                 className="pl-9 h-9 bg-background border-input"
@@ -177,7 +180,7 @@ export default function EntitiesTable<TData, TValue>({
                   onClick={() => handleSearch('')}
                 >
                   <X className="h-3 w-3" />
-                  <span className="sr-only">Clear search</span>
+                  <span className="sr-only">{t("clearSearch")}</span>
                 </Button>
               )}
             </div>
@@ -185,18 +188,18 @@ export default function EntitiesTable<TData, TValue>({
             {/* Column Settings Icon Button */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   size="icon"
                   className="h-9 w-9 shrink-0"
-                  aria-label="Column settings"
+                  aria-label={t("columnSettings")}
                 >
                   <SlidersHorizontal className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-[200px]">
                 <DropdownMenuLabel className="text-xs font-medium text-muted-foreground">
-                  Toggle columns
+                  {t("toggleColumns")}
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 {table
@@ -250,7 +253,7 @@ export default function EntitiesTable<TData, TValue>({
                   onClick={clearAllFilters}
                   className="h-6 px-2 text-xs"
                 >
-                  Clear all
+                  {t("clearAll")}
                 </Button>
               )}
             </div>
@@ -267,7 +270,7 @@ export default function EntitiesTable<TData, TValue>({
                 size="sm"
                 className="h-9 w-9 p-0 rounded-r-none"
                 onClick={() => setViewMode("cards")}
-                aria-label="Card view"
+                aria-label={t("cardView")}
               >
                 <LayoutList className="h-4 w-4" />
               </Button>
@@ -276,7 +279,7 @@ export default function EntitiesTable<TData, TValue>({
                 size="sm"
                 className="h-9 w-9 p-0 rounded-l-none border-l"
                 onClick={() => setViewMode("table")}
-                aria-label="Table view"
+                aria-label={t("tableView")}
               >
                 <TableIcon className="h-4 w-4" />
               </Button>
@@ -287,18 +290,18 @@ export default function EntitiesTable<TData, TValue>({
           {Object.keys(filterOptions).length > 0 && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   size="sm"
                   className="h-9 gap-2"
                 >
                   <Filter className="h-4 w-4" />
-                  <span className="hidden @sm/table:inline">Filters</span>
+                  <span className="hidden @sm/table:inline">{t("filters")}</span>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-[220px]">
                 <DropdownMenuLabel className="text-xs font-medium text-muted-foreground">
-                  Filter by columns
+                  {t("filterByColumns")}
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 {Object.entries(filterOptions).map(([columnId, options]) => (
@@ -311,10 +314,10 @@ export default function EntitiesTable<TData, TValue>({
                       onValueChange={(value) => handleColumnFilter(columnId, value)}
                     >
                       <SelectTrigger className="h-8 text-xs">
-                        <SelectValue placeholder="All" />
+                        <SelectValue placeholder={tFilter("all")} />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="all">All</SelectItem>
+                        <SelectItem value="all">{tFilter("all")}</SelectItem>
                         {options.map((option) => (
                           <SelectItem key={option} value={option}>
                             {option}
@@ -392,7 +395,7 @@ export default function EntitiesTable<TData, TValue>({
                       <details className="group">
                         <summary className="flex items-center gap-1 text-xs text-muted-foreground cursor-pointer hover:text-foreground transition-colors py-1">
                           <ChevronDown className="h-3 w-3 transition-transform group-open:rotate-180" />
-                          <span>{secondaryCells.length} more fields</span>
+                          <span>{t("moreFields", { count: secondaryCells.length })}</span>
                         </summary>
                         <div className="grid grid-cols-2 gap-2 text-xs pt-2 border-t mt-2">
                           {secondaryCells.map((cell) => (
@@ -424,9 +427,9 @@ export default function EntitiesTable<TData, TValue>({
                   <Search className="h-5 w-5 text-muted-foreground" />
                 </div>
                 <div>
-                  <p className="text-sm font-medium">No results found</p>
+                  <p className="text-sm font-medium">{t("noResultsFound")}</p>
                   <p className="text-xs text-muted-foreground">
-                    Try adjusting your search or filter criteria
+                    {t("adjustSearch")}
                   </p>
                 </div>
               </div>
@@ -440,7 +443,7 @@ export default function EntitiesTable<TData, TValue>({
           {isMobile && (
             <div className="flex items-center justify-center gap-1 py-1.5 px-3 bg-muted/30 text-xs text-muted-foreground border-b">
               <ChevronLeft className="h-3 w-3" />
-              <span>Swipe to see more columns</span>
+              <span>{t("swipeHint")}</span>
               <ChevronRight className="h-3 w-3" />
             </div>
           )}
@@ -505,9 +508,9 @@ export default function EntitiesTable<TData, TValue>({
                           <Search className="h-4 w-4" />
                         </div>
                         <div>
-                          <p className="text-sm font-medium">No results found</p>
+                          <p className="text-sm font-medium">{t("noResultsFound")}</p>
                           <p className="text-xs text-muted-foreground">
-                            Try adjusting your search or filter criteria
+                            {t("adjustSearch")}
                           </p>
                         </div>
                       </div>
@@ -526,40 +529,26 @@ export default function EntitiesTable<TData, TValue>({
         <div className="flex flex-col gap-2 @sm/table:flex-row @sm/table:items-center @sm/table:gap-4">
           <div className="text-sm text-muted-foreground">
             {table.getFilteredRowModel().rows.length === 0 ? (
-              "No items"
+              t("noItems")
             ) : (
-              <>
-                Showing{" "}
-                <span className="font-medium text-foreground">
-                  {table.getState().pagination.pageIndex * table.getState().pagination.pageSize + 1}
-                </span>{" "}
-                to{" "}
-                <span className="font-medium text-foreground">
-                  {Math.min(
-                    (table.getState().pagination.pageIndex + 1) * table.getState().pagination.pageSize,
-                    table.getFilteredRowModel().rows.length
-                  )}
-                </span>{" "}
-                of{" "}
-                <span className="font-medium text-foreground">
-                  {table.getFilteredRowModel().rows.length}
-                </span>{" "}
-                results
-              </>
+              t("showing", {
+                from: table.getState().pagination.pageIndex * table.getState().pagination.pageSize + 1,
+                to: Math.min(
+                  (table.getState().pagination.pageIndex + 1) * table.getState().pagination.pageSize,
+                  table.getFilteredRowModel().rows.length
+                ),
+                total: table.getFilteredRowModel().rows.length
+              })
             )}
           </div>
-          
+
           {/* Selected Count */}
           {table.getFilteredSelectedRowModel().rows.length > 0 && (
             <div className="text-sm text-muted-foreground">
-              <span className="font-medium text-foreground">
-                {table.getFilteredSelectedRowModel().rows.length}
-              </span>{" "}
-              of{" "}
-              <span className="font-medium text-foreground">
-                {table.getFilteredRowModel().rows.length}
-              </span>{" "}
-              row(s) selected
+              {t("rowsSelected", {
+                selected: table.getFilteredSelectedRowModel().rows.length,
+                total: table.getFilteredRowModel().rows.length
+              })}
             </div>
           )}
         </div>
@@ -577,7 +566,7 @@ export default function EntitiesTable<TData, TValue>({
                 className="h-10 w-10 p-0 min-w-[44px] min-h-[44px]"
               >
                 <ChevronLeft className="h-5 w-5" />
-                <span className="sr-only">Previous page</span>
+                <span className="sr-only">{t("previousPage")}</span>
               </Button>
 
               <div className="flex items-center gap-1.5 px-3 py-2 bg-muted/30 rounded-md min-w-[80px] justify-center">
@@ -598,7 +587,7 @@ export default function EntitiesTable<TData, TValue>({
                 className="h-10 w-10 p-0 min-w-[44px] min-h-[44px]"
               >
                 <ChevronRight className="h-5 w-5" />
-                <span className="sr-only">Next page</span>
+                <span className="sr-only">{t("nextPage")}</span>
               </Button>
             </div>
 
@@ -613,7 +602,7 @@ export default function EntitiesTable<TData, TValue>({
                   className="h-8 w-8 p-0"
                 >
                   <ChevronsLeft className="h-4 w-4" />
-                  <span className="sr-only">First page</span>
+                  <span className="sr-only">{t("firstPage")}</span>
                 </Button>
                 <Button
                   variant="outline"
@@ -623,16 +612,16 @@ export default function EntitiesTable<TData, TValue>({
                   className="h-8 w-8 p-0"
                 >
                   <ChevronLeft className="h-4 w-4" />
-                  <span className="sr-only">Previous page</span>
+                  <span className="sr-only">{t("previousPage")}</span>
                 </Button>
               </div>
-              
+
               <div className="flex items-center gap-1 px-2">
                 <span className="text-sm font-medium">
-                  Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()}
+                  {t("pageOf", { current: table.getState().pagination.pageIndex + 1, total: table.getPageCount() })}
                 </span>
               </div>
-              
+
               <div className="flex items-center gap-1">
                 <Button
                   variant="outline"
@@ -642,7 +631,7 @@ export default function EntitiesTable<TData, TValue>({
                   className="h-8 w-8 p-0"
                 >
                   <ChevronRight className="h-4 w-4" />
-                  <span className="sr-only">Next page</span>
+                  <span className="sr-only">{t("nextPage")}</span>
                 </Button>
                 <Button
                   variant="outline"
@@ -652,7 +641,7 @@ export default function EntitiesTable<TData, TValue>({
                   className="h-8 w-8 p-0"
                 >
                   <ChevronsRight className="h-4 w-4" />
-                  <span className="sr-only">Last page</span>
+                  <span className="sr-only">{t("lastPage")}</span>
                 </Button>
               </div>
             </div>

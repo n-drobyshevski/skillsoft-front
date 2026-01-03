@@ -3,6 +3,7 @@
 import { Clock, PlayCircle, CheckCircle2, ClipboardList } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { TabValue } from './MyTestsContent';
+import { useTranslations } from 'next-intl';
 
 interface SummaryStatsProps {
   counts: {
@@ -17,7 +18,7 @@ interface SummaryStatsProps {
 
 interface StatCardConfig {
   tab: TabValue;
-  label: string;
+  labelKey: 'stats.total' | 'stats.pending' | 'stats.inProgress' | 'stats.completed';
   icon: typeof Clock;
   bgClass: string;
   iconBgClass: string;
@@ -31,7 +32,7 @@ interface StatCardConfig {
 const STAT_CARDS: StatCardConfig[] = [
   {
     tab: 'all',
-    label: 'Всего',
+    labelKey: 'stats.total',
     icon: ClipboardList,
     bgClass: 'bg-slate-50 dark:bg-slate-950/30 border-slate-200/50 dark:border-slate-800/50',
     iconBgClass: 'bg-slate-100 dark:bg-slate-900/50',
@@ -42,7 +43,7 @@ const STAT_CARDS: StatCardConfig[] = [
   },
   {
     tab: 'pending',
-    label: 'Ожидают',
+    labelKey: 'stats.pending',
     icon: Clock,
     bgClass: 'bg-blue-50 dark:bg-blue-950/30 border-blue-200/50 dark:border-blue-800/50',
     iconBgClass: 'bg-blue-100 dark:bg-blue-900/50',
@@ -53,7 +54,7 @@ const STAT_CARDS: StatCardConfig[] = [
   },
   {
     tab: 'in_progress',
-    label: 'В работе',
+    labelKey: 'stats.inProgress',
     icon: PlayCircle,
     bgClass: 'bg-amber-50 dark:bg-amber-950/30 border-amber-200/50 dark:border-amber-800/50',
     iconBgClass: 'bg-amber-100 dark:bg-amber-900/50',
@@ -65,7 +66,7 @@ const STAT_CARDS: StatCardConfig[] = [
   },
   {
     tab: 'completed',
-    label: 'Завершены',
+    labelKey: 'stats.completed',
     icon: CheckCircle2,
     bgClass: 'bg-emerald-50 dark:bg-emerald-950/30 border-emerald-200/50 dark:border-emerald-800/50',
     iconBgClass: 'bg-emerald-100 dark:bg-emerald-900/50',
@@ -82,6 +83,8 @@ const STAT_CARDS: StatCardConfig[] = [
  * that act as quick filters
  */
 export function SummaryStats({ counts, activeTab, onTabChange }: SummaryStatsProps) {
+  const t = useTranslations('myTests');
+
   return (
     <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
       {STAT_CARDS.map(config => {
@@ -89,6 +92,7 @@ export function SummaryStats({ counts, activeTab, onTabChange }: SummaryStatsPro
         const count = counts[config.tab];
         const isActive = activeTab === config.tab;
         const showPulse = config.pulseIndicator && count > 0;
+        const label = t(config.labelKey);
 
         return (
           <button
@@ -106,7 +110,7 @@ export function SummaryStats({ counts, activeTab, onTabChange }: SummaryStatsPro
               isActive && `ring-2 ${config.activeRingClass}`
             )}
             aria-pressed={isActive}
-            aria-label={`${config.label}: ${count}. Нажмите для фильтрации.`}
+            aria-label={t('filterByStatus', { label, count })}
           >
             <div className={cn('relative p-2 sm:p-2.5 rounded-lg', config.iconBgClass)}>
               <Icon className={cn('size-4 sm:size-5', config.iconClass)} />
@@ -124,7 +128,7 @@ export function SummaryStats({ counts, activeTab, onTabChange }: SummaryStatsPro
               <p className={cn('text-xl sm:text-2xl font-bold tabular-nums leading-none', config.textClass)}>
                 {count}
               </p>
-              <p className={cn('text-[10px] sm:text-xs font-medium mt-0.5 truncate', config.labelClass)}>{config.label}</p>
+              <p className={cn('text-[10px] sm:text-xs font-medium mt-0.5 truncate', config.labelClass)}>{label}</p>
             </div>
           </button>
         );

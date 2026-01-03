@@ -1,16 +1,19 @@
+import { getTranslations } from "next-intl/server";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft } from "lucide-react";
 
-export default function UserProfileLoading() {
+export default async function UserProfileLoading() {
+  const t = await getTranslations('users.edit');
+
   return (
     <div className="flex flex-1 flex-col gap-4 p-4 pt-6 md:gap-6 md:p-6">
       {/* Back Navigation */}
       <div className="flex items-center gap-2">
         <Button variant="ghost" size="sm" disabled className="gap-2">
           <ChevronLeft className="h-4 w-4" />
-          <span>Back to Users</span>
+          <span>{t('backToProfile')}</span>
         </Button>
       </div>
 

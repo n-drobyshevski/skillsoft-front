@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo } from 'react';
+import { useTranslations, useLocale } from 'next-intl';
 import {
   BarChart,
   Bar,
@@ -18,6 +19,7 @@ import { ItemStatistics } from '@/types/psychometrics';
 import { cn } from '@/lib/utils';
 import { BarChart3, TrendingUp } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useFormattedNumbers } from '@/hooks/useFormattedNumbers';
 
 interface MetricDistributionChartProps {
   items: ItemStatistics[];
@@ -92,9 +94,11 @@ interface CustomTooltipProps {
     payload: { label: string; count: number; zone: string };
   }>;
   label?: string;
+  itemsLabel: string;
+  formatNumber: (value: number | null | undefined) => string;
 }
 
-function CustomTooltip({ active, payload }: CustomTooltipProps) {
+function CustomTooltip({ active, payload, itemsLabel, formatNumber }: CustomTooltipProps) {
   if (!active || !payload?.length) return null;
 
   const data = payload[0].payload;
@@ -102,16 +106,22 @@ function CustomTooltip({ active, payload }: CustomTooltipProps) {
   return (
     <div className="bg-popover border border-border rounded-lg shadow-xl p-2 text-sm">
       <p className="font-medium">{data.label}</p>
-      <p className="text-muted-foreground">{data.count} items</p>
+      <p className="text-muted-foreground">{formatNumber(data.count)} {itemsLabel}</p>
     </div>
   );
 }
 
-function StatsSummaryDisplay({ stats }: { stats: StatsSummary | null }) {
+interface StatsSummaryDisplayProps {
+  stats: StatsSummary | null;
+  t: (key: string) => string;
+  formatDecimal: (value: number | null | undefined, decimals?: number) => string;
+}
+
+function StatsSummaryDisplay({ stats, t, formatDecimal }: StatsSummaryDisplayProps) {
   if (!stats) {
     return (
       <div className="text-xs text-muted-foreground text-center py-2">
-        No data available
+        {t('stats.noData')}
       </div>
     );
   }
@@ -119,16 +129,16 @@ function StatsSummaryDisplay({ stats }: { stats: StatsSummary | null }) {
   return (
     <div className="grid grid-cols-3 gap-2 text-xs pt-2 border-t">
       <div className="text-center">
-        <div className="font-mono font-medium">{stats.mean.toFixed(2)}</div>
-        <div className="text-muted-foreground">Mean</div>
+        <div className="font-mono font-medium">{formatDecimal(stats.mean, 2)}</div>
+        <div className="text-muted-foreground">{t('stats.mean')}</div>
       </div>
       <div className="text-center">
-        <div className="font-mono font-medium">{stats.median.toFixed(2)}</div>
-        <div className="text-muted-foreground">Median</div>
+        <div className="font-mono font-medium">{formatDecimal(stats.median, 2)}</div>
+        <div className="text-muted-foreground">{t('stats.median')}</div>
       </div>
       <div className="text-center">
-        <div className="font-mono font-medium">{stats.stdDev.toFixed(2)}</div>
-        <div className="text-muted-foreground">Std Dev</div>
+        <div className="font-mono font-medium">{formatDecimal(stats.stdDev, 2)}</div>
+        <div className="text-muted-foreground">{t('stats.stdDev')}</div>
       </div>
     </div>
   );
@@ -136,6 +146,9 @@ function StatsSummaryDisplay({ stats }: { stats: StatsSummary | null }) {
 
 export function DifficultyDistributionChart({ items, className }: MetricDistributionChartProps) {
   const isMobile = useIsMobile();
+  const locale = useLocale();
+  const t = useTranslations('psychometrics.charts.distribution');
+  const { formatDecimal, formatNumber } = useFormattedNumbers();
 
   const { chartData, stats } = useMemo(() => {
     const values = items
@@ -163,16 +176,14 @@ export function DifficultyDistributionChart({ items, className }: MetricDistribu
   const chartHeight = isMobile ? 140 : 160;
 
   return (
-    <Card className={className}>
+    <Card className={className} key={locale}>
       <CardHeader className="pb-2">
         <CardTitle className="text-sm flex items-center gap-2">
           <BarChart3 className="h-4 w-4 text-primary" />
-          <span className="hidden sm:inline">Question Difficulty Distribution</span>
-          <span className="sm:hidden">Распределение сложности</span>
+          {t('difficulty.title')}
         </CardTitle>
         <CardDescription className="text-xs">
-          <span className="hidden sm:inline">p-value distribution (0.2-0.8 is optimal)</span>
-          <span className="sm:hidden">p-значения (0.2-0.8 оптимально)</span>
+          {t('difficulty.description')}
         </CardDescription>
       </CardHeader>
       <CardContent className="px-2 sm:px-6">
@@ -211,7 +222,14 @@ export function DifficultyDistributionChart({ items, className }: MetricDistribu
               width={isMobile ? 20 : 30}
               domain={[0, maxCount]}
             />
-            <Tooltip content={<CustomTooltip />} />
+            <Tooltip
+              content={
+                <CustomTooltip
+                  itemsLabel={t('tooltip.items')}
+                  formatNumber={formatNumber}
+                />
+              }
+            />
             <Bar dataKey="count" radius={[2, 2, 0, 0]}>
               {chartData.map((entry, index) => (
                 <Cell
@@ -226,26 +244,23 @@ export function DifficultyDistributionChart({ items, className }: MetricDistribu
           </BarChart>
         </ResponsiveContainer>
 
-        {/* Legend - compact on mobile */}
+        {/* Legend */}
         <div className="flex justify-center gap-2 sm:gap-4 text-[10px] sm:text-xs text-muted-foreground mt-2 flex-wrap">
           <div className="flex items-center gap-1">
             <div className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded bg-blue-500" />
-            <span className="hidden sm:inline">Too Hard</span>
-            <span className="sm:hidden">Сложн.</span>
+            <span>{t('difficulty.tooHard')}</span>
           </div>
           <div className="flex items-center gap-1">
             <div className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded bg-emerald-500" />
-            <span className="hidden sm:inline">Optimal</span>
-            <span className="sm:hidden">Оптим.</span>
+            <span>{t('difficulty.optimal')}</span>
           </div>
           <div className="flex items-center gap-1">
             <div className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded bg-violet-500" />
-            <span className="hidden sm:inline">Too Easy</span>
-            <span className="sm:hidden">Легко</span>
+            <span>{t('difficulty.tooEasy')}</span>
           </div>
         </div>
 
-        <StatsSummaryDisplay stats={stats} />
+        <StatsSummaryDisplay stats={stats} t={t} formatDecimal={formatDecimal} />
       </CardContent>
     </Card>
   );
@@ -253,6 +268,9 @@ export function DifficultyDistributionChart({ items, className }: MetricDistribu
 
 export function DiscriminationDistributionChart({ items, className }: MetricDistributionChartProps) {
   const isMobile = useIsMobile();
+  const locale = useLocale();
+  const t = useTranslations('psychometrics.charts.distribution');
+  const { formatDecimal, formatNumber } = useFormattedNumbers();
 
   const { chartData, stats } = useMemo(() => {
     const values = items
@@ -283,16 +301,14 @@ export function DiscriminationDistributionChart({ items, className }: MetricDist
   const chartHeight = isMobile ? 140 : 160;
 
   return (
-    <Card className={className}>
+    <Card className={className} key={locale}>
       <CardHeader className="pb-2">
         <CardTitle className="text-sm flex items-center gap-2">
           <TrendingUp className="h-4 w-4 text-primary" />
-          <span className="hidden sm:inline">Question Effectiveness Distribution</span>
-          <span className="sm:hidden">Распределение эффективности</span>
+          {t('discrimination.title')}
         </CardTitle>
         <CardDescription className="text-xs">
-          <span className="hidden sm:inline">rpb distribution (0.25+ is good)</span>
-          <span className="sm:hidden">rpb-значения (0.25+ хорошо)</span>
+          {t('discrimination.description')}
         </CardDescription>
       </CardHeader>
       <CardContent className="px-2 sm:px-6">
@@ -331,7 +347,14 @@ export function DiscriminationDistributionChart({ items, className }: MetricDist
               width={isMobile ? 20 : 30}
               domain={[0, maxCount]}
             />
-            <Tooltip content={<CustomTooltip />} />
+            <Tooltip
+              content={
+                <CustomTooltip
+                  itemsLabel={t('tooltip.items')}
+                  formatNumber={formatNumber}
+                />
+              }
+            />
             <Bar dataKey="count" radius={[2, 2, 0, 0]}>
               {chartData.map((entry, index) => (
                 <Cell
@@ -346,31 +369,27 @@ export function DiscriminationDistributionChart({ items, className }: MetricDist
           </BarChart>
         </ResponsiveContainer>
 
-        {/* Legend - compact on mobile */}
+        {/* Legend */}
         <div className="flex justify-center gap-2 sm:gap-3 text-[10px] sm:text-xs text-muted-foreground mt-2 flex-wrap">
           <div className="flex items-center gap-1">
             <div className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded bg-red-500" />
-            <span className="hidden sm:inline">Negative</span>
-            <span className="sm:hidden">Негат.</span>
+            <span>{t('discrimination.negative')}</span>
           </div>
           <div className="flex items-center gap-1">
             <div className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded bg-orange-500" />
-            <span className="hidden sm:inline">Critical</span>
-            <span className="sm:hidden">Крит.</span>
+            <span>{t('discrimination.critical')}</span>
           </div>
           <div className="flex items-center gap-1">
             <div className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded bg-amber-500" />
-            <span className="hidden sm:inline">Warning</span>
-            <span className="sm:hidden">Внимание</span>
+            <span>{t('discrimination.warning')}</span>
           </div>
           <div className="flex items-center gap-1">
             <div className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded bg-emerald-500" />
-            <span className="hidden sm:inline">Good</span>
-            <span className="sm:hidden">Хорошо</span>
+            <span>{t('discrimination.good')}</span>
           </div>
         </div>
 
-        <StatsSummaryDisplay stats={stats} />
+        <StatsSummaryDisplay stats={stats} t={t} formatDecimal={formatDecimal} />
       </CardContent>
     </Card>
   );

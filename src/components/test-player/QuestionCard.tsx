@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { SessionQuestion, AnswerValue, QuestionType } from '@/types/domain';
 import { Card, CardContent } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
@@ -40,6 +41,8 @@ export function QuestionCard({
   questionNumber,
   validationError,
 }: QuestionCardProps) {
+  const t = useTranslations('assessment');
+
   // Local state for text input types
   const [textInput, setTextInput] = useState<string>((selectedValue as string) || '');
 
@@ -98,12 +101,12 @@ export function QuestionCard({
   // Render text input (OPEN_TEXT, BEHAVIORAL_EXAMPLE)
   const renderTextInput = () => {
     const placeholder = isBehavioralExample
-      ? 'Опишите конкретную ситуацию из вашего опыта...'
-      : 'Введите ваш ответ...';
+      ? t('describeSituation')
+      : t('enterAnswer');
 
     const hint = isBehavioralExample
-      ? 'Опишите конкретную ситуацию, что вы сделали, и каков был результат'
-      : 'Напишите развёрнутый ответ на вопрос';
+      ? t('describeSituationHint')
+      : t('writeDetailedAnswer');
 
     const minChars = isBehavioralExample ? MIN_CHARS_BEHAVIORAL : MIN_CHARS_OPEN_TEXT;
     const charCount = textInput.length;
@@ -149,7 +152,7 @@ export function QuestionCard({
           </p>
         ) : !isValid ? (
           <p id="answer-hint" className="text-xs text-neutral-500 text-center">
-            {hint} (еще {charsRemaining} {charsRemaining === 1 ? 'символ' : charsRemaining < 5 ? 'символа' : 'символов'})
+            {hint} ({t('moreChars', { count: charsRemaining })})
           </p>
         ) : (
           <p id="answer-hint" className="text-xs text-emerald-400 text-center flex items-center justify-center gap-1">
@@ -219,7 +222,10 @@ export function QuestionCard({
 
         {/* Scale hint */}
         <p className="text-xs text-neutral-500 text-center">
-          Выберите значение на шкале от {question.answerOptions[0]?.value || 1} до {question.answerOptions[question.answerOptions.length - 1]?.value || 5}
+          {t('selectScaleValue', {
+            min: question.answerOptions[0]?.value || 1,
+            max: question.answerOptions[question.answerOptions.length - 1]?.value || 5,
+          })}
         </p>
       </div>
     );
@@ -302,15 +308,15 @@ export function QuestionCard({
               {questionNumber}
             </span>
             <span className="text-sm font-medium text-neutral-500">
-              Вопрос {questionNumber}
+              {t('question')} {questionNumber}
             </span>
             {/* Question type badge (mobile) */}
             <span className="ml-auto inline-block text-[10px] text-neutral-500 bg-neutral-800/50 px-2 py-1 rounded whitespace-nowrap">
-              {isSJT && 'Ситуационный'}
-              {isMCQ && 'Выбор'}
-              {isLikertType && 'Шкала'}
-              {isBehavioralExample && 'Поведенческий'}
-              {isOpenText && 'Открытый'}
+              {isSJT && t('situational')}
+              {isMCQ && t('choice')}
+              {isLikertType && t('scale')}
+              {isBehavioralExample && t('behavioral')}
+              {isOpenText && t('open')}
             </span>
           </div>
 
@@ -341,11 +347,11 @@ export function QuestionCard({
 
               {/* Question type badge (desktop) */}
               <span className="inline-block text-xs text-neutral-500 bg-neutral-800/50 px-2 py-1 rounded">
-                {isSJT && 'Ситуационный вопрос'}
-                {isMCQ && 'Множественный выбор'}
-                {isLikertType && 'Шкала оценки'}
-                {isBehavioralExample && 'Поведенческий пример'}
-                {isOpenText && 'Открытый вопрос'}
+                {isSJT && t('situationalQuestion')}
+                {isMCQ && t('multipleChoice')}
+                {isLikertType && t('ratingScale')}
+                {isBehavioralExample && t('behavioralExample')}
+                {isOpenText && t('openQuestion')}
               </span>
             </div>
           </div>
@@ -378,7 +384,7 @@ export function QuestionCard({
         {/* Question type hint */}
         {isSJT && (
           <p className="mt-6 text-xs text-neutral-500 text-center bg-neutral-800/30 py-3 rounded border border-neutral-700/50">
-            Выберите наиболее подходящий ответ для данной ситуации
+            {t('selectBestOption')}
           </p>
         )}
       </CardContent>

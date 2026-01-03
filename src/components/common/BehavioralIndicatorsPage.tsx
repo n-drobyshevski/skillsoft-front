@@ -37,6 +37,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { useTranslations } from "next-intl";
 
 import {
 	ArrowUpDown,
@@ -87,149 +88,154 @@ interface BehavioralIndicator {
 	};
 }
 
-// Column definitions
-const columns: ColumnDef<BehavioralIndicator>[] = [
-	{
-		accessorKey: "title",
-		header: ({ column }: { column: any }) => {
-			return (
-				<Button
-					variant="ghost"
-					onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-					size="sm"
-					className="-ml-4"
-				>
-					Title
-					<ArrowUpDown className="ml-2 h-4 w-4" />
-				</Button>
-			);
-		},
-		cell: ({ row }: { row: any }) => (
-			<div className="flex flex-col">
-				<span className="font-medium">{row.getValue("title")}</span>
-				<span className="text-sm text-muted-foreground">
-					{row.original.description}
-				</span>
-			</div>
-		),
-	},
-	{
-		accessorKey: "competency",
-		header: ({ column }) => (
-			<Button
-				variant="ghost"
-				onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-			>
-				Competency
-				<ArrowUpDown className="ml-2 h-4 w-4" />
-			</Button>
-		),
-		cell: ({ row }: { row: any }) => (
-			<div className="flex items-center gap-2">
-				<Link
-					href={`/hr/competencies/${row.original.competency.id}`}
-					className="text-primary hover:underline"
-				>
-					{row.original.competency.name}
-				</Link>
-				<Badge variant="secondary" className="capitalize">
-					{row.original.competency.category.toLowerCase().replace("_", " ")}
-				</Badge>
-			</div>
-		),
-		sortingFn: (a: any, b: any) =>
-			a.original.competency.name.localeCompare(b.original.competency.name),
-	},
-	{
-		accessorKey: "observabilityLevel",
-		header: ({ column }) => (
-			<Button
-				variant="ghost"
-				onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-			>
-				Level
-				<ArrowUpDown className="ml-2 h-4 w-4" />
-			</Button>
-		),
-		cell: ({ row }: { row: any }) => {
-			const level = row.getValue("observabilityLevel") as string;
-			return (
-				<Badge variant="outline" className={levelToColor(level)}>
-					{level}
-				</Badge>
-			);
-		},
-	},
-	{
-		accessorKey: "weight",
-		header: ({ column }) => (
-			<Button
-				variant="ghost"
-				onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-			>
-				Weight
-				<ArrowUpDown className="ml-2 h-4 w-4" />
-			</Button>
-		),
-		cell: ({ row }) => {
-			const weight = row.getValue("weight") as number;
-			return <span className="font-medium">{weight.toFixed(2)}</span>;
-		},
-	},
-	{
-		accessorKey: "isActive",
-		header: "Status",
-		cell: ({ row }) => {
-			const isActive = row.getValue("isActive") as boolean;
-			return (
-				<Badge variant={isActive ? "default" : "secondary"}>
-					{isActive ? "Active" : "Inactive"}
-				</Badge>
-			);
-		},
-	},
-	{
-		id: "actions",
-		cell: ({ row }) => {
-			const indicator = row.original;
-			return (
-				<DropdownMenu>
-					<DropdownMenuTrigger asChild>
-						<Button variant="ghost" className="h-8 w-8 p-0">
-							<span className="sr-only">Open menu</span>
-							<MoreHorizontal className="h-4 w-4" />
-						</Button>
-					</DropdownMenuTrigger>
-					<DropdownMenuContent align="end">
-						<DropdownMenuLabel>Actions</DropdownMenuLabel>
-						<DropdownMenuItem
-							onClick={() => navigator.clipboard.writeText(indicator.id)}
-						>
-							Copy ID
-						</DropdownMenuItem>
-						<DropdownMenuSeparator />
-						<DropdownMenuItem>
-							<Eye className="mr-2 h-4 w-4" />
-							View Details
-						</DropdownMenuItem>
-						<DropdownMenuItem>
-							<Settings2 className="mr-2 h-4 w-4" />
-							Edit Indicator
-						</DropdownMenuItem>
-					</DropdownMenuContent>
-				</DropdownMenu>
-			);
-		},
-	},
-];
-
 const BehavioralIndicatorsPage: React.FC = () => {
+	const t = useTranslations("table");
+	const tIndicator = useTranslations("indicator");
+	const tStatus = useTranslations("status");
+	const tCompetency = useTranslations("competency");
+
 	const [indicators, setIndicators] = useState<BehavioralIndicator[]>([]);
 	const [loading, setLoading] = useState<boolean>(true);
 	const [sorting, setSorting] = useState<SortingState>([]);
 	const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 	const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
 	const [rowSelection, setRowSelection] = useState({});
+
+	// Column definitions - inside component for translations
+	const columns: ColumnDef<BehavioralIndicator>[] = [
+		{
+			accessorKey: "title",
+			header: ({ column }: { column: any }) => {
+				return (
+					<Button
+						variant="ghost"
+						onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+						size="sm"
+						className="-ml-4"
+					>
+						{t("title")}
+						<ArrowUpDown className="ml-2 h-4 w-4" />
+					</Button>
+				);
+			},
+			cell: ({ row }: { row: any }) => (
+				<div className="flex flex-col">
+					<span className="font-medium">{row.getValue("title")}</span>
+					<span className="text-sm text-muted-foreground">
+						{row.original.description}
+					</span>
+				</div>
+			),
+		},
+		{
+			accessorKey: "competency",
+			header: ({ column }) => (
+				<Button
+					variant="ghost"
+					onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+				>
+					{tCompetency("title")}
+					<ArrowUpDown className="ml-2 h-4 w-4" />
+				</Button>
+			),
+			cell: ({ row }: { row: any }) => (
+				<div className="flex items-center gap-2">
+					<Link
+						href={`/hr/competencies/${row.original.competency.id}`}
+						className="text-primary hover:underline"
+					>
+						{row.original.competency.name}
+					</Link>
+					<Badge variant="secondary" className="capitalize">
+						{row.original.competency.category.toLowerCase().replace("_", " ")}
+					</Badge>
+				</div>
+			),
+			sortingFn: (a: any, b: any) =>
+				a.original.competency.name.localeCompare(b.original.competency.name),
+		},
+		{
+			accessorKey: "observabilityLevel",
+			header: ({ column }) => (
+				<Button
+					variant="ghost"
+					onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+				>
+					{t("level")}
+					<ArrowUpDown className="ml-2 h-4 w-4" />
+				</Button>
+			),
+			cell: ({ row }: { row: any }) => {
+				const level = row.getValue("observabilityLevel") as string;
+				return (
+					<Badge variant="outline" className={levelToColor(level)}>
+						{level}
+					</Badge>
+				);
+			},
+		},
+		{
+			accessorKey: "weight",
+			header: ({ column }) => (
+				<Button
+					variant="ghost"
+					onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+				>
+					{t("weight")}
+					<ArrowUpDown className="ml-2 h-4 w-4" />
+				</Button>
+			),
+			cell: ({ row }) => {
+				const weight = row.getValue("weight") as number;
+				return <span className="font-medium">{weight.toFixed(2)}</span>;
+			},
+		},
+		{
+			accessorKey: "isActive",
+			header: t("status"),
+			cell: ({ row }) => {
+				const isActive = row.getValue("isActive") as boolean;
+				return (
+					<Badge variant={isActive ? "default" : "secondary"}>
+						{isActive ? tStatus("active") : tStatus("inactive")}
+					</Badge>
+				);
+			},
+		},
+		{
+			id: "actions",
+			cell: ({ row }) => {
+				const indicator = row.original;
+				return (
+					<DropdownMenu>
+						<DropdownMenuTrigger asChild>
+							<Button variant="ghost" className="h-8 w-8 p-0">
+								<span className="sr-only">{t("openMenu")}</span>
+								<MoreHorizontal className="h-4 w-4" />
+							</Button>
+						</DropdownMenuTrigger>
+						<DropdownMenuContent align="end">
+							<DropdownMenuLabel>{t("actions")}</DropdownMenuLabel>
+							<DropdownMenuItem
+								onClick={() => navigator.clipboard.writeText(indicator.id)}
+							>
+								{t("copyId")}
+							</DropdownMenuItem>
+							<DropdownMenuSeparator />
+							<DropdownMenuItem>
+								<Eye className="mr-2 h-4 w-4" />
+								{t("viewDetails")}
+							</DropdownMenuItem>
+							<DropdownMenuItem>
+								<Settings2 className="mr-2 h-4 w-4" />
+								{tIndicator("edit")}
+							</DropdownMenuItem>
+						</DropdownMenuContent>
+					</DropdownMenu>
+				);
+			},
+		},
+	];
 
 	useEffect(() => {
 		const fetchIndicators = async () => {
@@ -286,7 +292,7 @@ const BehavioralIndicatorsPage: React.FC = () => {
 				<div className="text-center">
 					<div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500 mx-auto mb-4"></div>
 					<p className="text-[var(--text-secondary)]">
-						Loading behavioral indicators...
+						{t("loadingIndicators")}
 					</p>
 				</div>
 			</div>
@@ -299,20 +305,20 @@ const BehavioralIndicatorsPage: React.FC = () => {
 			<div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
 				<div>
 					<h1 className="text-3xl font-bold tracking-tight">
-						Behavioral Indicators
+						{tIndicator("title")}
 					</h1>
 					<p className="text-muted-foreground">
-						Manage and track behavioral indicators across all competencies
+						{t("manageIndicators")}
 					</p>
 				</div>
 				<div className="flex items-center gap-2">
 					<Button variant="outline" size="sm">
 						<Download className="mr-2 h-4 w-4" />
-						Export All
+						{t("exportAll")}
 					</Button>
 					<Button size="sm">
 						<Plus className="mr-2 h-4 w-4" />
-						New Indicator
+						{t("newIndicator")}
 					</Button>
 				</div>
 			</div>
@@ -324,7 +330,7 @@ const BehavioralIndicatorsPage: React.FC = () => {
 						<div className="relative flex-1 max-w-sm">
 							<Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
 							<Input
-								placeholder="Search indicators..."
+								placeholder={t("searchIndicators")}
 								value={
 									(table.getColumn("title")?.getFilterValue() as string) ?? ""
 								}
@@ -338,7 +344,7 @@ const BehavioralIndicatorsPage: React.FC = () => {
 							<DropdownMenuTrigger asChild>
 								<Button variant="outline" size="sm" className="ml-auto">
 									<Filter className="mr-2 h-4 w-4" />
-									View
+									{t("view")}
 								</Button>
 							</DropdownMenuTrigger>
 							<DropdownMenuContent align="end">
@@ -408,7 +414,7 @@ const BehavioralIndicatorsPage: React.FC = () => {
 										colSpan={columns.length}
 										className="h-24 text-center"
 									>
-										No behavioral indicators found.
+										{t("noIndicatorsFound")}
 									</TableCell>
 								</TableRow>
 							)}
@@ -419,12 +425,14 @@ const BehavioralIndicatorsPage: React.FC = () => {
 				{/* Pagination */}
 				<div className="flex items-center justify-between px-2">
 					<div className="flex-1 text-sm text-muted-foreground">
-						{table.getFilteredSelectedRowModel().rows.length} of{" "}
-						{table.getFilteredRowModel().rows.length} row(s) selected.
+						{t("rowsSelected", {
+							selected: table.getFilteredSelectedRowModel().rows.length,
+							total: table.getFilteredRowModel().rows.length
+						})}
 					</div>
 					<div className="flex items-center space-x-6 lg:space-x-8">
 						<div className="flex items-center space-x-2">
-							<p className="text-sm font-medium">Rows per page</p>
+							<p className="text-sm font-medium">{t("rowsPerPage")}</p>
 							<select
 								value={table.getState().pagination.pageSize}
 								onChange={(e) => {
@@ -440,8 +448,10 @@ const BehavioralIndicatorsPage: React.FC = () => {
 							</select>
 						</div>
 						<div className="flex w-[100px] items-center justify-center text-sm font-medium">
-							Page {table.getState().pagination.pageIndex + 1} of{" "}
-							{table.getPageCount()}
+							{t("pageOf", {
+								current: table.getState().pagination.pageIndex + 1,
+								total: table.getPageCount()
+							})}
 						</div>
 						<div className="flex items-center space-x-2">
 							<Button
@@ -450,7 +460,7 @@ const BehavioralIndicatorsPage: React.FC = () => {
 								onClick={() => table.setPageIndex(0)}
 								disabled={!table.getCanPreviousPage()}
 							>
-								<span className="sr-only">Go to first page</span>
+								<span className="sr-only">{t("firstPage")}</span>
 								<ChevronLeftIcon className="h-4 w-4" />
 								<ChevronLeftIcon className="h-4 w-4" />
 							</Button>
@@ -460,7 +470,7 @@ const BehavioralIndicatorsPage: React.FC = () => {
 								onClick={() => table.previousPage()}
 								disabled={!table.getCanPreviousPage()}
 							>
-								<span className="sr-only">Go to previous page</span>
+								<span className="sr-only">{t("previousPage")}</span>
 								<ChevronLeftIcon className="h-4 w-4" />
 							</Button>
 							<Button
@@ -469,7 +479,7 @@ const BehavioralIndicatorsPage: React.FC = () => {
 								onClick={() => table.nextPage()}
 								disabled={!table.getCanNextPage()}
 							>
-								<span className="sr-only">Go to next page</span>
+								<span className="sr-only">{t("nextPage")}</span>
 								<ChevronRightIcon className="h-4 w-4" />
 							</Button>
 							<Button
@@ -478,7 +488,7 @@ const BehavioralIndicatorsPage: React.FC = () => {
 								onClick={() => table.setPageIndex(table.getPageCount() - 1)}
 								disabled={!table.getCanNextPage()}
 							>
-								<span className="sr-only">Go to last page</span>
+								<span className="sr-only">{t("lastPage")}</span>
 								<ChevronRightIcon className="h-4 w-4" />
 								<ChevronRightIcon className="h-4 w-4" />
 							</Button>

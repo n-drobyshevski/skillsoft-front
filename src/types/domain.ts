@@ -892,22 +892,82 @@ export interface SubmitAnswerRequest {
 // TEST RESULT INTERFACES
 // ============================================
 
+/**
+ * Result status enum for test scoring workflow.
+ * Matches backend TestResult.status field.
+ *
+ * Status transitions:
+ * - PENDING: Scoring in progress (retries active, fallback to scheduled job)
+ * - COMPLETED: Scoring successful, all data available
+ * - FAILED: All scoring attempts exhausted, requires manual intervention
+ */
+export type ResultStatus = 'PENDING' | 'COMPLETED' | 'FAILED';
+
+/**
+ * Extended metrics for TEAM_FIT assessment results.
+ * Populated by TeamFitScoringStrategy on backend.
+ */
+export interface TeamFitExtendedMetrics {
+  /** Ratio of unique skills candidate brings to team (0-1) */
+  diversityRatio: number;
+  /** Ratio of overlapping skills with team (0-1) */
+  saturationRatio: number;
+  /** Multiplier applied to final score based on team fit */
+  teamFitMultiplier: number;
+  /** Count of competencies contributing to diversity */
+  diversityCount: number;
+  /** Count of competencies already saturated in team */
+  saturationCount: number;
+  /** Count of competency gaps candidate can fill */
+  gapCount: number;
+}
+
+/**
+ * Test result interface matching backend TestResultDto.
+ *
+ * Key differences from SPEC.md:
+ * - Added `status` field (PENDING | COMPLETED | FAILED)
+ * - Added `clerkUserId` field for user association
+ * - Added `totalQuestions` field
+ * - Renamed `createdAt` to `completedAt`
+ * - All score fields can be null when status is PENDING
+ * - bigFiveProfile only populated for TEAM_FIT goal
+ * - extendedMetrics only populated for TEAM_FIT goal
+ */
 export interface TestResult {
   id: string;
   sessionId: string;
   templateId: string;
   templateName: string;
   clerkUserId: string;
-  overallScore: number;
-  overallPercentage: number;
-  percentile?: number;
-  passed: boolean;
-  competencyScores: CompetencyScore[];
+  /** Raw score sum - can be null when PENDING */
+  overallScore: number | null;
+  /** Score as percentage (0-100) - can be null when PENDING */
+  overallPercentage: number | null;
+  /** Percentile ranking - optional even when COMPLETED */
+  percentile?: number | null;
+  /** Whether candidate passed - can be null when PENDING */
+  passed: boolean | null;
+  /** Competency breakdown - can be null when PENDING */
+  competencyScores: CompetencyScore[] | null;
   totalTimeSeconds: number;
   questionsAnswered: number;
   questionsSkipped: number;
   totalQuestions: number;
   completedAt: string;
+  /** Scoring workflow status - CRITICAL for UI state management */
+  status: ResultStatus;
+  /**
+   * Big Five personality profile (OCEAN model).
+   * Only populated for TEAM_FIT assessments.
+   * For OVERVIEW/JOB_FIT, use useBigFiveProjection hook with onetCode.
+   */
+  bigFiveProfile?: Record<string, number> | null;
+  /**
+   * Extended metrics for TEAM_FIT scoring strategy.
+   * Contains diversity/saturation analysis for team composition.
+   */
+  extendedMetrics?: TeamFitExtendedMetrics | null;
 }
 
 export interface CompetencyScore {

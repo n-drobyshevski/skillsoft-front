@@ -10,6 +10,7 @@ import {
   DifficultyFlag,
   ItemValidityStatus,
 } from '@/types/psychometrics';
+import { useTranslations } from 'next-intl';
 
 interface IssuesBannerProps {
   /** Question ID for link */
@@ -25,29 +26,30 @@ interface IssuesBannerProps {
 }
 
 /**
- * Get issue messages based on flags
+ * Get issue messages based on flags (using translation function)
  */
 function getIssueMessages(
   discriminationFlag: DiscriminationFlag | null,
-  difficultyFlag: DifficultyFlag | null
+  difficultyFlag: DifficultyFlag | null,
+  t: ReturnType<typeof useTranslations>
 ): string[] {
   const messages: string[] = [];
 
   if (discriminationFlag != null) {
     if (discriminationFlag === DiscriminationFlag.NEGATIVE) {
-      messages.push('Негативный индекс различения - элемент работает в обратном направлении');
+      messages.push(t('issues.negativeDiscrimination'));
     } else if (discriminationFlag === DiscriminationFlag.CRITICAL) {
-      messages.push('Критически низкий индекс различения');
+      messages.push(t('issues.criticalDiscrimination'));
     } else if (discriminationFlag === DiscriminationFlag.WARNING) {
-      messages.push('Слабый индекс различения');
+      messages.push(t('issues.weakDiscrimination'));
     }
   }
 
   if (difficultyFlag != null) {
     if (difficultyFlag === DifficultyFlag.TOO_HARD) {
-      messages.push('Вопрос слишком сложный');
+      messages.push(t('issues.tooHard'));
     } else if (difficultyFlag === DifficultyFlag.TOO_EASY) {
-      messages.push('Вопрос слишком легкий');
+      messages.push(t('issues.tooEasy'));
     }
   }
 
@@ -71,7 +73,8 @@ export function IssuesBanner({
   className,
 }: IssuesBannerProps) {
   const isMobile = useIsMobile();
-  const issues = getIssueMessages(discriminationFlag, difficultyFlag);
+  const t = useTranslations('psychometrics');
+  const issues = getIssueMessages(discriminationFlag, difficultyFlag, t);
   const hasIssues = issues.length > 0 ||
     validityStatus === ItemValidityStatus.FLAGGED_FOR_REVIEW ||
     validityStatus === ItemValidityStatus.RETIRED;
@@ -95,11 +98,11 @@ export function IssuesBanner({
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium text-amber-800 dark:text-amber-300">
-                {issues.length > 0 ? issues[0] : 'Требует проверки'}
+                {issues.length > 0 ? issues[0] : t('issues.requiresReview')}
               </p>
               {issues.length > 1 && (
                 <p className="text-xs text-amber-600 dark:text-amber-400 mt-0.5">
-                  +{issues.length - 1} ещё
+                  {t('issues.moreIssues', { count: issues.length - 1 })}
                 </p>
               )}
             </div>
@@ -108,7 +111,7 @@ export function IssuesBanner({
                 href={`/psychometrics/flagged/${questionId}`}
                 variant="ghost"
                 className="shrink-0 text-amber-700 dark:text-amber-300 p-2 -mr-2"
-                aria-label="Подробнее"
+                aria-label={t('issues.viewDetails')}
               >
                 <ChevronRight className="h-4 w-4" />
               </UiLink>
@@ -134,21 +137,21 @@ export function IssuesBanner({
           </div>
           <div className="flex-1">
             <h4 className="font-semibold text-amber-800 dark:text-amber-300">
-              Обнаружены проблемы с психометрикой
+              {t('issues.psychometricIssues')}
             </h4>
             <ul className="text-sm text-amber-700 dark:text-amber-400 mt-1 space-y-0.5">
               {issues.map((issue, index) => (
                 <li key={index}>• {issue}</li>
               ))}
               {issues.length === 0 && validityStatus === ItemValidityStatus.FLAGGED_FOR_REVIEW && (
-                <li>• Элемент помечен для проверки</li>
+                <li>• {t('issues.itemFlagged')}</li>
               )}
               {issues.length === 0 && validityStatus === ItemValidityStatus.RETIRED && (
-                <li>• Элемент выведен из использования</li>
+                <li>• {t('issues.itemRetired')}</li>
               )}
             </ul>
             <p className="text-sm text-amber-700 dark:text-amber-400 mt-2">
-              Рекомендуется пересмотреть формулировку или варианты ответов.
+              {t('issues.recommendReview')}
             </p>
             {validityStatus === ItemValidityStatus.FLAGGED_FOR_REVIEW && (
               <div className="mt-3">
@@ -158,7 +161,7 @@ export function IssuesBanner({
                   className="text-amber-700 dark:text-amber-300 decoration-amber-500/50 hover:decoration-amber-500"
                   trailingIcon={<ExternalLink className="h-3 w-3" />}
                 >
-                  Перейти к детальному анализу проблемы
+                  {t('issues.viewDetailedAnalysis')}
                 </UiLink>
               </div>
             )}

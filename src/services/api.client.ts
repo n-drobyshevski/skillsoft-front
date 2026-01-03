@@ -419,3 +419,355 @@ export function getCompetencyIssuesFromError(error: ApiError): CompetencyIssue[]
   }
   return (error.context.competencyIssues as CompetencyIssue[]) || [];
 }
+
+// ============================================
+// SCORING WORKFLOW: POLLING & RETRY FUNCTIONS
+// ============================================
+
+import { ResultStatus } from '@/types/domain';
+
+/**
+ * Options for polling behavior.
+ */
+export interface PollOptions {
+  /** Maximum number of poll attempts before timeout (default: 15) */
+  maxAttempts?: number;
+  /** Initial interval between polls in ms (default: 1000) */
+  initialIntervalMs?: number;
+  /** Maximum interval between polls in ms (default: 5000) */
+  maxIntervalMs?: number;
+  /** Multiplier for exponential backoff (default: 1.5) */
+  backoffMultiplier?: number;
+  /** Callback when result is still PENDING */
+  onPending?: (attempt: number, maxAttempts: number) => void;
+  /** Callback when result transitions to COMPLETED */
+  onCompleted?: (result: TestResult) => void;
+  /** Callback when result transitions to FAILED */
+  onFailed?: (result: TestResult) => void;
+  /** AbortSignal for cancellation */
+  signal?: AbortSignal;
+}
+
+/**
+ * Default polling configuration.
+ * Optimized for typical scoring latency (< 3s p95).
+ */
+const DEFAULT_POLL_OPTIONS: Required<Omit<PollOptions, 'onPending' | 'onCompleted' | 'onFailed' | 'signal'>> = {
+  maxAttempts: 15,
+  initialIntervalMs: 1000,
+  maxIntervalMs: 5000,
+  backoffMultiplier: 1.5,
+};
+
+/**
+ * Error thrown when polling times out.
+ */
+export class PollTimeoutError extends Error {
+  constructor(
+    public readonly resultId: string,
+    public readonly attempts: number,
+    public readonly lastStatus: ResultStatus
+  ) {
+    super(`Polling timed out after ${attempts} attempts. Last status: ${lastStatus}`);
+    this.name = 'PollTimeoutError';
+  }
+}
+
+/**
+ * Sleep utility that respects AbortSignal.
+ */
+async function sleep(ms: number, signal?: AbortSignal): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const timeout = setTimeout(resolve, ms);
+
+    if (signal) {
+      const abortHandler = () => {
+        clearTimeout(timeout);
+        reject(new DOMException('Polling aborted', 'AbortError'));
+      };
+
+      if (signal.aborted) {
+        abortHandler();
+        return;
+      }
+
+      signal.addEventListener('abort', abortHandler, { once: true });
+    }
+  });
+}
+
+/**
+ * Calculate next polling interval using exponential backoff.
+ *
+ * Formula: min(initialInterval * (multiplier ^ attempt), maxInterval)
+ *
+ * @param attempt - Current attempt number (0-indexed)
+ * @param options - Polling options
+ * @returns Interval in milliseconds
+ */
+function calculateBackoffInterval(
+  attempt: number,
+  options: Required<Omit<PollOptions, 'onPending' | 'onCompleted' | 'onFailed' | 'signal'>>
+): number {
+  const { initialIntervalMs, maxIntervalMs, backoffMultiplier } = options;
+  const interval = initialIntervalMs * Math.pow(backoffMultiplier, attempt);
+  return Math.min(interval, maxIntervalMs);
+}
+
+/**
+ * Poll for test result completion with exponential backoff.
+ *
+ * Use this function after test completion when result may have PENDING status.
+ * Implements resilient polling pattern to handle backend retry logic.
+ *
+ * @example
+ * ```typescript
+ * try {
+ *   const result = await pollForResult(resultId, {
+ *     maxAttempts: 10,
+ *     onPending: (attempt, max) => setProgress(attempt / max * 100),
+ *     onCompleted: (result) => console.log('Score:', result.overallPercentage),
+ *   });
+ *
+ *   if (result.status === 'COMPLETED') {
+ *     router.push(`/results/${result.id}`);
+ *   }
+ * } catch (error) {
+ *   if (error instanceof PollTimeoutError) {
+ *     // Show retry UI
+ *   }
+ * }
+ * ```
+ *
+ * @param resultId - TestResult ID to poll
+ * @param options - Polling configuration and callbacks
+ * @returns Final TestResult (COMPLETED or FAILED)
+ * @throws PollTimeoutError if max attempts reached
+ * @throws DOMException if aborted via signal
+ */
+export async function pollForResult(
+  resultId: string,
+  options: PollOptions = {}
+): Promise<TestResult> {
+  const config = {
+    ...DEFAULT_POLL_OPTIONS,
+    ...options,
+  };
+
+  let attempt = 0;
+  let lastResult: TestResult | null = null;
+
+  while (attempt < config.maxAttempts) {
+    // Check for abort
+    if (options.signal?.aborted) {
+      throw new DOMException('Polling aborted', 'AbortError');
+    }
+
+    try {
+      // Fetch current result state - use direct fetch to avoid server-side caching
+      const response = await fetch(`${getApiBaseUrl()}/tests/results/${resultId}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        cache: 'no-store',
+        mode: 'cors',
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch result: ${response.status}`);
+      }
+
+      const result = await response.json() as TestResult;
+
+      if (!result) {
+        throw new Error(`Result not found: ${resultId}`);
+      }
+
+      lastResult = result;
+
+      // Check terminal states
+      if (result.status === 'COMPLETED') {
+        options.onCompleted?.(result);
+        return result;
+      }
+
+      if (result.status === 'FAILED') {
+        options.onFailed?.(result);
+        return result;
+      }
+
+      // Still PENDING - notify and continue polling
+      options.onPending?.(attempt + 1, config.maxAttempts);
+
+      // Wait before next attempt with backoff
+      const interval = calculateBackoffInterval(attempt, config);
+      await sleep(interval, options.signal);
+
+      attempt++;
+    } catch (error) {
+      // Re-throw abort errors
+      if (error instanceof DOMException && error.name === 'AbortError') {
+        throw error;
+      }
+
+      // Network errors - continue polling with backoff
+      console.warn(`Poll attempt ${attempt + 1} failed:`, error);
+
+      const interval = calculateBackoffInterval(attempt, config);
+      await sleep(interval, options.signal);
+
+      attempt++;
+    }
+  }
+
+  // Max attempts reached
+  throw new PollTimeoutError(
+    resultId,
+    attempt,
+    lastResult?.status ?? 'PENDING'
+  );
+}
+
+/**
+ * Retry options for failed scoring.
+ */
+export interface RetryOptions {
+  /** Maximum number of retry attempts (default: 3) */
+  maxRetries?: number;
+  /** Delay between retries in ms (default: 1000) */
+  retryDelayMs?: number;
+  /** AbortSignal for cancellation */
+  signal?: AbortSignal;
+}
+
+/**
+ * Error thrown when retry attempts exhausted.
+ */
+export class RetryExhaustedError extends Error {
+  constructor(
+    public readonly resultId: string,
+    public readonly attempts: number,
+    public readonly lastError?: Error
+  ) {
+    super(`Retry exhausted after ${attempts} attempts`);
+    this.name = 'RetryExhaustedError';
+  }
+}
+
+/**
+ * Retry scoring calculation for a failed result.
+ *
+ * This triggers the backend to re-attempt scoring calculation.
+ * Use when result status is FAILED and user wants to retry.
+ *
+ * @example
+ * ```typescript
+ * try {
+ *   const result = await retryScoring(resultId);
+ *
+ *   if (result.status === 'COMPLETED') {
+ *     // Show results
+ *   } else if (result.status === 'PENDING') {
+ *     // Start polling
+ *   }
+ * } catch (error) {
+ *   // Show contact support
+ * }
+ * ```
+ *
+ * @param resultId - TestResult ID to retry
+ * @param options - Retry configuration
+ * @returns Updated TestResult
+ * @throws RetryExhaustedError if all retries fail
+ */
+export async function retryScoring(
+  resultId: string,
+  options: RetryOptions = {}
+): Promise<TestResult> {
+  const { maxRetries = 3, retryDelayMs = 1000, signal } = options;
+
+  let lastError: Error | undefined;
+
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    // Check for abort
+    if (signal?.aborted) {
+      throw new DOMException('Retry aborted', 'AbortError');
+    }
+
+    try {
+      // Call the retry endpoint
+      const response = await fetch(`${getApiBaseUrl()}/tests/results/${resultId}/retry`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        mode: 'cors',
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || `Retry failed: ${response.status}`);
+      }
+
+      const result = await response.json() as TestResult;
+      return result;
+    } catch (error) {
+      lastError = error instanceof Error ? error : new Error(String(error));
+
+      // Don't retry abort errors
+      if (error instanceof DOMException && error.name === 'AbortError') {
+        throw error;
+      }
+
+      // Wait before next retry
+      if (attempt < maxRetries - 1) {
+        await sleep(retryDelayMs, signal);
+      }
+    }
+  }
+
+  throw new RetryExhaustedError(resultId, maxRetries, lastError);
+}
+
+/**
+ * Check if a result needs polling.
+ * Helper to determine if pollForResult should be called.
+ */
+export function shouldPollResult(result: TestResult): boolean {
+  return result.status === 'PENDING';
+}
+
+/**
+ * Check if a result can be retried.
+ * Helper to determine if retryScoring should be available.
+ */
+export function canRetryResult(result: TestResult): boolean {
+  return result.status === 'FAILED';
+}
+
+/**
+ * Format poll timeout for user display.
+ */
+export function formatPollTimeout(options: PollOptions = {}): string {
+  const {
+    maxAttempts = DEFAULT_POLL_OPTIONS.maxAttempts,
+    initialIntervalMs = DEFAULT_POLL_OPTIONS.initialIntervalMs,
+    maxIntervalMs = DEFAULT_POLL_OPTIONS.maxIntervalMs,
+    backoffMultiplier = DEFAULT_POLL_OPTIONS.backoffMultiplier,
+  } = options;
+
+  // Calculate approximate total wait time
+  let totalMs = 0;
+  for (let i = 0; i < maxAttempts; i++) {
+    const interval = Math.min(initialIntervalMs * Math.pow(backoffMultiplier, i), maxIntervalMs);
+    totalMs += interval;
+  }
+
+  const totalSeconds = Math.ceil(totalMs / 1000);
+  return totalSeconds > 60
+    ? `${Math.ceil(totalSeconds / 60)} minutes`
+    : `${totalSeconds} seconds`;
+}

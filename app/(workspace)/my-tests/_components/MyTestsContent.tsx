@@ -10,6 +10,7 @@ import { EmptyState } from './EmptyState';
 import { SummaryStats } from './SummaryStats';
 import { TestSessionSummary, TestResult, SessionStatus } from '@/types/domain';
 import { cn } from '@/lib/utils';
+import { useTranslations } from 'next-intl';
 
 // Extended session type with result
 export interface EnrichedTestSession extends TestSessionSummary {
@@ -23,11 +24,11 @@ interface MyTestsContentProps {
   initialTab?: TabValue;
 }
 
-const TAB_CONFIG: { value: TabValue; label: string; statuses: SessionStatus[] }[] = [
-  { value: 'all', label: 'Все', statuses: [] },
-  { value: 'pending', label: 'Ожидают', statuses: [SessionStatus.NOT_STARTED] },
-  { value: 'in_progress', label: 'В работе', statuses: [SessionStatus.IN_PROGRESS] },
-  { value: 'completed', label: 'Завершены', statuses: [SessionStatus.COMPLETED, SessionStatus.ABANDONED, SessionStatus.TIMED_OUT] },
+const TAB_CONFIG: { value: TabValue; labelKey: 'tabs.all' | 'tabs.pending' | 'tabs.inProgress' | 'tabs.completed'; statuses: SessionStatus[] }[] = [
+  { value: 'all', labelKey: 'tabs.all', statuses: [] },
+  { value: 'pending', labelKey: 'tabs.pending', statuses: [SessionStatus.NOT_STARTED] },
+  { value: 'in_progress', labelKey: 'tabs.inProgress', statuses: [SessionStatus.IN_PROGRESS] },
+  { value: 'completed', labelKey: 'tabs.completed', statuses: [SessionStatus.COMPLETED, SessionStatus.ABANDONED, SessionStatus.TIMED_OUT] },
 ];
 
 /**
@@ -40,6 +41,7 @@ const TAB_CONFIG: { value: TabValue; label: string; statuses: SessionStatus[] }[
  * - Lazy computation: groupSessionsByTemplate only runs for active tab
  */
 export function MyTestsContent({ sessions, initialTab = 'all' }: MyTestsContentProps) {
+  const t = useTranslations('myTests');
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -186,7 +188,7 @@ export function MyTestsContent({ sessions, initialTab = 'all' }: MyTestsContentP
                   isPending && 'opacity-70'
                 )}
               >
-                <span>{tab.label}</span>
+                <span>{t(tab.labelKey)}</span>
                 <Badge
                   variant="secondary"
                   className={cn(

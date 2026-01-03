@@ -14,6 +14,7 @@ import { EnrichedTestSession } from './MyTestsContent';
 import { TestCard } from './TestCard';
 import { HistoryTestCard } from './HistoryTestCard';
 import { TemplateStats, calculateTemplateStats } from './TemplateHeader';
+import { useTranslations } from 'next-intl';
 
 export interface TemplateGroupData {
   templateId: string;
@@ -38,6 +39,7 @@ interface TemplateGroupProps {
  * - Cleaner collapsible history section
  */
 export function TemplateGroup({ group, defaultExpanded = false }: TemplateGroupProps) {
+  const t = useTranslations('myTests');
   const [isOpen, setIsOpen] = useState(defaultExpanded);
   const hasPreviousAttempts = group.previousSessions.length > 0;
   const showBestScore = group.stats.bestScore !== null && group.stats.completedAttempts > 0;
@@ -61,7 +63,7 @@ export function TemplateGroup({ group, defaultExpanded = false }: TemplateGroupP
                   ? 'border-emerald-500/30 bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400'
                   : 'border-amber-500/30 bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-400'
               )}
-              aria-label={`Лучший результат: ${Math.round(group.stats.bestScore!)}%`}
+              aria-label={t('bestScore', { score: Math.round(group.stats.bestScore!) })}
             >
               <Trophy className="size-3" />
               {Math.round(group.stats.bestScore!)}%
@@ -72,7 +74,7 @@ export function TemplateGroup({ group, defaultExpanded = false }: TemplateGroupP
           {group.stats.totalAttempts > 1 && (
             <Badge variant="secondary" className="text-xs">
               <span className="sm:hidden">{group.stats.totalAttempts}x</span>
-              <span className="hidden sm:inline">{group.stats.totalAttempts} {getAttemptsLabel(group.stats.totalAttempts)}</span>
+              <span className="hidden sm:inline">{t('attempts', { count: group.stats.totalAttempts })}</span>
             </Badge>
           )}
         </div>
@@ -92,8 +94,8 @@ export function TemplateGroup({ group, defaultExpanded = false }: TemplateGroupP
             >
               <span className="flex items-center gap-1.5 sm:gap-2 text-xs">
                 <History className="size-3 sm:size-3.5" />
-                <span className="sm:hidden">{group.previousSessions.length} ранее</span>
-                <span className="hidden sm:inline">{getPreviousAttemptsLabel(group.previousSessions.length)}</span>
+                <span className="sm:hidden">{group.previousSessions.length} {t('earlier')}</span>
+                <span className="hidden sm:inline">{t('previousAttempts', { count: group.previousSessions.length })}</span>
               </span>
               <ChevronDown
                 className={cn(
@@ -117,18 +119,6 @@ export function TemplateGroup({ group, defaultExpanded = false }: TemplateGroupP
   );
 }
 
-/**
- * Get Russian plural form for attempts
- */
-function getAttemptsLabel(count: number): string {
-  const lastTwo = count % 100;
-  const lastOne = count % 10;
-
-  if (lastTwo >= 11 && lastTwo <= 14) return 'попыток';
-  if (lastOne === 1) return 'попытка';
-  if (lastOne >= 2 && lastOne <= 4) return 'попытки';
-  return 'попыток';
-}
 
 /**
  * Group sessions by template and prepare data for rendering

@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Search, RefreshCw, BookOpen, AlertCircle } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -106,6 +107,7 @@ export function NoSearchResults({
   onSuggestionClick,
   onClearSearch,
 }: NoSearchResultsProps) {
+  const t = useTranslations("feedback");
   return (
     <div
       className={cn(
@@ -126,18 +128,17 @@ export function NoSearchResults({
 
       {/* Message */}
       <h3 className="text-lg font-semibold text-foreground mb-1">
-        Ничего не найдено
+        {t("nothingFound")}
       </h3>
       <p className="text-sm text-muted-foreground max-w-sm mb-4">
-        По запросу «<span className="font-medium">{query}</span>» термины не
-        найдены
+        {t("noTermsFound", { query })}
       </p>
 
       {/* Suggestions */}
       {suggestions.length > 0 && (
         <div className="mb-4">
           <p className="text-xs text-muted-foreground/70 mb-2">
-            Возможно, вы имели в виду:
+            {t("maybeMeant")}
           </p>
           <div className="flex flex-wrap justify-center gap-2">
             {suggestions.map((suggestion) => (
@@ -162,7 +163,7 @@ export function NoSearchResults({
       {onClearSearch && (
         <Button variant="outline" size="sm" onClick={onClearSearch}>
           <RefreshCw className="size-4 mr-2" />
-          Сбросить поиск
+          {t("resetSearch")}
         </Button>
       )}
     </div>
@@ -178,6 +179,7 @@ interface EmptyCategoryProps {
 }
 
 export function EmptyCategory({ categoryName }: EmptyCategoryProps) {
+  const t = useTranslations("feedback");
   return (
     <div
       className={cn(
@@ -189,7 +191,7 @@ export function EmptyCategory({ categoryName }: EmptyCategoryProps) {
     >
       <BookOpen className="size-8 text-muted-foreground/40 mb-3" />
       <p className="text-sm text-muted-foreground">
-        В категории «{categoryName}» пока нет терминов
+        {t("noCategoryTerms", { category: categoryName })}
       </p>
     </div>
   );
@@ -206,10 +208,16 @@ interface ErrorStateProps {
 }
 
 export function GlossaryErrorState({
-  title = "Ошибка загрузки",
-  message = "Не удалось загрузить глоссарий. Попробуйте обновить страницу.",
+  title,
+  message,
   onRetry,
 }: ErrorStateProps) {
+  const t = useTranslations("feedback");
+  const tCommon = useTranslations("common");
+
+  const displayTitle = title ?? t("loadingError");
+  const displayMessage = message ?? t("couldNotLoad");
+
   return (
     <div
       className={cn(
@@ -229,14 +237,14 @@ export function GlossaryErrorState({
       </div>
 
       {/* Message */}
-      <h3 className="text-lg font-semibold text-foreground mb-1">{title}</h3>
-      <p className="text-sm text-muted-foreground max-w-sm mb-4">{message}</p>
+      <h3 className="text-lg font-semibold text-foreground mb-1">{displayTitle}</h3>
+      <p className="text-sm text-muted-foreground max-w-sm mb-4">{displayMessage}</p>
 
       {/* Retry button */}
       {onRetry && (
         <Button variant="outline" size="sm" onClick={onRetry}>
           <RefreshCw className="size-4 mr-2" />
-          Повторить
+          {tCommon("retry")}
         </Button>
       )}
     </div>

@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import {
   Inbox,
@@ -29,10 +30,10 @@ interface EmptyStateConfig {
   iconClassName: string;
   bgGradient: string;
   decorColor: string;
-  title: string;
-  description: string;
+  titleKey: string;
+  descriptionKey: string;
   action?: {
-    label: string;
+    labelKey: string;
     href: string;
     icon: typeof ArrowRight;
   };
@@ -44,11 +45,10 @@ const EMPTY_STATE_CONFIG: Record<EmptyStateType, EmptyStateConfig> = {
     iconClassName: 'text-slate-400 dark:text-slate-500',
     bgGradient: 'from-slate-100/80 to-slate-50/50 dark:from-slate-800/50 dark:to-slate-900/30',
     decorColor: 'bg-slate-300/50 dark:bg-slate-700/50',
-    title: 'Нет назначенных тестов',
-    description:
-      'Когда HR-отдел назначит вам тестирование, оно появится здесь. Пока можете ознакомиться с каталогом тестов.',
+    titleKey: 'noAssignedTests',
+    descriptionKey: 'whenHrAssigns',
     action: {
-      label: 'Каталог тестов',
+      labelKey: 'testCatalog',
       href: '/test-templates',
       icon: ArrowRight,
     },
@@ -58,19 +58,18 @@ const EMPTY_STATE_CONFIG: Record<EmptyStateType, EmptyStateConfig> = {
     iconClassName: 'text-slate-400 dark:text-slate-500',
     bgGradient: 'from-slate-100/80 to-slate-50/50 dark:from-slate-800/50 dark:to-slate-900/30',
     decorColor: 'bg-slate-300/50 dark:bg-slate-700/50',
-    title: 'Нет тестов',
-    description: 'У вас пока нет назначенных тестов.',
+    titleKey: 'noTests',
+    descriptionKey: 'noAssignedTestsYet',
   },
   no_pending: {
     icon: CheckCircle2,
     iconClassName: 'text-emerald-500',
     bgGradient: 'from-emerald-100/80 to-emerald-50/50 dark:from-emerald-900/30 dark:to-emerald-950/20',
     decorColor: 'bg-emerald-300/50 dark:bg-emerald-700/50',
-    title: 'Все тесты начаты!',
-    description:
-      'Отличная работа! Все назначенные тесты уже начаты или завершены. Проверьте активные тесты.',
+    titleKey: 'allTestsStarted',
+    descriptionKey: 'greatWorkAllStarted',
     action: {
-      label: 'Активные тесты',
+      labelKey: 'activeTests',
       href: '/my-tests?tab=in_progress',
       icon: PlayCircle,
     },
@@ -80,10 +79,10 @@ const EMPTY_STATE_CONFIG: Record<EmptyStateType, EmptyStateConfig> = {
     iconClassName: 'text-blue-500',
     bgGradient: 'from-blue-100/80 to-blue-50/50 dark:from-blue-900/30 dark:to-blue-950/20',
     decorColor: 'bg-blue-300/50 dark:bg-blue-700/50',
-    title: 'Нет активных тестов',
-    description: 'У вас нет тестов в процессе прохождения. Начните новый тест!',
+    titleKey: 'noActiveTests',
+    descriptionKey: 'noTestsInProgress',
     action: {
-      label: 'Начать тест',
+      labelKey: 'startTest',
       href: '/my-tests?tab=pending',
       icon: PlayCircle,
     },
@@ -93,10 +92,10 @@ const EMPTY_STATE_CONFIG: Record<EmptyStateType, EmptyStateConfig> = {
     iconClassName: 'text-amber-500',
     bgGradient: 'from-amber-100/80 to-amber-50/50 dark:from-amber-900/30 dark:to-amber-950/20',
     decorColor: 'bg-amber-300/50 dark:bg-amber-700/50',
-    title: 'Нет завершенных тестов',
-    description: 'Вы ещё не завершили ни одного теста. Начните с ожидающих тестов!',
+    titleKey: 'noCompletedTests',
+    descriptionKey: 'noTestsCompletedYet',
     action: {
-      label: 'Ожидающие тесты',
+      labelKey: 'pendingTests',
       href: '/my-tests?tab=pending',
       icon: Sparkles,
     },
@@ -113,6 +112,7 @@ const EMPTY_STATE_CONFIG: Record<EmptyStateType, EmptyStateConfig> = {
  * - Smooth fade-in animation
  */
 export function EmptyState({ type }: EmptyStateProps) {
+  const t = useTranslations('myTests');
   const config = EMPTY_STATE_CONFIG[type];
   const Icon = config.icon;
   const ActionIcon = config.action?.icon;
@@ -160,11 +160,11 @@ export function EmptyState({ type }: EmptyStateProps) {
       </div>
 
       {/* Title */}
-      <h3 className="text-lg sm:text-xl font-semibold mb-2 text-foreground">{config.title}</h3>
+      <h3 className="text-lg sm:text-xl font-semibold mb-2 text-foreground">{t(config.titleKey)}</h3>
 
       {/* Description */}
       <p className="text-muted-foreground text-sm sm:text-base max-w-sm leading-relaxed mb-6">
-        {config.description}
+        {t(config.descriptionKey)}
       </p>
 
       {/* Action Button */}
@@ -172,7 +172,7 @@ export function EmptyState({ type }: EmptyStateProps) {
         <Button asChild variant="outline" className="group">
           <Link href={config.action.href}>
             <ActionIcon className="size-4 mr-2 transition-transform group-hover:scale-110" />
-            {config.action.label}
+            {t(config.action.labelKey)}
             <ArrowRight className="size-4 ml-2 opacity-50 transition-transform group-hover:translate-x-1" />
           </Link>
         </Button>

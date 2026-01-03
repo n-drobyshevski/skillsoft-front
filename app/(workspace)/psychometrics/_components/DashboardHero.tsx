@@ -5,8 +5,9 @@ import { PsychometricHealthReport } from '@/types/psychometrics';
 import { cn } from '@/lib/utils';
 import { TrendingUp, TrendingDown, Clock, Activity, FileText, Percent, AlertTriangle } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
-import { ru } from 'date-fns/locale';
+import { ru, enUS } from 'date-fns/locale';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useTranslations, useLocale } from 'next-intl';
 import {
   HealthScoreHelp,
   HealthScoreBreakdownHelp,
@@ -86,12 +87,12 @@ function getScoreColor(score: number): {
   };
 }
 
-// Get status label based on score
-function getStatusLabel(score: number): string {
-  if (score >= 80) return 'Excellent';
-  if (score >= 60) return 'Good';
-  if (score >= 40) return 'Needs Attention';
-  return 'Critical';
+// Get status key based on score (for translation lookup)
+function getStatusKey(score: number): 'excellent' | 'good' | 'needsAttention' | 'critical' {
+  if (score >= 80) return 'excellent';
+  if (score >= 60) return 'good';
+  if (score >= 40) return 'needsAttention';
+  return 'critical';
 }
 
 // Circular progress component - responsive sizing
@@ -103,6 +104,8 @@ function CircularProgress({
   mobileStrokeWidth = 6,
   className,
   isMobile = false,
+  ariaLabel,
+  healthLabel,
 }: {
   value: number;
   size?: number;
@@ -111,6 +114,8 @@ function CircularProgress({
   mobileStrokeWidth?: number;
   className?: string;
   isMobile?: boolean;
+  ariaLabel: string;
+  healthLabel: string;
 }) {
   const actualSize = isMobile ? mobileSize : size;
   const actualStroke = isMobile ? mobileStrokeWidth : strokeWidth;
@@ -127,7 +132,7 @@ function CircularProgress({
       aria-valuenow={value}
       aria-valuemin={0}
       aria-valuemax={100}
-      aria-label={`Оценка здоровья психометрики: ${value} из 100`}
+      aria-label={ariaLabel}
     >
       <svg width={actualSize} height={actualSize} className="-rotate-90" aria-hidden="true">
         {/* Background circle */}
@@ -160,7 +165,7 @@ function CircularProgress({
       <div className="absolute inset-0 flex flex-col items-center justify-center" aria-hidden="true">
         <span className={cn(isMobile ? 'text-2xl' : 'text-3xl', 'font-bold', colors.text)}>{value}</span>
         <span className={cn(isMobile ? 'text-xs' : 'text-xs', 'text-muted-foreground flex items-center gap-0.5')}>
-          Health
+          {healthLabel}
           {!isMobile && <HealthScoreHelp />}
         </span>
       </div>
@@ -173,10 +178,12 @@ function CompactHealthScore({
   score,
   statusLabel,
   trendValue,
+  ariaLabel,
 }: {
   score: number;
   statusLabel: string;
   trendValue: number;
+  ariaLabel: string;
 }) {
   const colors = getScoreColor(score);
   const TrendIcon = trendValue >= 0 ? TrendingUp : TrendingDown;
@@ -208,7 +215,7 @@ function CompactHealthScore({
         aria-valuenow={score}
         aria-valuemin={0}
         aria-valuemax={100}
-        aria-label={`Здоровье: ${score}%`}
+        aria-label={ariaLabel}
       >
         <div className="h-1 w-full rounded-full bg-muted/50 overflow-hidden" aria-hidden="true">
           <div
@@ -262,20 +269,26 @@ function MobileStatPill({
 
 export function DashboardHero({ report, className }: DashboardHeroProps) {
   const isMobile = useIsMobile();
+  const t = useTranslations('psychometrics');
+  const locale = useLocale();
   const healthScore = useMemo(() => calculateHealthScore(report), [report]);
   const colors = getScoreColor(healthScore);
-  const statusLabel = getStatusLabel(healthScore);
+  const statusKey = getStatusKey(healthScore);
+  const statusLabel = t(`healthStatus.${statusKey}`);
+
+  // Get date-fns locale based on current locale
+  const dateFnsLocale = locale === 'ru' ? ru : enUS;
 
   // Format last audit time
   const lastAuditDisplay = useMemo(() => {
     if (!report.lastAuditRun) return null;
     try {
       const date = new Date(report.lastAuditRun);
-      return formatDistanceToNow(date, { addSuffix: true, locale: ru });
+      return formatDistanceToNow(date, { addSuffix: true, locale: dateFnsLocale });
     } catch {
       return null;
     }
-  }, [report.lastAuditRun]);
+  }, [report.lastAuditRun, dateFnsLocale]);
 
   // Trend indicator (mock - in real app this would come from historical data)
   const trendValue = 2.5; // Positive means improvement
@@ -300,9 +313,9 @@ export function DashboardHero({ report, className }: DashboardHeroProps) {
         aria-describedby="psychometric-health-status"
       >
         {/* Screen reader heading */}
-        <h2 id="psychometric-health-heading" className="sr-only">Здоровье психометрики</h2>
+        <h2 id="psychometric-health-heading" className="sr-only">{t('hero.ariaPsychometricHealth')}</h2>
         <p id="psychometric-health-status" className="sr-only">
-          Оценка: {healthScore} из 100, статус: {statusLabel}
+          {t('hero.ariaScoreStatus', { score: healthScore, status: statusLabel })}
         </p>
 
         {/* Background decoration - smaller on mobile */}
@@ -320,35 +333,36 @@ export function DashboardHero({ report, className }: DashboardHeroProps) {
             score={healthScore}
             statusLabel={statusLabel}
             trendValue={trendValue}
+            ariaLabel={t('hero.ariaHealth', { score: healthScore })}
           />
 
           {/* Stats: Compact 4-column grid */}
-          <div className="grid grid-cols-4 gap-1.5" role="group" aria-label="Статистика психометрики">
+          <div className="grid grid-cols-4 gap-1.5" role="group" aria-label={t('hero.ariaStats')}>
             <MobileStatPill
               icon={Clock}
-              label="audit"
+              label={t('hero.audit')}
               value={lastAuditDisplay ? lastAuditDisplay.split(' ')[0] : '—'}
-              ariaLabel={`Последний аудит: ${lastAuditDisplay ?? 'не проводился'}`}
+              ariaLabel={lastAuditDisplay ? t('hero.ariaLastAudit', { time: lastAuditDisplay }) : t('hero.ariaLastAuditNever')}
             />
             <MobileStatPill
               icon={FileText}
-              label="items"
+              label={t('hero.items')}
               value={report.totalItems}
-              ariaLabel={`Всего элементов: ${report.totalItems}`}
+              ariaLabel={t('hero.ariaTotalItems', { count: report.totalItems })}
             />
             <MobileStatPill
               icon={Percent}
-              label="active"
+              label={t('hero.active')}
               value={`${activeRate}%`}
               valueColor="text-emerald-600"
-              ariaLabel={`Активных элементов: ${activeRate}%`}
+              ariaLabel={t('hero.ariaActiveItems', { rate: activeRate })}
             />
             <MobileStatPill
               icon={AlertTriangle}
-              label="issues"
+              label={t('hero.issues')}
               value={report.flaggedItems}
               valueColor={report.flaggedItems > 0 ? 'text-orange-600' : undefined}
-              ariaLabel={`Проблемных элементов: ${report.flaggedItems}`}
+              ariaLabel={t('hero.ariaIssues', { count: report.flaggedItems })}
             />
           </div>
         </div>
@@ -376,12 +390,18 @@ export function DashboardHero({ report, className }: DashboardHeroProps) {
       <div className="relative flex flex-col md:flex-row md:items-center md:justify-between gap-6">
         {/* Left side - Score and status */}
         <div className="flex items-center gap-6">
-          <CircularProgress value={healthScore} size={100} strokeWidth={6} />
+          <CircularProgress
+            value={healthScore}
+            size={100}
+            strokeWidth={6}
+            ariaLabel={t('hero.ariaHealthScore', { value: healthScore })}
+            healthLabel={t('hero.health')}
+          />
 
           <div className="space-y-1">
             <div className="flex items-center gap-2">
               <Activity className={cn('h-5 w-5', colors.text)} />
-              <h2 className="text-lg font-semibold">Psychometric Health</h2>
+              <h2 className="text-lg font-semibold">{t('hero.psychometricHealth')}</h2>
             </div>
             <p className={cn('text-2xl font-bold', colors.text)}>
               {statusLabel}
@@ -393,7 +413,7 @@ export function DashboardHero({ report, className }: DashboardHeroProps) {
               <span className={trendColor}>
                 {trendValue >= 0 ? '+' : ''}{trendValue.toFixed(1)}%
               </span>
-              <span className="text-muted-foreground">vs last 7 days</span>
+              <span className="text-muted-foreground">{t('hero.vsLast7Days')}</span>
             </div>
           </div>
         </div>
@@ -406,9 +426,9 @@ export function DashboardHero({ report, className }: DashboardHeroProps) {
               <Clock className="h-4 w-4 text-muted-foreground" />
             </div>
             <div>
-              <p className="text-xs text-muted-foreground">Last Audit</p>
+              <p className="text-xs text-muted-foreground">{t('hero.audit')}</p>
               <p className="font-medium text-sm">
-                {lastAuditDisplay || 'Never'}
+                {lastAuditDisplay || t('hero.never')}
               </p>
             </div>
           </div>
@@ -416,7 +436,7 @@ export function DashboardHero({ report, className }: DashboardHeroProps) {
           {/* Total Items */}
           <div className="text-center md:text-left">
             <p className="text-xs text-muted-foreground flex items-center justify-center md:justify-start gap-0.5">
-              Total Items
+              {t('hero.totalItems')}
               <HeroTotalItemsHelp />
             </p>
             <p className="text-xl font-bold">{report.totalItems}</p>
@@ -425,7 +445,7 @@ export function DashboardHero({ report, className }: DashboardHeroProps) {
           {/* Active Rate */}
           <div className="text-center md:text-left">
             <p className="text-xs text-muted-foreground flex items-center justify-center md:justify-start gap-0.5">
-              Active Rate
+              {t('hero.activeRate')}
               <HeroActiveRateHelp />
             </p>
             <p className="text-xl font-bold text-emerald-600">{activeRate}%</p>
@@ -434,7 +454,7 @@ export function DashboardHero({ report, className }: DashboardHeroProps) {
           {/* Issues */}
           <div className="text-center md:text-left">
             <p className="text-xs text-muted-foreground flex items-center justify-center md:justify-start gap-0.5">
-              Issues
+              {t('hero.issues')}
               <HeroIssuesHelp />
             </p>
             <p className={cn(
@@ -451,27 +471,27 @@ export function DashboardHero({ report, className }: DashboardHeroProps) {
       <div className="mt-6 pt-4 border-t border-border/50">
         <div className="flex flex-wrap items-center gap-4 text-xs">
           <span className="text-muted-foreground flex items-center gap-0.5">
-            Score Breakdown:
+            {t('hero.scoreBreakdown')}
             <HealthScoreBreakdownHelp />
           </span>
           <div className="flex items-center gap-2">
             <div className="w-2.5 h-2.5 rounded bg-emerald-500" />
             <span className="flex items-center gap-0.5">
-              Active Items (40%)
+              {t('hero.activeItems40')}
               <ActiveItemsWeightHelp />
             </span>
           </div>
           <div className="flex items-center gap-2">
             <div className="w-2.5 h-2.5 rounded bg-blue-500" />
             <span className="flex items-center gap-0.5">
-              Reliable Competencies (30%)
+              {t('hero.reliableCompetencies30')}
               <ReliableCompetenciesWeightHelp />
             </span>
           </div>
           <div className="flex items-center gap-2">
             <div className="w-2.5 h-2.5 rounded bg-amber-500" />
             <span className="flex items-center gap-0.5">
-              Non-Flagged Items (30%)
+              {t('hero.nonFlaggedItems30')}
               <NonFlaggedItemsWeightHelp />
             </span>
           </div>

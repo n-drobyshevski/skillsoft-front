@@ -21,6 +21,7 @@ import {
 import { AssessmentGoal, AssessmentGoalInfo, TestTemplateSummary } from "@/types/domain";
 import StartTestDriveButton from "./StartTestDriveButton";
 import StartTestSessionButton from "./StartTestSessionButton";
+import { useTranslations } from 'next-intl';
 
 interface MobileTemplateActionsProps {
   template: TestTemplateSummary;
@@ -32,11 +33,11 @@ interface MobileTemplateActionsProps {
 /**
  * Format duration for display
  */
-function formatDuration(minutes: number): string {
-  if (minutes < 60) return `${minutes} мин`;
+function formatDuration(minutes: number, t: ReturnType<typeof useTranslations>): string {
+  if (minutes < 60) return `${minutes} ${t('minutes')}`;
   const hours = Math.floor(minutes / 60);
   const mins = minutes % 60;
-  return mins > 0 ? `${hours}ч ${mins}м` : `${hours}ч`;
+  return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`;
 }
 
 /**
@@ -54,6 +55,8 @@ export default function MobileTemplateActions({
   open,
   onOpenChange,
 }: MobileTemplateActionsProps) {
+  const t = useTranslations('template');
+  const tCommon = useTranslations('common');
   const goalInfo = template.goal
     ? AssessmentGoalInfo[template.goal]
     : AssessmentGoalInfo[AssessmentGoal.OVERVIEW];
@@ -74,7 +77,7 @@ export default function MobileTemplateActions({
           <div className="flex items-center justify-center gap-3 mt-2 text-xs text-muted-foreground">
             <span className="inline-flex items-center gap-1">
               <Clock className="size-3" />
-              {formatDuration(template.timeLimitMinutes)}
+              {formatDuration(template.timeLimitMinutes, t)}
             </span>
             <span className="text-muted-foreground/40">•</span>
             <span className="inline-flex items-center gap-1">
@@ -84,7 +87,7 @@ export default function MobileTemplateActions({
             <span className="text-muted-foreground/40">•</span>
             <span className="inline-flex items-center gap-1">
               <BookOpen className="size-3" />
-              {template.competencyCount} навыков
+              {template.competencyCount} {t('skills')}
             </span>
           </div>
         </DrawerHeader>
@@ -108,7 +111,7 @@ export default function MobileTemplateActions({
                 onClick={() => onOpenChange(false)}
               >
                 <Eye className="h-4 w-4" />
-                Подробнее
+                {t('details')}
               </Button>
             </Link>
 
@@ -125,7 +128,7 @@ export default function MobileTemplateActions({
                 className="w-full h-11 justify-center gap-2 text-sm font-medium"
                 onClick={() => onOpenChange(false)}
               >
-                Отмена
+                {tCommon('cancel')}
               </Button>
             )}
           </div>
@@ -140,7 +143,7 @@ export default function MobileTemplateActions({
                   onClick={() => onOpenChange(false)}
                 >
                   <Settings className="h-4 w-4" />
-                  Настройки
+                  {t('settings')}
                 </Button>
               </Link>
 
@@ -151,7 +154,7 @@ export default function MobileTemplateActions({
                   onClick={() => onOpenChange(false)}
                 >
                   <Pencil className="h-4 w-4" />
-                  Изменить
+                  {tCommon('edit')}
                 </Button>
               </Link>
             </div>

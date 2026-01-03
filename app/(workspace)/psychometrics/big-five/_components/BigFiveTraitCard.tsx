@@ -2,9 +2,10 @@
 
 import { Card, CardContent } from '@/components/ui/card';
 import { ReliabilityStatusBadge } from '../../_components/ReliabilityStatusBadge';
-import { BigFiveReliability, BigFiveTrait, BigFiveTraitDisplay } from '@/types/psychometrics';
+import { BigFiveReliability, BigFiveTrait } from '@/types/psychometrics';
 import { cn } from '@/lib/utils';
 import { Users, FileText, BarChart3 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 /**
  * Color palette for each Big Five trait
@@ -53,6 +54,21 @@ export const TRAIT_COLORS: Record<BigFiveTrait, {
   },
 };
 
+/**
+ * Maps BigFiveTrait enum values to translation keys
+ * Exported for reuse in other Big Five components
+ */
+export const getTraitKey = (trait: BigFiveTrait): string => {
+  const mapping: Record<BigFiveTrait, string> = {
+    [BigFiveTrait.OPENNESS]: 'openness',
+    [BigFiveTrait.CONSCIENTIOUSNESS]: 'conscientiousness',
+    [BigFiveTrait.EXTRAVERSION]: 'extraversion',
+    [BigFiveTrait.AGREEABLENESS]: 'agreeableness',
+    [BigFiveTrait.EMOTIONAL_STABILITY]: 'emotionalStability',
+  };
+  return mapping[trait];
+};
+
 interface BigFiveTraitCardProps {
   reliability: BigFiveReliability;
   className?: string;
@@ -63,8 +79,9 @@ interface BigFiveTraitCardProps {
  * with trait-specific color accent and statistics
  */
 export function BigFiveTraitCard({ reliability, className }: BigFiveTraitCardProps) {
+  const t = useTranslations('psychometrics.bigFive');
   const colors = TRAIT_COLORS[reliability.trait];
-  const traitInfo = BigFiveTraitDisplay[reliability.trait];
+  const traitKey = getTraitKey(reliability.trait);
 
   const formatAlpha = (value: number | null): string => {
     if (value === null) return '-';
@@ -90,10 +107,10 @@ export function BigFiveTraitCard({ reliability, className }: BigFiveTraitCardPro
         <div className="flex items-start justify-between gap-2 mb-3">
           <div className="min-w-0 flex-1">
             <h3 className={cn('font-semibold text-sm truncate', colors.text)}>
-              {traitInfo.label}
+              {t(`traits.${traitKey}.label`)}
             </h3>
             <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">
-              {traitInfo.description}
+              {t(`traits.${traitKey}.description`)}
             </p>
           </div>
           <ReliabilityStatusBadge
@@ -111,7 +128,7 @@ export function BigFiveTraitCard({ reliability, className }: BigFiveTraitCardPro
             >
               {formatAlpha(reliability.cronbachAlpha)}
             </span>
-            <span className="text-xs text-muted-foreground">alpha</span>
+            <span className="text-xs text-muted-foreground">{t('card.alpha')}</span>
           </div>
         </div>
 
@@ -125,7 +142,7 @@ export function BigFiveTraitCard({ reliability, className }: BigFiveTraitCardPro
               {reliability.contributingCompetencies ?? '-'}
             </div>
             <div className="text-[11px] text-muted-foreground">
-              Компетенций
+              {t('stats.competencies')}
             </div>
           </div>
 
@@ -137,7 +154,7 @@ export function BigFiveTraitCard({ reliability, className }: BigFiveTraitCardPro
               {reliability.totalItems ?? '-'}
             </div>
             <div className="text-[11px] text-muted-foreground">
-              Вопросов
+              {t('stats.questions')}
             </div>
           </div>
 
@@ -149,7 +166,7 @@ export function BigFiveTraitCard({ reliability, className }: BigFiveTraitCardPro
               {reliability.sampleSize?.toLocaleString() ?? '-'}
             </div>
             <div className="text-[11px] text-muted-foreground">
-              Ответов
+              {t('stats.responses')}
             </div>
           </div>
         </div>

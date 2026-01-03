@@ -2,6 +2,7 @@
 
 import * as React from 'react';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -205,55 +206,59 @@ export function NoItemsFound({
   onClearFilters?: () => void;
   className?: string;
 }) {
+  const t = useTranslations('psychometrics');
   return (
     <EmptyState
       variant="filter"
       icon={Filter}
-      title="Элементы не найдены"
-      description="Попробуйте изменить фильтры или поисковый запрос"
-      action={onClearFilters ? { label: 'Сбросить фильтры', onClick: onClearFilters } : undefined}
+      title={t('itemsNotFound')}
+      description={t('tryChangingFilters')}
+      action={onClearFilters ? { label: t('resetFilters'), onClick: onClearFilters } : undefined}
       className={className}
     />
   );
 }
 
 export function NoDataYet({
-  entityName = 'данные',
+  entityName = 'data',
   className,
 }: {
   entityName?: string;
   className?: string;
 }) {
+  const t = useTranslations('psychometrics');
   return (
     <EmptyState
       variant="default"
       icon={Database}
-      title={`Нет ${entityName}`}
-      description="Данные появятся после проведения первых тестов"
+      title={t('noData', { entityName })}
+      description={t('dataWillAppear')}
       className={className}
     />
   );
 }
 
 export function AllItemsValid({ className }: { className?: string }) {
+  const t = useTranslations('psychometrics');
   return (
     <EmptyState
       variant="success"
       icon={CheckCircle2}
-      title="Все элементы в порядке"
-      description="Все вопросы соответствуют психометрическим стандартам качества"
+      title={t('allItemsOk')}
+      description={t('allQuestionsValid')}
       className={className}
     />
   );
 }
 
 export function NoFlaggedItems({ className }: { className?: string }) {
+  const t = useTranslations('psychometrics');
   return (
     <EmptyState
       variant="success"
       icon={CheckCircle2}
-      title="Нет проблемных элементов"
-      description="Все вопросы имеют хорошие показатели дискриминации и сложности"
+      title={t('noFlaggedItems')}
+      description={t('allQuestionsGood')}
       className={className}
     />
   );
@@ -268,17 +273,18 @@ export function SearchNoResults({
   onClear?: () => void;
   className?: string;
 }) {
+  const t = useTranslations('psychometrics');
   return (
     <EmptyState
       variant="search"
       icon={Search}
-      title="Ничего не найдено"
+      title={t('nothingFoundSearch')}
       description={
         query
-          ? `По запросу "${query}" ничего не найдено`
-          : 'Попробуйте изменить поисковый запрос'
+          ? t('noResultsFor', { query })
+          : t('tryDifferentQuery')
       }
-      action={onClear ? { label: 'Очистить поиск', onClick: onClear } : undefined}
+      action={onClear ? { label: t('clearSearchBtn'), onClick: onClear } : undefined}
       className={className}
     />
   );
@@ -293,15 +299,16 @@ export function InsufficientData({
   currentCount?: number;
   className?: string;
 }) {
+  const t = useTranslations('psychometrics');
   const description = currentCount !== undefined
-    ? `Необходимо минимум ${requiredCount} ответов для расчета. Текущее количество: ${currentCount}`
-    : `Необходимо минимум ${requiredCount} ответов для расчета психометрических показателей`;
+    ? t('minResponses', { required: requiredCount, current: currentCount })
+    : t('minResponsesGeneric', { required: requiredCount });
 
   return (
     <EmptyState
       variant="warning"
       icon={AlertTriangle}
-      title="Недостаточно данных"
+      title={t('insufficientData')}
       description={description}
       className={className}
     />

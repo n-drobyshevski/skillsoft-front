@@ -56,23 +56,11 @@ import {
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useTranslations } from 'next-intl';
+import { useEnumTranslation } from '@/hooks/useEnumTranslation';
 
 // Tab configuration for status filtering
 type StatusTabValue = 'all' | ItemValidityStatus;
-
-interface TabConfig {
-  value: StatusTabValue;
-  label: string;
-  shortLabel: string; // For mobile
-}
-
-const STATUS_TABS: TabConfig[] = [
-  { value: 'all', label: 'Все', shortLabel: 'Все' },
-  { value: ItemValidityStatus.ACTIVE, label: 'Активные', shortLabel: 'Актив.' },
-  { value: ItemValidityStatus.PROBATION, label: 'Пробационные', shortLabel: 'Проб.' },
-  { value: ItemValidityStatus.FLAGGED_FOR_REVIEW, label: 'На проверке', shortLabel: 'Провер.' },
-  { value: ItemValidityStatus.RETIRED, label: 'Отключенные', shortLabel: 'Откл.' },
-];
 
 interface ItemsTableClientProps {
   initialItems: Page<ItemStatistics>;
@@ -132,6 +120,18 @@ export function ItemsTableClient({
   const searchParams = useSearchParams();
   const isMobile = useIsMobile();
   const queryClient = useQueryClient();
+  const t = useTranslations('psychometrics');
+  const tCommon = useTranslations('common');
+  const { translate: translateStatus } = useEnumTranslation<ItemValidityStatus>('itemValidityStatus');
+
+  // Status tabs with translations
+  const STATUS_TABS = [
+    { value: 'all' as StatusTabValue, label: tCommon('all'), shortLabel: tCommon('all') },
+    { value: ItemValidityStatus.ACTIVE, label: translateStatus(ItemValidityStatus.ACTIVE), shortLabel: t('itemsTable.tabs.active') },
+    { value: ItemValidityStatus.PROBATION, label: translateStatus(ItemValidityStatus.PROBATION), shortLabel: t('itemsTable.tabs.probation') },
+    { value: ItemValidityStatus.FLAGGED_FOR_REVIEW, label: translateStatus(ItemValidityStatus.FLAGGED_FOR_REVIEW), shortLabel: t('itemsTable.tabs.flagged') },
+    { value: ItemValidityStatus.RETIRED, label: translateStatus(ItemValidityStatus.RETIRED), shortLabel: t('itemsTable.tabs.retired') },
+  ];
   const [isPending, startTransition] = useTransition();
 
   // Optimistic tab state for instant UI feedback
@@ -296,7 +296,7 @@ export function ItemsTableClient({
       .map((item) => item.questionId);
 
     if (questionIds.length === 0) {
-      toast.error('Не найдены элементы для отключения');
+      toast.error(t('itemsTable.batch.noItemsToRetire'));
       return;
     }
 
@@ -305,31 +305,31 @@ export function ItemsTableClient({
       const results = await psychometricsApi.batchUpdateItemStatus(
         questionIds,
         ItemValidityStatus.RETIRED,
-        'Массовое отключение через интерфейс управления'
+        t('itemsTable.batch.retireReason')
       );
 
       const successCount = results.filter((r) => r.success).length;
       const failCount = results.filter((r) => !r.success).length;
 
       if (failCount === 0) {
-        toast.success(`Отключено: ${successCount} элементов`, {
-          description: 'Элементы успешно переведены в статус "Отключенные"',
+        toast.success(t('itemsTable.batch.retiredCount', { count: successCount }), {
+          description: t('itemsTable.toast.retireSuccess'),
         });
       } else if (successCount > 0) {
-        toast.warning(`Отключено: ${successCount}, ошибок: ${failCount}`, {
-          description: 'Некоторые элементы не удалось обновить',
+        toast.warning(t('itemsTable.batch.partialSuccess', { success: successCount, failed: failCount }), {
+          description: t('itemsTable.toast.partialError'),
         });
       } else {
-        toast.error('Не удалось отключить элементы', {
-          description: results[0]?.error || 'Произошла ошибка при обновлении',
+        toast.error(t('itemsTable.toast.retireFailed'), {
+          description: results[0]?.error || t('itemsTable.toast.error'),
         });
       }
 
       clearSelection();
       router.refresh();
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Неизвестная ошибка';
-      toast.error('Ошибка при отключении элементов', { description: message });
+      const message = error instanceof Error ? error.message : t('itemsTable.toast.unknownError');
+      toast.error(t('itemsTable.toast.retireError'), { description: message });
     } finally {
       setIsBatchLoading(false);
     }
@@ -343,7 +343,7 @@ export function ItemsTableClient({
       .map((item) => item.questionId);
 
     if (questionIds.length === 0) {
-      toast.error('Не найдены элементы для активации');
+      toast.error(t('itemsTable.batch.noItemsToActivate'));
       return;
     }
 
@@ -352,31 +352,31 @@ export function ItemsTableClient({
       const results = await psychometricsApi.batchUpdateItemStatus(
         questionIds,
         ItemValidityStatus.ACTIVE,
-        'Массовая активация через интерфейс управления'
+        t('itemsTable.batch.activateReason')
       );
 
       const successCount = results.filter((r) => r.success).length;
       const failCount = results.filter((r) => !r.success).length;
 
       if (failCount === 0) {
-        toast.success(`Активировано: ${successCount} элементов`, {
-          description: 'Элементы успешно переведены в статус "Активные"',
+        toast.success(t('itemsTable.batch.activatedCount', { count: successCount }), {
+          description: t('itemsTable.toast.activateSuccess'),
         });
       } else if (successCount > 0) {
-        toast.warning(`Активировано: ${successCount}, ошибок: ${failCount}`, {
-          description: 'Некоторые элементы не удалось обновить',
+        toast.warning(t('itemsTable.batch.partialSuccess', { success: successCount, failed: failCount }), {
+          description: t('itemsTable.toast.partialError'),
         });
       } else {
-        toast.error('Не удалось активировать элементы', {
-          description: results[0]?.error || 'Произошла ошибка при обновлении',
+        toast.error(t('itemsTable.toast.activateFailed'), {
+          description: results[0]?.error || t('itemsTable.toast.error'),
         });
       }
 
       clearSelection();
       router.refresh();
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Неизвестная ошибка';
-      toast.error('Ошибка при активации элементов', { description: message });
+      const message = error instanceof Error ? error.message : t('itemsTable.toast.unknownError');
+      toast.error(t('itemsTable.toast.activateError'), { description: message });
     } finally {
       setIsBatchLoading(false);
     }
@@ -446,11 +446,11 @@ export function ItemsTableClient({
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
             <Input
               type="search"
-              placeholder="Поиск по вопросам..."
+              placeholder={t('itemsTable.searchPlaceholder')}
               value={searchInput}
               onChange={(e) => handleSearchChange(e.target.value)}
               className="pl-9 pr-9 min-h-[48px] sm:min-h-[40px]"
-              aria-label="Поиск по тексту вопроса"
+              aria-label={t('itemsTable.searchPlaceholder')}
             />
             {searchInput && (
               <Button
@@ -459,7 +459,7 @@ export function ItemsTableClient({
                 size="icon"
                 onClick={handleClearSearch}
                 className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8"
-                aria-label="Очистить поиск"
+                aria-label={tCommon('clearSearch')}
               >
                 <X className="h-4 w-4" />
               </Button>
@@ -473,12 +473,12 @@ export function ItemsTableClient({
           >
             <SelectTrigger
               className="w-full sm:w-[280px] min-h-[48px] sm:min-h-[40px]"
-              aria-label="Фильтр по компетенции"
+              aria-label={t('itemsTable.filterByCompetency')}
             >
-              <SelectValue placeholder="Все компетенции" />
+              <SelectValue placeholder={t('itemsTable.allCompetencies')} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Все компетенции</SelectItem>
+              <SelectItem value="all">{t('itemsTable.allCompetencies')}</SelectItem>
               {competencies.map((competency) => (
                 <SelectItem key={competency.id} value={competency.id}>
                   {competency.name}
@@ -491,10 +491,10 @@ export function ItemsTableClient({
 
       {/* Results count */}
       <div className="text-sm text-muted-foreground" role="status" aria-live="polite">
-        Найдено: {totalElements} элементов
+        {t('itemsTable.foundCount', { count: totalElements })}
         {currentSearch && (
           <span className="ml-1">
-            по запросу «<span className="font-medium">{currentSearch}</span>»
+            {t('itemsTable.forQuery', { query: currentSearch })}
           </span>
         )}
       </div>
@@ -506,7 +506,7 @@ export function ItemsTableClient({
           <div className="absolute inset-0 z-10 flex items-center justify-center bg-background/60 backdrop-blur-[1px] rounded-lg">
             <div className="flex items-center gap-2 bg-background/90 px-4 py-2 rounded-full shadow-sm border">
               <Loader2 className="h-4 w-4 animate-spin text-primary" />
-              <span className="text-sm text-muted-foreground">Загрузка...</span>
+              <span className="text-sm text-muted-foreground">{tCommon('loading')}</span>
             </div>
           </div>
         )}
@@ -530,12 +530,12 @@ export function ItemsTableClient({
               <Checkbox
                 checked={allSelected ? true : someSelected ? 'indeterminate' : false}
                 onCheckedChange={handleSelectAll}
-                aria-label={allSelected ? 'Снять выделение со всех' : 'Выбрать все на странице'}
+                aria-label={allSelected ? t('itemsTable.batch.deselectAll') : t('itemsTable.batch.selectAllPage')}
                 className="h-5 w-5"
               />
             </div>
             <span className="text-sm text-muted-foreground">
-              {allSelected ? 'Снять выделение' : 'Выбрать все'}
+              {allSelected ? t('itemsTable.batch.deselectAll') : t('itemsTable.batch.selectAll')}
             </span>
           </label>
 
@@ -557,11 +557,11 @@ export function ItemsTableClient({
                     <Checkbox
                       checked={allSelected ? true : someSelected ? 'indeterminate' : false}
                       onCheckedChange={handleSelectAll}
-                      aria-label="Выбрать все элементы на странице"
+                      aria-label={t('itemsTable.batch.selectAllPage')}
                     />
                   </TableHead>
-                  <TableHead className="w-[40%]">Вопрос</TableHead>
-                  <TableHead>Компетенция</TableHead>
+                  <TableHead className="w-[40%]">{t('itemsTable.columns.question')}</TableHead>
+                  <TableHead>{t('itemsTable.columns.competency')}</TableHead>
                   <TableHead className="text-center">
                     <TableHeaderWithHelp label="p" helpKey="difficulty" />
                   </TableHead>
@@ -569,10 +569,10 @@ export function ItemsTableClient({
                     <TableHeaderWithHelp label="rpb" helpKey="discrimination" />
                   </TableHead>
                   <TableHead className="text-center">
-                    <TableHeaderWithHelp label="Ответы" helpKey="responseCount" />
+                    <TableHeaderWithHelp label={t('itemsTable.columns.responses')} helpKey="responseCount" />
                   </TableHead>
                   <TableHead>
-                    <TableHeaderWithHelp label="Статус" helpKey="validityStatus" />
+                    <TableHeaderWithHelp label={t('itemsTable.columns.status')} helpKey="validityStatus" />
                   </TableHead>
                 </TableRow>
               </TableHeader>
@@ -661,10 +661,10 @@ export function ItemsTableClient({
         <nav
           className="flex items-center justify-between"
           role="navigation"
-          aria-label="Навигация по страницам"
+          aria-label={tCommon('pagination.navigation')}
         >
           <div className="text-sm text-muted-foreground hidden sm:block">
-            Страница {pageNumber + 1} из {totalPages}
+            {tCommon('pagination.pageOf', { current: pageNumber + 1, total: totalPages })}
           </div>
           <div className="flex items-center gap-1 sm:gap-1 w-full sm:w-auto justify-center sm:justify-end">
             <Button
@@ -673,7 +673,7 @@ export function ItemsTableClient({
               onClick={() => handlePageChange(0)}
               disabled={first}
               className="h-11 w-11 sm:h-9 sm:w-9"
-              aria-label="Первая страница"
+              aria-label={tCommon('pagination.firstPage')}
             >
               <ChevronsLeft className="h-5 w-5 sm:h-4 sm:w-4" />
             </Button>
@@ -683,7 +683,7 @@ export function ItemsTableClient({
               onClick={() => handlePageChange(pageNumber - 1)}
               disabled={first}
               className="h-11 w-11 sm:h-9 sm:w-9"
-              aria-label="Предыдущая страница"
+              aria-label={tCommon('pagination.previousPage')}
             >
               <ChevronLeft className="h-5 w-5 sm:h-4 sm:w-4" />
             </Button>
@@ -699,7 +699,7 @@ export function ItemsTableClient({
               onClick={() => handlePageChange(pageNumber + 1)}
               disabled={last}
               className="h-11 w-11 sm:h-9 sm:w-9"
-              aria-label="Следующая страница"
+              aria-label={tCommon('pagination.nextPage')}
             >
               <ChevronRight className="h-5 w-5 sm:h-4 sm:w-4" />
             </Button>
@@ -709,7 +709,7 @@ export function ItemsTableClient({
               onClick={() => handlePageChange(totalPages - 1)}
               disabled={last}
               className="h-11 w-11 sm:h-9 sm:w-9"
-              aria-label="Последняя страница"
+              aria-label={tCommon('pagination.lastPage')}
             >
               <ChevronsRight className="h-5 w-5 sm:h-4 sm:w-4" />
             </Button>

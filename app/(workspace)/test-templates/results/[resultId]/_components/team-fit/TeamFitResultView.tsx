@@ -10,12 +10,13 @@ import {
   Lightbulb,
   Target
 } from 'lucide-react';
-import CompetencyRadarChart from '@/components/data-display/charts/CompetencyRadarChart';
 import { useBigFiveProjection, bigFiveToArray } from '@/hooks/useBigFiveProjection';
 import { TeamFitHero } from './TeamFitHero';
 import { CompetencyProfile } from '../shared/CompetencyProfile';
 import { ActionButtonsBar } from '../shared/ActionButtonsBar';
 import { BaseResultViewProps } from '../shared/types';
+import { TeamSaturationRadar } from '@/components/results';
+import { toTeamSaturationDataSimulated } from '@/lib/result-transformers';
 
 /**
  * Team Fit Result View for Scenario C (Team Compatibility Analysis).
@@ -36,13 +37,10 @@ export function TeamFitResultView({ result, template }: BaseResultViewProps) {
   const bigFiveProfile = useBigFiveProjection(result.competencyScores);
   const bigFiveData = bigFiveToArray(bigFiveProfile);
 
-  // Prepare data for radar chart
-  const radarData = useMemo(() => {
-    return result.competencyScores.map(cs => ({
-      subject: cs.competencyName,
-      A: Math.round(cs.percentage),
-      fullMark: 100
-    }));
+  // Transform competency scores to team saturation data for radar visualization
+  // Using simulated team data for demo - in production, fetch real team saturation
+  const teamSaturationData = useMemo(() => {
+    return toTeamSaturationDataSimulated(result.competencyScores, 55, 20);
   }, [result.competencyScores]);
 
   // Calculate team contribution insights
@@ -83,26 +81,25 @@ export function TeamFitResultView({ result, template }: BaseResultViewProps) {
 
         {/* Main content grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 animate-fadeInUp-2">
-          {/* Competency Profile */}
+          {/* Team Saturation Radar */}
           <Card className="h-full">
             <CardHeader className="pb-2 sm:pb-3 px-3 sm:px-6">
               <CardTitle className="text-sm sm:text-lg font-semibold flex items-center gap-2">
-                <BarChart3 className="h-4 w-4 sm:h-5 sm:w-5 shrink-0" />
-                Skills Profile
+                <Users className="h-4 w-4 sm:h-5 sm:w-5 shrink-0" />
+                Team Fit Profile
               </CardTitle>
               <CardDescription className="text-[10px] sm:text-sm">
-                Team contribution
+                Your skills vs team saturation
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-3 sm:space-y-4 px-2 sm:px-6">
-              {/* Radar chart */}
-              {radarData.length >= 3 ? (
-                <div className="flex justify-center items-center min-h-[200px] sm:min-h-[280px] md:min-h-[320px]">
-                  <CompetencyRadarChart
-                    data={radarData}
-                    passingScore={passingScore}
-                  />
-                </div>
+            <CardContent className="px-3 sm:px-6">
+              {teamSaturationData.length >= 3 ? (
+                <TeamSaturationRadar
+                  data={teamSaturationData}
+                  showCandidate={true}
+                  showTeam={true}
+                  animate={true}
+                />
               ) : (
                 <div className="flex flex-col items-center justify-center min-h-[200px] sm:min-h-[280px] text-center p-4 sm:p-6">
                   <Lightbulb className="h-8 w-8 sm:h-12 sm:w-12 text-muted-foreground/50 mb-2 sm:mb-3" />
@@ -111,34 +108,6 @@ export function TeamFitResultView({ result, template }: BaseResultViewProps) {
                   </p>
                 </div>
               )}
-
-              {/* Profile stats */}
-              <div className="grid grid-cols-3 gap-1.5 sm:gap-2 pt-2 sm:pt-3 border-t">
-                <div className="text-center p-2 sm:p-2.5 bg-muted/40 rounded-lg min-w-0">
-                  <div className="text-[9px] sm:text-[10px] uppercase tracking-wide text-muted-foreground mb-0.5">
-                    Avg
-                  </div>
-                  <div className="text-sm sm:text-base font-bold tabular-nums">
-                    {insights.avgScore}%
-                  </div>
-                </div>
-                <div className="text-center p-2 sm:p-2.5 bg-blue-500/10 rounded-lg min-w-0">
-                  <div className="text-[9px] sm:text-[10px] uppercase tracking-wide text-muted-foreground mb-0.5">
-                    Strong
-                  </div>
-                  <div className="text-sm sm:text-base font-bold tabular-nums text-blue-600 dark:text-blue-400">
-                    {insights.strengths.length}
-                  </div>
-                </div>
-                <div className="text-center p-2 sm:p-2.5 bg-muted/40 rounded-lg min-w-0">
-                  <div className="text-[9px] sm:text-[10px] uppercase tracking-wide text-muted-foreground mb-0.5">
-                    Grow
-                  </div>
-                  <div className="text-sm sm:text-base font-bold tabular-nums text-muted-foreground">
-                    {insights.developing.length}
-                  </div>
-                </div>
-              </div>
             </CardContent>
           </Card>
 

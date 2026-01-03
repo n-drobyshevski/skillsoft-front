@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { AlertTriangle } from 'lucide-react';
 import {
   AlertDialog,
@@ -32,26 +33,28 @@ export function AbandonDialog({
   onConfirm,
   isSubmitting,
 }: AbandonDialogProps) {
+  const t = useTranslations('assessment');
+
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle className="flex items-center gap-2 text-destructive">
             <AlertTriangle className="h-5 w-5" />
-            Выйти из теста?
+            {t('exitTestQuestion')}
           </AlertDialogTitle>
           <AlertDialogDescription>
-            Ваш прогресс будет сохранён. Вы сможете продолжить позже.
+            {t('progressWillBeSaved')}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={isSubmitting}>Продолжить тест</AlertDialogCancel>
+          <AlertDialogCancel disabled={isSubmitting}>{t('continueTestBtn')}</AlertDialogCancel>
           <AlertDialogAction
             onClick={onConfirm}
             disabled={isSubmitting}
             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
           >
-            {isSubmitting ? 'Выход...' : 'Выйти'}
+            {isSubmitting ? t('exiting') : t('exit')}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

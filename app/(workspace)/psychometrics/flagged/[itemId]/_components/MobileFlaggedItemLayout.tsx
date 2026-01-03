@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -47,8 +48,14 @@ import {
 // Severity level type
 type SeverityLevel = 'critical' | 'high' | 'medium' | 'low';
 
+// Translation function type
+type TranslationFunction = ReturnType<typeof useTranslations<'psychometrics.flaggedDetail'>>;
+
 // Get flag severity and reasons
-function getFlagDetails(item: ItemStatisticsDetail): {
+function getFlagDetails(
+  item: ItemStatisticsDetail,
+  t: TranslationFunction
+): {
   severity: SeverityLevel;
   reasons: string[];
 } {
@@ -57,34 +64,34 @@ function getFlagDetails(item: ItemStatisticsDetail): {
 
   // Check discrimination
   if (item.discriminationFlag === DiscriminationFlag.NEGATIVE) {
-    reasons.push('Негативный индекс различения (rpb < 0) - элемент работает в обратном направлении');
+    reasons.push(t('reasons.negativeDiscrimination'));
     severityLevel = 3;
   } else if (item.discriminationFlag === DiscriminationFlag.CRITICAL) {
-    reasons.push('Критически низкий индекс различения (rpb < 0.1) - элемент не различает респондентов');
+    reasons.push(t('reasons.criticalDiscrimination'));
     severityLevel = Math.max(severityLevel, 2);
   } else if (item.discriminationFlag === DiscriminationFlag.WARNING) {
-    reasons.push('Слабый индекс различения (0.1 <= rpb < 0.25) - маргинальное различение');
+    reasons.push(t('reasons.weakDiscrimination'));
     severityLevel = Math.max(severityLevel, 1);
   }
 
   // Check difficulty
   if (item.difficultyFlag === DifficultyFlag.TOO_HARD) {
-    reasons.push('Слишком высокая сложность (p < 0.2) - менее 20% правильных ответов');
+    reasons.push(t('reasons.tooHard'));
     severityLevel = Math.max(severityLevel, 2);
   } else if (item.difficultyFlag === DifficultyFlag.TOO_EASY) {
-    reasons.push('Слишком низкая сложность (p > 0.9) - более 90% правильных ответов');
+    reasons.push(t('reasons.tooEasy'));
     severityLevel = Math.max(severityLevel, 2);
   }
 
   // Check response count
   if (item.responseCount < 30) {
-    reasons.push('Недостаточно ответов для надежной статистики (< 30)');
+    reasons.push(t('reasons.insufficientResponses'));
     severityLevel = Math.max(severityLevel, 1);
   }
 
   // Default if no specific issues
   if (reasons.length === 0) {
-    reasons.push('Элемент помечен для ручной проверки');
+    reasons.push(t('reasons.flaggedForManualReview'));
     severityLevel = Math.max(severityLevel, 1);
   }
 
@@ -96,7 +103,10 @@ function getFlagDetails(item: ItemStatisticsDetail): {
 }
 
 // Generate suggested actions
-function generateSuggestedActions(item: ItemStatisticsDetail) {
+function generateSuggestedActions(
+  item: ItemStatisticsDetail,
+  t: TranslationFunction
+) {
   const actions: Array<{
     title: string;
     description?: string;
@@ -105,45 +115,45 @@ function generateSuggestedActions(item: ItemStatisticsDetail) {
 
   if (item.discriminationFlag === DiscriminationFlag.NEGATIVE) {
     actions.push({
-      title: 'Рассмотрите удаление элемента',
-      description: 'Негативный rpb означает, что элемент работает против измеряемого конструкта.',
+      title: t('suggestedActions.considerRemoval'),
+      description: t('suggestedActions.considerRemovalDesc'),
       priority: 'high',
     });
     actions.push({
-      title: 'Проверьте ключ ответа',
-      description: 'Возможно, правильный ответ указан неверно.',
+      title: t('suggestedActions.checkAnswerKey'),
+      description: t('suggestedActions.checkAnswerKeyDesc'),
       priority: 'high',
     });
   } else if (item.discriminationFlag === DiscriminationFlag.CRITICAL) {
     actions.push({
-      title: 'Переформулируйте вопрос',
-      description: 'Текущая формулировка не позволяет различать респондентов.',
+      title: t('suggestedActions.reformulateQuestion'),
+      description: t('suggestedActions.reformulateQuestionDesc'),
       priority: 'high',
     });
   } else if (item.discriminationFlag === DiscriminationFlag.WARNING) {
     actions.push({
-      title: 'Наблюдайте за показателями',
-      description: 'Соберите больше данных и повторно оцените.',
+      title: t('suggestedActions.monitorMetrics'),
+      description: t('suggestedActions.monitorMetricsDesc'),
       priority: 'medium',
     });
   }
 
   if (item.difficultyFlag === DifficultyFlag.TOO_HARD) {
     actions.push({
-      title: 'Упростите формулировку',
+      title: t('suggestedActions.simplifyWording'),
       priority: 'medium',
     });
   } else if (item.difficultyFlag === DifficultyFlag.TOO_EASY) {
     actions.push({
-      title: 'Усложните вопрос',
+      title: t('suggestedActions.increaseComplexity'),
       priority: 'medium',
     });
   }
 
   if (item.responseCount < 50) {
     actions.push({
-      title: 'Соберите больше данных',
-      description: `Текущее количество ответов (${item.responseCount}) недостаточно.`,
+      title: t('suggestedActions.collectMoreData'),
+      description: t('suggestedActions.collectMoreDataDesc', { count: item.responseCount }),
       priority: 'low',
     });
   }
@@ -178,8 +188,9 @@ interface MobileFlaggedItemLayoutProps {
 export function MobileFlaggedItemLayout({ item, similarItems }: MobileFlaggedItemLayoutProps) {
   const isMobile = useIsMobile();
   const router = useRouter();
-  const flagDetails = getFlagDetails(item);
-  const suggestedActions = generateSuggestedActions(item);
+  const t = useTranslations('psychometrics.flaggedDetail');
+  const flagDetails = getFlagDetails(item, t);
+  const suggestedActions = generateSuggestedActions(item, t);
 
   // Convert flagged items to SimilarItem format
   const similarItemsFormatted = similarItems.map((fi) => ({
@@ -204,7 +215,7 @@ export function MobileFlaggedItemLayout({ item, similarItems }: MobileFlaggedIte
               className="flex items-center gap-1 text-sm min-h-[44px] -ml-2 pl-2"
             >
               <ArrowLeft className="h-4 w-4" />
-              <span className="hidden xs:inline">Проблемные</span>
+              <span className="hidden xs:inline">{t('backToFlagged')}</span>
             </UiLink>
 
             <ValidityStatusBadge status={item.validityStatus} size="md" />
@@ -230,7 +241,7 @@ export function MobileFlaggedItemLayout({ item, similarItems }: MobileFlaggedIte
             <CardHeader className="pb-2 px-3 pt-3">
               <CardTitle className="text-sm flex items-center gap-2">
                 <FileText className="h-4 w-4" />
-                Текст вопроса
+                {t('questionText')}
               </CardTitle>
             </CardHeader>
             <CardContent className="px-3 pb-3">
@@ -263,7 +274,7 @@ export function MobileFlaggedItemLayout({ item, similarItems }: MobileFlaggedIte
                 <AccordionTrigger className="py-3 hover:no-underline">
                   <div className="flex items-center gap-2 text-sm font-medium">
                     <Lightbulb className="h-4 w-4" />
-                    <span>Рекомендуемые действия</span>
+                    <span>{t('accordion.suggestedActions')}</span>
                     <Badge variant="secondary" className="ml-1 text-xs">
                       {suggestedActions.length}
                     </Badge>
@@ -299,17 +310,17 @@ export function MobileFlaggedItemLayout({ item, similarItems }: MobileFlaggedIte
               <AccordionTrigger className="py-3 hover:no-underline">
                 <div className="flex items-center gap-2 text-sm font-medium">
                   <BarChart3 className="h-4 w-4" />
-                  <span>Дополнительные показатели</span>
+                  <span>{t('accordion.additionalStats')}</span>
                 </div>
               </AccordionTrigger>
               <AccordionContent className="pb-3">
                 <div className="grid grid-cols-2 gap-3">
                   <div className="text-sm">
-                    <p className="text-muted-foreground text-xs">Ответов</p>
+                    <p className="text-muted-foreground text-xs">{t('stats.responses')}</p>
                     <p className="font-semibold">{item.responseCount}</p>
                   </div>
                   <div className="text-sm">
-                    <p className="text-muted-foreground text-xs">Последний расчет</p>
+                    <p className="text-muted-foreground text-xs">{t('stats.lastCalculation')}</p>
                     <p className="font-semibold">
                       {item.lastCalculatedAt
                         ? new Date(item.lastCalculatedAt).toLocaleDateString('ru-RU')
@@ -319,11 +330,11 @@ export function MobileFlaggedItemLayout({ item, similarItems }: MobileFlaggedIte
                   {item.previousDiscriminationIndex != null && (
                     <>
                       <div className="text-sm">
-                        <p className="text-muted-foreground text-xs">Предыдущий rpb</p>
+                        <p className="text-muted-foreground text-xs">{t('stats.previousRpb')}</p>
                         <p className="font-semibold">{item.previousDiscriminationIndex.toFixed(2)}</p>
                       </div>
                       <div className="text-sm">
-                        <p className="text-muted-foreground text-xs">Изменение rpb</p>
+                        <p className="text-muted-foreground text-xs">{t('stats.rpbChange')}</p>
                         <p
                           className={cn(
                             'font-semibold',
@@ -352,7 +363,7 @@ export function MobileFlaggedItemLayout({ item, similarItems }: MobileFlaggedIte
                 <AccordionTrigger className="py-3 hover:no-underline">
                   <div className="flex items-center gap-2 text-sm font-medium">
                     <Target className="h-4 w-4" />
-                    <span>Эффективность дистракторов</span>
+                    <span>{t('accordion.distractorEfficiency')}</span>
                   </div>
                 </AccordionTrigger>
                 <AccordionContent className="pb-3">
@@ -377,7 +388,7 @@ export function MobileFlaggedItemLayout({ item, similarItems }: MobileFlaggedIte
                     ))}
                   </div>
                   <p className="text-xs text-muted-foreground mt-3">
-                    Дистракторы с очень низкими значениями (&lt;5%) неэффективны.
+                    {t('distractorNote')}
                   </p>
                 </AccordionContent>
               </AccordionItem>
@@ -389,7 +400,7 @@ export function MobileFlaggedItemLayout({ item, similarItems }: MobileFlaggedIte
                 <AccordionTrigger className="py-3 hover:no-underline">
                   <div className="flex items-center gap-2 text-sm font-medium">
                     <History className="h-4 w-4" />
-                    <span>История изменений</span>
+                    <span>{t('accordion.statusHistory')}</span>
                     <Badge variant="secondary" className="ml-1 text-xs">
                       {item.statusChangeHistory.length}
                     </Badge>
@@ -423,7 +434,7 @@ export function MobileFlaggedItemLayout({ item, similarItems }: MobileFlaggedIte
                 <AccordionTrigger className="py-3 hover:no-underline">
                   <div className="flex items-center gap-2 text-sm font-medium">
                     <Users className="h-4 w-4" />
-                    <span>Похожие проблемные элементы</span>
+                    <span>{t('accordion.similarItems')}</span>
                     <Badge variant="secondary" className="ml-1 text-xs">
                       {Math.min(similarItemsFormatted.length, 5)}
                     </Badge>
@@ -459,7 +470,7 @@ export function MobileFlaggedItemLayout({ item, similarItems }: MobileFlaggedIte
           <div className="pt-2">
             <Link href={`/psychometrics/items/${item.questionId}`}>
               <Button variant="outline" className="w-full gap-2 h-11">
-                Полная статистика элемента
+                {t('viewFullStats')}
                 <ExternalLink className="h-4 w-4" />
               </Button>
             </Link>

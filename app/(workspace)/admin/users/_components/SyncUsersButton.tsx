@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { RefreshCw, Loader2, CheckCircle, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
@@ -26,12 +27,13 @@ interface SyncResult {
 export function SyncUsersButton() {
   const [isSyncing, setIsSyncing] = useState(false);
   const router = useRouter();
+  const t = useTranslations('users');
 
   const handleSync = async () => {
     setIsSyncing(true);
-    
-    const toastId = toast.loading('Syncing users from Clerk...', {
-      description: 'Fetching user data and updating the database',
+
+    const toastId = toast.loading(t('sync.toast.syncing'), {
+      description: t('sync.toast.syncingDesc'),
     });
 
     try {
@@ -45,25 +47,29 @@ export function SyncUsersButton() {
       const result = await response.json() as SyncResult;
 
       if (result.success) {
-        toast.success('Users synced successfully!', {
+        toast.success(t('sync.toast.success'), {
           id: toastId,
-          description: `Created: ${result.created ?? 0}, Updated: ${result.updated ?? 0}, Total: ${result.total ?? 0}`,
+          description: t('sync.toast.successDesc', {
+            created: result.created ?? 0,
+            updated: result.updated ?? 0,
+            total: result.total ?? 0,
+          }),
           icon: <CheckCircle className="h-4 w-4" />,
         });
 
         // Refresh the router to re-fetch server components with fresh data
         router.refresh();
       } else {
-        toast.error('Sync failed', {
+        toast.error(t('sync.toast.failed'), {
           id: toastId,
-          description: result.error || 'Unknown error occurred',
+          description: result.error || t('sync.toast.failedDesc'),
           icon: <AlertCircle className="h-4 w-4" />,
         });
       }
     } catch (error) {
-      toast.error('Sync failed', {
+      toast.error(t('sync.toast.failed'), {
         id: toastId,
-        description: error instanceof Error ? error.message : 'Network error occurred',
+        description: error instanceof Error ? error.message : t('sync.toast.failedDesc'),
         icon: <AlertCircle className="h-4 w-4" />,
       });
     } finally {
@@ -85,19 +91,19 @@ export function SyncUsersButton() {
             {isSyncing ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin" />
-                <span className="hidden sm:inline">Syncing...</span>
+                <span className="hidden sm:inline">{t('sync.syncing')}</span>
               </>
             ) : (
               <>
                 <RefreshCw className="h-4 w-4" />
-                <span className="hidden sm:inline">Sync from Clerk</span>
-                <span className="sm:hidden">Sync</span>
+                <span className="hidden sm:inline">{t('sync.button')}</span>
+                <span className="sm:hidden">{t('sync.buttonShort')}</span>
               </>
             )}
           </Button>
         </TooltipTrigger>
         <TooltipContent>
-          <p>Manually sync all users from Clerk to the database</p>
+          <p>{t('sync.tooltip')}</p>
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>

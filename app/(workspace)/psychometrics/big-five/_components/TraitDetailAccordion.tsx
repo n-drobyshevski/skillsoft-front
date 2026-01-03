@@ -13,7 +13,6 @@ import { ReliabilityStatusBadge } from '../../_components/ReliabilityStatusBadge
 import {
   BigFiveReliability,
   BigFiveTrait,
-  BigFiveTraitDisplay,
   ReliabilityStatus,
 } from '@/types/psychometrics';
 import { TRAIT_COLORS } from './BigFiveTraitCard';
@@ -27,11 +26,25 @@ import {
   Info,
 } from 'lucide-react';
 import { useAccordionState } from '@/stores/useBigFivePageStore';
+import { useLocale, useTranslations } from 'next-intl';
+
+/**
+ * Maps BigFiveTrait enum to translation key suffix
+ */
+const TRAIT_KEYS: Record<BigFiveTrait, string> = {
+  [BigFiveTrait.OPENNESS]: 'openness',
+  [BigFiveTrait.CONSCIENTIOUSNESS]: 'conscientiousness',
+  [BigFiveTrait.EXTRAVERSION]: 'extraversion',
+  [BigFiveTrait.AGREEABLENESS]: 'agreeableness',
+  [BigFiveTrait.EMOTIONAL_STABILITY]: 'emotionalStability',
+};
 
 interface TraitDetailAccordionProps {
   reliabilityData: BigFiveReliability[];
   className?: string;
 }
+
+type TranslationFunction = ReturnType<typeof useTranslations<'psychometrics.bigFivePage'>>;
 
 /**
  * Trait-specific recommendations based on reliability status
@@ -39,49 +52,51 @@ interface TraitDetailAccordionProps {
 function getRecommendations(
   trait: BigFiveTrait,
   status: ReliabilityStatus,
-  alpha: number | null
+  alpha: number | null,
+  t: TranslationFunction
 ): {
   type: 'success' | 'warning' | 'error' | 'info';
   icon: typeof CheckCircle2;
   title: string;
   description: string;
 }[] {
-  const traitLabel = BigFiveTraitDisplay[trait].label;
+  const traitKey = TRAIT_KEYS[trait];
+  const traitLabel = t(`traits.${traitKey}.label` as Parameters<TranslationFunction>[0]);
   const recommendations: ReturnType<typeof getRecommendations> = [];
 
   if (status === ReliabilityStatus.RELIABLE) {
     recommendations.push({
       type: 'success',
       icon: CheckCircle2,
-      title: 'Отличная надежность',
-      description: `Шкала "${traitLabel}" демонстрирует высокую внутреннюю согласованность. Результаты измерений стабильны и воспроизводимы.`,
+      title: t('recommendations.excellentReliability'),
+      description: t('recommendations.excellentDescription', { trait: traitLabel }),
     });
   } else if (status === ReliabilityStatus.ACCEPTABLE) {
     recommendations.push({
       type: 'warning',
       icon: TrendingUp,
-      title: 'Рекомендуется улучшение',
-      description: `Надежность приемлема, но рекомендуется добавить дополнительные вопросы или пересмотреть существующие для повышения точности измерения "${traitLabel}".`,
+      title: t('recommendations.improvementRecommended'),
+      description: t('recommendations.improvementDescription', { trait: traitLabel }),
     });
   } else if (status === ReliabilityStatus.UNRELIABLE) {
     recommendations.push({
       type: 'error',
       icon: AlertCircle,
-      title: 'Требуется внимание',
-      description: `Низкая надежность шкалы "${traitLabel}". Необходимо провести анализ вопросов и удалить те, которые снижают согласованность.`,
+      title: t('recommendations.needsAttention'),
+      description: t('recommendations.needsAttentionDescription', { trait: traitLabel }),
     });
     recommendations.push({
       type: 'info',
       icon: Lightbulb,
-      title: 'Рекомендация',
-      description: 'Проверьте корреляцию каждого вопроса с общим баллом шкалы. Удалите вопросы с отрицательной или слабой корреляцией.',
+      title: t('recommendations.actionRecommendation'),
+      description: t('recommendations.actionDescription'),
     });
   } else {
     recommendations.push({
       type: 'info',
       icon: Info,
-      title: 'Недостаточно данных',
-      description: `Для расчета надежности шкалы "${traitLabel}" требуется больше ответов. Продолжайте сбор данных.`,
+      title: t('recommendations.insufficientData'),
+      description: t('recommendations.insufficientDataDescription', { trait: traitLabel }),
     });
   }
 
@@ -90,8 +105,8 @@ function getRecommendations(
     recommendations.push({
       type: 'warning',
       icon: TrendingUp,
-      title: 'Близко к порогу',
-      description: 'Alpha находится на границе приемлемого уровня. Небольшие улучшения могут перевести шкалу в категорию "Надежная".',
+      title: t('recommendations.nearThreshold'),
+      description: t('recommendations.nearThresholdDescription'),
     });
   }
 
@@ -99,42 +114,22 @@ function getRecommendations(
 }
 
 /**
- * Get trait-specific description and interpretation guidelines
+ * Get trait-specific description and interpretation guidelines using translations
  */
-function getTraitInterpretation(trait: BigFiveTrait): {
+function getTraitInterpretation(
+  trait: BigFiveTrait,
+  t: TranslationFunction
+): {
   highScore: string;
   lowScore: string;
   importance: string;
 } {
-  const interpretations: Record<BigFiveTrait, ReturnType<typeof getTraitInterpretation>> = {
-    [BigFiveTrait.OPENNESS]: {
-      highScore: 'Креативность, любознательность, готовность к новому опыту',
-      lowScore: 'Практичность, традиционность, предпочтение проверенных методов',
-      importance: 'Важно для ролей, требующих инноваций и творческого мышления',
-    },
-    [BigFiveTrait.CONSCIENTIOUSNESS]: {
-      highScore: 'Организованность, надежность, целеустремленность',
-      lowScore: 'Гибкость, спонтанность, менее структурированный подход',
-      importance: 'Ключевой предиктор эффективности на большинстве позиций',
-    },
-    [BigFiveTrait.EXTRAVERSION]: {
-      highScore: 'Энергичность, общительность, уверенность в социальных ситуациях',
-      lowScore: 'Сдержанность, предпочтение индивидуальной работы',
-      importance: 'Критично для позиций с высоким уровнем социального взаимодействия',
-    },
-    [BigFiveTrait.AGREEABLENESS]: {
-      highScore: 'Сотрудничество, эмпатия, готовность помочь',
-      lowScore: 'Независимость, конкурентность, прямолинейность',
-      importance: 'Важно для командной работы и позиций обслуживания клиентов',
-    },
-    [BigFiveTrait.EMOTIONAL_STABILITY]: {
-      highScore: 'Спокойствие, стрессоустойчивость, эмоциональный контроль',
-      lowScore: 'Эмоциональная реактивность, чувствительность к стрессу',
-      importance: 'Критично для позиций с высоким уровнем стресса и ответственности',
-    },
+  const traitKey = TRAIT_KEYS[trait];
+  return {
+    highScore: t(`traits.${traitKey}.highScore` as Parameters<TranslationFunction>[0]),
+    lowScore: t(`traits.${traitKey}.lowScore` as Parameters<TranslationFunction>[0]),
+    importance: t(`traits.${traitKey}.importance` as Parameters<TranslationFunction>[0]),
   };
-
-  return interpretations[trait];
 }
 
 const recommendationStyles = {
@@ -171,6 +166,8 @@ const recommendationStyles = {
  */
 export function TraitDetailAccordion({ reliabilityData, className }: TraitDetailAccordionProps) {
   const hasAutoExpandedRef = useRef(false);
+  const t = useTranslations('psychometrics.bigFivePage');
+  const locale = useLocale();
 
   // Use Zustand store for accordion state
   const { expandedItems, toggle, expandProblematic } = useAccordionState();
@@ -224,11 +221,24 @@ export function TraitDetailAccordion({ reliabilityData, className }: TraitDetail
     }
   };
 
+  /**
+   * Format date using locale-aware formatting
+   */
+  const formatDate = (dateString: string): string => {
+    return new Date(dateString).toLocaleString(locale === 'ru' ? 'ru-RU' : 'en-US', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  };
+
   return (
     <Card className={className}>
       <CardHeader className="pb-3">
         <CardTitle className="text-base font-semibold">
-          Детальный анализ черт
+          {t('accordion.title')}
         </CardTitle>
       </CardHeader>
       <CardContent className="pt-0">
@@ -240,12 +250,13 @@ export function TraitDetailAccordion({ reliabilityData, className }: TraitDetail
         >
           {sortedData.map((reliability) => {
             const colors = TRAIT_COLORS[reliability.trait];
-            const traitInfo = BigFiveTraitDisplay[reliability.trait];
-            const interpretation = getTraitInterpretation(reliability.trait);
+            const traitKey = TRAIT_KEYS[reliability.trait];
+            const interpretation = getTraitInterpretation(reliability.trait, t);
             const recommendations = getRecommendations(
               reliability.trait,
               reliability.reliabilityStatus,
-              reliability.cronbachAlpha
+              reliability.cronbachAlpha,
+              t
             );
 
             return (
@@ -261,7 +272,7 @@ export function TraitDetailAccordion({ reliabilityData, className }: TraitDetail
                       style={{ backgroundColor: colors.accent }}
                     />
                     <span className={cn('font-medium', colors.text)}>
-                      {traitInfo.label}
+                      {t(`traits.${traitKey}.label` as Parameters<TranslationFunction>[0])}
                     </span>
                     <div className="flex items-center gap-2 ml-auto mr-4">
                       <Badge variant="outline" className="font-mono">
@@ -276,7 +287,9 @@ export function TraitDetailAccordion({ reliabilityData, className }: TraitDetail
                   <div className="space-y-4 pt-2">
                     {/* Description */}
                     <div className={cn('rounded-lg p-3', colors.bg)}>
-                      <p className="text-sm">{traitInfo.description}</p>
+                      <p className="text-sm">
+                        {t(`traits.${traitKey}.description` as Parameters<TranslationFunction>[0])}
+                      </p>
                     </div>
 
                     {/* Interpretation Grid */}
@@ -285,7 +298,7 @@ export function TraitDetailAccordion({ reliabilityData, className }: TraitDetail
                         <div className="flex items-center gap-2 mb-2">
                           <TrendingUp className="h-4 w-4 text-emerald-500" />
                           <span className="text-xs font-medium text-muted-foreground">
-                            Высокий балл
+                            {t('accordion.highScore')}
                           </span>
                         </div>
                         <p className="text-sm">{interpretation.highScore}</p>
@@ -294,7 +307,7 @@ export function TraitDetailAccordion({ reliabilityData, className }: TraitDetail
                         <div className="flex items-center gap-2 mb-2">
                           <TrendingDown className="h-4 w-4 text-blue-500" />
                           <span className="text-xs font-medium text-muted-foreground">
-                            Низкий балл
+                            {t('accordion.lowScore')}
                           </span>
                         </div>
                         <p className="text-sm">{interpretation.lowScore}</p>
@@ -303,7 +316,7 @@ export function TraitDetailAccordion({ reliabilityData, className }: TraitDetail
 
                     {/* Importance note */}
                     <div className="text-sm text-muted-foreground bg-muted/50 rounded-lg p-3">
-                      <span className="font-medium">Значимость: </span>
+                      <span className="font-medium">{t('accordion.importance')} </span>
                       {interpretation.importance}
                     </div>
 
@@ -313,32 +326,32 @@ export function TraitDetailAccordion({ reliabilityData, className }: TraitDetail
                         <div className="text-xl sm:text-lg font-bold tabular-nums">
                           {reliability.cronbachAlpha?.toFixed(2) ?? '-'}
                         </div>
-                        <div className="text-[11px] text-muted-foreground">Alpha</div>
+                        <div className="text-[11px] text-muted-foreground">{t('accordion.alpha')}</div>
                       </div>
                       <div className="rounded-lg border p-3 sm:p-2">
                         <div className="text-xl sm:text-lg font-bold tabular-nums">
                           {reliability.contributingCompetencies ?? '-'}
                         </div>
-                        <div className="text-[11px] text-muted-foreground">Competencies</div>
+                        <div className="text-[11px] text-muted-foreground">{t('accordion.competencies')}</div>
                       </div>
                       <div className="rounded-lg border p-3 sm:p-2">
                         <div className="text-xl sm:text-lg font-bold tabular-nums">
                           {reliability.totalItems ?? '-'}
                         </div>
-                        <div className="text-[11px] text-muted-foreground">Items</div>
+                        <div className="text-[11px] text-muted-foreground">{t('accordion.items')}</div>
                       </div>
                       <div className="rounded-lg border p-3 sm:p-2">
                         <div className="text-xl sm:text-lg font-bold tabular-nums">
                           {reliability.sampleSize?.toLocaleString() ?? '-'}
                         </div>
-                        <div className="text-[11px] text-muted-foreground">Responses</div>
+                        <div className="text-[11px] text-muted-foreground">{t('accordion.responses')}</div>
                       </div>
                     </div>
 
                     {/* Recommendations */}
                     <div className="space-y-2">
                       <h4 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                        Рекомендации
+                        {t('accordion.recommendations')}
                       </h4>
                       {recommendations.map((rec, index) => {
                         const styles = recommendationStyles[rec.type];
@@ -370,14 +383,8 @@ export function TraitDetailAccordion({ reliabilityData, className }: TraitDetail
                     {/* Last calculated info */}
                     {reliability.lastCalculatedAt && (
                       <div className="text-xs text-muted-foreground text-right">
-                        Рассчитано:{' '}
-                        {new Date(reliability.lastCalculatedAt).toLocaleString('ru-RU', {
-                          day: 'numeric',
-                          month: 'long',
-                          year: 'numeric',
-                          hour: '2-digit',
-                          minute: '2-digit',
-                        })}
+                        {t('accordion.calculated')}{' '}
+                        {formatDate(reliability.lastCalculatedAt)}
                       </div>
                     )}
                   </div>

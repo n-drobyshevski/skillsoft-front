@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations, useLocale } from 'next-intl';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -38,21 +39,25 @@ const DESKTOP_TITLE = 'text-xl font-bold';
 /**
  * Format duration in seconds to human-readable string
  */
-function formatDuration(seconds: number): string {
+function formatDuration(seconds: number, locale: string): string {
   const hours = Math.floor(seconds / 3600);
   const mins = Math.floor((seconds % 3600) / 60);
   const secs = seconds % 60;
 
-  if (hours > 0) return `${hours}ч ${mins}м`;
-  if (mins > 0) return `${mins}м ${secs}с`;
-  return `${secs}с`;
+  const h = locale === 'ru' ? 'ч' : 'h';
+  const m = locale === 'ru' ? 'м' : 'm';
+  const s = locale === 'ru' ? 'с' : 's';
+
+  if (hours > 0) return `${hours}${h} ${mins}${m}`;
+  if (mins > 0) return `${mins}${m} ${secs}${s}`;
+  return `${secs}${s}`;
 }
 
 /**
  * Format date to localized string
  */
-function formatDate(dateString: string): string {
-  return new Date(dateString).toLocaleDateString('ru-RU', {
+function formatDate(dateString: string, locale: string): string {
+  return new Date(dateString).toLocaleDateString(locale === 'ru' ? 'ru-RU' : 'en-US', {
     day: 'numeric',
     month: 'short',
     year: 'numeric',
@@ -254,6 +259,9 @@ export function JobFitHero({
   timeSpent,
   percentile,
 }: JobFitHeroProps) {
+  const t = useTranslations('template.heroCard');
+  const tMetrics = useTranslations('template.heroCard.metrics');
+  const locale = useLocale();
   const variant: HeroVariant = passed ? 'success' : 'warning';
   const styles = VARIANT_STYLES[variant];
   const score = Math.round(overallPercentage);
@@ -274,13 +282,13 @@ export function JobFitHero({
             </div>
             <div className="flex-1 min-w-0">
               <h2 className={cn(MOBILE_TITLE, styles.titleText)}>
-                {passed ? 'Квалифицирован!' : 'Продолжайте развитие'}
+                {passed ? t('jobFit.qualified') : t('jobFit.keepGrowing')}
               </h2>
               <p className="text-sm text-muted-foreground truncate">{templateName}</p>
               {onetSocCode && (
                 <div className="flex items-center gap-1 mt-1">
                   <Briefcase className="h-3 w-3 text-muted-foreground" />
-                  <span className="text-xs text-muted-foreground">O*NET: {onetSocCode}</span>
+                  <span className="text-xs text-muted-foreground">{t('jobFit.onet')}: {onetSocCode}</span>
                 </div>
               )}
             </div>
@@ -293,12 +301,12 @@ export function JobFitHero({
               {passed ? (
                 <>
                   <CheckCircle2 className="h-3 w-3 mr-1" />
-                  Соответствует
+                  {t('jobFit.matches')}
                 </>
               ) : (
                 <>
                   <AlertTriangle className="h-3 w-3 mr-1" />
-                  Не соответствует
+                  {t('jobFit.doesNotMatch')}
                 </>
               )}
             </Badge>
@@ -306,14 +314,14 @@ export function JobFitHero({
 
           {/* Metrics Grid */}
           <div className="grid grid-cols-2 gap-2">
-            <MetricPill icon={Clock} label="Время" value={formatDuration(timeSpent)} />
-            <MetricPill icon={CheckCircle2} label="Вопросов" value={questionsAnswered} subValue={`/${totalQuestions}`} />
+            <MetricPill icon={Clock} label={tMetrics('time')} value={formatDuration(timeSpent, locale)} />
+            <MetricPill icon={CheckCircle2} label={tMetrics('questions')} value={questionsAnswered} subValue={`/${totalQuestions}`} />
           </div>
 
           {/* Date */}
           <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
             <Calendar className="h-3 w-3" />
-            {formatDate(completedAt)}
+            {formatDate(completedAt, locale)}
           </div>
         </div>
 
@@ -330,19 +338,19 @@ export function JobFitHero({
             </div>
             <div className="min-w-0">
               <h2 className={cn(DESKTOP_TITLE, styles.titleText)}>
-                {passed ? 'Квалифицирован!' : 'Продолжайте развитие'}
+                {passed ? t('jobFit.qualified') : t('jobFit.keepGrowing')}
               </h2>
               <p className="text-sm text-muted-foreground truncate">{templateName}</p>
               <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
                 {onetSocCode && (
                   <span className="flex items-center gap-1">
                     <Briefcase className="h-3 w-3" />
-                    O*NET: {onetSocCode}
+                    {t('jobFit.onet')}: {onetSocCode}
                   </span>
                 )}
                 <span className="flex items-center gap-1">
                   <Calendar className="h-3 w-3" />
-                  {formatDate(completedAt)}
+                  {formatDate(completedAt, locale)}
                 </span>
               </div>
             </div>
@@ -357,20 +365,20 @@ export function JobFitHero({
               {passed ? (
                 <>
                   <CheckCircle2 className="h-3 w-3 mr-1" />
-                  Соответствует
+                  {t('jobFit.matches')}
                 </>
               ) : (
                 <>
                   <AlertTriangle className="h-3 w-3 mr-1" />
-                  Не соответствует
+                  {t('jobFit.doesNotMatch')}
                 </>
               )}
             </Badge>
             <div className="flex gap-2">
-              <MetricPill icon={Clock} label="Время" value={formatDuration(timeSpent)} />
-              <MetricPill icon={CheckCircle2} label="Ответы" value={questionsAnswered} subValue={`/${totalQuestions}`} />
+              <MetricPill icon={Clock} label={tMetrics('time')} value={formatDuration(timeSpent, locale)} />
+              <MetricPill icon={CheckCircle2} label={tMetrics('answers')} value={questionsAnswered} subValue={`/${totalQuestions}`} />
               {percentile !== undefined && (
-                <MetricPill icon={TrendingUp} label="Перцентиль" value={`${percentile}th`} />
+                <MetricPill icon={TrendingUp} label={tMetrics('percentile')} value={`${percentile}th`} />
               )}
             </div>
           </div>
@@ -394,6 +402,9 @@ export function TeamFitHero({
   totalQuestions,
   timeSpent,
 }: TeamFitHeroProps) {
+  const t = useTranslations('template.heroCard');
+  const tMetrics = useTranslations('template.heroCard.metrics');
+  const locale = useLocale();
   const variant: HeroVariant = passed ? 'info' : 'neutral';
   const styles = VARIANT_STYLES[variant];
   const score = Math.round(overallPercentage);
@@ -410,13 +421,13 @@ export function TeamFitHero({
             </div>
             <div className="flex-1 min-w-0">
               <h2 className={cn(MOBILE_TITLE, styles.titleText)}>
-                {passed ? 'Отличная совместимость!' : 'Требуется адаптация'}
+                {passed ? t('teamFit.greatFit') : t('teamFit.needsAdaptation')}
               </h2>
               <p className="text-sm text-muted-foreground truncate">{templateName}</p>
               {teamId && (
                 <div className="flex items-center gap-1 mt-1">
                   <Users className="h-3 w-3 text-muted-foreground" />
-                  <span className="text-xs text-muted-foreground">Команда: {teamId}</span>
+                  <span className="text-xs text-muted-foreground">{t('teamFit.team')}: {teamId}</span>
                 </div>
               )}
             </div>
@@ -429,12 +440,12 @@ export function TeamFitHero({
               {passed ? (
                 <>
                   <CheckCircle2 className="h-3 w-3 mr-1" />
-                  Подходит
+                  {t('teamFit.fits')}
                 </>
               ) : (
                 <>
                   <AlertTriangle className="h-3 w-3 mr-1" />
-                  Адаптация
+                  {t('teamFit.adaptation')}
                 </>
               )}
             </Badge>
@@ -442,14 +453,14 @@ export function TeamFitHero({
 
           {/* Metrics Grid */}
           <div className="grid grid-cols-2 gap-2">
-            <MetricPill icon={Clock} label="Время" value={formatDuration(timeSpent)} />
-            <MetricPill icon={CheckCircle2} label="Вопросов" value={questionsAnswered} subValue={`/${totalQuestions}`} />
+            <MetricPill icon={Clock} label={tMetrics('time')} value={formatDuration(timeSpent, locale)} />
+            <MetricPill icon={CheckCircle2} label={tMetrics('questions')} value={questionsAnswered} subValue={`/${totalQuestions}`} />
           </div>
 
           {/* Date */}
           <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
             <Calendar className="h-3 w-3" />
-            {formatDate(completedAt)}
+            {formatDate(completedAt, locale)}
           </div>
         </div>
 
@@ -462,19 +473,19 @@ export function TeamFitHero({
             </div>
             <div className="min-w-0">
               <h2 className={cn(DESKTOP_TITLE, styles.titleText)}>
-                {passed ? 'Отличная совместимость!' : 'Требуется адаптация'}
+                {passed ? t('teamFit.greatFit') : t('teamFit.needsAdaptation')}
               </h2>
               <p className="text-sm text-muted-foreground truncate">{templateName}</p>
               <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
                 {teamId && (
                   <span className="flex items-center gap-1">
                     <Users className="h-3 w-3" />
-                    Команда: {teamId}
+                    {t('teamFit.team')}: {teamId}
                   </span>
                 )}
                 <span className="flex items-center gap-1">
                   <Calendar className="h-3 w-3" />
-                  {formatDate(completedAt)}
+                  {formatDate(completedAt, locale)}
                 </span>
               </div>
             </div>
@@ -489,18 +500,18 @@ export function TeamFitHero({
               {passed ? (
                 <>
                   <CheckCircle2 className="h-3 w-3 mr-1" />
-                  Подходит
+                  {t('teamFit.fits')}
                 </>
               ) : (
                 <>
                   <AlertTriangle className="h-3 w-3 mr-1" />
-                  Адаптация
+                  {t('teamFit.adaptation')}
                 </>
               )}
             </Badge>
             <div className="flex gap-2">
-              <MetricPill icon={Clock} label="Время" value={formatDuration(timeSpent)} />
-              <MetricPill icon={CheckCircle2} label="Ответы" value={questionsAnswered} subValue={`/${totalQuestions}`} />
+              <MetricPill icon={Clock} label={tMetrics('time')} value={formatDuration(timeSpent, locale)} />
+              <MetricPill icon={CheckCircle2} label={tMetrics('answers')} value={questionsAnswered} subValue={`/${totalQuestions}`} />
             </div>
           </div>
         </div>
@@ -521,6 +532,9 @@ export function CompetencyPassportHero({
   timeSpent,
   competencyCount,
 }: CompetencyPassportHeroProps) {
+  const t = useTranslations('template.heroCard');
+  const tMetrics = useTranslations('template.heroCard.metrics');
+  const locale = useLocale();
   const variant: HeroVariant = 'neutral';
   const styles = VARIANT_STYLES[variant];
 
@@ -536,7 +550,7 @@ export function CompetencyPassportHero({
             </div>
             <div className="flex-1 min-w-0">
               <h2 className={cn(MOBILE_TITLE, styles.titleText)}>
-                Ваш профиль компетенций
+                {t('competencyPassport.yourProfile')}
               </h2>
               <p className="text-sm text-muted-foreground truncate">{templateName}</p>
             </div>
@@ -546,19 +560,19 @@ export function CompetencyPassportHero({
           <div className="flex items-center justify-center px-4 py-3 rounded-lg bg-primary/5 border border-primary/20">
             <LayoutGrid className="h-5 w-5 text-primary mr-2" />
             <span className="text-lg font-bold text-primary">{competencyCount}</span>
-            <span className="text-sm text-muted-foreground ml-1.5">компетенций</span>
+            <span className="text-sm text-muted-foreground ml-1.5">{t('competencyPassport.competencies')}</span>
           </div>
 
           {/* Metrics Grid */}
           <div className="grid grid-cols-2 gap-2">
-            <MetricPill icon={Clock} label="Время" value={formatDuration(timeSpent)} />
-            <MetricPill icon={CheckCircle2} label="Вопросов" value={questionsAnswered} subValue={`/${totalQuestions}`} />
+            <MetricPill icon={Clock} label={tMetrics('time')} value={formatDuration(timeSpent, locale)} />
+            <MetricPill icon={CheckCircle2} label={tMetrics('questions')} value={questionsAnswered} subValue={`/${totalQuestions}`} />
           </div>
 
           {/* Date */}
           <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
             <Calendar className="h-3 w-3" />
-            {formatDate(completedAt)}
+            {formatDate(completedAt, locale)}
           </div>
         </div>
 
@@ -571,12 +585,12 @@ export function CompetencyPassportHero({
             </div>
             <div className="min-w-0">
               <h2 className={cn(DESKTOP_TITLE, styles.titleText)}>
-                Ваш профиль компетенций
+                {t('competencyPassport.yourProfile')}
               </h2>
               <p className="text-sm text-muted-foreground truncate">{templateName}</p>
               <div className="flex items-center gap-1 mt-1 text-xs text-muted-foreground">
                 <Calendar className="h-3 w-3" />
-                {formatDate(completedAt)}
+                {formatDate(completedAt, locale)}
               </div>
             </div>
           </div>
@@ -590,11 +604,11 @@ export function CompetencyPassportHero({
                 <span className="text-sm font-semibold tabular-nums text-primary truncate">
                   {competencyCount}
                 </span>
-                <span className="text-[10px] text-muted-foreground uppercase tracking-wide truncate">компетенций</span>
+                <span className="text-[10px] text-muted-foreground uppercase tracking-wide truncate">{t('competencyPassport.competencies')}</span>
               </div>
             </div>
-            <MetricPill icon={Clock} label="Время" value={formatDuration(timeSpent)} />
-            <MetricPill icon={CheckCircle2} label="Ответы" value={questionsAnswered} subValue={`/${totalQuestions}`} />
+            <MetricPill icon={Clock} label={tMetrics('time')} value={formatDuration(timeSpent, locale)} />
+            <MetricPill icon={CheckCircle2} label={tMetrics('answers')} value={questionsAnswered} subValue={`/${totalQuestions}`} />
           </div>
         </div>
       </CardContent>

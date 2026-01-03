@@ -56,7 +56,8 @@ export {
   useBatchSelection,
 } from './BatchActionToolbar';
 
-// Help tooltip components
+// Help tooltip components and hook
+export { usePsychometricHelp } from './usePsychometricHelp';
 export {
   HelpTooltip,
   LabelWithHelp,
@@ -72,7 +73,6 @@ export {
   ReliableCompetenciesHelp,
   FlaggedItemsHelp,
   TableHeaderWithHelp,
-  psychometricHelp,
   // Section header helpers
   ItemStatusSectionHelp,
   CompetencyReliabilitySectionHelp,

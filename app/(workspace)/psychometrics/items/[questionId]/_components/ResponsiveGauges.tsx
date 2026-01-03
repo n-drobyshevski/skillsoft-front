@@ -13,6 +13,7 @@ import {
   type GaugeZone,
 } from '../../../_components/SemiCircularGauge';
 import { LinearMetricGauge } from './LinearMetricGauge';
+import { useTranslations } from 'next-intl';
 
 interface ResponsiveGaugesProps {
   /** Difficulty index value (p) */
@@ -26,23 +27,29 @@ interface ResponsiveGaugesProps {
 /**
  * Get quality label and description for difficulty
  */
-function getDifficultyQuality(p: number | null | undefined): { label: string; color: string; description: string } {
-  if (p == null) return { label: 'Нет данных', color: 'text-muted-foreground', description: 'Недостаточно данных' };
-  if (p < 0.2) return { label: 'Слишком сложный', color: 'text-blue-600 dark:text-blue-400', description: 'Менее 20% правильных ответов' };
-  if (p > 0.9) return { label: 'Слишком легкий', color: 'text-purple-600 dark:text-purple-400', description: 'Более 90% правильных ответов' };
-  return { label: 'Оптимальный', color: 'text-emerald-600 dark:text-emerald-400', description: 'Сложность в допустимом диапазоне' };
+function getDifficultyQuality(
+  p: number | null | undefined,
+  t: ReturnType<typeof useTranslations>
+): { label: string; color: string; description: string } {
+  if (p == null) return { label: t('gauges.noData'), color: 'text-muted-foreground', description: t('gauges.insufficientData') };
+  if (p < 0.2) return { label: t('gauges.tooHard'), color: 'text-blue-600 dark:text-blue-400', description: t('gauges.tooHardDesc') };
+  if (p > 0.9) return { label: t('gauges.tooEasy'), color: 'text-purple-600 dark:text-purple-400', description: t('gauges.tooEasyDesc') };
+  return { label: t('gauges.optimal'), color: 'text-emerald-600 dark:text-emerald-400', description: t('gauges.optimalDesc') };
 }
 
 /**
  * Get quality label and description for discrimination
  */
-function getDiscriminationQuality(rpb: number | null | undefined): { label: string; color: string; description: string } {
-  if (rpb == null) return { label: 'Нет данных', color: 'text-muted-foreground', description: 'Недостаточно данных' };
-  if (rpb < 0) return { label: 'Токсичный', color: 'text-red-600 dark:text-red-400', description: 'Элемент работает в обратном направлении' };
-  if (rpb < 0.1) return { label: 'Критично', color: 'text-orange-600 dark:text-orange-400', description: 'Элемент не различает респондентов' };
-  if (rpb < 0.25) return { label: 'Слабый', color: 'text-amber-600 dark:text-amber-400', description: 'Маргинальное различение' };
-  if (rpb < 0.35) return { label: 'Хороший', color: 'text-green-600 dark:text-green-400', description: 'Приемлемое различение' };
-  return { label: 'Отличный', color: 'text-emerald-600 dark:text-emerald-400', description: 'Сильное различение' };
+function getDiscriminationQuality(
+  rpb: number | null | undefined,
+  t: ReturnType<typeof useTranslations>
+): { label: string; color: string; description: string } {
+  if (rpb == null) return { label: t('gauges.noData'), color: 'text-muted-foreground', description: t('gauges.insufficientData') };
+  if (rpb < 0) return { label: t('gauges.toxic'), color: 'text-red-600 dark:text-red-400', description: t('gauges.toxicDesc') };
+  if (rpb < 0.1) return { label: t('gauges.critical'), color: 'text-orange-600 dark:text-orange-400', description: t('gauges.criticalDesc') };
+  if (rpb < 0.25) return { label: t('gauges.weak'), color: 'text-amber-600 dark:text-amber-400', description: t('gauges.weakDesc') };
+  if (rpb < 0.35) return { label: t('gauges.good'), color: 'text-green-600 dark:text-green-400', description: t('gauges.goodDesc') };
+  return { label: t('gauges.excellent'), color: 'text-emerald-600 dark:text-emerald-400', description: t('gauges.excellentDesc') };
 }
 
 /**
@@ -62,8 +69,9 @@ export function ResponsiveGauges({
   className,
 }: ResponsiveGaugesProps) {
   const isMobile = useIsMobile();
-  const diffQuality = getDifficultyQuality(difficultyIndex);
-  const discQuality = getDiscriminationQuality(discriminationIndex);
+  const t = useTranslations('psychometrics');
+  const diffQuality = getDifficultyQuality(difficultyIndex, t);
+  const discQuality = getDiscriminationQuality(discriminationIndex, t);
 
   // Mobile: Compact linear gauges
   if (isMobile) {
@@ -74,14 +82,14 @@ export function ResponsiveGauges({
           <CardContent className="p-4">
             <div className="flex items-center gap-2 mb-3">
               <Target className="h-4 w-4 text-muted-foreground shrink-0" />
-              <span className="text-sm font-medium">Индекс сложности (p)</span>
+              <span className="text-sm font-medium">{t('gauges.difficultyTitle')}</span>
             </div>
             <LinearMetricGauge
               value={difficultyIndex}
               minValue={0}
               maxValue={1}
               zones={DIFFICULTY_ZONES}
-              label="Индекс сложности (p)"
+              label={t('gauges.difficultyTitle')}
               shortLabel="p"
               format="decimal2"
               size="md"
@@ -99,14 +107,14 @@ export function ResponsiveGauges({
           <CardContent className="p-4">
             <div className="flex items-center gap-2 mb-3">
               <TrendingUp className="h-4 w-4 text-muted-foreground shrink-0" />
-              <span className="text-sm font-medium">Индекс различения (rpb)</span>
+              <span className="text-sm font-medium">{t('gauges.discriminationTitle')}</span>
             </div>
             <LinearMetricGauge
               value={discriminationIndex}
               minValue={-0.5}
               maxValue={1}
               zones={DISCRIMINATION_ZONES}
-              label="Индекс различения (rpb)"
+              label={t('gauges.discriminationTitle')}
               shortLabel="rpb"
               format="decimal2"
               size="md"
@@ -129,10 +137,10 @@ export function ResponsiveGauges({
         <CardHeader className="pb-3">
           <CardTitle className="text-base flex items-center gap-2">
             <Target className="h-4 w-4" />
-            Индекс сложности (p)
+            {t('gauges.difficultyTitle')}
           </CardTitle>
           <CardDescription>
-            Доля правильных ответов
+            {t('gauges.difficultyDescription')}
           </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col items-center py-4">
@@ -152,10 +160,10 @@ export function ResponsiveGauges({
         <CardHeader className="pb-3">
           <CardTitle className="text-base flex items-center gap-2">
             <TrendingUp className="h-4 w-4" />
-            Индекс различения (rpb)
+            {t('gauges.discriminationTitle')}
           </CardTitle>
           <CardDescription>
-            Корреляция с общим баллом
+            {t('gauges.discriminationDescription')}
           </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col items-center py-4">

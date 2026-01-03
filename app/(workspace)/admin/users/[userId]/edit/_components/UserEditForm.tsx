@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,7 +28,8 @@ import {
   Lock,
   Unlock,
 } from "lucide-react";
-import { User, UserRole, getRoleDisplayName } from "@/types/user";
+import { User, UserRole } from "@/types/user";
+import { useUserRoleTranslation } from "@/hooks/useUserEnums";
 import {
   updateUserAction,
   syncUserToBackend,
@@ -43,6 +45,8 @@ interface UserEditFormProps {
 
 export default function UserEditForm({ user, userId }: UserEditFormProps) {
   const router = useRouter();
+  const t = useTranslations('users');
+  const { getLabel: getRoleLabel, getRoleOptions } = useUserRoleTranslation();
   const [isPending, startTransition] = useTransition();
   const [isSyncing, setIsSyncing] = useState(false);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
@@ -87,13 +91,13 @@ export default function UserEditForm({ user, userId }: UserEditFormProps) {
     try {
       const result = await syncUserToBackend(user.clerkId);
       if (result.success) {
-        setMessage({ type: "success", text: "User data synced from Clerk successfully" });
+        setMessage({ type: "success", text: t('edit.messages.syncSuccess') });
         router.refresh();
       } else {
         setMessage({ type: "error", text: result.message });
       }
     } catch {
-      setMessage({ type: "error", text: "Failed to sync user data" });
+      setMessage({ type: "error", text: t('edit.messages.syncFailed') });
     } finally {
       setIsSyncing(false);
     }
@@ -136,9 +140,9 @@ export default function UserEditForm({ user, userId }: UserEditFormProps) {
                 <UserIcon className="w-4 h-4 text-blue-600 dark:text-blue-400" />
               </div>
               <div>
-                <CardTitle className="text-lg">Profile Information</CardTitle>
+                <CardTitle className="text-lg">{t('edit.sections.profileInformation')}</CardTitle>
                 <CardDescription>
-                  Update user profile details. Changes will be synced to Clerk and the backend.
+                  {t('edit.sections.profileInformationDesc')}
                 </CardDescription>
               </div>
             </div>
@@ -162,22 +166,22 @@ export default function UserEditForm({ user, userId }: UserEditFormProps) {
               {/* Name Fields */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="firstName">First Name</Label>
+                  <Label htmlFor="firstName">{t('edit.fields.firstName')}</Label>
                   <Input
                     id="firstName"
                     value={firstName}
                     onChange={(e) => setFirstName(e.target.value)}
-                    placeholder="Enter first name"
+                    placeholder={t('edit.placeholders.firstName')}
                     disabled={isPending}
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="lastName">Last Name</Label>
+                  <Label htmlFor="lastName">{t('edit.fields.lastName')}</Label>
                   <Input
                     id="lastName"
                     value={lastName}
                     onChange={(e) => setLastName(e.target.value)}
-                    placeholder="Enter last name"
+                    placeholder={t('edit.placeholders.lastName')}
                     disabled={isPending}
                   />
                 </div>
@@ -185,22 +189,22 @@ export default function UserEditForm({ user, userId }: UserEditFormProps) {
 
               {/* Username */}
               <div className="space-y-2">
-                <Label htmlFor="username">Username</Label>
+                <Label htmlFor="username">{t('edit.fields.username')}</Label>
                 <Input
                   id="username"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  placeholder="Enter username"
+                  placeholder={t('edit.placeholders.username')}
                   disabled={isPending}
                 />
                 <p className="text-xs text-muted-foreground">
-                  Username must be unique across all users. Leave empty to remove.
+                  {t('edit.help.usernameUnique')}
                 </p>
               </div>
 
               {/* Email (Read-only) */}
               <div className="space-y-2">
-                <Label htmlFor="email">Email Address</Label>
+                <Label htmlFor="email">{t('edit.fields.email')}</Label>
                 <Input
                   id="email"
                   value={user.email || ""}
@@ -208,7 +212,7 @@ export default function UserEditForm({ user, userId }: UserEditFormProps) {
                   className="bg-muted"
                 />
                 <p className="text-xs text-muted-foreground">
-                  Email cannot be changed here. Users can update their email through Clerk settings.
+                  {t('edit.help.emailReadOnly')}
                 </p>
               </div>
 
@@ -220,18 +224,18 @@ export default function UserEditForm({ user, userId }: UserEditFormProps) {
                   onClick={() => router.push(`/users/${userId}`)}
                   disabled={isPending}
                 >
-                  Cancel
+                  {t('edit.actions.cancel')}
                 </Button>
                 <Button type="submit" disabled={isPending}>
                   {isPending ? (
                     <>
                       <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Saving...
+                      {t('edit.actions.saving')}
                     </>
                   ) : (
                     <>
                       <Save className="h-4 w-4 mr-2" />
-                      Save Changes
+                      {t('edit.actions.save')}
                     </>
                   )}
                 </Button>
@@ -250,43 +254,43 @@ export default function UserEditForm({ user, userId }: UserEditFormProps) {
               <div className="p-1.5 rounded-lg bg-purple-100 dark:bg-purple-900/30">
                 <Shield className="w-4 h-4 text-purple-600 dark:text-purple-400" />
               </div>
-              <CardTitle className="text-base">Role & Permissions</CardTitle>
+              <CardTitle className="text-base">{t('edit.sections.rolePermissions')}</CardTitle>
             </div>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="role">User Role</Label>
+              <Label htmlFor="role">{t('edit.fields.role')}</Label>
               <Select
                 value={role}
                 onValueChange={(value) => setRole(value as UserRole)}
                 disabled={isPending}
               >
                 <SelectTrigger id="role">
-                  <SelectValue placeholder="Select a role" />
+                  <SelectValue placeholder={t('edit.fields.role')} />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value={UserRole.USER}>
                     <span className="flex items-center gap-2">
                       <span className="h-2 w-2 rounded-full bg-green-500" />
-                      {getRoleDisplayName(UserRole.USER)}
+                      {getRoleLabel(UserRole.USER)}
                     </span>
                   </SelectItem>
                   <SelectItem value={UserRole.EDITOR}>
                     <span className="flex items-center gap-2">
                       <span className="h-2 w-2 rounded-full bg-blue-500" />
-                      {getRoleDisplayName(UserRole.EDITOR)}
+                      {getRoleLabel(UserRole.EDITOR)}
                     </span>
                   </SelectItem>
                   <SelectItem value={UserRole.ADMIN}>
                     <span className="flex items-center gap-2">
                       <span className="h-2 w-2 rounded-full bg-red-500" />
-                      {getRoleDisplayName(UserRole.ADMIN)}
+                      {getRoleLabel(UserRole.ADMIN)}
                     </span>
                   </SelectItem>
                 </SelectContent>
               </Select>
               <p className="text-xs text-muted-foreground">
-                Role determines what actions the user can perform.
+                {t('edit.help.roleDescription')}
               </p>
             </div>
           </CardContent>
@@ -295,7 +299,7 @@ export default function UserEditForm({ user, userId }: UserEditFormProps) {
         {/* Sync & Actions */}
         <Card>
           <CardHeader className="pb-4">
-            <CardTitle className="text-base">Quick Actions</CardTitle>
+            <CardTitle className="text-base">{t('edit.sections.quickActions')}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             {/* Sync from Clerk */}
@@ -310,7 +314,7 @@ export default function UserEditForm({ user, userId }: UserEditFormProps) {
               ) : (
                 <RefreshCw className="h-4 w-4 mr-2" />
               )}
-              Sync from Clerk
+              {isSyncing ? t('edit.actions.syncing') : t('edit.actions.syncFromClerk')}
             </Button>
 
             <Separator />
@@ -325,12 +329,12 @@ export default function UserEditForm({ user, userId }: UserEditFormProps) {
               {user.banned ? (
                 <>
                   <Unlock className="h-4 w-4 mr-2" />
-                  Unban User
+                  {t('edit.actions.unbanUser')}
                 </>
               ) : (
                 <>
                   <Ban className="h-4 w-4 mr-2" />
-                  Ban User
+                  {t('edit.actions.banUser')}
                 </>
               )}
             </Button>
@@ -345,18 +349,18 @@ export default function UserEditForm({ user, userId }: UserEditFormProps) {
               {user.locked ? (
                 <>
                   <Unlock className="h-4 w-4 mr-2" />
-                  Unlock User
+                  {t('edit.actions.unlockUser')}
                 </>
               ) : (
                 <>
                   <Lock className="h-4 w-4 mr-2" />
-                  Lock User
+                  {t('edit.actions.lockUser')}
                 </>
               )}
             </Button>
 
             <p className="text-xs text-muted-foreground pt-2">
-              Banning revokes all sessions. Locking temporarily prevents sign-in.
+              {t('edit.help.banDescription')}
             </p>
           </CardContent>
         </Card>
@@ -364,11 +368,11 @@ export default function UserEditForm({ user, userId }: UserEditFormProps) {
         {/* User Info */}
         <Card className="bg-muted/30">
           <CardHeader className="pb-3">
-            <CardTitle className="text-base">Identifiers</CardTitle>
+            <CardTitle className="text-base">{t('edit.sections.identifiers')}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-2 text-sm">
             <div className="flex justify-between">
-              <span className="text-muted-foreground">User ID</span>
+              <span className="text-muted-foreground">{t('drawer.fields.userId')}</span>
               <code className="text-xs bg-muted px-1.5 py-0.5 rounded truncate max-w-[140px]" title={user.id}>
                 {user.id.substring(0, 8)}...
               </code>

@@ -12,6 +12,7 @@
  */
 
 import { useState, useMemo } from 'react';
+import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
@@ -66,7 +67,10 @@ interface AlphaIfDeletedListProps {
 /**
  * Get improvement status and styling
  */
-function getImprovementStatus(improvement: number): {
+function getImprovementStatus(
+  improvement: number,
+  t: ReturnType<typeof useTranslations<'psychometrics'>>
+): {
   type: 'positive' | 'negative' | 'neutral';
   Icon: typeof TrendingUp;
   colorClass: string;
@@ -79,7 +83,7 @@ function getImprovementStatus(improvement: number): {
       Icon: TrendingUp,
       colorClass: 'text-emerald-600 dark:text-emerald-400',
       badgeClass: 'bg-emerald-100 text-emerald-700 border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-400',
-      label: 'Улучшит Alpha',
+      label: t('competencyDetail.alphaList.improvesAlpha'),
     };
   }
   if (improvement < -0.01) {
@@ -88,7 +92,7 @@ function getImprovementStatus(improvement: number): {
       Icon: TrendingDown,
       colorClass: 'text-red-600 dark:text-red-400',
       badgeClass: 'bg-red-100 text-red-700 border-red-200 dark:bg-red-900/30 dark:text-red-400',
-      label: 'Важен для шкалы',
+      label: t('competencyDetail.alphaList.importantForScale'),
     };
   }
   return {
@@ -96,7 +100,7 @@ function getImprovementStatus(improvement: number): {
     Icon: Minus,
     colorClass: 'text-muted-foreground',
     badgeClass: 'bg-muted text-muted-foreground',
-    label: 'Нейтрален',
+    label: t('competencyDetail.alphaList.neutral'),
   };
 }
 
@@ -116,10 +120,11 @@ interface AlphaIfDeletedCardProps {
   questionId: string;
   entry: AlphaIfDeletedEntry;
   currentAlpha: number | null;
+  t: ReturnType<typeof useTranslations<'psychometrics'>>;
 }
 
-function AlphaIfDeletedCard({ questionId, entry, currentAlpha }: AlphaIfDeletedCardProps) {
-  const status = getImprovementStatus(entry.improvement);
+function AlphaIfDeletedCard({ questionId, entry, currentAlpha, t }: AlphaIfDeletedCardProps) {
+  const status = getImprovementStatus(entry.improvement, t);
   const isProblematic = entry.improvement > 0.01;
 
   return (
@@ -133,12 +138,16 @@ function AlphaIfDeletedCard({ questionId, entry, currentAlpha }: AlphaIfDeletedC
           ? 'bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800'
           : 'bg-muted/30 hover:bg-muted/50 border border-transparent'
       )}
-      aria-label={`${entry.questionText}. Alpha без элемента: ${entry.alphaIfDeleted.toFixed(3)}. Изменение: ${formatImprovement(entry.improvement)}`}
+      aria-label={t('competencyDetail.alphaList.cardAriaLabel', {
+        questionText: entry.questionText,
+        alphaValue: entry.alphaIfDeleted.toFixed(3),
+        change: formatImprovement(entry.improvement)
+      })}
     >
       <div className="flex-1 min-w-0 pr-3">
         <p className="text-sm font-medium line-clamp-2">{entry.questionText}</p>
         <p className="text-xs text-muted-foreground mt-0.5">
-          Alpha без:{' '}
+          {t('competencyDetail.alphaList.alphaWithout')}{' '}
           <span className={cn('font-mono', status.colorClass)}>
             {entry.alphaIfDeleted.toFixed(3)}
           </span>
@@ -162,9 +171,10 @@ interface MobileListProps {
   entries: Array<[string, AlphaIfDeletedEntry]>;
   currentAlpha: number | null;
   initialDisplayCount: number;
+  t: ReturnType<typeof useTranslations<'psychometrics'>>;
 }
 
-function MobileList({ entries, currentAlpha, initialDisplayCount }: MobileListProps) {
+function MobileList({ entries, currentAlpha, initialDisplayCount, t }: MobileListProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const hasMore = entries.length > initialDisplayCount;
   const displayEntries = isExpanded ? entries : entries.slice(0, initialDisplayCount);
@@ -177,6 +187,7 @@ function MobileList({ entries, currentAlpha, initialDisplayCount }: MobileListPr
           questionId={questionId}
           entry={entry}
           currentAlpha={currentAlpha}
+          t={t}
         />
       ))}
 
@@ -198,13 +209,13 @@ function MobileList({ entries, currentAlpha, initialDisplayCount }: MobileListPr
             aria-hidden="true"
           />
           {isExpanded
-            ? 'Свернуть список'
-            : `Показать еще ${entries.length - initialDisplayCount} элементов`}
+            ? t('competencyDetail.alphaList.collapseList')
+            : t('competencyDetail.alphaList.showMore', { count: entries.length - initialDisplayCount })}
         </Button>
       )}
 
       {/* Legend */}
-      <AlphaIfDeletedLegend />
+      <AlphaIfDeletedLegend t={t} />
     </div>
   );
 }
@@ -216,23 +227,24 @@ function MobileList({ entries, currentAlpha, initialDisplayCount }: MobileListPr
 interface DesktopTableProps {
   entries: Array<[string, AlphaIfDeletedEntry]>;
   currentAlpha: number | null;
+  t: ReturnType<typeof useTranslations<'psychometrics'>>;
 }
 
-function DesktopTable({ entries, currentAlpha }: DesktopTableProps) {
+function DesktopTable({ entries, currentAlpha, t }: DesktopTableProps) {
   return (
     <div className="space-y-4">
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead className="w-[50%]">Вопрос</TableHead>
-            <TableHead className="text-right">Alpha без элемента</TableHead>
-            <TableHead className="text-right">Изменение</TableHead>
-            <TableHead className="text-right w-[100px]">Статус</TableHead>
+            <TableHead className="w-[50%]">{t('competencyDetail.alphaList.columnQuestion')}</TableHead>
+            <TableHead className="text-right">{t('competencyDetail.alphaList.columnAlphaWithoutItem')}</TableHead>
+            <TableHead className="text-right">{t('competencyDetail.alphaList.columnChange')}</TableHead>
+            <TableHead className="text-right w-[100px]">{t('competencyDetail.alphaList.columnStatus')}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {entries.map(([questionId, entry]) => {
-            const status = getImprovementStatus(entry.improvement);
+            const status = getImprovementStatus(entry.improvement, t);
             const isProblematic = entry.improvement > 0.01;
 
             return (
@@ -274,7 +286,7 @@ function DesktopTable({ entries, currentAlpha }: DesktopTableProps) {
       </Table>
 
       {/* Legend */}
-      <AlphaIfDeletedLegend />
+      <AlphaIfDeletedLegend t={t} />
     </div>
   );
 }
@@ -283,27 +295,29 @@ function DesktopTable({ entries, currentAlpha }: DesktopTableProps) {
 // LEGEND COMPONENT
 // ============================================
 
-function AlphaIfDeletedLegend() {
+interface AlphaIfDeletedLegendProps {
+  t: ReturnType<typeof useTranslations<'psychometrics'>>;
+}
+
+function AlphaIfDeletedLegend({ t }: AlphaIfDeletedLegendProps) {
   return (
     <div
       className="p-3 rounded-lg bg-muted/50 text-xs text-muted-foreground"
       role="note"
-      aria-label="Легенда интерпретации"
+      aria-label={t('competencyDetail.alphaList.legendAriaLabel')}
     >
       <p className="flex items-center gap-2 font-medium">
         <Info className="h-3 w-3" aria-hidden="true" />
-        Как интерпретировать:
+        {t('competencyDetail.alphaList.howToInterpret')}
       </p>
       <ul className="mt-1.5 ml-5 space-y-0.5 list-disc">
         <li>
-          <span className="text-emerald-600 dark:text-emerald-400">Положительное</span> — удаление
-          элемента повысит Alpha
+          <span className="text-emerald-600 dark:text-emerald-400">{t('competencyDetail.alphaList.legendPositive')}</span> — {t('competencyDetail.alphaList.legendPositiveDesc')}
         </li>
         <li>
-          <span className="text-red-600 dark:text-red-400">Отрицательное</span> — элемент важен для
-          согласованности шкалы
+          <span className="text-red-600 dark:text-red-400">{t('competencyDetail.alphaList.legendNegative')}</span> — {t('competencyDetail.alphaList.legendNegativeDesc')}
         </li>
-        <li>Близко к нулю — элемент нейтрален</li>
+        <li>{t('competencyDetail.alphaList.legendNeutralDesc')}</li>
       </ul>
     </div>
   );
@@ -319,10 +333,15 @@ export function AlphaIfDeletedList({
   initialDisplayCount = 5,
   className,
   showCard = true,
-  title = 'Alpha если элемент удален',
-  description = 'Показывает влияние каждого элемента на общую надежность шкалы',
+  title,
+  description,
 }: AlphaIfDeletedListProps) {
+  const t = useTranslations('psychometrics');
   const isMobile = useIsMobile();
+
+  // Use provided title/description or fall back to translations
+  const displayTitle = title ?? t('competencyDetail.alphaList.title');
+  const displayDescription = description ?? t('competencyDetail.alphaList.description');
 
   // Memoize problematic count
   const problematicCount = useMemo(
@@ -340,9 +359,10 @@ export function AlphaIfDeletedList({
       entries={entries}
       currentAlpha={currentAlpha}
       initialDisplayCount={initialDisplayCount}
+      t={t}
     />
   ) : (
-    <DesktopTable entries={entries} currentAlpha={currentAlpha} />
+    <DesktopTable entries={entries} currentAlpha={currentAlpha} t={t} />
   );
 
   if (!showCard) {
@@ -358,17 +378,17 @@ export function AlphaIfDeletedList({
           ) : (
             <TrendingUp className="h-4 w-4" aria-hidden="true" />
           )}
-          {title}
+          {displayTitle}
           {problematicCount > 0 && (
             <Badge
               variant="outline"
               className="ml-auto bg-amber-100 text-amber-700 border-amber-200 dark:bg-amber-900/30 dark:text-amber-400"
             >
-              {problematicCount} требуют внимания
+              {t('competencyDetail.alphaList.requireAttention', { count: problematicCount })}
             </Badge>
           )}
         </CardTitle>
-        <CardDescription>{description}</CardDescription>
+        <CardDescription>{displayDescription}</CardDescription>
       </CardHeader>
       <CardContent>{content}</CardContent>
     </Card>
@@ -395,6 +415,8 @@ export function AlphaIfDeletedCompact({
   maxItems = 3,
   className,
 }: AlphaIfDeletedCompactProps) {
+  const t = useTranslations('psychometrics');
+
   // Sort by improvement descending and take top items
   const topItems = entries
     .filter(([, e]) => e.improvement > 0)
@@ -412,6 +434,7 @@ export function AlphaIfDeletedCompact({
           questionId={questionId}
           entry={entry}
           currentAlpha={currentAlpha}
+          t={t}
         />
       ))}
     </div>

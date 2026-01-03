@@ -2,6 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import { useUser } from "@clerk/nextjs";
+import { useTranslations } from "next-intl";
 import { useEffect, useState, useRef, useMemo } from "react";
 import {
   ChevronDown,
@@ -325,6 +326,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { setOpenMobile } = useSidebar();
   const isImmersive = useIsImmersive();
   const TeamLogo = baseData.teams[0].logo;
+  const t = useTranslations("navigation");
+  const tAuth = useTranslations("auth");
 
   // Track lens changes for temporary flash highlight
   const [showFlash, setShowFlash] = useState(false);
@@ -427,7 +430,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         {!isReady ? (
           /* Loading skeleton while lens system initializes */
           <SidebarGroup>
-            <SidebarGroupLabel>Loading...</SidebarGroupLabel>
+            <SidebarGroupLabel>{t("loading")}</SidebarGroupLabel>
           </SidebarGroup>
         ) : (
           /* Render filtered navigation groups */
@@ -462,7 +465,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 >
                   <Link href="/profile">
                     <UserCircle />
-                    <span>Мой профиль</span>
+                    <span>{t("myProfile")}</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -583,20 +586,20 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                       }
                     >
                       <User className="mr-2 h-4 w-4" />
-                      Профиль
+                      {t("profile")}
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
                     <Link href="/settings">
                       <Settings className="mr-2 h-4 w-4" />
-                      Настройки
+                      {t("settings")}
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <SignOutButton>
                     <DropdownMenuItem>
                       <LogOut className="mr-2 h-4 w-4" />
-                      Выйти
+                      {tAuth("signOut")}
                     </DropdownMenuItem>
                   </SignOutButton>
                 </DropdownMenuContent>

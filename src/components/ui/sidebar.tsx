@@ -275,7 +275,7 @@ function SidebarTrigger({
       size={isMobile ? "default" : "icon"}
       className={cn(
         "size-9 md:size-7",
-        isMobile && "w-full justify-start md:w-auto md:justify-center",
+        isMobile && "\justify-start md:w-auto md:justify-center",
         className
       )}
       onClick={(event) => {
@@ -285,7 +285,6 @@ function SidebarTrigger({
       {...props}
     >
       <PanelLeftIcon className="size-5 md:size-4" />
-      {isMobile && <span className="ml-2 md:hidden">Menu</span>}
       <span className="sr-only">Toggle Sidebar</span>
     </Button>
   );

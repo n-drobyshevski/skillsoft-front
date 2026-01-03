@@ -11,6 +11,7 @@ import {
 } from '@/components/ui/accordion';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { FileText, Layers, ExternalLink } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 interface QuestionSectionProps {
   /** Question text */
@@ -39,6 +40,7 @@ export function QuestionSection({
   className,
 }: QuestionSectionProps) {
   const isMobile = useIsMobile();
+  const t = useTranslations('psychometrics');
 
   // Truncate question text for accordion preview
   const previewText = questionText.length > 60
@@ -53,7 +55,7 @@ export function QuestionSection({
       <div className="mt-4 p-3 rounded-lg bg-muted/50">
         <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
           <Layers className="h-4 w-4" />
-          <span>Иерархия:</span>
+          <span>{t('question.hierarchy')}</span>
         </div>
         <div className="flex flex-wrap items-center gap-2 text-sm">
           <Link
@@ -79,7 +81,7 @@ export function QuestionSection({
         <CardHeader className="pb-3">
           <CardTitle className="text-base flex items-center gap-2">
             <FileText className="h-4 w-4" />
-            Текст вопроса
+            {t('question.title')}
           </CardTitle>
         </CardHeader>
         <CardContent>{content}</CardContent>
@@ -99,7 +101,7 @@ export function QuestionSection({
           <div className="flex items-start gap-2 min-w-0 flex-1 text-left">
             <FileText className="h-4 w-4 shrink-0 text-muted-foreground mt-0.5" />
             <div className="min-w-0 flex-1">
-              <span className="font-medium block">Текст вопроса</span>
+              <span className="font-medium block">{t('question.title')}</span>
               <span className="text-xs text-muted-foreground line-clamp-1 mt-0.5">
                 {previewText}
               </span>

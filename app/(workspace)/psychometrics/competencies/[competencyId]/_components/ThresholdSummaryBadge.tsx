@@ -1,3 +1,5 @@
+'use client';
+
 /**
  * ThresholdSummaryBadge - Quick pass/fail indicator for thresholds
  *
@@ -8,6 +10,7 @@
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import { Check, X, Minus } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 interface ThresholdCheck {
   label: string;
@@ -27,19 +30,20 @@ interface ThresholdSummaryBadgeProps {
 function evaluateThresholds(
   cronbachAlpha: number | null,
   sampleSize: number | null,
-  itemCount: number | null
+  itemCount: number | null,
+  labels: { alpha: string; sample: string; items: string }
 ): ThresholdCheck[] {
   return [
     {
-      label: 'Alpha',
+      label: labels.alpha,
       passed: cronbachAlpha === null ? null : cronbachAlpha >= 0.7,
     },
     {
-      label: 'Выборка',
+      label: labels.sample,
       passed: sampleSize === null ? null : sampleSize >= 100,
     },
     {
-      label: 'Элементы',
+      label: labels.items,
       passed: itemCount === null ? null : itemCount >= 3,
     },
   ];
@@ -51,14 +55,21 @@ export function ThresholdSummaryBadge({
   itemCount,
   className,
 }: ThresholdSummaryBadgeProps) {
-  const checks = evaluateThresholds(cronbachAlpha, sampleSize, itemCount);
+  const t = useTranslations('psychometrics.competencyDetail.thresholdSummaryBadge');
+
+  const labels = {
+    alpha: t('labels.alpha'),
+    sample: t('labels.sample'),
+    items: t('labels.items'),
+  };
+
+  const checks = evaluateThresholds(cronbachAlpha, sampleSize, itemCount, labels);
   const passedCount = checks.filter((c) => c.passed === true).length;
   const failedCount = checks.filter((c) => c.passed === false).length;
   const unknownCount = checks.filter((c) => c.passed === null).length;
 
   // Determine overall status
   const allPassed = passedCount === checks.length;
-  const allFailed = failedCount === checks.length;
   const hasFailed = failedCount > 0;
   const hasUnknown = unknownCount > 0;
 
@@ -75,7 +86,7 @@ export function ThresholdSummaryBadge({
         {allPassed ? (
           <>
             <Check className="h-3 w-3" aria-hidden="true" />
-            Все OK
+            {t('allOk')}
           </>
         ) : hasFailed ? (
           <>
@@ -85,7 +96,7 @@ export function ThresholdSummaryBadge({
         ) : hasUnknown ? (
           <>
             <Minus className="h-3 w-3" aria-hidden="true" />
-            Нет данных
+            {t('noData')}
           </>
         ) : (
           `${passedCount}/${checks.length}`
@@ -104,7 +115,21 @@ export function ThresholdIndicators({
   itemCount,
   className,
 }: ThresholdSummaryBadgeProps) {
-  const checks = evaluateThresholds(cronbachAlpha, sampleSize, itemCount);
+  const t = useTranslations('psychometrics.competencyDetail.thresholdSummaryBadge');
+
+  const labels = {
+    alpha: t('labels.alpha'),
+    sample: t('labels.sample'),
+    items: t('labels.items'),
+  };
+
+  const checks = evaluateThresholds(cronbachAlpha, sampleSize, itemCount, labels);
+
+  const getStatusText = (passed: boolean | null): string => {
+    if (passed === true) return t('statusMeets');
+    if (passed === false) return t('statusNotMeets');
+    return t('noData');
+  };
 
   return (
     <div className={cn('flex items-center gap-1', className)}>
@@ -128,9 +153,7 @@ export function ThresholdIndicators({
                   ? 'bg-red-100 dark:bg-red-900/30'
                   : 'bg-muted'
             )}
-            title={`${check.label}: ${
-              check.passed === true ? 'Соответствует' : check.passed === false ? 'Не соответствует' : 'Нет данных'
-            }`}
+            title={`${check.label}: ${getStatusText(check.passed)}`}
           >
             <Icon className={cn('h-3 w-3', colorClass)} aria-hidden="true" />
           </div>

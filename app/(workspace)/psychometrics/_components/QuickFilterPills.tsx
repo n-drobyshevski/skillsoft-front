@@ -2,6 +2,9 @@
 
 import { useRef, useState, useEffect, useCallback } from 'react';
 import { cn } from '@/lib/utils';
+import { useTranslations } from 'next-intl';
+import { useEnumTranslation } from '@/hooks/useEnumTranslation';
+import { ItemValidityStatus, ReliabilityStatus } from '@/types/psychometrics';
 
 export interface FilterOption<T extends string = string> {
   value: T | 'all';
@@ -89,12 +92,14 @@ export function QuickFilterPills<T extends string>({
   options,
   value,
   onChange,
-  allLabel = 'Все',
+  allLabel,
   className,
   size = 'md',
   mobileScroll = true,
 }: QuickFilterPillsProps<T>) {
+  const t = useTranslations('common');
   const styles = sizeStyles[size];
+  const resolvedAllLabel = allLabel ?? t('all');
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [showLeftFade, setShowLeftFade] = useState(false);
   const [showRightFade, setShowRightFade] = useState(false);
@@ -132,7 +137,7 @@ export function QuickFilterPills<T extends string>({
   // Add "all" option if not present
   const allOptions: FilterOption<T>[] = options.some(opt => opt.value === 'all')
     ? options
-    : [{ value: 'all' as T | 'all', label: allLabel }, ...options];
+    : [{ value: 'all' as T | 'all', label: resolvedAllLabel }, ...options];
 
   // Scroll active pill into view on mobile
   const handleChange = (optionValue: T | 'all') => {
@@ -175,7 +180,7 @@ export function QuickFilterPills<T extends string>({
           className
         )}
         role="group"
-        aria-label="Фильтры"
+        aria-label={t('filters')}
         style={{
           // Hide scrollbar cross-browser
           scrollbarWidth: 'none',
@@ -250,12 +255,15 @@ export function StatusFilterPills({
   onChange,
   className,
 }: StatusFilterPillsProps) {
+  const t = useTranslations('common');
+  const { translate } = useEnumTranslation<ItemValidityStatus>('itemValidityStatus');
+
   const options: FilterOption[] = [
-    { value: 'all', label: 'Все' },
-    { value: 'ACTIVE', label: 'Активные', count: activeCount, color: 'emerald' },
-    { value: 'PROBATION', label: 'Пробационные', count: probationCount, color: 'amber' },
-    { value: 'FLAGGED_FOR_REVIEW', label: 'На проверке', count: flaggedCount, color: 'orange' },
-    { value: 'RETIRED', label: 'Отключенные', count: retiredCount, color: 'red' },
+    { value: 'all', label: t('all') },
+    { value: 'ACTIVE', label: translate(ItemValidityStatus.ACTIVE), count: activeCount, color: 'emerald' },
+    { value: 'PROBATION', label: translate(ItemValidityStatus.PROBATION), count: probationCount, color: 'amber' },
+    { value: 'FLAGGED_FOR_REVIEW', label: translate(ItemValidityStatus.FLAGGED_FOR_REVIEW), count: flaggedCount, color: 'orange' },
+    { value: 'RETIRED', label: translate(ItemValidityStatus.RETIRED), count: retiredCount, color: 'red' },
   ];
 
   return (
@@ -290,12 +298,15 @@ export function ReliabilityFilterPills({
   onChange,
   className,
 }: ReliabilityFilterPillsProps) {
+  const t = useTranslations('common');
+  const { translate } = useEnumTranslation<ReliabilityStatus>('reliabilityStatus');
+
   const options: FilterOption[] = [
-    { value: 'all', label: 'Все' },
-    { value: 'RELIABLE', label: 'Надежные', count: reliableCount, color: 'emerald' },
-    { value: 'ACCEPTABLE', label: 'Приемлемые', count: acceptableCount, color: 'amber' },
-    { value: 'UNRELIABLE', label: 'Ненадежные', count: unreliableCount, color: 'red' },
-    { value: 'INSUFFICIENT_DATA', label: 'Недостаточно данных', count: insufficientCount, color: 'gray' },
+    { value: 'all', label: t('all') },
+    { value: 'RELIABLE', label: translate(ReliabilityStatus.RELIABLE), count: reliableCount, color: 'emerald' },
+    { value: 'ACCEPTABLE', label: translate(ReliabilityStatus.ACCEPTABLE), count: acceptableCount, color: 'amber' },
+    { value: 'UNRELIABLE', label: translate(ReliabilityStatus.UNRELIABLE), count: unreliableCount, color: 'red' },
+    { value: 'INSUFFICIENT_DATA', label: translate(ReliabilityStatus.INSUFFICIENT_DATA), count: insufficientCount, color: 'gray' },
   ];
 
   return (

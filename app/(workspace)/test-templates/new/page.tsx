@@ -3,26 +3,26 @@ import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { canCreateContent } from "@/services/roleApi";
 import { competenciesApi } from "@/services/api";
-import PageHeader from "@/components/common/PageHeader";
 import NewTestForm from "./_components/NewTestForm";
+import { NewTestPageHeader } from "./_components/NewTestPageHeader";
 
 export default async function NewTestPage() {
   // Check authentication and authorization
   const { userId } = await auth();
-  
+
   if (!userId) {
     redirect("/sign-in");
   }
 
   const canCreate = await canCreateContent();
-  
+
   if (!canCreate) {
     redirect("/test-templates");
   }
 
   // Fetch competencies for the form
   let competencies: Array<{ id: string; name: string; category: string }> = [];
-  
+
   try {
     const allCompetencies = await competenciesApi.getAllCompetencies();
     if (Array.isArray(allCompetencies)) {
@@ -37,10 +37,7 @@ export default async function NewTestPage() {
 
   return (
     <div className="flex flex-1 flex-col gap-4 p-4 pt-6 md:gap-6 md:p-6">
-      <PageHeader
-        title="Создание теста"
-        description="Создайте новый шаблон теста для оценки компетенций"
-      />
+      <NewTestPageHeader />
 
       <NewTestForm competencies={competencies} />
     </div>

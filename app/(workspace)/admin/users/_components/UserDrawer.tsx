@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations, useLocale } from "next-intl";
 
 // Create a stable timestamp that won't cause React Compiler issues
 const getStableNow = () => {
@@ -31,9 +32,11 @@ import {
   getUserInitials,
   getUserFullName,
   getRoleBadgeColor,
-  getRoleDisplayName,
-  getUserStatus,
+  getUserStatusKey,
+  getStatusBadgeVariant,
 } from "@/types/user";
+import { useUserRoleTranslation, useUserStatusTranslation } from "@/hooks/useUserEnums";
+import { useFormattedDates } from "@/hooks/useFormattedDates";
 import {
   Mail,
   Calendar,
@@ -73,6 +76,11 @@ export default function UserDrawer({
   user,
 }: UserDrawerProps) {
   const router = useRouter();
+  const t = useTranslations('users');
+  const tTime = useTranslations('users.time');
+  const locale = useLocale();
+  const { getLabel: getRoleLabel } = useUserRoleTranslation();
+  const { getLabel: getStatusLabel } = useUserStatusTranslation();
   const [copiedField, setCopiedField] = useState<string | null>(null);
 
   // Handle navigation - close drawer then navigate after animation completes
@@ -92,7 +100,7 @@ export default function UserDrawer({
 
   const formatDate = (dateString?: string) => {
     if (!dateString) return "—";
-    return new Intl.DateTimeFormat("en-US", {
+    return new Intl.DateTimeFormat(locale, {
       month: "short",
       day: "numeric",
       year: "numeric",
@@ -100,15 +108,15 @@ export default function UserDrawer({
   };
 
   const formatRelativeTime = (dateString?: string) => {
-    if (!dateString) return "Never";
+    if (!dateString) return tTime('never');
     const diffDays = Math.floor((STABLE_NOW - new Date(dateString).getTime()) / 86400000);
-    if (diffDays < 0) return "Just now";
-    if (diffDays === 0) return "Today";
-    if (diffDays === 1) return "Yesterday";
-    if (diffDays < 7) return `${diffDays}d ago`;
-    if (diffDays < 30) return `${Math.floor(diffDays / 7)}w ago`;
-    if (diffDays < 365) return `${Math.floor(diffDays / 30)}mo ago`;
-    return `${Math.floor(diffDays / 365)}y ago`;
+    if (diffDays < 0) return tTime('justNow');
+    if (diffDays === 0) return tTime('today');
+    if (diffDays === 1) return tTime('yesterday');
+    if (diffDays < 7) return tTime('daysAgo', { count: diffDays });
+    if (diffDays < 30) return tTime('weeksAgo', { count: Math.floor(diffDays / 7) });
+    if (diffDays < 365) return tTime('monthsAgo', { count: Math.floor(diffDays / 30) });
+    return tTime('yearsAgo', { count: Math.floor(diffDays / 365) });
   };
 
   const getRoleIcon = (role: UserRole) => {
@@ -123,8 +131,9 @@ export default function UserDrawer({
     }
   };
 
-  const status = getUserStatus(user);
-  
+  const statusKey = getUserStatusKey(user);
+  const statusVariant = getStatusBadgeVariant(statusKey);
+
   const getStatusColor = (variant: string) => {
     switch (variant) {
       case 'success': return "bg-emerald-500";
@@ -152,9 +161,9 @@ export default function UserDrawer({
                       {getUserInitials(user)}
                     </AvatarFallback>
                   </Avatar>
-                  <span 
-                    className={`absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-background ${getStatusColor(status.variant)}`}
-                    title={status.label}
+                  <span
+                    className={`absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-background ${getStatusColor(statusVariant)}`}
+                    title={getStatusLabel(statusKey)}
                   />
                 </div>
 
@@ -174,7 +183,7 @@ export default function UserDrawer({
                           )}
                         </TooltipTrigger>
                         <TooltipContent>
-                          {user.banned ? "Banned" : "Locked"}
+                          {user.banned ? getStatusLabel('banned') : getStatusLabel('locked')}
                         </TooltipContent>
                       </Tooltip>
                     )}
@@ -202,7 +211,7 @@ export default function UserDrawer({
                       className={`gap-1 h-5 text-[10px] px-1.5 ${getRoleBadgeColor(user.role)}`}
                     >
                       {getRoleIcon(user.role)}
-                      {getRoleDisplayName(user.role)}
+                      {getRoleLabel(user.role)}
                     </Badge>
                     {user.username && (
                       <Badge variant="secondary" className="h-5 text-[10px] px-1.5">
@@ -222,16 +231,16 @@ export default function UserDrawer({
                   <DropdownMenuContent align="end" className="w-48">
                     <DropdownMenuItem onClick={() => copyToClipboard(user.id, "id")}>
                       <Copy className="h-4 w-4 mr-2" />
-                      Copy User ID
+                      {t('drawer.copy.copyUserId')}
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => copyToClipboard(user.clerkId, "clerkId")}>
                       <Copy className="h-4 w-4 mr-2" />
-                      Copy Clerk ID
+                      {t('drawer.copy.copyClerkId')}
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem>
                       <ExternalLink className="h-4 w-4 mr-2" />
-                      View in Clerk
+                      {t('drawer.menu.viewInClerk')}
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -242,19 +251,19 @@ export default function UserDrawer({
           {/* Tabbed Content */}
           <Tabs defaultValue="details" className="flex-1 flex flex-col overflow-hidden">
             <TabsList className="w-full justify-start rounded-none border-b bg-transparent h-10 p-0 px-4">
-              <TabsTrigger 
-                value="details" 
+              <TabsTrigger
+                value="details"
                 className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent h-10 px-3"
               >
                 <Info className="h-3.5 w-3.5 mr-1.5" />
-                Details
+                {t('drawer.tabs.details')}
               </TabsTrigger>
-              <TabsTrigger 
-                value="activity" 
+              <TabsTrigger
+                value="activity"
                 className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent h-10 px-3"
               >
                 <History className="h-3.5 w-3.5 mr-1.5" />
-                Activity
+                {t('drawer.tabs.activity')}
               </TabsTrigger>
             </TabsList>
 
@@ -265,12 +274,12 @@ export default function UserDrawer({
                 <div className="grid grid-cols-2 gap-2">
                   <StatCard
                     icon={<Calendar className="h-3.5 w-3.5" />}
-                    label="Member since"
+                    label={t('drawer.fields.memberSince')}
                     value={formatDate(user.clerkCreatedAt ?? user.createdAt)}
                   />
                   <StatCard
                     icon={<Clock className="h-3.5 w-3.5" />}
-                    label="Last active"
+                    label={t('drawer.fields.lastActive')}
                     value={formatRelativeTime(user.lastSignInAt ?? user.lastLogin)}
                   />
                 </div>
@@ -278,16 +287,16 @@ export default function UserDrawer({
                 {/* Account Details */}
                 <div className="space-y-1">
                   <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">
-                    Account
+                    {t('drawer.sections.account')}
                   </p>
-                  <DetailRow label="Status" value={status.label} />
-                  {user.firstName && <DetailRow label="First name" value={user.firstName} />}
-                  {user.lastName && <DetailRow label="Last name" value={user.lastName} />}
-                  <DetailRow 
-                    label="User ID" 
-                    value={user.id} 
-                    mono 
-                    copyable 
+                  <DetailRow label={t('drawer.fields.status')} value={getStatusLabel(statusKey)} />
+                  {user.firstName && <DetailRow label={t('drawer.fields.firstName')} value={user.firstName} />}
+                  {user.lastName && <DetailRow label={t('drawer.fields.lastName')} value={user.lastName} />}
+                  <DetailRow
+                    label={t('drawer.fields.userId')}
+                    value={user.id}
+                    mono
+                    copyable
                     onCopy={() => copyToClipboard(user.id, "id")}
                     copied={copiedField === "id"}
                   />
@@ -296,19 +305,19 @@ export default function UserDrawer({
                 {/* Permissions */}
                 <div className="space-y-1">
                   <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">
-                    Permissions
+                    {t('drawer.sections.permissions')}
                   </p>
                   <div className="flex flex-wrap gap-1.5">
                     {getPermissionTags(user.role).map((perm) => (
                       <span
-                        key={perm.label}
+                        key={perm.key}
                         className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs ${
                           perm.allowed
                             ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400"
                             : "bg-muted text-muted-foreground line-through"
                         }`}
                       >
-                        {perm.label}
+                        {t(`drawer.permissions.${perm.key}`)}
                       </span>
                     ))}
                   </div>
@@ -320,25 +329,25 @@ export default function UserDrawer({
                 <div className="space-y-3">
                   {user.lastSignInAt && (
                     <ActivityItem
-                      title="Last sign-in"
+                      title={t('drawer.activity.lastSignIn')}
                       time={user.lastSignInAt ?? ""}
                       highlight
                     />
                   )}
                   {user.updatedAt && user.updatedAt !== user.createdAt && (
                     <ActivityItem
-                      title="Profile updated"
+                      title={t('drawer.activity.profileUpdated')}
                       time={user.updatedAt}
                     />
                   )}
                   {user.clerkCreatedAt && (
                     <ActivityItem
-                      title="Clerk account created"
+                      title={t('drawer.activity.clerkCreated')}
                       time={user.clerkCreatedAt ?? ""}
                     />
                   )}
                   <ActivityItem
-                    title="Synced to Skillsoft"
+                    title={t('drawer.activity.syncedToSkillsoft')}
                     time={user.createdAt}
                   />
                 </div>
@@ -348,33 +357,33 @@ export default function UserDrawer({
 
           {/* Footer Actions */}
           <div className="p-4 border-t bg-muted/30 space-y-2">
-            <Button 
-              className="w-full h-9" 
+            <Button
+              className="w-full h-9"
               size="sm"
               onClick={() => handleNavigate(`/admin/users/${user.id}`)}
             >
               <ExternalLink className="h-3.5 w-3.5 mr-2" />
-              View Full Profile
+              {t('drawer.actions.viewFullProfile')}
             </Button>
             <div className="flex gap-2">
-              <Button 
-                variant="outline" 
-                size="sm" 
+              <Button
+                variant="outline"
+                size="sm"
                 className="flex-1 h-8"
                 onClick={() => handleNavigate(`/admin/users/${user.id}/edit`)}
               >
                 <Edit className="h-3.5 w-3.5 mr-1.5" />
-                Edit
+                {t('drawer.actions.edit')}
               </Button>
               {user.isActive && !user.banned ? (
                 <Button variant="outline" size="sm" className="flex-1 h-8 text-orange-600 hover:text-orange-600 hover:bg-orange-50">
                   <UserX className="h-3.5 w-3.5 mr-1.5" />
-                  Deactivate
+                  {t('drawer.actions.deactivate')}
                 </Button>
               ) : (
                 <Button variant="outline" size="sm" className="flex-1 h-8 text-emerald-600 hover:text-emerald-600 hover:bg-emerald-50">
                   <UserCheck className="h-3.5 w-3.5 mr-1.5" />
-                  Activate
+                  {t('drawer.actions.activate')}
                 </Button>
               )}
             </div>
@@ -439,17 +448,19 @@ function DetailRow({
 }
 
 // Activity item component
-function ActivityItem({ 
-  title, 
-  time, 
-  highlight = false 
-}: { 
-  title: string; 
-  time: string; 
+function ActivityItem({
+  title,
+  time,
+  highlight = false
+}: {
+  title: string;
+  time: string;
   highlight?: boolean;
 }) {
+  const locale = useLocale();
+
   const formatDateTime = (dateString: string) => {
-    return new Intl.DateTimeFormat("en-US", {
+    return new Intl.DateTimeFormat(locale, {
       month: "short",
       day: "numeric",
       year: "numeric",
@@ -469,18 +480,18 @@ function ActivityItem({
   );
 }
 
-// Get permission tags for role
+// Get permission tags for role - returns translation keys
 function getPermissionTags(role: UserRole) {
   const allPermissions = [
-    { label: "Manage Users", roles: [UserRole.ADMIN] },
-    { label: "Edit Content", roles: [UserRole.ADMIN, UserRole.EDITOR] },
-    { label: "View Reports", roles: [UserRole.ADMIN, UserRole.EDITOR] },
-    { label: "System Settings", roles: [UserRole.ADMIN] },
-    { label: "Take Assessments", roles: [UserRole.USER, UserRole.EDITOR, UserRole.ADMIN] },
+    { key: "manageUsers", roles: [UserRole.ADMIN] },
+    { key: "editContent", roles: [UserRole.ADMIN, UserRole.EDITOR] },
+    { key: "viewReports", roles: [UserRole.ADMIN, UserRole.EDITOR] },
+    { key: "systemSettings", roles: [UserRole.ADMIN] },
+    { key: "takeAssessments", roles: [UserRole.USER, UserRole.EDITOR, UserRole.ADMIN] },
   ];
 
   return allPermissions.map((perm) => ({
-    label: perm.label,
+    key: perm.key,
     allowed: perm.roles.includes(role),
   }));
 }

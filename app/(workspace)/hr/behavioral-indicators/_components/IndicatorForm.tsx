@@ -2,8 +2,8 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
-import { z } from 'zod';
-import { indicatorSchema } from '../validation';
+import { useMemo } from 'react';
+import { createIndicatorSchema, IndicatorFormValues } from '@/lib/schemas';
 import { useWeightValidation } from '../hooks/useWeightValidation';
 import { BehavioralIndicator } from '@/types/domain';
 import { WeightAdjustmentModal } from './WeightAdjustmentModal';
@@ -49,19 +49,31 @@ import {
   Check,
   AlertCircle
 } from "lucide-react";
-import { HelpTooltip, formHelp } from '@/components/ui/help-tooltip';
+import { HelpTooltip } from '@/components/ui/help-tooltip';
 import { cn } from '@/lib/utils';
+import { useTranslations } from 'next-intl';
+import { useEnumTranslation } from '@/hooks/useEnumTranslation';
+import { useHelpTranslation } from '@/hooks/useHelpTranslation';
 
-type IndicatorFormValues = z.infer<typeof indicatorSchema>;
 const measurementTypes = Object.values(IndicatorMeasurementType);
 
 export function IndicatorForm({ indicator, competencyId, onUpdatePreview }: { indicator?: BehavioralIndicator, competencyId?: string, onUpdatePreview?: (data: IndicatorFormValues) => void }) {
   const router = useRouter();
+  const t = useTranslations('forms');
+  const tValidation = useTranslations();
+  const { getOptions: getObservabilityOptions } = useEnumTranslation<ObservabilityLevel>('observabilityLevel');
+  const { getOptions: getMeasurementOptions } = useEnumTranslation<IndicatorMeasurementType>('measurementType');
+  const { getOptions: getApprovalOptions } = useEnumTranslation<ApprovalStatus>('approvalStatus');
+  const { getOptions: getContextOptions } = useEnumTranslation<ContextScope>('contextScope');
+  const { getHelp } = useHelpTranslation('indicator');
   const [isLoading, setIsLoading] = useState(false);
   const [showWeightModal, setShowWeightModal] = useState(false);
   const isEditMode = !!indicator;
 
-  // Initialize form 
+  // Create i18n-aware schema with translated error messages
+  const indicatorSchema = useMemo(() => createIndicatorSchema(tValidation), [tValidation]);
+
+  // Initialize form
   const form = useForm<IndicatorFormValues>({
     resolver: zodResolver(indicatorSchema),
     mode: 'onChange', // Enable inline validation
@@ -119,7 +131,7 @@ export function IndicatorForm({ indicator, competencyId, onUpdatePreview }: { in
   async function onSubmit(data: IndicatorFormValues) {
     // Check weight validation before submitting
     if (!weightValidation.isValid) {
-      toast.error("Please fix weight validation errors before submitting.");
+      toast.error(t('weightValidationError'));
       return;
     }
 
@@ -152,22 +164,22 @@ export function IndicatorForm({ indicator, competencyId, onUpdatePreview }: { in
       }
     } catch (error: unknown) {
       // Handle different error types safely
-      let errorMessage = 'An error occurred.';
-      
+      let errorMessage = t('errorOccurred');
+
       if (error && typeof error === 'object') {
         const errorObj = error as Record<string, unknown>;
-        
+
         if (errorObj.status === 409) {
-          errorMessage = "Failed to update indicator. The title might already exist within the same competency.";
+          errorMessage = `${t('updateFailed')}. ${t('duplicateTitle')}`;
         } else if (typeof errorObj.message === 'string') {
           if (errorObj.message.includes('weight')) {
-            errorMessage = "Weight validation failed: " + errorObj.message;
+            errorMessage = `${t('weightValidationError')}: ${errorObj.message}`;
           } else {
             errorMessage = errorObj.message;
           }
         }
       }
-      
+
       toast.error(errorMessage);
     } finally {
       setIsLoading(false);
@@ -198,14 +210,14 @@ export function IndicatorForm({ indicator, competencyId, onUpdatePreview }: { in
                   <AlertTriangle className="h-4 w-4" />
                   <AlertDescription className="space-y-3">
                     <div>{weightValidation.errorMessage}</div>
-                    <Button 
+                    <Button
                       type="button"
-                      variant="outline" 
+                      variant="outline"
                       size="sm"
                       onClick={() => setShowWeightModal(true)}
                       className="bg-background"
                     >
-                      Adjust Existing Weights
+                      {t('indicator.buttons.adjustWeights')}
                     </Button>
                   </AlertDescription>
                 </Alert>
@@ -214,7 +226,7 @@ export function IndicatorForm({ indicator, competencyId, onUpdatePreview }: { in
                 <Alert>
                   <Info className="h-4 w-4" />
                   <AlertDescription>
-                    Only {weightValidation.remainingWeight.toFixed(3)} weight remaining for this competency.
+                    {t('indicator.alerts.weightRemaining', { remaining: weightValidation.remainingWeight.toFixed(3) })}
                   </AlertDescription>
                 </Alert>
               )}
@@ -228,8 +240,8 @@ export function IndicatorForm({ indicator, competencyId, onUpdatePreview }: { in
                 <FileText className="h-4 w-4 sm:h-5 sm:w-5" />
               </div>
               <div>
-                <h3 className="text-sm sm:text-base font-semibold">Core Information</h3>
-                <p className="text-xs sm:text-sm text-muted-foreground">Title and description for this indicator</p>
+                <h3 className="text-sm sm:text-base font-semibold">{t('indicator.sections.coreInformation')}</h3>
+                <p className="text-xs sm:text-sm text-muted-foreground">{t('indicator.sections.coreInformationDesc')}</p>
               </div>
             </div>
             <div className="p-4 sm:p-5 space-y-4 sm:space-y-5">
@@ -241,13 +253,13 @@ export function IndicatorForm({ indicator, competencyId, onUpdatePreview }: { in
                   return (
                     <FormItem>
                       <FormLabel className="text-sm font-medium flex items-center gap-1">
-                        Title <span className="text-destructive">*</span>
-                        <HelpTooltip content={formHelp.indicator.title} />
+                        {t('indicator.fields.title')} <span className="text-destructive">*</span>
+                        <HelpTooltip content={getHelp('title')} />
                       </FormLabel>
                       <FormControl>
                         <div className="relative">
                           <Input
-                            placeholder="e.g., Proactive Communication"
+                            placeholder={t('indicator.placeholders.title')}
                             className={cn(
                               "h-11 sm:h-10 pr-8 touch-manipulation",
                               fieldState.isValid && "border-green-500 focus-visible:ring-green-500",
@@ -283,12 +295,12 @@ export function IndicatorForm({ indicator, competencyId, onUpdatePreview }: { in
                   return (
                     <FormItem>
                       <FormLabel className="text-sm font-medium flex items-center gap-1">
-                        Description <span className="text-destructive">*</span>
-                        <HelpTooltip content={formHelp.indicator.description} />
+                        {t('indicator.fields.description')} <span className="text-destructive">*</span>
+                        <HelpTooltip content={getHelp('description')} />
                       </FormLabel>
                       <FormControl>
                         <Textarea
-                          placeholder="Detailed description of what this indicator measures..."
+                          placeholder={t('indicator.placeholders.description')}
                           className={cn(
                             "min-h-24 resize-none touch-manipulation",
                             fieldState.isValid && "border-green-500 focus-visible:ring-green-500",
@@ -316,8 +328,8 @@ export function IndicatorForm({ indicator, competencyId, onUpdatePreview }: { in
                 <Settings2 className="h-4 w-4 sm:h-5 sm:w-5" />
               </div>
               <div>
-                <h3 className="text-sm sm:text-base font-semibold">Classification & Metrics</h3>
-                <p className="text-xs sm:text-sm text-muted-foreground">Observability, measurement type, and weight</p>
+                <h3 className="text-sm sm:text-base font-semibold">{t('indicator.sections.classification')}</h3>
+                <p className="text-xs sm:text-sm text-muted-foreground">{t('indicator.sections.classificationDesc')}</p>
               </div>
             </div>
             <div className="p-4 sm:p-5 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-5">
@@ -327,8 +339,8 @@ export function IndicatorForm({ indicator, competencyId, onUpdatePreview }: { in
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="text-sm font-medium flex items-center gap-1">
-                      Observability Level
-                      <HelpTooltip content={formHelp.indicator.observabilityLevel} />
+                      {t('indicator.fields.observabilityLevel')}
+                      <HelpTooltip content={getHelp('observabilityLevel')} />
                     </FormLabel>
                     <Select
                       onValueChange={(value) => {
@@ -339,13 +351,13 @@ export function IndicatorForm({ indicator, competencyId, onUpdatePreview }: { in
                     >
                       <FormControl>
                         <SelectTrigger className="h-11 sm:h-10 touch-manipulation">
-                          <SelectValue placeholder="Select level" />
+                          <SelectValue placeholder={t('indicator.placeholders.selectLevel')} />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {Object.values(ObservabilityLevel).map((level) => (
-                          <SelectItem key={level} value={level}>
-                            {level.replace(/_/g, ' ')}
+                        {getObservabilityOptions(Object.values(ObservabilityLevel)).map((option) => (
+                          <SelectItem key={option.value} value={option.value}>
+                            {option.label}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -360,25 +372,25 @@ export function IndicatorForm({ indicator, competencyId, onUpdatePreview }: { in
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="text-sm font-medium flex items-center gap-1">
-                      Measurement Type
-                      <HelpTooltip content={formHelp.indicator.measurementType} />
+                      {t('indicator.fields.measurementType')}
+                      <HelpTooltip content={getHelp('measurementType')} />
                     </FormLabel>
-                    <Select 
+                    <Select
                       onValueChange={(value) => {
                         field.onChange(value);
                         handleFieldBlur();
-                      }} 
+                      }}
                       defaultValue={field.value}
                     >
                       <FormControl>
                         <SelectTrigger className="h-11 sm:h-10 touch-manipulation">
-                          <SelectValue placeholder="Select type" />
+                          <SelectValue placeholder={t('indicator.placeholders.selectType')} />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {measurementTypes.map((type) => (
-                          <SelectItem key={type} value={type}>
-                            {type.replace(/_/g, ' ')}
+                        {getMeasurementOptions(measurementTypes).map((option) => (
+                          <SelectItem key={option.value} value={option.value}>
+                            {option.label}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -393,8 +405,8 @@ export function IndicatorForm({ indicator, competencyId, onUpdatePreview }: { in
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="text-sm font-medium flex items-center gap-1">
-                      Weight <span className="text-destructive">*</span>
-                      <HelpTooltip content={formHelp.indicator.weight} />
+                      {t('indicator.fields.weight')} <span className="text-destructive">*</span>
+                      <HelpTooltip content={getHelp('weight')} />
                     </FormLabel>
                     <div className="relative">
                       <Scale className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -430,7 +442,7 @@ export function IndicatorForm({ indicator, competencyId, onUpdatePreview }: { in
                 name="orderIndex"
                 render={({ field }) => (
                   <FormItem className="md:col-start-1">
-                    <FormLabel className="text-sm font-medium">Order Index</FormLabel>
+                    <FormLabel className="text-sm font-medium">{t('indicator.fields.orderIndex')}</FormLabel>
                     <FormControl>
                       <Input
                         type="number"
@@ -455,60 +467,39 @@ export function IndicatorForm({ indicator, competencyId, onUpdatePreview }: { in
                 render={({ field }) => (
                   <FormItem className="md:col-span-2">
                     <FormLabel className="text-sm font-medium flex items-center gap-1">
-                      Context Scope
-                      <HelpTooltip content="Determines the applicability of this indicator. 'Universal' indicators are context-neutral and used in Scenario A (Competency Passport)." />
+                      {t('indicator.fields.contextScope')}
+                      <HelpTooltip content={t('indicator.help.contextScope')} />
                     </FormLabel>
-                    <Select 
+                    <Select
                       onValueChange={(value) => {
                         field.onChange(value);
                         handleFieldBlur();
-                      }} 
+                      }}
                       defaultValue={field.value || ContextScope.UNIVERSAL}
                     >
                       <FormControl>
                         <SelectTrigger className="h-11 sm:h-10 touch-manipulation">
-                          <SelectValue placeholder="Select context scope" />
+                          <SelectValue placeholder={t('indicator.placeholders.selectContextScope')} />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value={ContextScope.UNIVERSAL}>
-                          <div className="flex flex-col items-start py-1">
-                            <span className="font-medium">Universal - All Humans</span>
-                            <span className="text-xs text-muted-foreground">
-                              Context-neutral (Active Listening, Emotional Regulation)
-                            </span>
-                          </div>
-                        </SelectItem>
-                        <SelectItem value={ContextScope.PROFESSIONAL}>
-                          <div className="flex flex-col items-start py-1">
-                            <span className="font-medium">Professional - Office Jobs</span>
-                            <span className="text-xs text-muted-foreground">
-                              White-collar environments (Email Etiquette, Meeting Facilitation)
-                            </span>
-                          </div>
-                        </SelectItem>
-                        <SelectItem value={ContextScope.TECHNICAL}>
-                          <div className="flex flex-col items-start py-1">
-                            <span className="font-medium">Technical - Specialist Roles</span>
-                            <span className="text-xs text-muted-foreground">
-                              IT, Engineering, Data (Code Review, Technical Documentation)
-                            </span>
-                          </div>
-                        </SelectItem>
-                        <SelectItem value={ContextScope.MANAGERIAL}>
-                          <div className="flex flex-col items-start py-1">
-                            <span className="font-medium">Managerial - Leadership</span>
-                            <span className="text-xs text-muted-foreground">
-                              People management (Delegation, Performance Feedback)
-                            </span>
-                          </div>
-                        </SelectItem>
+                        {getContextOptions(Object.values(ContextScope)).map((option) => (
+                          <SelectItem key={option.value} value={option.value}>
+                            <div className="flex flex-col items-start py-1">
+                              <span className="font-medium">{option.label}</span>
+                              {option.description && (
+                                <span className="text-xs text-muted-foreground">
+                                  {option.description}
+                                </span>
+                              )}
+                            </div>
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                     <FormDescription className="text-xs">
                       <Info className="inline h-3 w-3 mr-1" />
-                      "Universal" indicators are included in Scenario A (General Overview / Competency Passport).
-                      Other scopes are for targeted assessments in Scenarios B and C.
+                      {t('indicator.help.contextScopeNote')}
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -524,8 +515,8 @@ export function IndicatorForm({ indicator, competencyId, onUpdatePreview }: { in
                 <ThumbsUp className="h-4 w-4 sm:h-5 sm:w-5" />
               </div>
               <div>
-                <h3 className="text-sm sm:text-base font-semibold">Contextual Examples</h3>
-                <p className="text-xs sm:text-sm text-muted-foreground">Provide examples to clarify the indicator</p>
+                <h3 className="text-sm sm:text-base font-semibold">{t('indicator.sections.contextualExamples')}</h3>
+                <p className="text-xs sm:text-sm text-muted-foreground">{t('indicator.sections.contextualExamplesDesc')}</p>
               </div>
             </div>
             <div className="p-4 sm:p-5 space-y-4 sm:space-y-5">
@@ -536,12 +527,12 @@ export function IndicatorForm({ indicator, competencyId, onUpdatePreview }: { in
                   <FormItem>
                     <FormLabel className="text-sm font-medium flex items-center gap-2">
                       <ThumbsUp className="h-4 w-4 text-green-600" />
-                      Positive Examples
-                      <HelpTooltip content={formHelp.indicator.examples} variant="tip" />
+                      {t('indicator.fields.examples')}
+                      <HelpTooltip content={getHelp('examples')} variant="tip" />
                     </FormLabel>
                     <FormControl>
                       <Textarea
-                        placeholder="List behaviors that demonstrate this indicator..."
+                        placeholder={t('indicator.placeholders.examples')}
                         className="min-h-24 resize-none border-green-200 focus-visible:ring-green-500/20 dark:border-green-800 touch-manipulation"
                         {...field} 
                         onBlur={() => {
@@ -561,12 +552,12 @@ export function IndicatorForm({ indicator, competencyId, onUpdatePreview }: { in
                   <FormItem>
                     <FormLabel className="text-sm font-medium flex items-center gap-2">
                       <ThumbsDown className="h-4 w-4 text-red-600" />
-                      Counter Examples
-                      <HelpTooltip content={formHelp.indicator.counterExamples} variant="tip" />
+                      {t('indicator.fields.counterExamples')}
+                      <HelpTooltip content={getHelp('counterExamples')} variant="tip" />
                     </FormLabel>
                     <FormControl>
                       <Textarea
-                        placeholder="List behaviors that contradict this indicator..."
+                        placeholder={t('indicator.placeholders.counterExamples')}
                         className="min-h-24 resize-none border-red-200 focus-visible:ring-red-500/20 dark:border-red-800 touch-manipulation"
                         {...field} 
                         onBlur={() => {
@@ -589,8 +580,8 @@ export function IndicatorForm({ indicator, competencyId, onUpdatePreview }: { in
                 <CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5" />
               </div>
               <div>
-                <h3 className="text-sm sm:text-base font-semibold">Status & Approval</h3>
-                <p className="text-xs sm:text-sm text-muted-foreground">Manage visibility and workflow</p>
+                <h3 className="text-sm sm:text-base font-semibold">{t('indicator.sections.statusApproval')}</h3>
+                <p className="text-xs sm:text-sm text-muted-foreground">{t('indicator.sections.statusApprovalDesc')}</p>
               </div>
             </div>
             <div className="p-4 sm:p-5 grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
@@ -599,23 +590,23 @@ export function IndicatorForm({ indicator, competencyId, onUpdatePreview }: { in
                 name="approvalStatus"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-sm font-medium">Approval Status</FormLabel>
-                    <Select 
+                    <FormLabel className="text-sm font-medium">{t('indicator.fields.approvalStatus')}</FormLabel>
+                    <Select
                       onValueChange={(value) => {
                         field.onChange(value);
                         handleFieldBlur();
-                      }} 
+                      }}
                       defaultValue={field.value}
                     >
                       <FormControl>
                         <SelectTrigger className="h-11 sm:h-10 touch-manipulation">
-                          <SelectValue placeholder="Select status" />
+                          <SelectValue placeholder={t('indicator.placeholders.selectStatus')} />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {Object.values(ApprovalStatus).map((status) => (
-                          <SelectItem key={status} value={status}>
-                            {status.replace(/_/g, ' ')}
+                        {getApprovalOptions(Object.values(ApprovalStatus)).map((option) => (
+                          <SelectItem key={option.value} value={option.value}>
+                            {option.label}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -629,7 +620,7 @@ export function IndicatorForm({ indicator, competencyId, onUpdatePreview }: { in
                 name="isActive"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-sm font-medium">Visibility</FormLabel>
+                    <FormLabel className="text-sm font-medium">{t('indicator.fields.visibility')}</FormLabel>
                     <div className="flex items-center gap-3 h-11 sm:h-10 px-3 rounded-lg border bg-muted/30 touch-manipulation">
                       <FormControl>
                         <Switch
@@ -642,7 +633,7 @@ export function IndicatorForm({ indicator, competencyId, onUpdatePreview }: { in
                         />
                       </FormControl>
                       <span className={`text-sm font-medium ${field.value ? 'text-green-600 dark:text-green-400' : 'text-muted-foreground'}`}>
-                        {field.value ? 'Active' : 'Inactive'}
+                        {field.value ? t('active') : t('inactive')}
                       </span>
                     </div>
                   </FormItem>
@@ -661,7 +652,7 @@ export function IndicatorForm({ indicator, competencyId, onUpdatePreview }: { in
               className="h-11 sm:h-10 min-h-[44px] touch-manipulation"
             >
               <X className="h-4 w-4 mr-2" />
-              Cancel
+              {t('cancel')}
             </Button>
             {onUpdatePreview && (
               <Button
@@ -672,7 +663,7 @@ export function IndicatorForm({ indicator, competencyId, onUpdatePreview }: { in
                 className="h-11 sm:h-10 min-h-[44px] touch-manipulation"
               >
                 <RefreshCw className="h-4 w-4 mr-2" />
-                Update Preview
+                {t('indicator.buttons.updatePreview')}
               </Button>
             )}
             <Button
@@ -683,12 +674,12 @@ export function IndicatorForm({ indicator, competencyId, onUpdatePreview }: { in
               {isLoading ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  {isEditMode ? 'Saving...' : 'Creating...'}
+                  {isEditMode ? t('saving') : t('creating')}
                 </>
               ) : (
                 <>
                   <Save className="h-4 w-4 mr-2" />
-                  {isEditMode ? 'Save Changes' : 'Create Indicator'}
+                  {isEditMode ? t('saveChanges') : t('indicator.buttons.createIndicator')}
                 </>
               )}
             </Button>

@@ -5,6 +5,8 @@ import { Suspense } from "react";
 import { Metadata, Viewport } from "next";
 import { ClerkProvider } from '@clerk/nextjs';
 import { Analytics } from '@vercel/analytics/next';
+import { NextIntlClientProvider } from 'next-intl';
+import { getLocale, getMessages } from 'next-intl/server';
 import { LayoutProvider } from "@/components/layout/layout-provider";
 import { QueryProvider } from "@/components/providers/QueryProvider";
 import { Toaster } from "@/components/ui/sonner";
@@ -83,34 +85,41 @@ const clerkAppearance = {
 
 /**
  * Root Layout
- * 
- * Provides ClerkProvider for authentication and ThemeProvider via LayoutProvider.
+ *
+ * Provides ClerkProvider for authentication, NextIntlClientProvider for i18n,
+ * and ThemeProvider via LayoutProvider.
  * Route-specific layouts handle sidebar/header:
  * - (auth)/ - Minimal layout for sign-in/sign-up
  * - (workspace)/ - Full dashboard layout with sidebar
- * 
+ *
  * Note: ClerkProvider uses dynamic prop for Next.js 16 cacheComponents compatibility.
  * This tells Clerk to defer auth state resolution to runtime.
  */
-export default function RootLayout({
+export default async function RootLayout({
 	children,
 }: Readonly<{
 	children: React.ReactNode;
 }>) {
 	const publishableKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
 
+	// Get locale and messages for i18n
+	const locale = await getLocale();
+	const messages = await getMessages();
+
 	// Always return the HTML structure, conditionally wrap with ClerkProvider
 	if (publishableKey && publishableKey.trim() !== '') {
 		return (
-			<ClerkProvider 
+			<ClerkProvider
 				appearance={clerkAppearance}
 				dynamic
 			>
-				<html lang="en" suppressHydrationWarning className="mobile-container">
+				<html lang={locale} suppressHydrationWarning className="mobile-container">
 					<body className="mobile-container" suppressHydrationWarning>
-						<Suspense fallback={<AuthLoadingFallback />}>
-							<LayoutContent>{children}</LayoutContent>
-						</Suspense>
+						<NextIntlClientProvider messages={messages} locale={locale}>
+							<Suspense fallback={<AuthLoadingFallback />}>
+								<LayoutContent>{children}</LayoutContent>
+							</Suspense>
+						</NextIntlClientProvider>
 						<Analytics />
 					</body>
 				</html>
@@ -120,18 +129,20 @@ export default function RootLayout({
 
 	// Fallback without ClerkProvider (for development without Clerk keys)
 	return (
-		<html lang="en" suppressHydrationWarning className="mobile-container">
+		<html lang={locale} suppressHydrationWarning className="mobile-container">
 			<body className="mobile-container" suppressHydrationWarning>
-				<LayoutProvider>
-					<QueryProvider>
-						{/* Skip links for keyboard navigation (WCAG 2.4.1) */}
-						<SkipLinks />
-						{/* Main content anchor for skip link target */}
-						<MainContentAnchor />
-						{children}
-						<Toaster richColors />
-					</QueryProvider>
-				</LayoutProvider>
+				<NextIntlClientProvider messages={messages} locale={locale}>
+					<LayoutProvider>
+						<QueryProvider>
+							{/* Skip links for keyboard navigation (WCAG 2.4.1) */}
+							<SkipLinks />
+							{/* Main content anchor for skip link target */}
+							<MainContentAnchor />
+							{children}
+							<Toaster richColors />
+						</QueryProvider>
+					</LayoutProvider>
+				</NextIntlClientProvider>
 				<Analytics />
 			</body>
 		</html>

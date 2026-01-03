@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { AlertCircle, RefreshCw, ArrowLeft, WifiOff } from "lucide-react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 
 
 type CompetencyFormData = {
@@ -37,6 +38,8 @@ interface ErrorState {
 
 export default function EditCompetencyPage() {
   const params = useParams();
+  const t = useTranslations('competency');
+  const tCommon = useTranslations('common');
   const competencyId = params.competencyId as string;
   const [competency, setCompetency] = useState<Competency | null>(null);
   const [previewCompetency, setPreviewCompetency] = useState<Competency | null>(null);
@@ -128,17 +131,17 @@ export default function EditCompetencyPage() {
               )}
             </div>
             <CardTitle className="text-destructive">
-              {error.isCorsError ? 'Connection Issue' : 
-               error.isNetworkError ? 'Network Error' : 
-               'Failed to Load Competency'}
+              {error.isCorsError ? t('connectionIssue') :
+               error.isNetworkError ? t('networkError') :
+               t('failedToLoad')}
             </CardTitle>
             <CardDescription>
               {error.isCorsError ? (
-                'Unable to connect to the server. This may be a temporary issue with the API.'
+                t('connectionIssueDescription')
               ) : error.isNetworkError ? (
-                'Unable to reach the server. Please check your internet connection.'
+                t('networkErrorDescription')
               ) : (
-                'An error occurred while loading the competency details.'
+                t('errorLoadingDescription')
               )}
             </CardDescription>
           </CardHeader>
@@ -151,16 +154,16 @@ export default function EditCompetencyPage() {
                 </div>
               </div>
             )}
-            
+
             <div className="flex flex-col gap-2">
               <Button onClick={fetchCompetency} className="w-full">
                 <RefreshCw className="w-4 h-4 mr-2" />
-                Try Again
+                {t('tryAgain')}
               </Button>
               <Button variant="outline" asChild className="w-full">
                 <Link href="/hr/competencies">
                   <ArrowLeft className="w-4 h-4 mr-2" />
-                  Back to Competencies
+                  {t('backToCompetencies')}
                 </Link>
               </Button>
             </div>
@@ -181,20 +184,20 @@ export default function EditCompetencyPage() {
         <div className="container mx-auto px-4">
           <PageHeader
             className="py-4 border-0"
-            title="Edit Competency"
+            title={t('edit')}
           />
         </div>
       </div>
-      
+
       <div className="container mx-auto px-4 py-6">
         <Tabs defaultValue="details" className="space-y-6">
           <div className="flex items-center space-x-1 rounded-lg bg-muted p-1">
             <TabsList className="bg-transparent">
               <TabsTrigger value="details" className="data-[state=active]:bg-background data-[state=active]:shadow-sm">
-                Details
+                {t('details')}
               </TabsTrigger>
               <TabsTrigger value="indicators" className="data-[state=active]:bg-background data-[state=active]:shadow-sm">
-                Behavioral Indicators
+                {t('behavioralIndicators')}
               </TabsTrigger>
             </TabsList>
           </div>

@@ -4,6 +4,10 @@ import { getAuthHeaders } from './roleApi';
 
 import { AssessmentQuestion, BehavioralIndicator, Competency, TemplateReadinessResponse } from '@/types/domain';
 import { User, UserCreateInput, UserUpdateInput, UserRole } from '@/types/user';
+
+// Local O*NET data loaders (frontend-only, no backend API calls)
+import { searchOccupations, getPopularOccupations, getOccupationBySocCode } from '@/lib/occupation-data-loader';
+import { buildONetProfile } from '@/lib/onet-profile-builder';
 import {
   ApiError,
   BackendErrorResponse,
@@ -330,6 +334,7 @@ export const competenciesApi = {
         return fetchApi(`/competencies/${competencyId}`, {
             tags: [`competency-${competencyId}`],
             revalidate: 60,
+            silentStatusCodes: [404], // 404 is expected for non-existent/deleted competencies
         });
     },
 
@@ -391,6 +396,7 @@ export const competenciesApi = {
         return fetchApi(`/competencies/${competencyId}/available-bi`, {
             tags: [`available-indicators-${competencyId}`],
             revalidate: 60,
+            silentStatusCodes: [404], // 404 is expected when competency doesn't exist
         });
     },
 };
@@ -400,6 +406,7 @@ const getIndicatorsCached = cache(async (competencyId: string) : Promise<Behavio
     return fetchApi(`/competencies/${competencyId}/bi`, {
         tags: [`indicators-${competencyId}`],
         revalidate: 60,
+        silentStatusCodes: [404], // 404 is expected when competency doesn't exist or has no indicators
     });
 });
 const getAllIndicatorsCached = cache(
@@ -419,6 +426,7 @@ export const behavioralIndicatorsApi = {
     return fetchApi(`/behavioral-indicators/${indicatorId}`, {
       tags: [`indicator-${indicatorId}`],
       revalidate: 60,
+      silentStatusCodes: [404], // 404 is expected for non-existent/deleted indicators
     });
   },
 
@@ -476,6 +484,7 @@ const getIndicatorQuestionsCached = cache(async (competencyId: string, behaviora
       {
         tags: [`questions-${competencyId}-${behavioralIndicatorId}`],
         revalidate: 60,
+        silentStatusCodes: [404], // 404 is expected when indicator doesn't exist or has no questions
       }
     );
 });
@@ -501,6 +510,7 @@ export const assessmentQuestionsApi = {
       {
         tags: [`question-${questionId}`],
         revalidate: 60,
+        silentStatusCodes: [404], // 404 is expected for non-existent/deleted questions
       }
     );
   },
@@ -617,6 +627,7 @@ export const usersApi = {
       tags: [`user-${userId}`],
       revalidate: 60,
       authHeaders,
+      silentStatusCodes: [404], // 404 is expected for non-existent users
     });
   },
 
@@ -626,6 +637,7 @@ export const usersApi = {
       tags: [`user-clerk-${clerkId}`],
       revalidate: 60,
       authHeaders,
+      silentStatusCodes: [404], // 404 is expected for non-existent users
     });
   },
 
@@ -819,6 +831,7 @@ export const testTemplatesApi = {
       tags: [`test-template-${id}`],
       revalidate: 60,
       authHeaders,
+      silentStatusCodes: [404], // 404 is expected for non-existent/deleted templates
     });
   },
 
@@ -940,6 +953,7 @@ export const testSessionsApi = {
       tags: [`test-session-${sessionId}`],
       cache: 'no-store',
       authHeaders,
+      silentStatusCodes: [404], // 404 is expected for non-existent/deleted sessions
     });
   },
 
@@ -1078,6 +1092,7 @@ export const testResultsApi = {
       tags: [`test-result-${resultId}`],
       cache: 'no-store',
       authHeaders,
+      silentStatusCodes: [404], // 404 is expected for non-existent/deleted results
     });
   },
 
@@ -1353,125 +1368,43 @@ import type {
   AssemblyProgress,
 } from '@/types/domain';
 
-const ONET_BASE = '/onet';
-
-/**
- * Mock O*NET job titles for development when backend is not available.
- * Can be enabled via NEXT_PUBLIC_USE_MOCK_API=true
- */
-const MOCK_JOB_TITLES: ONetJobTitle[] = [
-  { socCode: '15-1252.00', title: 'Software Developers', description: 'Research, design, and develop computer and network software or specialized utility programs.' },
-  { socCode: '15-1211.00', title: 'Computer Systems Analysts', description: 'Analyze science, engineering, business, and other data processing problems.' },
-  { socCode: '15-1299.08', title: 'Computer Systems Engineers/Architects', description: 'Design and develop solutions to complex applications problems.' },
-  { socCode: '13-1111.00', title: 'Management Analysts', description: 'Conduct organizational studies and evaluations.' },
-  { socCode: '11-1021.00', title: 'General and Operations Managers', description: 'Plan, direct, or coordinate the operations of public or private sector organizations.' },
-  { socCode: '11-3031.00', title: 'Financial Managers', description: 'Plan, direct, or coordinate accounting, investing, banking activities.' },
-  { socCode: '13-2011.00', title: 'Accountants and Auditors', description: 'Examine, analyze, and interpret accounting records.' },
-  { socCode: '17-2199.00', title: 'Engineers, All Other', description: 'Design and develop engineering solutions to technical problems.' },
-  { socCode: '13-1161.00', title: 'Market Research Analysts', description: 'Research market conditions in local, regional, or national areas.' },
-  { socCode: '15-1244.00', title: 'Network and Computer Systems Administrators', description: 'Install, configure, and support computer networks.' },
-];
-
-const USE_MOCK_API = process.env.NEXT_PUBLIC_USE_MOCK_API === 'true';
+// ============================================
+// O*NET API (Frontend-Only, Local Data)
+// ============================================
+//
+// Uses local JSON data files instead of backend API calls.
+// Data sources: OccupationData.json, Abilities.json, Knowledge.json, WorkStyles.json
+// This follows the same pattern as ESCO/O*NET standards integration for competencies.
 
 export const onetApi = {
   /**
    * Search O*NET job titles by title or keyword.
-   * Returns matching job titles for the job search combobox.
+   * Uses Fuse.js fuzzy search on local occupation data.
    */
   searchJobTitles: async (query: string, limit = 15): Promise<ONetJobTitle[]> => {
-    if (USE_MOCK_API || !query.trim()) {
-      // Mock mode or empty query: filter mock data
-      const filtered = MOCK_JOB_TITLES.filter(o =>
-        o.title.toLowerCase().includes(query.toLowerCase()) ||
-        o.description.toLowerCase().includes(query.toLowerCase())
-      );
-      return filtered.slice(0, limit);
+    if (!query.trim()) {
+      return [];
     }
-
-    try {
-      const authHeaders = await getAuthHeaders();
-      return await fetchApi(`${ONET_BASE}/search?q=${encodeURIComponent(query)}&limit=${limit}`, {
-        tags: ['onet-search'],
-        revalidate: 300, // Cache for 5 minutes
-        authHeaders,
-      });
-    } catch (error) {
-      console.warn('O*NET API not available, using mock data:', error);
-      // Fallback to mock data if API fails
-      const filtered = MOCK_JOB_TITLES.filter(o =>
-        o.title.toLowerCase().includes(query.toLowerCase())
-      );
-      return filtered.slice(0, limit);
-    }
+    // Use local data loader with fuzzy search
+    return searchOccupations(query, limit);
   },
 
   /**
    * Get detailed O*NET profile for an occupation.
-   * Includes benchmarks, knowledge areas, and skills.
+   * Builds profile from local element data (Abilities, Knowledge, WorkStyles).
    */
   getProfile: async (socCode: string): Promise<ONetProfile> => {
-    if (USE_MOCK_API) {
-      // Return mock profile
-      const jobTitle = MOCK_JOB_TITLES.find(o => o.socCode === socCode);
-      return {
-        socCode,
-        occupationTitle: jobTitle?.title || 'Unknown Occupation',
-        benchmarks: [
-          { competencyCode: 'PS01', competencyName: 'Problem Solving', requiredLevel: 4.2, importance: 4.5 },
-          { competencyCode: 'CT01', competencyName: 'Critical Thinking', requiredLevel: 4.0, importance: 4.3 },
-          { competencyCode: 'CM01', competencyName: 'Communication', requiredLevel: 3.8, importance: 4.0 },
-          { competencyCode: 'TW01', competencyName: 'Teamwork', requiredLevel: 3.5, importance: 3.8 },
-          { competencyCode: 'AD01', competencyName: 'Adaptability', requiredLevel: 3.7, importance: 3.5 },
-        ],
-        knowledgeAreas: ['Computers and Electronics', 'Engineering and Technology', 'Mathematics'],
-        skills: ['Programming', 'Systems Analysis', 'Complex Problem Solving'],
-      };
-    }
-
-    try {
-      const authHeaders = await getAuthHeaders();
-      return await fetchApi(`${ONET_BASE}/profiles/${encodeURIComponent(socCode)}`, {
-        tags: [`onet-profile-${socCode}`],
-        revalidate: 3600, // Cache for 1 hour
-        authHeaders,
-      });
-    } catch (error) {
-      console.warn('O*NET profile API not available, using mock data:', error);
-      const jobTitle = MOCK_JOB_TITLES.find(o => o.socCode === socCode);
-      return {
-        socCode,
-        occupationTitle: jobTitle?.title || 'Unknown Occupation',
-        benchmarks: [
-          { competencyCode: 'PS01', competencyName: 'Problem Solving', requiredLevel: 4.2, importance: 4.5 },
-          { competencyCode: 'CT01', competencyName: 'Critical Thinking', requiredLevel: 4.0, importance: 4.3 },
-          { competencyCode: 'CM01', competencyName: 'Communication', requiredLevel: 3.8, importance: 4.0 },
-        ],
-        knowledgeAreas: ['General'],
-        skills: ['General Skills'],
-      };
-    }
+    // Build profile from local JSON data
+    return buildONetProfile(socCode);
   },
 
   /**
    * Get popular/common job titles for quick selection.
-   * Shows when search input is empty.
+   * Returns curated list of high-demand occupations.
    */
   getPopularJobTitles: async (): Promise<ONetJobTitle[]> => {
-    if (USE_MOCK_API) {
-      return MOCK_JOB_TITLES.slice(0, 8);
-    }
-
-    try {
-      const authHeaders = await getAuthHeaders();
-      return await fetchApi(`${ONET_BASE}/popular`, {
-        tags: ['onet-popular'],
-        revalidate: 3600, // Cache for 1 hour
-        authHeaders,
-      });
-    } catch {
-      return MOCK_JOB_TITLES.slice(0, 8);
-    }
+    // Return popular occupations from local data
+    return getPopularOccupations(10);
   },
 };
 
@@ -1480,6 +1413,7 @@ export const onetApi = {
 // ============================================
 
 const TEAMS_BASE = '/teams';
+const USE_MOCK_API = process.env.NEXT_PUBLIC_USE_MOCK_API === 'true';
 
 /**
  * Mock teams for development when backend is not available.

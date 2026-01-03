@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { useTranslations } from 'next-intl';
 import { SessionQuestion } from '@/types/domain';
 import { cn } from '@/lib/utils';
 
@@ -18,34 +19,46 @@ interface LikertScaleQuestionProps {
   onChange: (value: number | null) => void;
 }
 
-// Default Likert scale options (1-5)
-const DEFAULT_LIKERT_OPTIONS: AnswerOption[] = [
-  { value: 1, text: 'Совершенно не согласен', label: '1' },
-  { value: 2, text: 'Не согласен', label: '2' },
-  { value: 3, text: 'Нейтрально', label: '3' },
-  { value: 4, text: 'Согласен', label: '4' },
-  { value: 5, text: 'Полностью согласен', label: '5' },
-];
+// Hook to get translated default options
+function useDefaultLikertOptions() {
+  const t = useTranslations('likert');
 
-// Frequency scale options
-const FREQUENCY_OPTIONS: AnswerOption[] = [
-  { value: 1, text: 'Никогда', label: '1' },
-  { value: 2, text: 'Редко', label: '2' },
-  { value: 3, text: 'Иногда', label: '3' },
-  { value: 4, text: 'Часто', label: '4' },
-  { value: 5, text: 'Всегда', label: '5' },
-];
+  return [
+    { value: 1, text: t('stronglyDisagree'), label: '1' },
+    { value: 2, text: t('disagree'), label: '2' },
+    { value: 3, text: t('neutral'), label: '3' },
+    { value: 4, text: t('agree'), label: '4' },
+    { value: 5, text: t('stronglyAgree'), label: '5' },
+  ];
+}
+
+// Hook to get translated frequency options
+function useFrequencyOptions() {
+  const t = useTranslations('frequency');
+
+  return [
+    { value: 1, text: t('never'), label: '1' },
+    { value: 2, text: t('rarely'), label: '2' },
+    { value: 3, text: t('sometimes'), label: '3' },
+    { value: 4, text: t('often'), label: '4' },
+    { value: 5, text: t('always'), label: '5' },
+  ];
+}
 
 export default function LikertScaleQuestion({
   question,
   value,
   onChange,
 }: LikertScaleQuestionProps) {
+  const t = useTranslations('assessment');
+  const defaultLikertOptions = useDefaultLikertOptions();
+  const frequencyOptions = useFrequencyOptions();
+
   // Use custom options if provided, otherwise use defaults
   const hasCustomOptions = question.answerOptions && question.answerOptions.length > 0;
-  const options: AnswerOption[] = hasCustomOptions 
+  const options: AnswerOption[] = hasCustomOptions
     ? (question.answerOptions as AnswerOption[])
-    : (question.questionType === 'FREQUENCY_SCALE' ? FREQUENCY_OPTIONS : DEFAULT_LIKERT_OPTIONS);
+    : (question.questionType === 'FREQUENCY_SCALE' ? frequencyOptions : defaultLikertOptions);
 
   return (
     <div className="space-y-4">
@@ -105,7 +118,7 @@ export default function LikertScaleQuestion({
       {/* Selected value display - helpful for mobile users */}
       {value !== null && (
         <p className="text-sm text-center text-muted-foreground">
-          Выбрано: <span className="font-medium text-foreground">
+          {t('selected')}: <span className="font-medium text-foreground">
             {options.find(o => (o.value ?? 0) === value)?.text || value}
           </span>
         </p>

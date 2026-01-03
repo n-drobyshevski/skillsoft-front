@@ -10,12 +10,19 @@ import {
   Target,
   Briefcase
 } from 'lucide-react';
-import GapAnalysisBarChart from '@/components/data-display/charts/GapAnalysisBarChart';
 import CompetencyRadarChart from '@/components/data-display/charts/CompetencyRadarChart';
 import { JobFitHero } from './JobFitHero';
 import { CompetencyProfile } from '../shared/CompetencyProfile';
 import { ActionButtonsBar } from '../shared/ActionButtonsBar';
 import { BaseResultViewProps } from '../shared/types';
+import {
+  GapAnalysisChart,
+  DevelopmentRecommendations,
+} from '@/components/results';
+import {
+  toGapData,
+  generateRecommendationsFromGaps,
+} from '@/lib/result-transformers';
 
 /**
  * Job Fit Result View for Scenario B (O*NET Benchmark Comparison).
@@ -32,14 +39,18 @@ export function JobFitResultView({ result, template }: BaseResultViewProps) {
   const isPassed = result.passed;
   const passingScore = template.passingScore || 70;
 
-  // Prepare data for gap analysis chart
+  // Transform data for enhanced gap analysis chart
   const gapData = useMemo(() => {
-    return result.competencyScores.map(cs => ({
-      name: cs.competencyName,
-      score: Math.round(cs.percentage),
-      target: passingScore
-    }));
+    return toGapData(result.competencyScores, { defaultTarget: passingScore });
   }, [result.competencyScores, passingScore]);
+
+  // Generate development recommendations from gaps
+  const recommendations = useMemo(() => {
+    return generateRecommendationsFromGaps(gapData, {
+      minGap: 5,
+      maxRecommendations: 5,
+    });
+  }, [gapData]);
 
   // Prepare data for radar chart
   const radarData = useMemo(() => {
@@ -79,7 +90,7 @@ export function JobFitResultView({ result, template }: BaseResultViewProps) {
 
         {/* Charts + Insights Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 animate-fadeInUp-2">
-          {/* Gap Analysis Chart */}
+          {/* Enhanced Gap Analysis Chart */}
           <Card className="h-full">
             <CardHeader className="pb-2 sm:pb-3 px-3 sm:px-6">
               <CardTitle className="text-base sm:text-lg font-semibold flex items-center gap-2">
@@ -87,42 +98,17 @@ export function JobFitResultView({ result, template }: BaseResultViewProps) {
                 Gap Analysis
               </CardTitle>
               <CardDescription className="text-xs sm:text-sm">
-                Scores vs. target ({passingScore}%)
+                Your scores vs. job requirements ({passingScore}%)
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-3 sm:space-y-4 px-2 sm:px-6">
-              {/* Chart container */}
-              <div className="flex justify-center items-center min-h-[200px] sm:min-h-[280px] md:min-h-[340px]">
-                <GapAnalysisBarChart data={gapData} />
-              </div>
-
-              {/* Gap summary stats */}
-              <div className="grid grid-cols-3 gap-1.5 sm:gap-2 pt-2 sm:pt-3 border-t">
-                <div className="text-center p-2 sm:p-2.5 bg-muted/40 rounded-lg min-w-0">
-                  <div className="text-[9px] sm:text-[10px] uppercase tracking-wide text-muted-foreground mb-0.5">
-                    Average
-                  </div>
-                  <div className="text-sm sm:text-base font-bold tabular-nums">
-                    {insights.avgScore}%
-                  </div>
-                </div>
-                <div className="text-center p-2 sm:p-2.5 bg-green-500/10 rounded-lg min-w-0">
-                  <div className="text-[9px] sm:text-[10px] uppercase tracking-wide text-muted-foreground mb-0.5">
-                    Exceeds
-                  </div>
-                  <div className="text-sm sm:text-base font-bold tabular-nums text-green-600 dark:text-green-400">
-                    {insights.strengths.length}
-                  </div>
-                </div>
-                <div className="text-center p-2 sm:p-2.5 bg-amber-500/10 rounded-lg min-w-0">
-                  <div className="text-[9px] sm:text-[10px] uppercase tracking-wide text-muted-foreground mb-0.5">
-                    Below
-                  </div>
-                  <div className="text-sm sm:text-base font-bold tabular-nums text-amber-600 dark:text-amber-400">
-                    {insights.gaps.length}
-                  </div>
-                </div>
-              </div>
+            <CardContent className="px-3 sm:px-6">
+              <GapAnalysisChart
+                data={gapData}
+                passingThreshold={passingScore}
+                animate={true}
+                sortBy="gap"
+                sortDirection="desc"
+              />
             </CardContent>
           </Card>
 
@@ -276,6 +262,21 @@ export function JobFitResultView({ result, template }: BaseResultViewProps) {
           showPassFail={true}
           passingScore={passingScore}
         />
+
+        {/* Development Recommendations */}
+        {recommendations.length > 0 && (
+          <Card className="animate-fadeInUp-4">
+            <CardContent className="p-4 sm:p-6">
+              <DevelopmentRecommendations
+                recommendations={recommendations}
+                initialCount={3}
+                showPriority={true}
+                showEstimatedTime={true}
+                showResources={false}
+              />
+            </CardContent>
+          </Card>
+        )}
 
         {/* Action buttons */}
         <ActionButtonsBar

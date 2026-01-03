@@ -5,6 +5,7 @@ import { ArrowUpRight, Target, Layers, ClipboardList, Activity } from 'lucide-re
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
 import type { WidgetVariant } from '@/types/dashboard';
+import { useTranslations } from 'next-intl';
 
 /**
  * Props for individual compact stat card
@@ -259,30 +260,32 @@ export function CompactStatsRow({
   loading = false,
   className,
 }: CompactStatsRowProps) {
+  const t = useTranslations('dashboard');
+
   const cards = [
     {
-      title: 'Competencies',
+      title: t('competencies'),
       value: stats.totalCompetencies,
       icon: Target,
       href: '/hr/competencies',
       variant: 'default' as WidgetVariant,
     },
     {
-      title: 'Indicators',
+      title: t('indicators'),
       value: stats.totalIndicators,
       icon: Layers,
       href: '/hr/behavioral-indicators',
       variant: 'default' as WidgetVariant,
     },
     {
-      title: 'Questions',
+      title: t('questions'),
       value: stats.totalQuestions,
       icon: ClipboardList,
       href: '/hr/assessment-questions',
       variant: 'default' as WidgetVariant,
     },
     {
-      title: 'Active Templates',
+      title: t('activeTemplates'),
       value: stats.activeTemplates,
       icon: Activity,
       href: '/test-templates',

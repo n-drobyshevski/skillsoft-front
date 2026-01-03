@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 import { AlertTriangle, Info, CheckCircle, HelpCircle, Lightbulb } from 'lucide-react';
 import {
@@ -37,9 +38,9 @@ interface ValidationFeedbackProps {
 // ============================================================================
 
 /**
- * Generate contextual guidance based on question type and error
+ * Generate contextual guidance key based on question type and error
  */
-function getQuestionTypeGuidance(questionType: QuestionType, message: string): string {
+function getQuestionTypeGuidanceKey(questionType: QuestionType, message: string): string {
   // Detect common validation patterns
   const isLengthError = message.toLowerCase().includes('символ') ||
                         message.toLowerCase().includes('character') ||
@@ -52,36 +53,36 @@ function getQuestionTypeGuidance(questionType: QuestionType, message: string): s
   switch (questionType) {
     case 'LIKERT':
       if (isRequiredError || isSelectionError) {
-        return 'Choose the option that best reflects your typical behavior or attitude. There are no right or wrong answers.';
+        return 'likertRequired';
       }
-      return 'Likert scales measure agreement or frequency. Select the point that best matches your response.';
+      return 'likertDefault';
 
     case 'SJT':
       if (isSelectionError) {
-        return 'Rank the response options from most to least effective. Consider how you would actually behave in this situation.';
+        return 'sjtSelection';
       }
-      return 'Situational judgment tests assess your decision-making. Think about what action would be most appropriate.';
+      return 'sjtDefault';
 
     case 'MCQ':
       if (isRequiredError) {
-        return 'Select the answer you believe is correct. Only one option can be chosen.';
+        return 'mcqRequired';
       }
-      return 'Multiple choice questions have one correct answer. Read all options before selecting.';
+      return 'mcqDefault';
 
     case 'OPEN_ENDED':
       if (isLengthError) {
-        return 'Provide a detailed response. Include specific examples from your experience to support your answer.';
+        return 'openEndedLength';
       }
       if (isRequiredError) {
-        return 'This question requires a written response. Take time to articulate your thoughts clearly.';
+        return 'openEndedRequired';
       }
-      return 'Open-ended questions allow you to express yourself freely. Be specific and provide examples.';
+      return 'openEndedDefault';
 
     case 'RANKING':
-      return 'Drag items to reorder them from highest to lowest priority. Each position matters.';
+      return 'rankingDefault';
 
     default:
-      return 'Please review your response and ensure it meets the requirements shown.';
+      return 'generalDefault';
   }
 }
 
@@ -169,9 +170,11 @@ export function ValidationFeedback({
   showHelp = true,
   compact = false,
 }: ValidationFeedbackProps) {
+  const t = useTranslations('validationGuidance');
+  const tFeedback = useTranslations('feedback');
   const config = getSeverityConfig(severity);
-  const autoGuidance = getQuestionTypeGuidance(questionType, message);
-  const displayGuidance = guidance ?? autoGuidance;
+  const autoGuidanceKey = getQuestionTypeGuidanceKey(questionType, message);
+  const displayGuidance = guidance ?? t(autoGuidanceKey);
 
   // Compact mode - just icon and message
   if (compact) {
@@ -193,7 +196,7 @@ export function ValidationFeedback({
               <button
                 type="button"
                 className="opacity-60 hover:opacity-100 transition-opacity"
-                aria-label="Show guidance"
+                aria-label={tFeedback('showGuidance')}
               >
                 <HelpCircle className="h-3.5 w-3.5" />
               </button>
@@ -244,12 +247,14 @@ export function ValidationFeedback({
  * ValidationSuccess - Positive feedback for valid input
  */
 export function ValidationSuccess({
-  message = 'Looks good!',
+  message,
   className,
 }: {
   message?: string;
   className?: string;
 }) {
+  const t = useTranslations('feedback');
+  const displayMessage = message ?? t('looksGood');
   return (
     <div
       role="status"
@@ -259,7 +264,7 @@ export function ValidationSuccess({
       )}
     >
       <CheckCircle className="h-4 w-4 shrink-0" />
-      <span>{message}</span>
+      <span>{displayMessage}</span>
     </div>
   );
 }

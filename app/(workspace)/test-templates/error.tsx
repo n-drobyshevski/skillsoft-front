@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo } from 'react';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -82,6 +83,9 @@ export default function TestTemplatesError({
   };
   reset: () => void;
 }) {
+  const t = useTranslations('template.errors');
+  const tCommon = useTranslations('errors');
+
   // Log error for debugging and monitoring
   useEffect(() => {
     // eslint-disable-next-line no-console
@@ -123,8 +127,8 @@ export default function TestTemplatesError({
     if (lowerMessage.includes('database')) {
       return {
         category: ErrorCategory.SERVER,
-        title: 'Ошибка базы данных',
-        message: 'Произошла ошибка при работе с базой данных. Пожалуйста, попробуйте позже.',
+        title: t('databaseError'),
+        message: t('databaseErrorDescription'),
         isRetryable: true,
         suggestedAction: ErrorAction.RETRY,
       };
@@ -133,8 +137,8 @@ export default function TestTemplatesError({
     if (lowerMessage.includes('network') || lowerMessage.includes('connection') || lowerMessage.includes('fetch')) {
       return {
         category: ErrorCategory.NETWORK,
-        title: 'Ошибка сети',
-        message: 'Не удалось подключиться к серверу. Проверьте интернет-соединение.',
+        title: t('networkError'),
+        message: t('networkErrorDescription'),
         isRetryable: true,
         suggestedAction: ErrorAction.RETRY,
       };
@@ -143,8 +147,8 @@ export default function TestTemplatesError({
     if (lowerMessage.includes('template') || lowerMessage.includes('шаблон')) {
       return {
         category: ErrorCategory.NOT_FOUND,
-        title: 'Шаблон не найден',
-        message: 'Запрашиваемый шаблон теста не найден или был удалён.',
+        title: t('templateNotFound'),
+        message: t('templateNotFoundDescription'),
         isRetryable: false,
         suggestedAction: ErrorAction.GO_BACK,
       };
@@ -158,7 +162,7 @@ export default function TestTemplatesError({
       isRetryable: isRetryableError(category),
       suggestedAction: getSuggestedAction(category),
     };
-  }, [error]);
+  }, [error, t]);
 
   // Determine which action buttons to show
   const showRetryButton = errorInfo.isRetryable;
@@ -187,21 +191,21 @@ export default function TestTemplatesError({
           {/* Correlation ID for support */}
           {error.correlationId && (
             <div className="text-xs text-muted-foreground bg-muted p-2 rounded font-mono">
-              <span className="font-medium">ID запроса:</span> {error.correlationId}
+              <span className="font-medium">{t('requestId')}:</span> {error.correlationId}
             </div>
           )}
 
           {/* Error digest (Next.js error ID) */}
           {error.digest && !error.correlationId && (
             <div className="text-xs text-muted-foreground bg-muted p-2 rounded font-mono">
-              <span className="font-medium">Error ID:</span> {error.digest}
+              <span className="font-medium">{t('errorId')}:</span> {error.digest}
             </div>
           )}
 
           {/* Development mode details */}
           {process.env.NODE_ENV === 'development' && (
             <div className="text-xs text-muted-foreground bg-muted/50 p-3 rounded overflow-auto max-h-40 space-y-2">
-              <p className="font-medium text-foreground">Dev Info:</p>
+              <p className="font-medium text-foreground">{t('devInfo')}:</p>
               <div className="space-y-1">
                 {error.status && (
                   <p><span className="font-medium">Status:</span> {error.status}</p>
@@ -223,7 +227,7 @@ export default function TestTemplatesError({
           {showRetryButton && (
             <Button onClick={reset} className="w-full">
               <RefreshCw className="w-4 h-4 mr-2" />
-              Попробовать снова
+              {t('tryAgain')}
             </Button>
           )}
 
@@ -232,7 +236,7 @@ export default function TestTemplatesError({
             <Button asChild className="w-full">
               <Link href="/sign-in">
                 <LogIn className="w-4 h-4 mr-2" />
-                Войти в систему
+                {t('signIn')}
               </Link>
             </Button>
           )}
@@ -241,7 +245,7 @@ export default function TestTemplatesError({
           {showBackButton && (
             <Button variant="outline" onClick={() => window.history.back()} className="w-full">
               <ArrowLeft className="w-4 h-4 mr-2" />
-              Вернуться назад
+              {t('goBack')}
             </Button>
           )}
 
@@ -249,7 +253,7 @@ export default function TestTemplatesError({
           <Button variant="outline" asChild className="w-full">
             <Link href="/test-templates">
               <FileText className="w-4 h-4 mr-2" />
-              К списку шаблонов
+              {t('toTemplateList')}
             </Link>
           </Button>
 
@@ -257,7 +261,7 @@ export default function TestTemplatesError({
           <Button variant="ghost" asChild className="w-full">
             <Link href="/">
               <Home className="w-4 h-4 mr-2" />
-              На главную
+              {t('toHome')}
             </Link>
           </Button>
 
@@ -265,7 +269,7 @@ export default function TestTemplatesError({
           {errorInfo.suggestedAction === ErrorAction.CONTACT_SUPPORT && (
             <p className="text-xs text-muted-foreground text-center mt-2 flex items-center justify-center gap-1">
               <HelpCircle className="w-3 h-3" />
-              Если проблема повторяется, обратитесь в поддержку
+              {t('contactSupport')}
             </p>
           )}
         </CardFooter>

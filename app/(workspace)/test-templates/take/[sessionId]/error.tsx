@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { AlertCircle, Home, RefreshCw, FileText } from 'lucide-react';
@@ -19,6 +20,9 @@ export default function TestTakeError({
   error: Error & { digest?: string; status?: number };
   reset: () => void;
 }) {
+  const t = useTranslations('template.take.errors');
+  const tErrors = useTranslations('template.errors');
+
   useEffect(() => {
     // Log the error for debugging
     // eslint-disable-next-line no-console
@@ -34,28 +38,28 @@ export default function TestTakeError({
   const getErrorMessage = () => {
     if (isNotFoundError) {
       return {
-        title: 'Тест не найден',
-        description: 'Сессия тестирования не найдена. Возможно, она была удалена или завершена.',
+        title: t('notFound'),
+        description: t('notFoundDescription'),
       };
     }
 
     if (isInvalidStateError) {
       return {
-        title: 'Недействительная сессия',
-        description: 'Эта сессия тестирования уже завершена или отменена.',
+        title: t('invalidSession'),
+        description: t('invalidSessionDescription'),
       };
     }
 
     if (isSessionError) {
       return {
-        title: 'Ошибка сессии тестирования',
-        description: 'Произошла ошибка при загрузке теста. Попробуйте вернуться к списку тестов и начать заново.',
+        title: tErrors('sessionError'),
+        description: tErrors('sessionErrorDescription'),
       };
     }
 
     return {
-      title: 'Произошла ошибка',
-      description: 'Не удалось загрузить тест. Пожалуйста, попробуйте ещё раз.',
+      title: tErrors('errorOccurred'),
+      description: tErrors('failedToLoad'),
     };
   };
 
@@ -76,13 +80,13 @@ export default function TestTakeError({
         <CardContent className="space-y-4">
           {error.digest && (
             <div className="text-xs text-muted-foreground bg-muted p-2 rounded font-mono">
-              Error ID: {error.digest}
+              {tErrors('errorId')}: {error.digest}
             </div>
           )}
 
           {process.env.NODE_ENV === 'development' && error.message && (
             <div className="text-xs text-muted-foreground bg-muted p-2 rounded overflow-auto max-h-32">
-              <p className="font-medium mb-1">Dev Info:</p>
+              <p className="font-medium mb-1">{tErrors('devInfo')}:</p>
               <pre className="whitespace-pre-wrap">{error.message}</pre>
             </div>
           )}
@@ -92,21 +96,21 @@ export default function TestTakeError({
           {showRetryButton && (
             <Button onClick={reset} className="w-full">
               <RefreshCw className="w-4 h-4 mr-2" />
-              Попробовать снова
+              {tErrors('tryAgain')}
             </Button>
           )}
 
           <Button variant="outline" asChild className="w-full">
             <Link href="/test-templates">
               <FileText className="w-4 h-4 mr-2" />
-              К списку тестов
+              {tErrors('toTemplateList')}
             </Link>
           </Button>
 
           <Button variant="ghost" asChild className="w-full">
             <Link href="/">
               <Home className="w-4 h-4 mr-2" />
-              На главную
+              {tErrors('toHome')}
             </Link>
           </Button>
         </CardFooter>

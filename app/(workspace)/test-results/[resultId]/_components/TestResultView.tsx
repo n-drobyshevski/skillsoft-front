@@ -8,6 +8,7 @@ import { useBigFiveProjection } from '@/hooks/useBigFiveProjection';
 import { TestResult, CompetencyScore } from '@/types/domain';
 import { CheckCircle2, XCircle, Clock, FileText, Target, TrendingUp, Trophy, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useTranslations } from 'next-intl';
 
 interface TestResultViewProps {
   result: TestResult;
@@ -24,6 +25,7 @@ interface TestResultViewProps {
  * - Staggered animations and micro-interactions
  */
 export default function TestResultView({ result }: TestResultViewProps) {
+  const t = useTranslations('results');
   // Transform competency scores to Big Five profile using O*NET mapping
   const bigFiveProfile = useBigFiveProjection(result.competencyScores);
 
@@ -78,7 +80,7 @@ export default function TestResultView({ result }: TestResultViewProps) {
           </h1>
 
           <p className="text-muted-foreground text-center max-w-md mb-8">
-            Completed {new Date(result.completedAt).toLocaleString()}
+            {t('completed')} {new Date(result.completedAt).toLocaleString()}
           </p>
 
           {/* Enhanced Score Circle */}
@@ -134,12 +136,12 @@ export default function TestResultView({ result }: TestResultViewProps) {
                 {isPassed ? (
                   <>
                     <CheckCircle2 className="h-3.5 w-3.5 mr-1.5" />
-                    Passed
+                    {t('passed')}
                   </>
                 ) : (
                   <>
                     <XCircle className="h-3.5 w-3.5 mr-1.5" />
-                    Not Passed
+                    {t('notPassed')}
                   </>
                 )}
               </Badge>
@@ -150,7 +152,7 @@ export default function TestResultView({ result }: TestResultViewProps) {
           {result.percentile !== undefined && result.percentile !== null && (
             <div className="px-6 py-3 rounded-full bg-background/50 backdrop-blur-sm border border-border/50">
               <p className="text-sm text-muted-foreground">
-                Better than <span className="font-bold text-foreground">{result.percentile}%</span> of participants
+                {t('betterThan', { percentage: result.percentile })}
               </p>
             </div>
           )}
@@ -161,30 +163,30 @@ export default function TestResultView({ result }: TestResultViewProps) {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 animate-fadeInUp-2">
         <EnhancedStatCard
           icon={<Target className="h-5 w-5" />}
-          label="Score"
+          label={t('score')}
           value={`${result.overallScore.toFixed(1)}`}
           subtitle={`of ${result.competencyScores.reduce((sum, c) => sum + c.maxScore, 0).toFixed(1)}`}
           color="success"
         />
         <EnhancedStatCard
           icon={<Clock className="h-5 w-5" />}
-          label="Time"
+          label={t('time')}
           value={`${timeInMinutes}:${timeInSeconds.toString().padStart(2, '0')}`}
-          subtitle="minutes"
+          subtitle={t('minutes')}
           color="info"
         />
         <EnhancedStatCard
           icon={<FileText className="h-5 w-5" />}
-          label="Answered"
+          label={t('answered')}
           value={`${result.questionsAnswered}/${result.totalQuestions}`}
-          subtitle={result.questionsSkipped > 0 ? `${result.questionsSkipped} skipped` : 'all answered'}
+          subtitle={result.questionsSkipped > 0 ? t('skippedCount', { count: result.questionsSkipped }) : t('allAnswered')}
           color="primary"
         />
         <EnhancedStatCard
           icon={<TrendingUp className="h-5 w-5" />}
-          label="Competencies"
+          label={t('competencies')}
           value={`${result.competencyScores.length}`}
-          subtitle="assessed"
+          subtitle={t('assessed')}
           color="primary"
         />
       </div>
@@ -194,15 +196,15 @@ export default function TestResultView({ result }: TestResultViewProps) {
         {/* Enhanced Competency Scores */}
         <Card>
           <CardHeader>
-            <CardTitle>Competency Scores</CardTitle>
+            <CardTitle>{t('competencyScores')}</CardTitle>
             <CardDescription>
-              Breakdown of your performance by competency area
+              {t('breakdownDescription')}
             </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
               {sortedCompetencies.map((competency) => (
-                <EnhancedCompetencyCard key={competency.competencyId} competency={competency} />
+                <EnhancedCompetencyCard key={competency.competencyId} competency={competency} t={t} />
               ))}
             </div>
           </CardContent>
@@ -211,8 +213,8 @@ export default function TestResultView({ result }: TestResultViewProps) {
         {/* Big Five Personality Profile */}
         <BigFiveRadar
           profile={bigFiveProfile}
-          title="Personality Profile"
-          description="Big Five (OCEAN) dimensions derived from your competency assessment using O*NET mapping"
+          title={t('personalityProfile')}
+          description={t('personalityDescription')}
           showLegend={true}
         />
       </div>
@@ -277,7 +279,7 @@ function EnhancedStatCard({
 /**
  * Enhanced Competency Card with performance tiers and gradient progress bars
  */
-function EnhancedCompetencyCard({ competency }: { competency: CompetencyScore }) {
+function EnhancedCompetencyCard({ competency, t }: { competency: CompetencyScore; t: ReturnType<typeof useTranslations<'results'>> }) {
   const percentage = Math.round(competency.percentage);
 
   // Determine performance tier
@@ -291,7 +293,7 @@ function EnhancedCompetencyCard({ competency }: { competency: CompetencyScore })
       bgColor: 'bg-emerald-500/10',
       borderColor: 'border-emerald-500/20',
       progressColor: 'bg-gradient-to-r from-emerald-500 to-teal-500',
-      label: 'Excellent',
+      labelKey: 'tier.excellent' as const,
       icon: '🎯'
     },
     good: {
@@ -299,7 +301,7 @@ function EnhancedCompetencyCard({ competency }: { competency: CompetencyScore })
       bgColor: 'bg-blue-500/10',
       borderColor: 'border-blue-500/20',
       progressColor: 'bg-gradient-to-r from-blue-500 to-cyan-500',
-      label: 'Good',
+      labelKey: 'tier.good' as const,
       icon: '✓'
     },
     average: {
@@ -307,7 +309,7 @@ function EnhancedCompetencyCard({ competency }: { competency: CompetencyScore })
       bgColor: 'bg-amber-500/10',
       borderColor: 'border-amber-500/20',
       progressColor: 'bg-gradient-to-r from-amber-500 to-orange-500',
-      label: 'Average',
+      labelKey: 'tier.average' as const,
       icon: '→'
     },
     poor: {
@@ -315,7 +317,7 @@ function EnhancedCompetencyCard({ competency }: { competency: CompetencyScore })
       bgColor: 'bg-red-500/10',
       borderColor: 'border-red-500/20',
       progressColor: 'bg-gradient-to-r from-red-500 to-rose-500',
-      label: 'Needs Improvement',
+      labelKey: 'tier.needsImprovement' as const,
       icon: '↓'
     }
   };
@@ -352,7 +354,7 @@ function EnhancedCompetencyCard({ competency }: { competency: CompetencyScore })
             {competency.score.toFixed(1)}/{competency.maxScore.toFixed(1)}
           </span>
           <Badge variant="secondary" className="mt-1 text-xs">
-            {config.label}
+            {t(config.labelKey)}
           </Badge>
         </div>
       </div>
@@ -383,7 +385,7 @@ function EnhancedCompetencyCard({ competency }: { competency: CompetencyScore })
       {/* Questions answered info */}
       {competency.questionsAnswered && (
         <p className="text-xs text-muted-foreground mt-2">
-          {competency.questionsAnswered} questions answered
+          {t('questionsAnswered', { count: competency.questionsAnswered })}
         </p>
       )}
     </div>

@@ -3,6 +3,7 @@
 import React, { useEffect, useState, useCallback, useRef, useMemo } from 'react';
 import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import { useAuth } from '@clerk/nextjs';
+import { useTranslations } from 'next-intl';
 import { useUIStore } from "@/store/ui-store";
 import { testSessionsClientApi, type ApiError } from '@/services/api.client';
 import {
@@ -49,6 +50,7 @@ export default function TestTakePage() {
   const templateId = searchParams.get('template');
   const testDriveMode = searchParams.get('testDrive') === 'true';
   const { userId, isSignedIn, isLoaded } = useAuth();
+  const t = useTranslations('template.take');
 
   // Use Zustand store directly for immersive mode
   const enterImmersiveMode = useUIStore((state) => state.enterImmersiveMode);
@@ -112,7 +114,7 @@ export default function TestTakePage() {
       // Handle 'new' session creation
       if (sessionId === 'new') {
         if (!templateId) {
-          setError('Не указан шаблон теста');
+          setError(t('errors.templateNotSpecified'));
           setErrorStatus(400);
           setStatus('error');
           return;
@@ -174,7 +176,7 @@ export default function TestTakePage() {
 
       // Check session status before attempting to load questions
       if (!sessionData) {
-        setError('Сессия не найдена');
+        setError(t('errors.sessionNotFound'));
         setErrorStatus(404);
         setStatus('error');
         return;
@@ -182,22 +184,22 @@ export default function TestTakePage() {
 
       // Handle non-active session states
       if (sessionData.status === SessionStatus.ABANDONED) {
-        setError('Эта сессия была отменена. Вы можете начать новый тест.');
+        setError(t('errors.abandonedDescription'));
         setErrorStatus(400);
         setStatus('error');
-        toast.info('Сессия была отменена ранее');
+        toast.info(t('toasts.sessionAbandoned'));
         return;
       }
 
       if (sessionData.status === SessionStatus.COMPLETED) {
-        setError('Этот тест уже был завершён');
+        setError(t('errors.completedDescription'));
         setErrorStatus(400);
         setStatus('error');
         return;
       }
 
       if (sessionData.status === SessionStatus.TIMED_OUT) {
-        setError('Время выполнения теста истекло');
+        setError(t('errors.timedOutDescription'));
         setErrorStatus(400);
         setStatus('error');
         return;
@@ -205,7 +207,7 @@ export default function TestTakePage() {
 
       // Only load current question if session is active (NOT_STARTED or IN_PROGRESS)
       if (sessionData.status !== SessionStatus.NOT_STARTED && sessionData.status !== SessionStatus.IN_PROGRESS) {
-        setError(`Недействительный статус сессии: ${sessionData.status}`);
+        setError(t('errors.invalidStatus', { status: sessionData.status }));
         setErrorStatus(400);
         setStatus('error');
         return;
@@ -223,7 +225,7 @@ export default function TestTakePage() {
             setIsRetrying(true);
             // eslint-disable-next-line no-console
             console.log(`Retrying getCurrentQuestion (attempt ${attempt}/3)...`);
-            toast.info(`Повторная попытка... (${attempt}/3)`, { duration: 2000 });
+            toast.info(t('loading.retrying', { attempt, max: 3 }), { duration: 2000 });
           },
         }
       );
@@ -250,14 +252,14 @@ export default function TestTakePage() {
 
       // Handle specific error scenarios
       if (errorStatusCode === 404) {
-        toast.error('Тест не найден');
+        toast.error(t('toasts.testNotFound'));
       } else if (errorStatusCode === 400) {
-        toast.error('Недействительная сессия теста');
+        toast.error(t('toasts.invalidSession'));
       } else if (errorStatusCode && errorStatusCode >= 500) {
-        toast.error('Ошибка сервера. Попробуйте ещё раз.');
+        toast.error(t('toasts.serverError'));
       }
     }
-  }, [sessionId, templateId, router]);
+  }, [sessionId, templateId, router, t]);
 
   // Manual retry function for user-initiated retries
   const handleManualRetry = useCallback(() => {
@@ -278,14 +280,14 @@ export default function TestTakePage() {
     // Check if user is signed in
     if (!isSignedIn) {
       setStatus('auth-error');
-      setError('Вы должны войти в систему для прохождения теста');
+      setError(t('errors.userNotAuthenticated'));
       return;
     }
 
     // Check if we have userId
     if (!userId) {
       setStatus('auth-error');
-      setError('Не удалось получить данные пользователя');
+      setError(t('errors.userDataError'));
       return;
     }
 
@@ -326,7 +328,7 @@ export default function TestTakePage() {
     } catch (err: unknown) {
       // eslint-disable-next-line no-console
       console.error('Failed to discard and start new session:', err);
-      toast.error('Не удалось начать новую сессию');
+      toast.error(t('toasts.failedToStartNewSession'));
       setShowExistingSessionDialog(false);
     } finally {
       setIsSubmitting(false);
@@ -348,61 +350,61 @@ export default function TestTakePage() {
     const getErrorConfig = () => {
       if (isNotFound) {
         return {
-          title: 'Тест не найден',
-          description: error || 'Сессия тестирования не найдена. Возможно, она была удалена или завершена.',
+          title: t('errors.notFound'),
+          description: error || t('errors.notFoundDescription'),
           icon: XCircle,
           actions: [
-            { label: 'К списку тестов', onClick: () => router.push('/test-templates'), variant: 'default' as const },
+            { label: t('actions.toTestList'), onClick: () => router.push('/test-templates'), variant: 'default' as const },
           ],
         };
       }
 
       if (isInvalidState) {
         // Check if this is an abandoned session and we have template info to restart
-        const isAbandoned = error?.toLowerCase().includes('отменена') || error?.toLowerCase().includes('abandon');
+        const isAbandoned = error?.toLowerCase().includes('отменена') || error?.toLowerCase().includes('abandon') || error?.toLowerCase().includes('cancelled');
 
         // If abandoned and we have template ID, allow starting a new test
         if (isAbandoned && templateId) {
           return {
-            title: 'Тест был отменён',
-            description: error || 'Эта сессия тестирования была отменена.',
+            title: t('errors.abandoned'),
+            description: error || t('errors.abandonedDescription'),
             icon: AlertTriangle,
             actions: [
-              { label: 'Начать новый тест', onClick: () => router.push(`/test-templates/take/new?template=${templateId}`), variant: 'default' as const },
-              { label: 'К списку тестов', onClick: () => router.push('/test-templates'), variant: 'outline' as const },
+              { label: t('actions.startNewTest'), onClick: () => router.push(`/test-templates/take/new?template=${templateId}`), variant: 'default' as const },
+              { label: t('actions.toTestList'), onClick: () => router.push('/test-templates'), variant: 'outline' as const },
             ],
           };
         }
 
         return {
-          title: 'Недействительная сессия',
-          description: error || 'Эта сессия тестирования уже завершена или отменена.',
+          title: t('errors.invalidSession'),
+          description: error || t('errors.invalidSessionDescription'),
           icon: AlertTriangle,
           actions: [
-            { label: 'К списку тестов', onClick: () => router.push('/test-templates'), variant: 'default' as const },
+            { label: t('actions.toTestList'), onClick: () => router.push('/test-templates'), variant: 'default' as const },
           ],
         };
       }
 
       if (isServerError) {
         return {
-          title: 'Ошибка сервера',
-          description: error || 'Не удалось загрузить тест из-за ошибки сервера. Попробуйте ещё раз через несколько секунд.',
+          title: t('errors.serverError'),
+          description: error || t('errors.serverErrorDescription'),
           icon: AlertTriangle,
           actions: [
-            { label: 'Попробовать снова', onClick: handleManualRetry, variant: 'default' as const, icon: RefreshCw },
-            { label: 'К списку тестов', onClick: () => router.push('/test-templates'), variant: 'outline' as const },
+            { label: t('actions.tryAgain'), onClick: handleManualRetry, variant: 'default' as const, icon: RefreshCw },
+            { label: t('actions.toTestList'), onClick: () => router.push('/test-templates'), variant: 'outline' as const },
           ],
         };
       }
 
       return {
-        title: 'Ошибка',
-        description: error || 'Произошла ошибка при загрузке теста',
+        title: t('errors.generic'),
+        description: error || t('errors.genericDescription'),
         icon: XCircle,
         actions: [
-          { label: 'Попробовать снова', onClick: handleManualRetry, variant: 'default' as const, icon: RefreshCw },
-          { label: 'К списку тестов', onClick: () => router.push('/test-templates'), variant: 'outline' as const },
+          { label: t('actions.tryAgain'), onClick: handleManualRetry, variant: 'default' as const, icon: RefreshCw },
+          { label: t('actions.toTestList'), onClick: () => router.push('/test-templates'), variant: 'outline' as const },
         ],
       };
     };
@@ -442,7 +444,7 @@ export default function TestTakePage() {
                   variant={action.variant}
                   onClick={action.onClick}
                   className="w-full"
-                  disabled={action.label.includes('снова') && isRetrying}
+                  disabled={action.label === t('actions.tryAgain') && isRetrying}
                 >
                   {ActionIcon && <ActionIcon className="w-4 h-4 mr-2" />}
                   {action.label}
@@ -466,17 +468,17 @@ export default function TestTakePage() {
         <AlertDialog open={showExistingSessionDialog} onOpenChange={setShowExistingSessionDialog}>
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>Продолжить предыдущую сессию?</AlertDialogTitle>
+              <AlertDialogTitle>{t('dialogs.existingSession.title')}</AlertDialogTitle>
               <AlertDialogDescription>
-                У вас есть незавершённый тест. Вы можете продолжить его или начать заново.
+                {t('dialogs.existingSession.description')}
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel onClick={handleDiscardAndStartNew} disabled={isSubmitting}>
-                {isSubmitting ? 'Загрузка...' : 'Начать заново'}
+                {isSubmitting ? t('dialogs.existingSession.loading') : t('dialogs.existingSession.startNew')}
               </AlertDialogCancel>
               <AlertDialogAction onClick={handleContinueExistingSession}>
-                Продолжить
+                {t('dialogs.existingSession.continue')}
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
@@ -498,6 +500,8 @@ export default function TestTakePage() {
 
 // Loading skeleton with retry indicator
 function TestTakeSkeleton({ retryAttempt = 0, isRetrying = false }: { retryAttempt?: number; isRetrying?: boolean }) {
+  const t = useTranslations('template.take');
+
   return (
     <div className="min-h-screen bg-background flex flex-col">
       {/* Header skeleton */}
@@ -520,7 +524,7 @@ function TestTakeSkeleton({ retryAttempt = 0, isRetrying = false }: { retryAttem
           {isRetrying && retryAttempt > 0 && (
             <div className="flex items-center justify-center gap-2 text-muted-foreground mb-4">
               <Loader2 className="h-4 w-4 animate-spin" />
-              <p className="text-sm">Повторная попытка {retryAttempt} из 3...</p>
+              <p className="text-sm">{t('loading.retrying', { attempt: retryAttempt, max: 3 })}</p>
             </div>
           )}
 

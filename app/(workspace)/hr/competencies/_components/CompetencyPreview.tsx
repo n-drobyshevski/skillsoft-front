@@ -6,6 +6,7 @@ import { Competency, BigFiveInfo, getEffectiveBigFive, getEffectiveDimension } f
 import type { BigFiveDimension } from "@/types/domain";
 import { Eye, Sparkles, Tag, Layers, FileText, Globe2, Briefcase, Globe, Brain, Lightbulb, Shield, Users, Heart, Smile, Info } from "lucide-react";
 import { getBigFiveMapping } from "@/hooks/useBigFiveMapper";
+import { useTranslations } from "next-intl";
 
 // Big Five dimension icons mapping
 const BigFiveIcons: Record<BigFiveDimension, React.ElementType> = {
@@ -51,20 +52,22 @@ const BigFiveColorClasses: Record<BigFiveDimension, { bg: string; border: string
 };
 
 export default function CompetencyPreview({ competency }: { competency: Competency }) {
+  const t = useTranslations("competency");
+
   return (
     <div className="rounded-xl border bg-linear-to-br from-card to-muted/30 shadow-sm overflow-hidden">
       {/* Preview Header */}
       <div className="flex items-center justify-between px-4 py-3 bg-muted/50 border-b">
         <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
           <Eye className="h-4 w-4" />
-          <span>Live Preview</span>
+          <span>{t("livePreview")}</span>
         </div>
         <div className="flex items-center gap-1.5">
           <span className="relative flex h-2 w-2">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
             <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
           </span>
-          <span className="text-xs text-muted-foreground">Auto-updating</span>
+          <span className="text-xs text-muted-foreground">{t("autoUpdating")}</span>
         </div>
       </div>
 
@@ -73,12 +76,12 @@ export default function CompetencyPreview({ competency }: { competency: Competen
         {/* Title & Status */}
         <div className="space-y-3">
           <h2 className="text-xl font-semibold tracking-tight leading-tight">
-            {competency.name || <span className="text-muted-foreground italic">Competency name...</span>}
+            {competency.name || <span className="text-muted-foreground italic">{t("competencyName")}</span>}
           </h2>
           <div className="flex flex-wrap items-center gap-2">
             <Badge variant={competency.isActive ? "default" : "secondary"} className="font-medium">
               <Sparkles className="h-3 w-3 mr-1" />
-              {competency.isActive ? "Active" : "Inactive"}
+              {competency.isActive ? t("active") : t("inactive")}
             </Badge>
             {competency.category && (
               <Badge variant="outline" className="font-normal bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950 dark:text-blue-300 dark:border-blue-800">
@@ -93,10 +96,10 @@ export default function CompetencyPreview({ competency }: { competency: Competen
         <div className="space-y-2">
           <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
             <FileText className="h-4 w-4" />
-            Description
+            {t("description")}
           </div>
           <p className="text-sm text-foreground/80 leading-relaxed pl-6">
-            {competency.description || <span className="text-muted-foreground italic">No description yet...</span>}
+            {competency.description || <span className="text-muted-foreground italic">{t("noDescriptionYet")}</span>}
           </p>
         </div>
 
@@ -104,7 +107,7 @@ export default function CompetencyPreview({ competency }: { competency: Competen
         {competency.approvalStatus && (
           <div className="pt-3 border-t">
             <div className="flex items-center justify-between text-sm">
-              <span className="text-muted-foreground">Approval Status</span>
+              <span className="text-muted-foreground">{t("approvalStatus")}</span>
               <Badge 
                 variant="outline" 
                 className={`font-normal ${
@@ -126,7 +129,7 @@ export default function CompetencyPreview({ competency }: { competency: Competen
           <div className="pt-3 border-t space-y-3">
             <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
               <Globe2 className="h-4 w-4" />
-              Standard Mapping
+              {t("standardsMapping")}
             </div>
             <div className="space-y-2 pl-6">
               {competency.standardCodes.onetRef && (

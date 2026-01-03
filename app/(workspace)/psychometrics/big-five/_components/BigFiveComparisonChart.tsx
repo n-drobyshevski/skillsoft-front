@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo } from 'react';
+import { useTranslations } from 'next-intl';
 import {
   BarChart,
   Bar,
@@ -13,9 +14,21 @@ import {
   ReferenceLine,
 } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { BigFiveReliability, BigFiveTrait, BigFiveTraitDisplay } from '@/types/psychometrics';
+import { BigFiveReliability, BigFiveTrait } from '@/types/psychometrics';
 import { TRAIT_COLORS } from './BigFiveTraitCard';
 import { useIsMobile } from '@/hooks/use-mobile';
+
+// Map BigFiveTrait enum to translation keys
+const getTraitKey = (trait: BigFiveTrait): string => {
+  const mapping: Record<BigFiveTrait, string> = {
+    [BigFiveTrait.OPENNESS]: 'openness',
+    [BigFiveTrait.CONSCIENTIOUSNESS]: 'conscientiousness',
+    [BigFiveTrait.EXTRAVERSION]: 'extraversion',
+    [BigFiveTrait.AGREEABLENESS]: 'agreeableness',
+    [BigFiveTrait.EMOTIONAL_STABILITY]: 'emotionalStability',
+  };
+  return mapping[trait];
+};
 
 interface BigFiveComparisonChartProps {
   reliabilityData: BigFiveReliability[];
@@ -36,6 +49,7 @@ const TRAIT_ORDER: BigFiveTrait[] = [
  * Includes reference lines for reliability thresholds (0.6, 0.7, 0.8).
  */
 export function BigFiveComparisonChart({ reliabilityData, className }: BigFiveComparisonChartProps) {
+  const t = useTranslations('psychometrics.bigFivePage');
   const isMobile = useIsMobile();
 
   // Transform and sort data for the chart
@@ -45,19 +59,21 @@ export function BigFiveComparisonChart({ reliabilityData, className }: BigFiveCo
 
     return TRAIT_ORDER.map(trait => {
       const data = dataMap.get(trait);
-      const traitInfo = BigFiveTraitDisplay[trait];
+      const traitKey = getTraitKey(trait);
       const colors = TRAIT_COLORS[trait];
+      const fullLabel = t(`traits.${traitKey}.label`);
 
       return {
         trait,
-        name: isMobile ? traitInfo.label.split(' ')[0] : traitInfo.label,
-        fullName: traitInfo.label,
+        traitKey,
+        name: isMobile ? fullLabel.split(' ')[0] : fullLabel,
+        fullName: fullLabel,
         alpha: data?.cronbachAlpha ?? 0,
         color: colors.accent,
         hasData: data?.cronbachAlpha !== null && data?.cronbachAlpha !== undefined,
       };
     });
-  }, [reliabilityData, isMobile]);
+  }, [reliabilityData, isMobile, t]);
 
   // Calculate average alpha
   const averageAlpha = useMemo(() => {
@@ -70,13 +86,13 @@ export function BigFiveComparisonChart({ reliabilityData, className }: BigFiveCo
     <Card className={className}>
       <CardHeader className="pb-2">
         <CardTitle className="text-base font-semibold">
-          Сравнение надежности черт
+          {t('chart.comparisonTitle')}
         </CardTitle>
         <CardDescription>
-          Cronbach&apos;s Alpha по чертам Big Five
+          {t('chart.comparisonDescription')}
           {averageAlpha !== null && (
             <span className="ml-2 font-medium text-foreground">
-              (Среднее: {averageAlpha.toFixed(2)})
+              ({t('chart.average')}: {averageAlpha.toFixed(2)})
             </span>
           )}
         </CardDescription>
@@ -107,6 +123,13 @@ export function BigFiveComparisonChart({ reliabilityData, className }: BigFiveCo
                 if (!active || !payload || !payload[0]) return null;
                 const data = payload[0].payload as typeof chartData[0];
 
+                const getStatusLabel = (alpha: number): string => {
+                  if (alpha >= 0.8) return t('chart.status.excellent');
+                  if (alpha >= 0.7) return t('chart.status.good');
+                  if (alpha >= 0.6) return t('chart.status.acceptable');
+                  return t('chart.status.unreliable');
+                };
+
                 return (
                   <div className="bg-popover border border-border rounded-lg shadow-lg p-3 min-w-[180px]">
                     <div className="flex items-center gap-2 mb-2">
@@ -127,13 +150,7 @@ export function BigFiveComparisonChart({ reliabilityData, className }: BigFiveCo
                     </div>
                     {data.hasData && (
                       <div className="text-xs text-muted-foreground mt-1">
-                        {data.alpha >= 0.8
-                          ? 'Отлично'
-                          : data.alpha >= 0.7
-                            ? 'Хорошо'
-                            : data.alpha >= 0.6
-                              ? 'Приемлемо'
-                              : 'Ненадежно'}
+                        {getStatusLabel(data.alpha)}
                       </div>
                     )}
                   </div>
@@ -181,15 +198,15 @@ export function BigFiveComparisonChart({ reliabilityData, className }: BigFiveCo
         <div className="flex flex-wrap justify-center gap-4 mt-4 text-xs text-muted-foreground">
           <div className="flex items-center gap-1.5">
             <div className="w-4 h-0.5 bg-red-500 rounded" style={{ borderStyle: 'dashed' }} />
-            <span>0.6 Минимум</span>
+            <span>0.6 {t('chart.thresholds.minimum')}</span>
           </div>
           <div className="flex items-center gap-1.5">
             <div className="w-4 h-0.5 bg-amber-500 rounded" style={{ borderStyle: 'dashed' }} />
-            <span>0.7 Хорошо</span>
+            <span>0.7 {t('chart.thresholds.good')}</span>
           </div>
           <div className="flex items-center gap-1.5">
             <div className="w-4 h-0.5 bg-emerald-500 rounded" style={{ borderStyle: 'dashed' }} />
-            <span>0.8 Отлично</span>
+            <span>0.8 {t('chart.thresholds.excellent')}</span>
           </div>
         </div>
       </CardContent>

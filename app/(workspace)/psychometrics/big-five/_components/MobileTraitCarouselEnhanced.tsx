@@ -8,6 +8,8 @@ import { MobileTraitCardSimple } from './MobileTraitCardSimple';
 import { TraitDetailDrawer } from './TraitDetailDrawer';
 import { useBigFivePageStore } from '@/stores/useBigFivePageStore';
 import { useCarouselUrlSync } from '../_hooks';
+import { useTranslations } from 'next-intl';
+import { getTraitKey } from './BigFiveTraitCard';
 
 interface MobileTraitCarouselEnhancedProps {
   reliabilityData: BigFiveReliability[];
@@ -29,6 +31,7 @@ export function MobileTraitCarouselEnhanced({
   reliabilityData,
   className
 }: MobileTraitCarouselEnhancedProps) {
+  const t = useTranslations('psychometrics.bigFive');
   const scrollRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
@@ -166,14 +169,18 @@ export function MobileTraitCarouselEnhanced({
         className="sr-only"
       >
         {reliabilityData[activeIndex] && (
-          `Showing ${reliabilityData[activeIndex].traitDisplayName}, trait ${activeIndex + 1} of ${reliabilityData.length}`
+          t('carousel.showing', {
+            trait: t(`traits.${getTraitKey(reliabilityData[activeIndex].trait)}.label`),
+            index: activeIndex + 1,
+            total: reliabilityData.length
+          })
         )}
       </div>
 
       {/* Section header */}
       <div className="flex items-center justify-between mb-3">
         <h2 className="text-sm font-medium text-muted-foreground">
-          Trait Details
+          {t('carousel.traitDetails')}
         </h2>
         <span className="text-xs text-muted-foreground tabular-nums">
           {activeIndex + 1} / {reliabilityData.length}
@@ -186,7 +193,7 @@ export function MobileTraitCarouselEnhanced({
         className="flex gap-2 overflow-x-auto snap-x snap-mandatory scroll-smooth pb-4 -mx-4 px-4"
         style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         role="region"
-        aria-label="Big Five trait cards"
+        aria-label={t('carousel.cardsLabel')}
       >
         {reliabilityData.map((reliability, index) => (
           <div
@@ -194,7 +201,7 @@ export function MobileTraitCarouselEnhanced({
             className="snap-start shrink-0 w-[256px]"
             role="group"
             aria-roledescription="slide"
-            aria-label={`${index + 1} of ${reliabilityData.length}`}
+            aria-label={t('carousel.slideLabel', { index: index + 1, total: reliabilityData.length })}
           >
             <MobileTraitCardSimple
               reliability={reliability}
@@ -218,20 +225,20 @@ export function MobileTraitCarouselEnhanced({
             'disabled:opacity-30 disabled:cursor-not-allowed',
             'touch-manipulation'
           )}
-          aria-label="Previous trait"
+          aria-label={t('carousel.previousTrait')}
         >
           <ChevronLeft className="h-5 w-5" />
         </button>
 
         {/* Pagination Dots - 44px touch targets */}
-        <div className="flex items-center gap-1" role="tablist" aria-label="Carousel pagination">
+        <div className="flex items-center gap-1" role="tablist" aria-label={t('carousel.paginationLabel')}>
           {reliabilityData.map((item, index) => (
             <button
               key={index}
               onClick={() => scrollToIndex(index)}
               role="tab"
               aria-selected={index === activeIndex}
-              aria-label={`${item.traitDisplayName}, trait ${index + 1} of ${reliabilityData.length}`}
+              aria-label={t('carousel.showing', { trait: t(`traits.${getTraitKey(item.trait)}.label`), index: index + 1, total: reliabilityData.length })}
               className={cn(
                 'flex items-center justify-center w-11 h-11',
                 'touch-manipulation transition-transform',
@@ -259,7 +266,7 @@ export function MobileTraitCarouselEnhanced({
             'disabled:opacity-30 disabled:cursor-not-allowed',
             'touch-manipulation'
           )}
-          aria-label="Next trait"
+          aria-label={t('carousel.nextTrait')}
         >
           <ChevronRight className="h-5 w-5" />
         </button>

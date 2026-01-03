@@ -1,4 +1,6 @@
 import { notFound } from "next/navigation";
+import { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import { usersApi } from "@/services/api";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -10,14 +12,27 @@ import {
   User,
   getUserFullName,
   getUserInitials,
-  getUserStatus,
+  getUserStatusKey,
+  getStatusBadgeVariant,
   getRoleBadgeColor,
-  getRoleDisplayName,
+  UserStatusKey,
 } from "@/types/user";
 import UserEditForm from "./_components/UserEditForm";
 
 interface UserEditPageProps {
   params: Promise<{ userId: string }>;
+}
+
+export async function generateMetadata({ params }: UserEditPageProps): Promise<Metadata> {
+  const { userId } = await params;
+  const t = await getTranslations('metadata.users');
+  const user = await getUserData(userId);
+  const name = user ? getUserFullName(user) : 'User';
+
+  return {
+    title: t('editTitle', { name }),
+    description: t('editDescription'),
+  };
 }
 
 /**
@@ -40,8 +55,8 @@ async function getUserData(userId: string): Promise<User | null> {
 }
 
 // Status badge component
-function StatusBadge({ user }: { user: User }) {
-  const status = getUserStatus(user);
+function StatusBadge({ statusKey, label }: { statusKey: UserStatusKey; label: string }) {
+  const variant = getStatusBadgeVariant(statusKey);
   const variantClasses = {
     success: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400",
     warning: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400",
@@ -50,8 +65,8 @@ function StatusBadge({ user }: { user: User }) {
   };
 
   return (
-    <Badge className={`${variantClasses[status.variant]} px-2.5 py-0.5`}>
-      {status.label}
+    <Badge className={`${variantClasses[variant]} px-2.5 py-0.5`}>
+      {label}
     </Badge>
   );
 }
@@ -59,6 +74,9 @@ function StatusBadge({ user }: { user: User }) {
 export default async function UserEditPage({ params }: UserEditPageProps) {
   const { userId } = await params;
   const user = await getUserData(userId);
+  const t = await getTranslations('users.edit');
+  const tRole = await getTranslations('enums.userRole');
+  const tStatus = await getTranslations('enums.userStatus');
 
   if (!user) {
     notFound();
@@ -66,6 +84,9 @@ export default async function UserEditPage({ params }: UserEditPageProps) {
 
   const fullName = getUserFullName(user);
   const initials = getUserInitials(user);
+  const statusKey = getUserStatusKey(user);
+  const roleLabel = tRole(user.role);
+  const statusLabel = tStatus(statusKey);
 
   return (
     <div className="flex flex-1 flex-col gap-4 p-4 pt-6 md:gap-6 md:p-6">
@@ -74,7 +95,7 @@ export default async function UserEditPage({ params }: UserEditPageProps) {
         <Button variant="ghost" size="sm" asChild className="gap-2">
           <Link href={`/users/${userId}`}>
             <ChevronLeft className="h-4 w-4" />
-            <span>Back to Profile</span>
+            <span>{t('backToProfile')}</span>
           </Link>
         </Button>
       </div>
@@ -97,12 +118,12 @@ export default async function UserEditPage({ params }: UserEditPageProps) {
             <div className="flex-1 min-w-0">
               <div className="flex flex-wrap items-center gap-2">
                 <h1 className="text-xl md:text-2xl font-semibold tracking-tight truncate">
-                  Edit: {fullName}
+                  {t('title', { name: fullName })}
                 </h1>
                 <Badge variant="secondary" className={`${getRoleBadgeColor(user.role)} shrink-0`}>
-                  {getRoleDisplayName(user.role)}
+                  {roleLabel}
                 </Badge>
-                <StatusBadge user={user} />
+                <StatusBadge statusKey={statusKey} label={statusLabel} />
               </div>
               <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1.5 text-sm text-muted-foreground">
                 {user.email && (
@@ -123,7 +144,7 @@ export default async function UserEditPage({ params }: UserEditPageProps) {
             {/* Cancel Button */}
             <div className="flex gap-2 shrink-0">
               <Button variant="outline" size="sm" asChild>
-                <Link href={`/users/${userId}`}>Cancel</Link>
+                <Link href={`/users/${userId}`}>{t('actions.cancel')}</Link>
               </Button>
             </div>
           </div>

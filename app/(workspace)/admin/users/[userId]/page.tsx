@@ -1,4 +1,6 @@
 import { notFound } from "next/navigation";
+import { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import { usersApi } from "@/services/api";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -33,14 +35,27 @@ import {
   User,
   getUserFullName,
   getUserInitials,
-  getUserStatus,
-  getRoleDisplayName,
+  getUserStatusKey,
+  getStatusBadgeVariant,
   UserRole,
+  UserStatusKey,
 } from "@/types/user";
 import UserProfileClient from "./_components/UserProfileClient";
 
 interface UserProfilePageProps {
   params: Promise<{ userId: string }>;
+}
+
+export async function generateMetadata({ params }: UserProfilePageProps): Promise<Metadata> {
+  const { userId } = await params;
+  const t = await getTranslations('metadata.users');
+  const user = await getUserData(userId);
+  const name = user ? getUserFullName(user) : 'User';
+
+  return {
+    title: t('profileTitle', { name }),
+    description: t('profileDescription'),
+  };
 }
 
 function isClerkId(id: string): boolean {
@@ -58,20 +73,20 @@ async function getUserData(userId: string): Promise<User | null> {
   }
 }
 
-function formatDate(dateString?: string | null): string {
-  if (!dateString) return "Never";
+function formatDate(dateString?: string | null, neverLabel: string = "Never", locale: string = "en-US"): string {
+  if (!dateString) return neverLabel;
   const date = new Date(dateString);
-  return date.toLocaleDateString("en-US", {
+  return date.toLocaleDateString(locale, {
     year: "numeric",
     month: "short",
     day: "numeric",
   });
 }
 
-function formatDateTime(dateString?: string | null): string {
-  if (!dateString) return "Never";
+function formatDateTime(dateString?: string | null, neverLabel: string = "Never", locale: string = "en-US"): string {
+  if (!dateString) return neverLabel;
   const date = new Date(dateString);
-  return date.toLocaleDateString("en-US", {
+  return date.toLocaleDateString(locale, {
     year: "numeric",
     month: "short",
     day: "numeric",
@@ -81,7 +96,7 @@ function formatDateTime(dateString?: string | null): string {
 }
 
 // Enhanced role badge with icon
-function RoleBadge({ role }: { role: UserRole }) {
+function RoleBadge({ role, label }: { role: UserRole; label: string }) {
   const getConfig = () => {
     switch (role) {
       case UserRole.ADMIN:
@@ -118,14 +133,14 @@ function RoleBadge({ role }: { role: UserRole }) {
       className={`${config.bg} ${config.text} ${config.border} gap-1.5 px-2.5 py-1 font-medium`}
     >
       <Icon className="h-3 w-3" />
-      {getRoleDisplayName(role)}
+      {label}
     </Badge>
   );
 }
 
 // Enhanced status badge with pulse animation
-function StatusBadge({ user }: { user: User }) {
-  const status = getUserStatus(user);
+function StatusBadge({ statusKey, label }: { statusKey: UserStatusKey; label: string }) {
+  const variant = getStatusBadgeVariant(statusKey);
   const statusConfig = {
     success: {
       icon: CheckCircle2,
@@ -157,7 +172,7 @@ function StatusBadge({ user }: { user: User }) {
     },
   };
 
-  const config = statusConfig[status.variant];
+  const config = statusConfig[variant];
 
   return (
     <Badge
@@ -165,7 +180,7 @@ function StatusBadge({ user }: { user: User }) {
       className={`${config.bg} ${config.text} ${config.border} gap-1.5 px-2.5 py-1 font-medium`}
     >
       <span className={`h-2 w-2 rounded-full ${config.dot}`} />
-      {status.label}
+      {label}
     </Badge>
   );
 }
@@ -245,6 +260,11 @@ function StatCard({
 export default async function UserProfilePage({ params }: UserProfilePageProps) {
   const { userId } = await params;
   const user = await getUserData(userId);
+  const t = await getTranslations('users.profile');
+  const tTime = await getTranslations('users.time');
+  const tRole = await getTranslations('enums.userRole');
+  const tStatus = await getTranslations('enums.userStatus');
+  const { locale } = await import('next-intl/server').then(m => m.getLocale()).then(locale => ({ locale }));
 
   if (!user) {
     notFound();
@@ -252,6 +272,10 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
 
   const fullName = getUserFullName(user);
   const initials = getUserInitials(user);
+  const neverLabel = tTime('never');
+  const statusKey = getUserStatusKey(user);
+  const roleLabel = tRole(user.role);
+  const statusLabel = tStatus(statusKey);
 
   return (
     <div className="flex flex-1 flex-col min-h-0">
@@ -291,8 +315,8 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
                         {fullName}
                       </h1>
                       <div className="flex items-center justify-center sm:justify-start gap-2 flex-wrap">
-                        <RoleBadge role={user.role} />
-                        <StatusBadge user={user} />
+                        <RoleBadge role={user.role} label={roleLabel} />
+                        <StatusBadge statusKey={statusKey} label={statusLabel} />
                       </div>
                     </div>
 
@@ -312,7 +336,7 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
                       )}
                       <span className="flex items-center gap-1.5">
                         <Calendar className="h-4 w-4" />
-                        <span>Joined {formatDate(user.clerkCreatedAt || user.createdAt)}</span>
+                        <span>{t('joined', { date: formatDate(user.clerkCreatedAt || user.createdAt, neverLabel, locale) })}</span>
                       </span>
                     </div>
 
@@ -324,7 +348,7 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
                         </div>
                         <div>
                           <p className="text-lg font-bold">0</p>
-                          <p className="text-xs text-muted-foreground">Assessments</p>
+                          <p className="text-xs text-muted-foreground">{t('stats.assessments')}</p>
                         </div>
                       </div>
                       <Separator orientation="vertical" className="h-10" />
@@ -334,7 +358,7 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
                         </div>
                         <div>
                           <p className="text-lg font-bold">0</p>
-                          <p className="text-xs text-muted-foreground">Completed</p>
+                          <p className="text-xs text-muted-foreground">{t('stats.completed')}</p>
                         </div>
                       </div>
                       <Separator orientation="vertical" className="h-10" />
@@ -344,7 +368,7 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
                         </div>
                         <div>
                           <p className="text-lg font-bold">--</p>
-                          <p className="text-xs text-muted-foreground">Avg. Score</p>
+                          <p className="text-xs text-muted-foreground">{t('stats.avgScore')}</p>
                         </div>
                       </div>
                     </div>
@@ -355,7 +379,7 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
                     <Button variant="default" size="sm" asChild className="shadow-sm">
                       <Link href={`/admin/users/${userId}/edit`}>
                         <Edit className="h-4 w-4 mr-2" />
-                        Edit Profile
+                        {t('actions.editProfile')}
                       </Link>
                     </Button>
                   </div>
@@ -371,10 +395,10 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
         <div className="mx-auto max-w-7xl">
           {/* Mobile Stats Grid (visible on smaller screens) */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6 lg:hidden">
-            <StatCard icon={ClipboardList} value={0} label="Assessments" color="primary" />
-            <StatCard icon={Award} value={0} label="Completed" color="emerald" />
-            <StatCard icon={BarChart3} value="--" label="Avg. Score" color="violet" />
-            <StatCard icon={Target} value={0} label="Competencies" color="amber" />
+            <StatCard icon={ClipboardList} value={0} label={t('stats.assessments')} color="primary" />
+            <StatCard icon={Award} value={0} label={t('stats.completed')} color="emerald" />
+            <StatCard icon={BarChart3} value="--" label={t('stats.avgScore')} color="violet" />
+            <StatCard icon={Target} value={0} label={t('stats.competencies')} color="amber" />
           </div>
 
           {/* Content Grid */}
@@ -388,25 +412,25 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
                     <div className="p-1.5 rounded-lg bg-blue-100 dark:bg-blue-900/30">
                       <UserIcon className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
                     </div>
-                    Account Info
+                    {t('sections.accountInfo')}
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   {user.email && (
-                    <InfoRow icon={Mail} label="Email" value={user.email} />
+                    <InfoRow icon={Mail} label={t('info.email')} value={user.email} />
                   )}
                   {user.username && (
-                    <InfoRow icon={AtSign} label="Username" value={`@${user.username}`} />
+                    <InfoRow icon={AtSign} label={t('info.username')} value={`@${user.username}`} />
                   )}
                   <InfoRow
                     icon={Shield}
-                    label="Role"
-                    value={<RoleBadge role={user.role} />}
+                    label={t('info.role')}
+                    value={<RoleBadge role={user.role} label={roleLabel} />}
                   />
                   <InfoRow
                     icon={Activity}
-                    label="Status"
-                    value={<StatusBadge user={user} />}
+                    label={t('info.status')}
+                    value={<StatusBadge statusKey={statusKey} label={statusLabel} />}
                   />
                 </CardContent>
               </Card>
@@ -418,24 +442,24 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
                     <div className="p-1.5 rounded-lg bg-emerald-100 dark:bg-emerald-900/30">
                       <Clock className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
                     </div>
-                    Activity
+                    {t('sections.activity')}
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <InfoRow
                     icon={Calendar}
-                    label="Member Since"
-                    value={formatDate(user.clerkCreatedAt || user.createdAt)}
+                    label={t('info.memberSince')}
+                    value={formatDate(user.clerkCreatedAt || user.createdAt, neverLabel, locale)}
                   />
                   <InfoRow
                     icon={Clock}
-                    label="Last Sign In"
-                    value={formatDateTime(user.lastSignInAt || user.lastLogin)}
+                    label={t('info.lastSignIn')}
+                    value={formatDateTime(user.lastSignInAt || user.lastLogin, neverLabel, locale)}
                   />
                   <InfoRow
                     icon={Activity}
-                    label="Last Updated"
-                    value={formatDateTime(user.updatedAt)}
+                    label={t('info.lastUpdated')}
+                    value={formatDateTime(user.updatedAt, neverLabel, locale)}
                   />
                 </CardContent>
               </Card>
@@ -447,26 +471,26 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
                     <div className="p-1.5 rounded-lg bg-violet-100 dark:bg-violet-900/30">
                       <Target className="w-3.5 h-3.5 text-violet-600 dark:text-violet-400" />
                     </div>
-                    Statistics
+                    {t('sections.statistics')}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-2 gap-3">
                     <div className="text-center p-3 rounded-xl bg-background/60 border border-border/50">
                       <p className="text-2xl font-bold text-primary">0</p>
-                      <p className="text-xs text-muted-foreground mt-0.5">Tests</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">{t('stats.tests')}</p>
                     </div>
                     <div className="text-center p-3 rounded-xl bg-background/60 border border-border/50">
                       <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">0</p>
-                      <p className="text-xs text-muted-foreground mt-0.5">Done</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">{t('stats.done')}</p>
                     </div>
                     <div className="text-center p-3 rounded-xl bg-background/60 border border-border/50">
                       <p className="text-2xl font-bold text-violet-600 dark:text-violet-400">--</p>
-                      <p className="text-xs text-muted-foreground mt-0.5">Score</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">{t('stats.score')}</p>
                     </div>
                     <div className="text-center p-3 rounded-xl bg-background/60 border border-border/50">
                       <p className="text-2xl font-bold text-amber-600 dark:text-amber-400">0</p>
-                      <p className="text-xs text-muted-foreground mt-0.5">Skills</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">{t('stats.skills')}</p>
                     </div>
                   </div>
                 </CardContent>
@@ -480,15 +504,15 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
                   <TabsList className="w-full grid grid-cols-3 h-11 p-1 bg-muted/50">
                     <TabsTrigger value="overview" className="gap-2 data-[state=active]:shadow-sm">
                       <Target className="h-4 w-4 hidden sm:block" />
-                      Overview
+                      {t('tabs.overview')}
                     </TabsTrigger>
                     <TabsTrigger value="assessments" className="gap-2 data-[state=active]:shadow-sm">
                       <ClipboardList className="h-4 w-4 hidden sm:block" />
-                      Assessments
+                      {t('tabs.assessments')}
                     </TabsTrigger>
                     <TabsTrigger value="activity" className="gap-2 data-[state=active]:shadow-sm">
                       <Activity className="h-4 w-4 hidden sm:block" />
-                      Activity
+                      {t('tabs.activity')}
                     </TabsTrigger>
                   </TabsList>
 
@@ -501,7 +525,7 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
                             <div className="p-1.5 rounded-lg bg-amber-100 dark:bg-amber-900/30">
                               <ClipboardList className="w-4 h-4 text-amber-600 dark:text-amber-400" />
                             </div>
-                            Assigned Assessments
+                            {t('sections.assignedAssessments')}
                           </CardTitle>
                         </CardHeader>
                         <CardContent>
@@ -509,10 +533,9 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
                             <div className="mx-auto w-16 h-16 bg-gradient-to-br from-muted to-muted/50 rounded-2xl flex items-center justify-center mb-4 shadow-inner">
                               <ClipboardList className="h-8 w-8 text-muted-foreground" />
                             </div>
-                            <h3 className="text-lg font-semibold mb-2">No Assessments Yet</h3>
+                            <h3 className="text-lg font-semibold mb-2">{t('empty.noAssessments')}</h3>
                             <p className="text-sm text-muted-foreground max-w-sm mx-auto">
-                              This user hasn&apos;t been assigned any assessments yet.
-                              Assessments will appear here once assigned.
+                              {t('empty.noAssessmentsDesc')}
                             </p>
                           </div>
                         </CardContent>
@@ -524,7 +547,7 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
                             <div className="p-1.5 rounded-lg bg-blue-100 dark:bg-blue-900/30">
                               <FileQuestion className="w-4 h-4 text-blue-600 dark:text-blue-400" />
                             </div>
-                            Content Contributions
+                            {t('sections.contentContributions')}
                           </CardTitle>
                         </CardHeader>
                         <CardContent>
@@ -532,9 +555,9 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
                             <div className="mx-auto w-16 h-16 bg-gradient-to-br from-muted to-muted/50 rounded-2xl flex items-center justify-center mb-4 shadow-inner">
                               <FileQuestion className="h-8 w-8 text-muted-foreground" />
                             </div>
-                            <h3 className="text-lg font-semibold mb-2">No Contributions Yet</h3>
+                            <h3 className="text-lg font-semibold mb-2">{t('empty.noContributions')}</h3>
                             <p className="text-sm text-muted-foreground max-w-sm mx-auto">
-                              Content created by this {getRoleDisplayName(user.role).toLowerCase()} will appear here.
+                              {t('empty.noContributionsDesc', { role: roleLabel.toLowerCase() })}
                             </p>
                           </div>
                         </CardContent>
@@ -548,7 +571,7 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
                             <div className="p-1.5 rounded-lg bg-violet-100 dark:bg-violet-900/30">
                               <Target className="w-4 h-4 text-violet-600 dark:text-violet-400" />
                             </div>
-                            Competency Progress
+                            {t('sections.competencyProgress')}
                           </CardTitle>
                         </CardHeader>
                         <CardContent>
@@ -556,10 +579,9 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
                             <div className="mx-auto w-16 h-16 bg-gradient-to-br from-muted to-muted/50 rounded-2xl flex items-center justify-center mb-4 shadow-inner">
                               <Target className="h-8 w-8 text-muted-foreground" />
                             </div>
-                            <h3 className="text-lg font-semibold mb-2">No Progress Data</h3>
+                            <h3 className="text-lg font-semibold mb-2">{t('empty.noProgress')}</h3>
                             <p className="text-sm text-muted-foreground max-w-sm mx-auto">
-                              Competency assessments and progress tracking will be displayed here
-                              once the user completes assessments.
+                              {t('empty.noProgressDesc')}
                             </p>
                           </div>
                         </CardContent>
@@ -572,11 +594,11 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
                     <Card className="hover:shadow-md transition-shadow">
                       <CardHeader className="flex flex-row items-center justify-between">
                         <CardTitle className="text-base font-semibold">
-                          {user.role === UserRole.USER ? "Assessment History" : "Created Assessments"}
+                          {user.role === UserRole.USER ? t('sections.assessmentHistory') : t('sections.createdAssessments')}
                         </CardTitle>
                         {user.role !== UserRole.USER && (
                           <Button variant="outline" size="sm">
-                            Create Assessment
+                            {t('actions.createAssessment')}
                           </Button>
                         )}
                       </CardHeader>
@@ -585,10 +607,9 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
                           <div className="mx-auto w-20 h-20 bg-gradient-to-br from-muted to-muted/50 rounded-2xl flex items-center justify-center mb-4 shadow-inner">
                             <ClipboardList className="h-10 w-10 text-muted-foreground" />
                           </div>
-                          <h3 className="text-xl font-semibold mb-2">Coming Soon</h3>
+                          <h3 className="text-xl font-semibold mb-2">{t('empty.comingSoon')}</h3>
                           <p className="text-sm text-muted-foreground max-w-md mx-auto">
-                            Assessment management and history tracking is currently in development.
-                            Check back soon for updates!
+                            {t('empty.comingSoonDesc')}
                           </p>
                         </div>
                       </CardContent>
@@ -599,7 +620,7 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
                   <TabsContent value="activity" className="mt-6 space-y-6">
                     <Card className="hover:shadow-md transition-shadow">
                       <CardHeader>
-                        <CardTitle className="text-base font-semibold">Recent Activity</CardTitle>
+                        <CardTitle className="text-base font-semibold">{t('sections.recentActivity')}</CardTitle>
                       </CardHeader>
                       <CardContent>
                         <div className="space-y-1">
@@ -610,9 +631,9 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
                               <div className="w-px flex-1 bg-border mt-2" />
                             </div>
                             <div className="pb-4 flex-1">
-                              <p className="text-sm font-semibold">Account Created</p>
+                              <p className="text-sm font-semibold">{t('activity.accountCreated')}</p>
                               <p className="text-xs text-muted-foreground mt-0.5">
-                                {formatDateTime(user.clerkCreatedAt || user.createdAt)}
+                                {formatDateTime(user.clerkCreatedAt || user.createdAt, neverLabel, locale)}
                               </p>
                             </div>
                           </div>
@@ -624,9 +645,9 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
                                 <div className="w-px flex-1 bg-border mt-2" />
                               </div>
                               <div className="pb-4 flex-1">
-                                <p className="text-sm font-semibold">Last Sign In</p>
+                                <p className="text-sm font-semibold">{t('info.lastSignIn')}</p>
                                 <p className="text-xs text-muted-foreground mt-0.5">
-                                  {formatDateTime(user.lastSignInAt)}
+                                  {formatDateTime(user.lastSignInAt, neverLabel, locale)}
                                 </p>
                               </div>
                             </div>
@@ -634,7 +655,7 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
 
                           <div className="flex items-center justify-center pt-6 pb-2">
                             <p className="text-sm text-muted-foreground bg-muted/50 px-4 py-2 rounded-full">
-                              More detailed activity logging coming soon
+                              {t('activity.moreDetailedLogging')}
                             </p>
                           </div>
                         </div>

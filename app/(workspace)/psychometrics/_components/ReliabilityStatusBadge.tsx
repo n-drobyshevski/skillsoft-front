@@ -1,11 +1,9 @@
 'use client';
 
 import { Badge } from '@/components/ui/badge';
-import {
-  ReliabilityStatus,
-  ReliabilityStatusDisplay
-} from '@/types/psychometrics';
+import { ReliabilityStatus } from '@/types/psychometrics';
 import { cn } from '@/lib/utils';
+import { useEnumTranslation } from '@/hooks/useEnumTranslation';
 import { CheckCircle2, AlertTriangle, XCircle, HelpCircle, LucideIcon } from 'lucide-react';
 
 interface ReliabilityStatusBadgeProps {
@@ -41,7 +39,8 @@ export function ReliabilityStatusBadge({
   iconOnly = false,
   size = 'md',
 }: ReliabilityStatusBadgeProps) {
-  const display = ReliabilityStatusDisplay[status];
+  const { translateWithDescription } = useEnumTranslation<ReliabilityStatus>('reliabilityStatus');
+  const { label, description } = translateWithDescription(status);
   const Icon = statusIconMap[status];
 
   const sizeClasses = {
@@ -58,7 +57,8 @@ export function ReliabilityStatusBadge({
         sizeClasses[size],
         className
       )}
-      title={display.description}
+      title={description}
+      aria-label={`${label}${description ? `: ${description}` : ''}`}
     >
       {showIcon && (
         <Icon
@@ -69,8 +69,8 @@ export function ReliabilityStatusBadge({
           aria-hidden="true"
         />
       )}
-      {!iconOnly && (showLabel ? display.label : status)}
-      {iconOnly && <span className="sr-only">{display.label}</span>}
+      {!iconOnly && (showLabel ? label : status)}
+      {iconOnly && <span className="sr-only">{label}</span>}
     </Badge>
   );
 }

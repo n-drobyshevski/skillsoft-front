@@ -40,6 +40,8 @@ import {
   Loader2,
   ArrowRight
 } from 'lucide-react';
+import { useTranslations, useLocale } from 'next-intl';
+import { useEnumTranslation } from '@/hooks/useEnumTranslation';
 
 interface ItemDetailClientProps {
   item: ItemStatisticsDetail;
@@ -47,6 +49,10 @@ interface ItemDetailClientProps {
 
 export function ItemDetailClient({ item }: ItemDetailClientProps) {
   const router = useRouter();
+  const t = useTranslations('psychometrics');
+  const tCommon = useTranslations('common');
+  const locale = useLocale();
+  const { translate: translateStatus } = useEnumTranslation<ItemValidityStatus>('itemValidityStatus');
   const [isRecalculating, setIsRecalculating] = useState(false);
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
   const [newStatus, setNewStatus] = useState<ItemValidityStatus>(item.validityStatus);
@@ -57,13 +63,13 @@ export function ItemDetailClient({ item }: ItemDetailClientProps) {
     setIsRecalculating(true);
     try {
       await psychometricsApi.recalculateItem(item.questionId);
-      toast.success('Пересчет завершен', {
-        description: 'Психометрические показатели обновлены',
+      toast.success(t('itemDetail.recalculateSuccess'), {
+        description: t('itemDetail.metricsUpdated'),
       });
       router.refresh();
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Не удалось выполнить пересчет';
-      toast.error('Ошибка', { description: message });
+      const message = error instanceof Error ? error.message : t('itemDetail.recalculateFailed');
+      toast.error(t('itemDetail.error'), { description: message });
     } finally {
       setIsRecalculating(false);
     }
@@ -71,7 +77,7 @@ export function ItemDetailClient({ item }: ItemDetailClientProps) {
 
   const handleStatusUpdate = async () => {
     if (!statusReason.trim()) {
-      toast.error('Укажите причину изменения статуса');
+      toast.error(t('itemDetail.reasonRequired'));
       return;
     }
 
@@ -81,15 +87,15 @@ export function ItemDetailClient({ item }: ItemDetailClientProps) {
         newStatus,
         reason: statusReason,
       });
-      toast.success('Статус обновлен', {
-        description: `Новый статус: ${ItemValidityStatusDisplay[newStatus].label}`,
+      toast.success(t('itemDetail.statusUpdated'), {
+        description: t('itemDetail.newStatusIs', { status: translateStatus(newStatus) }),
       });
       setIsStatusDialogOpen(false);
       setStatusReason('');
       router.refresh();
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Не удалось обновить статус';
-      toast.error('Ошибка', { description: message });
+      const message = error instanceof Error ? error.message : t('itemDetail.statusUpdateFailed');
+      toast.error(t('itemDetail.error'), { description: message });
     } finally {
       setIsUpdatingStatus(false);
     }
@@ -110,25 +116,25 @@ export function ItemDetailClient({ item }: ItemDetailClientProps) {
           ) : (
             <RefreshCw className="h-4 w-4" />
           )}
-          Пересчитать
+          {t('itemDetail.recalculate')}
         </Button>
 
         <AlertDialog open={isStatusDialogOpen} onOpenChange={setIsStatusDialogOpen}>
           <AlertDialogTrigger asChild>
             <Button variant="outline" className="gap-2">
-              Изменить статус
+              {t('itemDetail.changeStatus')}
             </Button>
           </AlertDialogTrigger>
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>Изменить статус элемента</AlertDialogTitle>
+              <AlertDialogTitle>{t('itemDetail.changeStatusTitle')}</AlertDialogTitle>
               <AlertDialogDescription>
-                Выберите новый статус и укажите причину изменения.
+                {t('itemDetail.changeStatusDescription')}
               </AlertDialogDescription>
             </AlertDialogHeader>
             <div className="space-y-4 py-4">
               <div className="space-y-2">
-                <label className="text-sm font-medium">Новый статус</label>
+                <label className="text-sm font-medium">{t('itemDetail.newStatus')}</label>
                 <Select
                   value={newStatus}
                   onValueChange={(value) => setNewStatus(value as ItemValidityStatus)}
@@ -137,10 +143,10 @@ export function ItemDetailClient({ item }: ItemDetailClientProps) {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {Object.entries(ItemValidityStatusDisplay).map(([key, display]) => (
-                      <SelectItem key={key} value={key}>
+                    {Object.values(ItemValidityStatus).map((status) => (
+                      <SelectItem key={status} value={status}>
                         <div className="flex items-center gap-2">
-                          <span>{display.label}</span>
+                          <span>{translateStatus(status)}</span>
                         </div>
                       </SelectItem>
                     ))}
@@ -148,25 +154,25 @@ export function ItemDetailClient({ item }: ItemDetailClientProps) {
                 </Select>
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium">Причина изменения</label>
+                <label className="text-sm font-medium">{t('itemDetail.changeReason')}</label>
                 <Textarea
                   value={statusReason}
                   onChange={(e) => setStatusReason(e.target.value)}
-                  placeholder="Опишите причину изменения статуса..."
+                  placeholder={t('itemDetail.reasonPlaceholder')}
                   rows={3}
                 />
               </div>
             </div>
             <AlertDialogFooter>
-              <AlertDialogCancel disabled={isUpdatingStatus}>Отмена</AlertDialogCancel>
+              <AlertDialogCancel disabled={isUpdatingStatus}>{tCommon('cancel')}</AlertDialogCancel>
               <AlertDialogAction onClick={handleStatusUpdate} disabled={isUpdatingStatus}>
                 {isUpdatingStatus ? (
                   <>
                     <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                    Сохранение...
+                    {tCommon('saving')}
                   </>
                 ) : (
-                  'Сохранить'
+                  tCommon('save')
                 )}
               </AlertDialogAction>
             </AlertDialogFooter>
@@ -181,7 +187,7 @@ export function ItemDetailClient({ item }: ItemDetailClientProps) {
             <CardHeader className="pb-3">
               <CardTitle className="text-base flex items-center gap-2">
                 <BarChart3 className="h-4 w-4" />
-                Эффективность дистракторов
+                {t('itemDetail.distractorEfficiency')}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -206,7 +212,7 @@ export function ItemDetailClient({ item }: ItemDetailClientProps) {
                 ))}
               </div>
               <p className="text-xs text-muted-foreground mt-4">
-                Показывает долю респондентов, выбравших каждый вариант ответа
+                {t('itemDetail.distractorDescription')}
               </p>
             </CardContent>
           </Card>
@@ -218,7 +224,7 @@ export function ItemDetailClient({ item }: ItemDetailClientProps) {
             <CardHeader className="pb-3">
               <CardTitle className="text-base flex items-center gap-2">
                 <Lightbulb className="h-4 w-4 text-amber-500" />
-                Рекомендации
+                {t('itemDetail.recommendations')}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -240,7 +246,7 @@ export function ItemDetailClient({ item }: ItemDetailClientProps) {
             <CardHeader className="pb-3">
               <CardTitle className="text-base flex items-center gap-2">
                 <History className="h-4 w-4" />
-                История изменений статуса
+                {t('itemDetail.statusHistory')}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -260,7 +266,7 @@ export function ItemDetailClient({ item }: ItemDetailClientProps) {
                         <p className="text-sm">{change.reason}</p>
                       )}
                       <p className="text-xs text-muted-foreground mt-1">
-                        {new Date(change.timestamp).toLocaleString('ru-RU')}
+                        {new Date(change.timestamp).toLocaleString(locale === 'ru' ? 'ru-RU' : 'en-US')}
                       </p>
                     </div>
                   </div>
@@ -274,19 +280,19 @@ export function ItemDetailClient({ item }: ItemDetailClientProps) {
         {item.previousDiscriminationIndex != null && (
           <Card>
             <CardHeader className="pb-3">
-              <CardTitle className="text-base">Сравнение показателей</CardTitle>
+              <CardTitle className="text-base">{t('itemDetail.metricsComparison')}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground">Предыдущий rpb</p>
+                  <p className="text-sm text-muted-foreground">{t('itemDetail.previousRpb')}</p>
                   <p className="text-xl font-bold">
                     {item.previousDiscriminationIndex.toFixed(2)}
                   </p>
                 </div>
                 <ArrowRight className="h-6 w-6 text-muted-foreground" />
                 <div>
-                  <p className="text-sm text-muted-foreground">Текущий rpb</p>
+                  <p className="text-sm text-muted-foreground">{t('itemDetail.currentRpb')}</p>
                   <p className={`text-xl font-bold ${
                     item.discriminationIndex != null
                       ? item.discriminationIndex > item.previousDiscriminationIndex
@@ -302,7 +308,7 @@ export function ItemDetailClient({ item }: ItemDetailClientProps) {
               </div>
               {item.discriminationIndex != null && (
                 <p className="text-sm text-muted-foreground mt-2">
-                  Изменение:{' '}
+                  {t('itemDetail.change')}:{' '}
                   <span className={
                     item.discriminationIndex > item.previousDiscriminationIndex
                       ? 'text-emerald-600'

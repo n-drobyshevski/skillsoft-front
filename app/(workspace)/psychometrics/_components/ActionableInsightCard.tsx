@@ -2,6 +2,7 @@
 
 import { useMemo } from 'react';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { UiLink } from '@/components/ui/ui-link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -82,10 +83,14 @@ const severityConfig: Record<Severity, {
   },
 };
 
-// Generate insights from report data
+// Generate insights from report data using translations
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type TranslateFunction = (key: string, values?: Record<string, any>) => string;
+
 function generateInsights(
   report: PsychometricHealthReport,
-  flaggedItems: FlaggedItemSummary[]
+  flaggedItems: FlaggedItemSummary[],
+  t: TranslateFunction
 ): Insight[] {
   const insights: Insight[] = [];
 
@@ -97,16 +102,16 @@ function generateInsights(
     insights.push({
       id: 'negative-discrimination',
       severity: 'critical',
-      title: 'Questions may be misleading',
-      message: `${negativeItems.length} question(s) have negative discrimination, meaning wrong answers correlate with higher overall scores.`,
-      explanation: 'This typically happens when questions are confusing, have incorrect answer keys, or measure something different than intended.',
+      title: t('negativeDiscrimination.title'),
+      message: t('negativeDiscrimination.message', { count: negativeItems.length }),
+      explanation: t('negativeDiscrimination.explanation'),
       actions: [
-        'Review question wording for ambiguity',
-        'Verify the correct answer is properly marked',
-        'Consider removing or revising these questions',
+        t('negativeDiscrimination.action1'),
+        t('negativeDiscrimination.action2'),
+        t('negativeDiscrimination.action3'),
       ],
       link: '/psychometrics/flagged',
-      linkText: 'Review flagged items',
+      linkText: t('negativeDiscrimination.linkText'),
       count: negativeItems.length,
     });
   }
@@ -119,16 +124,16 @@ function generateInsights(
     insights.push({
       id: 'too-easy',
       severity: 'high',
-      title: 'Questions may be too easy',
-      message: `${tooEasyItems.length} question(s) have very high success rates (p > 0.9), providing little differentiation.`,
-      explanation: 'When almost everyone answers correctly, the question does not help distinguish between skill levels.',
+      title: t('tooEasy.title'),
+      message: t('tooEasy.message', { count: tooEasyItems.length }),
+      explanation: t('tooEasy.explanation'),
       actions: [
-        'Increase complexity of the question',
-        'Add more challenging answer options',
-        'Consider replacing with more discriminating items',
+        t('tooEasy.action1'),
+        t('tooEasy.action2'),
+        t('tooEasy.action3'),
       ],
       link: '/psychometrics/items?difficulty=TOO_EASY',
-      linkText: 'View easy items',
+      linkText: t('tooEasy.linkText'),
       count: tooEasyItems.length,
     });
   }
@@ -141,16 +146,16 @@ function generateInsights(
     insights.push({
       id: 'too-hard',
       severity: 'high',
-      title: 'Questions may be too difficult',
-      message: `${tooHardItems.length} question(s) have very low success rates (p < 0.2), which may frustrate test-takers.`,
-      explanation: 'When almost no one answers correctly, the question may be beyond the expected skill level or poorly worded.',
+      title: t('tooHard.title'),
+      message: t('tooHard.message', { count: tooHardItems.length }),
+      explanation: t('tooHard.explanation'),
       actions: [
-        'Simplify the question wording',
-        'Ensure the content matches the target audience',
-        'Check if the correct answer is achievable',
+        t('tooHard.action1'),
+        t('tooHard.action2'),
+        t('tooHard.action3'),
       ],
       link: '/psychometrics/items?difficulty=TOO_HARD',
-      linkText: 'View difficult items',
+      linkText: t('tooHard.linkText'),
       count: tooHardItems.length,
     });
   }
@@ -160,16 +165,16 @@ function generateInsights(
     insights.push({
       id: 'unreliable-competencies',
       severity: 'medium',
-      title: 'Test Reliability below recommended',
-      message: `${report.unreliableCompetencies} competency measurement(s) have Cronbach's Alpha below 0.6.`,
-      explanation: "Test Reliability Score (Cronbach's Alpha) measures internal consistency. Low values suggest the questions may not be measuring the same underlying competency.",
+      title: t('unreliableCompetencies.title'),
+      message: t('unreliableCompetencies.message', { count: report.unreliableCompetencies }),
+      explanation: t('unreliableCompetencies.explanation'),
       actions: [
-        'Review questions for alignment with the competency',
-        'Consider adding more questions to increase reliability',
-        'Remove items that lower the overall reliability',
+        t('unreliableCompetencies.action1'),
+        t('unreliableCompetencies.action2'),
+        t('unreliableCompetencies.action3'),
       ],
       link: '/psychometrics/competencies?status=UNRELIABLE',
-      linkText: 'View unreliable competencies',
+      linkText: t('unreliableCompetencies.linkText'),
       count: report.unreliableCompetencies,
     });
   }
@@ -179,16 +184,16 @@ function generateInsights(
     insights.push({
       id: 'probation-items',
       severity: 'medium',
-      title: 'Many items awaiting validation',
-      message: `${report.probationItems} question(s) are still gathering data (< 50 responses).`,
-      explanation: 'Psychometric metrics require sufficient response data to be reliable. Consider increasing test deployment.',
+      title: t('probationItems.title'),
+      message: t('probationItems.message', { count: report.probationItems }),
+      explanation: t('probationItems.explanation'),
       actions: [
-        'Increase test deployment to gather more responses',
-        'Review items after 50+ responses',
-        'Consider prioritizing critical competency areas',
+        t('probationItems.action1'),
+        t('probationItems.action2'),
+        t('probationItems.action3'),
       ],
       link: '/psychometrics/items?status=PROBATION',
-      linkText: 'View probation items',
+      linkText: t('probationItems.linkText'),
       count: report.probationItems,
     });
   }
@@ -198,15 +203,15 @@ function generateInsights(
     insights.push({
       id: 'all-reliable',
       severity: 'info',
-      title: 'All competencies are reliable',
-      message: `All ${report.reliableCompetencies + report.acceptableCompetencies} competency measurements meet reliability standards.`,
-      explanation: 'Your assessment instruments are performing well. Continue monitoring for any changes.',
+      title: t('allReliable.title'),
+      message: t('allReliable.message', { count: report.reliableCompetencies + report.acceptableCompetencies }),
+      explanation: t('allReliable.explanation'),
       actions: [
-        'Continue regular psychometric audits',
-        'Monitor for any degradation over time',
+        t('allReliable.action1'),
+        t('allReliable.action2'),
       ],
       link: '/psychometrics/competencies',
-      linkText: 'View all competencies',
+      linkText: t('allReliable.linkText'),
     });
   }
 
@@ -225,15 +230,25 @@ interface ActionableInsightCardProps {
   insight: Insight;
   className?: string;
   compact?: boolean;
+  /** Translation labels for UI elements */
+  labels?: {
+    suggestedActions: string;
+    viewDetails: string;
+  };
 }
 
 export function ActionableInsightCard({
   insight,
   className,
   compact = false,
+  labels,
 }: ActionableInsightCardProps) {
+  const t = useTranslations('psychometrics.insights');
   const config = severityConfig[insight.severity];
   const Icon = config.icon;
+
+  const suggestedActionsLabel = labels?.suggestedActions ?? t('suggestedActions');
+  const viewDetailsLabel = labels?.viewDetails ?? t('viewDetails');
 
   if (compact) {
     return (
@@ -266,7 +281,7 @@ export function ActionableInsightCard({
               trailingIcon={<ChevronRight className="h-3 w-3" />}
               className="mt-1"
             >
-              {insight.linkText || 'View details'}
+              {insight.linkText || viewDetailsLabel}
             </UiLink>
           )}
         </div>
@@ -308,7 +323,7 @@ export function ActionableInsightCard({
         <div className="space-y-1.5">
           <p className="text-xs font-medium flex items-center gap-1.5">
             <Lightbulb className="h-3.5 w-3.5 text-amber-500" />
-            Suggested actions:
+            {suggestedActionsLabel}
           </p>
           <ul className="text-xs text-muted-foreground space-y-1 ml-5">
             {insight.actions.map((action, index) => (
@@ -323,7 +338,7 @@ export function ActionableInsightCard({
         {insight.link && (
           <Link href={insight.link}>
             <Button variant="outline" size="sm" className="w-full mt-2 min-h-[44px]">
-              {insight.linkText || 'View details'}
+              {insight.linkText || viewDetailsLabel}
               <ArrowRight className="h-4 w-4 ml-2" />
             </Button>
           </Link>
@@ -347,9 +362,11 @@ export function ActionableInsightsList({
   compact = false,
   className,
 }: ActionableInsightsListProps) {
+  const t = useTranslations('psychometrics.insights');
+
   const insights = useMemo(
-    () => generateInsights(report, report.topFlaggedItems).slice(0, maxInsights),
-    [report, maxInsights]
+    () => generateInsights(report, report.topFlaggedItems, t).slice(0, maxInsights),
+    [report, maxInsights, t]
   );
 
   if (insights.length === 0) {
@@ -358,8 +375,8 @@ export function ActionableInsightsList({
         <CardContent className="py-8">
           <div className="text-center text-muted-foreground">
             <Info className="h-8 w-8 mx-auto mb-2 opacity-50" />
-            <p>No actionable insights at this time</p>
-            <p className="text-sm">Your assessment items are performing well</p>
+            <p>{t('noInsights.title')}</p>
+            <p className="text-sm">{t('noInsights.description')}</p>
           </div>
         </CardContent>
       </Card>
@@ -388,64 +405,68 @@ interface SingleInsightProps {
 }
 
 export function SingleInsightCard({ type, value, customInsight, className }: SingleInsightProps) {
+  const t = useTranslations('psychometrics.insights.singleInsight');
+
   const insight = useMemo((): Insight | null => {
     if (customInsight) return customInsight;
+
+    const formattedValue = value?.toFixed(2) ?? 'N/A';
 
     switch (type) {
       case 'negative-rpb':
         return {
           id: 'negative-rpb',
           severity: 'critical',
-          title: 'Negative Question Effectiveness',
-          message: `This question has a Question Effectiveness (rpb) of ${value?.toFixed(2) ?? 'N/A'}, indicating it may be misleading.`,
-          explanation: 'Wrong answers are correlating with higher overall scores. This suggests the question is confusing or the answer key may be incorrect.',
+          title: t('negativeRpb.title'),
+          message: t('negativeRpb.message', { value: formattedValue }),
+          explanation: t('negativeRpb.explanation'),
           actions: [
-            'Review the question wording',
-            'Verify the correct answer is marked',
-            'Consider retiring this question',
+            t('negativeRpb.action1'),
+            t('negativeRpb.action2'),
+            t('negativeRpb.action3'),
           ],
         };
       case 'too-easy':
         return {
           id: 'too-easy',
           severity: 'high',
-          title: 'Very Easy Question',
-          message: `This question has a difficulty (p) of ${value?.toFixed(2) ?? 'N/A'}. Almost everyone answers it correctly.`,
-          explanation: 'Questions with p > 0.9 provide little value in distinguishing between skill levels.',
+          title: t('tooEasy.title'),
+          message: t('tooEasy.message', { value: formattedValue }),
+          explanation: t('tooEasy.explanation'),
           actions: [
-            'Increase question complexity',
-            'Add more challenging distractors',
+            t('tooEasy.action1'),
+            t('tooEasy.action2'),
           ],
         };
       case 'too-hard':
         return {
           id: 'too-hard',
           severity: 'high',
-          title: 'Very Difficult Question',
-          message: `This question has a difficulty (p) of ${value?.toFixed(2) ?? 'N/A'}. Very few people answer it correctly.`,
-          explanation: 'Questions with p < 0.2 may be beyond the expected skill level or poorly worded.',
+          title: t('tooHard.title'),
+          message: t('tooHard.message', { value: formattedValue }),
+          explanation: t('tooHard.explanation'),
           actions: [
-            'Simplify the question',
-            'Check if content matches target audience',
+            t('tooHard.action1'),
+            t('tooHard.action2'),
           ],
         };
       case 'low-alpha':
         return {
           id: 'low-alpha',
           severity: 'medium',
-          title: 'Low Reliability Score',
-          message: `This competency has a Test Reliability Score of ${value?.toFixed(2) ?? 'N/A'}, below the recommended 0.7 threshold.`,
-          explanation: 'Low reliability suggests the questions may not be consistently measuring the same competency.',
+          title: t('lowAlpha.title'),
+          message: t('lowAlpha.message', { value: formattedValue }),
+          explanation: t('lowAlpha.explanation'),
           actions: [
-            'Review question alignment',
-            'Consider adding more questions',
-            'Remove inconsistent items',
+            t('lowAlpha.action1'),
+            t('lowAlpha.action2'),
+            t('lowAlpha.action3'),
           ],
         };
       default:
         return null;
     }
-  }, [type, value, customInsight]);
+  }, [type, value, customInsight, t]);
 
   if (!insight) return null;
 

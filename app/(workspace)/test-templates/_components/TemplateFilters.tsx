@@ -3,6 +3,7 @@
 
 import React, { useState, useCallback, useMemo, useRef, useEffect, useTransition } from "react";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -29,27 +30,29 @@ interface TemplateFiltersProps {
 }
 
 /**
- * Goal filter configuration with labels
+ * Goal filter configuration with translation keys
  */
-const goalFilterConfig: Record<GoalFilter, {
-  label: string;
-  shortLabel: string;
-}> = {
+type GoalFilterConfig = Record<GoalFilter, {
+  labelKey: string;
+  shortLabelKey: string;
+}>;
+
+const goalFilterConfig: GoalFilterConfig = {
   ALL: {
-    label: 'Все',
-    shortLabel: 'Все',
+    labelKey: 'filters.all',
+    shortLabelKey: 'filters.all',
   },
   [AssessmentGoal.OVERVIEW]: {
-    label: 'Обзор',
-    shortLabel: 'Обзор',
+    labelKey: 'filters.overview',
+    shortLabelKey: 'filters.overview',
   },
   [AssessmentGoal.JOB_FIT]: {
-    label: 'Для работы',
-    shortLabel: 'Работа',
+    labelKey: 'filters.jobFit',
+    shortLabelKey: 'filters.forJob',
   },
   [AssessmentGoal.TEAM_FIT]: {
-    label: 'Для команды',
-    shortLabel: 'Команда',
+    labelKey: 'filters.teamFit',
+    shortLabelKey: 'filters.forTeam',
   },
 };
 
@@ -72,6 +75,8 @@ export default function TemplateFilters({
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
+
+  const t = useTranslations('template');
 
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -193,11 +198,11 @@ export default function TemplateFilters({
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
           <Input
             type="text"
-            placeholder="Поиск шаблонов..."
+            placeholder={t('filters.searchPlaceholder')}
             value={searchQuery}
             onChange={handleSearchChange}
             className="pl-9 pr-8 h-9 text-sm"
-            aria-label="Поиск шаблонов"
+            aria-label={t('filters.searchPlaceholder')}
           />
           {searchQuery && (
             <Button
@@ -205,7 +210,7 @@ export default function TemplateFilters({
               size="icon"
               className="absolute right-1 top-1/2 -translate-y-1/2 h-6 w-6"
               onClick={handleClearSearch}
-              aria-label="Очистить поиск"
+              aria-label={t('filters.clearSearch')}
             >
               <X className="h-3 w-3" />
             </Button>
@@ -214,7 +219,7 @@ export default function TemplateFilters({
 
         {/* Results Count - Desktop */}
         <span className="hidden sm:block text-xs text-muted-foreground whitespace-nowrap">
-          {filteredTemplates.length} из {templates.length}
+          {t('filters.xOfY', { shown: filteredTemplates.length, total: templates.length })}
         </span>
       </div>
 
@@ -241,8 +246,8 @@ export default function TemplateFilters({
                     isPending && 'opacity-70'
                   )}
                 >
-                  <span className="hidden sm:inline">{config.label}</span>
-                  <span className="sm:hidden">{config.shortLabel}</span>
+                  <span className="hidden sm:inline">{t(config.labelKey)}</span>
+                  <span className="sm:hidden">{t(config.shortLabelKey)}</span>
                   <Badge
                     variant="secondary"
                     className={cn(
@@ -262,7 +267,7 @@ export default function TemplateFilters({
 
       {/* Results Count - Mobile */}
       <div className="sm:hidden text-xs text-muted-foreground">
-        Показано {filteredTemplates.length} из {templates.length}
+        {t('filters.showingOf', { shown: filteredTemplates.length, total: templates.length })}
       </div>
     </div>
   );

@@ -19,6 +19,7 @@ import {
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
 import type { PsychometricSummary } from '@/types/dashboard';
+import { useTranslations } from 'next-intl';
 
 /**
  * Props for PsychometricHealthWidget
@@ -45,7 +46,7 @@ function getScoreColors(score: number): {
   ring: string;
   bg: string;
   glow: string;
-  label: string;
+  labelKey: 'excellent' | 'good' | 'needsAttention' | 'critical';
 } {
   if (score >= 80) {
     return {
@@ -54,7 +55,7 @@ function getScoreColors(score: number): {
       ring: 'stroke-emerald-500',
       bg: 'bg-emerald-500',
       glow: 'bg-emerald-500/20',
-      label: 'Excellent',
+      labelKey: 'excellent',
     };
   }
   if (score >= 60) {
@@ -64,7 +65,7 @@ function getScoreColors(score: number): {
       ring: 'stroke-amber-500',
       bg: 'bg-amber-500',
       glow: 'bg-amber-500/20',
-      label: 'Good',
+      labelKey: 'good',
     };
   }
   if (score >= 40) {
@@ -74,7 +75,7 @@ function getScoreColors(score: number): {
       ring: 'stroke-orange-500',
       bg: 'bg-orange-500',
       glow: 'bg-orange-500/20',
-      label: 'Needs Attention',
+      labelKey: 'needsAttention',
     };
   }
   return {
@@ -83,7 +84,7 @@ function getScoreColors(score: number): {
     ring: 'stroke-red-500',
     bg: 'bg-red-500',
     glow: 'bg-red-500/20',
-    label: 'Critical',
+    labelKey: 'critical',
   };
 }
 
@@ -93,15 +94,17 @@ function getScoreColors(score: number): {
 function CircularGauge({
   value,
   className,
+  t,
 }: {
   value: number;
   className?: string;
+  t: ReturnType<typeof useTranslations<'dashboard'>>;
 }) {
   const colors = getScoreColors(value);
 
   return (
     <div className={cn('relative inline-flex items-center justify-center', className)}>
-      <GaugeSVG value={value} size={140} strokeWidth={8} colors={colors} />
+      <GaugeSVG value={value} size={140} strokeWidth={8} colors={colors} t={t} />
     </div>
   );
 }
@@ -113,9 +116,11 @@ function CircularGauge({
 function CompactHealthBar({
   value,
   className,
+  t,
 }: {
   value: number;
   className?: string;
+  t: ReturnType<typeof useTranslations<'dashboard'>>;
 }) {
   const colors = getScoreColors(value);
 
@@ -139,7 +144,7 @@ function CompactHealthBar({
       {/* Progress bar section */}
       <div className="flex-1 min-w-0 overflow-hidden">
         {/* Label */}
-        <span className="text-sm font-medium">Health Score</span>
+        <span className="text-sm font-medium">{t('healthScore')}</span>
         {/* Animated progress bar - fixed width constraints */}
         <div className="h-2 bg-muted/50 rounded-full overflow-hidden mt-1.5 w-full max-w-full">
           <motion.div
@@ -162,11 +167,13 @@ function GaugeSVG({
   size,
   strokeWidth,
   colors,
+  t,
 }: {
   value: number;
   size: number;
   strokeWidth: number;
   colors: ReturnType<typeof getScoreColors>;
+  t: ReturnType<typeof useTranslations<'dashboard'>>;
 }) {
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
@@ -216,7 +223,7 @@ function GaugeSVG({
         >
           {value}
         </motion.span>
-        <span className="text-xs text-muted-foreground mt-0.5">Health Score</span>
+        <span className="text-xs text-muted-foreground mt-0.5">{t('healthScore')}</span>
       </div>
     </div>
   );
@@ -277,10 +284,12 @@ function ScoreBreakdownBar({
   activeRatio,
   reliableRatio,
   nonFlaggedRatio,
+  t,
 }: {
   activeRatio: number;
   reliableRatio: number;
   nonFlaggedRatio: number;
+  t: ReturnType<typeof useTranslations<'dashboard'>>;
 }) {
   // Convert ratios to percentages for display
   const activePercent = Math.round(activeRatio * 100);
@@ -290,7 +299,7 @@ function ScoreBreakdownBar({
   return (
     <div className="space-y-2">
       <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
-        <span>Score Breakdown</span>
+        <span>{t('scoreBreakdown')}</span>
       </div>
 
       {/* Progress bar */}
@@ -319,11 +328,11 @@ function ScoreBreakdownBar({
       <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px]">
         <div className="flex items-center gap-1">
           <div className="w-2 h-2 rounded-sm bg-emerald-500" />
-          <span className="text-muted-foreground">Active {activePercent}%</span>
+          <span className="text-muted-foreground">{t('active')} {activePercent}%</span>
         </div>
         <div className="flex items-center gap-1">
           <div className="w-2 h-2 rounded-sm bg-blue-500" />
-          <span className="text-muted-foreground">Reliable {reliablePercent}%</span>
+          <span className="text-muted-foreground">{t('reliable')} {reliablePercent}%</span>
         </div>
         <div className="flex items-center gap-1">
           <div className="w-2 h-2 rounded-sm bg-amber-500" />
@@ -340,9 +349,11 @@ function ScoreBreakdownBar({
 function AuditBanner({
   onTriggerAudit,
   auditInProgress,
+  t,
 }: {
   onTriggerAudit?: () => void;
   auditInProgress?: boolean;
+  t: ReturnType<typeof useTranslations<'dashboard'>>;
 }) {
   return (
     <div className="flex items-center justify-between p-2.5 rounded-lg border border-amber-200 bg-amber-50/50 dark:border-amber-800 dark:bg-amber-950/20">
@@ -350,10 +361,10 @@ function AuditBanner({
         <AlertTriangle className="w-4 h-4 text-amber-600 dark:text-amber-400" />
         <div className="text-xs">
           <span className="font-medium text-amber-700 dark:text-amber-300">
-            Audit Recommended
+            {t('auditRecommended')}
           </span>
           <p className="text-amber-600/80 dark:text-amber-400/80">
-            Last run over 7 days ago
+            {t('lastRunOverWeek')}
           </p>
         </div>
       </div>
@@ -368,7 +379,7 @@ function AuditBanner({
           <RefreshCw
             className={cn('w-3 h-3 mr-1', auditInProgress && 'animate-spin')}
           />
-          Run
+          {t('run')}
         </Button>
       )}
     </div>
@@ -401,6 +412,8 @@ export function PsychometricHealthWidget({
   auditInProgress = false,
   className,
 }: PsychometricHealthWidgetProps) {
+  const t = useTranslations('dashboard');
+
   // Calculate derived metrics
   const metrics = useMemo(() => {
     if (!data) return null;
@@ -438,17 +451,17 @@ export function PsychometricHealthWidget({
           <div className="w-9 h-9 rounded-lg bg-muted flex items-center justify-center">
             <Activity className="w-4 h-4 text-muted-foreground" />
           </div>
-          <CardTitle className="text-base">Psychometric Health</CardTitle>
+          <CardTitle className="text-base">{t('psychometricHealth')}</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col items-center justify-center py-8 text-center">
           <div className="w-12 h-12 rounded-full bg-muted/50 flex items-center justify-center mb-3">
             <BarChart3 className="w-6 h-6 text-muted-foreground" />
           </div>
           <p className="text-sm text-muted-foreground">
-            No psychometric data available.
+            {t('noPsychometricData')}
           </p>
           <p className="text-xs text-muted-foreground mt-1">
-            Run your first audit to see metrics.
+            {t('runFirstAudit')}
           </p>
           {onTriggerAudit && (
             <Button
@@ -461,7 +474,7 @@ export function PsychometricHealthWidget({
               <RefreshCw
                 className={cn('w-4 h-4 mr-2', auditInProgress && 'animate-spin')}
               />
-              Run Audit
+              {t('runAudit')}
             </Button>
           )}
         </CardContent>
@@ -488,7 +501,7 @@ export function PsychometricHealthWidget({
             <Activity className="w-4 h-4 text-muted-foreground" />
           </div>
           <div>
-            <CardTitle className="text-base">Psychometric Health</CardTitle>
+            <CardTitle className="text-base">{t('psychometricHealth')}</CardTitle>
             <Badge
               variant="outline"
               className={cn(
@@ -497,14 +510,14 @@ export function PsychometricHealthWidget({
                 'border-current'
               )}
             >
-              {colors.label}
+              {t(colors.labelKey)}
             </Badge>
           </div>
         </div>
         <Link href="/psychometrics">
           <Button variant="ghost" size="sm" className="h-7 px-2">
             <ChevronRight className="w-4 h-4" />
-            <span className="sr-only">View psychometrics dashboard</span>
+            <span className="sr-only">{t('viewAnalytics')}</span>
           </Button>
         </Link>
       </CardHeader>
@@ -513,33 +526,33 @@ export function PsychometricHealthWidget({
         {/* Mobile layout: Compact bar + metrics below */}
         <div className="md:hidden space-y-3">
           {/* Compact health bar */}
-          <CompactHealthBar value={data.healthScore} />
+          <CompactHealthBar value={data.healthScore} t={t} />
 
           {/* 4-metric grid - no icons on mobile */}
           {metrics && (
             <div className="grid grid-cols-4 gap-1.5">
               <MetricCard
-                label="Items"
+                label={t('items')}
                 value={metrics.totalItems}
                 icon={Sparkles}
                 hideIcon
               />
               <MetricCard
-                label="Active"
+                label={t('active')}
                 value={`${metrics.activeRate}%`}
                 icon={CheckCircle2}
                 variant="success"
                 hideIcon
               />
               <MetricCard
-                label="Issues"
+                label={t('issues')}
                 value={metrics.issues}
                 icon={FileWarning}
                 variant={metrics.issues > 0 ? 'warning' : 'success'}
                 hideIcon
               />
               <MetricCard
-                label="Reliable"
+                label={t('reliable')}
                 value={`${metrics.reliablePercent}%`}
                 icon={BarChart3}
                 variant="info"
@@ -553,31 +566,31 @@ export function PsychometricHealthWidget({
         <div className="hidden md:flex items-center gap-4">
           {/* Left: Circular Gauge */}
           <div className="shrink-0">
-            <CircularGauge value={data.healthScore} />
+            <CircularGauge value={data.healthScore} t={t} />
           </div>
 
           {/* Right: 4-metric grid */}
           {metrics && (
             <div className="flex-1 grid grid-cols-2 gap-2 w-full">
               <MetricCard
-                label="Total Items"
+                label={t('totalItems')}
                 value={metrics.totalItems}
                 icon={Sparkles}
               />
               <MetricCard
-                label="Active Rate"
+                label={t('activeRate')}
                 value={`${metrics.activeRate}%`}
                 icon={CheckCircle2}
                 variant="success"
               />
               <MetricCard
-                label="Issues"
+                label={t('issues')}
                 value={metrics.issues}
                 icon={FileWarning}
                 variant={metrics.issues > 0 ? 'warning' : 'success'}
               />
               <MetricCard
-                label="Reliable"
+                label={t('reliable')}
                 value={`${metrics.reliablePercent}%`}
                 icon={BarChart3}
                 variant="info"
@@ -592,6 +605,7 @@ export function PsychometricHealthWidget({
             activeRatio={metrics.activeRatio}
             reliableRatio={metrics.reliableRatio}
             nonFlaggedRatio={metrics.nonFlaggedRatio}
+            t={t}
           />
         )}
 
@@ -600,6 +614,7 @@ export function PsychometricHealthWidget({
           <AuditBanner
             onTriggerAudit={onTriggerAudit}
             auditInProgress={auditInProgress}
+            t={t}
           />
         )}
       </CardContent>

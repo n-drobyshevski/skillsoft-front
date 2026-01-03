@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -72,24 +73,24 @@ function getErrorIcon(category: ErrorCategory | undefined) {
   }
 }
 
-function getDefaultTitle(category: ErrorCategory | undefined): string {
+function getDefaultTitleKey(category: ErrorCategory | undefined): string {
   switch (category) {
     case ErrorCategory.NETWORK:
-      return 'Ошибка сети';
+      return 'networkError';
     case ErrorCategory.SERVER:
-      return 'Ошибка сервера';
+      return 'serverError';
     case ErrorCategory.AUTHENTICATION:
-      return 'Требуется вход';
+      return 'loginRequired';
     case ErrorCategory.AUTHORIZATION:
-      return 'Доступ запрещён';
+      return 'accessDenied';
     case ErrorCategory.NOT_FOUND:
-      return 'Не найдено';
+      return 'notFound';
     case ErrorCategory.VALIDATION:
-      return 'Ошибка валидации';
+      return 'validationError';
     case ErrorCategory.RATE_LIMIT:
-      return 'Превышен лимит';
+      return 'rateLimitExceeded';
     default:
-      return 'Ошибка загрузки данных';
+      return 'loadingDataError';
   }
 }
 
@@ -170,6 +171,9 @@ export function InlineError({
   showActions = true,
 }: InlineErrorProps) {
   const router = useRouter();
+  const t = useTranslations('errors');
+  const tCommon = useTranslations('common');
+  const tAuth = useTranslations('auth');
   const [isExpanded, setIsExpanded] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
   const [isRetrying, setIsRetrying] = useState(false);
@@ -179,7 +183,7 @@ export function InlineError({
   const correlationId = error.correlationId;
 
   const Icon = getErrorIcon(category);
-  const displayTitle = title ?? getDefaultTitle(category);
+  const displayTitle = title ?? t(getDefaultTitleKey(category));
   const colors = getColorClasses(category, variant);
 
   const handleRetry = async () => {
@@ -279,7 +283,7 @@ export function InlineError({
             disabled={isRetrying}
           >
             <RefreshCw className={cn('h-4 w-4 mr-1.5', isRetrying && 'animate-spin')} />
-            Повторить
+            {tCommon('retry')}
           </Button>
         )}
       </div>
@@ -336,7 +340,7 @@ export function InlineError({
                 {correlationId && (
                   <div className="flex items-center justify-between">
                     <span className="text-muted-foreground">
-                      <span className="font-medium">ID запроса:</span>{' '}
+                      <span className="font-medium">{t('requestId')}:</span>{' '}
                       <span className="font-mono">{correlationId}</span>
                     </span>
                     <Button
@@ -377,14 +381,14 @@ export function InlineError({
                     disabled={isRetrying}
                   >
                     <RefreshCw className={cn('h-4 w-4 mr-1.5', isRetrying && 'animate-spin')} />
-                    Попробовать снова
+                    {t('tryAgain')}
                   </Button>
                 )}
                 {error.suggestedAction === ErrorAction.SIGN_IN && (
                   <Button variant="outline" size="sm" asChild>
                     <a href="/sign-in">
                       <LogIn className="h-4 w-4 mr-1.5" />
-                      Войти
+                      {tAuth('signIn')}
                     </a>
                   </Button>
                 )}

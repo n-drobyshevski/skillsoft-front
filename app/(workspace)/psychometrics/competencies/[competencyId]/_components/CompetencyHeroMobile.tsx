@@ -13,10 +13,11 @@
 
 import { cn } from '@/lib/utils';
 import { Users, FileText, TrendingUp } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { ReliabilityStatusBadge, StatPill, StatPillGroup } from '../../../_components';
 import PageHeader from '@/components/common/PageHeader';
 import { HeroAlphaGauge } from './HeroAlphaGauge';
-import { getStatusGradient, getAlphaQuality } from '../_lib/competency-detail.utils';
+import { getStatusGradient, getLocalizedAlphaQuality } from '../_lib/competency-detail.utils';
 import type { CompetencyReliabilityDetail } from '@/types/psychometrics';
 
 interface CompetencyHeroMobileProps {
@@ -51,8 +52,9 @@ function getAlphaVariant(alpha: number | null): 'success' | 'warning' | 'danger'
 }
 
 export function CompetencyHeroMobile({ data, className }: CompetencyHeroMobileProps) {
+  const t = useTranslations('psychometrics');
   const statusConfig = getStatusGradient(data.reliabilityStatus);
-  const alphaQuality = getAlphaQuality(data.cronbachAlpha);
+  const alphaQuality = getLocalizedAlphaQuality(data.cronbachAlpha, (key) => t(key.replace('psychometrics.', '')));
 
   return (
     <header
@@ -67,7 +69,7 @@ export function CompetencyHeroMobile({ data, className }: CompetencyHeroMobilePr
       {/* Header with title and status badge */}
       <PageHeader
         title={data.competencyName}
-        description="Анализ надежности измерений"
+        description={t('competencyDetail.heroMobile.analysisDescription')}
       >
         <ReliabilityStatusBadge status={data.reliabilityStatus} className="text-sm" />
       </PageHeader>
@@ -96,23 +98,23 @@ export function CompetencyHeroMobile({ data, className }: CompetencyHeroMobilePr
             <StatPillGroup className="justify-center">
               <StatPill
                 icon={Users}
-                label="Респонденты"
+                label={t('competencyDetail.heroMobile.stats.respondents')}
                 value={data.sampleSize?.toLocaleString() ?? '-'}
                 variant={getSampleSizeVariant(data.sampleSize)}
                 size="md"
-                title={`Количество респондентов: ${data.sampleSize ?? 'нет данных'}`}
+                title={`${t('competencyDetail.heroMobile.stats.respondents')}: ${data.sampleSize ?? '-'}`}
               />
               <StatPill
                 icon={FileText}
-                label="Элементы"
+                label={t('competencyDetail.heroMobile.stats.items')}
                 value={data.itemCount ?? '-'}
                 variant={getItemCountVariant(data.itemCount)}
                 size="md"
-                title={`Количество элементов шкалы: ${data.itemCount ?? 'нет данных'}`}
+                title={`${t('competencyDetail.heroMobile.stats.items')}: ${data.itemCount ?? '-'}`}
               />
               <StatPill
                 icon={TrendingUp}
-                label="Качество"
+                label={t('competencyDetail.heroMobile.stats.quality')}
                 value={alphaQuality.label}
                 variant={getAlphaVariant(data.cronbachAlpha)}
                 size="md"
@@ -127,7 +129,7 @@ export function CompetencyHeroMobile({ data, className }: CompetencyHeroMobilePr
             <div
               className="text-center p-4 rounded-lg bg-background/50"
               role="group"
-              aria-label="Sample size"
+              aria-label={t('competencyDetail.heroMobile.stats.respondents')}
             >
               <div className="flex items-center justify-center gap-1.5 text-muted-foreground mb-1">
                 <Users className="h-4 w-4" aria-hidden="true" />
@@ -135,14 +137,14 @@ export function CompetencyHeroMobile({ data, className }: CompetencyHeroMobilePr
               <p className="text-2xl font-bold tabular-nums">
                 {data.sampleSize?.toLocaleString() ?? '-'}
               </p>
-              <p className="text-sm text-muted-foreground">Респондентов</p>
+              <p className="text-sm text-muted-foreground">{t('competencyDetail.heroMobile.stats.respondents')}</p>
             </div>
 
             {/* Items Card */}
             <div
               className="text-center p-4 rounded-lg bg-background/50"
               role="group"
-              aria-label="Item count"
+              aria-label={t('competencyDetail.heroMobile.stats.items')}
             >
               <div className="flex items-center justify-center gap-1.5 text-muted-foreground mb-1">
                 <FileText className="h-4 w-4" aria-hidden="true" />
@@ -150,14 +152,14 @@ export function CompetencyHeroMobile({ data, className }: CompetencyHeroMobilePr
               <p className="text-2xl font-bold tabular-nums">
                 {data.itemCount ?? '-'}
               </p>
-              <p className="text-sm text-muted-foreground">Элементов</p>
+              <p className="text-sm text-muted-foreground">{t('competencyDetail.heroMobile.stats.items')}</p>
             </div>
 
             {/* Quality Card */}
             <div
               className="text-center p-4 rounded-lg bg-background/50"
               role="group"
-              aria-label="Alpha quality assessment"
+              aria-label={t('competencyDetail.heroMobile.stats.quality')}
             >
               <div className="flex items-center justify-center gap-1.5 text-muted-foreground mb-1">
                 <TrendingUp className="h-4 w-4" aria-hidden="true" />

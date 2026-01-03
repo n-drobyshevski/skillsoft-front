@@ -1,15 +1,25 @@
 import { Suspense } from "react";
 import Link from "next/link";
+import { Metadata } from "next";
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import PageHeader from "@/components/common/PageHeader";
 import AddUserForm from "./AddUserForm";
 
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('metadata.users');
+  return {
+    title: `${t('newTitle')} - SkillSoft`,
+    description: t('newDescription'),
+  };
+}
+
 /**
  * Add New User Page
- * 
+ *
  * Server component that handles authorization and renders the user creation form.
  * Only accessible to ADMIN users.
  */
@@ -17,6 +27,7 @@ export default async function NewUserPage() {
   // Check auth
   const authResult = await auth();
   const { userId, orgRole } = authResult;
+  const t = await getTranslations('users.new');
 
   if (!userId) {
     redirect("/sign-in");
@@ -31,13 +42,13 @@ export default async function NewUserPage() {
   return (
     <div className="flex flex-1 flex-col gap-4 p-4 pt-6 md:gap-6 md:p-6">
       <PageHeader
-        title="Add New User"
-        description="Create a new user account in the system"
+        title={t('title')}
+        description={t('description')}
       >
         <Link href="/users">
           <Button variant="outline" className="gap-2 h-9">
             <ArrowLeft className="h-4 w-4" />
-            Back to Users
+            {t('backToUsers')}
           </Button>
         </Link>
       </PageHeader>

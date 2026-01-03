@@ -4,6 +4,7 @@ import * as React from 'react';
 import Link from 'next/link';
 import { UiLink } from '@/components/ui/ui-link';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -80,16 +81,19 @@ interface ReviewSuggestion {
   alternativeReason?: string;
 }
 
+// Type for translation function
+type TranslationFunction = ReturnType<typeof useTranslations<'psychometrics.flaggedPage'>>;
+
 /**
  * Generate smart review suggestion based on item metrics
  */
-function generateSuggestion(item: FlaggedItemSummary): ReviewSuggestion {
+function generateSuggestion(item: FlaggedItemSummary, t: TranslationFunction): ReviewSuggestion {
   // Rule 1: Negative discrimination = immediate retire
   if (item.discriminationFlag === DiscriminationFlag.NEGATIVE) {
     return {
       action: 'RETIRE',
       confidence: 0.95,
-      reason: 'Negative discrimination - high performers answer worse than low performers',
+      reason: t('suggestions.negativeReason'),
     };
   }
 
@@ -102,8 +106,8 @@ function generateSuggestion(item: FlaggedItemSummary): ReviewSuggestion {
     return {
       action: 'FLAG_FOR_REVIEW',
       confidence: 0.8,
-      reason: 'Critical discrimination with extreme difficulty suggests content problems',
-      alternativeReason: 'Consider retiring if no content improvement is possible',
+      reason: t('suggestions.criticalWithDifficultyReason'),
+      alternativeReason: t('suggestions.criticalAlternative'),
     };
   }
 
@@ -112,7 +116,7 @@ function generateSuggestion(item: FlaggedItemSummary): ReviewSuggestion {
     return {
       action: 'MONITOR',
       confidence: 0.7,
-      reason: 'Warning-level with stable response count - may improve with more data',
+      reason: t('suggestions.warningReason'),
     };
   }
 
@@ -120,7 +124,7 @@ function generateSuggestion(item: FlaggedItemSummary): ReviewSuggestion {
   return {
     action: 'FLAG_FOR_REVIEW',
     confidence: 0.6,
-    reason: 'Requires manual review to determine appropriate action',
+    reason: t('suggestions.defaultReason'),
   };
 }
 
@@ -134,6 +138,7 @@ interface UrgentActionBannerProps {
   onRetireAllNegative: () => void;
   onReviewOneByOne: () => void;
   isLoading?: boolean;
+  t: TranslationFunction;
 }
 
 function UrgentActionBanner({
@@ -142,6 +147,7 @@ function UrgentActionBanner({
   onRetireAllNegative,
   onReviewOneByOne,
   isLoading,
+  t,
 }: UrgentActionBannerProps) {
   if (negativeCount === 0 && criticalCount === 0) return null;
 
@@ -158,15 +164,15 @@ function UrgentActionBanner({
             </div>
             <div>
               <h3 className="font-semibold text-red-900 dark:text-red-100">
-                {urgentCount} item{urgentCount !== 1 ? 's' : ''} need{urgentCount === 1 ? 's' : ''} immediate action
+                {t('urgent.title', { count: urgentCount })}
               </h3>
               <p className="text-sm text-red-700 dark:text-red-300 mt-1">
                 {hasNegative && (
-                  <span className="font-medium">{negativeCount} negative discrimination</span>
+                  <span className="font-medium">{t('urgent.negativeCount', { count: negativeCount })}</span>
                 )}
                 {hasNegative && criticalCount > 0 && ' • '}
                 {criticalCount > 0 && (
-                  <span>{criticalCount} critical</span>
+                  <span>{t('urgent.criticalCount', { count: criticalCount })}</span>
                 )}
               </p>
             </div>
@@ -186,7 +192,7 @@ function UrgentActionBanner({
                 ) : (
                   <Ban className="h-4 w-4 mr-2" />
                 )}
-                Retire All Negative
+                {t('urgent.retireAllNegative')}
               </Button>
             )}
             <Button
@@ -196,7 +202,7 @@ function UrgentActionBanner({
               className="flex-1 sm:flex-initial"
             >
               <Eye className="h-4 w-4 mr-2" />
-              Review One by One
+              {t('urgent.reviewOneByOne')}
             </Button>
           </div>
         </div>
@@ -208,14 +214,15 @@ function UrgentActionBanner({
 /**
  * Smart Suggestion Badge Component
  */
-function SuggestionBadge({ suggestion }: { suggestion: ReviewSuggestion }) {
+function SuggestionBadge({ suggestion, t }: { suggestion: ReviewSuggestion; t: TranslationFunction }) {
   const config = {
-    RETIRE: { icon: Ban, color: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300', label: 'Retire' },
-    FLAG_FOR_REVIEW: { icon: Eye, color: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300', label: 'Review' },
-    MONITOR: { icon: Clock, color: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300', label: 'Monitor' },
+    RETIRE: { icon: Ban, color: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300', labelKey: 'suggestions.retire' as const },
+    FLAG_FOR_REVIEW: { icon: Eye, color: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300', labelKey: 'suggestions.review' as const },
+    MONITOR: { icon: Clock, color: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300', labelKey: 'suggestions.monitor' as const },
   };
 
-  const { icon: Icon, color, label } = config[suggestion.action];
+  const { icon: Icon, color, labelKey } = config[suggestion.action];
+  const label = t(labelKey);
 
   return (
     <Tooltip>
@@ -230,12 +237,12 @@ function SuggestionBadge({ suggestion }: { suggestion: ReviewSuggestion }) {
         <div className="space-y-1">
           <p className="font-medium flex items-center gap-1">
             <Lightbulb className="h-3 w-3" />
-            Suggestion: {label}
+            {t('suggestions.suggestionLabel')}: {label}
           </p>
           <p className="text-xs text-muted-foreground">{suggestion.reason}</p>
           {suggestion.alternativeReason && (
             <p className="text-xs text-muted-foreground italic">
-              Alt: {suggestion.alternativeReason}
+              {t('suggestions.alternativeLabel')}: {suggestion.alternativeReason}
             </p>
           )}
         </div>
@@ -245,18 +252,18 @@ function SuggestionBadge({ suggestion }: { suggestion: ReviewSuggestion }) {
 }
 
 // Severity icon and color mapping
-function getSeverityInfo(flag: DiscriminationFlag | null) {
-  if (!flag) return { icon: AlertCircle, color: 'text-gray-500', bg: 'bg-gray-100', label: 'Unknown' };
+function getSeverityInfo(flag: DiscriminationFlag | null, t: TranslationFunction) {
+  if (!flag) return { icon: AlertCircle, color: 'text-gray-500', bg: 'bg-gray-100', label: t('stats.unknown' as Parameters<typeof t>[0]) };
 
   switch (flag) {
     case DiscriminationFlag.NEGATIVE:
-      return { icon: XCircle, color: 'text-red-600', bg: 'bg-red-100 dark:bg-red-900/30', label: 'Negative' };
+      return { icon: XCircle, color: 'text-red-600', bg: 'bg-red-100 dark:bg-red-900/30', label: t('stats.negative') };
     case DiscriminationFlag.CRITICAL:
-      return { icon: AlertTriangle, color: 'text-orange-600', bg: 'bg-orange-100 dark:bg-orange-900/30', label: 'Critical' };
+      return { icon: AlertTriangle, color: 'text-orange-600', bg: 'bg-orange-100 dark:bg-orange-900/30', label: t('stats.critical') };
     case DiscriminationFlag.WARNING:
-      return { icon: AlertCircle, color: 'text-amber-600', bg: 'bg-amber-100 dark:bg-amber-900/30', label: 'Warning' };
+      return { icon: AlertCircle, color: 'text-amber-600', bg: 'bg-amber-100 dark:bg-amber-900/30', label: t('stats.warnings') };
     default:
-      return { icon: AlertCircle, color: 'text-emerald-600', bg: 'bg-emerald-100 dark:bg-emerald-900/30', label: 'Normal' };
+      return { icon: AlertCircle, color: 'text-emerald-600', bg: 'bg-emerald-100 dark:bg-emerald-900/30', label: t('stats.normal' as Parameters<typeof t>[0]) };
   }
 }
 
@@ -296,6 +303,7 @@ interface FlaggedItemCardProps {
   onQuickRetire: (item: FlaggedItemSummary) => void;
   onMarkReviewed: (item: FlaggedItemSummary) => void;
   isLoading?: boolean;
+  t: TranslationFunction;
 }
 
 function FlaggedItemCard({
@@ -306,8 +314,9 @@ function FlaggedItemCard({
   onQuickRetire,
   onMarkReviewed,
   isLoading,
+  t,
 }: FlaggedItemCardProps) {
-  const severityInfo = getSeverityInfo(item.discriminationFlag);
+  const severityInfo = getSeverityInfo(item.discriminationFlag, t);
   const SeverityIcon = severityInfo.icon;
   const canQuickRetire = item.discriminationFlag === DiscriminationFlag.NEGATIVE ||
     item.discriminationFlag === DiscriminationFlag.CRITICAL;
@@ -350,7 +359,7 @@ function FlaggedItemCard({
               className="block line-clamp-2"
               onClick={(e) => selectionMode && e.preventDefault()}
             >
-              {item.questionText ?? 'Question text not specified'}
+              {item.questionText ?? t('card.questionNotSpecified')}
             </UiLink>
             <div className="flex flex-wrap gap-2 mt-2 text-sm text-muted-foreground">
               <span className="truncate max-w-[200px]">{item.competencyName}</span>
@@ -386,7 +395,7 @@ function FlaggedItemCard({
 
               {/* Response count */}
               <div className="flex items-center gap-1">
-                <span className="text-xs text-muted-foreground">Responses:</span>
+                <span className="text-xs text-muted-foreground">{t('card.responses')}:</span>
                 <span className="text-sm font-medium">{item.responseCount}</span>
               </div>
             </div>
@@ -395,7 +404,7 @@ function FlaggedItemCard({
           {/* Actions column */}
           <div className="flex flex-col items-end gap-2 shrink-0">
             {/* Smart Suggestion Badge */}
-            <SuggestionBadge suggestion={generateSuggestion(item)} />
+            <SuggestionBadge suggestion={generateSuggestion(item, t)} t={t} />
 
             <ValidityStatusBadge status={item.validityStatus} />
 
@@ -422,7 +431,7 @@ function FlaggedItemCard({
                         )}
                       </Button>
                     </TooltipTrigger>
-                    <TooltipContent>Quick Retire</TooltipContent>
+                    <TooltipContent>{t('card.quickRetire')}</TooltipContent>
                   </Tooltip>
                 )}
 
@@ -447,14 +456,14 @@ function FlaggedItemCard({
                         )}
                       </Button>
                     </TooltipTrigger>
-                    <TooltipContent>Mark as Reviewed</TooltipContent>
+                    <TooltipContent>{t('card.markAsReviewed')}</TooltipContent>
                   </Tooltip>
                 )}
 
                 {/* Details link */}
                 <Link href={`/psychometrics/items/${item.questionId}`}>
                   <Button variant="ghost" size="sm" className="gap-1 h-8">
-                    <span className="hidden sm:inline">Details</span>
+                    <span className="hidden sm:inline">{t('card.details')}</span>
                     <ArrowRight className="h-3 w-3" />
                   </Button>
                 </Link>
@@ -482,6 +491,7 @@ interface SeveritySectionProps {
   onMarkReviewed: (item: FlaggedItemSummary) => void;
   loadingId?: string;
   defaultOpen?: boolean;
+  t: TranslationFunction;
 }
 
 /**
@@ -504,6 +514,7 @@ function SeveritySection({
   onMarkReviewed,
   loadingId,
   defaultOpen = false,
+  t,
 }: SeveritySectionProps) {
   const [isOpen, setIsOpen] = React.useState(defaultOpen);
   const isMobile = useIsMobile();
@@ -543,14 +554,14 @@ function SeveritySection({
                 </Badge>
                 {selectedInSection > 0 && selectionMode && (
                   <Badge variant="outline" className="text-xs">
-                    {selectedInSection} selected
+                    {t('selection.selected', { count: selectedInSection })}
                   </Badge>
                 )}
               </div>
               {/* Collapsed summary - show when collapsed */}
               {!isOpen && (
                 <p className="text-xs text-muted-foreground mt-0.5 hidden sm:block">
-                  Avg p: {avgDifficulty.toFixed(2)} • Avg rpb: {avgDiscrimination.toFixed(2)}
+                  {t('sections.avgP')}: {avgDifficulty.toFixed(2)} • {t('sections.avgRpb')}: {avgDiscrimination.toFixed(2)}
                 </p>
               )}
               {/* Full description - show when expanded */}
@@ -573,12 +584,12 @@ function SeveritySection({
               {allSelected ? (
                 <>
                   <CheckSquare className="h-4 w-4 mr-1" />
-                  <span className="hidden sm:inline">Deselect All</span>
+                  <span className="hidden sm:inline">{t('selection.deselectAll')}</span>
                 </>
               ) : (
                 <>
                   <Square className="h-4 w-4 mr-1" />
-                  <span className="hidden sm:inline">Select All</span>
+                  <span className="hidden sm:inline">{t('selection.selectAll')}</span>
                 </>
               )}
             </Button>
@@ -609,6 +620,7 @@ function SeveritySection({
               onQuickRetire={onQuickRetire}
               onMarkReviewed={onMarkReviewed}
               isLoading={loadingId === item.questionId}
+              t={t}
             />
           )
         ))}
@@ -624,7 +636,7 @@ interface FlaggedItemsClientProps {
 /**
  * Batch Operation Progress Overlay
  */
-function BatchOperationOverlay() {
+function BatchOperationOverlay({ t }: { t: TranslationFunction }) {
   const saga = useBatchSaga();
   const isExecuting = useIsExecuting();
 
@@ -640,14 +652,14 @@ function BatchOperationOverlay() {
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
         <div className="w-full space-y-2">
           <div className="flex justify-between text-sm">
-            <span className="text-muted-foreground">Processing items...</span>
+            <span className="text-muted-foreground">{t('batch.processing')}</span>
             <span className="font-medium">{saga.completedItems}/{saga.totalItems}</span>
           </div>
           <Progress value={progress} className="h-2" />
         </div>
         {saga.failedItems.length > 0 && (
           <p className="text-sm text-amber-600">
-            {saga.failedItems.length} item(s) failed
+            {t('batch.itemsFailed', { count: saga.failedItems.length })}
           </p>
         )}
       </div>
@@ -658,7 +670,7 @@ function BatchOperationOverlay() {
 /**
  * Undo Banner Component
  */
-function UndoBanner() {
+function UndoBanner({ t }: { t: TranslationFunction }) {
   const canUndo = useCanUndo();
   const countdown = useUndoCountdown();
   const lastAction = useLastUndoAction();
@@ -673,14 +685,14 @@ function UndoBanner() {
     setIsUndoing(false);
 
     if (success) {
-      toast.success('Action undone successfully');
+      toast.success(t('undo.undoSuccess'));
     } else {
-      toast.error('Failed to undo action');
+      toast.error(t('undo.undoFailed'));
     }
   };
 
   const itemCount = lastAction.itemIds.length;
-  const actionLabel = lastAction.newStatus === ItemValidityStatus.RETIRED ? 'retired' : 'updated';
+  const isRetired = lastAction.newStatus === ItemValidityStatus.RETIRED;
 
   return (
     <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 animate-in slide-in-from-bottom-4">
@@ -717,7 +729,10 @@ function UndoBanner() {
         {/* Message */}
         <div className="flex-1 min-w-0">
           <p className="text-sm font-medium">
-            {itemCount} item{itemCount !== 1 ? 's' : ''} {actionLabel}
+            {isRetired
+              ? t('undo.itemsRetired', { count: itemCount })
+              : t('undo.itemsUpdated', { count: itemCount })
+            }
           </p>
         </div>
 
@@ -734,7 +749,7 @@ function UndoBanner() {
           ) : (
             <Undo2 className="h-4 w-4" />
           )}
-          Undo
+          {t('undo.undoButton')}
         </Button>
       </div>
     </div>
@@ -743,6 +758,7 @@ function UndoBanner() {
 
 export function FlaggedItemsClient({ initialItems }: FlaggedItemsClientProps) {
   const router = useRouter();
+  const t = useTranslations('psychometrics.flaggedPage');
 
   // Store state and actions
   const {
@@ -786,7 +802,7 @@ export function FlaggedItemsClient({ initialItems }: FlaggedItemsClientProps) {
       ItemValidityStatus.RETIRED,
       'Quick retired due to negative discrimination'
     );
-    toast.success(`${groups.negative.length} negative items retired`);
+    toast.success(t('batch.retiredSuccess', { count: groups.negative.length }));
   };
 
   // Handler for "Review One by One" - navigate to first urgent item
@@ -807,9 +823,9 @@ export function FlaggedItemsClient({ initialItems }: FlaggedItemsClientProps) {
       };
       await psychometricsApi.updateItemStatus(item.questionId, request);
       removeItems([item.questionId]);
-      toast.success('Item retired successfully');
+      toast.success(t('batch.itemRetired'));
     } catch (error) {
-      toast.error('Failed to retire item');
+      toast.error(t('batch.retireFailed'));
       console.error('Error retiring item:', error);
     } finally {
       setLoadingItem(null);
@@ -826,9 +842,9 @@ export function FlaggedItemsClient({ initialItems }: FlaggedItemsClientProps) {
       };
       await psychometricsApi.updateItemStatus(item.questionId, request);
       removeItems([item.questionId]);
-      toast.success('Item marked as reviewed');
+      toast.success(t('batch.itemReviewed'));
     } catch (error) {
-      toast.error('Failed to update item status');
+      toast.error(t('batch.updateFailed'));
       console.error('Error updating item:', error);
     } finally {
       setLoadingItem(null);
@@ -843,7 +859,7 @@ export function FlaggedItemsClient({ initialItems }: FlaggedItemsClientProps) {
       ItemValidityStatus.RETIRED,
       'Batch retired due to poor psychometric properties'
     );
-    toast.success(`${selectedCount} items retired successfully`);
+    toast.success(t('batch.retiredSuccessBatch', { count: selectedCount }));
   };
 
   // Handle batch activate using store saga
@@ -854,7 +870,7 @@ export function FlaggedItemsClient({ initialItems }: FlaggedItemsClientProps) {
       ItemValidityStatus.ACTIVE,
       'Batch activated after review'
     );
-    toast.success(`${selectedCount} items activated successfully`);
+    toast.success(t('batch.activatedSuccess', { count: selectedCount }));
   };
 
   // Toggle selection for a section
@@ -892,6 +908,7 @@ export function FlaggedItemsClient({ initialItems }: FlaggedItemsClientProps) {
         onRetireAllNegative={handleRetireAllNegative}
         onReviewOneByOne={handleReviewOneByOne}
         isLoading={isExecuting}
+        t={t}
       />
 
       {/* Selection mode toggle */}
@@ -906,19 +923,19 @@ export function FlaggedItemsClient({ initialItems }: FlaggedItemsClientProps) {
           {selectionMode ? (
             <>
               <XCircle className="h-4 w-4" />
-              Exit Selection Mode
+              {t('selection.exitSelectionMode')}
             </>
           ) : (
             <>
               <CheckSquare className="h-4 w-4" />
-              Selection Mode
+              {t('selection.selectionMode')}
             </>
           )}
         </Button>
 
         {selectionMode && (
           <div className="text-sm text-muted-foreground">
-            {selectedCount} of {displayItems.length} items selected
+            {t('selection.selectedCount', { selected: selectedCount, total: displayItems.length })}
           </div>
         )}
       </div>
@@ -926,8 +943,8 @@ export function FlaggedItemsClient({ initialItems }: FlaggedItemsClientProps) {
       {/* Tier 2: Collapsible Grouped Items */}
       <div className="space-y-4">
         <SeveritySection
-          title="Negative Discrimination"
-          description="Items working in reverse - high performers answer worse. Immediate action recommended."
+          title={t('sections.negativeDiscrimination')}
+          description={t('sections.negativeDescription')}
           items={groups.negative}
           icon={XCircle}
           iconColor="text-red-600"
@@ -940,10 +957,11 @@ export function FlaggedItemsClient({ initialItems }: FlaggedItemsClientProps) {
           onMarkReviewed={handleMarkReviewed}
           loadingId={loadingItemId ?? undefined}
           defaultOpen={groups.negative.length > 0}
+          t={t}
         />
         <SeveritySection
-          title="Critical Discrimination"
-          description="Items barely distinguish respondents by competency level. Review and consider action."
+          title={t('sections.criticalDiscrimination')}
+          description={t('sections.criticalDescription')}
           items={groups.critical}
           icon={AlertTriangle}
           iconColor="text-orange-600"
@@ -956,10 +974,11 @@ export function FlaggedItemsClient({ initialItems }: FlaggedItemsClientProps) {
           onMarkReviewed={handleMarkReviewed}
           loadingId={loadingItemId ?? undefined}
           defaultOpen={groups.negative.length === 0 && groups.critical.length > 0}
+          t={t}
         />
         <SeveritySection
-          title="Warnings"
-          description="Items with weak discrimination requiring observation. May improve with more data."
+          title={t('sections.warnings')}
+          description={t('sections.warningsDescription')}
           items={groups.warning}
           icon={AlertCircle}
           iconColor="text-amber-600"
@@ -972,11 +991,12 @@ export function FlaggedItemsClient({ initialItems }: FlaggedItemsClientProps) {
           onMarkReviewed={handleMarkReviewed}
           loadingId={loadingItemId ?? undefined}
           defaultOpen={false}
+          t={t}
         />
         {groups.other.length > 0 && (
           <SeveritySection
-            title="Other Issues"
-            description="Items with other issues (e.g., difficulty only)"
+            title={t('sections.otherIssues')}
+            description={t('sections.otherDescription')}
             items={groups.other}
             icon={AlertCircle}
             iconColor="text-gray-600"
@@ -989,6 +1009,7 @@ export function FlaggedItemsClient({ initialItems }: FlaggedItemsClientProps) {
             onMarkReviewed={handleMarkReviewed}
             loadingId={loadingItemId ?? undefined}
             defaultOpen={false}
+            t={t}
           />
         )}
       </div>
@@ -1005,10 +1026,10 @@ export function FlaggedItemsClient({ initialItems }: FlaggedItemsClientProps) {
       )}
 
       {/* Batch operation progress overlay */}
-      <BatchOperationOverlay />
+      <BatchOperationOverlay t={t} />
 
       {/* Undo banner */}
-      <UndoBanner />
+      <UndoBanner t={t} />
     </div>
   );
 }

@@ -10,12 +10,17 @@ import { Badge } from '@/components/ui/badge';
 import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card';
 import { Separator } from '@/components/ui/separator';
 import EntityTable from './Table';
+import { useTranslations } from 'next-intl';
 
 interface CompetencyTableProps {
   competencies: Competency[];
 }
 
 const CompetencyTable: React.FC<CompetencyTableProps> = ({ competencies }) => {
+  const t = useTranslations('table');
+  const tCompetency = useTranslations('competency');
+  const tStatus = useTranslations('status');
+
   const competencyColumns: ColumnDef<Competency>[] = [
     {
       accessorKey: 'name',
@@ -25,7 +30,7 @@ const CompetencyTable: React.FC<CompetencyTableProps> = ({ competencies }) => {
           onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
           className="-ml-4 text-muted-foreground"
         >
-          Name
+          {t('name')}
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       ),
@@ -58,14 +63,14 @@ const CompetencyTable: React.FC<CompetencyTableProps> = ({ competencies }) => {
                     {competency.name}
                   </h4>
                   <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                    <Badge 
+                    <Badge
                       variant={competency.isActive ? 'default' : 'secondary'}
                       className="h-5 text-xs"
                     >
-                      {competency.isActive ? 'Active' : 'Inactive'}
+                      {competency.isActive ? tStatus('active') : tStatus('inactive')}
                     </Badge>
                     <span>•</span>
-                    <span>Version {competency.version}</span>
+                    <span>{t('version')} {competency.version}</span>
                   </div>
                 </div>
 
@@ -88,7 +93,7 @@ const CompetencyTable: React.FC<CompetencyTableProps> = ({ competencies }) => {
                   <div className="space-y-1">
                     <div className="flex items-center gap-1.5">
                       <Target className="h-3.5 w-3.5 text-muted-foreground" />
-                      <span className="text-muted-foreground">Category</span>
+                      <span className="text-muted-foreground">{tCompetency('category')}</span>
                     </div>
                     <p className="font-medium">{competency.category}</p>
                   </div>
@@ -96,17 +101,15 @@ const CompetencyTable: React.FC<CompetencyTableProps> = ({ competencies }) => {
                   <div className="space-y-1">
                     <div className="flex items-center gap-1.5">
                       <CheckCircle2 className="h-3.5 w-3.5 text-muted-foreground" />
-                      <span className="text-muted-foreground">Indicators</span>
+                      <span className="text-muted-foreground">{tCompetency('indicators')}</span>
                     </div>
-                    <p className="font-medium">
-                      {indicatorCount} indicator{indicatorCount !== 1 ? 's' : ''}
-                    </p>
+                    <p className="font-medium">{indicatorCount}</p>
                   </div>
 
                   <div className="space-y-1">
                     <div className="flex items-center gap-1.5">
                       <Clock className="h-3.5 w-3.5 text-muted-foreground" />
-                      <span className="text-muted-foreground">Updated</span>
+                      <span className="text-muted-foreground">{t('updatedAt')}</span>
                     </div>
                     <p className="font-medium">{formatDate(competency.lastModified)}</p>
                   </div>
@@ -163,21 +166,21 @@ const CompetencyTable: React.FC<CompetencyTableProps> = ({ competencies }) => {
     },
     {
       accessorKey: 'category',
-      header: 'Category',
+      header: tCompetency('category'),
     },
     {
       accessorKey: 'behavioralIndicators',
-      header: 'Indicators',
+      header: tCompetency('indicators'),
       cell: ({ row }) => row.original.behavioralIndicators?.length || 0,
     },
     {
       accessorKey: 'isActive',
-      header: 'Status',
+      header: t('status'),
       cell: ({ row }) => {
         const isActive = row.getValue('isActive') as boolean;
         return (
           <Badge variant={isActive ? 'default' : 'secondary'}>
-            {isActive ? 'Active' : 'Inactive'}
+            {isActive ? tStatus('active') : tStatus('inactive')}
           </Badge>
         );
       },

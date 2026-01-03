@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 import { motion, useReducedMotion } from 'framer-motion';
 import {
@@ -12,7 +13,7 @@ export interface GaugeZone {
   min: number;
   max: number;
   color: string;
-  label: string;
+  labelKey: string;
   bgClass: string;
   textClass: string;
 }
@@ -84,9 +85,11 @@ export function MobileMetricPill({
   className,
 }: MobileMetricPillProps) {
   const prefersReducedMotion = useReducedMotion();
+  const t = useTranslations('psychometrics.flaggedDetail.metrics');
   const activeZone = getActiveZone(value, zones);
   const percentage = calculatePercentage(value, minValue, maxValue);
   const formattedValue = formatValue(value, format);
+  const zoneLabel = activeZone ? t(activeZone.labelKey) : t('noData');
 
   const sizeStyles = {
     sm: {
@@ -157,7 +160,7 @@ export function MobileMetricPill({
             activeZone.textClass
           )}
         >
-          {activeZone.label}
+          {zoneLabel}
         </span>
       )}
     </div>
@@ -170,7 +173,7 @@ export function MobileMetricPill({
         <TooltipTrigger asChild>{content}</TooltipTrigger>
         <TooltipContent side="bottom" className="text-xs">
           <p className="font-medium">{fullLabel}</p>
-          <p className="text-muted-foreground">{activeZone?.label || 'Нет данных'}</p>
+          <p className="text-muted-foreground">{zoneLabel}</p>
         </TooltipContent>
       </Tooltip>
     );
@@ -192,7 +195,7 @@ export const DIFFICULTY_ZONES: GaugeZone[] = [
     min: 0,
     max: 0.2,
     color: '#3b82f6', // blue
-    label: 'Слишком сложный',
+    labelKey: 'tooHard',
     bgClass: 'bg-blue-100 dark:bg-blue-900/30',
     textClass: 'text-blue-600 dark:text-blue-400',
   },
@@ -200,7 +203,7 @@ export const DIFFICULTY_ZONES: GaugeZone[] = [
     min: 0.2,
     max: 0.9,
     color: '#10b981', // emerald
-    label: 'Оптимальный',
+    labelKey: 'optimal',
     bgClass: 'bg-emerald-100 dark:bg-emerald-900/30',
     textClass: 'text-emerald-600 dark:text-emerald-400',
   },
@@ -208,7 +211,7 @@ export const DIFFICULTY_ZONES: GaugeZone[] = [
     min: 0.9,
     max: 1,
     color: '#a855f7', // purple
-    label: 'Слишком легкий',
+    labelKey: 'tooEasy',
     bgClass: 'bg-purple-100 dark:bg-purple-900/30',
     textClass: 'text-purple-600 dark:text-purple-400',
   },
@@ -222,7 +225,7 @@ export const DISCRIMINATION_ZONES: GaugeZone[] = [
     min: -1,
     max: 0,
     color: '#dc2626', // red
-    label: 'Негативный',
+    labelKey: 'negative',
     bgClass: 'bg-red-100 dark:bg-red-900/30',
     textClass: 'text-red-600 dark:text-red-400',
   },
@@ -230,7 +233,7 @@ export const DISCRIMINATION_ZONES: GaugeZone[] = [
     min: 0,
     max: 0.1,
     color: '#f97316', // orange
-    label: 'Критично',
+    labelKey: 'critical',
     bgClass: 'bg-orange-100 dark:bg-orange-900/30',
     textClass: 'text-orange-600 dark:text-orange-400',
   },
@@ -238,7 +241,7 @@ export const DISCRIMINATION_ZONES: GaugeZone[] = [
     min: 0.1,
     max: 0.25,
     color: '#f59e0b', // amber
-    label: 'Предупреждение',
+    labelKey: 'warning',
     bgClass: 'bg-amber-100 dark:bg-amber-900/30',
     textClass: 'text-amber-600 dark:text-amber-400',
   },
@@ -246,7 +249,7 @@ export const DISCRIMINATION_ZONES: GaugeZone[] = [
     min: 0.25,
     max: 0.35,
     color: '#22c55e', // green
-    label: 'Хорошо',
+    labelKey: 'good',
     bgClass: 'bg-green-100 dark:bg-green-900/30',
     textClass: 'text-green-600 dark:text-green-400',
   },
@@ -254,7 +257,7 @@ export const DISCRIMINATION_ZONES: GaugeZone[] = [
     min: 0.35,
     max: 1,
     color: '#10b981', // emerald
-    label: 'Отлично',
+    labelKey: 'excellent',
     bgClass: 'bg-emerald-100 dark:bg-emerald-900/30',
     textClass: 'text-emerald-600 dark:text-emerald-400',
   },
@@ -268,7 +271,7 @@ export const RESPONSE_COUNT_ZONES: GaugeZone[] = [
     min: 0,
     max: 30,
     color: '#dc2626', // red
-    label: 'Недостаточно',
+    labelKey: 'insufficient',
     bgClass: 'bg-red-100 dark:bg-red-900/30',
     textClass: 'text-red-600 dark:text-red-400',
   },
@@ -276,7 +279,7 @@ export const RESPONSE_COUNT_ZONES: GaugeZone[] = [
     min: 30,
     max: 50,
     color: '#f59e0b', // amber
-    label: 'Минимум',
+    labelKey: 'minimum',
     bgClass: 'bg-amber-100 dark:bg-amber-900/30',
     textClass: 'text-amber-600 dark:text-amber-400',
   },
@@ -284,7 +287,7 @@ export const RESPONSE_COUNT_ZONES: GaugeZone[] = [
     min: 50,
     max: 100,
     color: '#22c55e', // green
-    label: 'Хорошо',
+    labelKey: 'good',
     bgClass: 'bg-green-100 dark:bg-green-900/30',
     textClass: 'text-green-600 dark:text-green-400',
   },
@@ -292,7 +295,7 @@ export const RESPONSE_COUNT_ZONES: GaugeZone[] = [
     min: 100,
     max: 10000,
     color: '#10b981', // emerald
-    label: 'Отлично',
+    labelKey: 'excellent',
     bgClass: 'bg-emerald-100 dark:bg-emerald-900/30',
     textClass: 'text-emerald-600 dark:text-emerald-400',
   },
@@ -313,10 +316,11 @@ interface SpecificPillProps {
  * Pre-configured pill for difficulty index display
  */
 export function DifficultyPill({ value, onClick, size, className }: SpecificPillProps) {
+  const t = useTranslations('psychometrics.flaggedDetail.metrics');
   return (
     <MobileMetricPill
       shortLabel="p"
-      fullLabel="Индекс сложности"
+      fullLabel={t('difficultyIndex')}
       value={value}
       zones={DIFFICULTY_ZONES}
       minValue={0}
@@ -333,10 +337,11 @@ export function DifficultyPill({ value, onClick, size, className }: SpecificPill
  * Pre-configured pill for discrimination index display
  */
 export function DiscriminationPill({ value, onClick, size, className }: SpecificPillProps) {
+  const t = useTranslations('psychometrics.flaggedDetail.metrics');
   return (
     <MobileMetricPill
       shortLabel="rpb"
-      fullLabel="Индекс различения"
+      fullLabel={t('discriminationIndex')}
       value={value}
       zones={DISCRIMINATION_ZONES}
       minValue={-0.5}
@@ -353,10 +358,11 @@ export function DiscriminationPill({ value, onClick, size, className }: Specific
  * Pre-configured pill for response count display
  */
 export function ResponseCountPill({ value, onClick, size, className }: SpecificPillProps) {
+  const t = useTranslations('psychometrics.flaggedDetail.metrics');
   return (
     <MobileMetricPill
       shortLabel="n"
-      fullLabel="Количество ответов"
+      fullLabel={t('responseCount')}
       value={value}
       zones={RESPONSE_COUNT_ZONES}
       minValue={0}

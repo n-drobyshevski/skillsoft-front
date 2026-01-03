@@ -15,5 +15,8 @@ export * from './skills';
 // Error types (API errors, validation errors)
 export * from './errors';
 
+// Result visualization types (Phase 4)
+export * from './results';
+
 // Global types (Clerk session, RBAC)
 export { ROLE_HIERARCHY, ROUTE_PERMISSIONS } from './globals.d';

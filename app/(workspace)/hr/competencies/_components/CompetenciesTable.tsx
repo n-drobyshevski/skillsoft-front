@@ -50,6 +50,7 @@ import {
 } from "@/lib/ui-utils";
 import EntitiesTable from "@/components/data-display/Table";
 import CompetencyDrawer from "./CompetencyDrawer";
+import { useTranslations } from "next-intl";
 
 // Helper component for standards badges
 function StandardsBadges({ standardCodes }: { standardCodes?: StandardCodesDto }) {
@@ -128,6 +129,9 @@ interface CompetenciesTableProps {
 
 export default function CompetenciesTable({ competencies }: CompetenciesTableProps) {
   const router = useRouter();
+  const t = useTranslations("competency");
+  const tCommon = useTranslations("common");
+  const tTable = useTranslations("table");
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [selectedCompetency, setSelectedCompetency] =
     useState<Competency | null>(null);
@@ -149,7 +153,7 @@ export default function CompetenciesTable({ competencies }: CompetenciesTablePro
                 column.toggleSorting(column.getIsSorted() === "asc")
               }
             >
-              Competency
+              {t("title").slice(0, -3)}
               <ArrowUpDown className="ml-2 h-4 w-4" />
             </Button>
           </div>
@@ -181,7 +185,7 @@ export default function CompetenciesTable({ competencies }: CompetenciesTablePro
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
-          Category
+          {t("category")}
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       ),
@@ -199,7 +203,7 @@ export default function CompetenciesTable({ competencies }: CompetenciesTablePro
     {
       accessorKey: "standardCodes",
       header: () => (
-        <div className="text-left pl-3">Standards</div>
+        <div className="text-left pl-3">{t("standards")}</div>
       ),
       cell: ({ row }) => {
         const standardCodes = row.original.standardCodes;
@@ -213,7 +217,7 @@ export default function CompetenciesTable({ competencies }: CompetenciesTablePro
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
-          Indicators
+          {t("indicators")}
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       ),
@@ -248,28 +252,28 @@ export default function CompetenciesTable({ competencies }: CompetenciesTablePro
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48">
-              <DropdownMenuLabel className="text-xs text-muted-foreground font-normal">Actions</DropdownMenuLabel>
+              <DropdownMenuLabel className="text-xs text-muted-foreground font-normal">{tTable("actions")}</DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={(e) => {
                 e.stopPropagation();
                 handleViewDetails(competency);
               }}>
                 <Layers className="mr-2 h-4 w-4 text-muted-foreground" />
-                Quick View
+                {t("quickView")}
               </DropdownMenuItem>
               <DropdownMenuItem onClick={(e) => {
                 e.stopPropagation();
                 router.push(`/hr/competencies/${competency.id}`);
               }}>
                 <ExternalLink className="mr-2 h-4 w-4 text-muted-foreground" />
-                View Details
+                {t("viewDetails")}
               </DropdownMenuItem>
               <DropdownMenuItem onClick={(e) => {
                 e.stopPropagation();
                 router.push(`/hr/competencies/${competency.id}/edit`);
               }}>
                 <Settings2 className="mr-2 h-4 w-4 text-muted-foreground" />
-                Edit
+                {tCommon("edit")}
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem
@@ -280,7 +284,7 @@ export default function CompetenciesTable({ competencies }: CompetenciesTablePro
                 className="text-muted-foreground"
               >
                 <Copy className="mr-2 h-4 w-4" />
-                Copy ID
+                {tTable("copyId")}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

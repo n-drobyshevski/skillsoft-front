@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -42,21 +43,22 @@ interface SuggestedActionsCardProps {
   expandable?: boolean;
 }
 
+// Priority styles without labels (labels come from translations)
 const priorityStyles = {
   high: {
     container: 'border-l-4 border-l-red-500 bg-red-50 dark:bg-red-950/20',
     icon: 'text-red-600 dark:text-red-400',
-    label: 'Критично',
+    badgeClasses: 'bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-400',
   },
   medium: {
     container: 'border-l-4 border-l-amber-500 bg-amber-50 dark:bg-amber-950/20',
     icon: 'text-amber-600 dark:text-amber-400',
-    label: 'Рекомендуется',
+    badgeClasses: 'bg-amber-100 text-amber-700 dark:bg-amber-900/50 dark:text-amber-400',
   },
   low: {
     container: 'border-l-4 border-l-blue-500 bg-blue-50 dark:bg-blue-950/20',
     icon: 'text-blue-600 dark:text-blue-400',
-    label: 'Опционально',
+    badgeClasses: 'bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-400',
   },
 };
 
@@ -66,13 +68,23 @@ const priorityStyles = {
 function ActionItem({
   action,
   className,
+  labels,
 }: {
   action: SuggestedAction;
   className?: string;
+  labels: {
+    execute: string;
+    priority: {
+      high: string;
+      medium: string;
+      low: string;
+    };
+  };
 }) {
   const Icon = action.icon || ArrowRight;
   const priority = action.priority || 'medium';
   const styles = priorityStyles[priority];
+  const priorityLabel = labels.priority[priority];
 
   return (
     <div
@@ -103,12 +115,10 @@ function ActionItem({
               <span
                 className={cn(
                   'text-xs px-1.5 py-0.5 rounded',
-                  priority === 'high' && 'bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-400',
-                  priority === 'medium' && 'bg-amber-100 text-amber-700 dark:bg-amber-900/50 dark:text-amber-400',
-                  priority === 'low' && 'bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-400'
+                  styles.badgeClasses
                 )}
               >
-                {styles.label}
+                {priorityLabel}
               </span>
             )}
           </div>
@@ -123,7 +133,7 @@ function ActionItem({
               onClick={action.onAction}
               disabled={action.disabled}
             >
-              {action.actionLabel || 'Выполнить'} <ArrowRight className="h-3 w-3 ml-1" />
+              {action.actionLabel || labels.execute} <ArrowRight className="h-3 w-3 ml-1" />
             </Button>
           )}
         </div>
@@ -139,11 +149,22 @@ function ActionItem({
  * descriptions, and optional action buttons.
  */
 export function SuggestedActionsCard({
-  title = 'Рекомендуемые действия',
+  title,
   actions,
   className,
   maxVisible = 5,
 }: SuggestedActionsCardProps) {
+  const t = useTranslations('psychometrics.suggestedActionsCard');
+
+  const labels = {
+    execute: t('execute'),
+    priority: {
+      high: t('priority.high'),
+      medium: t('priority.medium'),
+      low: t('priority.low'),
+    },
+  };
+
   // Sort actions by priority (high first)
   const sortedActions = [...actions].sort((a, b) => {
     const priorityOrder = { high: 0, medium: 1, low: 2 };
@@ -162,18 +183,18 @@ export function SuggestedActionsCard({
       <CardHeader className="pb-3">
         <CardTitle className="text-base flex items-center gap-2">
           <Lightbulb className="h-4 w-4 text-amber-500" />
-          {title}
+          {title ?? t('title')}
         </CardTitle>
       </CardHeader>
       <CardContent>
         <div className="space-y-3">
           {visibleActions.map((action, index) => (
-            <ActionItem key={index} action={action} />
+            <ActionItem key={index} action={action} labels={labels} />
           ))}
         </div>
         {remainingCount > 0 && (
           <p className="text-xs text-muted-foreground text-center mt-4">
-            + еще {remainingCount} рекомендаций
+            {t('moreRecommendations', { count: remainingCount })}
           </p>
         )}
       </CardContent>
@@ -191,12 +212,23 @@ export function InlineActionsList({
   actions: SuggestedAction[];
   className?: string;
 }) {
+  const t = useTranslations('psychometrics.suggestedActionsCard');
+
+  const labels = {
+    execute: t('execute'),
+    priority: {
+      high: t('priority.high'),
+      medium: t('priority.medium'),
+      low: t('priority.low'),
+    },
+  };
+
   if (actions.length === 0) return null;
 
   return (
     <div className={cn('space-y-2', className)}>
       {actions.map((action, index) => (
-        <ActionItem key={index} action={action} />
+        <ActionItem key={index} action={action} labels={labels} />
       ))}
     </div>
   );

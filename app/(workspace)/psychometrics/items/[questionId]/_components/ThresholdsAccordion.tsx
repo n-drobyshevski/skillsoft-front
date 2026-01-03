@@ -15,6 +15,7 @@ import {
   MetricComparisonRow,
   MetricComparisonList,
 } from '../../../_components';
+import { useTranslations } from 'next-intl';
 
 interface ThresholdsAccordionProps {
   /** Difficulty index value */
@@ -33,7 +34,8 @@ interface ThresholdsAccordionProps {
 function getComplianceStatus(
   difficultyIndex: number | null | undefined,
   discriminationIndex: number | null | undefined,
-  responseCount: number
+  responseCount: number,
+  t: ReturnType<typeof useTranslations>
 ): { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' } {
   const issues: string[] = [];
 
@@ -54,11 +56,11 @@ function getComplianceStatus(
   }
 
   if (issues.length === 0) {
-    return { label: 'Все в норме', variant: 'secondary' };
+    return { label: t('thresholds.allNormal'), variant: 'secondary' };
   } else if (issues.length === 1) {
-    return { label: '1 предупреждение', variant: 'outline' };
+    return { label: t('thresholds.oneWarning'), variant: 'outline' };
   } else {
-    return { label: `${issues.length} предупреждения`, variant: 'destructive' };
+    return { label: t('thresholds.multipleWarnings', { count: issues.length }), variant: 'destructive' };
   }
 }
 
@@ -77,28 +79,29 @@ export function ThresholdsAccordion({
   className,
 }: ThresholdsAccordionProps) {
   const isMobile = useIsMobile();
-  const status = getComplianceStatus(difficultyIndex, discriminationIndex, responseCount);
+  const t = useTranslations('psychometrics');
+  const status = getComplianceStatus(difficultyIndex, discriminationIndex, responseCount, t);
 
   const content = (
     <MetricComparisonList>
       <MetricComparisonRow
-        label="Индекс сложности (p)"
+        label={t('thresholds.difficultyIndex')}
         currentValue={difficultyIndex}
         threshold={{ min: 0.2, max: 0.9 }}
-        description="Оптимальный диапазон: 0.2 - 0.9"
+        description={t('thresholds.difficultyRange')}
       />
       <MetricComparisonRow
-        label="Индекс различения (rpb)"
+        label={t('thresholds.discriminationIndex')}
         currentValue={discriminationIndex}
         threshold={{ min: 0.25, max: 1 }}
-        description="Хорошее значение: >= 0.25, отличное: >= 0.35"
+        description={t('thresholds.discriminationRange')}
       />
       <MetricComparisonRow
-        label="Количество ответов"
+        label={t('thresholds.responseCountLabel')}
         currentValue={responseCount}
         threshold={{ min: 50, max: 10000 }}
         format="integer"
-        description="Минимум 50 ответов для надежной статистики"
+        description={t('thresholds.responseCountRange')}
         showBar={false}
       />
     </MetricComparisonList>
@@ -111,13 +114,13 @@ export function ThresholdsAccordion({
         <CardHeader className="pb-3">
           <CardTitle className="text-base flex items-center gap-2">
             <BarChart3 className="h-4 w-4" />
-            Сравнение с пороговыми значениями
+            {t('thresholds.title')}
             <Badge variant={status.variant} className="ml-auto">
               {status.label}
             </Badge>
           </CardTitle>
           <CardDescription>
-            Текущие показатели относительно рекомендуемых диапазонов
+            {t('thresholds.description')}
           </CardDescription>
         </CardHeader>
         <CardContent>{content}</CardContent>
@@ -136,7 +139,7 @@ export function ThresholdsAccordion({
         <AccordionTrigger className="px-4 py-3 hover:no-underline">
           <div className="flex items-center gap-2 min-w-0 flex-1">
             <BarChart3 className="h-4 w-4 shrink-0 text-muted-foreground" />
-            <span className="font-medium truncate">Пороговые значения</span>
+            <span className="font-medium truncate">{t('thresholds.mobileTitle')}</span>
             <Badge variant={status.variant} className="ml-auto mr-2">
               {status.label}
             </Badge>
@@ -144,7 +147,7 @@ export function ThresholdsAccordion({
         </AccordionTrigger>
         <AccordionContent className="px-4 pb-4">
           <p className="text-sm text-muted-foreground mb-3">
-            Текущие показатели относительно рекомендуемых диапазонов
+            {t('thresholds.description')}
           </p>
           {content}
         </AccordionContent>

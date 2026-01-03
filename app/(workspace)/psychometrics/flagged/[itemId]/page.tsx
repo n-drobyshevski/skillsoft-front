@@ -1,4 +1,5 @@
-import { Metadata } from 'next';
+import type { Metadata } from 'next';
+import { getTranslations, getLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { UiLink } from '@/components/ui/ui-link';
@@ -37,24 +38,26 @@ import {
   ItemStatisticsDetail,
   DiscriminationFlag,
   DifficultyFlag,
-  ItemValidityStatus,
   FlaggedItemSummary,
 } from '@/types/psychometrics';
 
-export const metadata: Metadata = {
-  title: 'Детали проблемного элемента - Психометрика - SkillSoft',
-  description: 'Детальный анализ проблемного элемента оценки с рекомендациями по исправлению.',
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('psychometrics.flaggedPage.detail');
+  return {
+    title: t('metadataTitle'),
+    description: t('metadataDescription'),
+  };
+}
 
 interface PageProps {
   params: Promise<{ itemId: string }>;
 }
 
-async function getItemDetail(questionId: string) {
+async function getItemDetail(questionId: string, errorMessage: string) {
   const item = await getPsychometricsItemDetailCached(questionId);
   return {
     item,
-    error: item === null ? 'Не удалось загрузить данные.' : null,
+    error: item === null ? errorMessage : null,
   };
 }
 
@@ -66,8 +69,22 @@ async function getSimilarFlaggedItems() {
 // Severity level type
 type SeverityLevel = 'critical' | 'high' | 'medium' | 'low';
 
+// Translation function type for reasons
+type ReasonTranslator = {
+  (key: 'negativeDiscrimination'): string;
+  (key: 'criticalDiscrimination'): string;
+  (key: 'weakDiscrimination'): string;
+  (key: 'tooHard'): string;
+  (key: 'tooEasy'): string;
+  (key: 'insufficientResponses'): string;
+  (key: 'manualReview'): string;
+};
+
 // Get flag reason and severity
-function getFlagDetails(item: ItemStatisticsDetail): {
+function getFlagDetails(
+  item: ItemStatisticsDetail,
+  tReasons: ReasonTranslator
+): {
   severity: SeverityLevel;
   reasons: string[];
   color: string;
@@ -82,34 +99,34 @@ function getFlagDetails(item: ItemStatisticsDetail): {
 
   // Check discrimination
   if (item.discriminationFlag === DiscriminationFlag.NEGATIVE) {
-    reasons.push('Негативный индекс различения (rpb < 0) - элемент работает в обратном направлении');
+    reasons.push(tReasons('negativeDiscrimination'));
     severityLevel = 3; // critical
   } else if (item.discriminationFlag === DiscriminationFlag.CRITICAL) {
-    reasons.push('Критически низкий индекс различения (rpb < 0.1) - элемент не различает респондентов');
+    reasons.push(tReasons('criticalDiscrimination'));
     severityLevel = Math.max(severityLevel, 2); // high
   } else if (item.discriminationFlag === DiscriminationFlag.WARNING) {
-    reasons.push('Слабый индекс различения (0.1 <= rpb < 0.25) - маргинальное различение');
+    reasons.push(tReasons('weakDiscrimination'));
     severityLevel = Math.max(severityLevel, 1); // medium
   }
 
   // Check difficulty
   if (item.difficultyFlag === DifficultyFlag.TOO_HARD) {
-    reasons.push('Слишком высокая сложность (p < 0.2) - менее 20% правильных ответов');
+    reasons.push(tReasons('tooHard'));
     severityLevel = Math.max(severityLevel, 2); // high
   } else if (item.difficultyFlag === DifficultyFlag.TOO_EASY) {
-    reasons.push('Слишком низкая сложность (p > 0.9) - более 90% правильных ответов');
+    reasons.push(tReasons('tooEasy'));
     severityLevel = Math.max(severityLevel, 2); // high
   }
 
   // Check response count
   if (item.responseCount < 30) {
-    reasons.push('Недостаточно ответов для надежной статистики (< 30)');
+    reasons.push(tReasons('insufficientResponses'));
     severityLevel = Math.max(severityLevel, 1); // medium
   }
 
   // Default if no specific issues found
   if (reasons.length === 0) {
-    reasons.push('Элемент помечен для ручной проверки');
+    reasons.push(tReasons('manualReview'));
     severityLevel = Math.max(severityLevel, 1); // medium
   }
 
@@ -151,8 +168,33 @@ function getFlagDetails(item: ItemStatisticsDetail): {
   };
 }
 
+// Translation function type for actions
+type ActionTranslator = {
+  (key: 'considerRemoval'): string;
+  (key: 'negativeRpbDescription'): string;
+  (key: 'checkAnswerKey'): string;
+  (key: 'answerKeyDescription'): string;
+  (key: 'reformulateQuestion'): string;
+  (key: 'reformulateDescription'): string;
+  (key: 'reviewOptions'): string;
+  (key: 'reviewOptionsDescription'): string;
+  (key: 'monitorMetrics'): string;
+  (key: 'monitorDescription'): string;
+  (key: 'simplifyWording'): string;
+  (key: 'simplifyDescription'): string;
+  (key: 'addHints'): string;
+  (key: 'addHintsDescription'): string;
+  (key: 'increaseComplexity'): string;
+  (key: 'increaseDescription'): string;
+  (key: 'collectMoreData'): string;
+  (key: 'collectDescription', params: { count: number }): string;
+};
+
 // Generate suggested actions based on item metrics
-function generateSuggestedActions(item: ItemStatisticsDetail) {
+function generateSuggestedActions(
+  item: ItemStatisticsDetail,
+  tActions: ActionTranslator
+) {
   const actions: Array<{
     title: string;
     description?: string;
@@ -162,30 +204,30 @@ function generateSuggestedActions(item: ItemStatisticsDetail) {
   // Based on discrimination
   if (item.discriminationFlag === DiscriminationFlag.NEGATIVE) {
     actions.push({
-      title: 'Рассмотрите удаление элемента',
-      description: 'Негативный rpb означает, что элемент работает против измеряемого конструкта. Рекомендуется отключить.',
+      title: tActions('considerRemoval'),
+      description: tActions('negativeRpbDescription'),
       priority: 'high',
     });
     actions.push({
-      title: 'Проверьте ключ ответа',
-      description: 'Возможно, правильный ответ указан неверно или шкала оценки инвертирована.',
+      title: tActions('checkAnswerKey'),
+      description: tActions('answerKeyDescription'),
       priority: 'high',
     });
   } else if (item.discriminationFlag === DiscriminationFlag.CRITICAL) {
     actions.push({
-      title: 'Переформулируйте вопрос',
-      description: 'Текущая формулировка не позволяет различать респондентов по уровню компетенции.',
+      title: tActions('reformulateQuestion'),
+      description: tActions('reformulateDescription'),
       priority: 'high',
     });
     actions.push({
-      title: 'Пересмотрите варианты ответов',
-      description: 'Проверьте, что дистракторы достаточно правдоподобны и различимы.',
+      title: tActions('reviewOptions'),
+      description: tActions('reviewOptionsDescription'),
       priority: 'medium',
     });
   } else if (item.discriminationFlag === DiscriminationFlag.WARNING) {
     actions.push({
-      title: 'Наблюдайте за показателями',
-      description: 'Соберите больше данных и повторно оцените через 50+ дополнительных ответов.',
+      title: tActions('monitorMetrics'),
+      description: tActions('monitorDescription'),
       priority: 'medium',
     });
   }
@@ -193,19 +235,19 @@ function generateSuggestedActions(item: ItemStatisticsDetail) {
   // Based on difficulty
   if (item.difficultyFlag === DifficultyFlag.TOO_HARD) {
     actions.push({
-      title: 'Упростите формулировку',
-      description: 'Вопрос может быть слишком сложным или неоднозначным для целевой аудитории.',
+      title: tActions('simplifyWording'),
+      description: tActions('simplifyDescription'),
       priority: 'medium',
     });
     actions.push({
-      title: 'Добавьте подсказки в варианты',
-      description: 'Рассмотрите возможность добавления контекста или уточнения в варианты ответов.',
+      title: tActions('addHints'),
+      description: tActions('addHintsDescription'),
       priority: 'low',
     });
   } else if (item.difficultyFlag === DifficultyFlag.TOO_EASY) {
     actions.push({
-      title: 'Усложните вопрос',
-      description: 'Добавьте нюансы или измените дистракторы, чтобы они были более привлекательны.',
+      title: tActions('increaseComplexity'),
+      description: tActions('increaseDescription'),
       priority: 'medium',
     });
   }
@@ -213,8 +255,8 @@ function generateSuggestedActions(item: ItemStatisticsDetail) {
   // Based on response count
   if (item.responseCount < 50) {
     actions.push({
-      title: 'Соберите больше данных',
-      description: `Текущее количество ответов (${item.responseCount}) недостаточно для надежных выводов. Нужно минимум 50.`,
+      title: tActions('collectMoreData'),
+      description: tActions('collectDescription', { count: item.responseCount }),
       priority: 'low',
     });
   }
@@ -237,8 +279,11 @@ function generateSuggestedActions(item: ItemStatisticsDetail) {
 
 export default async function FlaggedItemDetailPage({ params }: PageProps) {
   const { itemId } = await params;
+  const t = await getTranslations('psychometrics.flaggedPage.detail');
+  const locale = await getLocale();
+
   const [{ item, error }, { items: flaggedItems }] = await Promise.all([
-    getItemDetail(itemId),
+    getItemDetail(itemId, t('failedToLoadData')),
     getSimilarFlaggedItems(),
   ]);
 
@@ -249,10 +294,10 @@ export default async function FlaggedItemDetailPage({ params }: PageProps) {
   if (error) {
     return (
       <div className="flex flex-1 flex-col gap-6 p-4 pt-6 md:gap-8 md:p-6">
-        <PageHeader title="Ошибка загрузки" />
+        <PageHeader title={t('errorLoading')} />
         <Card className="border-destructive/50 bg-destructive/10">
           <CardContent className="p-4">
-            <div className="text-destructive font-medium mb-1">Ошибка</div>
+            <div className="text-destructive font-medium mb-1">{t('error')}</div>
             <p className="text-sm text-muted-foreground">{error}</p>
           </CardContent>
         </Card>
@@ -260,8 +305,13 @@ export default async function FlaggedItemDetailPage({ params }: PageProps) {
     );
   }
 
-  const flagDetails = getFlagDetails(item!);
-  const suggestedActions = generateSuggestedActions(item!);
+  // Create translation functions for reasons and actions
+  const tReasons = ((key: string) => t(`reasons.${key}`)) as ReasonTranslator;
+  const tActions = ((key: string, params?: { count: number }) =>
+    params ? t(`actions.${key}`, params) : t(`actions.${key}`)) as ActionTranslator;
+
+  const flagDetails = getFlagDetails(item!, tReasons);
+  const suggestedActions = generateSuggestedActions(item!, tActions);
   const FlagIcon = flagDetails.icon;
 
   // Convert flagged items to SimilarItem format
@@ -284,11 +334,11 @@ export default async function FlaggedItemDetailPage({ params }: PageProps) {
           variant="muted"
           leadingIcon={<ArrowLeft className="h-4 w-4" />}
         >
-          Вернуться к списку
+          {t('backToList')}
         </UiLink>
 
       <PageHeader
-        title="Проблемный элемент"
+        title={t('pageTitle')}
         description={item!.competencyName}
       >
         <div className="flex items-center gap-2">
@@ -306,19 +356,13 @@ export default async function FlaggedItemDetailPage({ params }: PageProps) {
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-2">
                 <h3 className={`font-semibold ${flagDetails.color}`}>
-                  {flagDetails.severity === 'critical' && 'Критическая проблема'}
-                  {flagDetails.severity === 'high' && 'Серьезная проблема'}
-                  {flagDetails.severity === 'medium' && 'Требует внимания'}
-                  {flagDetails.severity === 'low' && 'Незначительная проблема'}
+                  {t(`severity.${flagDetails.severity}`)}
                 </h3>
                 <Badge
                   variant="outline"
                   className={flagDetails.color}
                 >
-                  {flagDetails.severity === 'critical' && 'Критично'}
-                  {flagDetails.severity === 'high' && 'Высокий'}
-                  {flagDetails.severity === 'medium' && 'Средний'}
-                  {flagDetails.severity === 'low' && 'Низкий'}
+                  {t(`severity.${flagDetails.severity}Badge`)}
                 </Badge>
               </div>
               <ul className="space-y-1">
@@ -339,14 +383,14 @@ export default async function FlaggedItemDetailPage({ params }: PageProps) {
         <CardHeader className="pb-3">
           <CardTitle className="text-base flex items-center gap-2">
             <FileText className="h-4 w-4" />
-            Текст вопроса
+            {t('questionSection.title')}
           </CardTitle>
         </CardHeader>
         <CardContent>
           <p className="text-lg mb-4">{item!.questionText}</p>
           <div className="flex flex-wrap gap-x-4 gap-y-2 text-sm">
             <span className="text-muted-foreground">
-              Компетенция:{' '}
+              {t('questionSection.competency')}{' '}
               <Link
                 href={`/psychometrics/competencies/${item!.competencyName}`}
                 className="font-medium text-primary hover:underline"
@@ -355,7 +399,7 @@ export default async function FlaggedItemDetailPage({ params }: PageProps) {
               </Link>
             </span>
             <span className="text-muted-foreground">
-              Индикатор:{' '}
+              {t('questionSection.indicator')}{' '}
               <span className="font-medium text-foreground">{item!.indicatorTitle}</span>
             </span>
           </div>
@@ -368,10 +412,10 @@ export default async function FlaggedItemDetailPage({ params }: PageProps) {
           <CardHeader className="pb-3">
             <CardTitle className="text-base flex items-center gap-2">
               <Target className="h-4 w-4" />
-              Индекс сложности
+              {t('gauges.difficultyTitle')}
             </CardTitle>
             <CardDescription>
-              Доля правильных ответов (идеально: 0.2 - 0.9)
+              {t('gauges.difficultyDescription')}
             </CardDescription>
           </CardHeader>
           <CardContent className="flex justify-center py-4">
@@ -383,10 +427,10 @@ export default async function FlaggedItemDetailPage({ params }: PageProps) {
           <CardHeader className="pb-3">
             <CardTitle className="text-base flex items-center gap-2">
               <TrendingUp className="h-4 w-4" />
-              Индекс различения
+              {t('gauges.discriminationTitle')}
             </CardTitle>
             <CardDescription>
-              Корреляция с общим баллом (идеально: &gt;= 0.25)
+              {t('gauges.discriminationDescription')}
             </CardDescription>
           </CardHeader>
           <CardContent className="flex justify-center py-4">
@@ -398,28 +442,28 @@ export default async function FlaggedItemDetailPage({ params }: PageProps) {
       {/* Metrics Comparison */}
       <Card>
         <CardHeader className="pb-3">
-          <CardTitle className="text-base">Сравнение с пороговыми значениями</CardTitle>
+          <CardTitle className="text-base">{t('comparison.title')}</CardTitle>
         </CardHeader>
         <CardContent>
           <MetricComparisonList>
             <MetricComparisonRow
-              label="Индекс сложности (p)"
+              label={t('comparison.difficulty')}
               currentValue={item!.difficultyIndex}
               threshold={{ min: 0.2, max: 0.9 }}
-              description="Оптимальный диапазон: 0.2 - 0.9"
+              description={t('comparison.difficultyDescription')}
             />
             <MetricComparisonRow
-              label="Индекс различения (rpb)"
+              label={t('comparison.discrimination')}
               currentValue={item!.discriminationIndex}
               threshold={{ min: 0.25, max: 1 }}
-              description="Хорошее значение: >= 0.25, отличное: >= 0.35"
+              description={t('comparison.discriminationDescription')}
             />
             <MetricComparisonRow
-              label="Количество ответов"
+              label={t('comparison.responseCount')}
               currentValue={item!.responseCount}
               threshold={{ min: 50, max: 10000 }}
               format="integer"
-              description="Минимум 50 ответов для надежной статистики"
+              description={t('comparison.responseDescription')}
               showBar={false}
             />
           </MetricComparisonList>
@@ -432,10 +476,10 @@ export default async function FlaggedItemDetailPage({ params }: PageProps) {
           <CardContent className="pt-6">
             <div className="flex items-start justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">Ответов</p>
+                <p className="text-sm text-muted-foreground">{t('stats.responses')}</p>
                 <p className="text-2xl font-bold mt-1">{item!.responseCount}</p>
                 <p className="text-xs text-muted-foreground mt-1">
-                  {item!.responseCount < 50 ? 'Недостаточно' : 'Достаточно'}
+                  {item!.responseCount < 50 ? t('stats.insufficient') : t('stats.sufficient')}
                 </p>
               </div>
               <Users className="h-5 w-5 text-muted-foreground" />
@@ -446,15 +490,15 @@ export default async function FlaggedItemDetailPage({ params }: PageProps) {
           <CardContent className="pt-6">
             <div className="flex items-start justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">Последний расчет</p>
+                <p className="text-sm text-muted-foreground">{t('stats.lastCalculation')}</p>
                 <p className="text-lg font-bold mt-1">
                   {item!.lastCalculatedAt
-                    ? new Date(item!.lastCalculatedAt).toLocaleDateString('ru-RU')
+                    ? new Date(item!.lastCalculatedAt).toLocaleDateString(locale)
                     : '-'}
                 </p>
                 {item!.lastCalculatedAt && (
                   <p className="text-xs text-muted-foreground mt-1">
-                    {new Date(item!.lastCalculatedAt).toLocaleTimeString('ru-RU')}
+                    {new Date(item!.lastCalculatedAt).toLocaleTimeString(locale)}
                   </p>
                 )}
               </div>
@@ -468,7 +512,7 @@ export default async function FlaggedItemDetailPage({ params }: PageProps) {
               <CardContent className="pt-6">
                 <div className="flex items-start justify-between">
                   <div>
-                    <p className="text-sm text-muted-foreground">Предыдущий rpb</p>
+                    <p className="text-sm text-muted-foreground">{t('stats.previousRpb')}</p>
                     <p className="text-2xl font-bold mt-1">
                       {item!.previousDiscriminationIndex.toFixed(2)}
                     </p>
@@ -481,7 +525,7 @@ export default async function FlaggedItemDetailPage({ params }: PageProps) {
               <CardContent className="pt-6">
                 <div className="flex items-start justify-between">
                   <div>
-                    <p className="text-sm text-muted-foreground">Изменение rpb</p>
+                    <p className="text-sm text-muted-foreground">{t('stats.rpbChange')}</p>
                     {item!.discriminationIndex != null && (
                       <p
                         className={`text-2xl font-bold mt-1 ${
@@ -509,15 +553,15 @@ export default async function FlaggedItemDetailPage({ params }: PageProps) {
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Suggested Actions */}
         <SuggestedActionsCard
-          title="Рекомендуемые действия"
+          title={t('actions.title')}
           actions={suggestedActions}
           maxVisible={6}
         />
 
         {/* Similar Flagged Items */}
         <SimilarItemsCard
-          title="Похожие проблемные элементы"
-          description="Элементы с аналогичными проблемами"
+          title={t('similarItems.title')}
+          description={t('similarItems.description')}
           items={similarItems}
           currentItemId={item!.questionId}
           maxItems={5}
@@ -532,7 +576,7 @@ export default async function FlaggedItemDetailPage({ params }: PageProps) {
       <div className="flex justify-center">
         <Link href={`/psychometrics/items/${item!.questionId}`}>
           <Button variant="outline" className="gap-2">
-            Полная статистика элемента
+            {t('fullStats')}
             <ExternalLink className="h-4 w-4" />
           </Button>
         </Link>

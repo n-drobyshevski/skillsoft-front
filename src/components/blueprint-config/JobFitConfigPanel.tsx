@@ -1,9 +1,8 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Switch } from '@/components/ui/switch';
 import { Slider } from '@/components/ui/slider';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -29,11 +28,9 @@ import {
   Target,
   AlertCircle,
   CheckCircle2,
-  Zap,
-  Lock,
-  Clock,
 } from 'lucide-react';
 import { ONetSearchCombobox } from './ONetSearchCombobox';
+import { PassportSection, type DeltaConfig } from '@/components/passport';
 import type { ONetProfile, ONetBenchmark } from '@/types/domain';
 
 // ============================================================================
@@ -41,6 +38,11 @@ import type { ONetProfile, ONetBenchmark } from '@/types/domain';
 // ============================================================================
 
 interface JobFitConfigPanelProps {
+  /** Candidate's Clerk user ID for passport lookup */
+  candidateClerkUserId?: string | null;
+  /** Callback when delta config changes */
+  onDeltaConfigChange?: (config: DeltaConfig) => void;
+  /** Additional class names */
   className?: string;
 }
 
@@ -68,14 +70,32 @@ function getStrictnessLabel(value: number) {
 // Component
 // ============================================================================
 
-export function JobFitConfigPanel({ className }: JobFitConfigPanelProps) {
+export function JobFitConfigPanel({
+  candidateClerkUserId,
+  onDeltaConfigChange,
+  className,
+}: JobFitConfigPanelProps) {
   const form = useFormContext();
   const [onetProfile, setOnetProfile] = useState<ONetProfile | null>(null);
   const [benchmarkOpen, setBenchmarkOpen] = useState(false);
 
   const onetSocCode = form.watch('onetSocCode');
   const strictnessLevel = form.watch('strictnessLevel') ?? 60;
-  const enableDeltaTesting = form.watch('enableDeltaTesting');
+
+  // Get required competency IDs from O*NET profile
+  const requiredCompetencyIds = onetProfile?.benchmarks.map((b) => b.competencyCode) || [];
+
+  // Handle delta config change
+  const handleDeltaConfigChange = useCallback(
+    (config: DeltaConfig) => {
+      // Update form field
+      form.setValue('enableDeltaTesting', config.enabled);
+      form.setValue('candidateClerkUserId', candidateClerkUserId || '');
+      // Notify parent
+      onDeltaConfigChange?.(config);
+    },
+    [form, candidateClerkUserId, onDeltaConfigChange]
+  );
 
   // Handle O*NET selection
   const handleONetChange = useCallback(
@@ -206,53 +226,15 @@ export function JobFitConfigPanel({ className }: JobFitConfigPanelProps) {
         )}
       />
 
-      {/* Delta Testing Toggle */}
-      <Card className="border-dashed">
-        <CardHeader className="pb-3">
-          <div className="flex items-start justify-between">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-gradient-to-br from-amber-100 to-orange-100 dark:from-amber-900/50 dark:to-orange-900/50">
-                <Zap className="h-5 w-5 text-amber-600 dark:text-amber-400" />
-              </div>
-              <div>
-                <CardTitle className="text-base flex items-center gap-2">
-                  Delta Testing
-                  <Badge variant="outline" className="text-[10px] h-4 px-1.5 text-amber-600 border-amber-300">
-                    Coming Soon
-                  </Badge>
-                </CardTitle>
-                <CardDescription className="text-xs mt-0.5">
-                  Skip already-measured competencies from Passport
-                </CardDescription>
-              </div>
-            </div>
-            <FormField
-              control={form.control}
-              name="enableDeltaTesting"
-              render={({ field }) => (
-                <FormControl>
-                  <Switch
-                    checked={field.value}
-                    onCheckedChange={field.onChange}
-                    disabled
-                    className="data-[state=checked]:bg-amber-500"
-                  />
-                </FormControl>
-              )}
-            />
-          </div>
-        </CardHeader>
-
-        <CardContent className="pt-0">
-          <div className="flex items-start gap-2 p-2 rounded-lg bg-muted/50 text-xs text-muted-foreground">
-            <Lock className="h-3.5 w-3.5 shrink-0 mt-0.5" />
-            <span>
-              Delta testing requires an existing Competency Passport. This feature will enable shorter
-              assessments by reusing previous results.
-            </span>
-          </div>
-        </CardContent>
-      </Card>
+      {/* Passport & Delta Testing Section */}
+      <div className="border-t pt-4">
+        <PassportSection
+          clerkUserId={candidateClerkUserId}
+          requiredCompetencyIds={requiredCompetencyIds}
+          onDeltaConfigChange={handleDeltaConfigChange}
+          deltaTestingEnabled={!!onetSocCode}
+        />
+      </div>
 
       {/* Warning if no job selected */}
       {!onetSocCode && (

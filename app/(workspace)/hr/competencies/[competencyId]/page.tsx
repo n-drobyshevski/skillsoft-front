@@ -34,6 +34,7 @@ import type {
 import { ObservabilityLevel, BigFiveInfo, getEffectiveBigFive, getEffectiveDimension } from "@/types/domain";
 import { levelToColor, approvalStatusToColor } from "@/lib/ui-utils";
 import { getBigFiveMapping } from "@/hooks/useBigFiveMapper";
+import { getTranslations } from "next-intl/server";
 
 interface CompetencyDetailPageProps {
 	params: { competencyId: string };
@@ -66,6 +67,7 @@ export default async function CompetencyDetailPage({
 }: CompetencyDetailPageProps) {
 	const { competencyId } = await params;
 	const { competency, questions } = await getCompetencyData(competencyId);
+	const t = await getTranslations("competency");
 
 	if (!competency) {
 		notFound();
@@ -82,13 +84,13 @@ export default async function CompetencyDetailPage({
                                 <div className="p-1.5 rounded-lg bg-emerald-100 dark:bg-emerald-900/30">
                                     <FilePen className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
                                 </div>
-                                Description
+                                {t("description")}
                             </CardTitle>
                         </CardHeader>
                         <CardContent className="pt-0">
                             <p className="text-sm text-muted-foreground leading-relaxed">
                                 {competency.description ||
-                                    "No description available for this competency."}
+                                    t("noDescriptionAvailable")}
                             </p>
                         </CardContent>
                     </Card>
@@ -97,18 +99,18 @@ export default async function CompetencyDetailPage({
                             <TabsList className="grid w-full grid-cols-2">
                                 <TabsTrigger value="indicators">
                                     <span className="hidden sm:inline">
-                                        Behavioral Indicators {competency.behavioralIndicators?.length ? `(${competency.behavioralIndicators.length})` : ''}
+                                        {t("behavioralIndicators")} {competency.behavioralIndicators?.length ? `(${competency.behavioralIndicators.length})` : ''}
                                     </span>
                                     <span className="sm:hidden">
-                                        Indicators {competency.behavioralIndicators?.length ? `(${competency.behavioralIndicators.length})` : ''}
+                                        {t("indicators")} {competency.behavioralIndicators?.length ? `(${competency.behavioralIndicators.length})` : ''}
                                     </span>
                                 </TabsTrigger>
                                 <TabsTrigger value="questions">
                                     <span className="hidden sm:inline">
-                                        Assessment Questions {questions.length > 0 && `(${questions.length})`}
+                                        {t("assessmentQuestions")} {questions.length > 0 && `(${questions.length})`}
                                     </span>
                                     <span className="sm:hidden">
-                                        Questions {questions.length > 0 && `(${questions.length})`}
+                                        {t("questions")} {questions.length > 0 && `(${questions.length})`}
                                     </span>
                                 </TabsTrigger>
                             </TabsList>
@@ -121,7 +123,7 @@ export default async function CompetencyDetailPage({
                                         <div className="flex items-center justify-between mb-4 pb-3 border-b border-border/50">
                                             <div className="flex items-center gap-2">
                                                 <h4 className="text-sm font-medium text-muted-foreground">
-                                                    Behavioral Indicators
+                                                    {t("behavioralIndicators")}
                                                 </h4>
                                                 <Badge variant="secondary" className="text-xs">
                                                     {competency.behavioralIndicators.length}
@@ -130,13 +132,13 @@ export default async function CompetencyDetailPage({
                                             <Button asChild variant="outline" size="sm">
                                                 <Link href={`/behavioral-indicators/new?competencyId=${competency.id}`}>
                                                     <Plus className="mr-2 h-4 w-4" />
-                                                    Add Indicator
+                                                    {t("addIndicator")}
                                                 </Link>
                                             </Button>
                                         </div>
-                                        
+
                                         {/* Indicators list */}
-                                        <div className="space-y-2">	
+                                        <div className="space-y-2">
                                             {competency.behavioralIndicators.map((indicator) => (
                                                 <IndicatorCard key={indicator.id} indicator={indicator} />
                                             ))}
@@ -148,16 +150,15 @@ export default async function CompetencyDetailPage({
                                             <Target className="h-6 w-6 sm:h-8 sm:w-8 text-muted-foreground" />
                                         </div>
                                         <h3 className="text-base sm:text-lg font-medium text-foreground mb-2">
-                                            No Behavioral Indicators
+                                            {t("noBehavioralIndicators")}
                                         </h3>
                                         <p className="text-sm sm:text-base text-muted-foreground max-w-md mx-auto mb-4 sm:mb-6 px-4 leading-relaxed">
-                                            This competency doesn&apos;t have any behavioral indicators yet.
-                                            Add some to start defining what success looks like.
+                                            {t("noBehavioralIndicatorsDescription")}
                                         </p>
                                         <Button variant="outline" asChild className="touch-target">
                                             <Link href={`/behavioral-indicators/new?competencyId=${competency.id}`}>
                                                 <Target className="h-4 w-4 mr-2" />
-                                                Add Indicator
+                                                {t("addIndicator")}
                                             </Link>
                                         </Button>
                                     </div>
@@ -174,16 +175,15 @@ export default async function CompetencyDetailPage({
 												<FilePen className="h-6 w-6 sm:h-8 sm:w-8 text-muted-foreground" />
 											</div>
 											<h3 className="text-base sm:text-lg font-medium text-foreground mb-2">
-												No Assessment Questions
+												{t("noAssessmentQuestions")}
 											</h3>
 											<p className="text-sm sm:text-base text-muted-foreground max-w-md mx-auto mb-4 sm:mb-6 px-4 leading-relaxed">
-												This competency doesn&apos;t have any assessment questions yet.
-												Questions help evaluate behavioral indicators.
+												{t("noAssessmentQuestionsDescription")}
 											</p>
 											<Button variant="outline" asChild className="touch-target">
 												<Link href="/assessment-questions">
 													<FilePen className="h-4 w-4 mr-2" />
-													Browse Questions
+													{t("browseQuestions")}
 												</Link>
 											</Button>
 										</div>
@@ -202,42 +202,42 @@ export default async function CompetencyDetailPage({
 								<div className="p-1.5 rounded-lg bg-blue-100 dark:bg-blue-900/30">
 									<Info className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
 								</div>
-								Details
+								{t("details")}
 							</CardTitle>
 						</CardHeader>
 						<CardContent className="pt-0 space-y-4">
 							{/* Category */}
 							<div className="flex items-center justify-between py-2 border-b border-border/50 last:border-0">
-								<span className="text-sm text-muted-foreground font-medium">Category</span>
+								<span className="text-sm text-muted-foreground font-medium">{t("category")}</span>
 								<span className="text-sm font-medium text-foreground">{competency.category}</span>
 							</div>
 
 							{/* Approval Status */}
 							<div className="flex items-center justify-between py-2 border-b border-border/50 last:border-0">
-								<span className="text-sm text-muted-foreground font-medium">Approval Status</span>
-								<Badge 
-									variant="secondary" 
+								<span className="text-sm text-muted-foreground font-medium">{t("approvalStatus")}</span>
+								<Badge
+									variant="secondary"
 									className={`${approvalStatusToColor(competency.approvalStatus)} font-medium text-xs px-2.5 py-1`}
 								>
 									{(competency.approvalStatus ?? "DRAFT").replace("_", " ")}
 								</Badge>
 							</div>
-							
+
 							{/* Status */}
 							<div className="flex items-center justify-between py-2 border-b border-border/50 last:border-0">
-								<span className="text-sm text-muted-foreground font-medium">Status</span>
-								<Badge 
+								<span className="text-sm text-muted-foreground font-medium">{t("status")}</span>
+								<Badge
 									variant={competency.isActive ? "default" : "secondary"}
 									className="font-medium text-xs px-2.5 py-1"
 								>
 									<div className={`w-1.5 h-1.5 rounded-full mr-1.5 ${competency.isActive ? 'bg-green-500' : 'bg-gray-400'}`} />
-									{competency.isActive ? "Active" : "Inactive"}
+									{competency.isActive ? t("active") : t("inactive")}
 								</Badge>
 							</div>
-							
+
 							{/* Version */}
 							<div className="flex items-center justify-between py-2">
-								<span className="text-sm text-muted-foreground font-medium">Version</span>
+								<span className="text-sm text-muted-foreground font-medium">{t("version")}</span>
 								<span className="font-mono font-medium text-foreground bg-muted px-2 py-0.5 rounded text-xs">
 									v{competency.version}
 								</span>
@@ -256,7 +256,7 @@ export default async function CompetencyDetailPage({
 									<div className="p-1.5 rounded-lg bg-purple-100 dark:bg-purple-900/30">
 										<BarChart3 className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" />
 									</div>
-									Weight Distribution
+									{t("weightDistribution")}
 								</CardTitle>
 							</CardHeader>
 							<CardContent className="pt-0">
@@ -307,8 +307,8 @@ export default async function CompetencyDetailPage({
 									{/* Summary */}
 									<div className="pt-3 mt-4 border-t border-border/60">
 										<div className="flex justify-between text-xs text-muted-foreground font-medium">
-											<span>Total indicators: {competency.behavioralIndicators.length}</span>
-											<span>Total weight: {(competency.behavioralIndicators.reduce((sum, i) => sum + i.weight, 0)).toFixed(3)}</span>
+											<span>{t("totalIndicators")}: {competency.behavioralIndicators.length}</span>
+											<span>{t("totalWeight")}: {(competency.behavioralIndicators.reduce((sum, i) => sum + i.weight, 0)).toFixed(3)}</span>
 										</div>
 									</div>
 								</div>

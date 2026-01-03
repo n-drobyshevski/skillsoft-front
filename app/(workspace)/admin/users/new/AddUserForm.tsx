@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -35,36 +36,41 @@ import {
   Check,
 } from "lucide-react";
 
-// Validation schema - requires either email or username
-const createUserSchema = z.object({
-  email: z
-    .string()
-    .email("Please enter a valid email address")
-    .optional()
-    .or(z.literal("")),
-  username: z
-    .string()
-    .min(3, "Username must be at least 3 characters")
-    .max(20, "Username must be at most 20 characters")
-    .regex(/^[a-zA-Z0-9_]+$/, "Letters, numbers, underscores only")
-    .optional()
-    .or(z.literal("")),
-  password: z
-    .string()
-    .min(8, "Password must be at least 8 characters")
-    .regex(
-      /^(?=.*[a-zA-Z])(?=.*\d)/,
-      "Must contain letters and numbers"
-    ),
-  firstName: z.string().optional(),
-  lastName: z.string().optional(),
-  role: z.enum(["USER", "EDITOR", "ADMIN"]),
-}).refine(
-  (data) => (data.email && data.email.length > 0) || (data.username && data.username.length > 0),
-  { message: "Provide at least one", path: ["email"] }
-);
+/**
+ * Creates the user validation schema with i18n messages.
+ * This factory pattern allows Zod validation messages to be translated.
+ */
+function createUserSchemaFactory(t: (key: string) => string) {
+  return z.object({
+    email: z
+      .string()
+      .email(t('validEmail'))
+      .optional()
+      .or(z.literal("")),
+    username: z
+      .string()
+      .min(3, t('usernameMinLength'))
+      .max(20, t('usernameMaxLength'))
+      .regex(/^[a-zA-Z0-9_]+$/, t('usernamePattern'))
+      .optional()
+      .or(z.literal("")),
+    password: z
+      .string()
+      .min(8, t('passwordMinLength'))
+      .regex(
+        /^(?=.*[a-zA-Z])(?=.*\d)/,
+        t('passwordPattern')
+      ),
+    firstName: z.string().optional(),
+    lastName: z.string().optional(),
+    role: z.enum(["USER", "EDITOR", "ADMIN"]),
+  }).refine(
+    (data) => (data.email && data.email.length > 0) || (data.username && data.username.length > 0),
+    { message: t('emailOrUsername'), path: ["email"] }
+  );
+}
 
-type CreateUserFormData = z.infer<typeof createUserSchema>;
+type CreateUserFormData = z.infer<ReturnType<typeof createUserSchemaFactory>>;
 
 interface CreateUserResponse {
   success: boolean;
@@ -81,6 +87,8 @@ interface CreateUserResponse {
 
 export default function AddUserForm() {
   const router = useRouter();
+  const t = useTranslations('users');
+  const tValidation = useTranslations('users.new.validation');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [submitResult, setSubmitResult] = useState<{
@@ -88,6 +96,12 @@ export default function AddUserForm() {
     message: string;
     userId?: string;
   } | null>(null);
+
+  // Create schema with i18n validation messages
+  const createUserSchema = useMemo(
+    () => createUserSchemaFactory((key) => tValidation(key as Parameters<typeof tValidation>[0])),
+    [tValidation]
+  );
 
   const form = useForm<CreateUserFormData>({
     resolver: zodResolver(createUserSchema),
@@ -135,7 +149,7 @@ export default function AddUserForm() {
         const identifier = result.user.email || result.user.username || 'New user';
         setSubmitResult({
           type: "success",
-          message: `User "${identifier}" created successfully.`,
+          message: t('new.messages.createSuccess', { identifier }),
           userId: result.user.id,
         });
         form.reset();
@@ -147,7 +161,7 @@ export default function AddUserForm() {
       } else {
         setSubmitResult({
           type: "error",
-          message: result.error || "Failed to create user. Please try again.",
+          message: result.error || t('new.messages.createFailed'),
         });
       }
     } catch (error) {
@@ -156,7 +170,7 @@ export default function AddUserForm() {
         message:
           error instanceof Error
             ? error.message
-            : "An unexpected error occurred.",
+            : t('new.messages.createFailed'),
       });
     } finally {
       setIsSubmitting(false);
@@ -171,13 +185,13 @@ export default function AddUserForm() {
           <div className="p-4 pb-3">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-lg font-semibold leading-none tracking-tight">Login Identifier</h3>
-                <p className="text-sm text-muted-foreground mt-1">Choose email, username, or both</p>
+                <h3 className="text-lg font-semibold leading-none tracking-tight">{t('new.sections.loginIdentifier')}</h3>
+                <p className="text-sm text-muted-foreground mt-1">{t('new.sections.loginIdentifierDesc')}</p>
               </div>
               {hasIdentifier && (
                 <div className="flex items-center gap-1 text-emerald-600 text-xs font-medium">
                   <Check className="h-3.5 w-3.5" />
-                  Valid
+                  {t('new.validation.valid')}
                 </div>
               )}
             </div>
@@ -192,13 +206,13 @@ export default function AddUserForm() {
                   <FormItem className="flex-1">
                     <FormLabel className="text-sm font-medium flex items-center gap-1.5">
                       <Mail className="h-3.5 w-3.5 text-muted-foreground" />
-                      Email
+                      {t('new.fields.email')}
                       {hasEmail && <Check className="h-3 w-3 text-emerald-500" />}
                     </FormLabel>
                     <FormControl>
                       <Input
                         type="email"
-                        placeholder="user@example.com"
+                        placeholder={t('new.placeholders.email')}
                         className={`h-9 ${hasEmail ? 'border-emerald-300 focus-visible:ring-emerald-500' : ''}`}
                         {...field}
                       />
@@ -211,7 +225,7 @@ export default function AddUserForm() {
               {/* OR Divider */}
               <div className="flex md:flex-col items-center justify-center gap-2 py-2 md:py-0 md:px-2">
                 <div className="h-px md:h-auto md:w-px flex-1 bg-border" />
-                <span className="text-xs font-medium text-muted-foreground bg-card px-1">or</span>
+                <span className="text-xs font-medium text-muted-foreground bg-card px-1">{t('new.hints.or')}</span>
                 <div className="h-px md:h-auto md:w-px flex-1 bg-border" />
               </div>
 
@@ -222,13 +236,13 @@ export default function AddUserForm() {
                   <FormItem className="flex-1">
                     <FormLabel className="text-sm font-medium flex items-center gap-1.5">
                       <AtSign className="h-3.5 w-3.5 text-muted-foreground" />
-                      Username
+                      {t('new.fields.username')}
                       {hasUsername && <Check className="h-3 w-3 text-emerald-500" />}
                     </FormLabel>
                     <FormControl>
                       <Input
                         type="text"
-                        placeholder="johndoe"
+                        placeholder={t('new.placeholders.username')}
                         className={`h-9 ${hasUsername ? 'border-emerald-300 focus-visible:ring-emerald-500' : ''}`}
                         {...field}
                       />
@@ -242,7 +256,7 @@ export default function AddUserForm() {
             {/* Hint text */}
             {!hasIdentifier && (
               <p className="text-xs text-muted-foreground mt-3 text-center">
-                Enter at least one — user can log in with either
+                {t('new.hints.enterAtLeastOne')}
               </p>
             )}
           </div>
@@ -251,7 +265,7 @@ export default function AddUserForm() {
         {/* Password */}
         <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
           <div className="p-4 pb-3">
-            <h3 className="text-lg font-semibold leading-none tracking-tight">Password</h3>
+            <h3 className="text-lg font-semibold leading-none tracking-tight">{t('new.sections.password')}</h3>
           </div>
           <div className="px-4 pb-4">
             <FormField
@@ -263,7 +277,7 @@ export default function AddUserForm() {
                     <div className="relative">
                       <Input
                         type={showPassword ? "text" : "password"}
-                        placeholder="Min 8 characters with letters & numbers"
+                        placeholder={t('new.placeholders.password')}
                         className="h-9 pr-10"
                         {...field}
                       />
@@ -292,7 +306,7 @@ export default function AddUserForm() {
         {/* User Profile & Role */}
         <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
           <div className="p-4 pb-3">
-            <h3 className="text-lg font-semibold leading-none tracking-tight">Profile & Permissions</h3>
+            <h3 className="text-lg font-semibold leading-none tracking-tight">{t('new.sections.profilePermissions')}</h3>
           </div>
           <div className="px-4 pb-4 grid grid-cols-1 md:grid-cols-3 gap-4">
             <FormField
@@ -300,9 +314,9 @@ export default function AddUserForm() {
               name="firstName"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-sm font-medium">First Name</FormLabel>
+                  <FormLabel className="text-sm font-medium">{t('new.fields.firstName')}</FormLabel>
                   <FormControl>
-                    <Input placeholder="John" className="h-9" {...field} />
+                    <Input placeholder={t('new.placeholders.firstName')} className="h-9" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -314,9 +328,9 @@ export default function AddUserForm() {
               name="lastName"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-sm font-medium">Last Name</FormLabel>
+                  <FormLabel className="text-sm font-medium">{t('new.fields.lastName')}</FormLabel>
                   <FormControl>
-                    <Input placeholder="Doe" className="h-9" {...field} />
+                    <Input placeholder={t('new.placeholders.lastName')} className="h-9" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -328,33 +342,33 @@ export default function AddUserForm() {
               name="role"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-sm font-medium">Role</FormLabel>
+                  <FormLabel className="text-sm font-medium">{t('new.fields.role')}</FormLabel>
                   <Select
                     onValueChange={field.onChange}
                     defaultValue={field.value}
                   >
                     <FormControl>
                       <SelectTrigger className="h-9">
-                        <SelectValue placeholder="Select role" />
+                        <SelectValue placeholder={t('new.fields.role')} />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
                       <SelectItem value="USER">
                         <div className="flex items-center gap-2">
                           <span className="h-2 w-2 rounded-full bg-slate-400" />
-                          User
+                          {t('new.roles.user')}
                         </div>
                       </SelectItem>
                       <SelectItem value="EDITOR">
                         <div className="flex items-center gap-2">
                           <span className="h-2 w-2 rounded-full bg-blue-500" />
-                          Editor
+                          {t('new.roles.editor')}
                         </div>
                       </SelectItem>
                       <SelectItem value="ADMIN">
                         <div className="flex items-center gap-2">
                           <span className="h-2 w-2 rounded-full bg-red-500" />
-                          Admin
+                          {t('new.roles.admin')}
                         </div>
                       </SelectItem>
                     </SelectContent>
@@ -382,7 +396,7 @@ export default function AddUserForm() {
               <AlertCircle className="h-4 w-4" />
             )}
             <AlertTitle>
-              {submitResult.type === "success" ? "Success" : "Error"}
+              {submitResult.type === "success" ? t('new.messages.success') : t('new.messages.error')}
             </AlertTitle>
             <AlertDescription>{submitResult.message}</AlertDescription>
           </Alert>
@@ -397,18 +411,18 @@ export default function AddUserForm() {
             disabled={isSubmitting}
             className="h-9"
           >
-            Cancel
+            {t('new.actions.cancel')}
           </Button>
           <Button type="submit" disabled={isSubmitting} className="h-9">
             {isSubmitting ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Creating...
+                {t('new.actions.creating')}
               </>
             ) : (
               <>
                 <UserPlus className="mr-2 h-4 w-4" />
-                Create User
+                {t('new.actions.create')}
               </>
             )}
           </Button>

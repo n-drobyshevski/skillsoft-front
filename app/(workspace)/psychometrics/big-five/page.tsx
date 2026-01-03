@@ -1,8 +1,9 @@
-import { Metadata } from 'next';
+import type { Metadata } from 'next';
+import { getTranslations } from 'next-intl/server';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import PageHeader from '@/components/common/PageHeader';
 import { BigFiveReliability, ReliabilityStatus } from '@/types/psychometrics';
-import { Brain, TrendingUp, AlertTriangle, HelpCircle, CheckCircle2, XCircle } from 'lucide-react';
+import { Brain, AlertTriangle, HelpCircle, CheckCircle2, XCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 import { TriggerAuditButton } from '../_components/TriggerAuditButton';
@@ -16,10 +17,13 @@ import {
 } from './_components';
 import { getPsychometricsBigFiveCached } from '@/services/api.cache.psychometrics';
 
-export const metadata: Metadata = {
-  title: 'Big Five Reliability - Psychometrics - SkillSoft',
-  description: 'Cronbach Alpha reliability analysis for Big Five personality traits.',
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('psychometrics.bigFivePage');
+  return {
+    title: t('metadataTitle'),
+    description: t('metadataDescription'),
+  };
+}
 
 /**
  * Fetch Big Five reliability data from the cached API
@@ -70,20 +74,21 @@ function calculateSummaryStats(data: BigFiveReliability[]) {
         break;
     }
 
-    if (item.cronbachAlpha !== null) {
+    // Use != null to catch both null and undefined
+    if (item.cronbachAlpha != null && typeof item.cronbachAlpha === 'number') {
       alphaSum += item.cronbachAlpha;
       alphaCount++;
 
       if (stats.lowestAlpha === null || item.cronbachAlpha < stats.lowestAlpha.value) {
         stats.lowestAlpha = {
-          trait: item.traitDisplayName,
+          trait: item.traitDisplayName ?? item.trait,
           value: item.cronbachAlpha,
         };
       }
 
       if (stats.highestAlpha === null || item.cronbachAlpha > stats.highestAlpha.value) {
         stats.highestAlpha = {
-          trait: item.traitDisplayName,
+          trait: item.traitDisplayName ?? item.trait,
           value: item.cronbachAlpha,
         };
       }
@@ -97,41 +102,49 @@ function calculateSummaryStats(data: BigFiveReliability[]) {
   return stats;
 }
 
+interface HeroBannerTranslations {
+  traitsReliable: string;
+  needsAttention: string;
+  couldImprove: string;
+  allReliable: string;
+  awaitingData: string;
+  average: string;
+}
+
 /**
  * Hero Banner - Quick health summary visible above the fold on mobile
  * Answers "Is there a problem?" in < 3 seconds
  */
-function HeroBanner({ data }: { data: BigFiveReliability[] }) {
+function HeroBanner({ data, translations }: { data: BigFiveReliability[]; translations: HeroBannerTranslations }) {
   const stats = calculateSummaryStats(data);
   const totalWithData = stats.reliableCount + stats.acceptableCount + stats.unreliableCount;
-  const hasIssues = stats.unreliableCount > 0 || stats.acceptableCount > 0;
   const allReliable = stats.reliableCount === totalWithData && totalWithData > 0;
 
   // Determine overall status
   const getOverallStatus = () => {
     if (stats.unreliableCount > 0) {
       return {
-        text: `${stats.unreliableCount} trait${stats.unreliableCount > 1 ? 's' : ''} need attention`,
+        text: translations.needsAttention,
         color: 'red',
         icon: XCircle
       };
     }
     if (stats.acceptableCount > 0) {
       return {
-        text: `${stats.acceptableCount} trait${stats.acceptableCount > 1 ? 's' : ''} could improve`,
+        text: translations.couldImprove,
         color: 'amber',
         icon: AlertTriangle
       };
     }
     if (allReliable) {
       return {
-        text: 'All traits are reliable',
+        text: translations.allReliable,
         color: 'emerald',
         icon: CheckCircle2
       };
     }
     return {
-      text: 'Awaiting more data',
+      text: translations.awaitingData,
       color: 'gray',
       icon: HelpCircle
     };
@@ -164,7 +177,7 @@ function HeroBanner({ data }: { data: BigFiveReliability[] }) {
           <StatusIcon className={cn('h-6 w-6 shrink-0', iconColorClasses[status.color as keyof typeof iconColorClasses])} />
           <div>
             <div className="font-semibold">
-              {stats.reliableCount}/{totalWithData} Traits Reliable
+              {translations.traitsReliable}
             </div>
             <div className={cn('text-sm', iconColorClasses[status.color as keyof typeof iconColorClasses])}>
               {status.text}
@@ -173,7 +186,7 @@ function HeroBanner({ data }: { data: BigFiveReliability[] }) {
         </div>
         {stats.averageAlpha !== null && (
           <div className="text-right hidden sm:block">
-            <div className="text-xs text-muted-foreground">Average</div>
+            <div className="text-xs text-muted-foreground">{translations.average}</div>
             <div className="text-2xl font-bold tabular-nums">
               {stats.averageAlpha.toFixed(2)}
             </div>
@@ -184,10 +197,21 @@ function HeroBanner({ data }: { data: BigFiveReliability[] }) {
   );
 }
 
+interface SummaryStatsCardTranslations {
+  title: string;
+  reliable: string;
+  acceptable: string;
+  unreliable: string;
+  noData: string;
+  averageAlpha: string;
+  highest: string;
+  lowest: string;
+}
+
 /**
  * Summary statistics card component
  */
-function SummaryStatsCard({ data }: { data: BigFiveReliability[] }) {
+function SummaryStatsCard({ data, translations }: { data: BigFiveReliability[]; translations: SummaryStatsCardTranslations }) {
   const stats = calculateSummaryStats(data);
 
   return (
@@ -195,7 +219,7 @@ function SummaryStatsCard({ data }: { data: BigFiveReliability[] }) {
       <CardHeader className="pb-3">
         <CardTitle className="text-base font-semibold flex items-center gap-2">
           <Brain className="h-4 w-4 text-purple-500" />
-          Summary Statistics
+          {translations.title}
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -209,7 +233,7 @@ function SummaryStatsCard({ data }: { data: BigFiveReliability[] }) {
             <div className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
               {stats.reliableCount}
             </div>
-            <div className="text-xs text-muted-foreground">Reliable</div>
+            <div className="text-xs text-muted-foreground">{translations.reliable}</div>
           </div>
 
           {/* Acceptable */}
@@ -220,7 +244,7 @@ function SummaryStatsCard({ data }: { data: BigFiveReliability[] }) {
             <div className="text-2xl font-bold text-amber-600 dark:text-amber-400">
               {stats.acceptableCount}
             </div>
-            <div className="text-xs text-muted-foreground">Acceptable</div>
+            <div className="text-xs text-muted-foreground">{translations.acceptable}</div>
           </div>
 
           {/* Unreliable */}
@@ -231,7 +255,7 @@ function SummaryStatsCard({ data }: { data: BigFiveReliability[] }) {
             <div className="text-2xl font-bold text-red-600 dark:text-red-400">
               {stats.unreliableCount}
             </div>
-            <div className="text-xs text-muted-foreground">Unreliable</div>
+            <div className="text-xs text-muted-foreground">{translations.unreliable}</div>
           </div>
 
           {/* Insufficient Data */}
@@ -242,35 +266,35 @@ function SummaryStatsCard({ data }: { data: BigFiveReliability[] }) {
             <div className="text-2xl font-bold text-gray-600 dark:text-gray-400">
               {stats.insufficientDataCount}
             </div>
-            <div className="text-xs text-muted-foreground">No Data</div>
+            <div className="text-xs text-muted-foreground">{translations.noData}</div>
           </div>
         </div>
 
         {/* Average and Range - Stack on very small screens */}
         <div className="mt-4 pt-4 border-t grid grid-cols-3 gap-2 sm:gap-4">
           <div className="text-center">
-            <div className="text-xs text-muted-foreground mb-1">Average Alpha</div>
+            <div className="text-xs text-muted-foreground mb-1">{translations.averageAlpha}</div>
             <div className="text-xl font-bold tabular-nums">
               {stats.averageAlpha !== null ? stats.averageAlpha.toFixed(2) : '-'}
             </div>
           </div>
           <div className="text-center">
-            <div className="text-xs text-muted-foreground mb-1">Highest</div>
+            <div className="text-xs text-muted-foreground mb-1">{translations.highest}</div>
             <div className="text-xl font-bold tabular-nums text-emerald-600 dark:text-emerald-400">
-              {stats.highestAlpha !== null ? stats.highestAlpha.value.toFixed(2) : '-'}
+              {stats.highestAlpha?.value != null ? stats.highestAlpha.value.toFixed(2) : '-'}
             </div>
-            {stats.highestAlpha && (
+            {stats.highestAlpha?.trait && (
               <div className="text-[11px] text-muted-foreground truncate">
                 {stats.highestAlpha.trait}
               </div>
             )}
           </div>
           <div className="text-center">
-            <div className="text-xs text-muted-foreground mb-1">Lowest</div>
+            <div className="text-xs text-muted-foreground mb-1">{translations.lowest}</div>
             <div className="text-xl font-bold tabular-nums text-amber-600 dark:text-amber-400">
-              {stats.lowestAlpha !== null ? stats.lowestAlpha.value.toFixed(2) : '-'}
+              {stats.lowestAlpha?.value != null ? stats.lowestAlpha.value.toFixed(2) : '-'}
             </div>
-            {stats.lowestAlpha && (
+            {stats.lowestAlpha?.trait && (
               <div className="text-[11px] text-muted-foreground truncate">
                 {stats.lowestAlpha.trait}
               </div>
@@ -282,18 +306,22 @@ function SummaryStatsCard({ data }: { data: BigFiveReliability[] }) {
   );
 }
 
+interface EmptyStateTranslations {
+  title: string;
+  description: string;
+}
+
 /**
  * Empty state component when no data is available
  */
-function EmptyState() {
+function EmptyState({ translations }: { translations: EmptyStateTranslations }) {
   return (
     <Card>
       <CardContent className="p-8 text-center">
         <Brain className="h-12 w-12 mx-auto mb-4 text-muted-foreground opacity-50" />
-        <h3 className="font-semibold text-lg mb-2">No Big Five Data</h3>
+        <h3 className="font-semibold text-lg mb-2">{translations.title}</h3>
         <p className="text-sm text-muted-foreground max-w-md mx-auto">
-          Big Five trait reliability data has not been calculated yet.
-          Run a psychometric audit to start the analysis.
+          {translations.description}
         </p>
         <div className="mt-4">
           <TriggerAuditButton />
@@ -304,13 +332,46 @@ function EmptyState() {
 }
 
 export default async function BigFivePage() {
+  const t = await getTranslations('psychometrics.bigFivePage');
   const { reliabilityData, error } = await getBigFiveData();
+
+  // Pre-calculate stats for translations that need counts
+  const stats = reliabilityData.length > 0 ? calculateSummaryStats(reliabilityData) : null;
+  const totalWithData = stats
+    ? stats.reliableCount + stats.acceptableCount + stats.unreliableCount
+    : 0;
+
+  // Prepare translations for child components
+  const heroTranslations: HeroBannerTranslations = {
+    traitsReliable: t('hero.traitsReliable', { reliable: stats?.reliableCount ?? 0, total: totalWithData }),
+    needsAttention: t('hero.needsAttention', { count: stats?.unreliableCount ?? 0 }),
+    couldImprove: t('hero.couldImprove', { count: stats?.acceptableCount ?? 0 }),
+    allReliable: t('hero.allReliable'),
+    awaitingData: t('hero.awaitingData'),
+    average: t('hero.average'),
+  };
+
+  const summaryTranslations: SummaryStatsCardTranslations = {
+    title: t('summary.title'),
+    reliable: t('summary.reliable'),
+    acceptable: t('summary.acceptable'),
+    unreliable: t('summary.unreliable'),
+    noData: t('summary.noData'),
+    averageAlpha: t('summary.averageAlpha'),
+    highest: t('summary.highest'),
+    lowest: t('summary.lowest'),
+  };
+
+  const emptyStateTranslations: EmptyStateTranslations = {
+    title: t('emptyState.title'),
+    description: t('emptyState.description'),
+  };
 
   return (
     <div className="flex flex-1 flex-col gap-6 p-4 pt-6 md:gap-8 md:p-6">
       <PageHeader
-        title="Big Five Reliability"
-        description="Cronbach's Alpha reliability analysis for personality trait measurements"
+        title={t('pageTitle')}
+        description={t('pageDescription')}
       >
         <TriggerAuditButton />
       </PageHeader>
@@ -319,23 +380,23 @@ export default async function BigFivePage() {
       {error && (
         <Card className="border-destructive/50 bg-destructive/10">
           <CardContent className="p-4">
-            <div className="text-destructive font-medium mb-1">Data Loading Error</div>
+            <div className="text-destructive font-medium mb-1">{t('error.loadingError')}</div>
             <p className="text-sm text-muted-foreground">{error}</p>
           </CardContent>
         </Card>
       )}
 
       {/* Empty State */}
-      {!error && reliabilityData.length === 0 && <EmptyState />}
+      {!error && reliabilityData.length === 0 && <EmptyState translations={emptyStateTranslations} />}
 
       {/* Main Content - Mobile-First Layout */}
       {reliabilityData.length > 0 && (
         <>
           {/* SECTION 1: Hero Banner - Quick health summary (visible above fold on mobile) */}
-          <HeroBanner data={reliabilityData} />
+          <HeroBanner data={reliabilityData} translations={heroTranslations} />
 
           {/* SECTION 2: Summary Stats - Most important info for quick assessment */}
-          <SummaryStatsCard data={reliabilityData} />
+          <SummaryStatsCard data={reliabilityData} translations={summaryTranslations} />
 
           {/* SECTION 3: Comparison Chart */}
           <div>

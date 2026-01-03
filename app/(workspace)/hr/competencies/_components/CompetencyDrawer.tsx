@@ -15,10 +15,10 @@ import { approvalStatusToColor } from "@/lib/ui-utils";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { getBigFiveMapping } from "@/hooks/useBigFiveMapper";
-import { 
-  Trash2, 
-  Layers, 
-  FileText, 
+import {
+  Trash2,
+  Layers,
+  FileText,
   Activity,
   ChevronRight,
   Pencil,
@@ -38,6 +38,7 @@ import { deleteCompetency } from "@/src/app/actions";
 import { toast } from "sonner";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 // Big Five dimension icons mapping
 const BigFiveIcons: Record<BigFiveDimension, React.ElementType> = {
@@ -58,6 +59,8 @@ export default function CompetencyDrawer({
   competency: Competency;
 }) {
   const router = useRouter();
+  const t = useTranslations("competency");
+  const tCommon = useTranslations("common");
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const isMobile = useIsMobile();
@@ -73,10 +76,10 @@ export default function CompetencyDrawer({
     setIsDeleting(true);
     try {
       await deleteCompetency(competency.id);
-      toast.success('Competency deleted successfully');
+      toast.success(t('deletedSuccess'));
       onOpenChange(false);
     } catch {
-      toast.error('Failed to delete competency. Please try again.');
+      toast.error(t('deleteFailed'));
     } finally {
       setIsDeleting(false);
       setShowDeleteDialog(false);
@@ -104,7 +107,7 @@ export default function CompetencyDrawer({
                 {competency.name}
               </SheetTitle>
               <SheetDescription className="text-xs text-muted-foreground">
-                Competency Overview
+                {t("overview")}
               </SheetDescription>
             </div>
           </div>
@@ -115,7 +118,7 @@ export default function CompetencyDrawer({
               variant={competency.isActive ? "default" : "secondary"}
               className="h-5 text-[11px] px-1.5 font-medium"
             >
-              {competency.isActive ? "Active" : "Inactive"}
+              {competency.isActive ? t("active") : t("inactive")}
             </Badge>
             <Badge
               variant="outline"
@@ -133,7 +136,7 @@ export default function CompetencyDrawer({
             <section className="space-y-2">
               <div className="flex items-center gap-2 text-muted-foreground">
                 <FileText className="h-3.5 w-3.5" />
-                <h3 className="text-xs font-medium uppercase tracking-wide">Description</h3>
+                <h3 className="text-xs font-medium uppercase tracking-wide">{t("description")}</h3>
               </div>
               <p className="text-sm leading-relaxed text-foreground/90 pl-5">
                 {competency.description}
@@ -145,7 +148,7 @@ export default function CompetencyDrawer({
               <section className="space-y-2">
                 <div className="flex items-center gap-2 text-muted-foreground">
                   <Globe2 className="h-3.5 w-3.5" />
-                  <h3 className="text-xs font-medium uppercase tracking-wide">Standards</h3>
+                  <h3 className="text-xs font-medium uppercase tracking-wide">{t("standards")}</h3>
                 </div>
                 <div className="space-y-2 pl-5">
                   {/* O*NET */}
@@ -256,7 +259,7 @@ export default function CompetencyDrawer({
                 <div className="flex items-center gap-2 text-muted-foreground">
                   <Activity className="h-3.5 w-3.5" />
                   <h3 className="text-xs font-medium uppercase tracking-wide">
-                    Behavioral Indicators
+                    {t("behavioralIndicators")}
                   </h3>
                   <Badge variant="secondary" className="h-4 text-[10px] px-1.5 ml-auto">
                     {competency.behavioralIndicators.length}
@@ -285,11 +288,11 @@ export default function CompetencyDrawer({
                             <Badge variant="outline" className="h-5 text-[10px] px-1.5 text-muted-foreground">
                               Weight: {indicator.weight.toFixed(2)}
                             </Badge>
-                            <button 
+                            <button
                               onClick={() => handleNavigate(`/hr/behavioral-indicators/${indicator.id}`)}
                               className="text-xs text-primary/80 hover:text-primary flex items-center gap-1 transition-colors"
                             >
-                              View Details
+                              {t("viewDetails")}
                               <ChevronRight className="h-3 w-3" />
                             </button>
                           </div>
@@ -313,7 +316,7 @@ export default function CompetencyDrawer({
               className="h-10 sm:h-8 min-h-[44px] sm:min-h-0 px-3 sm:px-2.5 text-xs text-muted-foreground hover:text-destructive hover:bg-destructive/10 touch-manipulation"
             >
               <Trash2 className="mr-1.5 h-3.5 w-3.5" />
-              Delete
+              {tCommon("delete")}
             </Button>
             <div className="flex-1" />
             <Button
@@ -323,7 +326,7 @@ export default function CompetencyDrawer({
               className="h-10 sm:h-8 min-h-[44px] sm:min-h-0 px-3 sm:px-2.5 text-xs text-muted-foreground hover:text-foreground touch-manipulation"
             >
               <Layers className="mr-1.5 h-3.5 w-3.5" />
-              View
+              {tCommon("viewDetails")}
             </Button>
             <Button
               variant="default"
@@ -332,7 +335,7 @@ export default function CompetencyDrawer({
               className="h-10 sm:h-8 min-h-[44px] sm:min-h-0 px-4 sm:px-3 text-xs touch-manipulation"
             >
               <Pencil className="mr-1.5 h-3.5 w-3.5" />
-              Edit
+              {tCommon("edit")}
             </Button>
           </div>
         </div>
@@ -342,11 +345,11 @@ export default function CompetencyDrawer({
         open={showDeleteDialog}
         onOpenChange={setShowDeleteDialog}
         onConfirm={handleDelete}
-        title="Delete Competency"
-        description="Are you sure you want to delete this competency? This action will also remove all associated behavioral indicators and assessment questions."
+        title={t("deleteConfirmTitle")}
+        description={t("deleteConfirmDescriptionIndicators")}
         entityName={competency.name}
         isDeleting={isDeleting}
-        confirmButtonText="Delete Competency"
+        confirmButtonText={t("delete")}
       />
     </Sheet>
   );

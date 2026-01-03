@@ -1,11 +1,9 @@
 'use client';
 
 import { Badge } from '@/components/ui/badge';
-import {
-  ItemValidityStatus,
-  ItemValidityStatusDisplay
-} from '@/types/psychometrics';
+import { ItemValidityStatus } from '@/types/psychometrics';
 import { cn } from '@/lib/utils';
+import { useEnumTranslation } from '@/hooks/useEnumTranslation';
 import {
   CheckCircle2,
   Clock,
@@ -30,7 +28,6 @@ interface ValidityStatusBadgeProps {
 const DEFAULT_STATUS_CONFIG = {
   color: 'bg-slate-100 text-slate-800 border-slate-200 dark:bg-slate-900/30 dark:text-slate-400 dark:border-slate-800',
   icon: HelpCircle,
-  display: { label: 'Неизвестно', description: 'Unknown status', color: 'slate' },
 };
 
 // Color mapping for each status with accessible contrast
@@ -59,14 +56,6 @@ const statusIconMap: Record<string, LucideIcon> = {
   'FLAGGED': AlertTriangle,
 };
 
-// Extended display map for additional statuses
-const extendedDisplayMap: Record<string, { label: string; description: string; color: string }> = {
-  ...ItemValidityStatusDisplay,
-  'VALID': { label: 'Валидный', description: 'Item passed quality checks', color: 'emerald' },
-  'PENDING': { label: 'Ожидание', description: 'Gathering data', color: 'amber' },
-  'NEEDS_REVIEW': { label: 'На проверке', description: 'Needs manual review', color: 'orange' },
-  'FLAGGED': { label: 'Помечен', description: 'Critical issues detected', color: 'orange' },
-};
 
 // Size configuration
 const sizeConfig = {
@@ -96,6 +85,7 @@ const sizeConfig = {
  * - Responsive sizing
  * - Tooltip with full description
  * - Graceful fallback for unknown statuses
+ * - i18n support via useEnumTranslation
  */
 export function ValidityStatusBadge({
   status,
@@ -104,9 +94,11 @@ export function ValidityStatusBadge({
   showIcon = true,
   size = 'md',
 }: ValidityStatusBadgeProps) {
+  const { translateWithDescription } = useEnumTranslation<ItemValidityStatus>('itemValidityStatus');
+
   // Get config with fallbacks for unknown statuses
   const statusKey = String(status);
-  const display = extendedDisplayMap[statusKey] || DEFAULT_STATUS_CONFIG.display;
+  const { label, description } = translateWithDescription(statusKey as ItemValidityStatus);
   const Icon = statusIconMap[statusKey] || DEFAULT_STATUS_CONFIG.icon;
   const colorClasses = statusColorMap[statusKey] || DEFAULT_STATUS_CONFIG.color;
   const sizeStyles = sizeConfig[size];
@@ -121,8 +113,8 @@ export function ValidityStatusBadge({
         'inline-flex items-center',
         className
       )}
-      title={display.description}
-      aria-label={`${display.label}: ${display.description}`}
+      title={description}
+      aria-label={`${label}${description ? `: ${description}` : ''}`}
       role="status"
     >
       {showIcon && (
@@ -131,7 +123,7 @@ export function ValidityStatusBadge({
           aria-hidden="true"
         />
       )}
-      {showLabel && <span>{display.label}</span>}
+      {showLabel && <span>{label}</span>}
     </Badge>
   );
 }
@@ -144,8 +136,10 @@ export function ValidityStatusIcon({
   className,
   size = 'md',
 }: Omit<ValidityStatusBadgeProps, 'showLabel' | 'showIcon'>) {
+  const { translateWithDescription } = useEnumTranslation<ItemValidityStatus>('itemValidityStatus');
+
   const statusKey = String(status);
-  const display = extendedDisplayMap[statusKey] || DEFAULT_STATUS_CONFIG.display;
+  const { label, description } = translateWithDescription(statusKey as ItemValidityStatus);
   const Icon = statusIconMap[statusKey] || DEFAULT_STATUS_CONFIG.icon;
   const sizeStyles = sizeConfig[size];
 
@@ -165,8 +159,8 @@ export function ValidityStatusIcon({
 
   return (
     <span
-      title={display.description}
-      aria-label={`${display.label}: ${display.description}`}
+      title={description}
+      aria-label={`${label}${description ? `: ${description}` : ''}`}
       role="img"
     >
       <Icon

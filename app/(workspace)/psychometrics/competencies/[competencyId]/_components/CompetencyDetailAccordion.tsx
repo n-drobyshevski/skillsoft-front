@@ -13,6 +13,7 @@
  */
 
 import { useMemo } from 'react';
+import { useTranslations } from 'next-intl';
 import {
   Accordion,
   AccordionContent,
@@ -49,6 +50,7 @@ export function CompetencyDetailAccordion({
   detail,
   className,
 }: CompetencyDetailAccordionProps) {
+  const t = useTranslations('psychometrics');
   const isMobile = useIsMobile();
   const alphaQuality = getAlphaQuality(detail.cronbachAlpha);
 
@@ -86,7 +88,7 @@ export function CompetencyDetailAccordion({
             <div className="flex items-center justify-between w-full pr-2">
               <div className="flex items-center gap-2">
                 <Shield className="size-4 text-primary" aria-hidden="true" />
-                <span className="text-sm font-medium">Visual Gauge</span>
+                <span className="text-sm font-medium">{t('competencyDetail.accordion.visualGauge')}</span>
               </div>
               <AlphaInterpretationBadge alpha={detail.cronbachAlpha} />
             </div>
@@ -115,23 +117,23 @@ export function CompetencyDetailAccordion({
             <div className="flex items-center justify-between w-full pr-2">
               <div className="flex items-center gap-2">
                 <TrendingUp className="size-4 text-emerald-500" aria-hidden="true" />
-                <span className="text-sm font-medium">Интерпретация</span>
+                <span className="text-sm font-medium">{t('competencyDetail.accordion.interpretation')}</span>
               </div>
             </div>
           </AccordionTrigger>
           <AccordionContent className="px-4 pb-4">
             <AlphaInterpretationScale alpha={detail.cronbachAlpha} />
             <div className="mt-4 p-3 rounded-lg bg-muted/50">
-              <h4 className="font-medium text-sm mb-1">Что это означает?</h4>
+              <h4 className="font-medium text-sm mb-1">{t('competencyDetail.accordion.whatItMeans')}</h4>
               <p className="text-xs text-muted-foreground">
                 {detail.cronbachAlpha === null ? (
-                  'Недостаточно данных для расчета надежности.'
+                  t('competencyDetail.accordion.reliabilityMessages.insufficientData')
                 ) : detail.cronbachAlpha >= 0.7 ? (
-                  'Шкала показывает хорошую внутреннюю согласованность.'
+                  t('competencyDetail.accordion.reliabilityMessages.good')
                 ) : detail.cronbachAlpha >= 0.6 ? (
-                  'Приемлемая надежность. Рекомендуется пересмотреть элементы.'
+                  t('competencyDetail.accordion.reliabilityMessages.acceptable')
                 ) : (
-                  'Низкая надежность. Требуется серьезная ревизия.'
+                  t('competencyDetail.accordion.reliabilityMessages.low')
                 )}
               </p>
             </div>
@@ -144,7 +146,7 @@ export function CompetencyDetailAccordion({
             <div className="flex items-center justify-between w-full pr-2">
               <div className="flex items-center gap-2">
                 <Info className="size-4 text-blue-500" aria-hidden="true" />
-                <span className="text-sm font-medium">Пороговые значения</span>
+                <span className="text-sm font-medium">{t('competencyDetail.accordion.thresholdValues')}</span>
               </div>
               <ThresholdSummaryBadge
                 cronbachAlpha={detail.cronbachAlpha}
@@ -156,26 +158,26 @@ export function CompetencyDetailAccordion({
           <AccordionContent className="px-4 pb-4">
             <MetricComparisonList>
               <MetricComparisonRow
-                label="Cronbach's Alpha"
+                label={t('competencyDetail.accordion.metrics.cronbachAlpha')}
                 currentValue={detail.cronbachAlpha}
                 threshold={{ min: 0.7, max: 1 }}
                 format="decimal3"
-                description="Хорошая надежность: >= 0.7"
+                description={t('competencyDetail.accordion.thresholdDescriptions.alphaGood')}
               />
               <MetricComparisonRow
-                label="Размер выборки"
+                label={t('competencyDetail.accordion.metrics.sampleSize')}
                 currentValue={detail.sampleSize}
                 threshold={{ min: 100, max: 10000 }}
                 format="integer"
-                description="Рекомендуемый минимум: 100"
+                description={t('competencyDetail.accordion.thresholdDescriptions.sampleMinimum')}
                 showBar={false}
               />
               <MetricComparisonRow
-                label="Количество элементов"
+                label={t('competencyDetail.accordion.metrics.itemCount')}
                 currentValue={detail.itemCount}
                 threshold={{ min: 3, max: 30 }}
                 format="integer"
-                description="Оптимально: 5-15 элементов"
+                description={t('competencyDetail.accordion.thresholdDescriptions.itemsOptimal')}
                 showBar={false}
               />
             </MetricComparisonList>
@@ -193,7 +195,7 @@ export function CompetencyDetailAccordion({
                   ) : (
                     <TrendingUp className="size-4 text-emerald-500" aria-hidden="true" />
                   )}
-                  <span className="text-sm font-medium">Анализ элементов</span>
+                  <span className="text-sm font-medium">{t('competencyDetail.accordion.itemsAnalysis')}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   {problematicItems.length > 0 && (
@@ -201,7 +203,7 @@ export function CompetencyDetailAccordion({
                       variant="outline"
                       className="bg-amber-100 text-amber-700 border-amber-200 dark:bg-amber-900/30 dark:text-amber-400"
                     >
-                      {problematicItems.length} требуют внимания
+                      {t('competencyDetail.accordion.needAttention', { count: problematicItems.length })}
                     </Badge>
                   )}
                 </div>
@@ -231,6 +233,7 @@ interface DesktopDetailLayoutProps {
 }
 
 function DesktopDetailLayout({ detail, className }: DesktopDetailLayoutProps) {
+  const t = useTranslations('psychometrics');
   const alphaQuality = getAlphaQuality(detail.cronbachAlpha);
   const sortedAlphaIfDeleted = sortAlphaIfDeleted(detail.alphaIfDeleted);
 
@@ -243,9 +246,9 @@ function DesktopDetailLayout({ detail, className }: DesktopDetailLayoutProps) {
           <CardHeader className="pb-3">
             <CardTitle className="text-base flex items-center gap-2">
               <Shield className="h-4 w-4" aria-hidden="true" />
-              Cronbach's Alpha
+              {t('competencyDetail.accordion.metrics.cronbachAlpha')}
             </CardTitle>
-            <CardDescription>Коэффициент внутренней согласованности</CardDescription>
+            <CardDescription>{t('competencyDetail.accordion.internalConsistency')}</CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col items-center py-4">
             <AlphaGauge value={detail.cronbachAlpha} size="lg" />
@@ -257,23 +260,23 @@ function DesktopDetailLayout({ detail, className }: DesktopDetailLayoutProps) {
           <CardHeader className="pb-3">
             <CardTitle className="text-base flex items-center gap-2">
               <TrendingUp className="h-4 w-4" aria-hidden="true" />
-              Интерпретация
+              {t('competencyDetail.accordion.interpretation')}
             </CardTitle>
-            <CardDescription>Шкала качества надежности</CardDescription>
+            <CardDescription>{t('competencyDetail.accordion.reliabilityScale')}</CardDescription>
           </CardHeader>
           <CardContent>
             <AlphaInterpretationScale alpha={detail.cronbachAlpha} />
             <div className="mt-6 p-4 rounded-lg bg-muted/50">
-              <h4 className="font-medium mb-2">Что означает этот показатель?</h4>
+              <h4 className="font-medium mb-2">{t('competencyDetail.accordion.whatItMeansDesktop')}</h4>
               <p className="text-sm text-muted-foreground">
                 {detail.cronbachAlpha === null ? (
-                  'Недостаточно данных для расчета надежности. Необходимо собрать больше ответов.'
+                  t('competencyDetail.accordion.reliabilityMessages.insufficientDataDetailed')
                 ) : detail.cronbachAlpha >= 0.7 ? (
-                  'Шкала показывает хорошую внутреннюю согласованность. Элементы измеряют один и тот же конструкт.'
+                  t('competencyDetail.accordion.reliabilityMessages.goodDetailed')
                 ) : detail.cronbachAlpha >= 0.6 ? (
-                  'Приемлемая надежность. Рекомендуется пересмотреть элементы с низким вкладом.'
+                  t('competencyDetail.accordion.reliabilityMessages.acceptableDetailed')
                 ) : (
-                  'Низкая надежность. Элементы не образуют согласованную шкалу. Требуется серьезная ревизия.'
+                  t('competencyDetail.accordion.reliabilityMessages.lowDetailed')
                 )}
               </p>
             </div>
@@ -284,34 +287,34 @@ function DesktopDetailLayout({ detail, className }: DesktopDetailLayoutProps) {
       {/* Threshold Comparison - Full width */}
       <Card>
         <CardHeader className="pb-3">
-          <CardTitle className="text-base">Сравнение с пороговыми значениями</CardTitle>
+          <CardTitle className="text-base">{t('competencyDetail.accordion.thresholdComparison')}</CardTitle>
           <CardDescription>
-            Текущие показатели относительно стандартных критериев
+            {t('competencyDetail.accordion.thresholdComparisonDescription')}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <MetricComparisonList>
             <MetricComparisonRow
-              label="Cronbach's Alpha"
+              label={t('competencyDetail.accordion.metrics.cronbachAlpha')}
               currentValue={detail.cronbachAlpha}
               threshold={{ min: 0.7, max: 1 }}
               format="decimal3"
-              description="Хорошая надежность: >= 0.7, отличная: >= 0.8"
+              description={t('competencyDetail.accordion.thresholdDescriptions.alphaGoodDetailed')}
             />
             <MetricComparisonRow
-              label="Размер выборки"
+              label={t('competencyDetail.accordion.metrics.sampleSize')}
               currentValue={detail.sampleSize}
               threshold={{ min: 100, max: 10000 }}
               format="integer"
-              description="Рекомендуемый минимум: 100 респондентов"
+              description={t('competencyDetail.accordion.thresholdDescriptions.sampleMinimumDetailed')}
               showBar={false}
             />
             <MetricComparisonRow
-              label="Количество элементов"
+              label={t('competencyDetail.accordion.metrics.itemCount')}
               currentValue={detail.itemCount}
               threshold={{ min: 3, max: 30 }}
               format="integer"
-              description="Оптимально: 5-15 элементов на шкалу"
+              description={t('competencyDetail.accordion.thresholdDescriptions.itemsOptimalDetailed')}
               showBar={false}
             />
           </MetricComparisonList>

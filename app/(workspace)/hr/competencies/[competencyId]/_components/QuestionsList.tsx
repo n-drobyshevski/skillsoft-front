@@ -1,7 +1,10 @@
 
+"use client";
+
 import { AssessmentQuestion } from "@/types/domain";
 import { Badge } from "@/components/ui/badge";
 import { DifficultyLevel } from "@/types/domain";
+import { useTranslations } from "next-intl";
 
 function QuestionCard({ question, index }: { question: AssessmentQuestion; index: number }) {
   return (
@@ -57,20 +60,22 @@ function QuestionCard({ question, index }: { question: AssessmentQuestion; index
 }
 
 export default function QuestionsList({ questions }: { questions: AssessmentQuestion[] }) {
+  const t = useTranslations("competency");
+
   return (
     <div className="space-y-3">
       {/* Header */}
       <div className="flex items-center justify-between pb-2 border-b border-border/40">
         <div className="flex items-center gap-1.5">
           <h4 className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-            Questions
+            {t("questions")}
           </h4>
           <Badge variant="secondary" className="text-xs h-5 px-1.5">
             {questions.length}
           </Badge>
         </div>
       </div>
-      
+
       {/* Questions list */}
       <div className="space-y-1.5">
         {questions.map((question, index) => (

@@ -2,6 +2,7 @@
 
 import * as React from 'react';
 import { useEffect, useState, useCallback } from 'react';
+import { useTranslations } from 'next-intl';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Undo2, X, Loader2, CheckCircle, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -78,6 +79,7 @@ export function UndoToast({
   undoSuccess,
   position = 'bottom-center',
 }: UndoToastProps) {
+  const t = useTranslations('feedback');
   const progress = (countdown / totalDuration) * 100;
 
   // Calculate position classes
@@ -145,13 +147,13 @@ export function UndoToast({
               {undoSuccess === true && (
                 <p className="text-xs text-emerald-400 flex items-center gap-1 mt-0.5">
                   <CheckCircle className="h-3 w-3" />
-                  Undone successfully
+                  {t('undoneSuccessfully')}
                 </p>
               )}
               {undoSuccess === false && (
                 <p className="text-xs text-red-400 flex items-center gap-1 mt-0.5">
                   <AlertCircle className="h-3 w-3" />
-                  Failed to undo
+                  {t('failedToUndo')}
                 </p>
               )}
             </div>
@@ -172,14 +174,14 @@ export function UndoToast({
               ) : (
                 <Undo2 className="h-4 w-4" />
               )}
-              Undo
+              {t('undo')}
             </Button>
 
             {/* Dismiss button */}
             <button
               onClick={onDismiss}
               className="p-1 rounded-full hover:bg-slate-700 transition-colors"
-              aria-label="Dismiss"
+              aria-label={t('dismiss')}
             >
               <X className="h-4 w-4 text-slate-400" />
             </button>

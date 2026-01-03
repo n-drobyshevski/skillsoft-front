@@ -2,10 +2,11 @@
 
 import { Card, CardContent } from '@/components/ui/card';
 import { ReliabilityStatusBadge } from '../../_components/ReliabilityStatusBadge';
-import { BigFiveReliability, BigFiveTraitDisplay } from '@/types/psychometrics';
+import { BigFiveReliability } from '@/types/psychometrics';
 import { cn } from '@/lib/utils';
 import { ChevronRight } from 'lucide-react';
-import { TRAIT_COLORS } from './BigFiveTraitCard';
+import { TRAIT_COLORS, getTraitKey } from './BigFiveTraitCard';
+import { useTranslations } from 'next-intl';
 
 interface MobileTraitCardSimpleProps {
   reliability: BigFiveReliability;
@@ -30,8 +31,10 @@ export function MobileTraitCardSimple({
   isActive = false,
   className
 }: MobileTraitCardSimpleProps) {
+  const t = useTranslations('psychometrics.bigFive');
   const colors = TRAIT_COLORS[reliability.trait];
-  const traitInfo = BigFiveTraitDisplay[reliability.trait];
+  const traitKey = getTraitKey(reliability.trait);
+  const traitLabel = t(`traits.${traitKey}.label`);
 
   const formatAlpha = (value: number | null): string => {
     if (value === null) return '-';
@@ -51,7 +54,7 @@ export function MobileTraitCardSimple({
       onClick={onClick}
       role="button"
       tabIndex={0}
-      aria-label={`${traitInfo.label}: Alpha ${formatAlpha(reliability.cronbachAlpha)}, ${reliability.reliabilityStatus}. Tap for details.`}
+      aria-label={t('card.ariaLabel', { trait: traitLabel, alpha: formatAlpha(reliability.cronbachAlpha), status: reliability.reliabilityStatus })}
       onKeyDown={(e) => {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
@@ -69,7 +72,7 @@ export function MobileTraitCardSimple({
         {/* Row 1: Trait name and status badge */}
         <div className="flex items-start justify-between gap-2 mb-3">
           <h3 className={cn('font-semibold text-sm', colors.text)}>
-            {traitInfo.label}
+            {traitLabel}
           </h3>
           <ReliabilityStatusBadge
             status={reliability.reliabilityStatus}
@@ -90,13 +93,13 @@ export function MobileTraitCardSimple({
               >
                 {formatAlpha(reliability.cronbachAlpha)}
               </span>
-              <span className="text-xs text-muted-foreground">alpha</span>
+              <span className="text-xs text-muted-foreground">{t('card.alpha')}</span>
             </div>
           </div>
 
           {/* Tap affordance */}
           <div className="flex items-center gap-1 text-xs text-muted-foreground">
-            <span className="hidden xs:inline">Details</span>
+            <span className="hidden xs:inline">{t('card.details')}</span>
             <ChevronRight className="h-4 w-4" />
           </div>
         </div>

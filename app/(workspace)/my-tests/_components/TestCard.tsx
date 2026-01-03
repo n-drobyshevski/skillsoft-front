@@ -20,6 +20,7 @@ import { cn } from '@/lib/utils';
 import { EnrichedTestSession } from './MyTestsContent';
 import { SessionStatus } from '@/types/domain';
 import { CircularProgress, ScoreGauge } from './CircularProgress';
+import { useTranslations, useFormatter } from 'next-intl';
 
 interface TestCardProps {
   session: EnrichedTestSession;
@@ -32,7 +33,7 @@ interface TestCardProps {
 const STATUS_CONFIG: Record<
   SessionStatus,
   {
-    label: string;
+    labelKey: 'status.notStarted' | 'status.inProgress' | 'status.completed' | 'status.abandoned' | 'status.timedOut';
     icon: typeof Clock;
     borderClass: string;
     badgeClassName: string;
@@ -41,7 +42,7 @@ const STATUS_CONFIG: Record<
   }
 > = {
   NOT_STARTED: {
-    label: 'Ожидает',
+    labelKey: 'status.notStarted',
     icon: Clock,
     borderClass: 'border-l-blue-500',
     badgeClassName:
@@ -50,7 +51,7 @@ const STATUS_CONFIG: Record<
     progressTrack: 'text-blue-100 dark:text-blue-950',
   },
   IN_PROGRESS: {
-    label: 'В работе',
+    labelKey: 'status.inProgress',
     icon: PlayCircle,
     borderClass: 'border-l-amber-500',
     badgeClassName:
@@ -59,7 +60,7 @@ const STATUS_CONFIG: Record<
     progressTrack: 'text-amber-100 dark:text-amber-950',
   },
   COMPLETED: {
-    label: 'Завершен',
+    labelKey: 'status.completed',
     icon: CheckCircle2,
     borderClass: 'border-l-emerald-500',
     badgeClassName:
@@ -68,7 +69,7 @@ const STATUS_CONFIG: Record<
     progressTrack: 'text-emerald-100 dark:text-emerald-950',
   },
   ABANDONED: {
-    label: 'Прерван',
+    labelKey: 'status.abandoned',
     icon: XCircle,
     borderClass: 'border-l-red-500',
     badgeClassName:
@@ -77,7 +78,7 @@ const STATUS_CONFIG: Record<
     progressTrack: 'text-red-100 dark:text-red-950',
   },
   TIMED_OUT: {
-    label: 'Время истекло',
+    labelKey: 'status.timedOut',
     icon: AlertCircle,
     borderClass: 'border-l-gray-400',
     badgeClassName:
@@ -97,6 +98,8 @@ const STATUS_CONFIG: Record<
  * - Reduced redundancy and cleaner hierarchy
  */
 export function TestCard({ session, style, compact = false }: TestCardProps) {
+  const t = useTranslations('myTests');
+  const format = useFormatter();
   const config = STATUS_CONFIG[session.status];
   const StatusIcon = config.icon;
 
@@ -116,24 +119,24 @@ export function TestCard({ session, style, compact = false }: TestCardProps) {
       case SessionStatus.NOT_STARTED:
         return {
           href: `/test-templates/${session.templateId}/start`,
-          label: 'Начать',
-          labelFull: 'Начать тест',
+          label: t('actions.start'),
+          labelFull: t('actions.startTest'),
           icon: PlayCircle,
           variant: 'default' as const,
         };
       case SessionStatus.IN_PROGRESS:
         return {
           href: `/test-templates/take/${session.id}`,
-          label: 'Продолжить',
-          labelFull: 'Продолжить',
+          label: t('actions.continue'),
+          labelFull: t('actions.continue'),
           icon: ArrowRight,
           variant: 'default' as const,
         };
       case SessionStatus.COMPLETED:
         return {
           href: `/test-templates/results/${session.id}`,
-          label: 'Результаты',
-          labelFull: 'Результаты',
+          label: t('actions.viewResults'),
+          labelFull: t('actions.viewResults'),
           icon: Eye,
           variant: 'outline' as const,
         };
@@ -141,21 +144,21 @@ export function TestCard({ session, style, compact = false }: TestCardProps) {
       case SessionStatus.TIMED_OUT:
         return {
           href: `/test-templates/${session.templateId}/start`,
-          label: 'Повторить',
-          labelFull: 'Повторить',
+          label: t('actions.retry'),
+          labelFull: t('actions.retry'),
           icon: RotateCcw,
           variant: 'secondary' as const,
         };
       default:
         return {
           href: '#',
-          label: 'Открыть',
-          labelFull: 'Открыть',
+          label: t('actions.open'),
+          labelFull: t('actions.open'),
           icon: ArrowRight,
           variant: 'outline' as const,
         };
     }
-  }, [session]);
+  }, [session, t]);
 
   const ActionIcon = actionConfig.icon;
 
@@ -174,7 +177,7 @@ export function TestCard({ session, style, compact = false }: TestCardProps) {
         <div className="flex items-center justify-between gap-2 sm:gap-3 mb-2 sm:mb-3">
           <Badge variant="outline" className={cn('gap-1 sm:gap-1.5 text-xs font-medium', config.badgeClassName)}>
             <StatusIcon className="size-3 sm:size-3.5" />
-            <span className="hidden xs:inline">{config.label}</span>
+            <span className="hidden xs:inline">{t(config.labelKey)}</span>
           </Badge>
 
           <Button
@@ -212,9 +215,9 @@ export function TestCard({ session, style, compact = false }: TestCardProps) {
               />
               <div>
                 <p className="text-xs sm:text-sm font-medium tabular-nums">
-                  {progress.answeredCount} из {session.totalQuestions}
+                  {progress.answeredCount} {t('of')} {session.totalQuestions}
                 </p>
-                <p className="text-xs text-muted-foreground hidden sm:block">вопросов</p>
+                <p className="text-xs text-muted-foreground hidden sm:block">{t('questions')}</p>
               </div>
             </div>
           )}
@@ -232,9 +235,9 @@ export function TestCard({ session, style, compact = false }: TestCardProps) {
           {/* NOT_STARTED: Question count - simplified on mobile */}
           {session.status === SessionStatus.NOT_STARTED && session.totalQuestions && (
             <div className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground">
-              <span className="tabular-nums">{session.totalQuestions} вопр.</span>
+              <span className="tabular-nums">{session.totalQuestions} {t('questionsShort')}</span>
               <span className="text-muted-foreground/50 hidden xs:inline">|</span>
-              <span className="hidden xs:inline">{formatRelativeDate(session.createdAt)}</span>
+              <span className="hidden xs:inline">{formatRelativeDate(session.createdAt, format)}</span>
             </div>
           )}
 
@@ -243,8 +246,8 @@ export function TestCard({ session, style, compact = false }: TestCardProps) {
             session.status === SessionStatus.TIMED_OUT) && (
             <div className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground">
               <span className="truncate">
-                <span className="hidden xs:inline">{session.status === SessionStatus.ABANDONED ? 'Прерван' : 'Истекло'}: </span>
-                {formatRelativeDate(session.completedAt || session.createdAt)}
+                <span className="hidden xs:inline">{t(config.labelKey)}: </span>
+                {formatRelativeDate(session.completedAt || session.createdAt, format)}
               </span>
             </div>
           )}
@@ -274,35 +277,17 @@ export function TestCard({ session, style, compact = false }: TestCardProps) {
 }
 
 /**
- * Format date as relative time (e.g., "2 дня назад")
+ * Format date as relative time using intl formatter
  */
-function formatRelativeDate(dateString?: string): string {
+function formatRelativeDate(dateString?: string, formatter?: ReturnType<typeof useFormatter>): string {
   if (!dateString) return '—';
 
   const date = new Date(dateString);
-  const now = new Date();
-  const diffMs = now.getTime() - date.getTime();
-  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
 
-  if (diffDays === 0) {
-    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
-    if (diffHours === 0) {
-      const diffMinutes = Math.floor(diffMs / (1000 * 60));
-      if (diffMinutes < 5) return 'только что';
-      return `${diffMinutes} мин назад`;
-    }
-    return `${diffHours} ч назад`;
+  if (formatter) {
+    return formatter.relativeTime(date);
   }
 
-  if (diffDays === 1) return 'вчера';
-  if (diffDays < 7) return `${diffDays} дн назад`;
-  if (diffDays < 30) {
-    const weeks = Math.floor(diffDays / 7);
-    return `${weeks} нед назад`;
-  }
-
-  return date.toLocaleDateString('ru-RU', {
-    day: 'numeric',
-    month: 'short',
-  });
+  // Fallback
+  return date.toLocaleDateString();
 }

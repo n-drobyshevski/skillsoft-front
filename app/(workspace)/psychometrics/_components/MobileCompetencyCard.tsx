@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 import { Card, CardContent } from '@/components/ui/card';
 import { CompetencyReliability, ReliabilityStatus } from '@/types/psychometrics';
@@ -74,6 +75,7 @@ export function MobileCompetencyCard({
   competency,
   className,
 }: MobileCompetencyCardProps) {
+  const t = useTranslations('psychometrics');
   // Handle both null and undefined for cronbachAlpha
   const alpha = competency.cronbachAlpha ?? null;
   const alphaColors = getAlphaColorClasses(alpha);
@@ -129,7 +131,7 @@ export function MobileCompetencyCard({
                   <span className="tabular-nums">
                     {competency.itemCount ?? '-'}
                   </span>
-                  <span>вопросов</span>
+                  <span>{t('questions')}</span>
                 </div>
               </div>
 

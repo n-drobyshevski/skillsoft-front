@@ -83,6 +83,7 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion';
 import bigFiveMapping from '@/data/standards/onet_to_bigfive_map.json';
+import { useTranslations } from 'next-intl';
 
 // ============================================================================
 // Types & Schema
@@ -99,11 +100,12 @@ interface NewTestFormProps {
   competencies: CompetencyOption[];
 }
 
+// Validation schema - messages will be provided by the form component via t()
 const formSchema = z.object({
-  name: z.string().min(3, 'Минимум 3 символа').max(100, 'Максимум 100 символов'),
-  description: z.string().max(500, 'Максимум 500 символов').optional(),
+  name: z.string().min(3).max(100),
+  description: z.string().max(500).optional(),
   goal: z.nativeEnum(AssessmentGoal),
-  competencyIds: z.array(z.string()).min(1, 'Выберите хотя бы одну компетенцию'),
+  competencyIds: z.array(z.string()).min(1),
   questionsPerIndicator: z.number().min(1).max(5),
   timeLimitMinutes: z.number().min(5).max(180),
   passingScore: z.number().min(10).max(100),
@@ -130,11 +132,12 @@ type FormValues = z.infer<typeof formSchema>;
 // Step Configuration
 // ============================================================================
 
+// Step configuration - translations will be applied in StepIndicator
 const STEPS = [
-  { id: 1, title: 'Основное', description: 'Название и цель', icon: FileText },
-  { id: 2, title: 'Компетенции', description: 'Выбор навыков', icon: Target },
-  { id: 3, title: 'Настройки', description: 'Параметры теста', icon: Settings },
-  { id: 4, title: 'Проверка', description: 'Итог', icon: Eye },
+  { id: 1, titleKey: 'basic', descKey: 'basicDescription', icon: FileText },
+  { id: 2, titleKey: 'competencies', descKey: 'competenciesDescription', icon: Target },
+  { id: 3, titleKey: 'settings', descKey: 'settingsDescription', icon: Settings },
+  { id: 4, titleKey: 'review', descKey: 'reviewDescription', icon: Eye },
 ] as const;
 
 // ============================================================================
@@ -142,9 +145,11 @@ const STEPS = [
 // ============================================================================
 
 function StepIndicator({ currentStep, totalSteps }: { currentStep: number; totalSteps: number }) {
+  const t = useTranslations('template.newForm.steps');
+  const tForm = useTranslations('template.newForm');
   const progress = ((currentStep - 1) / (totalSteps - 1)) * 100;
   const currentStepInfo = STEPS[currentStep - 1];
-  
+
   return (
     <div className="mb-6 md:mb-10 px-1">
       {/* Desktop Stepper */}
@@ -168,8 +173,8 @@ function StepIndicator({ currentStep, totalSteps }: { currentStep: number; total
                   {isCompleted ? <Check className="h-5 w-5" /> : <Icon className="h-5 w-5" />}
                 </div>
                 <div className="min-w-0">
-                  <p className={cn("text-sm font-semibold truncate", isActive && "text-primary")}>{step.title}</p>
-                  <p className="text-xs text-muted-foreground truncate">{step.description}</p>
+                  <p className={cn("text-sm font-semibold truncate", isActive && "text-primary")}>{t(step.titleKey)}</p>
+                  <p className="text-xs text-muted-foreground truncate">{t(step.descKey)}</p>
                 </div>
               </div>
               {index < STEPS.length - 1 && (
@@ -179,18 +184,18 @@ function StepIndicator({ currentStep, totalSteps }: { currentStep: number; total
           );
         })}
       </div>
-      
+
       {/* Mobile Header (Modern & Clean) */}
       <div className="md:hidden flex items-end justify-between mb-4 pt-2">
         <div>
-           <span className="text-xs font-semibold text-primary uppercase tracking-wider">Шаг {currentStep} из {totalSteps}</span>
-           <h2 className="text-2xl font-bold tracking-tight mt-1">{currentStepInfo.title}</h2>
+           <span className="text-xs font-semibold text-primary uppercase tracking-wider">{tForm('stepXOfY', { current: currentStep, total: totalSteps })}</span>
+           <h2 className="text-2xl font-bold tracking-tight mt-1">{t(currentStepInfo.titleKey)}</h2>
         </div>
         <div className="bg-secondary p-2.5 rounded-xl text-foreground/70">
             {React.createElement(currentStepInfo.icon, { className: "h-6 w-6" })}
         </div>
       </div>
-      
+
       <Progress value={progress} className="h-1.5 md:h-1.5 rounded-full" />
     </div>
   );
@@ -222,9 +227,40 @@ const GOAL_OPTIONS = [
 ] as const;
 
 function BasicInfoStep({ form }: { form: ReturnType<typeof useForm<FormValues>> }) {
-  const description = form.watch('description') || '';
-  const selectedGoal = form.watch('goal');
-  const selectedCompetencyCount = form.watch('competencyIds')?.length || 0;
+  const t = useTranslations('template.newForm');
+  const tTemplate = useTranslations('template');
+  // Use useWatch for reactive form value watching - this properly triggers re-renders
+  const description = useWatch({ control: form.control, name: 'description' }) || '';
+  const selectedGoal = useWatch({ control: form.control, name: 'goal' });
+  const competencyIds = useWatch({ control: form.control, name: 'competencyIds' });
+  const selectedCompetencyCount = competencyIds?.length || 0;
+
+  // Track previous goal and panel reset counter
+  const prevGoalRef = useRef(selectedGoal);
+  const [panelResetKey, setPanelResetKey] = useState(0);
+
+  // Reset goal-specific fields AND increment reset key when goal changes
+  useEffect(() => {
+    // Skip initial render or if goal hasn't changed
+    if (prevGoalRef.current === selectedGoal) {
+      return;
+    }
+
+    prevGoalRef.current = selectedGoal;
+
+    // Increment reset key to force full panel remount with fresh state
+    setPanelResetKey(prev => prev + 1);
+
+    // Reset ALL goal-specific fields to defaults (not just other goals)
+    // This ensures clean slate regardless of which goal is selected
+    form.setValue('includeBigFive', true);
+    form.setValue('preferredDifficulty', 'INTERMEDIATE');
+    form.setValue('onetSocCode', '');
+    form.setValue('strictnessLevel', 60);
+    form.setValue('enableDeltaTesting', false);
+    form.setValue('teamId', '');
+    form.setValue('saturationThreshold', 0.7);
+  }, [selectedGoal, form]);
 
   return (
     <div className="space-y-6 md:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -234,10 +270,10 @@ function BasicInfoStep({ form }: { form: ReturnType<typeof useForm<FormValues>> 
           name="name"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="text-base font-medium">Название теста</FormLabel>
+              <FormLabel className="text-base font-medium">{t('testName')}</FormLabel>
               <FormControl>
                 <Input
-                  placeholder="Например: Оценка лидерских качеств"
+                  placeholder={t('testNamePlaceholder')}
                   {...field}
                   className="h-14 md:h-12 text-base rounded-xl"
                 />
@@ -252,7 +288,7 @@ function BasicInfoStep({ form }: { form: ReturnType<typeof useForm<FormValues>> 
           name="goal"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="text-base font-medium">Цель оценки</FormLabel>
+              <FormLabel className="text-base font-medium">{t('assessmentGoal')}</FormLabel>
               <FormControl>
                 <GoalSelector
                   value={field.value}
@@ -265,15 +301,16 @@ function BasicInfoStep({ form }: { form: ReturnType<typeof useForm<FormValues>> 
         />
 
         {/* Goal-Specific Configuration Panels */}
+        {/* panelResetKey forces full component remount when goal changes, resetting all internal state */}
         <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
           {selectedGoal === AssessmentGoal.OVERVIEW && (
             <Card className="border-dashed border-primary/30 bg-primary/5 dark:bg-primary/10">
               <CardContent className="pt-5">
                 <div className="flex items-center gap-2 mb-4">
                   <Crosshair className="h-4 w-4 text-primary" />
-                  <span className="text-sm font-semibold">Настройки Universal Baseline</span>
+                  <span className="text-sm font-semibold">{tTemplate('overviewSettings')}</span>
                 </div>
-                <OverviewConfigPanel selectedCompetencyCount={selectedCompetencyCount} />
+                <OverviewConfigPanel key={`overview-${panelResetKey}`} selectedCompetencyCount={selectedCompetencyCount} />
               </CardContent>
             </Card>
           )}
@@ -283,9 +320,9 @@ function BasicInfoStep({ form }: { form: ReturnType<typeof useForm<FormValues>> 
               <CardContent className="pt-5">
                 <div className="flex items-center gap-2 mb-4">
                   <Briefcase className="h-4 w-4 text-blue-500" />
-                  <span className="text-sm font-semibold">Настройки Job Fit</span>
+                  <span className="text-sm font-semibold">{tTemplate('jobFitSettings')}</span>
                 </div>
-                <JobFitConfigPanel />
+                <JobFitConfigPanel key={`jobfit-${panelResetKey}`} />
               </CardContent>
             </Card>
           )}
@@ -295,9 +332,9 @@ function BasicInfoStep({ form }: { form: ReturnType<typeof useForm<FormValues>> 
               <CardContent className="pt-5">
                 <div className="flex items-center gap-2 mb-4">
                   <Users className="h-4 w-4 text-purple-500" />
-                  <span className="text-sm font-semibold">Настройки Team Fit</span>
+                  <span className="text-sm font-semibold">{tTemplate('teamFitSettings')}</span>
                 </div>
-                <TeamFitConfigPanel />
+                <TeamFitConfigPanel key={`teamfit-${panelResetKey}`} />
               </CardContent>
             </Card>
           )}
@@ -308,10 +345,10 @@ function BasicInfoStep({ form }: { form: ReturnType<typeof useForm<FormValues>> 
           name="description"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="text-base font-medium">Описание</FormLabel>
+              <FormLabel className="text-base font-medium">{t('descriptionLabel')}</FormLabel>
               <FormControl>
                 <Textarea
-                  placeholder="Опишите цель и содержание теста..."
+                  placeholder={t('descriptionPlaceholder')}
                   className="min-h-32 rounded-xl resize-none text-base"
                   {...field}
                 />
@@ -336,10 +373,8 @@ function BasicInfoStep({ form }: { form: ReturnType<typeof useForm<FormValues>> 
 
 const BIG_FIVE_CONFIG = {
   OPENNESS: {
-    name: 'Openness',
-    nameRu: 'Открытость опыту',
-    description: 'Creativity, curiosity, and willingness to explore',
-    descriptionRu: 'Креативность, любознательность, открытость новому',
+    nameKey: 'openness',
+    descKey: 'opennessDesc',
     icon: Lightbulb,
     color: 'text-purple-600 dark:text-purple-400',
     bgColor: 'bg-purple-50 dark:bg-purple-950/40',
@@ -347,10 +382,8 @@ const BIG_FIVE_CONFIG = {
     selectedCardBg: 'bg-purple-50/80 dark:bg-purple-950/50',
   },
   CONSCIENTIOUSNESS: {
-    name: 'Conscientiousness',
-    nameRu: 'Добросовестность',
-    description: 'Organization, responsibility, and self-discipline',
-    descriptionRu: 'Организованность, ответственность, самодисциплина',
+    nameKey: 'conscientiousness',
+    descKey: 'conscientiousnessDesc',
     icon: ListChecks,
     color: 'text-blue-600 dark:text-blue-400',
     bgColor: 'bg-blue-50 dark:bg-blue-950/40',
@@ -358,10 +391,8 @@ const BIG_FIVE_CONFIG = {
     selectedCardBg: 'bg-blue-50/80 dark:bg-blue-950/50',
   },
   EXTRAVERSION: {
-    name: 'Extraversion',
-    nameRu: 'Экстраверсия',
-    description: 'Sociability, assertiveness, and energy',
-    descriptionRu: 'Общительность, активность, энергичность',
+    nameKey: 'extraversion',
+    descKey: 'extraversionDesc',
     icon: Sparkles,
     color: 'text-orange-600 dark:text-orange-400',
     bgColor: 'bg-orange-50 dark:bg-orange-950/40',
@@ -369,10 +400,8 @@ const BIG_FIVE_CONFIG = {
     selectedCardBg: 'bg-orange-50/80 dark:bg-orange-950/50',
   },
   AGREEABLENESS: {
-    name: 'Agreeableness',
-    nameRu: 'Доброжелательность',
-    description: 'Cooperation, empathy, and trust',
-    descriptionRu: 'Сотрудничество, эмпатия, доверие',
+    nameKey: 'agreeableness',
+    descKey: 'agreeablenessDesc',
     icon: Heart,
     color: 'text-pink-600 dark:text-pink-400',
     bgColor: 'bg-pink-50 dark:bg-pink-950/40',
@@ -380,10 +409,8 @@ const BIG_FIVE_CONFIG = {
     selectedCardBg: 'bg-pink-50/80 dark:bg-pink-950/50',
   },
   EMOTIONAL_STABILITY: {
-    name: 'Emotional Stability',
-    nameRu: 'Эмоциональная стабильность',
-    description: 'Calmness, resilience, and stress management',
-    descriptionRu: 'Спокойствие, стрессоустойчивость, уравновешенность',
+    nameKey: 'emotionalStability',
+    descKey: 'emotionalStabilityDesc',
     icon: Shield,
     color: 'text-green-600 dark:text-green-400',
     bgColor: 'bg-green-50 dark:bg-green-950/40',
@@ -395,9 +422,12 @@ const BIG_FIVE_CONFIG = {
 type BigFiveCategory = keyof typeof BIG_FIVE_CONFIG;
 
 function CompetenciesStep({ form, competencies }: NewTestFormProps & { form: any }) {
+  const t = useTranslations('template.newForm');
+  const tBigFive = useTranslations('template.newForm.bigFive');
+  const tTemplate = useTranslations('template');
   const [searchQuery, setSearchQuery] = useState('');
   const [openSections, setOpenSections] = useState<string[]>(['CONSCIENTIOUSNESS', 'EXTRAVERSION']);
-  
+
   // Local state for selections - completely independent of React Hook Form reactive system
   const [selectedIds, setSelectedIds] = useState<string[]>(() => form.getValues('competencyIds') || []);
 
@@ -515,7 +545,7 @@ function CompetenciesStep({ form, competencies }: NewTestFormProps & { form: any
     return (
       <div className="text-center py-16 border rounded-2xl bg-muted/20">
         <Target className="h-16 w-16 mx-auto text-muted-foreground/50 mb-4" />
-        <h3 className="font-semibold text-xl">Нет компетенций</h3>
+        <h3 className="font-semibold text-xl">{t('noCompetencies')}</h3>
       </div>
     );
   }
@@ -527,7 +557,7 @@ function CompetenciesStep({ form, competencies }: NewTestFormProps & { form: any
         <div className="relative flex-1">
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
           <Input
-            placeholder="Поиск компетенций..."
+            placeholder={t('searchCompetencies')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="h-12 text-base rounded-xl pl-11 pr-10"
@@ -553,7 +583,7 @@ function CompetenciesStep({ form, competencies }: NewTestFormProps & { form: any
             className="h-12 rounded-xl"
           >
             <CheckCircle2 className="h-4 w-4 mr-2" />
-            Выбрать все
+            {t('selectAll')}
           </Button>
           {selectedIds.length > 0 && (
             <Button
@@ -563,7 +593,7 @@ function CompetenciesStep({ form, competencies }: NewTestFormProps & { form: any
               className="h-12 rounded-xl"
             >
               <X className="h-4 w-4 mr-2" />
-              Сбросить
+              {t('clearAll')}
             </Button>
           )}
         </div>
@@ -573,7 +603,7 @@ function CompetenciesStep({ form, competencies }: NewTestFormProps & { form: any
       {selectedCount > 0 && (
         <div className="flex items-center gap-3 p-4 bg-primary/5 border border-primary/20 rounded-xl">
           <Badge className="h-7 px-3 text-sm">{selectedCount}</Badge>
-          <span className="text-sm font-medium text-primary">Выбрано компетенций</span>
+          <span className="text-sm font-medium text-primary">{t('selectedCompetencies')}</span>
         </div>
       )}
 
@@ -581,7 +611,7 @@ function CompetenciesStep({ form, competencies }: NewTestFormProps & { form: any
       {totalFiltered === 0 ? (
         <div className="text-center py-12 border rounded-2xl bg-muted/20">
           <Filter className="h-10 w-10 mx-auto text-muted-foreground/50 mb-3" />
-          <p className="text-muted-foreground">Ничего не найдено</p>
+          <p className="text-muted-foreground">{t('nothingFound')}</p>
         </div>
       ) : (
         <Accordion 
@@ -622,13 +652,13 @@ function CompetenciesStep({ form, competencies }: NewTestFormProps & { form: any
                     </div>
                     <div className="flex-1 text-left">
                       <div className="flex items-center gap-3 mb-1">
-                        <h3 className="font-bold text-base">{config.nameRu}</h3>
+                        <h3 className="font-bold text-base">{tBigFive(config.nameKey)}</h3>
                         <Badge variant="secondary" className="text-xs">
                           {selectedCount} / {comps.length}
                         </Badge>
                       </div>
                       <p className="text-xs text-muted-foreground">
-                        {config.descriptionRu}
+                        {tBigFive(config.descKey)}
                       </p>
                     </div>
                   </div>
@@ -642,7 +672,7 @@ function CompetenciesStep({ form, competencies }: NewTestFormProps & { form: any
                       onClick={() => handleSelectAllInCategory(categoryKey)}
                       className="h-8 text-xs"
                     >
-                      {allSelected ? 'Снять выбор' : 'Выбрать все'}
+                      {allSelected ? tTemplate('deselectCategory') : tTemplate('selectCategory')}
                     </Button>
                   </div>
                   <div className="grid gap-2 md:grid-cols-2">
@@ -705,20 +735,41 @@ function CompetenciesStep({ form, competencies }: NewTestFormProps & { form: any
 // ============================================================================
 
 function ConfigurationStep({ form }: { form: any }) {
+  const t = useTranslations('template.newForm');
+  const tTemplate = useTranslations('template');
+  const tCommon = useTranslations('common');
+
+  const mainParams = [
+    { name: 'questionsPerIndicator', labelKey: 'questionsPerIndicator', icon: HelpCircle, options: [1, 2, 3, 5], suffixKey: 'q' },
+    { name: 'timeLimitMinutes', labelKey: 'timeLimit', icon: Clock, options: [15, 30, 45, 60, 90, 120], suffixKey: 'min' },
+    { name: 'passingScore', labelKey: 'passingThreshold', icon: Percent, options: [50, 60, 70, 80, 90], suffixKey: '%' },
+  ];
+
+  const modeSettings = [
+    { name: 'shuffleQuestions', labelKey: 'shuffleQuestions', descKey: 'shuffleQuestionsDesc' },
+    { name: 'shuffleOptions', labelKey: 'shuffleOptions', descKey: 'shuffleOptionsDesc' },
+    { name: 'allowSkip', labelKey: 'allowSkip', descKey: 'allowSkipDesc' },
+    { name: 'allowBackNavigation', labelKey: 'allowBackNavigation', descKey: 'allowBackNavigationDesc' },
+    { name: 'showResultsImmediately', labelKey: 'showResultsImmediately', descKey: 'showResultsImmediatelyDesc' },
+  ];
+
+  const getSuffix = (key: string) => {
+    if (key === '%') return '%';
+    if (key === 'min') return tTemplate('minutes');
+    if (key === 'q') return tCommon('questionsShort');
+    return '';
+  };
+
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div className="space-y-4">
-        <h3 className="text-lg font-semibold tracking-tight">Основные параметры</h3>
+        <h3 className="text-lg font-semibold tracking-tight">{t('mainParameters')}</h3>
         <div className="grid gap-3 md:grid-cols-3">
-          {[
-            { name: 'questionsPerIndicator', label: 'Вопросы/индикатор', icon: HelpCircle, options: [1, 2, 3, 5], suffix: 'вопр.' },
-            { name: 'timeLimitMinutes', label: 'Время на тест', icon: Clock, options: [15, 30, 45, 60, 90, 120], suffix: 'мин' },
-            { name: 'passingScore', label: 'Проходной балл', icon: Percent, options: [50, 60, 70, 80, 90], suffix: '%' },
-          ].map((fieldData) => (
+          {mainParams.map((fieldData) => (
             <FormField key={fieldData.name} control={form.control} name={fieldData.name} render={({ field }) => (
               <FormItem className="p-4 border rounded-2xl bg-card shadow-sm space-y-3">
                 <FormLabel className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-                  <fieldData.icon className="h-4 w-4" /> {fieldData.label}
+                  <fieldData.icon className="h-4 w-4" /> {t(fieldData.labelKey)}
                 </FormLabel>
                 <Select value={field.value.toString()} onValueChange={(v) => field.onChange(parseInt(v))}>
                   <FormControl>
@@ -728,7 +779,7 @@ function ConfigurationStep({ form }: { form: any }) {
                   </FormControl>
                   <SelectContent>
                     {fieldData.options.map(opt => (
-                      <SelectItem key={opt} value={opt.toString()}>{opt} {fieldData.suffix}</SelectItem>
+                      <SelectItem key={opt} value={opt.toString()}>{opt} {getSuffix(fieldData.suffixKey)}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -739,20 +790,14 @@ function ConfigurationStep({ form }: { form: any }) {
       </div>
 
       <div className="space-y-4">
-        <h3 className="text-lg font-semibold tracking-tight">Режим прохождения</h3>
+        <h3 className="text-lg font-semibold tracking-tight">{t('testMode')}</h3>
         <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
-          {[
-            { name: 'shuffleQuestions', label: 'Перемешать вопросы', desc: 'Случайный порядок' },
-            { name: 'shuffleOptions', label: 'Перемешать ответы', desc: 'Случайный порядок вариантов' },
-            { name: 'allowSkip', label: 'Разрешить пропуск', desc: 'Можно пропустить вопрос' },
-            { name: 'allowBackNavigation', label: 'Возврат назад', desc: 'Можно изменить ответ' },
-            { name: 'showResultsImmediately', label: 'Результат сразу', desc: 'Показать итог в конце' },
-          ].map((item) => (
+          {modeSettings.map((item) => (
             <FormField key={item.name} control={form.control} name={item.name} render={({ field }) => (
               <FormItem className="flex items-center justify-between p-4 border rounded-2xl bg-card shadow-sm active:bg-muted/30 transition-colors">
                 <div className="space-y-1 mr-4">
-                  <FormLabel className="text-base font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">{item.label}</FormLabel>
-                  <FormDescription className="text-xs">{item.desc}</FormDescription>
+                  <FormLabel className="text-base font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">{t(item.labelKey)}</FormLabel>
+                  <FormDescription className="text-xs">{t(item.descKey)}</FormDescription>
                 </div>
                 <FormControl>
                   {/* CHANGED: Removed scale-110, added scale-90 for mobile to make it smaller */}
@@ -772,12 +817,14 @@ function ConfigurationStep({ form }: { form: any }) {
 // ============================================================================
 
 function ReviewStep({ form, competencies }: NewTestFormProps & { form: any }) {
+  const t = useTranslations('template.newForm');
+  const tTemplate = useTranslations('template');
   const values = form.getValues();
   const selectedCompetencies = competencies.filter(c => values.competencyIds.includes(c.id));
   const config = [
-    { label: 'Вопросов/инд.', value: values.questionsPerIndicator, icon: HelpCircle },
-    { label: 'Время', value: `${values.timeLimitMinutes} мин`, icon: Clock },
-    { label: 'Порог', value: `${values.passingScore}%`, icon: Percent },
+    { labelKey: 'questionsPerIndicatorShort', value: values.questionsPerIndicator, icon: HelpCircle },
+    { labelKey: 'timeShort', value: `${values.timeLimitMinutes} ${tTemplate('minutes')}`, icon: Clock },
+    { labelKey: 'thresholdShort', value: `${values.passingScore}%`, icon: Percent },
   ];
 
   return (
@@ -791,7 +838,7 @@ function ReviewStep({ form, competencies }: NewTestFormProps & { form: any }) {
             </div>
             <div>
                <h3 className="font-bold text-xl break-words leading-tight mb-1">{values.name}</h3>
-               <p className="text-sm text-muted-foreground line-clamp-2">{values.description || "Без описания"}</p>
+               <p className="text-sm text-muted-foreground line-clamp-2">{values.description || t('noDescription')}</p>
             </div>
           </div>
         </CardContent>
@@ -803,13 +850,13 @@ function ReviewStep({ form, competencies }: NewTestFormProps & { form: any }) {
             <CardContent className="pt-5">
                 <div className="flex items-center gap-3 mb-4">
                     <div className="p-2 bg-primary/10 rounded-lg text-primary"><Target className="h-5 w-5" /></div>
-                    <span className="font-semibold">Компетенции ({selectedCompetencies.length})</span>
+                    <span className="font-semibold">{t('reviewCompetencies', { count: selectedCompetencies.length })}</span>
                 </div>
                 <div className="flex flex-wrap gap-2">
                     {selectedCompetencies.slice(0, 5).map(c => (
                         <Badge key={c.id} variant="secondary" className="rounded-md font-normal">{c.name}</Badge>
                     ))}
-                    {selectedCompetencies.length > 5 && <Badge variant="outline">+{selectedCompetencies.length - 5} ещё</Badge>}
+                    {selectedCompetencies.length > 5 && <Badge variant="outline">+{selectedCompetencies.length - 5} {t('more')}</Badge>}
                 </div>
             </CardContent>
         </Card>
@@ -819,14 +866,14 @@ function ReviewStep({ form, competencies }: NewTestFormProps & { form: any }) {
             <CardContent className="pt-5">
                 <div className="flex items-center gap-3 mb-4">
                     <div className="p-2 bg-primary/10 rounded-lg text-primary"><Settings className="h-5 w-5" /></div>
-                    <span className="font-semibold">Параметры</span>
+                    <span className="font-semibold">{t('reviewParameters')}</span>
                 </div>
                 <div className="grid grid-cols-3 gap-2">
                     {config.map((c, i) => (
                         <div key={i} className="text-center p-2 rounded-xl bg-muted/30 border">
                             <div className="text-lg font-bold">{c.value}</div>
                             <div className="text-[10px] uppercase text-muted-foreground font-medium flex justify-center gap-1 items-center mt-1">
-                                <c.icon className="h-3 w-3" /> {c.label}
+                                <c.icon className="h-3 w-3" /> {t(c.labelKey)}
                             </div>
                         </div>
                     ))}
@@ -846,6 +893,8 @@ export default function NewTestForm({ competencies }: NewTestFormProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [currentStep, setCurrentStep] = useState(1);
+  const t = useTranslations('template');
+  const tCommon = useTranslations('common');
   
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -916,10 +965,10 @@ export default function NewTestForm({ competencies }: NewTestFormProps) {
         };
 
         const template = await testTemplatesApi.createTemplate(request) as { id: string };
-        toast.success('Тест создан!');
+        toast.success(t('testCreated'));
         router.push(`/test-templates/${template.id}`);
       } catch (e: any) {
-        toast.error(e?.message || 'Ошибка создания');
+        toast.error(e?.message || t('creationError'));
       }
     });
   };
@@ -943,16 +992,16 @@ export default function NewTestForm({ competencies }: NewTestFormProps) {
           <div className="fixed bottom-0 left-0 right-0 p-4 bg-background/90 backdrop-blur-xl border-t z-50 grid grid-cols-[1fr_2fr] gap-3 safe-area-bottom shadow-lg md:hidden">
              <Button type="button" variant="outline" size="lg" className="h-12 rounded-xl text-base w-full"
                 onClick={currentStep === 1 ? () => router.back() : () => setCurrentStep(p => p - 1)} disabled={isPending}>
-                {currentStep === 1 ? 'Отмена' : 'Назад'}
+                {currentStep === 1 ? t('cancel') : t('back')}
              </Button>
-             
+
              {currentStep < STEPS.length ? (
                <Button type="button" size="lg" className="h-12 rounded-xl text-base w-full shadow-primary/25 shadow-md" onClick={handleNext}>
-                 Далее
+                 {t('next')}
                </Button>
              ) : (
                <Button type="submit" size="lg" className="h-12 rounded-xl text-base w-full shadow-primary/25 shadow-md" disabled={isPending}>
-                 {isPending ? <Loader2 className="animate-spin" /> : <><Check className="mr-2 h-5 w-5" /> Создать</>}
+                 {isPending ? <Loader2 className="animate-spin" /> : <><Check className="mr-2 h-5 w-5" /> {tCommon('create')}</>}
                </Button>
              )}
           </div>
@@ -960,13 +1009,13 @@ export default function NewTestForm({ competencies }: NewTestFormProps) {
           {/* Desktop Footer (Standard) */}
           <div className="hidden md:flex justify-between mt-8">
              <Button type="button" variant="ghost" onClick={currentStep === 1 ? () => router.back() : () => setCurrentStep(p => p - 1)}>
-                <ArrowLeft className="mr-2 h-4 w-4" /> Назад
+                <ArrowLeft className="mr-2 h-4 w-4" /> {t('back')}
              </Button>
              {currentStep < STEPS.length ? (
-               <Button type="button" onClick={handleNext}>Далее <ArrowRight className="ml-2 h-4 w-4" /></Button>
+               <Button type="button" onClick={handleNext}>{t('next')} <ArrowRight className="ml-2 h-4 w-4" /></Button>
              ) : (
                <Button type="submit" disabled={isPending}>
-                 {isPending ? <Loader2 className="animate-spin mr-2" /> : <Check className="mr-2 h-4 w-4" />} Создать тест
+                 {isPending ? <Loader2 className="animate-spin mr-2" /> : <Check className="mr-2 h-4 w-4" />} {t('createTest')}
                </Button>
              )}
           </div>

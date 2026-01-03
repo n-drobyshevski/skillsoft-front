@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useCallback, useRef, useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import { TestTemplateSummary } from "@/types/domain";
 import TestTemplateCard from "./TestTemplateCard";
 import TemplateFilters from "./TemplateFilters";
@@ -27,6 +28,8 @@ export default function TestTemplatesGrid({
   const [focusedIndex, setFocusedIndex] = useState<number>(-1);
   const gridRef = useRef<HTMLDivElement>(null);
   const cardRefs = useRef<Map<string, HTMLDivElement>>(new Map());
+
+  const t = useTranslations('template');
 
   // Mark the first active template as recommended
   const recommendedTemplateId = templates.length > 0 ? templates[0]?.id : null;
@@ -118,7 +121,7 @@ export default function TestTemplatesGrid({
         href="#templates-grid"
         className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:bg-background focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:ring-2 focus:ring-ring focus:rounded-md"
       >
-        Skip to templates
+        {t('grid.skipToTemplates')}
       </a>
 
       {/* Filters */}
@@ -146,10 +149,10 @@ export default function TestTemplatesGrid({
             </svg>
           </div>
           <h3 className="text-base font-medium mt-4 mb-1">
-            Шаблоны не найдены
+            {t('grid.noTemplatesFound')}
           </h3>
           <p className="text-sm text-muted-foreground max-w-sm">
-            Попробуйте изменить параметры поиска или фильтрации.
+            {t('grid.noTemplatesDescription')}
           </p>
         </div>
       ) : (
@@ -158,7 +161,7 @@ export default function TestTemplatesGrid({
           id="templates-grid"
           className="grid gap-2 sm:gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
           role="grid"
-          aria-label={`${filteredTemplates.length} шаблонов тестов`}
+          aria-label={t('grid.templateCount', { count: filteredTemplates.length })}
         >
           {filteredTemplates.map((template, index) => (
             <div
@@ -187,8 +190,8 @@ export default function TestTemplatesGrid({
         className="sr-only"
       >
         {filteredTemplates.length === 0
-          ? 'Шаблоны по заданным фильтрам не найдены'
-          : `Показано ${filteredTemplates.length} из ${templates.length} шаблонов`}
+          ? t('grid.templatesNotFoundByFilter')
+          : t('filters.showingOf', { shown: filteredTemplates.length, total: templates.length })}
       </div>
     </div>
   );

@@ -3,12 +3,12 @@
 import React, { useState, useEffect, useMemo, useCallback, Suspense } from 'react';
 import { BehavioralIndicator, Competency } from '@/types/domain';
 import { behavioralIndicatorsApi } from '@/services/api';
-import { 
-  Search, 
-  Plus, 
-  ArrowUpDown, 
-  CheckCircle2, 
-  Circle, 
+import {
+  Search,
+  Plus,
+  ArrowUpDown,
+  CheckCircle2,
+  Circle,
   AlertCircle,
   Eye,
   Settings2,
@@ -18,6 +18,7 @@ import {
   PieChart,
   Edit3
 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 // Enhanced UI Components
 import { Button } from '@/components/ui/button';
@@ -123,48 +124,48 @@ const StatsSkeleton = () => (
 );
 
 // Stats Cards Component
-const StatsCards = ({ stats }: { stats: IndicatorStats }) => (
+const StatsCards = ({ stats, t }: { stats: IndicatorStats; t: ReturnType<typeof useTranslations<'competency'>> }) => (
   <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
     <Card>
       <CardContent className="p-4">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm font-medium text-muted-foreground">This Competency</p>
+            <p className="text-sm font-medium text-muted-foreground">{t('thisCompetency')}</p>
             <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">{stats.currentCompetency}</p>
           </div>
           <CheckCircle2 className="h-8 w-8 text-emerald-600 dark:text-emerald-400" />
         </div>
       </CardContent>
     </Card>
-    
+
     <Card>
       <CardContent className="p-4">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm font-medium text-muted-foreground">Other Competencies</p>
+            <p className="text-sm font-medium text-muted-foreground">{t('otherCompetencies')}</p>
             <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">{stats.otherCompetencies}</p>
           </div>
           <Users className="h-8 w-8 text-blue-600 dark:text-blue-400" />
         </div>
       </CardContent>
     </Card>
-    
+
     <Card>
       <CardContent className="p-4">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm font-medium text-muted-foreground">Unassigned</p>
+            <p className="text-sm font-medium text-muted-foreground">{t('unassigned')}</p>
             <p className="text-2xl font-bold text-amber-600 dark:text-amber-400">{stats.unassigned}</p>
           </div>
           <Circle className="h-8 w-8 text-amber-600 dark:text-amber-400" />
         </div>
       </CardContent>
     </Card>
-    
+
     <Card>
       <CardContent className="p-4">
         <div>
-          <p className="text-sm font-medium text-muted-foreground mb-2">By Level</p>
+          <p className="text-sm font-medium text-muted-foreground mb-2">{t('byLevel')}</p>
           <div className="space-y-1">
             {Object.entries(stats.byObservabilityLevel).slice(0, 2).map(([level, count]) => (
               <div key={level} className="flex justify-between text-xs">
@@ -180,15 +181,19 @@ const StatsCards = ({ stats }: { stats: IndicatorStats }) => (
 );
 
 // Current Indicator Row Component
-const CurrentIndicatorRow = React.memo(({ 
-  indicator, 
-  onView
+const CurrentIndicatorRow = React.memo(({
+  indicator,
+  onView,
+  t
 }: {
   indicator: BehavioralIndicator;
   onView: (indicator: BehavioralIndicator) => void;
+  t: ReturnType<typeof useTranslations<'competency'>>;
 }) => {
+  const tTable = useTranslations('table');
+
   return (
-    <TableRow 
+    <TableRow
       className="hover:bg-accent/30 transition-colors cursor-pointer group"
       onClick={() => onView(indicator)}
     >
@@ -201,8 +206,8 @@ const CurrentIndicatorRow = React.memo(({
             <span>ID: {indicator.id.slice(0, 8)}...</span>
             {indicator.orderIndex !== undefined && (
               <>
-                <span>•</span>
-                <span>Order: {indicator.orderIndex}</span>
+                <span>-</span>
+                <span>{t('order')}: {indicator.orderIndex}</span>
               </>
             )}
           </div>
@@ -219,7 +224,7 @@ const CurrentIndicatorRow = React.memo(({
         </Badge>
       </TableCell>
       <TableCell>
-        <span className="text-sm">{indicator.isActive ? 'Active' : 'Inactive'}</span>
+        <span className="text-sm">{indicator.isActive ? t('active') : t('inactive')}</span>
       </TableCell>
       <TableCell onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center gap-2">
@@ -230,16 +235,16 @@ const CurrentIndicatorRow = React.memo(({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuLabel>Actions</DropdownMenuLabel>
+              <DropdownMenuLabel>{tTable('actions')}</DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={() => onView(indicator)}>
                 <Eye className="w-4 h-4 mr-2" />
-                View Details
+                {t('viewDetails')}
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
                 <Link href={`/hr/behavioral-indicators/${indicator.id}`}>
                   <Pencil className="w-4 h-4 mr-2" />
-                  Edit Indicator
+                  {t('editIndicator')}
                 </Link>
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -253,11 +258,14 @@ const CurrentIndicatorRow = React.memo(({
 CurrentIndicatorRow.displayName = 'CurrentIndicatorRow';
 
 // Main Component
-export function CompetencyIndicatorsManager({ 
-  competency 
-}: { 
-  competency: Competency 
+export function CompetencyIndicatorsManager({
+  competency
+}: {
+  competency: Competency
 }) {
+  const t = useTranslations('competency');
+  const tTable = useTranslations('table');
+
   // State Management
   const [allIndicators, setAllIndicators] = useState<BehavioralIndicator[]>([]);
   const [currentCompetencyIndicators, setCurrentCompetencyIndicators] = useState<BehavioralIndicator[]>([]);
@@ -394,10 +402,10 @@ export function CompetencyIndicatorsManager({
     return (
       <div className="p-8 text-center">
         <AlertCircle className="h-12 w-12 mx-auto mb-4 text-destructive" />
-        <h3 className="font-semibold mb-2">Error loading indicators</h3>
+        <h3 className="font-semibold mb-2">{t('errorLoadingIndicators')}</h3>
         <p className="text-sm text-muted-foreground mb-4">{error}</p>
         <Button onClick={fetchIndicators} variant="outline">
-          Try Again
+          {t('tryAgain')}
         </Button>
       </div>
     );
@@ -426,7 +434,7 @@ export function CompetencyIndicatorsManager({
 
       {/* Stats Cards */}
       <Suspense fallback={<StatsSkeleton />}>
-        {!isLoading && <StatsCards stats={stats} />}
+        {!isLoading && <StatsCards stats={stats} t={t} />}
       </Suspense>
 
       {/* Weight Distribution */}
@@ -651,6 +659,7 @@ export function CompetencyIndicatorsManager({
                         key={indicator.id}
                         indicator={indicator}
                         onView={handleViewIndicator}
+                        t={t}
                       />
                     ))}
                   </TableBody>

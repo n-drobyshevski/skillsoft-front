@@ -1,15 +1,19 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '@clerk/nextjs';
+import { useTranslations } from 'next-intl';
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Clock, FileQuestion, ArrowRight, Target, Loader2 } from "lucide-react";
 import { ExistingSessionDialog } from "@/components/assessment/ExistingSessionDialog";
 import { ReadinessAlert } from "@/components/assessment/ReadinessAlert";
+import { AssemblyProgressModal } from "@/components/test-assembly";
 import { TestTemplate, TestSession } from "@/types/domain";
 import { useTemplateReadiness } from "@/hooks/useTemplateReadiness";
+import { useAssemblyProgress } from "@/hooks/useAssemblyProgress";
 
 interface StartAssessmentClientProps {
   template: TestTemplate;
@@ -31,10 +35,38 @@ export function StartAssessmentClient({
   abandonAndStartNew,
 }: StartAssessmentClientProps) {
   const router = useRouter();
+  const { userId } = useAuth();
+  const t = useTranslations('template.start');
   const [showDialog, setShowDialog] = useState(!!existingSession);
+  const [showAssemblyModal, setShowAssemblyModal] = useState(false);
 
   // Pre-flight readiness check
   const { readiness, isReady, isLoading: isCheckingReadiness } = useTemplateReadiness(template.id);
+
+  // Assembly progress tracking
+  const {
+    phase,
+    progress,
+    isAssembling,
+    isComplete,
+    isFailed,
+    error,
+    sessionId,
+    retryCount,
+    startAssembly,
+    retry,
+    reset,
+  } = useAssemblyProgress({
+    onComplete: (newSessionId) => {
+      // Navigate to test after short delay for UX
+      setTimeout(() => {
+        router.push(`/test-templates/take/${newSessionId}`);
+      }, 500);
+    },
+    onError: (err) => {
+      console.error('Assembly failed:', err);
+    },
+  });
 
   // Handle resume existing session
   const handleResume = () => {
@@ -50,6 +82,28 @@ export function StartAssessmentClient({
     }
     return { success: false, error: 'No existing session to abandon' };
   };
+
+  // Handle start assessment with assembly progress
+  const handleStartClick = useCallback(async () => {
+    setShowAssemblyModal(true);
+    await startAssembly(template.id, userId);
+  }, [template.id, userId, startAssembly]);
+
+  // Handle continue to test after assembly
+  const handleContinueToTest = useCallback((newSessionId: string) => {
+    router.push(`/test-templates/take/${newSessionId}`);
+  }, [router]);
+
+  // Handle cancel assembly
+  const handleCancelAssembly = useCallback(() => {
+    reset();
+    setShowAssemblyModal(false);
+  }, [reset]);
+
+  // Handle retry assembly
+  const handleRetryAssembly = useCallback(() => {
+    retry();
+  }, [retry]);
 
   const goalType = template.goal || 'ASSESSMENT';
 
@@ -77,7 +131,7 @@ export function StartAssessmentClient({
                 </svg>
               </div>
               <div className="flex-1">
-                <h3 className="font-semibold text-red-400 mb-1">Failed to Start Assessment</h3>
+                <h3 className="font-semibold text-red-400 mb-1">{t('failedToStart')}</h3>
                 <p className="text-sm text-red-300/90">{decodeURIComponent(errorMessage)}</p>
               </div>
             </div>
@@ -126,13 +180,13 @@ export function StartAssessmentClient({
             <div className="flex items-center justify-center gap-8 py-4 border-y border-neutral-800">
               <StatItem
                 icon={Clock}
-                label="Time"
-                value={`${estimatedMinutes} min`}
+                label={t('labels.time')}
+                value={`${estimatedMinutes} ${t('labels.min')}`}
               />
               <div className="h-8 w-px bg-neutral-800" />
               <StatItem
                 icon={FileQuestion}
-                label="Questions"
+                label={t('labels.questions')}
                 value={estimatedQuestions.toString()}
               />
               {template.competencyIds?.length > 0 && (
@@ -140,7 +194,7 @@ export function StartAssessmentClient({
                   <div className="h-8 w-px bg-neutral-800" />
                   <StatItem
                     icon={Target}
-                    label="Competencies"
+                    label={t('labels.competencies')}
                     value={template.competencyIds.length.toString()}
                   />
                 </>
@@ -148,39 +202,54 @@ export function StartAssessmentClient({
             </div>
 
             {/* Start Button */}
-            <form action={startAssessment} aria-label="Start assessment form">
-              <Button
-                type="submit"
-                size="lg"
-                disabled={isCheckingReadiness || !isReady}
-                aria-label={`Start ${template.name} assessment`}
-                className="w-full h-14 text-lg font-semibold bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg transition-all duration-200 hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
-              >
-                {isCheckingReadiness ? (
-                  <>
-                    <Loader2 className="mr-2 w-5 h-5 animate-spin" aria-hidden="true" />
-                    Checking Readiness...
-                  </>
-                ) : !isReady ? (
-                  <>
-                    Assessment Not Available
-                  </>
-                ) : (
-                  <>
-                    Begin Assessment
-                    <ArrowRight className="ml-2 w-5 h-5" aria-hidden="true" />
-                  </>
-                )}
-              </Button>
-            </form>
+            <Button
+              onClick={handleStartClick}
+              size="lg"
+              disabled={isCheckingReadiness || !isReady || isAssembling}
+              aria-label={`${t('begin')} - ${template.name}`}
+              className="w-full h-14 text-lg font-semibold bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg transition-all duration-200 hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+            >
+              {isCheckingReadiness ? (
+                <>
+                  <Loader2 className="mr-2 w-5 h-5 animate-spin" aria-hidden="true" />
+                  {t('checking')}
+                </>
+              ) : !isReady ? (
+                <>
+                  {t('notAvailable')}
+                </>
+              ) : (
+                <>
+                  {t('begin')}
+                  <ArrowRight className="ml-2 w-5 h-5" aria-hidden="true" />
+                </>
+              )}
+            </Button>
 
             {/* Footer Note */}
             <p className="text-center text-neutral-500 text-sm leading-relaxed">
-              Your progress will be saved automatically. You can pause and resume at any time.
+              {t('progressSaved')}
             </p>
           </div>
         </Card>
       </div>
+
+      {/* Assembly Progress Modal */}
+      <AssemblyProgressModal
+        open={showAssemblyModal}
+        onOpenChange={setShowAssemblyModal}
+        progress={progress}
+        phase={phase}
+        isAssembling={isAssembling}
+        isComplete={isComplete}
+        isFailed={isFailed}
+        error={error}
+        sessionId={sessionId}
+        retryCount={retryCount}
+        onRetry={handleRetryAssembly}
+        onContinue={handleContinueToTest}
+        onCancel={handleCancelAssembly}
+      />
     </div>
   );
 }

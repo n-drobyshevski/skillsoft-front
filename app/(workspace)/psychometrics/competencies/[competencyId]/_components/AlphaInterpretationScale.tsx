@@ -1,3 +1,5 @@
+'use client';
+
 /**
  * AlphaInterpretationScale - Visual scale showing Cronbach's Alpha zones
  *
@@ -5,11 +7,12 @@
  * - Color-coded zones from unacceptable (red) to excellent (green)
  * - Highlights the active zone based on current alpha value
  * - Accessible with proper ARIA labels
- * - Server Component (no interactivity needed)
+ * - i18n support via next-intl
  */
 
 import { cn } from '@/lib/utils';
 import { Info } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import {
   ALPHA_INTERPRETATION_ZONES,
   getActiveAlphaZone,
@@ -28,6 +31,7 @@ export function AlphaInterpretationScale({
   showLabels = true,
   showCurrentValue = true,
 }: AlphaInterpretationScaleProps) {
+  const t = useTranslations('psychometrics.competencyDetail.alphaInterpretationScale');
   const activeZone = getActiveAlphaZone(alpha);
   const activeZoneIndex = activeZone
     ? ALPHA_INTERPRETATION_ZONES.findIndex((z) => z.label === activeZone.label)
@@ -39,15 +43,15 @@ export function AlphaInterpretationScale({
       role="img"
       aria-label={
         alpha !== null && activeZone
-          ? `Шкала интерпретации Alpha Кронбаха. Текущее значение ${alpha.toFixed(3)} соответствует уровню: ${activeZone.description}`
-          : 'Шкала интерпретации Alpha Кронбаха. Данные отсутствуют.'
+          ? t('scaleAriaLabel', { alpha: alpha.toFixed(3), description: activeZone.description })
+          : t('noDataAriaLabel')
       }
     >
       {/* Header */}
       {showLabels && (
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <Info className="h-4 w-4" aria-hidden="true" />
-          <span>Шкала интерпретации Alpha Кронбаха</span>
+          <span>{t('scaleTitle')}</span>
         </div>
       )}
 
@@ -88,9 +92,9 @@ export function AlphaInterpretationScale({
       {/* Current Value Indicator */}
       {showCurrentValue && alpha !== null && activeZone && (
         <p className="text-sm text-center">
-          Текущее значение{' '}
+          {t('currentValue')}{' '}
           <span className="font-bold tabular-nums">{alpha.toFixed(3)}</span>{' '}
-          соответствует уровню:{' '}
+          {t('correspondingLevel')}{' '}
           <span className="font-semibold">{activeZone.description}</span>
         </p>
       )}
@@ -98,7 +102,7 @@ export function AlphaInterpretationScale({
       {/* No Data State */}
       {showCurrentValue && alpha === null && (
         <p className="text-sm text-center text-muted-foreground">
-          Недостаточно данных для определения уровня надежности
+          {t('noDataMessage')}
         </p>
       )}
     </div>
@@ -117,6 +121,7 @@ export function AlphaInterpretationBadge({
   alpha,
   className,
 }: AlphaInterpretationBadgeProps) {
+  const t = useTranslations('psychometrics.competencyDetail.alphaInterpretationScale');
   const activeZone = getActiveAlphaZone(alpha);
 
   if (!activeZone || alpha === null) {
@@ -128,7 +133,7 @@ export function AlphaInterpretationBadge({
           className
         )}
       >
-        Нет данных
+        {t('noDataBadge')}
       </span>
     );
   }

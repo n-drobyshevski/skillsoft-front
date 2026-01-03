@@ -1,10 +1,23 @@
 'use client';
 
 import { useMemo } from 'react';
+import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { BigFiveReliability, BigFiveTrait, BigFiveTraitDisplay } from '@/types/psychometrics';
+import { BigFiveReliability, BigFiveTrait } from '@/types/psychometrics';
 import { TRAIT_COLORS } from './BigFiveTraitCard';
 import { cn } from '@/lib/utils';
+
+// Map BigFiveTrait enum to translation keys
+const getTraitKey = (trait: BigFiveTrait): string => {
+  const mapping: Record<BigFiveTrait, string> = {
+    [BigFiveTrait.OPENNESS]: 'openness',
+    [BigFiveTrait.CONSCIENTIOUSNESS]: 'conscientiousness',
+    [BigFiveTrait.EXTRAVERSION]: 'extraversion',
+    [BigFiveTrait.AGREEABLENESS]: 'agreeableness',
+    [BigFiveTrait.EMOTIONAL_STABILITY]: 'emotionalStability',
+  };
+  return mapping[trait];
+};
 
 interface MobileVerticalBarChartProps {
   reliabilityData: BigFiveReliability[];
@@ -20,15 +33,6 @@ const TRAIT_ORDER: BigFiveTrait[] = [
   BigFiveTrait.EMOTIONAL_STABILITY,
 ];
 
-// Short labels for mobile
-const TRAIT_ABBREV: Record<BigFiveTrait, string> = {
-  [BigFiveTrait.OPENNESS]: 'O',
-  [BigFiveTrait.CONSCIENTIOUSNESS]: 'C',
-  [BigFiveTrait.EXTRAVERSION]: 'E',
-  [BigFiveTrait.AGREEABLENESS]: 'A',
-  [BigFiveTrait.EMOTIONAL_STABILITY]: 'ES',
-};
-
 /**
  * Mobile-optimized vertical bar chart for Big Five comparison.
  * Features:
@@ -38,25 +42,28 @@ const TRAIT_ABBREV: Record<BigFiveTrait, string> = {
  * - Touch-friendly tooltips
  */
 export function MobileVerticalBarChart({ reliabilityData, className }: MobileVerticalBarChartProps) {
+  const t = useTranslations('psychometrics.bigFivePage');
+
   // Transform data for display
   const chartData = useMemo(() => {
     const dataMap = new Map(reliabilityData.map(r => [r.trait, r]));
 
     return TRAIT_ORDER.map(trait => {
       const data = dataMap.get(trait);
-      const traitInfo = BigFiveTraitDisplay[trait];
+      const traitKey = getTraitKey(trait);
       const colors = TRAIT_COLORS[trait];
 
       return {
         trait,
-        label: traitInfo.label,
-        abbrev: TRAIT_ABBREV[trait],
+        traitKey,
+        label: t(`traits.${traitKey}.label`),
+        abbrev: t(`chart.abbrev.${traitKey}`),
         alpha: data?.cronbachAlpha ?? 0,
         color: colors.accent,
         hasData: data?.cronbachAlpha !== null && data?.cronbachAlpha !== undefined,
       };
     });
-  }, [reliabilityData]);
+  }, [reliabilityData, t]);
 
   // Calculate average
   const averageAlpha = useMemo(() => {
@@ -77,13 +84,13 @@ export function MobileVerticalBarChart({ reliabilityData, className }: MobileVer
     <Card className={className}>
       <CardHeader className="pb-2">
         <CardTitle className="text-base font-semibold">
-          Trait Reliability Comparison
+          {t('chart.comparisonTitle')}
         </CardTitle>
         <CardDescription className="text-[13px]">
-          Cronbach&apos;s Alpha across Big Five traits
+          {t('chart.comparisonDescription')}
           {averageAlpha !== null && (
             <span className="ml-2 font-medium text-foreground">
-              (Avg: {averageAlpha.toFixed(2)})
+              ({t('chart.average')}: {averageAlpha.toFixed(2)})
             </span>
           )}
         </CardDescription>
@@ -91,7 +98,7 @@ export function MobileVerticalBarChart({ reliabilityData, className }: MobileVer
 
       <CardContent className="pt-4">
         {/* Chart Container */}
-        <div className="relative h-[220px]" role="img" aria-label="Bar chart comparing reliability across traits">
+        <div className="relative h-[220px]" role="img" aria-label={t('chart.ariaLabel')}>
           {/* Reference Lines */}
           <div className="absolute inset-x-0 h-full">
             {/* 0.6 - Minimum threshold */}
@@ -158,7 +165,7 @@ export function MobileVerticalBarChart({ reliabilityData, className }: MobileVer
                   aria-valuenow={item.hasData ? Math.round(item.alpha * 100) : 0}
                   aria-valuemin={0}
                   aria-valuemax={100}
-                  aria-label={`${item.label}: ${item.hasData ? item.alpha.toFixed(2) : 'No data'}`}
+                  aria-label={`${item.label}: ${item.hasData ? item.alpha.toFixed(2) : t('chart.noData')}`}
                 />
 
                 {/* Trait Abbreviation */}
@@ -174,22 +181,22 @@ export function MobileVerticalBarChart({ reliabilityData, className }: MobileVer
         <div className="flex flex-wrap justify-center gap-x-4 gap-y-1.5 mt-5 pt-4 border-t">
           <div className="flex items-center gap-1.5">
             <div className="w-4 h-0.5 rounded bg-red-400" />
-            <span className="text-[11px] text-muted-foreground">0.6 Min</span>
+            <span className="text-[11px] text-muted-foreground">0.6 {t('chart.thresholds.minimum')}</span>
           </div>
           <div className="flex items-center gap-1.5">
             <div className="w-4 h-0.5 rounded bg-amber-400" />
-            <span className="text-[11px] text-muted-foreground">0.7 Good</span>
+            <span className="text-[11px] text-muted-foreground">0.7 {t('chart.thresholds.good')}</span>
           </div>
           <div className="flex items-center gap-1.5">
             <div className="w-4 h-0.5 rounded bg-emerald-400" />
-            <span className="text-[11px] text-muted-foreground">0.8 Excellent</span>
+            <span className="text-[11px] text-muted-foreground">0.8 {t('chart.thresholds.excellent')}</span>
           </div>
         </div>
 
         {/* Trait Full Names (expandable on mobile) */}
         <details className="mt-4 sm:hidden">
           <summary className="text-[11px] text-muted-foreground cursor-pointer hover:text-foreground transition-colors">
-            View trait names
+            {t('chart.viewTraitNames')}
           </summary>
           <div className="grid grid-cols-2 gap-1.5 mt-2 text-[11px] text-muted-foreground">
             {chartData.map((item) => (

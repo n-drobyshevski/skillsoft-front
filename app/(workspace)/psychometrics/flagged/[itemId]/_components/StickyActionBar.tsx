@@ -2,6 +2,7 @@
 
 import { useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Button } from '@/components/ui/button';
@@ -60,6 +61,7 @@ type SheetView = 'actions' | 'status-form';
 export function StickyActionBar({ item, className }: StickyActionBarProps) {
   const isMobile = useIsMobile();
   const router = useRouter();
+  const t = useTranslations('psychometrics.flaggedDetail');
 
   // Sheet state
   const [isSheetOpen, setIsSheetOpen] = useState(false);
@@ -80,17 +82,17 @@ export function StickyActionBar({ item, className }: StickyActionBarProps) {
     setIsRecalculating(true);
     try {
       await psychometricsApi.recalculateItem(item.questionId);
-      toast.success('Пересчет завершен', {
-        description: 'Психометрические показатели обновлены',
+      toast.success(t('toast.recalculateSuccess'), {
+        description: t('toast.metricsUpdated'),
       });
       router.refresh();
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Не удалось выполнить пересчет';
-      toast.error('Ошибка', { description: message });
+      const message = error instanceof Error ? error.message : t('toast.recalculateFailed');
+      toast.error(t('toast.error'), { description: message });
     } finally {
       setIsRecalculating(false);
     }
-  }, [item.questionId, router]);
+  }, [item.questionId, router, t]);
 
   // Handle quick status change
   const handleQuickStatusChange = useCallback(
@@ -101,8 +103,8 @@ export function StickyActionBar({ item, className }: StickyActionBarProps) {
           newStatus: targetStatus,
           reason,
         });
-        toast.success('Статус обновлен', {
-          description: `Новый статус: ${ItemValidityStatusDisplay[targetStatus]?.label}`,
+        toast.success(t('toast.statusUpdated'), {
+          description: t('toast.newStatus', { status: ItemValidityStatusDisplay[targetStatus]?.label }),
         });
 
         // Redirect to list if no longer flagged
@@ -113,19 +115,19 @@ export function StickyActionBar({ item, className }: StickyActionBarProps) {
         }
         setIsSheetOpen(false);
       } catch (error) {
-        const message = error instanceof Error ? error.message : 'Не удалось обновить статус';
-        toast.error('Ошибка', { description: message });
+        const message = error instanceof Error ? error.message : t('toast.statusUpdateFailed');
+        toast.error(t('toast.error'), { description: message });
       } finally {
         setIsUpdatingStatus(false);
       }
     },
-    [item.questionId, router]
+    [item.questionId, router, t]
   );
 
   // Handle status form submit
   const handleStatusFormSubmit = useCallback(async () => {
     if (!statusReason.trim()) {
-      toast.error('Укажите причину изменения статуса');
+      toast.error(t('toast.reasonRequired'));
       return;
     }
 
@@ -135,8 +137,8 @@ export function StickyActionBar({ item, className }: StickyActionBarProps) {
         newStatus,
         reason: statusReason,
       });
-      toast.success('Статус обновлен', {
-        description: `Новый статус: ${ItemValidityStatusDisplay[newStatus]?.label}`,
+      toast.success(t('toast.statusUpdated'), {
+        description: t('toast.newStatus', { status: ItemValidityStatusDisplay[newStatus]?.label }),
       });
       setStatusReason('');
       setSheetView('actions');
@@ -148,12 +150,12 @@ export function StickyActionBar({ item, className }: StickyActionBarProps) {
       }
       setIsSheetOpen(false);
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Не удалось обновить статус';
-      toast.error('Ошибка', { description: message });
+      const message = error instanceof Error ? error.message : t('toast.statusUpdateFailed');
+      toast.error(t('toast.error'), { description: message });
     } finally {
       setIsUpdatingStatus(false);
     }
-  }, [item.questionId, newStatus, statusReason, router]);
+  }, [item.questionId, newStatus, statusReason, router, t]);
 
   // Reset sheet state when closing
   const handleSheetOpenChange = useCallback(
@@ -198,7 +200,7 @@ export function StickyActionBar({ item, className }: StickyActionBarProps) {
             ) : (
               <RefreshCw className="h-4 w-4" />
             )}
-            Пересчитать
+            {t('actions.recalculate')}
           </Button>
 
           {/* More actions button */}
@@ -208,7 +210,7 @@ export function StickyActionBar({ item, className }: StickyActionBarProps) {
             className="min-h-[44px] min-w-[44px]"
             onClick={() => setIsSheetOpen(true)}
             disabled={isLoading}
-            aria-label="Больше действий"
+            aria-label={t('actions.moreActions')}
           >
             <MoreHorizontal className="h-5 w-5" />
           </Button>
@@ -224,8 +226,8 @@ export function StickyActionBar({ item, className }: StickyActionBarProps) {
           {sheetView === 'actions' ? (
             <>
               <DrawerHeader className="text-left pb-2">
-                <DrawerTitle>Действия</DrawerTitle>
-                <DrawerDescription>Управление проблемным элементом</DrawerDescription>
+                <DrawerTitle>{t('drawer.actionsTitle')}</DrawerTitle>
+                <DrawerDescription>{t('drawer.actionsDescription')}</DrawerDescription>
               </DrawerHeader>
 
               <div className="px-4 pb-4 space-y-2">
@@ -239,14 +241,14 @@ export function StickyActionBar({ item, className }: StickyActionBarProps) {
                       'hover:bg-emerald-50 dark:hover:bg-emerald-950/20'
                     )}
                     onClick={() =>
-                      handleQuickStatusChange(ItemValidityStatus.ACTIVE, 'Проверено и одобрено')
+                      handleQuickStatusChange(ItemValidityStatus.ACTIVE, t('actions.reviewedReason'))
                     }
                     disabled={isLoading}
                   >
                     <CheckCircle2 className="h-5 w-5 shrink-0" />
                     <div className="flex-1 min-w-0">
-                      <div className="font-medium">Отметить как проверенный</div>
-                      <div className="text-xs text-muted-foreground">Одобрить после ревью</div>
+                      <div className="font-medium">{t('actions.markAsReviewed')}</div>
+                      <div className="text-xs text-muted-foreground">{t('actions.approveAfterReview')}</div>
                     </div>
                   </Button>
                 )}
@@ -263,15 +265,15 @@ export function StickyActionBar({ item, className }: StickyActionBarProps) {
                     onClick={() =>
                       handleQuickStatusChange(
                         ItemValidityStatus.RETIRED,
-                        'Выведен из использования из-за низких показателей'
+                        t('actions.retireReason')
                       )
                     }
                     disabled={isLoading}
                   >
                     <Ban className="h-5 w-5 shrink-0" />
                     <div className="flex-1 min-w-0">
-                      <div className="font-medium">Вывести из использования</div>
-                      <div className="text-xs text-muted-foreground">Исключить из тестирования</div>
+                      <div className="font-medium">{t('actions.retire')}</div>
+                      <div className="text-xs text-muted-foreground">{t('actions.excludeFromTesting')}</div>
                     </div>
                   </Button>
                 )}
@@ -288,9 +290,9 @@ export function StickyActionBar({ item, className }: StickyActionBarProps) {
                   <div className="flex items-center gap-3">
                     <Settings2 className="h-5 w-5 shrink-0" />
                     <div className="text-left">
-                      <div className="font-medium">Изменить статус</div>
+                      <div className="font-medium">{t('actions.changeStatus')}</div>
                       <div className="text-xs text-muted-foreground">
-                        Текущий: {ItemValidityStatusDisplay[item.validityStatus]?.label}
+                        {t('actions.currentStatus', { status: ItemValidityStatusDisplay[item.validityStatus]?.label })}
                       </div>
                     </div>
                   </div>
@@ -303,7 +305,7 @@ export function StickyActionBar({ item, className }: StickyActionBarProps) {
                 <Button variant="ghost" className="w-full justify-start gap-3 h-12" asChild>
                   <a href={`/psychometrics/items/${item.questionId}`}>
                     <ExternalLink className="h-4 w-4 shrink-0" />
-                    <span>Полная статистика элемента</span>
+                    <span>{t('actions.viewFullStats')}</span>
                   </a>
                 </Button>
               </div>
@@ -311,7 +313,7 @@ export function StickyActionBar({ item, className }: StickyActionBarProps) {
               <DrawerFooter className="pt-0">
                 <DrawerClose asChild>
                   <Button variant="ghost" className="w-full min-h-[44px]">
-                    Закрыть
+                    {t('actions.close')}
                   </Button>
                 </DrawerClose>
               </DrawerFooter>
@@ -320,21 +322,21 @@ export function StickyActionBar({ item, className }: StickyActionBarProps) {
             /* Status Change Form View */
             <>
               <DrawerHeader className="text-left pb-2">
-                <DrawerTitle>Изменить статус</DrawerTitle>
-                <DrawerDescription>Выберите новый статус и укажите причину</DrawerDescription>
+                <DrawerTitle>{t('drawer.changeStatusTitle')}</DrawerTitle>
+                <DrawerDescription>{t('drawer.changeStatusDescription')}</DrawerDescription>
               </DrawerHeader>
 
               <div className="px-4 pb-4 space-y-4">
                 {/* Status select */}
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">Новый статус</label>
+                  <label className="text-sm font-medium">{t('form.newStatus')}</label>
                   <Select
                     value={newStatus}
                     onValueChange={(value) => setNewStatus(value as ItemValidityStatus)}
                     disabled={isUpdatingStatus}
                   >
                     <SelectTrigger className="h-12">
-                      <SelectValue placeholder="Выберите статус" />
+                      <SelectValue placeholder={t('form.selectStatus')} />
                     </SelectTrigger>
                     <SelectContent>
                       {Object.entries(ItemValidityStatusDisplay).map(([key, display]) => (
@@ -351,12 +353,12 @@ export function StickyActionBar({ item, className }: StickyActionBarProps) {
                 {/* Reason textarea */}
                 <div className="space-y-2">
                   <label className="text-sm font-medium">
-                    Причина изменения <span className="text-destructive">*</span>
+                    {t('form.changeReason')} <span className="text-destructive">*</span>
                   </label>
                   <Textarea
                     value={statusReason}
                     onChange={(e) => setStatusReason(e.target.value)}
-                    placeholder="Опишите причину изменения статуса..."
+                    placeholder={t('form.reasonPlaceholder')}
                     rows={3}
                     className="resize-none min-h-[80px]"
                     disabled={isUpdatingStatus}
@@ -375,7 +377,7 @@ export function StickyActionBar({ item, className }: StickyActionBarProps) {
                   }}
                   disabled={isUpdatingStatus}
                 >
-                  Назад
+                  {t('actions.back')}
                 </Button>
                 <Button
                   className="flex-1 min-h-[44px]"
@@ -385,10 +387,10 @@ export function StickyActionBar({ item, className }: StickyActionBarProps) {
                   {isUpdatingStatus ? (
                     <>
                       <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Сохранение...
+                      {t('actions.saving')}
                     </>
                   ) : (
-                    'Сохранить'
+                    t('actions.save')
                   )}
                 </Button>
               </DrawerFooter>

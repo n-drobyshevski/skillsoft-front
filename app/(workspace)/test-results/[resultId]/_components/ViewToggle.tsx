@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Maximize2, Minimize2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useTranslations } from 'next-intl';
 
 interface ViewToggleProps {
   defaultView?: 'compact' | 'detailed';
@@ -18,6 +19,7 @@ interface ViewToggleProps {
  * Persists preference in localStorage
  */
 export function ViewToggle({ defaultView = 'compact', onViewChange }: ViewToggleProps) {
+  const t = useTranslations('results');
   const [view, setView] = useState<'compact' | 'detailed'>(() => {
     if (typeof window !== 'undefined') {
       return (localStorage.getItem('test-results-view') as 'compact' | 'detailed') || defaultView;
@@ -40,7 +42,7 @@ export function ViewToggle({ defaultView = 'compact', onViewChange }: ViewToggle
 
   return (
     <div className="flex items-center gap-2 mb-4">
-      <span className="text-sm text-muted-foreground">View:</span>
+      <span className="text-sm text-muted-foreground">{t('view')}:</span>
       <div className="flex items-center gap-1 rounded-md border p-1 bg-muted/30">
         <Button
           variant={view === 'compact' ? 'default' : 'ghost'}
@@ -53,8 +55,8 @@ export function ViewToggle({ defaultView = 'compact', onViewChange }: ViewToggle
           )}
         >
           <Minimize2 className="h-3.5 w-3.5" />
-          Compact
-          <Badge variant="secondary" className="ml-1 h-4 px-1 text-xs">Recommended</Badge>
+          {t('compact')}
+          <Badge variant="secondary" className="ml-1 h-4 px-1 text-xs">{t('recommended')}</Badge>
         </Button>
         <Button
           variant={view === 'detailed' ? 'default' : 'ghost'}
@@ -67,7 +69,7 @@ export function ViewToggle({ defaultView = 'compact', onViewChange }: ViewToggle
           )}
         >
           <Maximize2 className="h-3.5 w-3.5" />
-          Detailed
+          {t('detailed')}
         </Button>
       </div>
     </div>

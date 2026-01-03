@@ -3,6 +3,7 @@
 import * as React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -43,7 +44,8 @@ interface NavItem {
   icon: LucideIcon;
   /** Filled icon variant for active state */
   activeIcon?: LucideIcon;
-  label: string;
+  /** Translation key for the label */
+  labelKey: string;
   /** Match pattern for active state (defaults to startsWith href) */
   matchPattern?: RegExp;
 }
@@ -51,15 +53,18 @@ interface NavItem {
 interface MoreMenuItem {
   href: string;
   icon: LucideIcon;
-  label: string;
-  description?: string;
+  /** Translation key for the label */
+  labelKey: string;
+  /** Translation key for the description */
+  descriptionKey?: string;
   /** Badge text (e.g., "New") */
   badge?: string;
 }
 
 interface MoreMenuSection {
   id: string;
-  title: string;
+  /** Translation key for the section title */
+  titleKey: string;
   items: MoreMenuItem[];
   /** Which lenses can see this section */
   lenses: string[];
@@ -67,11 +72,11 @@ interface MoreMenuSection {
 
 // All possible primary navigation items
 const ALL_NAV_ITEMS: NavItem[] = [
-  { href: '/dashboard', icon: Home, label: 'Главная' },
-  { href: '/my-tests', icon: ClipboardList, label: 'Мои тесты' },
-  { href: '/test-templates', icon: FileText, label: 'Тесты' },
-  { href: '/psychometrics', icon: BarChart3, label: 'Анализ' },
-  { href: '/profile', icon: User, label: 'Профиль' },
+  { href: '/dashboard', icon: Home, labelKey: 'home' },
+  { href: '/my-tests', icon: ClipboardList, labelKey: 'myTests' },
+  { href: '/test-templates', icon: FileText, labelKey: 'tests' },
+  { href: '/psychometrics', icon: BarChart3, labelKey: 'analysis' },
+  { href: '/profile', icon: User, labelKey: 'profile' },
 ];
 
 // Lens-specific nav item selection
@@ -89,52 +94,52 @@ const MORE_MENU_SECTIONS: MoreMenuSection[] = [
   // Quick Actions - Editor/Admin
   {
     id: 'quick-actions',
-    title: 'Быстрые действия',
+    titleKey: 'quickActions',
     lenses: ['editor', 'admin'],
     items: [
       {
         href: '/test-templates/new',
         icon: PlusCircle,
-        label: 'Создать тест',
-        description: 'Новый шаблон',
+        labelKey: 'createTest',
+        descriptionKey: 'newTemplate',
       },
       {
         href: '/test-templates/history',
         icon: History,
-        label: 'История',
-        description: 'Сессии тестов',
+        labelKey: 'history',
+        descriptionKey: 'testSessions2',
       },
     ],
   },
   // Library - Editor/Admin
   {
     id: 'library',
-    title: 'Библиотека',
+    titleKey: 'library',
     lenses: ['editor', 'admin'],
     items: [
       {
         href: '/hr/competencies',
         icon: Target,
-        label: 'Компетенции',
-        description: 'Управление',
+        labelKey: 'competencies',
+        descriptionKey: 'management',
       },
       {
         href: '/hr/behavioral-indicators',
         icon: Lightbulb,
-        label: 'Индикаторы',
-        description: 'Поведенческие',
+        labelKey: 'indicators',
+        descriptionKey: 'behavioral',
       },
       {
         href: '/hr/assessment-questions',
         icon: FileQuestion,
-        label: 'Вопросы',
-        description: 'Банк вопросов',
+        labelKey: 'questions',
+        descriptionKey: 'questionBank',
       },
       {
         href: '/skill-mapper',
         icon: Network,
-        label: 'Skill Mapper',
-        description: 'Связи навыков',
+        labelKey: 'skillMapper',
+        descriptionKey: 'skillLinks',
         badge: 'New',
       },
     ],
@@ -142,68 +147,68 @@ const MORE_MENU_SECTIONS: MoreMenuSection[] = [
   // Analytics - Admin only
   {
     id: 'analytics',
-    title: 'Аналитика',
+    titleKey: 'analytics',
     lenses: ['admin'],
     items: [
       {
         href: '/psychometrics/items',
         icon: Activity,
-        label: 'Статистика',
-        description: 'Вопросов',
+        labelKey: 'statistics',
+        descriptionKey: 'ofQuestions',
       },
       {
         href: '/psychometrics/flagged',
         icon: Flag,
-        label: 'Отмеченные',
-        description: 'Требуют внимания',
+        labelKey: 'flagged',
+        descriptionKey: 'needsAttention',
       },
     ],
   },
   // System - Admin only
   {
     id: 'system',
-    title: 'Система',
+    titleKey: 'system',
     lenses: ['admin'],
     items: [
       {
         href: '/admin/users',
         icon: Users,
-        label: 'Пользователи',
-        description: 'Управление',
+        labelKey: 'users',
+        descriptionKey: 'management',
       },
       {
         href: '/settings',
         icon: Settings,
-        label: 'Настройки',
-        description: 'Системные',
+        labelKey: 'settings',
+        descriptionKey: 'systemSettings',
       },
     ],
   },
   // Settings - Editor only (Admin has it in System)
   {
     id: 'editor-settings',
-    title: 'Настройки',
+    titleKey: 'settings',
     lenses: ['editor'],
     items: [
       {
         href: '/settings',
         icon: Settings,
-        label: 'Настройки',
-        description: 'Приложения',
+        labelKey: 'settings',
+        descriptionKey: 'appSettings',
       },
     ],
   },
   // Help - All lenses with More menu
   {
     id: 'help',
-    title: 'Помощь',
+    titleKey: 'help',
     lenses: ['editor', 'admin'],
     items: [
       {
         href: '/help',
         icon: HelpCircle,
-        label: 'Справка',
-        description: 'Документация',
+        labelKey: 'help',
+        descriptionKey: 'documentation',
       },
     ],
   },
@@ -231,9 +236,10 @@ interface NavItemComponentProps {
   item: NavItem;
   isActive: boolean;
   itemWidth: string;
+  t: (key: string) => string;
 }
 
-function NavItemComponent({ item, isActive, itemWidth }: NavItemComponentProps) {
+function NavItemComponent({ item, isActive, itemWidth, t }: NavItemComponentProps) {
   const Icon = item.icon;
 
   return (
@@ -288,7 +294,7 @@ function NavItemComponent({ item, isActive, itemWidth }: NavItemComponentProps) 
           isActive ? 'font-semibold' : 'font-medium'
         )}
       >
-        {item.label}
+        {t(item.labelKey)}
       </span>
 
       {/* Active indicator pill - animated with layoutId */}
@@ -315,9 +321,10 @@ interface MoreButtonProps {
   onClick: () => void;
   isOpen: boolean;
   itemWidth: string;
+  t: (key: string) => string;
 }
 
-function MoreButton({ onClick, isOpen, itemWidth }: MoreButtonProps) {
+function MoreButton({ onClick, isOpen, itemWidth, t }: MoreButtonProps) {
   return (
     <button
       type="button"
@@ -334,12 +341,12 @@ function MoreButton({ onClick, isOpen, itemWidth }: MoreButtonProps) {
         'text-muted-foreground hover:text-foreground hover:bg-muted/50',
         'active:scale-95 active:opacity-80'
       )}
-      aria-label="More options"
+      aria-label={t('moreOptions')}
       aria-expanded={isOpen}
     >
       <MoreHorizontal className="size-5" />
       <span className="text-[10px] sm:text-[11px] font-medium leading-none mt-0.5">
-        Ещё
+        {t('more')}
       </span>
     </button>
   );
@@ -387,6 +394,7 @@ export function MobileBottomNav({ hidden = false, className }: MobileBottomNavPr
   const { shouldShowNav } = useScrollDirection();
   const activeLens = useLensStore((state) => state.activeLens);
   const [showMoreMenu, setShowMoreMenu] = React.useState(false);
+  const t = useTranslations('navigation');
 
   // Get lens-filtered navigation items
   const lensConfig = getLensConfig(activeLens);
@@ -461,7 +469,7 @@ export function MobileBottomNav({ hidden = false, className }: MobileBottomNavPr
           'will-change-transform',
           className
         )}
-        aria-label="Mobile navigation"
+        aria-label={t('mobileNavigation')}
       >
         {/* Container with reduced height (48px from 56px) */}
         <div className="flex items-center justify-evenly h-12 w-full">
@@ -471,6 +479,7 @@ export function MobileBottomNav({ hidden = false, className }: MobileBottomNavPr
               item={item}
               isActive={isActive(item)}
               itemWidth={itemWidthPercent}
+              t={t}
             />
           ))}
 
@@ -480,6 +489,7 @@ export function MobileBottomNav({ hidden = false, className }: MobileBottomNavPr
               onClick={() => setShowMoreMenu(true)}
               isOpen={showMoreMenu}
               itemWidth={itemWidthPercent}
+              t={t}
             />
           )}
         </div>
@@ -498,9 +508,9 @@ export function MobileBottomNav({ hidden = false, className }: MobileBottomNavPr
           </div>
 
           <SheetHeader className="text-left px-4 pb-3">
-            <SheetTitle>Меню</SheetTitle>
+            <SheetTitle>{t('menu')}</SheetTitle>
             <SheetDescription>
-              Быстрый доступ ко всем разделам
+              {t('menuDescription')}
             </SheetDescription>
           </SheetHeader>
 
@@ -510,7 +520,7 @@ export function MobileBottomNav({ hidden = false, className }: MobileBottomNavPr
               <div key={section.id}>
                 {/* Section title */}
                 <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 px-1">
-                  {section.title}
+                  {t(section.titleKey)}
                 </h3>
 
                 {/* Grid layout for section items */}
@@ -561,13 +571,13 @@ export function MobileBottomNav({ hidden = false, className }: MobileBottomNavPr
                             active && 'text-primary'
                           )}
                         >
-                          {item.label}
+                          {t(item.labelKey)}
                         </span>
 
                         {/* Description */}
-                        {item.description && (
+                        {item.descriptionKey && (
                           <span className="text-[9px] text-muted-foreground text-center leading-tight truncate w-full">
-                            {item.description}
+                            {t(item.descriptionKey)}
                           </span>
                         )}
                       </Link>

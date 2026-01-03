@@ -18,6 +18,7 @@ import {
 import { cn } from '@/lib/utils';
 import { EnrichedTestSession } from './MyTestsContent';
 import { SessionStatus } from '@/types/domain';
+import { useTranslations, useFormatter } from 'next-intl';
 
 interface HistoryTestCardProps {
   session: EnrichedTestSession;
@@ -27,42 +28,42 @@ interface HistoryTestCardProps {
 const STATUS_CONFIG: Record<
   SessionStatus,
   {
-    label: string;
+    labelKey: 'status.notStarted' | 'status.inProgress' | 'status.completed' | 'status.abandoned' | 'status.timedOut';
     icon: typeof Clock;
     borderClass: string;
     badgeClassName: string;
   }
 > = {
   NOT_STARTED: {
-    label: 'Ожидает',
+    labelKey: 'status.notStarted',
     icon: Clock,
     borderClass: 'border-l-blue-500',
     badgeClassName:
       'border-blue-500/30 bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-400',
   },
   IN_PROGRESS: {
-    label: 'В работе',
+    labelKey: 'status.inProgress',
     icon: PlayCircle,
     borderClass: 'border-l-amber-500',
     badgeClassName:
       'border-amber-500/30 bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-400',
   },
   COMPLETED: {
-    label: 'Завершен',
+    labelKey: 'status.completed',
     icon: CheckCircle2,
     borderClass: 'border-l-emerald-500',
     badgeClassName:
       'border-emerald-500/30 bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400',
   },
   ABANDONED: {
-    label: 'Прерван',
+    labelKey: 'status.abandoned',
     icon: XCircle,
     borderClass: 'border-l-red-500',
     badgeClassName:
       'border-red-500/30 bg-red-50 dark:bg-red-950/30 text-red-700 dark:text-red-400',
   },
   TIMED_OUT: {
-    label: 'Время истекло',
+    labelKey: 'status.timedOut',
     icon: AlertCircle,
     borderClass: 'border-l-gray-400',
     badgeClassName:
@@ -75,11 +76,13 @@ const STATUS_CONFIG: Record<
  * Displays a previous attempt in a condensed row format for the collapsible history section
  */
 export function HistoryTestCard({ session }: HistoryTestCardProps) {
+  const t = useTranslations('myTests');
+  const format = useFormatter();
   const config = STATUS_CONFIG[session.status];
   const StatusIcon = config.icon;
 
   // Determine action link
-  const actionConfig = getActionConfig(session);
+  const actionConfig = getActionConfig(session, t);
 
   return (
     <div
@@ -92,12 +95,12 @@ export function HistoryTestCard({ session }: HistoryTestCardProps) {
       {/* Status Badge - icon only on mobile */}
       <Badge variant="outline" className={cn('gap-1 shrink-0 text-xs', config.badgeClassName)}>
         <StatusIcon className="size-3" />
-        <span className="hidden sm:inline">{config.label}</span>
+        <span className="hidden sm:inline">{t(config.labelKey)}</span>
       </Badge>
 
       {/* Date */}
       <span className="text-xs text-muted-foreground shrink-0">
-        {formatCompactDate(session.completedAt || session.startedAt || session.createdAt)}
+        {formatCompactDate(session.completedAt || session.startedAt || session.createdAt, format)}
       </span>
 
       {/* Score (if completed) */}
@@ -147,53 +150,61 @@ export function HistoryTestCard({ session }: HistoryTestCardProps) {
   );
 }
 
-function getActionConfig(session: EnrichedTestSession) {
+function getActionConfig(session: EnrichedTestSession, t: ReturnType<typeof useTranslations<'myTests'>>) {
   switch (session.status) {
     case SessionStatus.NOT_STARTED:
       return {
         href: `/test-templates/${session.templateId}/start`,
-        label: 'Начать',
+        label: t('actions.start'),
         icon: PlayCircle,
       };
     case SessionStatus.IN_PROGRESS:
       return {
         href: `/test-templates/take/${session.id}`,
-        label: 'Продолжить',
+        label: t('actions.continue'),
         icon: ArrowRight,
       };
     case SessionStatus.COMPLETED:
       return {
         href: `/test-templates/results/${session.id}`,
-        label: 'Результаты',
+        label: t('actions.viewResults'),
         icon: Eye,
       };
     case SessionStatus.ABANDONED:
     case SessionStatus.TIMED_OUT:
       return {
         href: `/test-templates/${session.templateId}/start`,
-        label: 'Повторить',
+        label: t('actions.retry'),
         icon: RotateCcw,
       };
     default:
       return {
         href: '#',
-        label: 'Открыть',
+        label: t('actions.open'),
         icon: ArrowRight,
       };
   }
 }
 
 /**
- * Format date in compact format (e.g., "12 дек" or "12 дек 2024")
+ * Format date in compact format using intl formatter
  */
-function formatCompactDate(dateString?: string): string {
+function formatCompactDate(dateString?: string, format?: ReturnType<typeof useFormatter>): string {
   if (!dateString) return '--';
 
   const date = new Date(dateString);
   const now = new Date();
   const isCurrentYear = date.getFullYear() === now.getFullYear();
 
-  const months = ['янв', 'фев', 'мар', 'апр', 'май', 'июн', 'июл', 'авг', 'сен', 'окт', 'ноя', 'дек'];
+  if (format) {
+    if (isCurrentYear) {
+      return format.dateTime(date, { day: 'numeric', month: 'short' });
+    }
+    return format.dateTime(date, { day: 'numeric', month: 'short', year: 'numeric' });
+  }
+
+  // Fallback for when formatter is not available
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
   const day = date.getDate();
   const month = months[date.getMonth()];
 

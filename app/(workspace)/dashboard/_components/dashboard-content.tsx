@@ -31,6 +31,7 @@ import { UserStats } from "@/types/user";
 import { ClientOnly } from "@/components/common/ClientOnly";
 import CompetencyByCategoryBarChart from "@/components/data-display/charts/CompetencyByCategoryBarChart";
 import { useActiveLens } from "@/hooks/useLens";
+import { useTranslations } from 'next-intl';
 
 // New unified dashboard components
 import {
@@ -129,6 +130,7 @@ export default function DashboardContent({
   const prefersReducedMotion = useReducedMotion();
   const activeLens = useActiveLens();
   const isUserLens = activeLens === 'user';
+  const t = useTranslations('dashboard');
 
   const motionProps = prefersReducedMotion
     ? { initial: "visible", animate: "visible" }
@@ -136,9 +138,9 @@ export default function DashboardContent({
 
   const greeting = () => {
     const hour = new Date().getHours();
-    if (hour < 12) return "Good morning";
-    if (hour < 18) return "Good afternoon";
-    return "Good evening";
+    if (hour < 12) return t('goodMorning');
+    if (hour < 18) return t('goodAfternoon');
+    return t('goodEvening');
   };
 
   const isAdmin = currentUser?.role === 'ADMIN';
@@ -183,8 +185,8 @@ export default function DashboardContent({
           </h1>
           <p className="text-sm sm:text-base text-muted-foreground">
             {isUserLens
-              ? "Here's your personal progress and pending assessments."
-              : "Overview of your competency framework and assessments"}
+              ? t('userSubtitle')
+              : t('overviewSubtitle')}
           </p>
         </div>
         {/* Action buttons - stack on mobile, row on larger screens */}
@@ -193,14 +195,14 @@ export default function DashboardContent({
             <Link href="/hr/competencies/new" className="w-full sm:w-auto">
               <Button variant="outline" size="default" className="w-full sm:w-auto gap-2 min-h-11 justify-center">
                 <Plus className="w-4 h-4" />
-                <span>Add Competency</span>
+                <span>{t('addCompetency')}</span>
               </Button>
             </Link>
           )}
           <Link href="/test-templates" className="w-full sm:w-auto">
             <Button size="default" className="w-full sm:w-auto gap-2 min-h-11 justify-center">
               <Play className="w-4 h-4" />
-              <span>{isUserLens ? "Browse Assessments" : "Take Assessment"}</span>
+              <span>{isUserLens ? t('browseAssessments') : t('takeAssessment')}</span>
             </Button>
           </Link>
         </div>
@@ -219,14 +221,14 @@ export default function DashboardContent({
                 <div className="space-y-1">
                   <CardTitle className="text-lg font-semibold flex items-center gap-2">
                     <Clock className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
-                    Pending Assessments
+                    {t('pendingAssessments')}
                   </CardTitle>
                   <CardDescription>
-                    You have {pendingSessions.length} assessment{pendingSessions.length > 1 ? 's' : ''} in progress or waiting to start.
+                    {t('pendingCount', { count: pendingSessions.length })}
                   </CardDescription>
                 </div>
                 <Button variant="outline" size="sm" asChild className="border-emerald-200 hover:bg-emerald-100 dark:border-emerald-800 dark:hover:bg-emerald-900/50">
-                  <Link href="/test-templates">View All</Link>
+                  <Link href="/test-templates">{t('viewAll')}</Link>
                 </Button>
               </div>
             </CardHeader>
@@ -237,18 +239,18 @@ export default function DashboardContent({
                     <div className="space-y-1">
                       <h4 className="font-medium leading-none">{session.templateName || "Assessment"}</h4>
                       <p className="text-xs text-muted-foreground">
-                        {session.status === 'IN_PROGRESS' ? 'In Progress' : 'Not Started'}
+                        {session.status === 'IN_PROGRESS' ? t('active') : t('newTemplate')}
                       </p>
                     </div>
                     <Badge variant={session.status === 'IN_PROGRESS' ? 'default' : 'secondary'} className={session.status === 'IN_PROGRESS' ? 'bg-emerald-600' : ''}>
-                      {session.status === 'IN_PROGRESS' ? 'Active' : 'New'}
+                      {session.status === 'IN_PROGRESS' ? t('active') : t('newTemplate')}
                     </Badge>
                   </div>
 
                   {session.status === 'IN_PROGRESS' && (
                     <div className="space-y-1">
                       <div className="flex items-center justify-between text-xs text-muted-foreground">
-                        <span>Progress</span>
+                        <span>{t('progress')}</span>
                         <span>{Math.round(((session.currentQuestionIndex || 0) / (session.questionOrder?.length || 1)) * 100)}%</span>
                       </div>
                       <Progress value={((session.currentQuestionIndex || 0) / (session.questionOrder?.length || 1)) * 100} className="h-1.5" />
@@ -257,7 +259,7 @@ export default function DashboardContent({
 
                   <Button size="sm" className="w-full mt-auto" asChild>
                     <Link href={`/test-templates/take/${session.id}`}>
-                      {session.status === 'IN_PROGRESS' ? 'Resume Assessment' : 'Start Assessment'}
+                      {session.status === 'IN_PROGRESS' ? t('resumeAssessment') : t('startAssessment')}
                       <ArrowRight className="ml-2 h-3 w-3" />
                     </Link>
                   </Button>
@@ -300,13 +302,13 @@ export default function DashboardContent({
                         <BarChart3 className="w-4 h-4 text-muted-foreground" />
                       </div>
                       <div>
-                        <CardTitle className="text-base">Competency Distribution</CardTitle>
-                        <CardDescription className="text-xs">By category</CardDescription>
+                        <CardTitle className="text-base">{t('competencyDistribution')}</CardTitle>
+                        <CardDescription className="text-xs">{t('byCategory')}</CardDescription>
                       </div>
                     </div>
                     <Link href="/hr/competencies">
                       <Button variant="ghost" size="sm" className="text-xs gap-1.5">
-                        View All
+                        {t('viewAll')}
                         <ArrowRight className="w-3 h-3" />
                       </Button>
                     </Link>
@@ -317,7 +319,7 @@ export default function DashboardContent({
                     <div className="h-[260px] flex items-center justify-center text-muted-foreground">
                       <div className="flex items-center gap-2">
                         <LineChart className="w-4 h-4 animate-pulse" />
-                        <span className="text-sm">Loading chart...</span>
+                        <span className="text-sm">{t('loadingChart')}</span>
                       </div>
                     </div>
                   }>
@@ -338,26 +340,26 @@ export default function DashboardContent({
                     <div className="w-9 h-9 rounded-lg bg-muted flex items-center justify-center">
                       <TrendingUp className="w-4 h-4 text-muted-foreground" />
                     </div>
-                    <CardTitle className="text-base">Framework Progress</CardTitle>
+                    <CardTitle className="text-base">{t('frameworkProgress')}</CardTitle>
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="space-y-2">
                     <div className="flex items-center justify-between text-sm">
-                      <span className="text-muted-foreground">Indicator coverage</span>
+                      <span className="text-muted-foreground">{t('indicatorCoverage')}</span>
                       <span className="font-medium">{Math.round(indicatorProgress)}%</span>
                     </div>
                     <Progress value={indicatorProgress} className="h-1.5" />
                   </div>
                   <div className="space-y-2">
                     <div className="flex items-center justify-between text-sm">
-                      <span className="text-muted-foreground">Question coverage</span>
+                      <span className="text-muted-foreground">{t('questionCoverage')}</span>
                       <span className="font-medium">{Math.round(questionProgress)}%</span>
                     </div>
                     <Progress value={questionProgress} className="h-1.5" />
                   </div>
                   <p className="text-xs text-muted-foreground pt-1">
-                    Target: 5 indicators & 15 questions per competency
+                    {t('frameworkTarget')}
                   </p>
                 </CardContent>
               </Card>
@@ -370,16 +372,16 @@ export default function DashboardContent({
                       <Globe2 className="w-4 h-4 text-muted-foreground" />
                     </div>
                     <div>
-                      <CardTitle className="text-base">Standards Mapping</CardTitle>
-                      <CardDescription className="text-xs">Global compatibility</CardDescription>
+                      <CardTitle className="text-base">{t('standardsMapping')}</CardTitle>
+                      <CardDescription className="text-xs">{t('globalCompatibility')}</CardDescription>
                     </div>
                   </div>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-2">
-                    <StandardBadge icon={Target} label="O*NET SOC Codes" />
-                    <StandardBadge icon={BookOpen} label="ESCO Skills Framework" />
-                    <StandardBadge icon={Brain} label="Big Five Personality Traits" />
+                    <StandardBadge icon={Target} label={t('onetCodes')} />
+                    <StandardBadge icon={BookOpen} label={t('escoFramework')} />
+                    <StandardBadge icon={Brain} label={t('bigFiveTraits')} />
                   </div>
                 </CardContent>
               </Card>
@@ -430,7 +432,7 @@ export default function DashboardContent({
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
                           </svg>
                         </div>
-                        <CardTitle className="text-base">Users</CardTitle>
+                        <CardTitle className="text-base">{t('users')}</CardTitle>
                       </div>
                       <Link href="/admin/users">
                         <Button variant="ghost" size="sm" className="h-7 px-2">
@@ -443,24 +445,24 @@ export default function DashboardContent({
                     <div className="grid grid-cols-2 gap-3 mb-4">
                       <div className="text-center p-3 rounded-lg bg-muted/50">
                         <p className="text-xl font-semibold">{userStats.totalUsers}</p>
-                        <p className="text-xs text-muted-foreground">Total</p>
+                        <p className="text-xs text-muted-foreground">{t('total')}</p>
                       </div>
                       <div className="text-center p-3 rounded-lg bg-muted/50">
                         <p className="text-xl font-semibold">{userStats.activeUsers}</p>
-                        <p className="text-xs text-muted-foreground">Active</p>
+                        <p className="text-xs text-muted-foreground">{t('active')}</p>
                       </div>
                     </div>
                     <div className="border-t pt-3 space-y-2 text-sm">
                       <div className="flex justify-between">
-                        <span className="text-muted-foreground">Admins</span>
+                        <span className="text-muted-foreground">{t('admins')}</span>
                         <span className="font-medium">{userStats.byRole.admin}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-muted-foreground">Editors</span>
+                        <span className="text-muted-foreground">{t('editors')}</span>
                         <span className="font-medium">{userStats.byRole.editor}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-muted-foreground">Users</span>
+                        <span className="text-muted-foreground">{t('users')}</span>
                         <span className="font-medium">{userStats.byRole.user}</span>
                       </div>
                     </div>
@@ -481,15 +483,15 @@ export default function DashboardContent({
                     </div>
                     <div className="space-y-3">
                       <div>
-                        <h4 className="font-semibold">Ready to assess?</h4>
+                        <h4 className="font-semibold">{t('readyToAssess')}</h4>
                         <p className="text-sm text-muted-foreground mt-0.5">
-                          Discover your strengths and growth areas.
+                          {t('discoverStrengths')}
                         </p>
                       </div>
                       <Link href="/test-templates">
                         <Button size="sm" className="gap-2">
                           <Play className="w-3.5 h-3.5" />
-                          Start Assessment
+                          {t('startAssessment')}
                         </Button>
                       </Link>
                     </div>

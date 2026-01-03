@@ -1,4 +1,7 @@
 import type { NextConfig } from "next";
+import createNextIntlPlugin from 'next-intl/plugin';
+
+const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts');
 
 const nextConfig: NextConfig = {
 	// Enable React Compiler for automatic memoization (Next.js 16)
@@ -82,6 +85,7 @@ const nextConfig: NextConfig = {
 			"fuse.js",
 			"zod",
 			"react-hook-form",
+			"next-intl",
 		],
 		// Enable server source maps for better debugging (disable in production)
 		serverSourceMaps: false,
@@ -190,4 +194,4 @@ const nextConfig: NextConfig = {
 	reactStrictMode: true,
 };
 
-export default nextConfig;
+export default withNextIntl(nextConfig);

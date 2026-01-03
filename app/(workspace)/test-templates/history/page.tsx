@@ -2,6 +2,7 @@ import React, { Suspense } from "react";
 import Link from "next/link";
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
+import { getTranslations, getLocale } from "next-intl/server";
 import { testResultsApi, testSessionsApi } from "@/services/api";
 import { TestResult, TestSessionSummary } from "@/types/domain";
 import { SessionStatus } from "@/types/domain";
@@ -26,7 +27,8 @@ import { cn } from "@/lib/utils";
 
 export default async function TestHistoryPage() {
   const { userId } = await auth();
-  
+  const t = await getTranslations("template.history");
+
   if (!userId) {
     redirect("/sign-in");
   }
@@ -34,13 +36,13 @@ export default async function TestHistoryPage() {
   return (
     <div className="flex flex-col gap-4 p-4 pt-6 md:gap-6 md:p-6 max-w-5xl mx-auto w-full">
       <PageHeader
-        title="Мои результаты"
-        description="История пройденных тестов и текущие сессии"
+        title={t("title")}
+        description={t("description")}
       >
         <Link href="/test-templates" className="w-full md:w-auto">
           <Button variant="outline" size="sm" className="w-full md:w-auto">
             <FileText className="mr-2 h-4 w-4" />
-            Все шаблоны
+            {t("allTemplates")}
           </Button>
         </Link>
       </PageHeader>
@@ -49,11 +51,11 @@ export default async function TestHistoryPage() {
         <TabsList className="w-full justify-start h-auto p-1 bg-muted/50 md:w-auto">
           <TabsTrigger value="results" className="flex-1 md:flex-none gap-2 py-2.5">
             <Trophy className="h-4 w-4" />
-            <span>Результаты</span>
+            <span>{t("tabs.results")}</span>
           </TabsTrigger>
           <TabsTrigger value="sessions" className="flex-1 md:flex-none gap-2 py-2.5">
             <PlayCircle className="h-4 w-4" />
-            <span>В процессе</span>
+            <span>{t("tabs.sessions")}</span>
           </TabsTrigger>
         </TabsList>
 
@@ -74,6 +76,8 @@ export default async function TestHistoryPage() {
 }
 
 async function ResultsList({ userId }: { userId: string }) {
+  const t = await getTranslations("template.history");
+  const locale = await getLocale();
   let results: TestResult[] = [];
   let error: string | null = null;
 
@@ -82,7 +86,7 @@ async function ResultsList({ userId }: { userId: string }) {
     results = response?.content || [];
   } catch (err) {
     console.error("Failed to fetch results:", err);
-    error = "Не удалось загрузить результаты";
+    error = t("errorLoading.results");
   }
 
   if (error) {
@@ -102,12 +106,12 @@ async function ResultsList({ userId }: { userId: string }) {
           <div className="rounded-full bg-muted p-4 mb-4">
             <History className="h-8 w-8 text-muted-foreground" />
           </div>
-          <h3 className="text-lg font-semibold mb-2">Нет результатов</h3>
+          <h3 className="text-lg font-semibold mb-2">{t("noResults.title")}</h3>
           <p className="text-sm text-muted-foreground max-w-xs mx-auto mb-4">
-            Вы ещё не завершили ни одного теста.
+            {t("noResults.description")}
           </p>
           <Link href="/test-templates">
-            <Button>Пройти первый тест</Button>
+            <Button>{t("noResults.action")}</Button>
           </Link>
         </CardContent>
       </Card>
@@ -120,29 +124,29 @@ async function ResultsList({ userId }: { userId: string }) {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
         <StatCard
           icon={<FileText className="h-4 w-4" />}
-          label="Тестов пройдено"
+          label={t("stats.testsTaken")}
           value={results.length.toString()}
         />
         <StatCard
           icon={<Trophy className="h-4 w-4" />}
-          label="Успешно"
+          label={t("stats.passed")}
           value={results.filter(r => r.passed).length.toString()}
         />
         <StatCard
           icon={<BarChart3 className="h-4 w-4" />}
-          label="Средний балл"
+          label={t("stats.averageScore")}
           value={`${Math.round(results.reduce((acc, r) => acc + r.overallPercentage, 0) / results.length)}%`}
         />
         <StatCard
           icon={<Clock className="h-4 w-4" />}
-          label="Общее время"
-          value={formatTotalTime(results.reduce((acc, r) => acc + (r.totalTimeSeconds || 0), 0))}
+          label={t("stats.totalTime")}
+          value={formatTotalTime(results.reduce((acc, r) => acc + (r.totalTimeSeconds || 0), 0), locale)}
         />
       </div>
 
       {/* Results list */}
       <div className="space-y-3">
-        <h3 className="text-sm font-medium text-muted-foreground px-1">История прохождений</h3>
+        <h3 className="text-sm font-medium text-muted-foreground px-1">{t("completionHistory")}</h3>
         {results.map((result) => (
           <ResultCard key={result.id} result={result} />
         ))}
@@ -152,6 +156,7 @@ async function ResultsList({ userId }: { userId: string }) {
 }
 
 async function SessionsList({ userId }: { userId: string }) {
+  const t = await getTranslations("template.history");
   let sessions: TestSessionSummary[] = [];
   let error: string | null = null;
 
@@ -162,7 +167,7 @@ async function SessionsList({ userId }: { userId: string }) {
     );
   } catch (err) {
     console.error("Failed to fetch sessions:", err);
-    error = "Не удалось загрузить сессии";
+    error = t("errorLoading.sessions");
   }
 
   if (error) {
@@ -182,12 +187,12 @@ async function SessionsList({ userId }: { userId: string }) {
           <div className="rounded-full bg-muted p-4 mb-4">
             <PlayCircle className="h-8 w-8 text-muted-foreground" />
           </div>
-          <h3 className="text-lg font-semibold mb-2">Нет активных сессий</h3>
+          <h3 className="text-lg font-semibold mb-2">{t("noSessions.title")}</h3>
           <p className="text-sm text-muted-foreground max-w-xs mx-auto mb-4">
-            У вас нет незавершённых тестов.
+            {t("noSessions.description")}
           </p>
           <Link href="/test-templates">
-            <Button>Начать новый тест</Button>
+            <Button>{t("noSessions.action")}</Button>
           </Link>
         </CardContent>
       </Card>
@@ -207,9 +212,11 @@ async function SessionsList({ userId }: { userId: string }) {
 // UI Components
 // ============================================================================
 
-function ResultCard({ result }: { result: TestResult }) {
+async function ResultCard({ result }: { result: TestResult }) {
+  const t = await getTranslations("template.history.resultCard");
+  const locale = await getLocale();
   const percentScore = Math.round(result.overallPercentage);
-  
+
   return (
     <Card className="active:scale-[0.99] transition-transform duration-200 hover:border-primary/50">
       <CardContent className="p-4 flex flex-col sm:flex-row sm:items-center gap-4">
@@ -218,41 +225,41 @@ function ResultCard({ result }: { result: TestResult }) {
           {/* Score Circle */}
           <div className={cn(
             "w-12 h-12 sm:w-14 sm:h-14 rounded-full flex items-center justify-center font-bold text-sm sm:text-lg shrink-0 mt-1 sm:mt-0",
-            result.passed 
-              ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' 
+            result.passed
+              ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
               : 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
           )}>
             {percentScore}%
           </div>
-          
+
           {/* Info */}
           <div className="flex-1 min-w-0 space-y-1">
             <div className="flex flex-wrap items-center gap-2">
               <h4 className="font-semibold text-base leading-tight">{result.templateName}</h4>
               <Badge variant={result.passed ? "default" : "secondary"} className="h-5 px-1.5 text-[10px]">
                 {result.passed ? <CheckCircle2 className="h-3 w-3 mr-1" /> : <XCircle className="h-3 w-3 mr-1" />}
-                {result.passed ? "Пройден" : "Не пройден"}
+                {result.passed ? t("passed") : t("failed")}
               </Badge>
             </div>
-            
+
             <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs sm:text-sm text-muted-foreground">
               <span className="flex items-center gap-1">
                 <Clock className="h-3 w-3" />
-                {formatDate(result.completedAt)}
+                {formatDate(result.completedAt, locale)}
               </span>
               <span className="hidden sm:inline">•</span>
-              <span>{result.questionsAnswered} вопросов</span>
+              <span>{result.questionsAnswered} {t("questions")}</span>
               <span className="hidden sm:inline">•</span>
-              <span>{formatDuration(result.totalTimeSeconds)}</span>
+              <span>{formatDuration(result.totalTimeSeconds, locale)}</span>
             </div>
           </div>
         </div>
-        
+
         {/* Action (Mobile: Full Width Button, Desktop: Arrow) */}
         <div className="w-full sm:w-auto border-t sm:border-t-0 pt-3 sm:pt-0 mt-1 sm:mt-0">
           <Link href={`/test-templates/results/${result.id}`} className="block">
             <Button variant="ghost" className="w-full sm:w-auto justify-between sm:justify-center group">
-              <span className="sm:hidden">Подробнее</span>
+              <span className="sm:hidden">{t("details")}</span>
               <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
             </Button>
           </Link>
@@ -262,11 +269,13 @@ function ResultCard({ result }: { result: TestResult }) {
   );
 }
 
-function SessionCard({ session }: { session: TestSessionSummary }) {
-  const progress = session.totalQuestions > 0 
-    ? Math.round((session.answeredQuestions / session.totalQuestions) * 100) 
+async function SessionCard({ session }: { session: TestSessionSummary }) {
+  const t = await getTranslations("template.history.resultCard");
+  const locale = await getLocale();
+  const progress = session.totalQuestions > 0
+    ? Math.round((session.answeredQuestions / session.totalQuestions) * 100)
     : 0;
-  
+
   return (
     <Card className="active:scale-[0.99] transition-transform duration-200 hover:border-primary/50">
       <CardContent className="p-4 flex flex-col sm:flex-row sm:items-center gap-4">
@@ -275,26 +284,26 @@ function SessionCard({ session }: { session: TestSessionSummary }) {
           <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-700 dark:text-blue-400 font-bold text-sm sm:text-lg shrink-0 mt-1 sm:mt-0">
             {progress}%
           </div>
-          
+
           <div className="flex-1 min-w-0 space-y-1">
             <div className="flex flex-wrap items-center gap-2">
               <h4 className="font-semibold text-base leading-tight">{session.templateName}</h4>
               <Badge variant="outline" className="h-5 px-1.5 text-[10px] border-blue-200 text-blue-700 bg-blue-50 dark:bg-blue-950/20 dark:border-blue-800 dark:text-blue-300">
-                В процессе
+                {t("inProgress")}
               </Badge>
             </div>
             <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs sm:text-sm text-muted-foreground">
-              <span>Начат {formatDate(session.startedAt || session.createdAt)}</span>
+              <span>{t("started")} {formatDate(session.startedAt || session.createdAt, locale)}</span>
               <span className="hidden sm:inline">•</span>
-              <span>{session.answeredQuestions} из {session.totalQuestions} вопросов</span>
+              <span>{session.answeredQuestions} {t("of")} {session.totalQuestions} {t("questions")}</span>
             </div>
           </div>
         </div>
-        
+
         <div className="w-full sm:w-auto border-t sm:border-t-0 pt-3 sm:pt-0 mt-1 sm:mt-0">
           <Link href={`/test-templates/take/${session.id}`} className="block">
             <Button size="sm" className="w-full sm:w-auto">
-              Продолжить
+              {t("continue")}
               <PlayCircle className="ml-2 h-4 w-4" />
             </Button>
           </Link>
@@ -338,28 +347,37 @@ function HistorySkeleton() {
 }
 
 // Helpers
-function formatDate(dateString: string | undefined): string {
+function formatDate(dateString: string | undefined, locale: string): string {
   if (!dateString) return "—";
   const date = new Date(dateString);
-  return date.toLocaleDateString("ru-RU", {
+  const localeCode = locale === "ru" ? "ru-RU" : "en-US";
+  return date.toLocaleDateString(localeCode, {
     day: "numeric",
     month: "short",
     year: date.getFullYear() !== new Date().getFullYear() ? "numeric" : undefined,
   });
 }
 
-function formatDuration(seconds: number): string {
-  if (!seconds || !Number.isFinite(seconds)) return "0м";
+function formatDuration(seconds: number, locale: string): string {
+  if (!seconds || !Number.isFinite(seconds)) return locale === "ru" ? "0м" : "0m";
   const hours = Math.floor(seconds / 3600);
   const mins = Math.floor((seconds % 3600) / 60);
-  if (hours > 0) return `${hours}ч ${mins}м`;
-  return `${mins}м`;
+  if (locale === "ru") {
+    if (hours > 0) return `${hours}ч ${mins}м`;
+    return `${mins}м`;
+  }
+  if (hours > 0) return `${hours}h ${mins}m`;
+  return `${mins}m`;
 }
 
-function formatTotalTime(seconds: number): string {
-  if (!seconds || !Number.isFinite(seconds)) return "0м";
+function formatTotalTime(seconds: number, locale: string): string {
+  if (!seconds || !Number.isFinite(seconds)) return locale === "ru" ? "0м" : "0m";
   const hours = Math.floor(seconds / 3600);
   const mins = Math.floor((seconds % 3600) / 60);
-  if (hours > 0) return `${hours}ч`;
-  return `${mins}м`;
+  if (locale === "ru") {
+    if (hours > 0) return `${hours}ч`;
+    return `${mins}м`;
+  }
+  if (hours > 0) return `${hours}h`;
+  return `${mins}m`;
 }

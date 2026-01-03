@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 
 interface SummaryHeroProps {
@@ -28,6 +29,7 @@ export function SummaryHero({
   templateName,
   timeRemaining,
 }: SummaryHeroProps) {
+  const t = useTranslations('assessment');
   const completionPercentage = Math.round((answeredCount / totalQuestions) * 100);
   const isComplete = answeredCount >= totalQuestions;
   const hasSkipped = skippedCount > 0;
@@ -93,7 +95,7 @@ export function SummaryHero({
               {completionPercentage}%
             </span>
             <span className="text-[10px] text-neutral-500 uppercase tracking-wide">
-              завершено
+              {t('completed')}
             </span>
           </div>
         </div>
@@ -105,7 +107,7 @@ export function SummaryHero({
           <div className="text-2xl font-bold text-emerald-400 tabular-nums">
             {answeredCount}
           </div>
-          <div className="text-xs text-neutral-500">Отвечено</div>
+          <div className="text-xs text-neutral-500">{t('answered')}</div>
         </div>
         <div className="space-y-1">
           <div className={cn(
@@ -114,7 +116,7 @@ export function SummaryHero({
           )}>
             {skippedCount}
           </div>
-          <div className="text-xs text-neutral-500">Пропущено</div>
+          <div className="text-xs text-neutral-500">{t('skipped')}</div>
         </div>
         <div className="space-y-1">
           <div className={cn(
@@ -123,7 +125,7 @@ export function SummaryHero({
           )}>
             {flaggedCount}
           </div>
-          <div className="text-xs text-neutral-500">Отмечено</div>
+          <div className="text-xs text-neutral-500">{t('flagged')}</div>
         </div>
       </div>
 
@@ -134,7 +136,7 @@ export function SummaryHero({
           timeRemaining < 300 ? "text-amber-400" : "text-neutral-400"
         )}>
           <span className="text-sm">
-            Осталось времени: <span className="font-mono font-medium">{formatTime(timeRemaining)}</span>
+            {t('timeRemaining')}: <span className="font-mono font-medium">{formatTime(timeRemaining)}</span>
           </span>
         </div>
       )}

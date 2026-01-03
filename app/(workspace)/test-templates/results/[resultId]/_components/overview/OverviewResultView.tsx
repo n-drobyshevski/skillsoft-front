@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo } from 'react';
+import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Award, Lightbulb, Brain, Target, GitCompareArrows, AlertTriangle } from 'lucide-react';
@@ -64,6 +65,8 @@ function getTraitDescription(trait: string, score: number): string {
  * - "Your Competency Profile" messaging
  */
 export function OverviewResultView({ result, template }: BaseResultViewProps) {
+  const t = useTranslations('template.resultsView.overview');
+
   // Project competencies to Big Five personality profile with detailed contributions
   const { profile: bigFiveProfile, contributions, metadata } = useBigFiveProjectionDetailed(result.competencyScores);
   const bigFiveLabels = getBigFiveLabels();
@@ -123,10 +126,10 @@ export function OverviewResultView({ result, template }: BaseResultViewProps) {
           <Card className="h-full">
             <CardHeader className="pb-2 sm:pb-3 px-3 sm:px-6">
               <CardTitle className="text-base sm:text-lg font-semibold">
-                Profile Overview
+                {t('profileOverview')}
               </CardTitle>
               <CardDescription className="text-xs sm:text-sm">
-                Assessment results
+                {t('assessmentResults')}
               </CardDescription>
             </CardHeader>
             <CardContent className="px-2 sm:px-6">
@@ -136,31 +139,31 @@ export function OverviewResultView({ result, template }: BaseResultViewProps) {
                   <TabsTrigger
                     value="competency"
                     className="gap-1 sm:gap-1.5 px-2 sm:px-3 py-2.5 sm:py-2 data-[state=active]:shadow-md touch-manipulation"
-                    title="Skills"
+                    title={t('skills')}
                   >
                     <Target className="h-4 w-4 shrink-0" />
                     <span className="sr-only xs:not-sr-only xs:inline text-xs sm:text-sm font-medium truncate">
-                      Skills
+                      {t('skills')}
                     </span>
                   </TabsTrigger>
                   <TabsTrigger
                     value="personality"
                     className="gap-1 sm:gap-1.5 px-2 sm:px-3 py-2.5 sm:py-2 data-[state=active]:shadow-md touch-manipulation"
-                    title="Big Five"
+                    title={t('bigFive')}
                   >
                     <Brain className="h-4 w-4 shrink-0" />
                     <span className="sr-only xs:not-sr-only xs:inline text-xs sm:text-sm font-medium truncate">
-                      Big 5
+                      {t('bigFive')}
                     </span>
                   </TabsTrigger>
                   <TabsTrigger
                     value="mapping"
                     className="gap-1 sm:gap-1.5 px-2 sm:px-3 py-2.5 sm:py-2 data-[state=active]:shadow-md touch-manipulation"
-                    title="Mapping"
+                    title={t('map')}
                   >
                     <GitCompareArrows className="h-4 w-4 shrink-0" />
                     <span className="sr-only xs:not-sr-only xs:inline text-xs sm:text-sm font-medium truncate">
-                      Map
+                      {t('map')}
                     </span>
                   </TabsTrigger>
                 </TabsList>
@@ -180,7 +183,7 @@ export function OverviewResultView({ result, template }: BaseResultViewProps) {
                         <Target className="w-6 h-6 sm:w-8 sm:h-8 text-muted-foreground" />
                       </div>
                       <p className="text-xs sm:text-sm text-muted-foreground">
-                        At least 3 competencies required for radar chart.
+                        {t('minCompetenciesRequired')}
                       </p>
                     </div>
                   )}
@@ -201,7 +204,7 @@ export function OverviewResultView({ result, template }: BaseResultViewProps) {
                         <Brain className="w-6 h-6 sm:w-8 sm:h-8 text-muted-foreground" />
                       </div>
                       <p className="text-xs sm:text-sm text-muted-foreground">
-                        Requires O*NET mappings. Contact admin.
+                        {t('requiresOnetMappings')}
                       </p>
                     </div>
                   )}
@@ -215,8 +218,8 @@ export function OverviewResultView({ result, template }: BaseResultViewProps) {
                         <div className="flex items-start gap-2 p-2 sm:p-3 mb-2 sm:mb-3 bg-muted/50 rounded-lg border border-muted-foreground/20">
                           <AlertTriangle className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-muted-foreground shrink-0 mt-0.5" />
                           <div className="text-[10px] sm:text-xs text-muted-foreground">
-                            <span className="font-medium">Limited coverage.</span>{' '}
-                            Only {metadata.coveragePercentage}% mapped.
+                            <span className="font-medium">{t('limitedCoverage')}</span>{' '}
+                            {t('onlyMapped', { percentage: metadata.coveragePercentage })}
                           </div>
                         </div>
                       )}
@@ -231,7 +234,7 @@ export function OverviewResultView({ result, template }: BaseResultViewProps) {
                         <GitCompareArrows className="w-6 h-6 sm:w-8 sm:h-8 text-muted-foreground" />
                       </div>
                       <p className="text-xs sm:text-sm text-muted-foreground">
-                        No O*NET mappings available.
+                        {t('noOnetMappings')}
                       </p>
                     </div>
                   )}
@@ -247,7 +250,7 @@ export function OverviewResultView({ result, template }: BaseResultViewProps) {
                 <div className="p-1.5 sm:p-2 rounded-lg bg-primary/10">
                   <Award className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
                 </div>
-                Key Insights
+                {t('keyInsights')}
               </CardTitle>
             </CardHeader>
             <CardContent className="flex-1 space-y-4 sm:space-y-5 px-4 sm:px-6">
@@ -259,10 +262,10 @@ export function OverviewResultView({ result, template }: BaseResultViewProps) {
                   </div>
                   <div className="min-w-0 flex-1">
                     <h4 className="font-semibold text-sm sm:text-base text-foreground mb-1">
-                      Profile Summary
+                      {t('profileSummary')}
                     </h4>
                     <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-                      {result.competencyScores.length} competencies assessed for your Competency Passport.
+                      {t('competenciesAssessed', { count: result.competencyScores.length })}
                     </p>
                   </div>
                 </div>
@@ -273,12 +276,12 @@ export function OverviewResultView({ result, template }: BaseResultViewProps) {
                 <div className="space-y-3">
                   <h5 className="text-xs sm:text-sm font-semibold text-foreground uppercase tracking-wider flex items-center gap-2">
                     <span className="w-1 h-4 bg-primary/60 rounded-full" />
-                    Top Traits
+                    {t('topTraits')}
                   </h5>
                   <div className="space-y-2.5 sm:space-y-3">
                     {topTraits.map(trait => (
-                      <div 
-                        key={trait.key} 
+                      <div
+                        key={trait.key}
                         className="p-3 sm:p-4 bg-muted/40 hover:bg-muted/60 rounded-xl border border-border/50 transition-colors"
                       >
                         <div className="flex items-center justify-between mb-1.5 sm:mb-2">
@@ -303,7 +306,7 @@ export function OverviewResultView({ result, template }: BaseResultViewProps) {
                 <div className="space-y-3">
                   <h5 className="text-xs sm:text-sm font-semibold text-foreground uppercase tracking-wider flex items-center gap-2">
                     <span className="w-1 h-4 bg-emerald-500/60 rounded-full" />
-                    Strengths
+                    {t('strengths')}
                   </h5>
                   <div className="flex flex-wrap gap-1.5 sm:gap-2">
                     {result.competencyScores
@@ -319,7 +322,7 @@ export function OverviewResultView({ result, template }: BaseResultViewProps) {
                       ))}
                     {result.competencyScores.filter(c => c.percentage >= 70).length === 0 && (
                       <p className="text-xs sm:text-sm text-muted-foreground italic">
-                        Keep developing skills.
+                        {t('keepDevelopingSkills')}
                       </p>
                     )}
                   </div>
@@ -332,10 +335,10 @@ export function OverviewResultView({ result, template }: BaseResultViewProps) {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <h5 className="text-xs sm:text-sm font-semibold text-foreground uppercase tracking-wider">
-                        Coverage
+                        {t('coverage')}
                       </h5>
                       <span className="text-xs sm:text-sm text-muted-foreground">
-                        {metadata.mappedCompetencies}/{metadata.totalCompetencies} mapped
+                        {t('mapped', { mapped: metadata.mappedCompetencies, total: metadata.totalCompetencies })}
                       </span>
                     </div>
                     <span className="text-base sm:text-lg font-bold text-foreground tabular-nums">
@@ -348,7 +351,7 @@ export function OverviewResultView({ result, template }: BaseResultViewProps) {
               {/* Development note - Footer */}
               <div className="pt-3 sm:pt-4 border-t border-border/50 mt-auto">
                 <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed text-center">
-                  Regular reassessment helps track growth.
+                  {t('developmentNote')}
                 </p>
               </div>
             </CardContent>

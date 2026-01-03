@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 import { useNetworkStatus } from '@/hooks/useNetworkStatus';
 import { WifiOff, RefreshCw, AlertTriangle, Wifi, X } from 'lucide-react';
@@ -42,6 +43,7 @@ export function OfflineIndicator({
   dismissible = true,
   autoHideDelay = 3000,
 }: OfflineIndicatorProps) {
+  const t = useTranslations('feedback');
   const { isOnline, isSlowConnection, effectiveType } = useNetworkStatus();
   const [isDismissed, setIsDismissed] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -97,7 +99,7 @@ export function OfflineIndicator({
     if (showOnlineNotice) {
       return {
         icon: <Wifi className="h-4 w-4 text-emerald-500" />,
-        message: 'Подключение восстановлено',
+        message: t('connectionRestored'),
         bgClass: 'bg-emerald-50 dark:bg-emerald-950/50 border-emerald-200 dark:border-emerald-800',
         textClass: 'text-emerald-700 dark:text-emerald-300',
         showRefresh: false,
@@ -108,7 +110,7 @@ export function OfflineIndicator({
     if (!isOnline) {
       return {
         icon: <WifiOff className="h-4 w-4 text-red-500" />,
-        message: 'Нет подключения — используются кэшированные данные',
+        message: t('noConnection'),
         bgClass: 'bg-red-50 dark:bg-red-950/50 border-red-200 dark:border-red-800',
         textClass: 'text-red-700 dark:text-red-300',
         showRefresh: false,
@@ -119,7 +121,7 @@ export function OfflineIndicator({
     if (isStale) {
       return {
         icon: <AlertTriangle className="h-4 w-4 text-amber-500" />,
-        message: 'Данные могут быть устаревшими',
+        message: t('dataOutdated'),
         bgClass: 'bg-amber-50 dark:bg-amber-950/50 border-amber-200 dark:border-amber-800',
         textClass: 'text-amber-700 dark:text-amber-300',
         showRefresh: true,
@@ -130,7 +132,7 @@ export function OfflineIndicator({
     if (isSlowConnection) {
       return {
         icon: <AlertTriangle className="h-4 w-4 text-amber-500" />,
-        message: `Медленное подключение${effectiveType ? ` (${effectiveType})` : ''}`,
+        message: `${t('slowConnection')}${effectiveType ? ` (${effectiveType})` : ''}`,
         bgClass: 'bg-amber-50 dark:bg-amber-950/50 border-amber-200 dark:border-amber-800',
         textClass: 'text-amber-700 dark:text-amber-300',
         showRefresh: false,
@@ -180,7 +182,7 @@ export function OfflineIndicator({
             className={cn('h-3.5 w-3.5 mr-1', isRefreshing && 'animate-spin')}
           />
           <span className="hidden sm:inline">
-            {isRefreshing ? 'Обновление...' : 'Обновить'}
+            {isRefreshing ? t('updating') : t('update')}
           </span>
         </Button>
       )}
@@ -194,7 +196,7 @@ export function OfflineIndicator({
             'focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
             'transition-colors'
           )}
-          aria-label="Скрыть уведомление"
+          aria-label={t('hideNotification')}
         >
           <X className="h-3.5 w-3.5" />
         </button>
@@ -216,6 +218,7 @@ export function CompactNetworkStatus({
   className,
   showLabel = false,
 }: CompactNetworkStatusProps) {
+  const t = useTranslations('feedback');
   const { isOnline, isSlowConnection, effectiveType } = useNetworkStatus();
 
   if (isOnline && !isSlowConnection) {
@@ -227,8 +230,8 @@ export function CompactNetworkStatus({
       role="status"
       aria-label={
         !isOnline
-          ? 'Нет подключения к интернету'
-          : `Медленное подключение: ${effectiveType}`
+          ? t('noConnection')
+          : `${t('slowConnection')}: ${effectiveType}`
       }
       className={cn(
         'flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium',
@@ -244,7 +247,7 @@ export function CompactNetworkStatus({
         <AlertTriangle className="h-3 w-3" />
       )}
       {showLabel && (
-        <span>{!isOnline ? 'Оффлайн' : effectiveType?.toUpperCase()}</span>
+        <span>{!isOnline ? t('offline') : effectiveType?.toUpperCase()}</span>
       )}
     </div>
   );

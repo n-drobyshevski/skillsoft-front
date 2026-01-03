@@ -2,6 +2,7 @@
 
 import { useMemo, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTranslations, useLocale } from 'next-intl';
 import {
   ScatterChart,
   Scatter,
@@ -17,10 +18,11 @@ import {
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useFormattedNumbers } from '@/hooks/useFormattedNumbers';
+import { useEnumTranslation } from '@/hooks/useEnumTranslation';
 import {
   ItemStatistics,
   ItemValidityStatus,
-  ItemValidityStatusDisplay,
 } from '@/types/psychometrics';
 import { cn } from '@/lib/utils';
 import { Target, AlertTriangle } from 'lucide-react';
@@ -70,29 +72,32 @@ interface CustomTooltipProps {
   payload?: Array<{
     payload: ScatterDataPoint;
   }>;
+  t: (key: string) => string;
+  formatDecimal: (value: number | null | undefined, decimals?: number) => string;
+  formatNumber: (value: number | null | undefined) => string;
+  translateStatus: (value: ItemValidityStatus) => string;
 }
 
-function CustomTooltip({ active, payload }: CustomTooltipProps) {
+function CustomTooltip({ active, payload, t, formatDecimal, formatNumber, translateStatus }: CustomTooltipProps) {
   if (!active || !payload?.length) return null;
 
   const data = payload[0].payload;
-  const statusDisplay = ItemValidityStatusDisplay[data.validityStatus];
 
   return (
     <div className="bg-popover border border-border rounded-lg shadow-xl p-3 max-w-xs">
       <p className="font-medium text-sm line-clamp-2 mb-2">{data.questionText}</p>
       <div className="space-y-1 text-xs">
         <div className="flex justify-between gap-4">
-          <span className="text-muted-foreground">Question Difficulty:</span>
-          <span className="font-mono font-medium">{data.x.toFixed(2)}</span>
+          <span className="text-muted-foreground">{t('tooltip.questionDifficulty')}:</span>
+          <span className="font-mono font-medium">{formatDecimal(data.x, 2)}</span>
         </div>
         <div className="flex justify-between gap-4">
-          <span className="text-muted-foreground">Question Effectiveness:</span>
-          <span className="font-mono font-medium">{data.y.toFixed(2)}</span>
+          <span className="text-muted-foreground">{t('tooltip.questionEffectiveness')}:</span>
+          <span className="font-mono font-medium">{formatDecimal(data.y, 2)}</span>
         </div>
         <div className="flex justify-between gap-4">
-          <span className="text-muted-foreground">Responses:</span>
-          <span className="font-medium">{data.responseCount}</span>
+          <span className="text-muted-foreground">{t('tooltip.responses')}:</span>
+          <span className="font-medium">{formatNumber(data.responseCount)}</span>
         </div>
         <div className="pt-1 border-t">
           <p className="text-muted-foreground truncate">{data.competencyName}</p>
@@ -105,7 +110,7 @@ function CustomTooltip({ active, payload }: CustomTooltipProps) {
               borderColor: statusColorMap[data.validityStatus]
             }}
           >
-            {statusDisplay.label}
+            {translateStatus(data.validityStatus)}
           </Badge>
         </div>
       </div>
@@ -120,32 +125,37 @@ interface ZoneSummary {
   toxic: number;
 }
 
-function MobileSummaryCard({ zoneCounts }: { zoneCounts: ZoneSummary }) {
+interface MobileSummaryCardProps {
+  zoneCounts: ZoneSummary;
+  t: (key: string) => string;
+}
+
+function MobileSummaryCard({ zoneCounts, t }: MobileSummaryCardProps) {
   return (
     <Card>
       <CardHeader className="pb-2">
         <CardTitle className="text-base flex items-center gap-2">
           <Target className="h-4 w-4" />
-          Item Quality Summary
+          {t('mobileSummaryTitle')}
         </CardTitle>
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-2 gap-3">
           <div className="p-2 rounded-lg bg-emerald-50 dark:bg-emerald-950/20 text-center">
             <div className="text-2xl font-bold text-emerald-600">{zoneCounts.optimal}</div>
-            <p className="text-xs text-muted-foreground">Optimal Zone</p>
+            <p className="text-xs text-muted-foreground">{t('zones.optimal')}</p>
           </div>
           <div className="p-2 rounded-lg bg-violet-50 dark:bg-violet-950/20 text-center">
             <div className="text-2xl font-bold text-violet-600">{zoneCounts.tooEasy}</div>
-            <p className="text-xs text-muted-foreground">Too Easy</p>
+            <p className="text-xs text-muted-foreground">{t('zones.tooEasy')}</p>
           </div>
           <div className="p-2 rounded-lg bg-blue-50 dark:bg-blue-950/20 text-center">
             <div className="text-2xl font-bold text-blue-600">{zoneCounts.tooHard}</div>
-            <p className="text-xs text-muted-foreground">Too Hard</p>
+            <p className="text-xs text-muted-foreground">{t('zones.tooHard')}</p>
           </div>
           <div className="p-2 rounded-lg bg-red-50 dark:bg-red-950/20 text-center">
             <div className="text-2xl font-bold text-red-600">{zoneCounts.toxic}</div>
-            <p className="text-xs text-muted-foreground">Toxic (rpb &lt; 0)</p>
+            <p className="text-xs text-muted-foreground">{t('zones.toxic')}</p>
           </div>
         </div>
       </CardContent>
@@ -156,6 +166,10 @@ function MobileSummaryCard({ zoneCounts }: { zoneCounts: ZoneSummary }) {
 export function ItemQualityScatter({ items, className, height = 400 }: ItemQualityScatterProps) {
   const router = useRouter();
   const isMobile = useIsMobile();
+  const locale = useLocale();
+  const t = useTranslations('psychometrics.charts.itemQualityScatter');
+  const { formatDecimal, formatNumber } = useFormattedNumbers();
+  const { translate: translateStatus } = useEnumTranslation<ItemValidityStatus>('itemValidityStatus');
 
   // Transform items to scatter data points
   const scatterData = useMemo(() => {
@@ -199,7 +213,7 @@ export function ItemQualityScatter({ items, className, height = 400 }: ItemQuali
 
   // Show mobile summary on small screens
   if (isMobile) {
-    return <MobileSummaryCard zoneCounts={zoneCounts} />;
+    return <MobileSummaryCard zoneCounts={zoneCounts} t={t} />;
   }
 
   if (scatterData.length === 0) {
@@ -208,8 +222,8 @@ export function ItemQualityScatter({ items, className, height = 400 }: ItemQuali
         <CardContent className="py-12">
           <div className="text-center text-muted-foreground">
             <AlertTriangle className="h-8 w-8 mx-auto mb-2 opacity-50" />
-            <p>No items with calculated metrics</p>
-            <p className="text-sm">Run an audit to calculate item statistics</p>
+            <p>{t('noItemsWithMetrics')}</p>
+            <p className="text-sm">{t('runAuditToCalculate')}</p>
           </div>
         </CardContent>
       </Card>
@@ -217,17 +231,17 @@ export function ItemQualityScatter({ items, className, height = 400 }: ItemQuali
   }
 
   return (
-    <Card className={cn('', className)}>
+    <Card className={cn('', className)} key={locale}>
       <CardHeader className="pb-2">
         <div className="flex items-start justify-between">
           <div>
             <CardTitle className="text-lg flex items-center gap-2">
               <Target className="h-5 w-5 text-primary" />
-              Item Quality Map
+              {t('title')}
               <ItemQualityMapHelp />
             </CardTitle>
             <CardDescription className="mt-1">
-              Question Difficulty vs Question Effectiveness ({scatterData.length} items)
+              {t('description', { count: scatterData.length })}
             </CardDescription>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -238,7 +252,7 @@ export function ItemQualityScatter({ items, className, height = 400 }: ItemQuali
                   style={{ backgroundColor: color }}
                 />
                 <span className="text-muted-foreground">
-                  {ItemValidityStatusDisplay[status as ItemValidityStatus].label}
+                  {translateStatus(status as ItemValidityStatus)}
                 </span>
               </div>
             ))}
@@ -296,7 +310,7 @@ export function ItemQualityScatter({ items, className, height = 400 }: ItemQuali
               strokeDasharray="5 5"
               strokeWidth={1.5}
               label={{
-                value: 'Good threshold (0.25)',
+                value: t('referenceLine.goodThreshold'),
                 position: 'right',
                 fill: '#f59e0b',
                 fontSize: 11
@@ -308,7 +322,7 @@ export function ItemQualityScatter({ items, className, height = 400 }: ItemQuali
               strokeDasharray="3 3"
               strokeWidth={2}
               label={{
-                value: 'Toxic',
+                value: t('referenceLine.toxic'),
                 position: 'right',
                 fill: '#ef4444',
                 fontSize: 11
@@ -321,9 +335,9 @@ export function ItemQualityScatter({ items, className, height = 400 }: ItemQuali
               dataKey="x"
               domain={[0, 1]}
               tickCount={6}
-              tickFormatter={(value: number) => value.toFixed(1)}
+              tickFormatter={(value: number) => formatDecimal(value, 1)}
               label={{
-                value: 'Question Difficulty (p-value)',
+                value: t('axis.xLabel'),
                 position: 'bottom',
                 offset: 20,
                 className: 'fill-muted-foreground text-xs'
@@ -335,9 +349,9 @@ export function ItemQualityScatter({ items, className, height = 400 }: ItemQuali
               dataKey="y"
               domain={[-0.5, 1]}
               tickCount={7}
-              tickFormatter={(value: number) => value.toFixed(1)}
+              tickFormatter={(value: number) => formatDecimal(value, 1)}
               label={{
-                value: 'Question Effectiveness (rpb)',
+                value: t('axis.yLabel'),
                 angle: -90,
                 position: 'left',
                 offset: 10,
@@ -347,7 +361,17 @@ export function ItemQualityScatter({ items, className, height = 400 }: ItemQuali
             />
 
             {/* Tooltip */}
-            <Tooltip content={<CustomTooltip />} cursor={{ strokeDasharray: '3 3' }} />
+            <Tooltip
+              content={
+                <CustomTooltip
+                  t={t}
+                  formatDecimal={formatDecimal}
+                  formatNumber={formatNumber}
+                  translateStatus={translateStatus}
+                />
+              }
+              cursor={{ strokeDasharray: '3 3' }}
+            />
 
             {/* Scatter Plot */}
             <Scatter
@@ -380,28 +404,28 @@ export function ItemQualityScatter({ items, className, height = 400 }: ItemQuali
           <div className="flex items-center gap-1.5">
             <div className="w-3 h-3 rounded bg-emerald-500/20 border border-emerald-500/40" />
             <span className="flex items-center gap-0.5">
-              Optimal (p: 0.2-0.8, rpb: 0.25+)
+              {t('zones.optimalRange')}
               <ZoneOptimalHelp />
             </span>
           </div>
           <div className="flex items-center gap-1.5">
             <div className="w-3 h-3 rounded bg-violet-500/20 border border-violet-500/40" />
             <span className="flex items-center gap-0.5">
-              Too Easy (p &gt; 0.9)
+              {t('zones.tooEasyRange')}
               <ZoneTooEasyHelp />
             </span>
           </div>
           <div className="flex items-center gap-1.5">
             <div className="w-3 h-3 rounded bg-blue-500/20 border border-blue-500/40" />
             <span className="flex items-center gap-0.5">
-              Too Hard (p &lt; 0.2)
+              {t('zones.tooHardRange')}
               <ZoneTooHardHelp />
             </span>
           </div>
           <div className="flex items-center gap-1.5">
             <div className="w-3 h-3 rounded bg-red-500/20 border border-red-500/40" />
             <span className="flex items-center gap-0.5">
-              Toxic (rpb &lt; 0)
+              {t('zones.toxic')}
               <ZoneToxicHelp />
             </span>
           </div>

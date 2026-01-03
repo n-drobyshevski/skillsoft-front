@@ -65,6 +65,7 @@ import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { AssessmentGoal, AssessmentGoalInfo, TestTemplate } from '@/types/domain';
 import { updateTemplateSettings, archiveTemplate, deleteTemplate } from '../../actions';
+import { useTranslations } from 'next-intl';
 
 // Validation schema for all settings
 const settingsSchema = z.object({
@@ -107,6 +108,8 @@ const goalConfig: Record<AssessmentGoal, { icon: typeof Briefcase; color: string
 export function SettingsForm({ template }: SettingsFormProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
+  const t = useTranslations('template');
+  const tCommon = useTranslations('common');
 
   const form = useForm<SettingsFormValues>({
     resolver: zodResolver(settingsSchema),
@@ -133,11 +136,11 @@ export function SettingsForm({ template }: SettingsFormProps) {
     startTransition(async () => {
       const result = await updateTemplateSettings(template.id, values);
       if (result.success) {
-        toast.success('Settings saved successfully');
+        toast.success(t('settingsSaved'));
         form.reset(values);
         router.refresh();
       } else {
-        toast.error(result.error || 'Failed to save settings');
+        toast.error(result.error || t('settingsSaveError'));
       }
     });
   };
@@ -146,10 +149,10 @@ export function SettingsForm({ template }: SettingsFormProps) {
     startTransition(async () => {
       const result = await archiveTemplate(template.id);
       if (result.success) {
-        toast.success('Template archived');
+        toast.success(t('templateArchived'));
         router.refresh();
       } else {
-        toast.error(result.error || 'Failed to archive');
+        toast.error(result.error || t('archiveError'));
       }
     });
   };
@@ -162,7 +165,7 @@ export function SettingsForm({ template }: SettingsFormProps) {
 
   const handleReset = () => {
     form.reset();
-    toast.info('Changes discarded');
+    toast.info(t('changesDiscarded'));
   };
 
   return (
@@ -181,10 +184,10 @@ export function SettingsForm({ template }: SettingsFormProps) {
                   <div>
                     <CardTitle className="flex items-center gap-2">
                       <Settings2 className="h-5 w-5" />
-                      General Information
+                      {t('generalInformation')}
                     </CardTitle>
                     <CardDescription className="mt-1.5">
-                      Basic template details visible to administrators
+                      {t('generalInformationDesc')}
                     </CardDescription>
                   </div>
                 </div>
@@ -196,13 +199,13 @@ export function SettingsForm({ template }: SettingsFormProps) {
                   render={({ field }) => (
                     <FormItem>
                       <div className="flex items-center justify-between">
-                        <FormLabel>Template Name</FormLabel>
+                        <FormLabel>{t('templateNameLabel')}</FormLabel>
                         <span className="text-xs text-muted-foreground">
                           {field.value.length}/100
                         </span>
                       </div>
                       <FormControl>
-                        <Input {...field} placeholder="e.g., Customer Service Skills Assessment" className="h-11" />
+                        <Input {...field} placeholder={t('testNamePlaceholder')} className="h-11" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -215,7 +218,7 @@ export function SettingsForm({ template }: SettingsFormProps) {
                   render={({ field }) => (
                     <FormItem>
                       <div className="flex items-center justify-between">
-                        <FormLabel>Description (Optional)</FormLabel>
+                        <FormLabel>{t('descriptionLabel')}</FormLabel>
                         <span className="text-xs text-muted-foreground">
                           {field.value?.length || 0}/500
                         </span>
@@ -223,7 +226,7 @@ export function SettingsForm({ template }: SettingsFormProps) {
                       <FormControl>
                         <Textarea
                           {...field}
-                          placeholder="Brief description of what this test measures..."
+                          placeholder={t('descriptionHelp')}
                           rows={3}
                           className="resize-none"
                         />
@@ -240,10 +243,10 @@ export function SettingsForm({ template }: SettingsFormProps) {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Target className="h-5 w-5" />
-                  Assessment Goal
+                  {t('assessmentGoal')}
                 </CardTitle>
                 <CardDescription className="mt-1.5">
-                  Select the primary purpose of this assessment
+                  {t('assessmentGoalDesc')}
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -318,10 +321,10 @@ export function SettingsForm({ template }: SettingsFormProps) {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <ListChecks className="h-5 w-5" />
-                  Test Configuration
+                  {t('testConfiguration')}
                 </CardTitle>
                 <CardDescription className="mt-1.5">
-                  Define test structure and scoring parameters
+                  {t('testConfigurationDesc')}
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -335,7 +338,7 @@ export function SettingsForm({ template }: SettingsFormProps) {
                           <div className="p-1.5 rounded-md bg-primary/10">
                             <ListChecks className="h-4 w-4 text-primary" />
                           </div>
-                          Questions per Indicator
+                          {t('questionsPerIndicatorLabel')}
                         </FormLabel>
                         <Select
                           value={field.value.toString()}
@@ -349,13 +352,13 @@ export function SettingsForm({ template }: SettingsFormProps) {
                           <SelectContent>
                             {[1, 2, 3, 5].map((n) => (
                               <SelectItem key={n} value={n.toString()}>
-                                {n} {n === 1 ? 'question' : 'questions'}
+                                {n} {n === 1 ? t('question') : t('questionsPlural')}
                               </SelectItem>
                             ))}
                           </SelectContent>
                         </Select>
                         <FormDescription className="text-xs leading-relaxed">
-                          Questions per behavioral indicator
+                          {t('questionsPerIndicatorDesc')}
                         </FormDescription>
                         <FormMessage />
                       </FormItem>
@@ -371,7 +374,7 @@ export function SettingsForm({ template }: SettingsFormProps) {
                           <div className="p-1.5 rounded-md bg-amber-500/10">
                             <Clock className="h-4 w-4 text-amber-600 dark:text-amber-500" />
                           </div>
-                          Time Limit
+                          {t('timeLimitLabel')}
                         </FormLabel>
                         <Select
                           value={field.value.toString()}
@@ -385,13 +388,13 @@ export function SettingsForm({ template }: SettingsFormProps) {
                           <SelectContent>
                             {[15, 30, 45, 60, 90, 120].map((n) => (
                               <SelectItem key={n} value={n.toString()}>
-                                {n} minutes
+                                {n} {t('minutes')}
                               </SelectItem>
                             ))}
                           </SelectContent>
                         </Select>
                         <FormDescription className="text-xs leading-relaxed">
-                          Maximum test duration
+                          {t('timeLimitDesc')}
                         </FormDescription>
                         <FormMessage />
                       </FormItem>
@@ -407,7 +410,7 @@ export function SettingsForm({ template }: SettingsFormProps) {
                           <div className="p-1.5 rounded-md bg-emerald-500/10">
                             <Target className="h-4 w-4 text-emerald-600 dark:text-emerald-500" />
                           </div>
-                          Passing Score
+                          {t('passingScoreLabel')}
                         </FormLabel>
                         <Select
                           value={field.value.toString()}
@@ -427,7 +430,7 @@ export function SettingsForm({ template }: SettingsFormProps) {
                           </SelectContent>
                         </Select>
                         <FormDescription className="text-xs leading-relaxed">
-                          Minimum percentage required
+                          {t('passingScoreDesc')}
                         </FormDescription>
                         <FormMessage />
                       </FormItem>
@@ -442,10 +445,10 @@ export function SettingsForm({ template }: SettingsFormProps) {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <ToggleRight className="h-5 w-5" />
-                  Test Behavior
+                  {t('testBehavior')}
                 </CardTitle>
                 <CardDescription className="mt-1.5">
-                  Control how test-takers interact with the assessment
+                  {t('testBehaviorDesc')}
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -453,32 +456,32 @@ export function SettingsForm({ template }: SettingsFormProps) {
                   {[
                     {
                       name: 'shuffleQuestions' as const,
-                      label: 'Shuffle Questions',
-                      description: 'Randomize question order for each session',
+                      labelKey: 'shuffleQuestionsLabel',
+                      descriptionKey: 'shuffleQuestionsDescription',
                       icon: Shuffle,
                     },
                     {
                       name: 'shuffleOptions' as const,
-                      label: 'Shuffle Answer Options',
-                      description: 'Randomize answer choices for each question',
+                      labelKey: 'shuffleOptionsLabel',
+                      descriptionKey: 'shuffleOptionsDescription',
                       icon: Shuffle,
                     },
                     {
                       name: 'allowSkip' as const,
-                      label: 'Allow Skip',
-                      description: 'Test-takers can skip questions and return later',
+                      labelKey: 'allowSkipLabel',
+                      descriptionKey: 'allowSkipDescription',
                       icon: SkipForward,
                     },
                     {
                       name: 'allowBackNavigation' as const,
-                      label: 'Allow Back Navigation',
-                      description: 'Test-takers can go back and change answers',
+                      labelKey: 'allowBackNavigationLabel',
+                      descriptionKey: 'allowBackNavigationDescription',
                       icon: ArrowLeftRight,
                     },
                     {
                       name: 'showResultsImmediately' as const,
-                      label: 'Show Results Immediately',
-                      description: 'Display results right after test completion',
+                      labelKey: 'showResultsLabel',
+                      descriptionKey: 'showResultsDescription',
                       icon: Eye,
                     },
                   ].map((setting) => {
@@ -496,10 +499,10 @@ export function SettingsForm({ template }: SettingsFormProps) {
                               </div>
                               <div className="space-y-0.5 flex-1 min-w-0">
                                 <FormLabel className="text-sm font-medium cursor-pointer">
-                                  {setting.label}
+                                  {t(setting.labelKey)}
                                 </FormLabel>
                                 <FormDescription className="text-xs leading-relaxed">
-                                  {setting.description}
+                                  {t(setting.descriptionKey)}
                                 </FormDescription>
                               </div>
                             </div>
@@ -526,9 +529,9 @@ export function SettingsForm({ template }: SettingsFormProps) {
             {/* Publication Status (Sticky) */}
             <Card className="lg:sticky lg:top-6">
               <CardHeader>
-                <CardTitle className="text-base">Publication Status</CardTitle>
+                <CardTitle className="text-base">{t('publicationStatus')}</CardTitle>
                 <CardDescription className="text-xs mt-1.5">
-                  Control template visibility
+                  {t('publicationStatusDesc')}
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -550,13 +553,13 @@ export function SettingsForm({ template }: SettingsFormProps) {
                               field.value ? "bg-emerald-500 animate-pulse" : "bg-muted-foreground"
                             )} />
                             <FormLabel className="text-sm font-semibold cursor-pointer">
-                              {field.value ? "Published" : "Draft"}
+                              {field.value ? t('published') : t('draft')}
                             </FormLabel>
                           </div>
                           <FormDescription className="text-xs leading-relaxed">
                             {field.value
-                              ? "Visible and available for assessments"
-                              : "Hidden from test-takers"}
+                              ? t('publishedDesc')
+                              : t('draftDesc')}
                           </FormDescription>
                         </div>
                         <FormControl>
@@ -575,25 +578,25 @@ export function SettingsForm({ template }: SettingsFormProps) {
             {/* Template Info */}
             <Card>
               <CardHeader>
-                <CardTitle className="text-base">Template Info</CardTitle>
+                <CardTitle className="text-base">{t('templateInfo')}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3 text-sm">
                 <div className="flex justify-between items-center">
-                  <span className="text-muted-foreground">Created</span>
+                  <span className="text-muted-foreground">{t('created')}</span>
                   <span className="font-medium">
                     {new Date(template.createdAt).toLocaleDateString()}
                   </span>
                 </div>
                 <Separator />
                 <div className="flex justify-between items-center">
-                  <span className="text-muted-foreground">Last Modified</span>
+                  <span className="text-muted-foreground">{t('lastModified')}</span>
                   <span className="font-medium">
                     {new Date(template.updatedAt).toLocaleDateString()}
                   </span>
                 </div>
                 <Separator />
                 <div className="flex justify-between items-center">
-                  <span className="text-muted-foreground">Competencies</span>
+                  <span className="text-muted-foreground">{t('competencies')}</span>
                   <Badge variant="secondary" className="font-medium">
                     {template.competencyIds?.length || 0}
                   </Badge>
@@ -606,10 +609,10 @@ export function SettingsForm({ template }: SettingsFormProps) {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-base text-destructive">
                   <AlertTriangle className="h-4 w-4" />
-                  Danger Zone
+                  {t('dangerZone')}
                 </CardTitle>
                 <CardDescription className="text-xs mt-1.5">
-                  Irreversible actions
+                  {t('dangerZoneDesc')}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-3">
@@ -624,22 +627,21 @@ export function SettingsForm({ template }: SettingsFormProps) {
                           size="sm"
                         >
                           <Archive className="h-4 w-4" />
-                          Archive Template
+                          {t('archiveTemplate')}
                         </Button>
                       </AlertDialogTrigger>
                       <AlertDialogContent>
                         <AlertDialogHeader>
-                          <AlertDialogTitle>Archive Template?</AlertDialogTitle>
+                          <AlertDialogTitle>{t('archiveTemplateTitle')}</AlertDialogTitle>
                           <AlertDialogDescription>
-                            This will hide the template from active use. Existing test sessions
-                            will be preserved. You can restore it later.
+                            {t('archiveTemplateDesc')}
                           </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
-                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogCancel>{tCommon('cancel')}</AlertDialogCancel>
                           <AlertDialogAction onClick={handleArchive} disabled={isPending}>
                             {isPending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-                            Archive
+                            {t('archive')}
                           </AlertDialogAction>
                         </AlertDialogFooter>
                       </AlertDialogContent>
@@ -657,26 +659,25 @@ export function SettingsForm({ template }: SettingsFormProps) {
                       size="sm"
                     >
                       <Trash2 className="h-4 w-4" />
-                      Delete Forever
+                      {t('deleteForever')}
                     </Button>
                   </AlertDialogTrigger>
                   <AlertDialogContent>
                     <AlertDialogHeader>
-                      <AlertDialogTitle>Delete Template Permanently?</AlertDialogTitle>
+                      <AlertDialogTitle>{t('deleteTemplateTitle')}</AlertDialogTitle>
                       <AlertDialogDescription>
-                        This action cannot be undone. This will permanently delete the
-                        template and all associated test sessions and results.
+                        {t('deleteTemplateDesc')}
                       </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogCancel>{tCommon('cancel')}</AlertDialogCancel>
                       <AlertDialogAction
                         onClick={handleDelete}
                         disabled={isPending}
                         className="bg-destructive hover:bg-destructive/90"
                       >
                         {isPending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-                        Delete Forever
+                        {t('deleteForever')}
                       </AlertDialogAction>
                     </AlertDialogFooter>
                   </AlertDialogContent>
@@ -695,14 +696,14 @@ export function SettingsForm({ template }: SettingsFormProps) {
                 {isDirty ? (
                   <>
                     <div className="h-2 w-2 rounded-full bg-amber-500 animate-pulse" />
-                    <span className="hidden sm:inline">Unsaved changes</span>
-                    <span className="sm:hidden">Unsaved</span>
+                    <span className="hidden sm:inline">{t('unsavedChanges')}</span>
+                    <span className="sm:hidden">{t('unsaved')}</span>
                   </>
                 ) : (
                   <>
                     <Check className="h-4 w-4 text-emerald-500" />
-                    <span className="hidden sm:inline">All changes saved</span>
-                    <span className="sm:hidden">Saved</span>
+                    <span className="hidden sm:inline">{t('allChangesSaved')}</span>
+                    <span className="sm:hidden">{t('saved')}</span>
                   </>
                 )}
               </div>
@@ -717,7 +718,7 @@ export function SettingsForm({ template }: SettingsFormProps) {
                     disabled={isPending}
                     size="sm"
                   >
-                    Discard
+                    {t('discard')}
                   </Button>
                 )}
                 <Button
@@ -729,12 +730,12 @@ export function SettingsForm({ template }: SettingsFormProps) {
                   {isPending ? (
                     <>
                       <Loader2 className="h-4 w-4 animate-spin" />
-                      Saving...
+                      {t('saving')}
                     </>
                   ) : (
                     <>
                       <Save className="h-4 w-4" />
-                      Save Changes
+                      {t('saveChanges')}
                     </>
                   )}
                 </Button>

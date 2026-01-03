@@ -3,6 +3,7 @@
 import React, { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@clerk/nextjs";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import {
   AlertDialog,
@@ -38,9 +39,12 @@ export default function StartTestSessionButton({
   const [existingSessionId, setExistingSessionId] = useState<string | null>(null);
   const [showDialog, setShowDialog] = useState(false);
 
+  const t = useTranslations('template');
+  const tCommon = useTranslations('common');
+
   const handleStartTest = async () => {
     if (!isSignedIn || !userId) {
-      toast.error("Необходимо войти в систему для прохождения теста");
+      toast.error(t('testSession.loginRequired'));
       router.push("/sign-in");
       return;
     }
@@ -76,16 +80,17 @@ export default function StartTestSessionButton({
           templateId,
           clerkUserId: userId,
         });
-        
-        toast.success("Тест начат!");
+
+        toast.success(t('take.toasts.testStarted'));
         router.push(`/test-templates/take/${session.id}`);
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.error("Failed to start test:", error);
-        
-        if (error.message?.includes("already has an in-progress session")) {
-          toast.error("У вас уже есть незавершённый тест. Завершите его или откажитесь перед началом нового.");
+
+        const errorMessage = error instanceof Error ? error.message : '';
+        if (errorMessage?.includes("already has an in-progress session")) {
+          toast.error(t('take.toasts.existingSessionError'));
         } else {
-          toast.error("Не удалось начать тест. Попробуйте позже.");
+          toast.error(t('take.toasts.failedToStart'));
         }
       } finally {
         setIsChecking(false);
@@ -102,17 +107,17 @@ export default function StartTestSessionButton({
 
   const handleStartNew = async () => {
     setShowDialog(false);
-    
+
     if (existingSessionId) {
       try {
         // Abandon the existing session first
         await testSessionsApi.abandonSession(existingSessionId);
-        toast.info("Предыдущая сессия отменена");
+        toast.info(t('take.toasts.previousSessionCancelled'));
       } catch (error) {
         console.error("Failed to abandon session:", error);
       }
     }
-    
+
     await startNewSession();
   };
 
@@ -125,20 +130,19 @@ export default function StartTestSessionButton({
         <AlertDialogHeader>
           <AlertDialogTitle className="flex items-center gap-2">
             <AlertTriangle className="h-5 w-5 text-amber-500" />
-            Незавершённый тест
+            {t('take.dialogs.existingSessionWithName.title')}
           </AlertDialogTitle>
           <AlertDialogDescription>
-            У вас уже есть незавершённая сессия для теста &quot;{templateName}&quot;.
-            Вы хотите продолжить её или начать заново?
+            {t('take.dialogs.existingSessionWithName.description', { name: templateName })}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter className="flex-col sm:flex-row gap-2">
-          <AlertDialogCancel>Отмена</AlertDialogCancel>
+          <AlertDialogCancel>{tCommon('cancel')}</AlertDialogCancel>
           <Button variant="outline" onClick={handleStartNew}>
-            Начать заново
+            {t('take.dialogs.existingSessionWithName.startNew')}
           </Button>
           <AlertDialogAction onClick={handleContinueExisting}>
-            Продолжить
+            {t('take.dialogs.existingSessionWithName.continue')}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
@@ -158,12 +162,12 @@ export default function StartTestSessionButton({
           {isLoading ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Подготовка теста...
+              {t('take.loading.preparing')}
             </>
           ) : (
             <>
               <Rocket className="mr-2 h-4 w-4 transition-transform group-hover:scale-110 group-hover:-rotate-12" />
-              <span className="font-semibold">Начать тест-драйв</span>
+              <span className="font-semibold">{t('testDrive.button')}</span>
               <PlayCircle className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-0.5" />
             </>
           )}
@@ -185,12 +189,12 @@ export default function StartTestSessionButton({
         {isLoading ? (
           <>
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            Загрузка...
+            {tCommon('loading')}
           </>
         ) : (
           <>
             <PlayCircle className="mr-2 h-4 w-4 transition-transform group-hover:scale-110" />
-            <span className="font-medium">Начать тест</span>
+            <span className="font-medium">{tCommon('startTest')}</span>
           </>
         )}
       </Button>

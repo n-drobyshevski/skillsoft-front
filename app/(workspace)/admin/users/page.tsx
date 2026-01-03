@@ -1,6 +1,7 @@
 import React, { Suspense } from "react";
 import Link from "next/link";
 import { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -8,19 +9,10 @@ import {
   UserRole,
   canUserAccess,
 } from "@/types/user";
-
-export const metadata: Metadata = {
-  title: "Users - SkillSoft",
-  description: "Manage user accounts and permissions. View, edit, and organize users in your organization.",
-  openGraph: {
-    title: "Users - SkillSoft",
-    description: "Manage user accounts and permissions.",
-  },
-};
-import { 
-  UserPlus, 
-  Users, 
-  ShieldCheck, 
+import {
+  UserPlus,
+  Users,
+  ShieldCheck,
   ShieldAlert,
   Activity,
   Ban,
@@ -32,20 +24,32 @@ import TableSkeleton from "@/components/data-display/TableSkeleton";
 import { SyncUsersButton } from "./_components/SyncUsersButton";
 import UsersTableWrapper from "./_components/UsersTableWrapper";
 
-async function getUsersData() {
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('metadata.users');
+  return {
+    title: `${t('title')} - SkillSoft`,
+    description: t('description'),
+    openGraph: {
+      title: `${t('title')} - SkillSoft`,
+      description: t('description'),
+    },
+  };
+}
+
+async function getUsersData(t: (key: string) => string) {
   try {
     const users = await usersApi.getAllUsers();
     if (!Array.isArray(users)) {
       if (users === null) {
-        return { users: [], error: "Backend service unavailable. Please ensure the backend is running at localhost:8080." };
+        return { users: [], error: t('errors.backendUnavailable') };
       }
-      return { users: [], error: "Invalid data format from server." };
+      return { users: [], error: t('errors.invalidDataFormat') };
     }
     return { users, error: null };
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Failed to load users.";
+    const message = err instanceof Error ? err.message : t('errors.loadingUsers');
     if (message.includes('ECONNREFUSED') || message.includes('fetch failed') || message.includes('CORS')) {
-      return { users: [], error: "Cannot connect to backend. Please ensure the backend server is running." };
+      return { users: [], error: t('errors.cannotConnect') };
     }
     return { users: [], error: message };
   }
@@ -85,7 +89,8 @@ function StatCard({
 
 // Main component
 export default async function UsersPage() {
-  const { users, error } = await getUsersData();
+  const t = await getTranslations('users');
+  const { users, error } = await getUsersData(t);
 
   // Calculate stats
   const totalUsers = users.length;
@@ -94,7 +99,7 @@ export default async function UsersPage() {
   const editorCount = users.filter(u => u.role === UserRole.EDITOR).length;
   const bannedCount = users.filter(u => u.banned).length;
   const lockedCount = users.filter(u => u.locked).length;
-  
+
   // Users with recent activity (signed in within last 30 days)
   const thirtyDaysAgo = new Date();
   thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
@@ -104,63 +109,63 @@ export default async function UsersPage() {
     return new Date(signInDate) > thirtyDaysAgo;
   }).length;
 
-  const activeRate = totalUsers > 0 
-    ? `${Math.round((activeUsers / totalUsers) * 100)}%` 
+  const activeRate = totalUsers > 0
+    ? `${Math.round((activeUsers / totalUsers) * 100)}%`
     : "0%";
 
   return (
     <div className="flex flex-1 flex-col gap-4 p-4 pt-6 md:gap-6 md:p-6">
-      <PageHeader 
-        title="User Management"
-        description="Manage users, roles, and access permissions"
+      <PageHeader
+        title={t('page.title')}
+        description={t('page.description')}
       >
         <div className="flex gap-2">
           <SyncUsersButton />
           <Link href="/users/new">
             <Button className="gap-2 shadow-sm">
               <UserPlus className="h-4 w-4" />
-              <span className="hidden sm:inline">Add User</span>
-              <span className="sm:hidden">Add</span>
+              <span className="hidden sm:inline">{t('actions.addUser')}</span>
+              <span className="sm:hidden">{t('actions.add')}</span>
             </Button>
           </Link>
         </div>
-      </PageHeader> 
-      
+      </PageHeader>
+
       {/* Compact Stats Row */}
       <div className="grid gap-4 grid-cols-2 lg:grid-cols-5">
         <StatCard
-          title="Total Users"
+          title={t('stats.totalUsers')}
           value={totalUsers}
           icon={Users}
-          description={`${activeUsers} can access`}
+          description={t('stats.canAccess', { count: activeUsers })}
           iconColor="text-primary"
         />
         <StatCard
-          title="Active Rate"
+          title={t('stats.activeRate')}
           value={activeRate}
           icon={Activity}
-          description={`${recentlyActive} active this month`}
+          description={t('stats.activeThisMonth', { count: recentlyActive })}
           iconColor="text-emerald-500"
         />
         <StatCard
-          title="Admins"
+          title={t('stats.admins')}
           value={adminCount}
           icon={ShieldAlert}
-          description="Full access"
+          description={t('stats.fullAccess')}
           iconColor="text-red-500"
         />
         <StatCard
-          title="Editors"
+          title={t('stats.editors')}
           value={editorCount}
           icon={ShieldCheck}
-          description="Content editors"
+          description={t('stats.contentEditors')}
           iconColor="text-blue-500"
         />
         <StatCard
-          title="Restricted"
+          title={t('stats.restricted')}
           value={bannedCount + lockedCount}
           icon={AlertTriangle}
-          description={`${bannedCount} banned, ${lockedCount} locked`}
+          description={t('stats.bannedLocked', { banned: bannedCount, locked: lockedCount })}
           iconColor="text-amber-500"
         />
       </div>
@@ -168,11 +173,11 @@ export default async function UsersPage() {
       {/* Error Message */}
       {error && (
         <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-4 text-sm text-destructive">
-          <div className="font-medium mb-1">Error Loading Users</div>
+          <div className="font-medium mb-1">{t('errors.loadingUsers')}</div>
           <div>{error}</div>
           {error.includes('backend') && (
             <div className="mt-2 text-xs text-muted-foreground">
-              Tip: Start the backend with: <code className="bg-muted px-1 rounded">cd assessment-backend && ./mvnw spring-boot:run</code>
+              {t('errors.backendTip')}<code className="bg-muted px-1 rounded">cd assessment-backend && ./mvnw spring-boot:run</code>
             </div>
           )}
         </div>

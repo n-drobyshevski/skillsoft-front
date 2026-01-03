@@ -32,6 +32,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
+import { useTranslations } from 'next-intl';
 
 interface TestTemplateCardProps {
   template: TestTemplateSummary;
@@ -73,16 +74,16 @@ function getGoalConfig(goal: AssessmentGoal | undefined) {
 /**
  * Format duration - compact for mobile, full for desktop
  */
-function formatDuration(minutes: number, compact = false): string {
+function formatDuration(minutes: number, compact = false, t?: ReturnType<typeof useTranslations>): string {
   if (minutes < 60) {
-    return compact ? `${minutes}м` : `${minutes} мин`;
+    return compact ? `${minutes}m` : `${minutes} ${t?.('minutes') || 'min'}`;
   }
   const hours = Math.floor(minutes / 60);
   const mins = minutes % 60;
   if (compact) {
-    return mins > 0 ? `${hours}:${mins.toString().padStart(2, '0')}` : `${hours}ч`;
+    return mins > 0 ? `${hours}:${mins.toString().padStart(2, '0')}` : `${hours}h`;
   }
-  return mins > 0 ? `${hours}ч ${mins}м` : `${hours}ч`;
+  return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`;
 }
 
 /**
@@ -102,6 +103,7 @@ function MobileTemplateCard({
   goalConfig: ReturnType<typeof getGoalConfig>;
   onMenuOpen: () => void;
 }) {
+  const t = useTranslations('template');
   const GoalIcon = goalConfig.icon;
 
   return (
@@ -145,7 +147,7 @@ function MobileTemplateCard({
             {template.name}
           </h3>
           {isRecommended && (
-            <Sparkles className="size-3.5 text-amber-500 shrink-0" aria-label="Рекомендуем" />
+            <Sparkles className="size-3.5 text-amber-500 shrink-0" aria-label={t('recommended')} />
           )}
         </div>
 
@@ -153,7 +155,7 @@ function MobileTemplateCard({
         <div className="flex items-center gap-1.5 mt-0.5 text-xs text-muted-foreground">
           <span className="inline-flex items-center gap-0.5">
             <Clock className="size-3" />
-            {formatDuration(template.timeLimitMinutes, true)}
+            {formatDuration(template.timeLimitMinutes, true, t)}
           </span>
           <span className="text-muted-foreground/40">•</span>
           <span className="inline-flex items-center gap-0.5">
@@ -179,7 +181,7 @@ function MobileTemplateCard({
             e.stopPropagation();
             onMenuOpen();
           }}
-          aria-label="Действия"
+          aria-label={t('actions')}
         >
           <MoreVertical className="size-4" />
         </Button>
@@ -203,6 +205,8 @@ function DesktopTemplateCard({
   isRecommended: boolean;
   goalConfig: ReturnType<typeof getGoalConfig>;
 }) {
+  const t = useTranslations('template');
+  const tCommon = useTranslations('common');
   const GoalIcon = goalConfig.icon;
   const goalInfo = template.goal ? AssessmentGoalInfo[template.goal] : AssessmentGoalInfo[AssessmentGoal.OVERVIEW];
 
@@ -233,7 +237,7 @@ function DesktopTemplateCard({
             {isRecommended && (
               <Badge className="bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300 text-xs font-medium px-2 py-0.5">
                 <Sparkles className="h-3 w-3 mr-1" />
-                Рекомендуем
+                {t('recommended')}
               </Badge>
             )}
           </div>
@@ -246,7 +250,7 @@ function DesktopTemplateCard({
                 variant="ghost"
                 size="icon"
                 className="h-7 w-7 opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity"
-                aria-label="Редактировать"
+                aria-label={tCommon('edit')}
                 asChild
               >
                 <Link href={`/test-templates/${template.id}/builder`}>
@@ -262,7 +266,7 @@ function DesktopTemplateCard({
                   variant="ghost"
                   size="icon"
                   className="h-7 w-7 opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity"
-                  aria-label="Действия"
+                  aria-label={t('actions')}
                 >
                   <MoreVertical className="h-4 w-4" />
                 </Button>
@@ -271,7 +275,7 @@ function DesktopTemplateCard({
                 <DropdownMenuItem asChild>
                   <Link href={`/test-templates/${template.id}`} className="cursor-pointer">
                     <Eye className="mr-2 h-4 w-4" />
-                    Подробнее
+                    {t('details')}
                   </Link>
                 </DropdownMenuItem>
 
@@ -281,13 +285,13 @@ function DesktopTemplateCard({
                     <DropdownMenuItem asChild>
                       <Link href={`/test-templates/${template.id}/settings`} className="cursor-pointer">
                         <Settings className="mr-2 h-4 w-4" />
-                        Настройки
+                        {t('settings')}
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
                       <Link href={`/test-templates/${template.id}/builder`} className="cursor-pointer">
                         <Pencil className="mr-2 h-4 w-4" />
-                        Редактировать
+                        {tCommon('edit')}
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
@@ -323,10 +327,10 @@ function DesktopTemplateCard({
 
       <CardContent className="p-4 pt-0 flex-1">
         {/* Stats Row */}
-        <div className="flex flex-wrap gap-1.5" aria-label="Характеристики теста">
+        <div className="flex flex-wrap gap-1.5" aria-label={t('testConfiguration')}>
           <span className="inline-flex items-center gap-1 text-xs text-muted-foreground bg-muted/50 rounded px-1.5 py-0.5">
             <Clock className="h-3 w-3" />
-            {formatDuration(template.timeLimitMinutes)}
+            {formatDuration(template.timeLimitMinutes, false, t)}
           </span>
           <span className="inline-flex items-center gap-1 text-xs text-muted-foreground bg-muted/50 rounded px-1.5 py-0.5">
             <Target className="h-3 w-3" />
@@ -334,7 +338,7 @@ function DesktopTemplateCard({
           </span>
           <span className="inline-flex items-center gap-1 text-xs text-muted-foreground bg-muted/50 rounded px-1.5 py-0.5">
             <BookOpen className="h-3 w-3" />
-            {template.competencyCount} навыков
+            {template.competencyCount} {t('skills')}
           </span>
         </div>
       </CardContent>

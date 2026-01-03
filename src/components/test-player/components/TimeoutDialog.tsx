@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { Clock } from 'lucide-react';
 import {
   AlertDialog,
@@ -25,21 +26,23 @@ export interface TimeoutDialogProps {
 }
 
 export function TimeoutDialog({ open, onComplete, isSubmitting }: TimeoutDialogProps) {
+  const t = useTranslations('assessment');
+
   return (
     <AlertDialog open={open}>
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle className="flex items-center gap-2">
             <Clock className="h-5 w-5 text-amber-500" />
-            Время истекло
+            {t('timeExpired')}
           </AlertDialogTitle>
           <AlertDialogDescription>
-            Отведённое время на тест закончилось. Ваши ответы будут сохранены автоматически.
+            {t('timeExpiredDescription')}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogAction onClick={onComplete} disabled={isSubmitting}>
-            {isSubmitting ? 'Сохранение...' : 'Посмотреть результаты'}
+            {isSubmitting ? t('saving') : t('viewResults')}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

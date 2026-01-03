@@ -18,14 +18,15 @@ import {
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { useActiveLens } from '@/hooks/useLens';
+import { useTranslations } from 'next-intl';
 
 /**
  * Action item configuration
  */
 interface ActionItem {
   icon: React.ElementType;
-  title: string;
-  subtitle?: string;
+  titleKey: string;
+  subtitleKey?: string;
   href: string;
   /** Which lenses can see this action */
   lenses: ('admin' | 'editor' | 'user')[];
@@ -38,36 +39,36 @@ const ACTIONS: ActionItem[] = [
   // Admin/Editor actions
   {
     icon: Plus,
-    title: 'New Competency',
-    subtitle: 'Define skills and behaviors',
+    titleKey: 'newCompetency',
+    subtitleKey: 'defineSkills',
     href: '/hr/competencies/new',
     lenses: ['admin', 'editor'],
   },
   {
     icon: Brain,
-    title: 'Add Indicator',
-    subtitle: 'Create behavioral markers',
+    titleKey: 'addIndicator',
+    subtitleKey: 'createBehavioralMarkers',
     href: '/hr/behavioral-indicators/new',
     lenses: ['admin', 'editor'],
   },
   {
     icon: ClipboardList,
-    title: 'Create Question',
-    subtitle: 'Build assessment items',
+    titleKey: 'createQuestion',
+    subtitleKey: 'buildAssessmentItems',
     href: '/hr/assessment-questions/new',
     lenses: ['admin', 'editor'],
   },
   {
     icon: FileText,
-    title: 'New Template',
-    subtitle: 'Design an assessment',
+    titleKey: 'newTemplate',
+    subtitleKey: 'designAssessment',
     href: '/test-templates/new',
     lenses: ['admin', 'editor'],
   },
   {
     icon: BarChart3,
-    title: 'View Analytics',
-    subtitle: 'Check psychometric metrics',
+    titleKey: 'viewAnalytics',
+    subtitleKey: 'checkPsychometricMetrics',
     href: '/psychometrics',
     lenses: ['admin', 'editor'],
   },
@@ -75,15 +76,15 @@ const ACTIONS: ActionItem[] = [
   // Admin-only actions
   {
     icon: Users,
-    title: 'Manage Users',
-    subtitle: 'User administration',
+    titleKey: 'manageUsers',
+    subtitleKey: 'userAdministration',
     href: '/admin/users',
     lenses: ['admin'],
   },
   {
     icon: Settings,
-    title: 'Settings',
-    subtitle: 'System configuration',
+    titleKey: 'settings',
+    subtitleKey: 'systemConfiguration',
     href: '/admin/settings',
     lenses: ['admin'],
   },
@@ -91,15 +92,15 @@ const ACTIONS: ActionItem[] = [
   // User actions
   {
     icon: Play,
-    title: 'Take Assessment',
-    subtitle: 'Start a new evaluation',
+    titleKey: 'takeAssessment',
+    subtitleKey: 'startAssessment',
     href: '/test-templates',
     lenses: ['user'],
   },
   {
     icon: BarChart3,
-    title: 'My Results',
-    subtitle: 'View past assessments',
+    titleKey: 'myResults',
+    subtitleKey: 'viewPastAssessments',
     href: '/my-results',
     lenses: ['user'],
   },
@@ -136,6 +137,7 @@ export function QuickActionsWidget({
   className,
 }: QuickActionsWidgetProps) {
   const activeLens = useActiveLens();
+  const t = useTranslations('dashboard');
 
   if (loading) {
     return <QuickActionsWidgetSkeleton className={className} />;
@@ -153,13 +155,13 @@ export function QuickActionsWidget({
           <div className="w-9 h-9 rounded-lg bg-muted flex items-center justify-center">
             <Zap className="w-4 h-4 text-muted-foreground" />
           </div>
-          <CardTitle className="text-base">Quick Actions</CardTitle>
+          <CardTitle className="text-base">{t('quickActions')}</CardTitle>
         </div>
       </CardHeader>
       <CardContent className="pt-1">
         <div className="space-y-0.5">
           {visibleActions.map((action) => (
-            <ActionRow key={action.href} {...action} />
+            <ActionRow key={action.href} action={action} t={t} />
           ))}
         </div>
       </CardContent>
@@ -171,13 +173,15 @@ export function QuickActionsWidget({
  * Individual action row component
  */
 function ActionRow({
-  icon: Icon,
-  title,
-  subtitle,
-  href,
-}: ActionItem) {
+  action,
+  t,
+}: {
+  action: ActionItem;
+  t: ReturnType<typeof useTranslations<'dashboard'>>;
+}) {
+  const Icon = action.icon;
   return (
-    <Link href={href}>
+    <Link href={action.href}>
       <motion.div
         whileHover={{ x: 2 }}
         whileTap={{ scale: 0.99 }}
@@ -187,9 +191,9 @@ function ActionRow({
           <Icon className="w-4 h-4 text-muted-foreground" />
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-medium">{title}</p>
-          {subtitle && (
-            <p className="text-xs text-muted-foreground truncate">{subtitle}</p>
+          <p className="text-sm font-medium">{t(action.titleKey as Parameters<typeof t>[0])}</p>
+          {action.subtitleKey && (
+            <p className="text-xs text-muted-foreground truncate">{t(action.subtitleKey as Parameters<typeof t>[0])}</p>
           )}
         </div>
         <ChevronRight className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />

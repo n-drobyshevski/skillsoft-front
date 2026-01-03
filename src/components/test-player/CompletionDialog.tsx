@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { useTranslations } from 'next-intl';
 import { CheckCircle2, Loader2, AlertTriangle, SkipForward } from 'lucide-react';
 import {
   AlertDialog,
@@ -43,6 +44,7 @@ export function CompletionDialog({
   skippedCount = 0,
   isSubmitting,
 }: CompletionDialogProps) {
+  const t = useTranslations('assessment');
   const completionPercentage = (answeredCount / totalQuestions) * 100;
   const allAnswered = answeredCount >= totalQuestions;
   const hasSkipped = skippedCount > 0;
@@ -68,10 +70,10 @@ export function CompletionDialog({
 
           <AlertDialogTitle className="text-center text-xl">
             {allAnswered && !hasSkipped
-              ? 'Готовы к отправке?'
+              ? t('readyToSubmit')
               : hasSkipped
-                ? 'Есть пропущенные вопросы'
-                : 'Отправить неполный тест?'
+                ? t('hasSkippedQuestions')
+                : t('submitIncomplete')
             }
           </AlertDialogTitle>
 
@@ -79,10 +81,10 @@ export function CompletionDialog({
             <div>
               <p>
                 {allAnswered && !hasSkipped
-                  ? 'Вы ответили на все вопросы. Отправить оценку сейчас?'
+                  ? t('allQuestionsAnswered')
                   : hasSkipped
-                    ? `Вы пропустили ${skippedCount} ${skippedCount === 1 ? 'вопрос' : skippedCount < 5 ? 'вопроса' : 'вопросов'}. Они будут засчитаны как неотвеченные.`
-                    : `Вы ответили на ${answeredCount} из ${totalQuestions} вопросов.`
+                    ? t('skippedQuestionsWarning', { count: skippedCount })
+                    : t('answeredOfTotal', { answered: answeredCount, total: totalQuestions })
                 }
               </p>
 
@@ -91,10 +93,10 @@ export function CompletionDialog({
                 <div className="mt-3 p-3 bg-amber-500/10 border border-amber-500/20 rounded-lg">
                   <p className="text-sm text-amber-400 flex items-center justify-center gap-2">
                     <SkipForward className="w-4 h-4" />
-                    {skippedCount} {skippedCount === 1 ? 'пропущенный вопрос' : skippedCount < 5 ? 'пропущенных вопроса' : 'пропущенных вопросов'}
+                    {t('skippedQuestionsCount', { count: skippedCount })}
                   </p>
                   <p className="text-xs text-neutral-500 mt-1">
-                    Вы можете вернуться и ответить на них
+                    {t('canGoBackToAnswer')}
                   </p>
                 </div>
               )}
@@ -106,7 +108,7 @@ export function CompletionDialog({
                   className="h-2 bg-neutral-800"
                 />
                 <p className="text-sm text-neutral-500">
-                  {answeredCount} / {totalQuestions} вопросов отвечено
+                  {t('questionsAnswered', { answered: answeredCount, total: totalQuestions })}
                 </p>
               </div>
             </div>
@@ -118,7 +120,7 @@ export function CompletionDialog({
             className="bg-neutral-800 border-neutral-700 hover:bg-neutral-700"
             disabled={isSubmitting}
           >
-            {hasSkipped ? 'Вернуться к вопросам' : 'Просмотреть ответы'}
+            {hasSkipped ? t('returnToQuestions') : t('reviewAnswers')}
           </AlertDialogCancel>
           <AlertDialogAction
             onClick={onComplete}
@@ -133,10 +135,10 @@ export function CompletionDialog({
             {isSubmitting ? (
               <>
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                Отправка...
+                {t('submitting')}
               </>
             ) : (
-              'Отправить оценку'
+              t('submitAssessment')
             )}
           </AlertDialogAction>
         </AlertDialogFooter>

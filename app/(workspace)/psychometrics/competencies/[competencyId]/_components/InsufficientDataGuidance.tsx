@@ -1,3 +1,5 @@
+'use client';
+
 /**
  * InsufficientDataGuidance - Guidance card for incomplete psychometric data
  *
@@ -6,14 +8,74 @@
  * - Sample size is below minimum threshold
  * - Item count is below minimum threshold
  *
- * Server Component - no interactivity needed
+ * Client Component - uses useTranslations hook for i18n
  */
 
 import { cn } from '@/lib/utils';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { AlertTriangle, Users, FileText, BarChart3, ArrowRight } from 'lucide-react';
-import { checkDataQuality, type DataQualityIssue } from '../_lib/competency-detail.utils';
+import { useTranslations } from 'next-intl';
+
+/**
+ * Localized data quality issue type
+ */
+interface LocalizedDataQualityIssue {
+  type: 'sample_size' | 'item_count' | 'alpha_missing';
+  severity: 'warning' | 'error';
+  messageKey: string;
+  messageParams?: Record<string, string | number>;
+  recommendationKey: string;
+}
+
+/**
+ * Check for data quality issues and return translation keys
+ */
+function checkDataQualityLocalized(
+  sampleSize: number | null,
+  itemCount: number | null,
+  cronbachAlpha: number | null
+): LocalizedDataQualityIssue[] {
+  const issues: LocalizedDataQualityIssue[] = [];
+
+  // Sample size checks
+  if (sampleSize === null || sampleSize < 30) {
+    issues.push({
+      type: 'sample_size',
+      severity: 'warning',
+      messageKey: sampleSize === null
+        ? 'issues.sampleSizeUnknown'
+        : 'issues.sampleSizeLow',
+      messageParams: sampleSize !== null ? { count: sampleSize } : undefined,
+      recommendationKey: 'issues.sampleSizeRecommendation',
+    });
+  }
+
+  // Item count checks
+  if (itemCount === null || itemCount < 3) {
+    issues.push({
+      type: 'item_count',
+      severity: 'error',
+      messageKey: itemCount === null
+        ? 'issues.itemCountUnknown'
+        : 'issues.itemCountLow',
+      messageParams: itemCount !== null ? { count: itemCount } : undefined,
+      recommendationKey: 'issues.itemCountRecommendation',
+    });
+  }
+
+  // Alpha missing
+  if (cronbachAlpha === null) {
+    issues.push({
+      type: 'alpha_missing',
+      severity: 'error',
+      messageKey: 'issues.alphaMissing',
+      recommendationKey: 'issues.alphaMissingRecommendation',
+    });
+  }
+
+  return issues;
+}
 
 interface InsufficientDataGuidanceProps {
   sampleSize: number | null;
@@ -25,7 +87,7 @@ interface InsufficientDataGuidanceProps {
 /**
  * Get icon for issue type
  */
-function getIssueIcon(type: DataQualityIssue['type']) {
+function getIssueIcon(type: LocalizedDataQualityIssue['type']) {
   switch (type) {
     case 'sample_size':
       return Users;
@@ -41,7 +103,7 @@ function getIssueIcon(type: DataQualityIssue['type']) {
 /**
  * Get severity styles
  */
-function getSeverityStyles(severity: DataQualityIssue['severity']) {
+function getSeverityStyles(severity: LocalizedDataQualityIssue['severity']) {
   return severity === 'error'
     ? {
         card: 'border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-950/20',
@@ -61,7 +123,8 @@ export function InsufficientDataGuidance({
   cronbachAlpha,
   className,
 }: InsufficientDataGuidanceProps) {
-  const issues = checkDataQuality(sampleSize, itemCount, cronbachAlpha);
+  const t = useTranslations('psychometrics.competencyDetail.insufficientDataGuidance');
+  const issues = checkDataQualityLocalized(sampleSize, itemCount, cronbachAlpha);
 
   // No issues - don't render
   if (issues.length === 0) {
@@ -71,6 +134,7 @@ export function InsufficientDataGuidance({
   // Determine overall severity
   const hasErrors = issues.some((i) => i.severity === 'error');
   const overallStyles = getSeverityStyles(hasErrors ? 'error' : 'warning');
+  const metCriteria = Math.max(0, 3 - issues.length);
 
   return (
     <Card
@@ -97,12 +161,12 @@ export function InsufficientDataGuidance({
               'font-semibold',
               hasErrors ? 'text-red-800 dark:text-red-300' : 'text-amber-800 dark:text-amber-300'
             )}>
-              {hasErrors ? 'Данные недостаточны' : 'Требуется внимание'}
+              {hasErrors ? t('insufficientData') : t('requiresAttention')}
             </h3>
             <p className="text-sm text-muted-foreground mt-0.5">
               {hasErrors
-                ? 'Невозможно рассчитать надежность. Выполните следующие действия:'
-                : 'Для повышения точности результатов рекомендуется:'}
+                ? t('cannotCalculate')
+                : t('forImproving')}
             </p>
           </div>
         </div>
@@ -127,14 +191,16 @@ export function InsufficientDataGuidance({
                 <Icon className={cn('h-4 w-4 mt-0.5 shrink-0', styles.icon)} aria-hidden="true" />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span className="text-sm font-medium">{issue.message}</span>
+                    <span className="text-sm font-medium">
+                      {t(issue.messageKey, issue.messageParams)}
+                    </span>
                     <Badge variant="outline" className={cn('text-xs', styles.badge)}>
-                      {issue.severity === 'error' ? 'Критично' : 'Внимание'}
+                      {issue.severity === 'error' ? t('criticalBadge') : t('attentionBadge')}
                     </Badge>
                   </div>
                   <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
                     <ArrowRight className="h-3 w-3 shrink-0" aria-hidden="true" />
-                    {issue.recommendation}
+                    {t(issue.recommendationKey)}
                   </p>
                 </div>
               </div>
@@ -146,9 +212,9 @@ export function InsufficientDataGuidance({
         {issues.length > 0 && (
           <div className="mt-4 pt-3 border-t border-current/10">
             <div className="flex items-center justify-between text-xs text-muted-foreground">
-              <span>Готовность к расчету</span>
+              <span>{t('readinessLabel')}</span>
               <span className="font-medium">
-                {Math.max(0, 3 - issues.length)} / 3 критериев
+                {t('criteriaCount', { met: metCriteria, total: 3 })}
               </span>
             </div>
             <div className="mt-2 h-2 rounded-full bg-muted/50 overflow-hidden">
@@ -157,12 +223,12 @@ export function InsufficientDataGuidance({
                   'h-full rounded-full transition-all duration-500',
                   hasErrors ? 'bg-red-500' : 'bg-amber-500'
                 )}
-                style={{ width: `${((3 - issues.length) / 3) * 100}%` }}
+                style={{ width: `${(metCriteria / 3) * 100}%` }}
                 role="progressbar"
-                aria-valuenow={3 - issues.length}
+                aria-valuenow={metCriteria}
                 aria-valuemin={0}
                 aria-valuemax={3}
-                aria-label="Готовность к расчету надежности"
+                aria-label={t('readinessLabel')}
               />
             </div>
           </div>
@@ -188,7 +254,8 @@ export function DataQualityBadge({
   cronbachAlpha,
   className,
 }: DataQualityBadgeProps) {
-  const issues = checkDataQuality(sampleSize, itemCount, cronbachAlpha);
+  const t = useTranslations('psychometrics.competencyDetail.insufficientDataGuidance');
+  const issues = checkDataQualityLocalized(sampleSize, itemCount, cronbachAlpha);
 
   if (issues.length === 0) {
     return (
@@ -200,7 +267,7 @@ export function DataQualityBadge({
           className
         )}
       >
-        Данные полные
+        {t('fullData')}
       </Badge>
     );
   }
@@ -217,7 +284,7 @@ export function DataQualityBadge({
         className
       )}
     >
-      {issues.length} {issues.length === 1 ? 'проблема' : 'проблемы'}
+      {t('problemCount', { count: issues.length })}
     </Badge>
   );
 }

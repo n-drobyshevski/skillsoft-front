@@ -1,19 +1,25 @@
 import React, { Suspense } from "react";
 import Link from "next/link";
-import { Metadata } from "next";
+import type { Metadata } from "next";
 import { Button } from "@/components/ui/button";
 import PageHeader from "@/components/common/PageHeader";
 import FlexibleStatsCards from "@/components/data-display/FlexibleStatsCards";
 import { Plus } from "lucide-react";
+import { getTranslations } from "next-intl/server";
 
-export const metadata: Metadata = {
-  title: "Behavioral Indicators - SkillSoft",
-  description: "Define and manage measurable behavioral indicators for competency assessment. Track observable behaviors that demonstrate competency levels.",
-  openGraph: {
-    title: "Behavioral Indicators - SkillSoft",
-    description: "Define and manage measurable behavioral indicators for competency assessment.",
-  },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("metadata.indicators");
+  const siteName = "SkillSoft";
+
+  return {
+    title: `${t("title")} - ${siteName}`,
+    description: t("description"),
+    openGraph: {
+      title: `${t("title")} - ${siteName}`,
+      description: t("description"),
+    },
+  };
+}
 import { BehavioralIndicator } from "@/types/domain";
 import {
   assessmentQuestionsApi,
@@ -71,18 +77,19 @@ async function getIndicatorsData(): Promise<{
 
 export default async function BehavioralIndicatorsPage() {
   const { indicators, error } = await getIndicatorsData();
+  const t = await getTranslations("indicator");
 
   return (
     <div className="flex flex-1 flex-col gap-4 p-4 pt-6 md:gap-6 md:p-6">
-      <PageHeader 
-        title="Behavioral Indicators"
-        description="Define and manage measurable behavioral indicators for competency assessment"
+      <PageHeader
+        title={t("title")}
+        description={t("pageDescription")}
       >
       <div className="flex items-center gap-2">
           <Link href="/hr/behavioral-indicators/new">
             <Button variant="outline">
               <Plus className="mr-2 h-4 w-4" />
-              Create Indicator
+              {t("create")}
             </Button>
           </Link>
         </div>

@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 
 interface CompactTestResultViewProps {
   result: TestResult;
@@ -37,6 +38,7 @@ interface CompactTestResultViewProps {
  * - All critical info above the fold
  */
 export default function CompactTestResultView({ result }: CompactTestResultViewProps) {
+  const t = useTranslations('results');
   const [chartsExpanded, setChartsExpanded] = useState(false);
 
   // Transform competency scores to Big Five profile
@@ -108,18 +110,18 @@ export default function CompactTestResultView({ result }: CompactTestResultViewP
                   {isPassed ? (
                     <>
                       <CheckCircle2 className="h-3 w-3 mr-1" />
-                      Passed
+                      {t('passed')}
                     </>
                   ) : (
                     <>
                       <XCircle className="h-3 w-3 mr-1" />
-                      Not Passed
+                      {t('notPassed')}
                     </>
                   )}
                 </Badge>
               </div>
               <p className="text-xs text-muted-foreground mt-0.5">
-                {result.overallScore.toFixed(1)} / {result.competencyScores.reduce((sum, c) => sum + c.maxScore, 0).toFixed(1)} points
+                {result.overallScore.toFixed(1)} / {result.competencyScores.reduce((sum, c) => sum + c.maxScore, 0).toFixed(1)} {t('points')}
               </p>
             </div>
           </div>
@@ -130,11 +132,11 @@ export default function CompactTestResultView({ result }: CompactTestResultViewP
               {result.templateName}
             </h1>
             <p className="text-xs text-muted-foreground">
-              Completed {new Date(result.completedAt).toLocaleDateString()} at {new Date(result.completedAt).toLocaleTimeString()}
+              {t('completed')} {new Date(result.completedAt).toLocaleDateString()} at {new Date(result.completedAt).toLocaleTimeString()}
             </p>
             {result.percentile !== undefined && result.percentile !== null && (
               <p className="text-xs text-muted-foreground mt-0.5">
-                <span className="font-semibold">{result.percentile}th percentile</span> - Better than {result.percentile}% of participants
+                <span className="font-semibold">{t('percentile', { value: result.percentile })}</span> - {t('betterThan', { percentage: result.percentile })}
               </p>
             )}
           </div>
@@ -145,25 +147,25 @@ export default function CompactTestResultView({ result }: CompactTestResultViewP
       <div className="grid grid-cols-2 md:grid-cols-4 gap-2" role="list" aria-label="Test statistics">
         <CompactStatBadge
           icon={<Clock className="h-4 w-4" />}
-          label="Time"
+          label={t('time')}
           value={`${timeInMinutes}:${timeInSeconds.toString().padStart(2, '0')}`}
           color="blue"
         />
         <CompactStatBadge
           icon={<FileText className="h-4 w-4" />}
-          label="Answered"
+          label={t('answered')}
           value={`${result.questionsAnswered}/${result.totalQuestions}`}
           color="purple"
         />
         <CompactStatBadge
           icon={<TrendingUp className="h-4 w-4" />}
-          label="Competencies"
+          label={t('competencies')}
           value={`${result.competencyScores.length}`}
           color="indigo"
         />
         <CompactStatBadge
           icon={<Target className="h-4 w-4" />}
-          label="Accuracy"
+          label={t('accuracy')}
           value={`${Math.round((result.questionsAnswered / result.totalQuestions) * 100)}%`}
           color={result.questionsSkipped === 0 ? "green" : "amber"}
         />
@@ -174,19 +176,19 @@ export default function CompactTestResultView({ result }: CompactTestResultViewP
         <CardHeader className="pb-3">
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle className="text-lg">Competency Breakdown</CardTitle>
+              <CardTitle className="text-lg">{t('competencyBreakdown')}</CardTitle>
               <CardDescription className="text-xs">
-                Your performance across {result.competencyScores.length} competency areas
+                {t('performanceAcross', { count: result.competencyScores.length })}
               </CardDescription>
             </div>
             <Badge variant="outline" className="text-xs">
-              {sortedCompetencies.filter(c => c.percentage >= 70).length}/{sortedCompetencies.length} proficient
+              {t('proficient', { count: sortedCompetencies.filter(c => c.percentage >= 70).length, total: sortedCompetencies.length })}
             </Badge>
           </div>
         </CardHeader>
         <CardContent className="space-y-2">
           {sortedCompetencies.map((competency) => (
-            <CompactCompetencyRow key={competency.competencyId} competency={competency} />
+            <CompactCompetencyRow key={competency.competencyId} competency={competency} t={t} />
           ))}
         </CardContent>
       </Card>
@@ -203,7 +205,7 @@ export default function CompactTestResultView({ result }: CompactTestResultViewP
           >
             <BarChart3 className="h-4 w-4" />
             <span className="text-sm font-medium">
-              {chartsExpanded ? "Hide" : "Show"} Detailed Charts & Analysis
+              {chartsExpanded ? t('hideChartsAnalysis') : t('showChartsAnalysis')}
             </span>
             {chartsExpanded ? (
               <ChevronUp className="h-4 w-4 ml-auto" />
@@ -217,22 +219,22 @@ export default function CompactTestResultView({ result }: CompactTestResultViewP
           {/* Big Five Personality Profile */}
           <BigFiveRadar
             profile={bigFiveProfile}
-            title="Personality Profile"
-            description="Big Five (OCEAN) dimensions derived from your competency assessment"
+            title={t('personalityProfile')}
+            description={t('personalityDescriptionShort')}
             showLegend={true}
           />
 
           {/* Detailed Competency Cards - Only show when expanded */}
           <Card>
             <CardHeader className="pb-3">
-              <CardTitle className="text-lg">Detailed Competency Analysis</CardTitle>
+              <CardTitle className="text-lg">{t('detailedAnalysis')}</CardTitle>
               <CardDescription className="text-xs">
-                In-depth breakdown with behavioral indicators
+                {t('detailedAnalysisDescription')}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               {sortedCompetencies.map((competency) => (
-                <DetailedCompetencyCard key={competency.competencyId} competency={competency} />
+                <DetailedCompetencyCard key={competency.competencyId} competency={competency} t={t} />
               ))}
             </CardContent>
           </Card>
@@ -286,7 +288,7 @@ function CompactStatBadge({
 /**
  * Compact Competency Row - Single line with progress bar
  */
-function CompactCompetencyRow({ competency }: { competency: CompetencyScore }) {
+function CompactCompetencyRow({ competency, t }: { competency: CompetencyScore; t: ReturnType<typeof useTranslations<'results'>> }) {
   const percentage = Math.round(competency.percentage);
 
   // Determine performance tier
@@ -298,25 +300,25 @@ function CompactCompetencyRow({ competency }: { competency: CompetencyScore }) {
     excellent: {
       color: 'text-emerald-600 dark:text-emerald-400',
       bgColor: 'bg-emerald-500',
-      label: 'Excellent',
+      labelKey: 'tier.excellent' as const,
       icon: '🎯'
     },
     good: {
       color: 'text-blue-600 dark:text-blue-400',
       bgColor: 'bg-blue-500',
-      label: 'Good',
+      labelKey: 'tier.good' as const,
       icon: '✓'
     },
     average: {
       color: 'text-amber-600 dark:text-amber-400',
       bgColor: 'bg-amber-500',
-      label: 'Average',
+      labelKey: 'tier.average' as const,
       icon: '→'
     },
     poor: {
       color: 'text-red-600 dark:text-red-400',
       bgColor: 'bg-red-500',
-      label: 'Needs Work',
+      labelKey: 'tier.needsWork' as const,
       icon: '↓'
     }
   };
@@ -356,7 +358,7 @@ function CompactCompetencyRow({ competency }: { competency: CompetencyScore }) {
           {percentage}%
         </span>
         <Badge variant="secondary" className="text-xs hidden sm:inline-flex">
-          {config.label}
+          {t(config.labelKey)}
         </Badge>
       </div>
     </div>
@@ -366,7 +368,7 @@ function CompactCompetencyRow({ competency }: { competency: CompetencyScore }) {
 /**
  * Detailed Competency Card - Only shown in expanded section
  */
-function DetailedCompetencyCard({ competency }: { competency: CompetencyScore }) {
+function DetailedCompetencyCard({ competency, t }: { competency: CompetencyScore; t: ReturnType<typeof useTranslations<'results'>> }) {
   const percentage = Math.round(competency.percentage);
 
   // Determine performance tier
@@ -380,7 +382,7 @@ function DetailedCompetencyCard({ competency }: { competency: CompetencyScore })
       bgColor: 'bg-emerald-500/10',
       borderColor: 'border-emerald-500/20',
       progressColor: 'bg-gradient-to-r from-emerald-500 to-teal-500',
-      label: 'Excellent',
+      labelKey: 'tier.excellent' as const,
       icon: '🎯'
     },
     good: {
@@ -388,7 +390,7 @@ function DetailedCompetencyCard({ competency }: { competency: CompetencyScore })
       bgColor: 'bg-blue-500/10',
       borderColor: 'border-blue-500/20',
       progressColor: 'bg-gradient-to-r from-blue-500 to-cyan-500',
-      label: 'Good',
+      labelKey: 'tier.good' as const,
       icon: '✓'
     },
     average: {
@@ -396,7 +398,7 @@ function DetailedCompetencyCard({ competency }: { competency: CompetencyScore })
       bgColor: 'bg-amber-500/10',
       borderColor: 'border-amber-500/20',
       progressColor: 'bg-gradient-to-r from-amber-500 to-orange-500',
-      label: 'Average',
+      labelKey: 'tier.average' as const,
       icon: '→'
     },
     poor: {
@@ -404,7 +406,7 @@ function DetailedCompetencyCard({ competency }: { competency: CompetencyScore })
       bgColor: 'bg-red-500/10',
       borderColor: 'border-red-500/20',
       progressColor: 'bg-gradient-to-r from-red-500 to-rose-500',
-      label: 'Needs Improvement',
+      labelKey: 'tier.needsImprovement' as const,
       icon: '↓'
     }
   };
@@ -441,7 +443,7 @@ function DetailedCompetencyCard({ competency }: { competency: CompetencyScore })
             {competency.score.toFixed(1)}/{competency.maxScore.toFixed(1)}
           </span>
           <Badge variant="secondary" className="mt-1 text-xs">
-            {config.label}
+            {t(config.labelKey)}
           </Badge>
         </div>
       </div>
@@ -468,7 +470,7 @@ function DetailedCompetencyCard({ competency }: { competency: CompetencyScore })
       {/* Questions info */}
       {competency.questionsAnswered && (
         <p className="text-xs text-muted-foreground mt-2">
-          {competency.questionsAnswered} questions answered
+          {t('questionsAnswered', { count: competency.questionsAnswered })}
         </p>
       )}
     </div>
