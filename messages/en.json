@@ -1363,12 +1363,16 @@
   },
   "settings": {
     "title": "Settings",
+    "description": "Manage your application preferences",
     "general": "General",
     "appearance": "Appearance",
+    "appearanceDescription": "Customize how SkillSoft looks on your device",
     "notifications": "Notifications",
     "security": "Security",
     "language": "Language",
+    "languageDescription": "Choose your preferred language",
     "theme": "Theme",
+    "themeDescription": "Select your preferred color theme",
     "darkMode": "Dark Mode",
     "lightMode": "Light Mode",
     "system": "System",
@@ -1379,7 +1383,8 @@
     "title": "Language",
     "select": "Select Language",
     "english": "English",
-    "russian": "Russian"
+    "russian": "Russian",
+    "refreshHint": "Some content may require a page refresh"
   },
   "feedback": {
     "undo": "Undo",
