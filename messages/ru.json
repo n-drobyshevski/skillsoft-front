@@ -68,6 +68,7 @@
     "hr": "HR Управление",
     "admin": "Администрирование",
     "users": "Пользователи",
+    "teams": "Команды",
     "roles": "Роли",
     "permissions": "Права доступа",
     "myTests": "Мои тесты",
@@ -3370,6 +3371,18 @@
       "profileDescription": "Просмотр данных, активности и прав пользователя",
       "editTitle": "Редактирование - {name}",
       "editDescription": "Обновление профиля и прав пользователя"
+    },
+    "teams": {
+      "title": "Команды",
+      "description": "Управление командами и участниками для командных оценок и сценариев TEAM_FIT.",
+      "newTitle": "Создать команду",
+      "newDescription": "Создание новой команды с участниками",
+      "detailTitle": "Детали команды - {name}",
+      "detailDescription": "Просмотр участников, профиля и аналитики компетенций",
+      "editTitle": "Редактирование команды - {name}",
+      "editDescription": "Обновление информации о команде и участниках",
+      "profileTitle": "Профиль команды - {name}",
+      "profileDescription": "Просмотр насыщенности компетенциями и пробелов в навыках"
     }
   },
   "users": {
@@ -3723,6 +3736,96 @@
       "yearsAgo": "{count, plural, one {# год назад} few {# года назад} many {# лет назад} other {# лет назад}}",
       "never": "Никогда",
       "justNow": "Только что"
+    }
+  },
+  "teams": {
+    "page": {
+      "title": "Управление командами",
+      "description": "Управление командами, участниками и командными оценками"
+    },
+    "actions": {
+      "createTeam": "Создать команду",
+      "create": "Создать"
+    },
+    "stats": {
+      "totalTeams": "Всего команд",
+      "avgTeamSize": "Ср. размер",
+      "draft": "Черновик",
+      "active": "Активные",
+      "archived": "В архиве",
+      "totalMembers": "{count} участников",
+      "membersPerTeam": "участников в команде",
+      "awaitingActivation": "Ожидают активации",
+      "readyForAssessment": "Готовы к оценке",
+      "noLongerActive": "Больше не активны"
+    },
+    "status": {
+      "draft": "Черновик",
+      "active": "Активна",
+      "archived": "В архиве"
+    },
+    "table": {
+      "columns": {
+        "team": "Команда",
+        "status": "Статус",
+        "members": "Участники",
+        "created": "Создана",
+        "actions": "Действия"
+      },
+      "filters": {
+        "all": "Все",
+        "draft": "Черновики",
+        "active": "Активные",
+        "archived": "В архиве"
+      },
+      "search": {
+        "placeholder": "Поиск команд по названию..."
+      },
+      "pagination": {
+        "showing": "Показано",
+        "of": "из",
+        "teams": "команд"
+      },
+      "bulk": {
+        "selected": "Выбрано: {count}",
+        "export": "Экспорт",
+        "archive": "В архив"
+      },
+      "empty": {
+        "noTeams": "Команды не найдены",
+        "adjustSearch": "Попробуйте изменить поисковый запрос",
+        "createFirst": "Создайте первую команду для начала работы"
+      },
+      "view": {
+        "toggleColumns": "Показать/скрыть колонки"
+      },
+      "menu": {
+        "copyTeamId": "Копировать ID команды",
+        "quickView": "Быстрый просмотр",
+        "viewDetails": "Подробнее",
+        "editTeam": "Редактировать",
+        "activate": "Активировать",
+        "archive": "В архив"
+      }
+    },
+    "drawer": {
+      "details": "Информация о команде",
+      "actions": "Действия",
+      "members": "Участники",
+      "leader": "Лидер",
+      "created": "Создана",
+      "viewDetails": "Подробнее",
+      "editTeam": "Редактировать",
+      "addMembers": "Добавить участников",
+      "activate": "Активировать команду",
+      "archive": "Архивировать команду"
+    },
+    "errors": {
+      "loadingTeams": "Ошибка загрузки команд",
+      "backendUnavailable": "Сервер недоступен",
+      "invalidDataFormat": "Неверный формат данных",
+      "cannotConnect": "Не удалось подключиться к серверу",
+      "backendTip": "Совет: Запустите сервер командой: "
     }
   },
   "activity": {

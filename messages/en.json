@@ -68,6 +68,7 @@
     "hr": "HR Management",
     "admin": "Administration",
     "users": "Users",
+    "teams": "Teams",
     "roles": "Roles",
     "permissions": "Permissions",
     "myTests": "My Tests",
@@ -3370,6 +3371,18 @@
       "profileDescription": "View user details, activity, and permissions",
       "editTitle": "Edit User - {name}",
       "editDescription": "Update user profile and permissions"
+    },
+    "teams": {
+      "title": "Teams",
+      "description": "Manage teams and group members for team-based assessments and TEAM_FIT scenarios.",
+      "newTitle": "Create Team",
+      "newDescription": "Create a new team with members",
+      "detailTitle": "Team Details - {name}",
+      "detailDescription": "View team members, profile, and competency analytics",
+      "editTitle": "Edit Team - {name}",
+      "editDescription": "Update team information and members",
+      "profileTitle": "Team Profile - {name}",
+      "profileDescription": "View team competency saturation and skill gaps"
     }
   },
   "users": {
@@ -3723,6 +3736,96 @@
       "yearsAgo": "{count} years ago",
       "never": "Never",
       "justNow": "Just now"
+    }
+  },
+  "teams": {
+    "page": {
+      "title": "Team Management",
+      "description": "Manage teams, members, and team-based assessments"
+    },
+    "actions": {
+      "createTeam": "Create Team",
+      "create": "Create"
+    },
+    "stats": {
+      "totalTeams": "Total Teams",
+      "avgTeamSize": "Avg. Size",
+      "draft": "Draft",
+      "active": "Active",
+      "archived": "Archived",
+      "totalMembers": "{count} total members",
+      "membersPerTeam": "members per team",
+      "awaitingActivation": "Awaiting activation",
+      "readyForAssessment": "Ready for assessment",
+      "noLongerActive": "No longer active"
+    },
+    "status": {
+      "draft": "Draft",
+      "active": "Active",
+      "archived": "Archived"
+    },
+    "table": {
+      "columns": {
+        "team": "Team",
+        "status": "Status",
+        "members": "Members",
+        "created": "Created",
+        "actions": "Actions"
+      },
+      "filters": {
+        "all": "All",
+        "draft": "Draft",
+        "active": "Active",
+        "archived": "Archived"
+      },
+      "search": {
+        "placeholder": "Search teams by name..."
+      },
+      "pagination": {
+        "showing": "Showing",
+        "of": "of",
+        "teams": "teams"
+      },
+      "bulk": {
+        "selected": "{count} selected",
+        "export": "Export",
+        "archive": "Archive"
+      },
+      "empty": {
+        "noTeams": "No teams found",
+        "adjustSearch": "Try adjusting your search query",
+        "createFirst": "Create your first team to get started"
+      },
+      "view": {
+        "toggleColumns": "Toggle columns"
+      },
+      "menu": {
+        "copyTeamId": "Copy Team ID",
+        "quickView": "Quick View",
+        "viewDetails": "View Details",
+        "editTeam": "Edit Team",
+        "activate": "Activate",
+        "archive": "Archive"
+      }
+    },
+    "drawer": {
+      "details": "Team Details",
+      "actions": "Actions",
+      "members": "Members",
+      "leader": "Leader",
+      "created": "Created",
+      "viewDetails": "View Details",
+      "editTeam": "Edit Team",
+      "addMembers": "Add Members",
+      "activate": "Activate Team",
+      "archive": "Archive Team"
+    },
+    "errors": {
+      "loadingTeams": "Error Loading Teams",
+      "backendUnavailable": "Backend service unavailable",
+      "invalidDataFormat": "Invalid data format from server",
+      "cannotConnect": "Cannot connect to backend",
+      "backendTip": "Tip: Start the backend with: "
     }
   },
   "activity": {

@@ -9,6 +9,9 @@ export * from './domain';
 // User types (authentication, roles)
 export * from './user';
 
+// Team types (team management, TEAM_FIT scenarios)
+export * from './team';
+
 // Skills types (ESCO, O*NET, search)
 export * from './skills';
 

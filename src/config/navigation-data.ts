@@ -168,6 +168,13 @@ export const NAVIGATION_CONFIG: NavigationConfig = {
           },
         },
         {
+          id: "teams",
+          path: "/admin/teams",
+          labelKey: "teams",
+          icon: "UsersRound",
+          isNew: true,
+        },
+        {
           id: "settings",
           path: "/settings",
           labelKey: "settings",
