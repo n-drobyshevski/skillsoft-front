@@ -1,60 +1,136 @@
 'use client';
 
+import { useEffect, useState, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ChevronRight, Clock } from 'lucide-react';
+import { ChevronRight, Clock, AlertCircle, XCircle, Timer } from 'lucide-react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import type { RecentCompletion } from '@/types/dashboard';
+import type { TestActivity, ActivityEventType } from '@/types/activity';
 import { AssessmentGoal, AssessmentGoalInfo } from '@/types/domain';
 import { useTranslations } from 'next-intl';
+import { activityApi } from '@/services/api';
+import { createLogger } from '@/lib/logger';
+
+const log = createLogger('RecentActivityWidget');
+
+// Polling interval: 30 seconds
+const POLL_INTERVAL_MS = 30_000;
 
 /**
  * Props for RecentActivityWidget
  */
 export interface RecentActivityWidgetProps {
-  /** Recent completions data */
+  /** Recent completions data (optional - will fetch from API if not provided) */
   completions?: RecentCompletion[];
-  /** Loading state */
+  /** Loading state (only used when completions are provided externally) */
   loading?: boolean;
   /** Additional CSS classes */
   className?: string;
   /** Maximum items to display */
   maxItems?: number;
+  /** Disable API fetching (use provided completions only) */
+  disableFetch?: boolean;
 }
 
 /**
- * RecentActivityWidget - Displays recent test completions.
+ * Map TestActivity from API to RecentCompletion for display
+ */
+function mapActivityToCompletion(activity: TestActivity): RecentCompletion {
+  return {
+    id: activity.sessionId,
+    userId: activity.clerkUserId,
+    userName: activity.userName,
+    templateName: activity.templateName,
+    templateGoal: activity.templateGoal,
+    completedAt: activity.occurredAt,
+    score: activity.score,
+    passed: activity.passed,
+  };
+}
+
+/**
+ * RecentActivityWidget - Displays recent test completions with live updates.
  *
  * Features:
- * - User avatar with initials
+ * - User avatar with initials (or image if available)
  * - Assessment type badge
- * - Pass/fail indicator
+ * - Pass/fail/abandoned/timed-out indicators
  * - Relative time display
+ * - Auto-refresh every 30 seconds
  *
  * @example
  * ```tsx
- * <RecentActivityWidget completions={recentCompletions} />
+ * // With auto-fetching (recommended)
+ * <RecentActivityWidget maxItems={5} />
+ *
+ * // With provided data (server-side rendering)
+ * <RecentActivityWidget completions={serverCompletions} disableFetch />
  * ```
  */
 export function RecentActivityWidget({
-  completions = [],
-  loading = false,
+  completions: externalCompletions,
+  loading: externalLoading = false,
   className,
   maxItems = 5,
+  disableFetch = false,
 }: RecentActivityWidgetProps) {
   const t = useTranslations('dashboard');
+  const tActivity = useTranslations('activity');
 
-  if (loading) {
+  const [activities, setActivities] = useState<TestActivity[]>([]);
+  const [isLoading, setIsLoading] = useState(!disableFetch && !externalCompletions);
+  const [error, setError] = useState<string | null>(null);
+
+  // Fetch activity from API
+  const fetchActivity = useCallback(async () => {
+    if (disableFetch) return;
+
+    try {
+      const data = await activityApi.getRecentActivity(maxItems);
+      setActivities(data);
+      setError(null);
+    } catch (err) {
+      log.error('Failed to fetch recent activity', { error: err });
+      setError('Failed to load activity');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [disableFetch, maxItems]);
+
+  // Initial fetch and polling
+  useEffect(() => {
+    if (disableFetch) return;
+
+    // Initial fetch
+    fetchActivity();
+
+    // Set up polling interval
+    const intervalId = setInterval(fetchActivity, POLL_INTERVAL_MS);
+
+    return () => clearInterval(intervalId);
+  }, [fetchActivity, disableFetch]);
+
+  // Determine what to display
+  const isLoadingState = externalLoading || isLoading;
+
+  if (isLoadingState) {
     return <RecentActivityWidgetSkeleton className={className} />;
   }
 
-  // Fallback mock data if no real data available
-  const displayCompletions =
-    completions.length > 0 ? completions.slice(0, maxItems) : MOCK_ACTIVITY;
+  // Use external completions if provided, otherwise use fetched activities
+  let displayCompletions: RecentCompletion[];
+  if (externalCompletions && externalCompletions.length > 0) {
+    displayCompletions = externalCompletions.slice(0, maxItems);
+  } else if (activities.length > 0) {
+    displayCompletions = activities.slice(0, maxItems).map(mapActivityToCompletion);
+  } else {
+    displayCompletions = [];
+  }
 
   return (
     <Card className={cn('h-full', className)}>
@@ -73,7 +149,23 @@ export function RecentActivityWidget({
         </Link>
       </CardHeader>
       <CardContent className="pt-1">
-        {displayCompletions.length === 0 ? (
+        {error ? (
+          <div className="text-center py-6 text-muted-foreground">
+            <AlertCircle className="w-8 h-8 mx-auto mb-2 text-destructive/60" />
+            <p className="text-sm text-destructive/80">{error}</p>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="mt-2"
+              onClick={() => {
+                setIsLoading(true);
+                fetchActivity();
+              }}
+            >
+              {tActivity('retry')}
+            </Button>
+          </div>
+        ) : displayCompletions.length === 0 ? (
           <div className="text-center py-6 text-muted-foreground">
             <p className="text-sm">{t('noRecentActivity')}</p>
             <p className="text-xs mt-1">{t('completionsAppearHere')}</p>
@@ -81,7 +173,11 @@ export function RecentActivityWidget({
         ) : (
           <div className="space-y-0.5 divide-y divide-border/50">
             {displayCompletions.map((completion, index) => (
-              <ActivityItem key={completion.id || index} completion={completion} />
+              <ActivityItem
+                key={completion.id || index}
+                completion={completion}
+                activity={activities.find(a => a.sessionId === completion.id)}
+              />
             ))}
           </div>
         )}
@@ -95,18 +191,31 @@ export function RecentActivityWidget({
  * Mobile: Multi-row stacked layout for better readability
  * Desktop: Compact horizontal layout
  */
-function ActivityItem({ completion }: { completion: RecentCompletion }) {
+function ActivityItem({
+  completion,
+  activity,
+}: {
+  completion: RecentCompletion;
+  activity?: TestActivity;
+}) {
+  const tActivity = useTranslations('activity');
   const initials = getInitials(completion.userName);
   const goalInfo =
     AssessmentGoalInfo[completion.templateGoal as AssessmentGoal] || {
       displayName: completion.templateGoal,
     };
-  const variant = getActivityVariant(completion);
+  const variant = getActivityVariant(completion, activity?.eventType);
+  const eventType = activity?.eventType || 'COMPLETED';
+  const eventLabel = getEventLabel(eventType, tActivity);
+  const EventIcon = getEventIcon(eventType);
 
   return (
     <div className="flex items-start gap-3 py-2.5">
       <div className="relative shrink-0">
         <Avatar className="h-7 w-7">
+          {activity?.userImageUrl && (
+            <AvatarImage src={activity.userImageUrl} alt={completion.userName} />
+          )}
           <AvatarFallback className="text-[10px] bg-muted font-medium">
             {initials}
           </AvatarFallback>
@@ -115,6 +224,8 @@ function ActivityItem({ completion }: { completion: RecentCompletion }) {
           className={cn(
             'absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full ring-2 ring-background',
             variant === 'success' && 'bg-emerald-500',
+            variant === 'warning' && 'bg-amber-500',
+            variant === 'error' && 'bg-red-500',
             variant === 'info' && 'bg-blue-500',
             variant === 'default' && 'bg-muted-foreground/40'
           )}
@@ -125,9 +236,13 @@ function ActivityItem({ completion }: { completion: RecentCompletion }) {
         <div className="sm:hidden">
           {/* Row 1: Username */}
           <span className="text-sm font-medium line-clamp-1">{completion.userName}</span>
-          {/* Row 2: Template name */}
+          {/* Row 2: Event + Template name */}
           <p className="text-sm text-muted-foreground mt-0.5">
-            <span>completed </span>
+            <span className="inline-flex items-center gap-1">
+              <EventIcon className="w-3 h-3" />
+              {eventLabel}
+            </span>
+            {' '}
             <span className="font-medium text-foreground">{completion.templateName}</span>
           </p>
           {/* Row 3: Badges + Time */}
@@ -135,7 +250,7 @@ function ActivityItem({ completion }: { completion: RecentCompletion }) {
             <Badge variant="outline" className="text-[10px] px-1.5 py-0">
               {goalInfo.displayName}
             </Badge>
-            {completion.score !== undefined && (
+            {completion.score !== undefined && eventType === 'COMPLETED' && (
               <Badge
                 variant={completion.passed ? 'default' : 'secondary'}
                 className={cn(
@@ -147,7 +262,7 @@ function ActivityItem({ completion }: { completion: RecentCompletion }) {
               </Badge>
             )}
             <span className="text-[10px] text-muted-foreground">
-              • {formatTimeAgo(new Date(completion.completedAt))}
+              {formatTimeAgo(new Date(completion.completedAt))}
             </span>
           </div>
         </div>
@@ -156,14 +271,17 @@ function ActivityItem({ completion }: { completion: RecentCompletion }) {
         <div className="hidden sm:block">
           <p className="text-sm leading-snug">
             <span className="font-medium">{completion.userName}</span>
-            <span className="text-muted-foreground"> completed </span>
+            <span className="text-muted-foreground inline-flex items-center gap-1 mx-1">
+              <EventIcon className="w-3 h-3" />
+              {eventLabel}
+            </span>
             <span className="font-medium">{completion.templateName}</span>
           </p>
           <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mt-0.5">
             <Badge variant="outline" className="text-[10px] px-1.5 py-0 shrink-0">
               {goalInfo.displayName}
             </Badge>
-            {completion.score !== undefined && (
+            {completion.score !== undefined && eventType === 'COMPLETED' && (
               <Badge
                 variant={completion.passed ? 'default' : 'secondary'}
                 className={cn(
@@ -196,14 +314,53 @@ function getInitials(name: string): string {
 }
 
 /**
- * Get activity variant based on completion result
+ * Get activity variant based on completion result and event type
  */
 function getActivityVariant(
-  completion: RecentCompletion
-): 'success' | 'info' | 'default' {
+  completion: RecentCompletion,
+  eventType?: ActivityEventType
+): 'success' | 'warning' | 'error' | 'info' | 'default' {
+  // Handle non-completion events
+  if (eventType === 'ABANDONED') return 'warning';
+  if (eventType === 'TIMED_OUT') return 'error';
+
+  // Handle completion events
   if (completion.passed === true) return 'success';
   if (completion.passed === false) return 'default';
   return 'info';
+}
+
+/**
+ * Get event label based on event type
+ */
+function getEventLabel(
+  eventType: ActivityEventType,
+  t: ReturnType<typeof useTranslations<'activity'>>
+): string {
+  switch (eventType) {
+    case 'COMPLETED':
+      return t('completed');
+    case 'ABANDONED':
+      return t('abandoned');
+    case 'TIMED_OUT':
+      return t('timedOut');
+    default:
+      return t('completed');
+  }
+}
+
+/**
+ * Get icon for event type
+ */
+function getEventIcon(eventType: ActivityEventType) {
+  switch (eventType) {
+    case 'ABANDONED':
+      return XCircle;
+    case 'TIMED_OUT':
+      return Timer;
+    default:
+      return Clock;
+  }
 }
 
 /**
@@ -219,42 +376,6 @@ function formatTimeAgo(date: Date): string {
 
   return date.toLocaleDateString();
 }
-
-/**
- * Mock activity data for demo purposes
- */
-const MOCK_ACTIVITY: RecentCompletion[] = [
-  {
-    id: '1',
-    userId: 'user1',
-    userName: 'Alex Johnson',
-    templateName: 'Team Leadership',
-    templateGoal: 'OVERVIEW',
-    completedAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
-    score: 85,
-    passed: true,
-  },
-  {
-    id: '2',
-    userId: 'user2',
-    userName: 'Sarah Chen',
-    templateName: 'Digital Communication',
-    templateGoal: 'JOB_FIT',
-    completedAt: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(),
-    score: 72,
-    passed: true,
-  },
-  {
-    id: '3',
-    userId: 'user3',
-    userName: 'John Miller',
-    templateName: 'Skills Assessment',
-    templateGoal: 'TEAM_FIT',
-    completedAt: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
-    score: 65,
-    passed: false,
-  },
-];
 
 /**
  * Loading skeleton for RecentActivityWidget

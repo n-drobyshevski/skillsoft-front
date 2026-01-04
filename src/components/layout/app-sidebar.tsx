@@ -162,11 +162,13 @@ function NavItem({
   isActive,
   isLensChanging,
   animationDelay,
+  t,
 }: {
   item: NavigationItem;
   isActive: boolean;
   isLensChanging: boolean;
   animationDelay: number;
+  t: (key: string) => string;
 }) {
   const pathname = usePathname();
 
@@ -203,7 +205,7 @@ function NavItem({
         <SidebarMenuButton asChild isActive={isActive}>
           <Link href={item.path}>
             <IconComponent />
-            <span>{item.label}</span>
+            <span>{t(item.labelKey)}</span>
             {item.isNew && (
               <Badge variant="secondary" className="ml-auto text-xs">
                 NEW
@@ -238,7 +240,7 @@ function NavItem({
         <CollapsibleTrigger asChild>
           <SidebarMenuButton isActive={isActive || hasActiveChild}>
             <IconComponent />
-            <span>{item.label}</span>
+            <span>{t(item.labelKey)}</span>
             {item.badge && <NavigationBadge config={item.badge} />}
             <ChevronRight
               className={cn(
@@ -259,7 +261,7 @@ function NavItem({
                   <SidebarMenuSubButton asChild isActive={isChildActive}>
                     <Link href={child.path}>
                       {ChildIconComponent && <ChildIconComponent />}
-                      <span>{child.label}</span>
+                      <span>{t(child.labelKey)}</span>
                       {child.badge && <NavigationBadge config={child.badge} />}
                     </Link>
                   </SidebarMenuSubButton>
@@ -280,10 +282,12 @@ function NavGroup({
   group,
   isLensChanging,
   itemStartIndex,
+  t,
 }: {
   group: NavigationGroup;
   isLensChanging: boolean;
   itemStartIndex: number;
+  t: (key: string) => string;
 }) {
   const pathname = usePathname();
 
@@ -297,7 +301,7 @@ function NavGroup({
               "animate-in fade-in-0 slide-in-from-left-2 duration-200"
           )}
         >
-          {group.label}
+          {t(group.labelKey)}
         </SidebarGroupLabel>
         <SidebarMenu>
           {group.items.map((item, index) => {
@@ -309,6 +313,7 @@ function NavGroup({
                 isActive={isActive}
                 isLensChanging={isLensChanging}
                 animationDelay={(itemStartIndex + index) * 50}
+                t={t}
               />
             );
           })}
@@ -443,6 +448,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 group={group}
                 isLensChanging={isLensChanging}
                 itemStartIndex={startIndex}
+                t={t}
               />
             );
           })
@@ -494,7 +500,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                             rel="noopener noreferrer"
                           >
                             <IconComponent />
-                            <span>{item.label}</span>
+                            <span>{t(item.labelKey)}</span>
                             <ExternalLink className="ml-auto h-3 w-3 opacity-50" />
                           </a>
                         </SidebarMenuButton>
@@ -507,7 +513,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                       <SidebarMenuButton asChild isActive={isActive}>
                         <Link href={item.path}>
                           <IconComponent />
-                          <span>{item.label}</span>
+                          <span>{t(item.labelKey)}</span>
                         </Link>
                       </SidebarMenuButton>
                     </SidebarMenuItem>

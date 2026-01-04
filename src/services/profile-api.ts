@@ -154,7 +154,8 @@ export async function getAssessmentSummary(clerkUserId: string): Promise<Assessm
   );
   const recentScores = sortedResults
     .slice(-10) // Last 10 results
-    .map(r => r.overallPercentage);
+    .map(r => r.overallPercentage)
+    .filter((score): score is number => score != null);
 
   return {
     totalCompleted: statistics?.totalTestsCompleted || allResults.length,

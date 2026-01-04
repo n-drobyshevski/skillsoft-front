@@ -56,17 +56,18 @@ async function ResultsContent({ resultId }: { resultId: string }) {
   const template = await testTemplatesApi.getTemplateById(result.templateId);
   
   const isPassed = result.passed;
-  const percentScore = Math.round(result.overallPercentage);
+  const percentScore = Math.round(result.overallPercentage ?? 0);
   const formattedTime = formatDuration(result.totalTimeSeconds);
+  const competencyScores = result.competencyScores ?? [];
 
   // Prepare data for charts
-  const radarData = result.competencyScores.map(cs => ({
+  const radarData = competencyScores.map(cs => ({
     subject: cs.competencyName,
     A: Math.round(cs.percentage),
     fullMark: 100
   }));
 
-  const gapData = result.competencyScores.map(cs => {
+  const gapData = competencyScores.map(cs => {
     const targetScore = template?.passingScore || 70; // Default to 70 if not specified
     return {
       name: cs.competencyName,
@@ -137,7 +138,7 @@ async function ResultsContent({ resultId }: { resultId: string }) {
               <StatCard
                 icon={<Target className="h-4 w-4" />}
                 label="Баллы"
-                value={`${result.overallScore} / ${Math.round(result.overallScore / (result.overallPercentage / 100 || 1))}`}
+                value={`${result.overallScore ?? 0} / ${Math.round((result.overallScore ?? 0) / ((result.overallPercentage ?? 0) / 100 || 1))}`}
               />
               <StatCard
                 icon={<Clock className="h-4 w-4" />}
@@ -252,7 +253,7 @@ async function ResultsContent({ resultId }: { resultId: string }) {
         </div>
 
         {/* Detailed Competency Breakdown */}
-        {result.competencyScores && result.competencyScores.length > 0 && (
+        {competencyScores.length > 0 && (
           <Card className="mt-6">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -264,7 +265,7 @@ async function ResultsContent({ resultId }: { resultId: string }) {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-              {result.competencyScores.map((competency, index) => (
+              {competencyScores.map((competency, index) => (
                 <div key={competency.competencyId}>
                   {index > 0 && <Separator className="my-4" />}
                   <CompetencyScoreCard competency={competency} />

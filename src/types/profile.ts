@@ -157,8 +157,8 @@ export function toRecentTestResult(result: TestResult, goal: AssessmentGoal = As
     templateId: result.templateId,
     templateName: result.templateName,
     goal,
-    overallPercentage: result.overallPercentage,
-    passed: result.passed,
+    overallPercentage: result.overallPercentage ?? 0,
+    passed: result.passed ?? false,
     completedAt: result.completedAt,
   };
 }
@@ -224,8 +224,8 @@ export function calculateImprovementMetrics(results: TestResult[]): ImprovementM
 
     if (recentHalf.length === 0 || previousHalf.length === 0) return null;
 
-    const recentAvg = recentHalf.reduce((sum, r) => sum + r.overallPercentage, 0) / recentHalf.length;
-    const previousAvg = previousHalf.reduce((sum, r) => sum + r.overallPercentage, 0) / previousHalf.length;
+    const recentAvg = recentHalf.reduce((sum, r) => sum + (r.overallPercentage ?? 0), 0) / recentHalf.length;
+    const previousAvg = previousHalf.reduce((sum, r) => sum + (r.overallPercentage ?? 0), 0) / previousHalf.length;
     const scoreChange = Math.round(recentAvg - previousAvg);
 
     return {
@@ -236,8 +236,8 @@ export function calculateImprovementMetrics(results: TestResult[]): ImprovementM
     };
   }
 
-  const recentAvg = recentResults.reduce((sum, r) => sum + r.overallPercentage, 0) / recentResults.length;
-  const previousAvg = previousResults.reduce((sum, r) => sum + r.overallPercentage, 0) / previousResults.length;
+  const recentAvg = recentResults.reduce((sum, r) => sum + (r.overallPercentage ?? 0), 0) / recentResults.length;
+  const previousAvg = previousResults.reduce((sum, r) => sum + (r.overallPercentage ?? 0), 0) / previousResults.length;
   const scoreChange = Math.round(recentAvg - previousAvg);
 
   return {

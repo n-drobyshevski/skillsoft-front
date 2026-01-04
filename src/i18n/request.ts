@@ -9,6 +9,9 @@ import { getRequestConfig } from 'next-intl/server';
 import { cookies, headers } from 'next/headers';
 import { type Locale, locales, defaultLocale, isValidLocale } from './config';
 
+// Type for internationalization messages
+type IntlMessages = Record<string, unknown>;
+
 /**
  * Static locale module map to avoid dynamic imports with template literals.
  * This satisfies the no-unsanitized/method ESLint rule by using a whitelist pattern.

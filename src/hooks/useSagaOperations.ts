@@ -191,7 +191,7 @@ export function useSagaOperations<TResult = unknown, TSnapshot = unknown>(
   }, []);
 
   // Ref to hold the executeItem implementation for recursive calls
-  const executeItemRef = useRef<(itemId: string) => Promise<SagaOperationResult<TResult>>>();
+  const executeItemRef = useRef<((itemId: string) => Promise<SagaOperationResult<TResult>>) | null>(null);
 
   // Execute a single item with retry logic (implementation)
   const executeItemImpl = useCallback(

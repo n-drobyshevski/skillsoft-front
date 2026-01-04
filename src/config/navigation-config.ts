@@ -27,7 +27,11 @@ export interface BadgeConfig {
 export interface NavigationChildItem {
   id: string;
   path: string;
-  label: string;
+  /** Translation key for the label (i18n) */
+  labelKey: string;
+  /** @deprecated Use labelKey instead - kept for migration */
+  label?: string;
+  /** @deprecated Use labelKey instead - kept for migration */
   labelEn?: string;
   icon?: string;
   badge?: BadgeConfig;
@@ -42,9 +46,11 @@ export interface NavigationItem {
   id: string;
   /** URL path or external URL */
   path: string;
-  /** Display label (Russian) */
-  label: string;
-  /** English label for accessibility */
+  /** Translation key for the label (i18n) */
+  labelKey: string;
+  /** @deprecated Use labelKey instead - kept for migration */
+  label?: string;
+  /** @deprecated Use labelKey instead - kept for migration */
   labelEn?: string;
   /** Lucide icon name */
   icon: string;
@@ -68,9 +74,11 @@ export interface NavigationItem {
 export interface NavigationGroup {
   /** Unique identifier */
   id: string;
-  /** Display label */
-  label: string;
-  /** English label for accessibility */
+  /** Translation key for the label (i18n) */
+  labelKey: string;
+  /** @deprecated Use labelKey instead - kept for migration */
+  label?: string;
+  /** @deprecated Use labelKey instead - kept for migration */
   labelEn?: string;
   /** Optional icon for collapsed state */
   icon?: string;

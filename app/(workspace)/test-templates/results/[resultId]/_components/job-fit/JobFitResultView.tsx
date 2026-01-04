@@ -36,13 +36,15 @@ import {
  */
 export function JobFitResultView({ result, template }: BaseResultViewProps) {
   const onetSocCode = template.blueprint?.onet_soc_code;
-  const isPassed = result.passed;
+  const isPassed = result.passed ?? false;
   const passingScore = template.passingScore || 70;
+
+  const competencyScores = result.competencyScores ?? [];
 
   // Transform data for enhanced gap analysis chart
   const gapData = useMemo(() => {
-    return toGapData(result.competencyScores, { defaultTarget: passingScore });
-  }, [result.competencyScores, passingScore]);
+    return toGapData(competencyScores, { defaultTarget: passingScore });
+  }, [competencyScores, passingScore]);
 
   // Generate development recommendations from gaps
   const recommendations = useMemo(() => {
@@ -54,23 +56,23 @@ export function JobFitResultView({ result, template }: BaseResultViewProps) {
 
   // Prepare data for radar chart
   const radarData = useMemo(() => {
-    return result.competencyScores.map(cs => ({
+    return competencyScores.map(cs => ({
       subject: cs.competencyName,
       A: Math.round(cs.percentage),
       fullMark: 100
     }));
-  }, [result.competencyScores]);
+  }, [competencyScores]);
 
   // Calculate insights
   const insights = useMemo(() => {
-    const strengths = result.competencyScores.filter(c => c.percentage >= passingScore);
-    const gaps = result.competencyScores.filter(c => c.percentage < passingScore);
-    const avgScore = Math.round(
-      result.competencyScores.reduce((sum, c) => sum + c.percentage, 0) / result.competencyScores.length
-    );
+    const strengths = competencyScores.filter(c => c.percentage >= passingScore);
+    const gaps = competencyScores.filter(c => c.percentage < passingScore);
+    const avgScore = competencyScores.length > 0
+      ? Math.round(competencyScores.reduce((sum, c) => sum + c.percentage, 0) / competencyScores.length)
+      : 0;
 
     return { strengths, gaps, avgScore };
-  }, [result.competencyScores, passingScore]);
+  }, [competencyScores, passingScore]);
 
   return (
     <div className="min-h-screen bg-muted/30 py-3 sm:py-4 md:py-8">
@@ -79,13 +81,13 @@ export function JobFitResultView({ result, template }: BaseResultViewProps) {
         <JobFitHero
           templateName={result.templateName}
           completedAt={result.completedAt}
-          overallPercentage={result.overallPercentage}
+          overallPercentage={result.overallPercentage ?? 0}
           passed={isPassed}
           onetSocCode={onetSocCode}
           questionsAnswered={result.questionsAnswered}
           totalQuestions={result.totalQuestions}
           timeSpent={result.totalTimeSeconds}
-          percentile={result.percentile}
+          percentile={result.percentile ?? undefined}
         />
 
         {/* Charts + Insights Section */}
@@ -258,7 +260,7 @@ export function JobFitResultView({ result, template }: BaseResultViewProps) {
 
         {/* Detailed competency breakdown - Mobile-First */}
         <CompetencyProfile
-          competencies={result.competencyScores}
+          competencies={competencyScores}
           showPassFail={true}
           passingScore={passingScore}
         />

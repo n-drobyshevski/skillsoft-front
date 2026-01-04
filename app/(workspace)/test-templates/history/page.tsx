@@ -135,7 +135,7 @@ async function ResultsList({ userId }: { userId: string }) {
         <StatCard
           icon={<BarChart3 className="h-4 w-4" />}
           label={t("stats.averageScore")}
-          value={`${Math.round(results.reduce((acc, r) => acc + r.overallPercentage, 0) / results.length)}%`}
+          value={`${Math.round(results.reduce((acc, r) => acc + (r.overallPercentage ?? 0), 0) / results.length)}%`}
         />
         <StatCard
           icon={<Clock className="h-4 w-4" />}
@@ -215,7 +215,7 @@ async function SessionsList({ userId }: { userId: string }) {
 async function ResultCard({ result }: { result: TestResult }) {
   const t = await getTranslations("template.history.resultCard");
   const locale = await getLocale();
-  const percentScore = Math.round(result.overallPercentage);
+  const percentScore = Math.round(result.overallPercentage ?? 0);
 
   return (
     <Card className="active:scale-[0.99] transition-transform duration-200 hover:border-primary/50">

@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useMemo } from "react";
+import { useTranslations } from "next-intl";
 import { User, Pencil, Shield, Check, ChevronDown } from "lucide-react";
 import {
   DropdownMenu,
@@ -10,7 +11,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { SidebarMenuButton } from "@/components/ui/sidebar";
 import { useLens, useLensConfig, useAvailableLenses } from "@/hooks/useLens";
-import { LENS_CONFIGS, getLensConfig, type LensConfig } from "@/config/lens-configs";
+import { getLensConfig } from "@/config/lens-configs";
 import { type LensType } from "@/store/lens-store";
 import { cn } from "@/lib/utils";
 
@@ -51,6 +52,9 @@ function LensIcon({ type, className }: { type: string; className?: string }) {
 
 
 export function LensSwitcher() {
+  // i18n translations for lens names and descriptions
+  const t = useTranslations("lens");
+
   // Subscribe only to what we need (selective subscriptions)
   const { activeLens, setLens } = useLens();
   const lensConfig = useLensConfig();
@@ -82,7 +86,7 @@ export function LensSwitcher() {
             "data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground",
             "group/lens"
           )}
-          tooltip={`Current view: ${lensConfig.name}`}
+          tooltip={t("currentView", { name: t(`${lensConfig.id}.name`) })}
         >
           {/* Lens Icon - with scale animation on hover */}
           <div
@@ -103,10 +107,10 @@ export function LensSwitcher() {
           {/* Label & Description */}
           <div className="grid flex-1 text-left text-sm leading-tight">
             <span className="truncate font-semibold">
-              {lensConfig.name}
+              {t(`${lensConfig.id}.name`)}
             </span>
             <span className="truncate text-xs text-muted-foreground">
-              Режим
+              {t("mode")}
             </span>
           </div>
 
@@ -175,10 +179,10 @@ export function LensSwitcher() {
                   ANIM.colors,
                   isActive && config.color
                 )}>
-                  {config.name}
+                  {t(`${id}.name`)}
                 </p>
                 <p className="text-xs text-muted-foreground truncate">
-                  {config.description}
+                  {t(`${id}.description`)}
                 </p>
               </div>
 
@@ -204,6 +208,7 @@ export function LensSwitcher() {
  * Compact lens indicator for collapsed sidebar state
  */
 export function LensIndicator() {
+  const t = useTranslations("lens");
   const lensConfig = useLensConfig();
   const availableLenses = useAvailableLenses();
 
@@ -219,7 +224,7 @@ export function LensIndicator() {
         "hover:scale-105",
         lensConfig.bgColor
       )}
-      title={`${lensConfig.name} View`}
+      title={t("view", { name: t(`${lensConfig.id}.name`) })}
     >
       <LensIcon
         type={lensConfig.icon}

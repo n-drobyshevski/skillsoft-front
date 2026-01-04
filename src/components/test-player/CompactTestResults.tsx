@@ -41,7 +41,8 @@ interface CompactTestResultsProps {
  * - Accessible contrast and spacing
  */
 export function CompactTestResults({ result, onRetry, onBack, onViewDetails }: CompactTestResultsProps) {
-  const { passed, overallPercentage, percentile, totalTimeSeconds, competencyScores } = result;
+  const { passed, overallPercentage, percentile, totalTimeSeconds, competencyScores: rawCompetencyScores } = result;
+  const competencyScores = rawCompetencyScores ?? [];
   const prefersReducedMotion = useReducedMotion();
 
   // Calculate display values
@@ -122,7 +123,7 @@ export function CompactTestResults({ result, onRetry, onBack, onViewDetails }: C
             </div>
             <div>
               <div className="text-5xl font-bold tracking-tight">
-                {Math.round(overallPercentage)}%
+                {Math.round(overallPercentage ?? 0)}%
               </div>
               <div className={cn(
                 "text-lg font-semibold uppercase tracking-wide",
@@ -173,7 +174,7 @@ export function CompactTestResults({ result, onRetry, onBack, onViewDetails }: C
                 )}
               </div>
               <div>
-                <div className="text-3xl font-bold">{Math.round(overallPercentage)}%</div>
+                <div className="text-3xl font-bold">{Math.round(overallPercentage ?? 0)}%</div>
                 <div className={cn(
                   "text-xs font-semibold uppercase",
                   passed ? "text-emerald-600" : "text-red-600"

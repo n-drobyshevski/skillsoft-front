@@ -102,7 +102,7 @@ export function calculateTemplateStats(sessions: EnrichedTestSession[]): Templat
   // Find best score from completed sessions with results
   const scores = completed
     .filter(s => s.result?.overallPercentage != null)
-    .map(s => s.result!.overallPercentage);
+    .map(s => s.result!.overallPercentage!);
   const bestScore = scores.length > 0 ? Math.max(...scores) : null;
 
   // Find latest activity date

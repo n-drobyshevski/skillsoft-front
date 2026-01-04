@@ -30,33 +30,34 @@ import { toTeamSaturationDataSimulated } from '@/lib/result-transformers';
  */
 export function TeamFitResultView({ result, template }: BaseResultViewProps) {
   const teamId = template.blueprint?.team_id;
-  const isGoodFit = result.passed;
+  const isGoodFit = result.passed ?? false;
   const passingScore = template.passingScore || 70;
+  const competencyScores = result.competencyScores ?? [];
 
   // Project competencies to Big Five for personality fit visualization
-  const bigFiveProfile = useBigFiveProjection(result.competencyScores);
+  const bigFiveProfile = useBigFiveProjection(competencyScores);
   const bigFiveData = bigFiveToArray(bigFiveProfile);
 
   // Transform competency scores to team saturation data for radar visualization
   // Using simulated team data for demo - in production, fetch real team saturation
   const teamSaturationData = useMemo(() => {
-    return toTeamSaturationDataSimulated(result.competencyScores, 55, 20);
-  }, [result.competencyScores]);
+    return toTeamSaturationDataSimulated(competencyScores, 55, 20);
+  }, [competencyScores]);
 
   // Calculate team contribution insights
   const insights = useMemo(() => {
-    const strengths = result.competencyScores.filter(c => c.percentage >= 70);
-    const developing = result.competencyScores.filter(c => c.percentage < 50);
-    const avgScore = Math.round(
-      result.competencyScores.reduce((sum, c) => sum + c.percentage, 0) / result.competencyScores.length
-    );
+    const strengths = competencyScores.filter(c => c.percentage >= 70);
+    const developing = competencyScores.filter(c => c.percentage < 50);
+    const avgScore = competencyScores.length > 0
+      ? Math.round(competencyScores.reduce((sum, c) => sum + c.percentage, 0) / competencyScores.length)
+      : 0;
 
     // Simulated complementary skills (in real implementation, compare against team average)
     const complementary = strengths.slice(0, 3);
     const gapAreas = developing.slice(0, 3);
 
     return { strengths, developing, avgScore, complementary, gapAreas };
-  }, [result.competencyScores]);
+  }, [competencyScores]);
 
   // Check if we have Big Five data
   const hasBigFiveData = useMemo(() => {
@@ -71,7 +72,7 @@ export function TeamFitResultView({ result, template }: BaseResultViewProps) {
         <TeamFitHero
           templateName={result.templateName}
           completedAt={result.completedAt}
-          overallPercentage={result.overallPercentage}
+          overallPercentage={result.overallPercentage ?? 0}
           passed={isGoodFit}
           teamId={teamId}
           questionsAnswered={result.questionsAnswered}
@@ -298,7 +299,7 @@ export function TeamFitResultView({ result, template }: BaseResultViewProps) {
 
         {/* Detailed competency breakdown - Mobile-First */}
         <CompetencyProfile
-          competencies={result.competencyScores}
+          competencies={competencyScores}
           showPassFail={true}
           passingScore={passingScore}
         />

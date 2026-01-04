@@ -91,11 +91,11 @@ export function CandidateResultDetails({
   }
 
   const isPassed = result.passed;
-  const percentScore = Math.round(result.overallPercentage);
+  const percentScore = Math.round(result.overallPercentage ?? 0);
   const formattedTime = formatDuration(result.totalTimeSeconds);
 
   // Prepare data for radar chart
-  const radarData = result.competencyScores.map((cs) => ({
+  const radarData = (result.competencyScores ?? []).map((cs) => ({
     subject: cs.competencyName,
     A: Math.round(cs.percentage),
     fullMark: 100,
@@ -212,7 +212,7 @@ export function CandidateResultDetails({
             Detailed Breakdown
           </h4>
           <div className="space-y-4">
-            {result.competencyScores.map((competency) => (
+            {(result.competencyScores ?? []).map((competency) => (
               <CompetencyScoreItem
                 key={competency.competencyId}
                 competency={competency}

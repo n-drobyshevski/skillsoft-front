@@ -6,16 +6,17 @@ import { useSelectedLayoutSegment } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
-import { 
-  LayoutDashboard, 
-  Wrench, 
-  Users, 
+import {
+  LayoutDashboard,
+  Wrench,
+  Users,
   Settings,
   Lock,
   Info,
   GitBranch,
   Loader2,
-  type LucideIcon 
+  Activity,
+  type LucideIcon
 } from 'lucide-react';
 import type { TemplateStatus } from './TemplateHeader';
 import { createNewVersion } from '../actions';
@@ -64,6 +65,12 @@ export function NavTabs({ baseUrl, status, templateId, templateName }: NavTabsPr
       href: `${baseUrl}/results`,
       segment: 'results',
       icon: Users,
+    },
+    {
+      label: 'Activity',
+      href: `${baseUrl}/activity`,
+      segment: 'activity',
+      icon: Activity,
     },
     {
       label: 'Settings',

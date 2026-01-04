@@ -1,7 +1,9 @@
 import { notFound } from "next/navigation";
 import { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
-import { usersApi } from "@/services/api";
+import { usersApi, testResultsApi, passportApi } from "@/services/api";
+import type { UserStatistics, TestResult } from "@/types/domain";
+import type { CompetencyPassport as DomainPassport } from "@/types/domain";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -17,7 +19,6 @@ import {
   Shield,
   Activity,
   Target,
-  FileQuestion,
   ClipboardList,
   Edit,
   Ban,
@@ -41,6 +42,9 @@ import {
   UserStatusKey,
 } from "@/types/user";
 import UserProfileClient from "./_components/UserProfileClient";
+import { AdminPassportSection } from "./_components/AdminPassportSection";
+import { UserAssessmentsTab } from "./_components/UserAssessmentsTab";
+import { UserActivityTab } from "./_components/UserActivityTab";
 
 interface UserProfilePageProps {
   params: Promise<{ userId: string }>;
@@ -71,6 +75,36 @@ async function getUserData(userId: string): Promise<User | null> {
   } catch {
     return null;
   }
+}
+
+// Profile data interface for aggregated user data
+interface UserProfileData {
+  statistics: UserStatistics | null;
+  passport: DomainPassport | null;
+  results: {
+    content: TestResult[];
+    totalElements: number;
+    totalPages: number;
+  } | null;
+}
+
+/**
+ * Fetch all profile-related data for a user in parallel.
+ * Uses Promise.allSettled for graceful degradation - each section
+ * can fail independently without blocking the entire page.
+ */
+async function getUserProfileData(clerkUserId: string): Promise<UserProfileData> {
+  const [statisticsResult, passportResult, resultsResult] = await Promise.allSettled([
+    testResultsApi.getUserStatistics(clerkUserId),
+    passportApi.getPassport(clerkUserId),
+    testResultsApi.getUserResults(clerkUserId, 0, 10),
+  ]);
+
+  return {
+    statistics: statisticsResult.status === 'fulfilled' ? statisticsResult.value : null,
+    passport: passportResult.status === 'fulfilled' ? passportResult.value : null,
+    results: resultsResult.status === 'fulfilled' ? resultsResult.value : null,
+  };
 }
 
 function formatDate(dateString?: string | null, neverLabel: string = "Never", locale: string = "en-US"): string {
@@ -270,12 +304,29 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
     notFound();
   }
 
+  // Fetch profile data (statistics, passport, results) in parallel
+  const profileData = await getUserProfileData(user.clerkId);
+
   const fullName = getUserFullName(user);
   const initials = getUserInitials(user);
   const neverLabel = tTime('never');
   const statusKey = getUserStatusKey(user);
   const roleLabel = tRole(user.role);
   const statusLabel = tStatus(statusKey);
+
+  // Extract stats from profile data with fallbacks
+  const stats = {
+    assessments: profileData.statistics?.totalTestsCompleted ?? 0,
+    completed: profileData.statistics?.totalTestsCompleted ?? 0,
+    avgScore: profileData.statistics?.averagePercentage != null
+      ? `${Math.round(profileData.statistics.averagePercentage)}%`
+      : '--',
+    competencies: profileData.results?.content?.reduce((acc, result) => {
+      const uniqueCompetencies = new Set(result.competencyScores?.map(c => c.competencyId) ?? []);
+      uniqueCompetencies.forEach(id => acc.add(id));
+      return acc;
+    }, new Set<string>()).size ?? 0,
+  };
 
   return (
     <div className="flex flex-1 flex-col min-h-0">
@@ -347,7 +398,7 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
                           <ClipboardList className="h-4 w-4 text-primary" />
                         </div>
                         <div>
-                          <p className="text-lg font-bold">0</p>
+                          <p className="text-lg font-bold">{stats.assessments}</p>
                           <p className="text-xs text-muted-foreground">{t('stats.assessments')}</p>
                         </div>
                       </div>
@@ -357,7 +408,7 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
                           <Award className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
                         </div>
                         <div>
-                          <p className="text-lg font-bold">0</p>
+                          <p className="text-lg font-bold">{stats.completed}</p>
                           <p className="text-xs text-muted-foreground">{t('stats.completed')}</p>
                         </div>
                       </div>
@@ -367,7 +418,7 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
                           <BarChart3 className="h-4 w-4 text-violet-600 dark:text-violet-400" />
                         </div>
                         <div>
-                          <p className="text-lg font-bold">--</p>
+                          <p className="text-lg font-bold">{stats.avgScore}</p>
                           <p className="text-xs text-muted-foreground">{t('stats.avgScore')}</p>
                         </div>
                       </div>
@@ -395,10 +446,10 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
         <div className="mx-auto max-w-7xl">
           {/* Mobile Stats Grid (visible on smaller screens) */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6 lg:hidden">
-            <StatCard icon={ClipboardList} value={0} label={t('stats.assessments')} color="primary" />
-            <StatCard icon={Award} value={0} label={t('stats.completed')} color="emerald" />
-            <StatCard icon={BarChart3} value="--" label={t('stats.avgScore')} color="violet" />
-            <StatCard icon={Target} value={0} label={t('stats.competencies')} color="amber" />
+            <StatCard icon={ClipboardList} value={stats.assessments} label={t('stats.assessments')} color="primary" />
+            <StatCard icon={Award} value={stats.completed} label={t('stats.completed')} color="emerald" />
+            <StatCard icon={BarChart3} value={stats.avgScore} label={t('stats.avgScore')} color="violet" />
+            <StatCard icon={Target} value={stats.competencies} label={t('stats.competencies')} color="amber" />
           </div>
 
           {/* Content Grid */}
@@ -477,19 +528,19 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
                 <CardContent>
                   <div className="grid grid-cols-2 gap-3">
                     <div className="text-center p-3 rounded-xl bg-background/60 border border-border/50">
-                      <p className="text-2xl font-bold text-primary">0</p>
+                      <p className="text-2xl font-bold text-primary">{stats.assessments}</p>
                       <p className="text-xs text-muted-foreground mt-0.5">{t('stats.tests')}</p>
                     </div>
                     <div className="text-center p-3 rounded-xl bg-background/60 border border-border/50">
-                      <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">0</p>
+                      <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">{stats.completed}</p>
                       <p className="text-xs text-muted-foreground mt-0.5">{t('stats.done')}</p>
                     </div>
                     <div className="text-center p-3 rounded-xl bg-background/60 border border-border/50">
-                      <p className="text-2xl font-bold text-violet-600 dark:text-violet-400">--</p>
+                      <p className="text-2xl font-bold text-violet-600 dark:text-violet-400">{stats.avgScore}</p>
                       <p className="text-xs text-muted-foreground mt-0.5">{t('stats.score')}</p>
                     </div>
                     <div className="text-center p-3 rounded-xl bg-background/60 border border-border/50">
-                      <p className="text-2xl font-bold text-amber-600 dark:text-amber-400">0</p>
+                      <p className="text-2xl font-bold text-amber-600 dark:text-amber-400">{stats.competencies}</p>
                       <p className="text-xs text-muted-foreground mt-0.5">{t('stats.skills')}</p>
                     </div>
                   </div>
@@ -518,149 +569,33 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
 
                   {/* Overview Tab */}
                   <TabsContent value="overview" className="mt-6 space-y-6">
-                    {user.role === UserRole.USER ? (
-                      <Card className="hover:shadow-md transition-shadow">
-                        <CardHeader>
-                          <CardTitle className="text-base font-semibold flex items-center gap-2">
-                            <div className="p-1.5 rounded-lg bg-amber-100 dark:bg-amber-900/30">
-                              <ClipboardList className="w-4 h-4 text-amber-600 dark:text-amber-400" />
-                            </div>
-                            {t('sections.assignedAssessments')}
-                          </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="text-center py-12">
-                            <div className="mx-auto w-16 h-16 bg-gradient-to-br from-muted to-muted/50 rounded-2xl flex items-center justify-center mb-4 shadow-inner">
-                              <ClipboardList className="h-8 w-8 text-muted-foreground" />
-                            </div>
-                            <h3 className="text-lg font-semibold mb-2">{t('empty.noAssessments')}</h3>
-                            <p className="text-sm text-muted-foreground max-w-sm mx-auto">
-                              {t('empty.noAssessmentsDesc')}
-                            </p>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ) : (
-                      <Card className="hover:shadow-md transition-shadow">
-                        <CardHeader>
-                          <CardTitle className="text-base font-semibold flex items-center gap-2">
-                            <div className="p-1.5 rounded-lg bg-blue-100 dark:bg-blue-900/30">
-                              <FileQuestion className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                            </div>
-                            {t('sections.contentContributions')}
-                          </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="text-center py-12">
-                            <div className="mx-auto w-16 h-16 bg-gradient-to-br from-muted to-muted/50 rounded-2xl flex items-center justify-center mb-4 shadow-inner">
-                              <FileQuestion className="h-8 w-8 text-muted-foreground" />
-                            </div>
-                            <h3 className="text-lg font-semibold mb-2">{t('empty.noContributions')}</h3>
-                            <p className="text-sm text-muted-foreground max-w-sm mx-auto">
-                              {t('empty.noContributionsDesc', { role: roleLabel.toLowerCase() })}
-                            </p>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    )}
-
-                    {user.role === UserRole.USER && (
-                      <Card className="hover:shadow-md transition-shadow">
-                        <CardHeader>
-                          <CardTitle className="text-base font-semibold flex items-center gap-2">
-                            <div className="p-1.5 rounded-lg bg-violet-100 dark:bg-violet-900/30">
-                              <Target className="w-4 h-4 text-violet-600 dark:text-violet-400" />
-                            </div>
-                            {t('sections.competencyProgress')}
-                          </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="text-center py-12">
-                            <div className="mx-auto w-16 h-16 bg-gradient-to-br from-muted to-muted/50 rounded-2xl flex items-center justify-center mb-4 shadow-inner">
-                              <Target className="h-8 w-8 text-muted-foreground" />
-                            </div>
-                            <h3 className="text-lg font-semibold mb-2">{t('empty.noProgress')}</h3>
-                            <p className="text-sm text-muted-foreground max-w-sm mx-auto">
-                              {t('empty.noProgressDesc')}
-                            </p>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    )}
+                    {/* Show competency passport for all users regardless of role */}
+                    <AdminPassportSection
+                      passport={profileData.passport}
+                      userName={fullName}
+                    />
                   </TabsContent>
 
                   {/* Assessments Tab */}
                   <TabsContent value="assessments" className="mt-6 space-y-6">
-                    <Card className="hover:shadow-md transition-shadow">
-                      <CardHeader className="flex flex-row items-center justify-between">
-                        <CardTitle className="text-base font-semibold">
-                          {user.role === UserRole.USER ? t('sections.assessmentHistory') : t('sections.createdAssessments')}
-                        </CardTitle>
-                        {user.role !== UserRole.USER && (
-                          <Button variant="outline" size="sm">
-                            {t('actions.createAssessment')}
-                          </Button>
-                        )}
-                      </CardHeader>
-                      <CardContent>
-                        <div className="text-center py-16">
-                          <div className="mx-auto w-20 h-20 bg-gradient-to-br from-muted to-muted/50 rounded-2xl flex items-center justify-center mb-4 shadow-inner">
-                            <ClipboardList className="h-10 w-10 text-muted-foreground" />
-                          </div>
-                          <h3 className="text-xl font-semibold mb-2">{t('empty.comingSoon')}</h3>
-                          <p className="text-sm text-muted-foreground max-w-md mx-auto">
-                            {t('empty.comingSoonDesc')}
-                          </p>
-                        </div>
-                      </CardContent>
-                    </Card>
+                    {/* Show test results history for all users regardless of role */}
+                    <UserAssessmentsTab
+                      results={profileData.results}
+                      userName={fullName}
+                    />
                   </TabsContent>
 
                   {/* Activity Tab */}
                   <TabsContent value="activity" className="mt-6 space-y-6">
-                    <Card className="hover:shadow-md transition-shadow">
-                      <CardHeader>
-                        <CardTitle className="text-base font-semibold">{t('sections.recentActivity')}</CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="space-y-1">
-                          {/* Timeline Item - Account Created */}
-                          <div className="flex gap-4 py-3">
-                            <div className="flex flex-col items-center">
-                              <div className="w-3 h-3 bg-primary rounded-full ring-4 ring-primary/20" />
-                              <div className="w-px flex-1 bg-border mt-2" />
-                            </div>
-                            <div className="pb-4 flex-1">
-                              <p className="text-sm font-semibold">{t('activity.accountCreated')}</p>
-                              <p className="text-xs text-muted-foreground mt-0.5">
-                                {formatDateTime(user.clerkCreatedAt || user.createdAt, neverLabel, locale)}
-                              </p>
-                            </div>
-                          </div>
-
-                          {user.lastSignInAt && (
-                            <div className="flex gap-4 py-3">
-                              <div className="flex flex-col items-center">
-                                <div className="w-3 h-3 bg-emerald-500 rounded-full ring-4 ring-emerald-500/20" />
-                                <div className="w-px flex-1 bg-border mt-2" />
-                              </div>
-                              <div className="pb-4 flex-1">
-                                <p className="text-sm font-semibold">{t('info.lastSignIn')}</p>
-                                <p className="text-xs text-muted-foreground mt-0.5">
-                                  {formatDateTime(user.lastSignInAt, neverLabel, locale)}
-                                </p>
-                              </div>
-                            </div>
-                          )}
-
-                          <div className="flex items-center justify-center pt-6 pb-2">
-                            <p className="text-sm text-muted-foreground bg-muted/50 px-4 py-2 rounded-full">
-                              {t('activity.moreDetailedLogging')}
-                            </p>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
+                    <UserActivityTab
+                      results={profileData.results}
+                      user={{
+                        clerkCreatedAt: user.clerkCreatedAt,
+                        createdAt: user.createdAt,
+                        lastSignInAt: user.lastSignInAt,
+                      }}
+                      locale={locale}
+                    />
                   </TabsContent>
                 </Tabs>
               </UserProfileClient>

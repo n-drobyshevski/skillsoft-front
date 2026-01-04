@@ -225,8 +225,8 @@ export function TestCard({ session, style, compact = false }: TestCardProps) {
           {/* COMPLETED: Score Gauge - uses responsive sizing internally */}
           {session.status === SessionStatus.COMPLETED && session.result && (
             <ScoreGauge
-              score={session.result.overallPercentage}
-              passed={session.result.passed}
+              score={session.result.overallPercentage ?? 0}
+              passed={session.result.passed ?? false}
               size={40}
               showLabel={true}
             />
@@ -267,7 +267,7 @@ export function TestCard({ session, style, compact = false }: TestCardProps) {
               )}
             >
               {session.result.passed ? <Trophy className="size-3" /> : <Target className="size-3" />}
-              {Math.round(session.result.overallPercentage)}%
+              {Math.round(session.result.overallPercentage ?? 0)}%
             </Badge>
           )}
         </div>

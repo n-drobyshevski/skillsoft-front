@@ -99,7 +99,26 @@
     "appSettings": "App settings",
     "documentation": "Documentation",
     "myProfile": "My Profile",
-    "loading": "Loading..."
+    "loading": "Loading...",
+    "groups": {
+      "personal": "My Workspace",
+      "testing": "Testing",
+      "library": "Library",
+      "analytics": "Analytics",
+      "system": "System"
+    },
+    "items": {
+      "overview": "Overview",
+      "availableTests": "Available Tests",
+      "hiringOverview": "Hiring Overview",
+      "studio": "Studio",
+      "allTemplates": "All Templates",
+      "sessionHistory": "Session History",
+      "psychometrics": "Psychometrics",
+      "psychDashboard": "Dashboard",
+      "itemStatistics": "Item Statistics",
+      "flaggedItems": "Flagged Items"
+    }
   },
   "auth": {
     "signIn": "Sign In",
@@ -3494,7 +3513,40 @@
         "competencyProgress": "Competency Progress",
         "assessmentHistory": "Assessment History",
         "createdAssessments": "Created Assessments",
-        "recentActivity": "Recent Activity"
+        "recentActivity": "Recent Activity",
+        "competencyPassport": "Competency Passport"
+      },
+      "passport": {
+        "empty": "No Passport Available",
+        "emptyDesc": "{name} hasn't completed any assessments yet. The competency passport will be generated after completing assessments.",
+        "thisUser": "This user",
+        "competenciesAssessed": "competencies assessed",
+        "bigFiveProfile": "Big Five Profile",
+        "topCompetencies": "Top Competencies",
+        "top": "Top",
+        "noBigFive": "No personality profile data available",
+        "noCompetencies": "No competency data available",
+        "valid": "Valid",
+        "expired": "Expired",
+        "expiringSoon": "Expires in {days} days"
+      },
+      "assessments": {
+        "empty": "No Assessments",
+        "emptyDesc": "{name} hasn't completed any tests yet.",
+        "thisUser": "This user",
+        "template": "Template",
+        "goal": "Goal",
+        "score": "Score",
+        "status": "Status",
+        "duration": "Duration",
+        "completedAt": "Completed",
+        "pending": "Pending",
+        "passed": "Passed",
+        "failed": "Failed",
+        "questions": "questions",
+        "view": "View",
+        "viewDetails": "View Details",
+        "page": "Page {current} of {total}"
       },
       "empty": {
         "noAssessments": "No Assessments Yet",
@@ -3504,11 +3556,24 @@
         "noProgress": "No Progress Data",
         "noProgressDesc": "Competency assessments and progress tracking will be displayed here once the user completes assessments.",
         "comingSoon": "Coming Soon",
-        "comingSoonDesc": "Assessment management and history tracking is currently in development. Check back soon for updates!"
+        "comingSoonDesc": "Assessment management and history tracking is currently in development. Check back soon for updates!",
+        "noCreatedAssessments": "No Created Assessments",
+        "noCreatedAssessmentsDesc": "Assessments created by this user will appear here."
       },
       "activity": {
         "accountCreated": "Account Created",
+        "lastSignIn": "Signed In",
+        "testStarted": "Started",
+        "testCompleted": "Completed",
+        "testPassed": "Passed",
+        "testFailed": "Failed",
+        "testAbandoned": "Abandoned",
+        "testTimedOut": "Timed Out",
+        "noActivity": "No activity recorded yet",
         "moreDetailedLogging": "More detailed activity logging coming soon"
+      },
+      "time": {
+        "never": "Never"
       },
       "actions": {
         "editProfile": "Edit Profile",
@@ -3653,6 +3718,102 @@
       "yearsAgo": "{count} years ago",
       "never": "Never",
       "justNow": "Just now"
+    }
+  },
+  "activity": {
+    "title": "Activity",
+    "recentActivity": "Recent Activity",
+    "templateActivity": "Template Activity",
+    "completed": "Completed",
+    "abandoned": "Abandoned",
+    "timedOut": "Timed Out",
+    "passed": "Passed",
+    "failed": "Failed",
+    "retry": "Retry",
+    "noActivity": "No activity yet",
+    "noActivityDescription": "Test completions will appear here",
+    "viewAll": "View All",
+    "stats": {
+      "totalSessions": "Total Sessions",
+      "completedSessions": "Completed",
+      "abandonedSessions": "Abandoned",
+      "timedOutSessions": "Timed Out",
+      "completionRate": "Completion Rate",
+      "completionRateDescription": "Percentage of started tests that were completed",
+      "passRate": "Pass Rate",
+      "passRateDescription": "Percentage of completed tests that passed",
+      "averageScore": "Average Score",
+      "averageTime": "Average Time",
+      "lastActivity": "Last Activity",
+      "detailsTitle": "Activity Statistics",
+      "detailsDescription": "Detailed breakdown of test activity for this template",
+      "tapForDetails": "Tap for details"
+    },
+    "filters": {
+      "status": "Status",
+      "allStatuses": "All Statuses",
+      "allResults": "All Results",
+      "passed": "Passed",
+      "failed": "Failed",
+      "dateRange": "Date Range",
+      "allTime": "All Time",
+      "last7Days": "Last 7 Days",
+      "last30Days": "Last 30 Days",
+      "last90Days": "Last 90 Days",
+      "from": "From",
+      "to": "To",
+      "apply": "Apply Filters",
+      "clear": "Clear",
+      "reset": "Reset"
+    },
+    "table": {
+      "title": "Activity Log",
+      "user": "User",
+      "status": "Status",
+      "score": "Score",
+      "result": "Result",
+      "timeSpent": "Time Spent",
+      "date": "Date",
+      "noResults": "No matching activities found",
+      "loading": "Loading activities..."
+    },
+    "empty": {
+      "title": "No activity yet",
+      "description": "Activity will appear here once candidates start taking tests"
+    },
+    "pagination": {
+      "of": "of",
+      "previous": "Previous",
+      "next": "Next"
+    },
+    "errors": {
+      "loadFailed": "Failed to load activity"
+    },
+    "time": {
+      "justNow": "just now",
+      "minutesAgo": "{count}m ago",
+      "hoursAgo": "{count}h ago",
+      "daysAgo": "{count}d ago",
+      "seconds": "{count} seconds",
+      "minutes": "{count} minutes",
+      "hours": "{count} hours"
+    }
+  },
+  "lens": {
+    "mode": "Mode",
+    "currentView": "Current view: {name}",
+    "view": "{name} View",
+    "user": {
+      "name": "Personal",
+      "description": "Your profile and settings"
+    },
+    "editor": {
+      "name": "Content",
+      "description": "Manage competencies and content"
+    },
+    "admin": {
+      "name": "Admin",
+      "description": "Full system management"
     }
   }
 }

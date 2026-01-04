@@ -140,7 +140,6 @@ const MORE_MENU_SECTIONS: MoreMenuSection[] = [
         icon: Network,
         labelKey: 'skillMapper',
         descriptionKey: 'skillLinks',
-        badge: 'New',
       },
     ],
   },

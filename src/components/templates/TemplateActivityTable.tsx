@@ -1,0 +1,265 @@
+'use client';
+
+import { useState, useEffect, useCallback } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
+import { cn } from '@/lib/utils';
+import { useTranslations } from 'next-intl';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { Loader2, Users, RefreshCw } from 'lucide-react';
+import { activityApi } from '@/services/api';
+import {
+  ActivityTable,
+  ActivityCardList,
+  ActivityPagination,
+  ActivityFilterPills,
+  useActivityFilters,
+  getDateRangeBounds,
+} from './activity';
+import type { ActivityPage, ActivityFilterParams } from '@/types/activity';
+import { createLogger } from '@/lib/logger';
+
+const log = createLogger('TemplateActivityTable');
+
+export interface TemplateActivityTableProps {
+  templateId: string;
+  className?: string;
+}
+
+/**
+ * TemplateActivityTable - Paginated activity table/list for a template.
+ *
+ * Features:
+ * - Mobile-first design with QuickFilterPills
+ * - Desktop: Table view with Select dropdowns
+ * - Mobile: Card list view with horizontal scroll filters
+ * - URL-synced filters (status, passed, dateRange)
+ * - Pagination with sticky mobile support
+ */
+export function TemplateActivityTable({
+  templateId,
+  className,
+}: TemplateActivityTableProps) {
+  const t = useTranslations('activity');
+  const tTable = useTranslations('activity.table');
+  const isMobile = useIsMobile();
+
+  // Filter state from URL
+  const {
+    filters,
+    setStatus,
+    setPassed,
+    setDateRange,
+    setPage,
+    hasActiveFilters,
+    resetFilters,
+  } = useActivityFilters();
+
+  // Data state
+  const [data, setData] = useState<ActivityPage | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const pageSize = 10;
+
+  // Fetch data based on filters
+  const fetchData = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const params: ActivityFilterParams = {
+        page: filters.page,
+        size: pageSize,
+      };
+
+      // Apply status filter
+      if (filters.status !== 'all') {
+        params.status = filters.status;
+      }
+
+      // Apply passed filter
+      if (filters.passed !== 'all') {
+        params.passed = filters.passed === 'true';
+      }
+
+      // Apply date range filter
+      const { from, to } = getDateRangeBounds(filters.dateRange);
+      if (from) params.from = from;
+      if (to) params.to = to;
+
+      const result = await activityApi.getTemplateActivity(templateId, params);
+      setData(result);
+    } catch (err) {
+      log.error('Failed to fetch template activity', { templateId, error: err });
+      setError(t('errors.loadFailed'));
+    } finally {
+      setLoading(false);
+    }
+  }, [templateId, filters, t]);
+
+  // Fetch on mount and filter changes
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  return (
+    <Card className={className}>
+      <CardHeader className="pb-3 md:pb-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="w-9 h-9 rounded-lg bg-muted flex items-center justify-center">
+              <Users className="w-4 h-4 text-muted-foreground" />
+            </div>
+            <CardTitle className="text-base">{tTable('title')}</CardTitle>
+          </div>
+
+          {/* Reset filters button */}
+          {hasActiveFilters && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={resetFilters}
+              className="text-xs h-8"
+            >
+              <RefreshCw className="w-3 h-3 mr-1" />
+              {t('filters.reset')}
+            </Button>
+          )}
+        </div>
+
+        {/* Filters */}
+        <ActivityFilterPills
+          statusValue={filters.status}
+          onStatusChange={setStatus}
+          passedValue={filters.passed}
+          onPassedChange={setPassed}
+          dateRangeValue={filters.dateRange}
+          onDateRangeChange={setDateRange}
+          className="mt-3"
+        />
+      </CardHeader>
+
+      <CardContent className="pt-0">
+        {loading ? (
+          <ActivityTableSkeleton isMobile={isMobile} />
+        ) : error ? (
+          <ErrorState message={error} onRetry={fetchData} t={t} />
+        ) : !data || data.content.length === 0 ? (
+          <EmptyState t={tTable} />
+        ) : (
+          <>
+            {/* Desktop: Table View */}
+            <div className="hidden md:block">
+              <ActivityTable data={data.content} />
+            </div>
+
+            {/* Mobile: Card List View */}
+            <div className="md:hidden">
+              <ActivityCardList data={data.content} />
+            </div>
+
+            {/* Pagination */}
+            <ActivityPagination
+              page={filters.page}
+              totalPages={data.totalPages}
+              totalElements={data.totalElements}
+              pageSize={pageSize}
+              onPageChange={setPage}
+              isFirst={data.first}
+              isLast={data.last}
+            />
+          </>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+/**
+ * Loading skeleton
+ */
+function ActivityTableSkeleton({ isMobile }: { isMobile: boolean }) {
+  if (isMobile) {
+    return (
+      <div className="space-y-2">
+        {[1, 2, 3, 4, 5].map((i) => (
+          <div key={i} className="p-3 border rounded-lg">
+            <div className="flex items-center gap-2">
+              <Skeleton className="w-8 h-8 rounded-full" />
+              <div className="flex-1 space-y-1.5">
+                <Skeleton className="h-4 w-32" />
+                <Skeleton className="h-3 w-20" />
+              </div>
+              <Skeleton className="h-5 w-14" />
+            </div>
+            <div className="flex gap-3 mt-2">
+              <Skeleton className="h-3 w-10" />
+              <Skeleton className="h-3 w-12" />
+              <Skeleton className="h-3 w-16 ml-auto" />
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-3">
+      {[1, 2, 3, 4, 5].map((i) => (
+        <div key={i} className="flex items-center gap-3 p-2">
+          <Skeleton className="w-7 h-7 rounded-full" />
+          <div className="flex-1 space-y-1.5">
+            <Skeleton className="h-4 w-32" />
+          </div>
+          <Skeleton className="h-4 w-16" />
+          <Skeleton className="h-4 w-12" />
+          <Skeleton className="h-5 w-14" />
+          <Skeleton className="h-4 w-12" />
+          <Skeleton className="h-4 w-16" />
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/**
+ * Error state
+ */
+function ErrorState({
+  message,
+  onRetry,
+  t,
+}: {
+  message: string;
+  onRetry: () => void;
+  t: ReturnType<typeof useTranslations<'activity'>>;
+}) {
+  return (
+    <div className="text-center py-8">
+      <p className="text-sm text-destructive/80 mb-2">{message}</p>
+      <Button variant="ghost" size="sm" onClick={onRetry}>
+        <RefreshCw className="w-3 h-3 mr-1" />
+        {t('retry')}
+      </Button>
+    </div>
+  );
+}
+
+/**
+ * Empty state
+ */
+function EmptyState({
+  t,
+}: {
+  t: ReturnType<typeof useTranslations<'activity.table'>>;
+}) {
+  return (
+    <div className="text-center py-8 text-muted-foreground">
+      <p className="text-sm">{t('noResults')}</p>
+    </div>
+  );
+}
+
+export default TemplateActivityTable;

@@ -27,16 +27,16 @@ interface TestResultViewProps {
 export default function TestResultView({ result }: TestResultViewProps) {
   const t = useTranslations('results');
   // Transform competency scores to Big Five profile using O*NET mapping
-  const bigFiveProfile = useBigFiveProjection(result.competencyScores);
+  const bigFiveProfile = useBigFiveProjection(result.competencyScores ?? undefined);
 
   // Sort competencies by percentage (descending)
-  const sortedCompetencies = [...result.competencyScores].sort(
+  const sortedCompetencies = [...(result.competencyScores ?? [])].sort(
     (a, b) => b.percentage - a.percentage
   );
 
   const timeInMinutes = Math.floor(result.totalTimeSeconds / 60);
   const timeInSeconds = result.totalTimeSeconds % 60;
-  const percentScore = Math.round(result.overallPercentage);
+  const percentScore = Math.round(result.overallPercentage ?? 0);
   const isPassed = result.passed;
 
   return (
@@ -164,8 +164,8 @@ export default function TestResultView({ result }: TestResultViewProps) {
         <EnhancedStatCard
           icon={<Target className="h-5 w-5" />}
           label={t('score')}
-          value={`${result.overallScore.toFixed(1)}`}
-          subtitle={`of ${result.competencyScores.reduce((sum, c) => sum + c.maxScore, 0).toFixed(1)}`}
+          value={`${(result.overallScore ?? 0).toFixed(1)}`}
+          subtitle={`of ${(result.competencyScores ?? []).reduce((sum, c) => sum + c.maxScore, 0).toFixed(1)}`}
           color="success"
         />
         <EnhancedStatCard
@@ -185,7 +185,7 @@ export default function TestResultView({ result }: TestResultViewProps) {
         <EnhancedStatCard
           icon={<TrendingUp className="h-5 w-5" />}
           label={t('competencies')}
-          value={`${result.competencyScores.length}`}
+          value={`${(result.competencyScores ?? []).length}`}
           subtitle={t('assessed')}
           color="primary"
         />

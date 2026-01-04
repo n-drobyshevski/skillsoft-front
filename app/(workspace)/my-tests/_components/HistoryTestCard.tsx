@@ -119,7 +119,7 @@ export function HistoryTestCard({ session }: HistoryTestCardProps) {
           ) : (
             <Target className="size-3" />
           )}
-          {Math.round(session.result.overallPercentage)}%
+          {Math.round(session.result.overallPercentage ?? 0)}%
         </Badge>
       )}
 

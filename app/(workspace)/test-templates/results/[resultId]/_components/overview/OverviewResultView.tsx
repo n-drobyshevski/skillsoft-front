@@ -66,9 +66,10 @@ function getTraitDescription(trait: string, score: number): string {
  */
 export function OverviewResultView({ result, template }: BaseResultViewProps) {
   const t = useTranslations('template.resultsView.overview');
+  const competencyScores = result.competencyScores ?? [];
 
   // Project competencies to Big Five personality profile with detailed contributions
-  const { profile: bigFiveProfile, contributions, metadata } = useBigFiveProjectionDetailed(result.competencyScores);
+  const { profile: bigFiveProfile, contributions, metadata } = useBigFiveProjectionDetailed(competencyScores);
   const bigFiveLabels = getBigFiveLabels();
 
   // Get top 2 traits for insights
@@ -96,12 +97,12 @@ export function OverviewResultView({ result, template }: BaseResultViewProps) {
 
   // Transform competency scores to radar chart format
   const competencyRadarData: CompetencyRadarDataPoint[] = useMemo(() => {
-    return result.competencyScores.map(score => ({
+    return competencyScores.map(score => ({
       subject: score.competencyName,
       A: Math.round(score.percentage),
       fullMark: 100
     }));
-  }, [result.competencyScores]);
+  }, [competencyScores]);
 
   // Check if we have competency data for the radar
   const hasCompetencyData = competencyRadarData.length >= 3;
@@ -116,7 +117,7 @@ export function OverviewResultView({ result, template }: BaseResultViewProps) {
           questionsAnswered={result.questionsAnswered}
           totalQuestions={result.totalQuestions}
           timeSpent={result.totalTimeSeconds}
-          competencyCount={result.competencyScores.length}
+          competencyCount={competencyScores.length}
         />
 
         {/* Main content grid */}
@@ -264,7 +265,7 @@ export function OverviewResultView({ result, template }: BaseResultViewProps) {
                       {t('profileSummary')}
                     </h4>
                     <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-                      {t('competenciesAssessed', { count: result.competencyScores.length })}
+                      {t('competenciesAssessed', { count: competencyScores.length })}
                     </p>
                   </div>
                 </div>
@@ -301,14 +302,14 @@ export function OverviewResultView({ result, template }: BaseResultViewProps) {
               )}
 
               {/* Strengths - Tertiary importance */}
-              {result.competencyScores.length > 0 && (
+              {competencyScores.length > 0 && (
                 <div className="space-y-3">
                   <h5 className="text-xs sm:text-sm font-semibold text-foreground uppercase tracking-wider flex items-center gap-2">
                     <span className="w-1 h-4 bg-emerald-500/60 rounded-full" />
                     {t('strengths')}
                   </h5>
                   <div className="flex flex-wrap gap-1.5 sm:gap-2">
-                    {result.competencyScores
+                    {competencyScores
                       .filter(c => c.percentage >= 70)
                       .slice(0, 3)
                       .map(c => (
@@ -319,7 +320,7 @@ export function OverviewResultView({ result, template }: BaseResultViewProps) {
                           {c.competencyName}
                         </span>
                       ))}
-                    {result.competencyScores.filter(c => c.percentage >= 70).length === 0 && (
+                    {competencyScores.filter(c => c.percentage >= 70).length === 0 && (
                       <p className="text-xs sm:text-sm text-muted-foreground italic">
                         {t('keepDevelopingSkills')}
                       </p>
@@ -359,7 +360,7 @@ export function OverviewResultView({ result, template }: BaseResultViewProps) {
 
         {/* Competency Profile - Mobile-First Unified Component */}
         <CompetencyProfile
-          competencies={result.competencyScores}
+          competencies={competencyScores}
           showPassFail={false}
         />
 

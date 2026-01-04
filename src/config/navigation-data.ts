@@ -17,8 +17,7 @@ export const NAVIGATION_CONFIG: NavigationConfig = {
     // ============================================
     {
       id: "personal",
-      label: "Мой кабинет",
-      labelEn: "My Workspace",
+      labelKey: "groups.personal",
       icon: "User",
       lenses: ["user"],
       collapsible: false,
@@ -26,15 +25,13 @@ export const NAVIGATION_CONFIG: NavigationConfig = {
         {
           id: "my-hub",
           path: "/dashboard",
-          label: "Обзор",
-          labelEn: "Overview",
+          labelKey: "items.overview",
           icon: "LayoutDashboard",
         },
         {
           id: "my-tests",
           path: "/my-tests",
-          label: "Мои тесты",
-          labelEn: "My Tests",
+          labelKey: "myTests",
           icon: "ClipboardCheck",
           badge: {
             content: { type: "count", key: "inProgressTests" },
@@ -45,8 +42,7 @@ export const NAVIGATION_CONFIG: NavigationConfig = {
         {
           id: "available-tests",
           path: "/test-templates",
-          label: "Доступные тесты",
-          labelEn: "Available Tests",
+          labelKey: "items.availableTests",
           icon: "FileStack",
         },
       ],
@@ -58,8 +54,7 @@ export const NAVIGATION_CONFIG: NavigationConfig = {
     // ============================================
     {
       id: "testing",
-      label: "Тестирование",
-      labelEn: "Testing",
+      labelKey: "groups.testing",
       icon: "ClipboardList",
       lenses: ["editor", "admin"],
       collapsible: false,
@@ -67,36 +62,14 @@ export const NAVIGATION_CONFIG: NavigationConfig = {
         {
           id: "overview",
           path: "/dashboard",
-          label: "Обзор найма",
-          labelEn: "Hiring Overview",
+          labelKey: "items.hiringOverview",
           icon: "BarChart3",
         },
         {
           id: "studio",
           path: "/test-templates",
-          label: "Студия",
-          labelEn: "Studio",
+          labelKey: "items.studio",
           icon: "Layers",
-          children: [
-            {
-              id: "all-templates",
-              path: "/test-templates",
-              label: "Все шаблоны",
-              labelEn: "All Templates",
-            },
-            {
-              id: "new-template",
-              path: "/test-templates/new",
-              label: "Создать тест",
-              labelEn: "Create Test",
-            },
-            {
-              id: "test-history",
-              path: "/test-templates/history",
-              label: "История сессий",
-              labelEn: "Session History",
-            },
-          ],
         },
       ],
       hasSeparator: true,
@@ -107,8 +80,7 @@ export const NAVIGATION_CONFIG: NavigationConfig = {
     // ============================================
     {
       id: "library",
-      label: "Библиотека",
-      labelEn: "Library",
+      labelKey: "groups.library",
       icon: "Library",
       lenses: ["editor", "admin"],
       collapsible: true,
@@ -117,8 +89,7 @@ export const NAVIGATION_CONFIG: NavigationConfig = {
         {
           id: "competencies",
           path: "/hr/competencies",
-          label: "Компетенции",
-          labelEn: "Competencies",
+          labelKey: "competencies",
           icon: "Target",
           badge: {
             content: { type: "count", key: "pendingCompetencies" },
@@ -129,24 +100,20 @@ export const NAVIGATION_CONFIG: NavigationConfig = {
         {
           id: "indicators",
           path: "/hr/behavioral-indicators",
-          label: "Индикаторы",
-          labelEn: "Indicators",
+          labelKey: "indicators",
           icon: "Lightbulb",
         },
         {
           id: "questions",
           path: "/hr/assessment-questions",
-          label: "Вопросы",
-          labelEn: "Questions",
+          labelKey: "questions",
           icon: "FileQuestion",
         },
         {
           id: "skill-mapper",
           path: "/skill-mapper",
-          label: "Skill Mapper",
-          labelEn: "Skill Mapper",
+          labelKey: "skillMapper",
           icon: "Network",
-          isNew: true,
         },
       ],
       hasSeparator: true,
@@ -157,8 +124,7 @@ export const NAVIGATION_CONFIG: NavigationConfig = {
     // ============================================
     {
       id: "analytics",
-      label: "Аналитика",
-      labelEn: "Analytics",
+      labelKey: "groups.analytics",
       icon: "LineChart",
       lenses: ["admin"],
       collapsible: true,
@@ -167,34 +133,13 @@ export const NAVIGATION_CONFIG: NavigationConfig = {
         {
           id: "psychometrics",
           path: "/psychometrics",
-          label: "Психометрика",
-          labelEn: "Psychometrics",
+          labelKey: "items.psychometrics",
           icon: "Activity",
           badge: {
             content: { type: "count", key: "flaggedItems" },
             variant: "destructive",
             hideWhenZero: true,
           },
-          children: [
-            {
-              id: "psych-dashboard",
-              path: "/psychometrics",
-              label: "Дашборд",
-              labelEn: "Dashboard",
-            },
-            {
-              id: "psych-items",
-              path: "/psychometrics/items",
-              label: "Статистика вопросов",
-              labelEn: "Item Statistics",
-            },
-            {
-              id: "psych-flagged",
-              path: "/psychometrics/flagged",
-              label: "Отмеченные",
-              labelEn: "Flagged Items",
-            },
-          ],
         },
       ],
       hasSeparator: true,
@@ -205,8 +150,7 @@ export const NAVIGATION_CONFIG: NavigationConfig = {
     // ============================================
     {
       id: "system",
-      label: "Система",
-      labelEn: "System",
+      labelKey: "groups.system",
       icon: "Shield",
       lenses: ["admin"],
       collapsible: true,
@@ -215,8 +159,7 @@ export const NAVIGATION_CONFIG: NavigationConfig = {
         {
           id: "users",
           path: "/admin/users",
-          label: "Пользователи",
-          labelEn: "Users",
+          labelKey: "users",
           icon: "UsersRound",
           badge: {
             content: { type: "count", key: "newUsers" },
@@ -227,8 +170,7 @@ export const NAVIGATION_CONFIG: NavigationConfig = {
         {
           id: "settings",
           path: "/settings",
-          label: "Настройки",
-          labelEn: "Settings",
+          labelKey: "settings",
           icon: "Settings",
         },
       ],
@@ -240,17 +182,9 @@ export const NAVIGATION_CONFIG: NavigationConfig = {
     {
       id: "docs",
       path: "https://skillsoft.app/docs",
-      label: "Документация",
-      labelEn: "Documentation",
+      labelKey: "documentation",
       icon: "BookOpen",
       isExternal: true,
-    },
-    {
-      id: "help",
-      path: "/help",
-      label: "Помощь",
-      labelEn: "Help",
-      icon: "HelpCircle",
     },
   ],
 };

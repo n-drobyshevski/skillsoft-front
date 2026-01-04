@@ -49,7 +49,7 @@ export async function generateMetadata({ params }: TestResultPageProps): Promise
     };
   }
 
-  const score = result.overallPercentage.toFixed(0);
+  const score = (result.overallPercentage ?? 0).toFixed(0);
   const description = result.passed
     ? t("passedDescription", { score })
     : t("failedDescription", { score });

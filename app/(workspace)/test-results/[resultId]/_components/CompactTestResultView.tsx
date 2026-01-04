@@ -42,16 +42,16 @@ export default function CompactTestResultView({ result }: CompactTestResultViewP
   const [chartsExpanded, setChartsExpanded] = useState(false);
 
   // Transform competency scores to Big Five profile
-  const bigFiveProfile = useBigFiveProjection(result.competencyScores);
+  const bigFiveProfile = useBigFiveProjection(result.competencyScores ?? undefined);
 
   // Sort competencies by percentage (descending)
-  const sortedCompetencies = [...result.competencyScores].sort(
+  const sortedCompetencies = [...(result.competencyScores ?? [])].sort(
     (a, b) => b.percentage - a.percentage
   );
 
   const timeInMinutes = Math.floor(result.totalTimeSeconds / 60);
   const timeInSeconds = result.totalTimeSeconds % 60;
-  const percentScore = Math.round(result.overallPercentage);
+  const percentScore = Math.round(result.overallPercentage ?? 0);
   const isPassed = result.passed;
 
   return (
@@ -121,7 +121,7 @@ export default function CompactTestResultView({ result }: CompactTestResultViewP
                 </Badge>
               </div>
               <p className="text-xs text-muted-foreground mt-0.5">
-                {result.overallScore.toFixed(1)} / {result.competencyScores.reduce((sum, c) => sum + c.maxScore, 0).toFixed(1)} {t('points')}
+                {(result.overallScore ?? 0).toFixed(1)} / {(result.competencyScores ?? []).reduce((sum, c) => sum + c.maxScore, 0).toFixed(1)} {t('points')}
               </p>
             </div>
           </div>
@@ -160,7 +160,7 @@ export default function CompactTestResultView({ result }: CompactTestResultViewP
         <CompactStatBadge
           icon={<TrendingUp className="h-4 w-4" />}
           label={t('competencies')}
-          value={`${result.competencyScores.length}`}
+          value={`${(result.competencyScores ?? []).length}`}
           color="indigo"
         />
         <CompactStatBadge
@@ -178,7 +178,7 @@ export default function CompactTestResultView({ result }: CompactTestResultViewP
             <div>
               <CardTitle className="text-lg">{t('competencyBreakdown')}</CardTitle>
               <CardDescription className="text-xs">
-                {t('performanceAcross', { count: result.competencyScores.length })}
+                {t('performanceAcross', { count: (result.competencyScores ?? []).length })}
               </CardDescription>
             </div>
             <Badge variant="outline" className="text-xs">

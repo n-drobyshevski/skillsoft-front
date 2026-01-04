@@ -5,6 +5,11 @@
  * Each lens represents a role-based view that filters UI and features.
  *
  * Inspired by Wiz Lens - "Role-based views for every team"
+ *
+ * @note i18n: The `name` and `description` fields are fallback values.
+ * UI components should use `useTranslations('lens')` hook and access
+ * translations via `t('${lensId}.name')` and `t('${lensId}.description')`.
+ * See messages/en.json and messages/ru.json for translations.
  */
 
 import { LensType } from "@/store/lens-store";
