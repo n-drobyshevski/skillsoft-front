@@ -23,6 +23,21 @@ export interface UserEnumOption<T extends string = string> {
 type TranslationFn = ReturnType<typeof useTranslations>;
 
 /**
+ * Creates a helper function to check if a translation key exists.
+ * Used internally by translation hooks to safely check for optional keys.
+ */
+function createHasKeyChecker(t: TranslationFn): (key: string) => boolean {
+  return (key: string): boolean => {
+    try {
+      (t as unknown as (key: string) => string)(key);
+      return true;
+    } catch {
+      return false;
+    }
+  };
+}
+
+/**
  * Hook for translating UserRole enum values with i18n support.
  *
  * @returns Object with getLabel, getDescription, and getRoleOptions functions
@@ -55,15 +70,8 @@ export function useUserRoleTranslation() {
       }
     };
 
-    // Check if a key exists
-    const hasKey = (key: string): boolean => {
-      try {
-        (t as unknown as (key: string) => string)(key);
-        return true;
-      } catch {
-        return false;
-      }
-    };
+    // Check if a key exists using the shared helper
+    const hasKey = createHasKeyChecker(t);
 
     return {
       /**
@@ -151,15 +159,8 @@ export function useUserStatusTranslation() {
       }
     };
 
-    // Check if a key exists
-    const hasKey = (key: string): boolean => {
-      try {
-        (t as unknown as (key: string) => string)(key);
-        return true;
-      } catch {
-        return false;
-      }
-    };
+    // Check if a key exists using the shared helper
+    const hasKey = createHasKeyChecker(t);
 
     // All available statuses in display order
     const allStatuses: UserStatusKey[] = ['active', 'inactive', 'locked', 'banned'];

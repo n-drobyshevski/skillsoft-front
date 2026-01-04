@@ -80,8 +80,7 @@ export function useLanguageHydration() {
  * Returns the locale from the store or falls back to default.
  */
 export function useCurrentLocale(): Locale {
-  const locale = useLanguageStore((state) => state.locale);
-  return locale;
+  return useLanguageStore((state) => state.locale);
 }
 
 /**
@@ -89,6 +88,5 @@ export function useCurrentLocale(): Locale {
  * Returns a function that updates the locale and triggers a page refresh.
  */
 export function useChangeLanguage() {
-  const setLocale = useLanguageStore((state) => state.setLocale);
-  return setLocale;
+  return useLanguageStore((state) => state.setLocale);
 }

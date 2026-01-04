@@ -176,7 +176,7 @@ function mapONetCategory(elementId: string): string {
  */
 function processONetElement(
   element: ONetElementAggregated,
-  category: 'ability' | 'work-style' | 'knowledge'
+  _category: 'ability' | 'work-style' | 'knowledge'
 ): UnifiedSkill {
   // Get top occupations by importance
   const topOccupations = Array.from(element.occupations.values())

@@ -23,11 +23,10 @@ export function DocsNavServer() {
       {/* Navigation Sections */}
       <ScrollArea className="flex-1 py-4">
         <nav className="px-3 space-y-6">
-          {docsNavigation.map((section, sectionIndex) => (
+          {docsNavigation.map((section) => (
             <DocsNavSection
               key={section.title}
               section={section}
-              sectionIndex={sectionIndex}
             />
           ))}
         </nav>
@@ -42,10 +41,8 @@ export function DocsNavServer() {
  */
 function DocsNavSection({
   section,
-  sectionIndex,
 }: {
   section: (typeof docsNavigation)[number];
-  sectionIndex: number;
 }) {
   return (
     <div className="space-y-1">

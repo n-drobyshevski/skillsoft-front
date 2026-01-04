@@ -529,7 +529,8 @@ export function formatAnswerDisplay(
         );
         if (optionIndex !== undefined && optionIndex >= 0) {
           const letter = String.fromCharCode(65 + optionIndex); // A, B, C, D
-          const option = question.answerOptions?.[optionIndex];
+          // Safe array access using .at() method
+          const option = question.answerOptions?.at(optionIndex);
           const text = option?.text || option?.label || '';
           return `${letter}${text ? `: ${text.substring(0, 50)}${text.length > 50 ? '...' : ''}` : ''}`;
         }

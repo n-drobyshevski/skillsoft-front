@@ -65,17 +65,19 @@ export function ResponsiveTable({
     new Set()
   );
 
-  const breakpointClass = {
+  const breakpointClassMap = {
     sm: "sm:hidden",
     md: "md:hidden",
     lg: "lg:hidden",
-  }[breakpoint];
+  } as const;
+  const breakpointClass = breakpointClassMap[breakpoint as keyof typeof breakpointClassMap];
 
-  const tableBreakpointClass = {
+  const tableBreakpointClassMap = {
     sm: "hidden sm:block",
     md: "hidden md:block",
     lg: "hidden lg:block",
-  }[breakpoint];
+  } as const;
+  const tableBreakpointClass = tableBreakpointClassMap[breakpoint as keyof typeof tableBreakpointClassMap];
 
   const primaryColumn = columns.find((col) => col.isPrimary) || columns[0];
   const secondaryColumns = columns.filter((col) => col.key !== primaryColumn.key);
@@ -125,7 +127,7 @@ export function ResponsiveTable({
               key={rowIndex}
               className={cn(
                 "overflow-hidden transition-all duration-200",
-                cardVariantClasses[cardVariant]
+                cardVariantClasses[cardVariant as keyof typeof cardVariantClasses]
               )}
             >
               <CardContent className="p-0">

@@ -50,6 +50,8 @@ interface BlueprintWorkspaceContextValue {
 
   // Actions
   addCompetency: (competency: LibraryCompetency) => void;
+  /** Insert competency at specific index (used by drag-and-drop) */
+  insertCompetencyAtIndex: (competency: LibraryCompetency, index: number) => void;
   removeCompetency: (competencyId: string) => void;
   reorderCompetencies: (fromIndex: number, toIndex: number) => void;
   updateCompetency: (
@@ -165,7 +167,7 @@ export function BlueprintWorkspaceProvider({
     loadHealth();
   }, []);
 
-  // Add competency from library to canvas
+  // Add competency from library to canvas (appends to end)
   const addCompetency = useCallback(
     (competency: LibraryCompetency) => {
       // Check if already added
@@ -194,6 +196,44 @@ export function BlueprintWorkspaceProvider({
         ...prev,
         competencies: [...prev.competencies, blueprintCompetency],
       }));
+
+      toast.success(`Added ${competency.name}`);
+    },
+    [localState.competencies]
+  );
+
+  // Insert competency at specific index (used by drag-and-drop)
+  const insertCompetencyAtIndex = useCallback(
+    (competency: LibraryCompetency, index: number) => {
+      // Check if already added
+      if (localState.competencies.some((c) => c.id === competency.id)) {
+        toast.warning('Competency already added');
+        return;
+      }
+
+      // Check if critical health (no questions)
+      if (competency.health === 'CRITICAL') {
+        toast.error(`${competency.name} has no questions available`);
+        return;
+      }
+
+      const blueprintCompetency: BlueprintCompetency = {
+        id: competency.id,
+        name: competency.name,
+        category: competency.category,
+        questionCount: Math.min(competency.questionCount, 5),
+        weight: 1.0,
+        difficulty: 'INTERMEDIATE',
+      };
+
+      // Update local state with insertion at specific index
+      setLocalState((prev) => {
+        const newCompetencies = [...prev.competencies];
+        // Clamp index to valid range
+        const safeIndex = Math.max(0, Math.min(index, newCompetencies.length));
+        newCompetencies.splice(safeIndex, 0, blueprintCompetency);
+        return { ...prev, competencies: newCompetencies };
+      });
 
       toast.success(`Added ${competency.name}`);
     },
@@ -343,6 +383,7 @@ export function BlueprintWorkspaceProvider({
     isOffline,
     // Actions
     addCompetency,
+    insertCompetencyAtIndex,
     removeCompetency,
     reorderCompetencies,
     updateCompetency,

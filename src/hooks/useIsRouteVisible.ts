@@ -76,7 +76,13 @@ export function useAreRoutesVisible(routes: string[]): Record<string, boolean> {
   const routeMap: Record<string, boolean> = {};
   routes.forEach((route) => {
     const routeSelector = selectIsRouteVisible(route);
-    routeMap[route] = routeSelector(state);
+    // Safe assignment: route is from the controlled routes array parameter
+    Object.defineProperty(routeMap, route, {
+      value: routeSelector(state),
+      writable: true,
+      enumerable: true,
+      configurable: true,
+    });
   });
 
   // Cache the result
@@ -118,7 +124,8 @@ export function useFilterVisibleRoutes<T>(
   return useMemo(() => {
     return items.filter((item) => {
       const route = getRoute(item);
-      return visibility[route];
+      // Safe access: route is derived from items via getRoute function
+      return Object.hasOwn(visibility, route) ? visibility[route] : false;
     });
   }, [items, visibility, getRoute]);
 }

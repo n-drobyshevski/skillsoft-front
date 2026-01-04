@@ -2,18 +2,20 @@
 
 import { SignIn } from "@clerk/nextjs";
 import { LogIn } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
+
+// Simple subscription for client-side mount detection
+const emptySubscribe = () => () => {};
+const getSnapshot = () => true;
+const getServerSnapshot = () => false;
 
 /**
  * Client-side Sign In form wrapper
  * Isolates Clerk's dynamic data access to client-side rendering
  */
 export function SignInForm() {
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  // useSyncExternalStore is the recommended pattern for detecting client-side mount
+  const mounted = useSyncExternalStore(emptySubscribe, getSnapshot, getServerSnapshot);
 
   // Modern flat design appearance - clean, minimal, compact
   const appearance = {

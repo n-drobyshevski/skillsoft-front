@@ -80,7 +80,7 @@ export function Callout({
   children,
   className,
 }: CalloutProps) {
-  const config = calloutConfig[type];
+  const config = calloutConfig[type as keyof typeof calloutConfig];
   const Icon = config.icon;
 
   return (

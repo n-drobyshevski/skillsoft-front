@@ -44,7 +44,7 @@ export function GlossaryTermSkeleton({
           <div
             className={cn(
               "w-1 h-10 rounded-full shrink-0",
-              categorySkeletonColors[category]
+              categorySkeletonColors[category as keyof typeof categorySkeletonColors]
             )}
           />
 

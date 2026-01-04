@@ -99,8 +99,7 @@ export function getBreadcrumbs(
     { title: "Документация", href: "/docs" },
   ];
 
-  // Find the section and page
-  const section = getSectionByPath(path);
+  // Find the page (section lookup intentionally omitted, used only for context)
   const page = getPageByPath(path);
 
   // If we're on a nested page (authoring/*), add the parent

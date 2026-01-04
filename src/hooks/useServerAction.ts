@@ -100,7 +100,7 @@ export function useServerAction<TInput, TOutput>(
  * );
  * ```
  */
-export function useFormAction<TInput, TOutput>(
+export function useFormAction<TOutput>(
   action: (prevState: ActionState<TOutput>, formData: FormData) => Promise<ActionState<TOutput>>,
   initialState: ActionState<TOutput> = { status: 'idle' }
 ): [state: ActionState<TOutput>, formAction: (payload: FormData) => void, isPending: boolean] {

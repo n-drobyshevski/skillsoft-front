@@ -81,7 +81,7 @@ export default function QuestionsPage() {
 
           <div className="rounded-lg border p-4 bg-muted/30">
             <p className="text-sm text-foreground mb-3 italic">
-              "Я легко нахожу общий язык с новыми коллегами"
+              &quot;Я легко нахожу общий язык с новыми коллегами&quot;
             </p>
             <div className="flex flex-wrap gap-2 text-xs">
               <span className="rounded bg-background px-2 py-1 border">
@@ -120,8 +120,8 @@ export default function QuestionsPage() {
 
           <div className="rounded-lg border p-4 bg-muted/30">
             <p className="text-sm text-foreground mb-3 italic">
-              "Коллега просит помочь с задачей, но у вас есть срочный дедлайн.
-              Что вы сделаете?"
+              &quot;Коллега просит помочь с задачей, но у вас есть срочный дедлайн.
+              Что вы сделаете?&quot;
             </p>
             <div className="space-y-2 text-sm">
               <div className="flex items-start gap-2">
@@ -168,7 +168,7 @@ export default function QuestionsPage() {
 
           <div className="rounded-lg border p-4 bg-muted/30">
             <p className="text-sm text-foreground mb-3 italic">
-              "Какие из следующих действий демонстрируют активное слушание?"
+              &quot;Какие из следующих действий демонстрируют активное слушание?&quot;
             </p>
             <div className="space-y-2 text-sm text-muted-foreground">
               <div className="flex items-center gap-2">

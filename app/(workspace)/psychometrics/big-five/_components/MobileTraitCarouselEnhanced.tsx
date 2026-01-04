@@ -31,7 +31,7 @@ export function MobileTraitCarouselEnhanced({
   reliabilityData,
   className
 }: MobileTraitCarouselEnhancedProps) {
-  const t = useTranslations('psychometrics.bigFive');
+  const t = useTranslations('psychometrics.bigFivePage');
   const scrollRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);

@@ -1,19 +1,8 @@
 "use client";
 
-import React, { useEffect, useRef, useState, useCallback, useMemo } from "react";
-import {
-  DndContext,
-  closestCenter,
-  DragEndEvent,
-  DragStartEvent,
-  DragOverlay,
-  KeyboardSensor,
-  PointerSensor,
-  TouchSensor,
-  useSensor,
-  useSensors,
-} from "@dnd-kit/core";
-import { SortableContext, sortableKeyboardCoordinates } from "@dnd-kit/sortable";
+import React, { useEffect, useRef, useState, useCallback } from "react";
+import { SortableContext } from "@dnd-kit/sortable";
+import { useDroppable } from "@dnd-kit/core";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -21,9 +10,10 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { Info, Loader2, Play, Redo2, Save, Sparkles, Undo2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useBlueprintWorkspace } from "./BlueprintWorkspaceProvider";
+import { useBuilderDnd } from "./BuilderDndProvider";
 import { CompetencySmartCard } from "./CompetencySmartCard";
 import { SaveStatusIndicator } from "./SaveStatusIndicator";
-import { BlueprintCompetency } from "../actions";
+import { InsertionIndicator } from "./InsertionIndicator";
 import { useBlueprintHistory, type HistoryActionType } from "@/hooks/useBlueprintHistory";
 
 export function WeightedCanvas() {
@@ -33,7 +23,6 @@ export function WeightedCanvas() {
     isSaving,
     saveBlueprint,
     setCompetencies,
-    addCompetency,
     templateId,
     // Auto-save state
     saveStatus,
@@ -41,6 +30,9 @@ export function WeightedCanvas() {
     hasUnsavedChanges,
     retryAttempt,
   } = useBlueprintWorkspace();
+
+  // Get drag state from shared DnD context
+  const { insertionTarget, isDragging, activeDragData } = useBuilderDnd();
 
   // Zustand-based history with SessionStorage persistence
   const {
@@ -55,11 +47,8 @@ export function WeightedCanvas() {
   const isRestoringRef = useRef(false);
   const lastTrackedRef = useRef<string>("");
 
-  const [isDragOver, setIsDragOver] = useState(false);
   // ARIA live region for accessibility announcements
   const [ariaAnnouncement, setAriaAnnouncement] = useState("");
-  const [draggedItemName, setDraggedItemName] = useState<string | null>(null);
-  const [activeId, setActiveId] = useState<string | null>(null);
 
   // DnD-Kit hydration fix: defer rendering until client-side to avoid ID mismatch
   // DnD-Kit uses incrementing IDs that differ between SSR and client
@@ -67,6 +56,14 @@ export function WeightedCanvas() {
   useEffect(() => {
     setIsDndReady(true);
   }, []);
+
+  // Use droppable for the canvas container to enable external drops
+  const { setNodeRef: setDroppableRef, isOver: isCanvasOver } = useDroppable({
+    id: 'canvas-droppable',
+  });
+
+  // Determine if we should show the drag-over state for empty canvas
+  const showEmptyDropState = isDragging && activeDragData?.type === 'library-item' && state.competencies.length === 0;
 
   // Track competency changes in history store
   useEffect(() => {
@@ -91,23 +88,6 @@ export function WeightedCanvas() {
     trackChange(state.competencies, actionType);
     lastTrackedRef.current = snapshot;
   }, [state.competencies, trackChange]);
-
-  // Mobile-optimized sensors with touch support
-  const sensors = useSensors(
-    useSensor(PointerSensor, {
-      activationConstraint: { distance: 8 }
-    }),
-    useSensor(TouchSensor, {
-      // Delay prevents accidental drags during scroll
-      activationConstraint: {
-        delay: 200,
-        tolerance: 8,
-      },
-    }),
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates
-    })
-  );
 
   const handleUndo = useCallback(() => {
     const previousState = historyUndo();
@@ -174,94 +154,6 @@ export function WeightedCanvas() {
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [handleUndo, handleRedo, handleSave]);
-
-  // Announce drag start for screen readers
-  const handleDragStart = (event: DragStartEvent) => {
-    const dragId = event.active.id as string;
-    const activeItem = state.competencies.find((c) => c.id === dragId);
-    if (activeItem) {
-      setActiveId(dragId);
-      setDraggedItemName(activeItem.name);
-      const position = state.competencies.findIndex((c) => c.id === dragId) + 1;
-      setAriaAnnouncement(
-        `Picked up ${activeItem.name}. Current position: ${position} of ${state.competencies.length}. Use arrow keys to move, Space or Enter to drop.`
-      );
-    }
-  };
-
-  const handleDragEnd = (event: DragEndEvent) => {
-    const { active, over } = event;
-    const prevDraggedName = draggedItemName;
-    setActiveId(null);
-    setDraggedItemName(null);
-
-    if (!over) {
-      setAriaAnnouncement(`Dropped ${prevDraggedName || 'item'}. Position unchanged.`);
-      return;
-    }
-
-    const dragActiveId = active.id as string;
-    const overId = over.id as string;
-    if (dragActiveId === overId) {
-      const activeItem = state.competencies.find((c) => c.id === dragActiveId);
-      setAriaAnnouncement(`Dropped ${activeItem?.name || 'item'}. Position unchanged.`);
-      return;
-    }
-
-    const items = state.competencies;
-    const oldIndex = items.findIndex((c) => c.id === dragActiveId);
-    const newIndex = items.findIndex((c) => c.id === overId);
-    if (oldIndex === -1 || newIndex === -1) return;
-
-    const activeItem = items[oldIndex];
-    const updated = [...items];
-    const [moved] = updated.splice(oldIndex, 1);
-    updated.splice(newIndex, 0, moved);
-    setCompetencies(updated);
-
-    // Announce the new position
-    setAriaAnnouncement(
-      `${activeItem.name} moved from position ${oldIndex + 1} to position ${newIndex + 1} of ${items.length}.`
-    );
-  };
-
-  // Get the currently dragged competency for the overlay
-  const activeCompetency = activeId ? state.competencies.find((c) => c.id === activeId) : null;
-
-  // Handle external drop from library panel
-  const handleExternalDrop = useCallback(
-    (e: React.DragEvent) => {
-      e.preventDefault();
-      setIsDragOver(false);
-
-      try {
-        const data = JSON.parse(e.dataTransfer.getData('application/json'));
-        if (data && data.id) {
-          addCompetency(data);
-        }
-      } catch (error) {
-        // Invalid drop data - ignore
-        console.warn('Invalid drag data', error);
-      }
-    },
-    [addCompetency]
-  );
-
-  const handleDragOver = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    e.dataTransfer.dropEffect = 'copy';
-    setIsDragOver(true);
-  }, []);
-
-  const handleDragLeave = useCallback((e: React.DragEvent) => {
-    // Only set drag over to false if leaving the container itself
-    const rect = e.currentTarget.getBoundingClientRect();
-    const x = e.clientX;
-    const y = e.clientY;
-    if (x < rect.left || x >= rect.right || y < rect.top || y >= rect.bottom) {
-      setIsDragOver(false);
-    }
-  }, []);
 
   return (
     <div className="flex flex-col h-full min-h-0 overflow-hidden">
@@ -363,10 +255,8 @@ export function WeightedCanvas() {
 
       <ScrollArea className="flex-1 min-h-0">
         <div
+          ref={setDroppableRef}
           className="p-2 sm:p-3 md:p-4 space-y-2 sm:space-y-3 md:space-y-4 min-h-full max-w-full overflow-hidden"
-          onDrop={handleExternalDrop}
-          onDragOver={handleDragOver}
-          onDragLeave={handleDragLeave}
         >
           {/* ARIA Live Region for screen reader announcements */}
           <div
@@ -380,35 +270,35 @@ export function WeightedCanvas() {
 
           {/* DnD-Kit hydration fix: render static list during SSR, DnD after hydration */}
           {isDndReady ? (
-            <DndContext
-              sensors={sensors}
-              collisionDetection={closestCenter}
-              onDragStart={handleDragStart}
-              onDragEnd={handleDragEnd}
-            >
-              <SortableContext items={state.competencies.map((c) => c.id)}>
-                <div className="space-y-2 sm:space-y-3 md:space-y-4">
-                  {state.competencies.length === 0 ? (
-                    <div
-                      className={cn(
-                        "flex flex-col items-center justify-center py-12 px-4 rounded-xl border-2 border-dashed transition-colors",
-                        isDragOver
-                          ? "border-primary bg-primary/5 text-primary"
-                          : "border-muted-foreground/20 text-muted-foreground"
-                      )}
-                    >
-                      <Sparkles className={cn("h-10 w-10 mb-3", isDragOver ? "text-primary" : "text-muted-foreground/40")} />
-                      <p className="text-sm font-medium">
-                        {isDragOver ? "Drop to add competency" : "Drag competencies here"}
-                      </p>
-                      <p className="text-xs mt-1 opacity-70">
-                        {isDragOver ? "" : "Or click + to add from library"}
-                      </p>
-                    </div>
-                  ) : (
-                    state.competencies.map((comp) => (
+            <SortableContext items={state.competencies.map((c) => c.id)}>
+              <div className="space-y-2 sm:space-y-3 md:space-y-4">
+                {state.competencies.length === 0 ? (
+                  <div
+                    className={cn(
+                      "flex flex-col items-center justify-center py-12 px-4 rounded-xl border-2 border-dashed transition-colors",
+                      showEmptyDropState
+                        ? "border-primary bg-primary/5 text-primary"
+                        : "border-muted-foreground/20 text-muted-foreground"
+                    )}
+                  >
+                    <Sparkles className={cn("h-10 w-10 mb-3", showEmptyDropState ? "text-primary" : "text-muted-foreground/40")} />
+                    <p className="text-sm font-medium">
+                      {showEmptyDropState ? "Drop to add competency" : "Drag competencies here"}
+                    </p>
+                    <p className="text-xs mt-1 opacity-70">
+                      {showEmptyDropState ? "" : "Or click + to add from library"}
+                    </p>
+                  </div>
+                ) : (
+                  state.competencies.map((comp, index) => (
+                    <React.Fragment key={comp.id}>
+                      {/* Insertion indicator BEFORE this card */}
+                      {insertionTarget?.index === index &&
+                        insertionTarget?.position === "before" && (
+                          <InsertionIndicator />
+                        )}
+
                       <CompetencySmartCard
-                        key={comp.id}
                         competency={comp}
                         laneId="DEFAULT"
                         isPending={isPending}
@@ -418,35 +308,17 @@ export function WeightedCanvas() {
                         }}
                         onWeightChange={(val) => setCompetencies(state.competencies.map((c) => c.id === comp.id ? { ...c, weight: val } : c))}
                       />
-                    ))
-                  )}
-                </div>
-              </SortableContext>
 
-              {/* Custom drag overlay with styled preview */}
-              <DragOverlay dropAnimation={null}>
-                {activeCompetency ? (
-                  <div className={cn(
-                    "rounded-xl border border-primary/40 bg-card/95 backdrop-blur-sm",
-                    "shadow-[0_16px_48px_rgba(0,0,0,0.15),0_8px_16px_rgba(0,0,0,0.1)]",
-                    "p-3 md:p-4 scale-[1.02] rotate-1",
-                    "ring-2 ring-primary/20"
-                  )}>
-                    <div className="flex items-center gap-3">
-                      <Badge variant="secondary" className="text-[10px] px-2 py-0.5">
-                        {activeCompetency.category.replace(/_/g, " ")}
-                      </Badge>
-                      <span className="text-sm font-semibold text-foreground">
-                        {activeCompetency.name}
-                      </span>
-                    </div>
-                    <div className="mt-2 text-xs text-muted-foreground">
-                      {activeCompetency.questionCount} questions • Weight {activeCompetency.weight?.toFixed(1) ?? 1}x
-                    </div>
-                  </div>
-                ) : null}
-              </DragOverlay>
-            </DndContext>
+                      {/* Insertion indicator AFTER this card */}
+                      {insertionTarget?.index === index &&
+                        insertionTarget?.position === "after" && (
+                          <InsertionIndicator />
+                        )}
+                    </React.Fragment>
+                  ))
+                )}
+              </div>
+            </SortableContext>
           ) : (
             /* Static list during SSR - no DnD to avoid hydration mismatch */
             <div className="space-y-2 sm:space-y-3 md:space-y-4">
@@ -472,17 +344,6 @@ export function WeightedCanvas() {
                   />
                 ))
               )}
-            </div>
-          )}
-          
-          {/* Drop indicator when dragging over non-empty canvas */}
-          {isDragOver && state.competencies.length > 0 && (
-            <div className={cn(
-              "p-4 rounded-xl border-2 border-dashed border-primary/60",
-              "bg-primary/5 text-center text-sm text-primary font-medium",
-              "animate-in fade-in duration-200"
-            )}>
-              Drop to add to bottom
             </div>
           )}
         </div>

@@ -108,7 +108,7 @@ export function TraitDetailDrawer({
   open,
   onOpenChange,
 }: TraitDetailDrawerProps) {
-  const t = useTranslations('psychometrics.bigFive');
+  const t = useTranslations('psychometrics.bigFivePage');
   const locale = useLocale();
 
   if (!reliability) return null;

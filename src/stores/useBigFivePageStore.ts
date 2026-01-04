@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { useShallow } from 'zustand/react/shallow';
-import { useEffect, useState } from 'react';
+import { useEffect, useSyncExternalStore } from 'react';
 import { BigFiveTrait, ReliabilityStatus } from '@/types/psychometrics';
 
 /**
@@ -189,17 +189,25 @@ export const useBigFivePageStore = create<BigFivePageState>()(
   )
 );
 
+// Subscription for hydration state using useSyncExternalStore
+const emptySubscribe = () => () => {};
+
 /**
  * Hook to handle store hydration on client side.
  * Must be called once in a root client component.
+ * Uses useSyncExternalStore to avoid the react-hooks/set-state-in-effect lint error.
  */
 export function useBigFiveStoreHydration() {
-  const [hydrated, setHydrated] = useState(false);
+  // useSyncExternalStore handles the hydration state without useEffect + setState
+  const hydrated = useSyncExternalStore(
+    emptySubscribe,
+    () => true,  // Client: always true after hydration
+    () => false  // Server: false during SSR
+  );
 
+  // Trigger rehydration once on client mount
   useEffect(() => {
-    // Rehydrate the store on client mount
     useBigFivePageStore.persist.rehydrate();
-    setHydrated(true);
   }, []);
 
   return hydrated;

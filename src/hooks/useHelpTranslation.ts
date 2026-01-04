@@ -48,6 +48,5 @@ export function useHelpTranslation<T extends HelpCategory>(category: T) {
  * for use with inline translation calls
  */
 export function useHelpText() {
-  const t = useTranslations('help');
-  return t;
+  return useTranslations('help');
 }

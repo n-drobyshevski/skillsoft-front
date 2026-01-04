@@ -135,6 +135,9 @@ export type ActionResponse<T> =
   | { success: true; data: T }
   | { success: false; error: string };
 
+// Import strategy mapping utilities (non-server-action exports)
+import { toBackendStrategy } from './strategy-mapping';
+
 // ============================================
 // API HELPERS
 // ============================================
@@ -168,7 +171,7 @@ export async function updateBlueprint(
     const updatePayload = {
       name: state.templateName,
       blueprint: {
-        strategy: state.strategy,
+        strategy: toBackendStrategy(state.strategy),
         competencyIds: state.competencies.map((c) => c.id),
         adaptivity: state.adaptivity,
         includeBigFive: state.includeBigFive,
@@ -375,7 +378,7 @@ export async function simulateTest(
     const simulatePayload = {
       templateId: state.templateId,
       blueprint: {
-        strategy: state.strategy,
+        strategy: toBackendStrategy(state.strategy),
         competencyIds: state.competencies.map((c) => c.id),
         adaptivity: state.adaptivity,
         includeBigFive: state.includeBigFive,
@@ -408,6 +411,48 @@ export async function simulateTest(
     }
 
     const result: SimulationResult = await response.json();
+
+    // Normalize: ensure distributionByCompetency is populated
+    // Backend returns sampleQuestions with competencyId - derive distribution from that
+    if (!result.distributionByCompetency?.length && result.sampleQuestions?.length) {
+      // Group questions by competencyId and count
+      const competencyMap = new Map<string, {
+        count: number;
+        competencyName: string;
+        difficultyMix: Record<Difficulty, number>;
+      }>();
+
+      result.sampleQuestions.forEach((q) => {
+        const compId = q.competencyId || 'unknown';
+        const existing = competencyMap.get(compId) || {
+          count: 0,
+          competencyName: q.competencyName || `Competency`,
+          difficultyMix: { FOUNDATIONAL: 0, INTERMEDIATE: 0, ADVANCED: 0, EXPERT: 0 },
+        };
+        existing.count++;
+        const diff = (q.difficulty as Difficulty) || 'INTERMEDIATE';
+        if (existing.difficultyMix[diff] !== undefined) {
+          existing.difficultyMix[diff]++;
+        }
+        competencyMap.set(compId, existing);
+      });
+
+      // Also try to get competency names from state that was passed
+      const competencyNames = new Map(
+        state.competencies.map((c) => [c.id, c.name])
+      );
+
+      result.distributionByCompetency = Array.from(competencyMap.entries()).map(
+        ([compId, data]) => ({
+          competencyId: compId,
+          competencyName: competencyNames.get(compId) || data.competencyName,
+          questionCount: data.count,
+          weight: 1,
+          difficultyMix: data.difficultyMix,
+        })
+      );
+    }
+
     return { success: true, data: result };
   } catch (error) {
     console.error('simulateTest error:', error);

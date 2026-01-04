@@ -31,7 +31,7 @@ export function MobileTraitCardSimple({
   isActive = false,
   className
 }: MobileTraitCardSimpleProps) {
-  const t = useTranslations('psychometrics.bigFive');
+  const t = useTranslations('psychometrics.bigFivePage');
   const colors = TRAIT_COLORS[reliability.trait];
   const traitKey = getTraitKey(reliability.trait);
   const traitLabel = t(`traits.${traitKey}.label`);

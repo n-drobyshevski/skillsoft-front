@@ -82,7 +82,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
-import bigFiveMapping from '@/data/standards/onet_to_bigfive_map.json';
+// Big Five mapping now uses competency.standardCodes.bigFiveRef.trait directly
 import { useTranslations } from 'next-intl';
 
 // ============================================================================
@@ -94,6 +94,11 @@ interface CompetencyOption {
   name: string;
   category: string;
   level?: string;
+  standardCodes?: {
+    bigFiveRef?: {
+      trait?: string;
+    };
+  };
 }
 
 interface NewTestFormProps {
@@ -442,30 +447,50 @@ function CompetenciesStep({ form, competencies }: NewTestFormProps & { form: any
     };
 
     competencies.forEach(comp => {
-      const mapping = (bigFiveMapping.mappings as any)[comp.id];
-      
-      if (mapping?.primaryBigFive) {
-        grouped[mapping.primaryBigFive as BigFiveCategory]?.push(comp);
+      // Primary: Use standardCodes.bigFiveRef.trait directly from competency data
+      const bigFiveTrait = comp.standardCodes?.bigFiveRef?.trait as BigFiveCategory | undefined;
+
+      if (bigFiveTrait && grouped[bigFiveTrait]) {
+        grouped[bigFiveTrait].push(comp);
       } else {
+        // Fallback: Category-based heuristics for competencies without Big Five mapping
         const categoryLower = comp.category.toLowerCase();
-        
-        if (categoryLower.includes('innovation') || categoryLower.includes('creative') || 
-            categoryLower.includes('analytical') || categoryLower.includes('learning')) {
+        const nameLower = comp.name.toLowerCase();
+
+        // Check both category and name for better matching
+        const matchesPattern = (patterns: string[]) =>
+          patterns.some(p => categoryLower.includes(p) || nameLower.includes(p));
+
+        if (matchesPattern(['innovation', 'creative', 'analytical', 'learning', 'thinking', 'idea', 'problem'])) {
           grouped.OPENNESS.push(comp);
-        } else if (categoryLower.includes('dependab') || categoryLower.includes('detail') || 
-                   categoryLower.includes('organiz') || categoryLower.includes('planning')) {
+        } else if (matchesPattern(['dependab', 'detail', 'organiz', 'planning', 'time', 'quality', 'decision'])) {
           grouped.CONSCIENTIOUSNESS.push(comp);
-        } else if (categoryLower.includes('leadership') || categoryLower.includes('social') || 
-                   categoryLower.includes('communication') || categoryLower.includes('initiative')) {
+        } else if (matchesPattern(['leadership', 'social', 'communication', 'initiative', 'influenc', 'present', 'negotiat'])) {
           grouped.EXTRAVERSION.push(comp);
-        } else if (categoryLower.includes('cooperat') || categoryLower.includes('team') || 
-                   categoryLower.includes('empathy') || categoryLower.includes('support')) {
+        } else if (matchesPattern(['cooperat', 'team', 'empathy', 'support', 'collaborat', 'conflict', 'interpersonal', 'relationship'])) {
           grouped.AGREEABLENESS.push(comp);
-        } else if (categoryLower.includes('stress') || categoryLower.includes('adapt') || 
-                   categoryLower.includes('resilience') || categoryLower.includes('control')) {
+        } else if (matchesPattern(['stress', 'adapt', 'resilience', 'control', 'emotional', 'pressure', 'flexib', 'change'])) {
           grouped.EMOTIONAL_STABILITY.push(comp);
         } else {
-          grouped.CONSCIENTIOUSNESS.push(comp);
+          // Default fallback based on common category enum patterns
+          const categoryMap: Record<string, BigFiveCategory> = {
+            'cognitive': 'OPENNESS',
+            'critical_thinking': 'OPENNESS',
+            'interpersonal': 'AGREEABLENESS',
+            'collaboration': 'AGREEABLENESS',
+            'leadership': 'EXTRAVERSION',
+            'communication': 'EXTRAVERSION',
+            'adaptability': 'EMOTIONAL_STABILITY',
+            'emotional_intelligence': 'EMOTIONAL_STABILITY',
+            'time_management': 'CONSCIENTIOUSNESS',
+          };
+          const mappedCategory = categoryMap[categoryLower];
+          if (mappedCategory) {
+            grouped[mappedCategory].push(comp);
+          } else {
+            // Ultimate fallback: distribute to CONSCIENTIOUSNESS
+            grouped.CONSCIENTIOUSNESS.push(comp);
+          }
         }
       }
     });

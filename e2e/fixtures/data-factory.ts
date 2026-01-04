@@ -133,7 +133,7 @@ export const DataFactory = {
       category: 'COGNITIVE',
       standardCodes: {
         onetRef: { code: '2.B.1.a', title: 'Active Listening' },
-        escoRef: { uri: 'http://data.europa.eu/esco/skill/test', title: 'Test Skill' },
+        escoRef: { uri: "https://data.europa.eu/esco/skill/test", title: 'Test Skill' },
         bigFiveRef: { trait: 'OPENNESS', title: 'Openness' },
       },
       ...overrides,

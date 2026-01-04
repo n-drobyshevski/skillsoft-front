@@ -708,11 +708,11 @@ export async function retryScoring(
       });
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
+        const errorData: { message?: string } = await response.json().catch(() => ({})) as { message?: string };
         throw new Error(errorData.message || `Retry failed: ${response.status}`);
       }
 
-      const result = await response.json() as TestResult;
+      const result: TestResult = await response.json() as TestResult;
       return result;
     } catch (error) {
       lastError = error instanceof Error ? error : new Error(String(error));

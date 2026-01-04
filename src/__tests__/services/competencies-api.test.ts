@@ -319,7 +319,7 @@ describe('Competencies API', () => {
       const updated = await updateCompetency('comp-1', {
         standardCodes: {
           onetRef: { code: '2.A.1.c', title: 'New O*NET Reference' },
-          escoRef: { uri: 'http://data.europa.eu/esco/skill/9999', title: 'New ESCO Skill' },
+          escoRef: { uri: "https://data.europa.eu/esco/skill/9999", title: 'New ESCO Skill' },
         },
       });
 

@@ -9,6 +9,24 @@ import { getRequestConfig } from 'next-intl/server';
 import { cookies, headers } from 'next/headers';
 import { type Locale, locales, defaultLocale, isValidLocale } from './config';
 
+/**
+ * Static locale module map to avoid dynamic imports with template literals.
+ * This satisfies the no-unsanitized/method ESLint rule by using a whitelist pattern.
+ */
+const localeModules: Record<Locale, () => Promise<{ default: IntlMessages }>> = {
+  en: () => import('../../messages/en.json'),
+  ru: () => import('../../messages/ru.json'),
+};
+
+/**
+ * Safely load messages for a given locale with fallback to default.
+ */
+async function loadMessages(locale: Locale): Promise<IntlMessages> {
+  const loader = localeModules[locale] ?? localeModules[defaultLocale];
+  const module = await loader();
+  return module.default;
+}
+
 export default getRequestConfig(async () => {
   // Priority: 1. Cookie, 2. Accept-Language header, 3. Default (Russian)
   const cookieStore = await cookies();
@@ -37,7 +55,7 @@ export default getRequestConfig(async () => {
 
   return {
     locale,
-    messages: (await import(`../../messages/${locale}.json`)).default,
+    messages: await loadMessages(locale),
     // Default timezone for Russian users
     timeZone: 'Europe/Moscow',
     now: new Date(),

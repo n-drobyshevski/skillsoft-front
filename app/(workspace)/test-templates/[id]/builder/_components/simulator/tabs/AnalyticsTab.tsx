@@ -24,21 +24,26 @@ const colors = ['#6366f1', '#22c55e', '#f97316', '#0ea5e9', '#8b5cf6', '#f59e0b'
 
 export default function AnalyticsTab({ result }: AnalyticsTabProps) {
   const competencyData = useMemo(() => {
-    if (result.distributionByCompetency?.length) {
+    if (result?.distributionByCompetency?.length) {
       return result.distributionByCompetency.map((entry) => ({
         name: entry.competencyName,
         value: entry.questionCount,
       }));
     }
 
-    return Object.entries(result.composition).map(([name, value]) => ({
-      name,
-      value,
-    }));
+    if (result?.composition) {
+      return Object.entries(result.composition).map(([name, value]) => ({
+        name,
+        value,
+      }));
+    }
+
+    return [];
   }, [result]);
 
   const difficultyData = useMemo(() => {
-    const distribution = result.distributionByDifficulty || result.difficultyDistribution;
+    const distribution = result?.distributionByDifficulty || result?.difficultyDistribution;
+    if (!distribution) return [];
     return Object.entries(distribution).map(([difficulty, value]) => ({
       name: difficulty,
       value,
@@ -46,7 +51,8 @@ export default function AnalyticsTab({ result }: AnalyticsTabProps) {
   }, [result]);
 
   const selectionData = useMemo(() => {
-    return Object.entries(result.selectionReasons || {}).map(([reason, value]) => ({
+    if (!result?.selectionReasons) return [];
+    return Object.entries(result.selectionReasons).map(([reason, value]) => ({
       name: selectionReasonLabels[reason as SelectionReason] || reason,
       value,
     }));

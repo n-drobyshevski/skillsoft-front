@@ -51,7 +51,7 @@ export function useDashboardWidgets(data: DashboardSummary | null): WidgetConfig
   const userRole = useUserRole();
 
   return useMemo(() => {
-    const widgets = Object.values(WIDGET_REGISTRY)
+    return Object.values(WIDGET_REGISTRY)
       // Filter by lens visibility
       .filter((config) => config.lenses.includes(activeLens))
 
@@ -77,8 +77,6 @@ export function useDashboardWidgets(data: DashboardSummary | null): WidgetConfig
 
       // Sort by priority (lower = higher priority)
       .sort((a, b) => a.priority - b.priority);
-
-    return widgets;
   }, [activeLens, userRole, data]);
 }
 

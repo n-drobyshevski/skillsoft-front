@@ -8,7 +8,7 @@ import { GlossarySearch } from "./GlossarySearch";
  * Separated from the server component for better code splitting
  */
 export function GlossarySearchClient() {
-  const handleSelectTerm = useCallback((termId: string, _sectionId: string) => {
+  const handleSelectTerm = useCallback((termId: string) => {
     const element = document.querySelector(`[data-term-id="${termId}"]`);
     if (element) {
       element.scrollIntoView({ behavior: "smooth", block: "center" });

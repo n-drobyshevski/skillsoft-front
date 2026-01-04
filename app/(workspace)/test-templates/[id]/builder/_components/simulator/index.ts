@@ -1,7 +1,10 @@
 // Re-exports for simulator components
 
-// Main panel
-export { SimulatorPanel } from './SimulatorPanel';
+// Main panel - V4 with all optimizations (replaces original)
+export { SimulatorPanelV4 as SimulatorPanel } from './SimulatorPanelV4';
+
+// Legacy panels (for reference/rollback)
+export { SimulatorPanel as SimulatorPanelLegacy } from './SimulatorPanel';
 
 // Core components
 export { PersonaSelector } from './PersonaSelector';

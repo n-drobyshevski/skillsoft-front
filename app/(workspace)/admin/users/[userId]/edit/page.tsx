@@ -62,10 +62,13 @@ function StatusBadge({ statusKey, label }: { statusKey: UserStatusKey; label: st
     warning: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400",
     destructive: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400",
     default: "bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-400",
-  };
+  } as const;
+
+  // Safe access with explicit type assertion for the variant classes object
+  const variantClass = variantClasses[variant as keyof typeof variantClasses] ?? variantClasses.default;
 
   return (
-    <Badge className={`${variantClasses[variant]} px-2.5 py-0.5`}>
+    <Badge className={`${variantClass} px-2.5 py-0.5`}>
       {label}
     </Badge>
   );

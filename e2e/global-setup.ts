@@ -13,7 +13,7 @@ function getApiBaseUrl(): string {
   }
 
   // If it already has a protocol, use it as-is (ensure /api suffix)
-  if (apiUrl.startsWith('http://') || apiUrl.startsWith('https://')) {
+  if (apiUrl.startsWith("https://") || apiUrl.startsWith('https://')) {
     return apiUrl.endsWith('/api') ? apiUrl : `${apiUrl}/api`;
   }
 

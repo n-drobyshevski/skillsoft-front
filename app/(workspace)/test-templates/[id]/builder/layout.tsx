@@ -2,6 +2,7 @@ import React from "react";
 import { notFound } from "next/navigation";
 import { testTemplatesApi, competenciesApi } from "@/services/api";
 import { BlueprintWorkspaceProvider } from "./_components/BlueprintWorkspaceProvider";
+import { fromBackendStrategy } from "./strategy-mapping";
 
 /**
  * Route Segment Config - Next.js 16 hybrid caching strategy
@@ -83,11 +84,7 @@ export default async function BuilderLayout({ children, params }: BuilderLayoutP
   const initialState = {
     templateId: template.id,
     templateName: template.name,
-    strategy: (template.goal === "JOB_FIT" 
-      ? "TARGETED_FIT" 
-      : template.goal === "TEAM_FIT" 
-        ? "DYNAMIC_GAP_ANALYSIS" 
-        : "UNIVERSAL_BASELINE") as "TARGETED_FIT" | "DYNAMIC_GAP_ANALYSIS" | "UNIVERSAL_BASELINE",
+    strategy: fromBackendStrategy(template.goal || "OVERVIEW"),
     competencies: (template.competencyIds || []).map((id) => {
       const comp = competencies.find((c) => c.id === id);
       return {

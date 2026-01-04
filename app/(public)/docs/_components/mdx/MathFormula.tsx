@@ -61,12 +61,19 @@ export function MathFormula({
         // Accessibility options
         fleqn: false, // Left-align equations in display mode
       });
-      setError(null);
+      // Only update error state if it was previously set (avoid synchronous setState)
+      if (error !== null) {
+        setError(null);
+      }
     } catch (err) {
       console.error("KaTeX rendering error:", err);
-      setError(err instanceof Error ? err.message : "Failed to render formula");
+      const errorMessage = err instanceof Error ? err.message : "Failed to render formula";
+      // Only update if error changed
+      if (error !== errorMessage) {
+        setError(errorMessage);
+      }
     }
-  }, [tex, display]);
+  }, [tex, display, error]);
 
   // Error state
   if (error) {
@@ -157,14 +164,14 @@ export function MathBlock({
     <div
       className={cn(
         "rounded-lg border p-4 my-4 overflow-x-auto",
-        variantStyles[variant],
+        variantStyles[variant as keyof typeof variantStyles],
         className
       )}
     >
       {title && (
         <div className="text-xs text-neutral-500 mb-2 font-medium">{title}</div>
       )}
-      <div className={cn("text-center min-w-fit", variantTextStyles[variant])}>
+      <div className={cn("text-center min-w-fit", variantTextStyles[variant as keyof typeof variantTextStyles])}>
         <MathFormula
           tex={tex}
           display

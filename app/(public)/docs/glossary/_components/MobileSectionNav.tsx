@@ -134,7 +134,9 @@ export function MobileSectionNav({ sections }: MobileSectionNavProps) {
     }
   };
 
-  const activeConfig = sectionConfig[activeSection] || sectionConfig["domain-terms"];
+  const activeConfig = Object.hasOwn(sectionConfig, activeSection)
+    ? sectionConfig[activeSection as keyof typeof sectionConfig]
+    : sectionConfig["domain-terms"];
 
   return (
     <>

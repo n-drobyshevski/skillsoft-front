@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { SearchIcon, FileTextIcon, HashIcon } from "lucide-react";
+import { SearchIcon, FileTextIcon } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -13,7 +13,25 @@ import {
   CommandGroup,
   CommandItem,
 } from "@/components/ui/command";
-import { docsNavigation, getAllPages } from "@/lib/docs/navigation";
+import { docsNavigation } from "@/lib/docs/navigation";
+
+/**
+ * Custom hook to register Cmd+K / Ctrl+K keyboard shortcut for search
+ * @param setOpen - State setter to toggle the search dialog
+ */
+function useSearchShortcut(setOpen: React.Dispatch<React.SetStateAction<boolean>>) {
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
+        e.preventDefault();
+        setOpen((open) => !open);
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [setOpen]);
+}
 
 /**
  * Documentation Search Component
@@ -29,17 +47,7 @@ export function DocsSearch() {
   const router = useRouter();
 
   // Register keyboard shortcut
-  useEffect(() => {
-    const down = (e: KeyboardEvent) => {
-      if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
-        e.preventDefault();
-        setOpen((open) => !open);
-      }
-    };
-
-    document.addEventListener("keydown", down);
-    return () => document.removeEventListener("keydown", down);
-  }, []);
+  useSearchShortcut(setOpen);
 
   // Handle navigation
   const handleSelect = useCallback(
@@ -110,17 +118,7 @@ export function DocsSearchTrigger() {
   const router = useRouter();
 
   // Register keyboard shortcut
-  useEffect(() => {
-    const down = (e: KeyboardEvent) => {
-      if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
-        e.preventDefault();
-        setOpen((open) => !open);
-      }
-    };
-
-    document.addEventListener("keydown", down);
-    return () => document.removeEventListener("keydown", down);
-  }, []);
+  useSearchShortcut(setOpen);
 
   const handleSelect = useCallback(
     (href: string) => {

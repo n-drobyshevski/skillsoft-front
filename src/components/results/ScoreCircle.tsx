@@ -162,10 +162,9 @@ export function ScoreCircle({
 
   // Subscribe to display value changes
   useEffect(() => {
-    const unsubscribe = displayValue.on('change', (latest) => {
+    return displayValue.on('change', (latest) => {
       setCurrentDisplayValue(latest);
     });
-    return unsubscribe;
   }, [displayValue]);
 
   // Trigger animation on mount or value change

@@ -21,8 +21,6 @@ export interface TocItem {
 
 interface MobileTocDrawerProps {
   items: TocItem[];
-  /** CSS class for styling */
-  className?: string;
 }
 
 /**
@@ -38,7 +36,7 @@ interface MobileTocDrawerProps {
  *
  * Visible only on mobile devices (< lg breakpoint).
  */
-export function MobileTocDrawer({ items, className }: MobileTocDrawerProps) {
+export function MobileTocDrawer({ items }: MobileTocDrawerProps) {
   const [open, setOpen] = React.useState(false);
   const [activeId, setActiveId] = React.useState<string>("");
   const [progress, setProgress] = React.useState(0);
@@ -62,8 +60,8 @@ export function MobileTocDrawer({ items, className }: MobileTocDrawerProps) {
       const scrollPosition = scrollTop + 100; // Offset for header
 
       for (let i = sections.length - 1; i >= 0; i--) {
-        const section = sections[i];
-        if (section.offsetTop <= scrollPosition) {
+        const section = sections.at(i);
+        if (section && section.offsetTop <= scrollPosition) {
           currentActiveId = section.id;
           break;
         }

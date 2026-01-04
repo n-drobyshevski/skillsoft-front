@@ -46,7 +46,7 @@ interface UserEditFormProps {
 export default function UserEditForm({ user, userId }: UserEditFormProps) {
   const router = useRouter();
   const t = useTranslations('users');
-  const { getLabel: getRoleLabel, getRoleOptions } = useUserRoleTranslation();
+  const { getLabel: getRoleLabel } = useUserRoleTranslation();
   const [isPending, startTransition] = useTransition();
   const [isSyncing, setIsSyncing] = useState(false);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);

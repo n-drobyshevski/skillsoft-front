@@ -1,9 +1,13 @@
 import { cache } from 'react';
 import { revalidateCompetencyTags, revalidateQuestionTags, revalidateUserTags } from '@/app/actions';
 import { getAuthHeaders } from './roleApi';
+import { createLogger } from '@/lib/logger';
 
 import { AssessmentQuestion, BehavioralIndicator, Competency, TemplateReadinessResponse } from '@/types/domain';
 import { User, UserCreateInput, UserUpdateInput, UserRole } from '@/types/user';
+
+// Logger for API service
+const log = createLogger('API');
 
 // Local O*NET data loaders (frontend-only, no backend API calls)
 import { searchOccupations, getPopularOccupations, getOccupationBySocCode } from '@/lib/occupation-data-loader';
@@ -101,17 +105,18 @@ async function parseErrorResponse(response: Response): Promise<BackendErrorRespo
         if (!text.trim()) {
             return null;
         }
-        const data = JSON.parse(text);
+        const data: unknown = JSON.parse(text);
         if (isBackendErrorResponse(data)) {
             return data;
         }
         // Handle simple { message: string } responses
         if (typeof data === 'object' && data !== null && 'message' in data) {
+            const errorObj = data as { message: unknown; code?: unknown; details?: unknown };
             return {
                 status: response.status,
-                message: String(data.message),
-                code: data.code,
-                details: data.details,
+                message: String(errorObj.message),
+                code: typeof errorObj.code === 'string' ? errorObj.code : undefined,
+                details: typeof errorObj.details === 'string' ? errorObj.details : undefined,
             };
         }
         return null;
@@ -156,19 +161,15 @@ async function handleResponse<T>(response: Response, silentStatusCodes: number[]
         const shouldLogError = process.env.NODE_ENV === 'development' && !silentStatusCodes.includes(response.status);
         if (shouldLogError) {
             // Use a single structured log for easier debugging
-            console.error(
-                `\n🚨 API Error [${response.status}] ${error.category}\n` +
-                `├─ Message: ${error.message}\n` +
-                `├─ URL: ${response.url}\n` +
-                (error.correlationId ? `├─ Correlation ID: ${error.correlationId}\n` : '') +
-                (error.code ? `├─ Code: ${error.code}\n` : '') +
-                (error.details ? `├─ Details: ${error.details}\n` : '') +
-                `└─ Retryable: ${error.isRetryable ? 'Yes' : 'No'}`
-            );
-            // Log full backend response separately for inspection
-            if (backendError) {
-                console.error('Backend Response:', backendError);
-            }
+            log.error(`API Error [${response.status}] ${error.category}`, {
+                message: error.message,
+                url: response.url,
+                correlationId: error.correlationId,
+                code: error.code,
+                details: error.details,
+                retryable: error.isRetryable,
+                backendError: backendError || undefined,
+            });
         }
 
         throw error;
@@ -226,14 +227,6 @@ export async function fetchApi<T>(
         // For server components, use getAuthHeaders() from roleApi.ts
         // For client components, use useAuth() hook from Clerk
 
-        // Debug logging for auth headers (only in development)
-        if (process.env.NODE_ENV === 'development' && Object.keys(authHeaders).length > 0) {
-            console.log(`[API] ${method} ${endpoint}`, {
-                userId: authHeaders['X-User-Id'] ? 'present' : 'missing',
-                role: authHeaders['X-User-Role'] || 'missing'
-            });
-        }
-
         const response = await fetch(`${getApiBaseUrl()}${endpoint}`, {
             ...fetchOptions,
             headers: {
@@ -267,8 +260,7 @@ export async function fetchApi<T>(
 
                 // Log in development
                 if (process.env.NODE_ENV === 'development') {
-                    console.error('[API Network Error]', {
-                        type: 'CORS',
+                    log.error('Network Error (CORS)', {
                         endpoint,
                         method,
                         originalMessage: error.message,
@@ -752,19 +744,30 @@ export const usersApi = {
     error?: string;
     errors?: string[];
   }> => {
+    type SyncResponse = {
+      success: boolean;
+      message?: string;
+      created?: number;
+      updated?: number;
+      failed?: number;
+      total?: number;
+      error?: string;
+      errors?: string[];
+    };
+
     const response = await fetch('/api/users/sync', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
     });
-    
+
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
+      const errorData: { error?: string } = await response.json().catch(() => ({})) as { error?: string };
       throw new Error(errorData.error || `Sync failed: ${response.status}`);
     }
-    
-    return response.json();
+
+    return response.json() as Promise<SyncResponse>;
   },
 };
 

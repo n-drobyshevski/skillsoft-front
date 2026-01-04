@@ -98,11 +98,11 @@ export const STRATEGY_CONFIG: Record<Strategy, StrategyDisplayConfig> = {
     badgeBg: 'bg-primary hover:bg-primary/90',
     focusColor: 'focus-visible:ring-primary/50',
     sections: [
-      { id: 'timeline', title: 'Question Flow', icon: 'LineChart', defaultOpen: true, priority: 1 },
-      { id: 'competency-balance', title: 'Competency Balance', icon: 'LayoutGrid', defaultOpen: false, priority: 2 },
-      { id: 'analytics', title: 'Coverage Analysis', icon: 'BarChart3', defaultOpen: false, priority: 3 },
-      { id: 'finetune', title: 'Fine Tune', icon: 'SlidersHorizontal', defaultOpen: false, priority: 4 },
-      { id: 'help', title: 'Help', icon: 'HelpCircle', defaultOpen: false, priority: 5 },
+      { id: 'insights', title: 'Assessment Profile', icon: 'Radar', defaultOpen: true, priority: 1 },
+      { id: 'simulated-results', title: 'Results Preview', icon: 'FileCheck', defaultOpen: false, priority: 2 },
+      { id: 'timeline', title: 'Question Flow', icon: 'LineChart', defaultOpen: false, priority: 3 },
+      { id: 'analytics', title: 'Coverage Analysis', icon: 'BarChart3', defaultOpen: false, priority: 4 },
+      { id: 'finetune', title: 'Fine Tune', icon: 'SlidersHorizontal', defaultOpen: false, priority: 5 },
     ],
   },
 
@@ -120,10 +120,10 @@ export const STRATEGY_CONFIG: Record<Strategy, StrategyDisplayConfig> = {
     focusColor: 'focus-visible:ring-emerald-500/50',
     sections: [
       { id: 'job-alignment', title: 'Job Alignment', icon: 'Briefcase', defaultOpen: true, priority: 1, requiresData: 'onetSocCode' },
-      { id: 'timeline', title: 'Question Flow', icon: 'LineChart', defaultOpen: false, priority: 2 },
-      { id: 'analytics', title: 'Skill Coverage', icon: 'CheckSquare', defaultOpen: false, priority: 3 },
-      { id: 'finetune', title: 'Fine Tune', icon: 'SlidersHorizontal', defaultOpen: false, priority: 4 },
-      { id: 'help', title: 'Help', icon: 'HelpCircle', defaultOpen: false, priority: 5 },
+      { id: 'simulated-results', title: 'Fit Preview', icon: 'FileCheck', defaultOpen: false, priority: 2 },
+      { id: 'timeline', title: 'Question Flow', icon: 'LineChart', defaultOpen: false, priority: 3 },
+      { id: 'analytics', title: 'Skill Coverage', icon: 'CheckSquare', defaultOpen: false, priority: 4 },
+      { id: 'finetune', title: 'Fine Tune', icon: 'SlidersHorizontal', defaultOpen: false, priority: 5 },
     ],
   },
 
@@ -142,10 +142,10 @@ export const STRATEGY_CONFIG: Record<Strategy, StrategyDisplayConfig> = {
     sections: [
       { id: 'team-comparison', title: 'Team Comparison', icon: 'Users', defaultOpen: true, priority: 1, requiresData: 'teamId' },
       { id: 'gap-analysis', title: 'Gap Analysis', icon: 'GitCompareArrows', defaultOpen: true, priority: 2, requiresData: 'teamId' },
-      { id: 'timeline', title: 'Question Flow', icon: 'LineChart', defaultOpen: false, priority: 3 },
-      { id: 'analytics', title: 'Analytics', icon: 'BarChart3', defaultOpen: false, priority: 4 },
-      { id: 'finetune', title: 'Fine Tune', icon: 'SlidersHorizontal', defaultOpen: false, priority: 5 },
-      { id: 'help', title: 'Help', icon: 'HelpCircle', defaultOpen: false, priority: 6 },
+      { id: 'simulated-results', title: 'Team Fit Preview', icon: 'FileCheck', defaultOpen: false, priority: 3 },
+      { id: 'timeline', title: 'Question Flow', icon: 'LineChart', defaultOpen: false, priority: 4 },
+      { id: 'analytics', title: 'Analytics', icon: 'BarChart3', defaultOpen: false, priority: 5 },
+      { id: 'finetune', title: 'Fine Tune', icon: 'SlidersHorizontal', defaultOpen: false, priority: 6 },
     ],
   },
 };

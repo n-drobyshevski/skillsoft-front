@@ -79,7 +79,7 @@ interface BigFiveTraitCardProps {
  * with trait-specific color accent and statistics
  */
 export function BigFiveTraitCard({ reliability, className }: BigFiveTraitCardProps) {
-  const t = useTranslations('psychometrics.bigFive');
+  const t = useTranslations('psychometrics.bigFivePage');
   const colors = TRAIT_COLORS[reliability.trait];
   const traitKey = getTraitKey(reliability.trait);
 

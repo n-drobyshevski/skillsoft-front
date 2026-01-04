@@ -44,19 +44,30 @@ const categoryLabels: Record<GlossaryCategory, string> = {
   technical: "Техническая",
 };
 
-interface IndexedTerm extends GlossaryTerm {
-  category: GlossaryCategory;
-  sectionId: string;
-}
 
 interface GlossarySearchProps {
   onSelectTerm: (termId: string, sectionId: string) => void;
 }
 
+// Helper to safely read from localStorage
+const getStoredRecentSearches = (): string[] => {
+  if (typeof window === "undefined") return [];
+  try {
+    const stored = localStorage.getItem("glossary-recent-searches");
+    if (stored) {
+      return JSON.parse(stored);
+    }
+  } catch {
+    // Ignore localStorage errors
+  }
+  return [];
+};
+
 export function GlossarySearch({ onSelectTerm }: GlossarySearchProps) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
-  const [recentSearches, setRecentSearches] = useState<string[]>([]);
+  // Use lazy initialization to read from localStorage
+  const [recentSearches, setRecentSearches] = useState<string[]>(getStoredRecentSearches);
 
   // Index all terms with their category
   const indexedTerms = useMemo(() => {
@@ -67,18 +78,6 @@ export function GlossarySearch({ onSelectTerm }: GlossarySearchProps) {
         sectionId: section.id,
       }))
     );
-  }, []);
-
-  // Load recent searches from localStorage
-  useEffect(() => {
-    try {
-      const stored = localStorage.getItem("glossary-recent-searches");
-      if (stored) {
-        setRecentSearches(JSON.parse(stored));
-      }
-    } catch {
-      // Ignore localStorage errors
-    }
   }, []);
 
   // Filter terms based on query

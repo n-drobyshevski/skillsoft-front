@@ -190,8 +190,11 @@ export function useSagaOperations<TResult = unknown, TSnapshot = unknown>(
     retryCountRef.current.clear();
   }, []);
 
-  // Execute a single item with retry logic
-  const executeItem = useCallback(
+  // Ref to hold the executeItem implementation for recursive calls
+  const executeItemRef = useRef<(itemId: string) => Promise<SagaOperationResult<TResult>>>();
+
+  // Execute a single item with retry logic (implementation)
+  const executeItemImpl = useCallback(
     async (itemId: string): Promise<SagaOperationResult<TResult>> => {
       if (cancelledRef.current) {
         return {
@@ -220,7 +223,8 @@ export function useSagaOperations<TResult = unknown, TSnapshot = unknown>(
         // Auto-retry if enabled and within limits
         if (autoRetry && retryable && currentRetries < maxRetries) {
           retryCountRef.current.set(itemId, currentRetries + 1);
-          return executeItem(itemId);
+          // Use ref for recursive call to avoid forward reference issue
+          return executeItemRef.current!(itemId);
         }
 
         return {
@@ -233,6 +237,17 @@ export function useSagaOperations<TResult = unknown, TSnapshot = unknown>(
       }
     },
     [onExecuteItem, isRetryable, autoRetry, maxRetries]
+  );
+
+  // Keep ref updated with latest implementation
+  executeItemRef.current = executeItemImpl;
+
+  // Stable wrapper for external use
+  const executeItem = useCallback(
+    (itemId: string): Promise<SagaOperationResult<TResult>> => {
+      return executeItemRef.current!(itemId);
+    },
+    []
   );
 
   // Execute batch with concurrency control
@@ -464,12 +479,12 @@ export function useStatusChangeSaga<TStatus>(config: {
   onComplete?: (successful: string[], failed: string[]) => void;
 }) {
   return useSagaOperations<void, { status: TStatus }>({
-    onExecuteItem: async (itemId) => {
+    onExecuteItem: async (_itemId) => {
       // Status is passed via closure in the execute call
       return undefined as void;
     },
-    captureSnapshot: (itemId) => ({
-      status: config.getCurrentStatus(itemId),
+    captureSnapshot: (_itemId) => ({
+      status: config.getCurrentStatus(_itemId),
     }),
     onRollbackItem: async (itemId, snapshot) => {
       await config.onUpdateStatus(itemId, snapshot.status);

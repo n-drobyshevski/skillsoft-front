@@ -109,10 +109,11 @@ export async function getUserRole(): Promise<UserRole | null> {
  */
 export async function hasMinimumRole(minimumRole: UserRole): Promise<boolean> {
   const userRole = await getEffectiveRole();
-  
-  const userLevel = ROLE_HIERARCHY[userRole] || 0;
-  const requiredLevel = ROLE_HIERARCHY[minimumRole] || 0;
-  
+
+  // Safe access with explicit type assertion for Record<UserRole, number>
+  const userLevel = ROLE_HIERARCHY[userRole as keyof typeof ROLE_HIERARCHY] ?? 0;
+  const requiredLevel = ROLE_HIERARCHY[minimumRole as keyof typeof ROLE_HIERARCHY] ?? 0;
+
   return userLevel >= requiredLevel;
 }
 
@@ -155,7 +156,8 @@ export function getRoleDisplayName(role: UserRole): string {
     [UserRole.EDITOR]: 'Editor',
     [UserRole.USER]: 'User',
   };
-  return names[role] || 'Unknown';
+  // Safe access with explicit type assertion for Record<UserRole, string>
+  return names[role as keyof typeof names] ?? 'Unknown';
 }
 
 /**
@@ -167,5 +169,6 @@ export function getRoleBadgeVariant(role: UserRole): 'default' | 'secondary' | '
     [UserRole.EDITOR]: 'default',
     [UserRole.USER]: 'secondary',
   };
-  return variants[role] || 'outline';
+  // Safe access with explicit type assertion for Record<UserRole, variant>
+  return variants[role as keyof typeof variants] ?? 'outline';
 }

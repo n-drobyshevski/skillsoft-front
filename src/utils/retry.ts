@@ -20,14 +20,22 @@ export interface ApiError extends Error {
 }
 
 /**
+ * Checks if an error has a status code within a given range.
+ * Shared helper to avoid duplicate status checking logic.
+ */
+function hasStatusInRange(error: unknown, minStatus: number, maxStatus: number): boolean {
+  if (error && typeof error === 'object' && 'status' in error) {
+    const status = (error as ApiError).status;
+    return status !== undefined && status >= minStatus && status < maxStatus;
+  }
+  return false;
+}
+
+/**
  * Default retry strategy: only retry on 5xx server errors
  */
 const defaultShouldRetry = (error: unknown): boolean => {
-  if (error && typeof error === 'object' && 'status' in error) {
-    const status = (error as ApiError).status;
-    return status !== undefined && status >= 500 && status < 600;
-  }
-  return false;
+  return hasStatusInRange(error, 500, 600);
 };
 
 /**
@@ -135,22 +143,14 @@ export function isRetryableError(error: unknown): boolean {
  * Determines if an error is a client error (4xx)
  */
 export function isClientError(error: unknown): boolean {
-  if (error && typeof error === 'object' && 'status' in error) {
-    const status = (error as ApiError).status;
-    return status !== undefined && status >= 400 && status < 500;
-  }
-  return false;
+  return hasStatusInRange(error, 400, 500);
 }
 
 /**
  * Determines if an error is a server error (5xx)
  */
 export function isServerError(error: unknown): boolean {
-  if (error && typeof error === 'object' && 'status' in error) {
-    const status = (error as ApiError).status;
-    return status !== undefined && status >= 500 && status < 600;
-  }
-  return false;
+  return hasStatusInRange(error, 500, 600);
 }
 
 /**

@@ -571,8 +571,7 @@ describe('Memory Leak Detection Patterns', () => {
 
       function ComponentWithSubscription() {
         React.useEffect(() => {
-          const cleanup = subscribe();
-          return cleanup;
+          return subscribe();
         }, []);
 
         return <div>Component with subscription</div>;

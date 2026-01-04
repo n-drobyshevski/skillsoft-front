@@ -72,7 +72,13 @@ export function useHasFeatures(features: string[]): Record<string, boolean> {
   const featureMap: Record<string, boolean> = {};
   features.forEach((feature) => {
     const featureSelector = selectHasFeature(feature);
-    featureMap[feature] = featureSelector(state);
+    // Safe assignment: feature is from the controlled features array parameter
+    Object.defineProperty(featureMap, feature, {
+      value: featureSelector(state),
+      writable: true,
+      enumerable: true,
+      configurable: true,
+    });
   });
 
   // Cache the result

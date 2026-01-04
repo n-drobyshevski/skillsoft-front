@@ -316,7 +316,7 @@ export function GapAnalysisChart({
 
   // Sort and limit data
   const sortedData = useMemo(() => {
-    const sorted = [...data].sort((a, b) => {
+    return [...data].sort((a, b) => {
       let comparison = 0;
       switch (sortBy) {
         case 'name':
@@ -334,7 +334,6 @@ export function GapAnalysisChart({
       }
       return sortDirection === 'desc' ? comparison : -comparison;
     });
-    return sorted;
   }, [data, sortBy, sortDirection]);
 
   // Apply max items limit

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useRef, useEffect } from 'react';
+import { useState, useCallback, useRef, useEffect, useSyncExternalStore } from 'react';
 import {
   useMotionValue,
   useTransform,
@@ -130,14 +130,18 @@ export interface UseSwipeActionsReturn {
 /**
  * Trigger haptic feedback if available
  */
-function triggerHaptic(intensity: 'light' | 'medium' | 'heavy' = 'medium') {
+type HapticIntensity = 'light' | 'medium' | 'heavy';
+const HAPTIC_DURATIONS: Readonly<Record<HapticIntensity, number>> = {
+  light: 10,
+  medium: 20,
+  heavy: 40,
+} as const;
+
+function triggerHaptic(intensity: HapticIntensity = 'medium') {
   if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
-    const durations = {
-      light: 10,
-      medium: 20,
-      heavy: 40,
-    };
-    navigator.vibrate(durations[intensity]);
+    // Type-safe access: intensity is constrained to HapticIntensity type
+    const duration = HAPTIC_DURATIONS[intensity];
+    navigator.vibrate(duration);
   }
 }
 
@@ -362,37 +366,41 @@ export function useSwipeActions(config: SwipeActionConfig = {}): UseSwipeActions
 }
 
 /**
- * Hook to detect if touch device
+ * Hook to detect if touch device using useSyncExternalStore
  */
 export function useIsTouchDevice() {
-  const [isTouch, setIsTouch] = useState(false);
-
-  useEffect(() => {
-    setIsTouch('ontouchstart' in window || navigator.maxTouchPoints > 0);
+  const subscribe = useCallback((callback: () => void) => {
+    // Touch capability doesn't change at runtime, but we still set up subscription
+    // for React's strict mode compatibility
+    return () => {};
   }, []);
 
-  return isTouch;
+  const getSnapshot = useCallback(() => {
+    return 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+  }, []);
+
+  const getServerSnapshot = useCallback(() => false, []);
+
+  return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 }
 
 /**
- * Hook to detect preferred reduced motion
+ * Hook to detect preferred reduced motion using useSyncExternalStore
  */
 export function usePrefersReducedMotion() {
-  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
-
-  useEffect(() => {
+  const subscribe = useCallback((callback: () => void) => {
     const mql = window.matchMedia('(prefers-reduced-motion: reduce)');
-    setPrefersReducedMotion(mql.matches);
-
-    const handler = (event: MediaQueryListEvent) => {
-      setPrefersReducedMotion(event.matches);
-    };
-
-    mql.addEventListener('change', handler);
-    return () => mql.removeEventListener('change', handler);
+    mql.addEventListener('change', callback);
+    return () => mql.removeEventListener('change', callback);
   }, []);
 
-  return prefersReducedMotion;
+  const getSnapshot = useCallback(() => {
+    return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  }, []);
+
+  const getServerSnapshot = useCallback(() => false, []);
+
+  return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 }
 
 export default useSwipeActions;

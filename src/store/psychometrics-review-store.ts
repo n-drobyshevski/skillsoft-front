@@ -623,7 +623,7 @@ export const usePsychometricsReviewStore = create<PsychometricsReviewStore>()(
         },
 
         retryFailedItems: async () => {
-          const { batchSaga, selectedIds } = get();
+          const { batchSaga } = get();
 
           if (!batchSaga || batchSaga.failedItems.length === 0) return;
 
@@ -682,7 +682,7 @@ export const usePsychometricsReviewStore = create<PsychometricsReviewStore>()(
             }));
 
             return true;
-          } catch (error) {
+          } catch {
             set({
               phase: 'TRIAGE',
               loadingItemId: null,
@@ -721,7 +721,11 @@ export const usePsychometricsReviewStore = create<PsychometricsReviewStore>()(
         },
 
         getSuggestion: (itemId) => {
-          return get().suggestions[itemId] ?? null;
+          const suggestions = get().suggestions;
+          // Safe access for Record<string, ReviewSuggestion> with hasOwnProperty check
+          return Object.prototype.hasOwnProperty.call(suggestions, itemId)
+            ? suggestions[itemId as keyof typeof suggestions] ?? null
+            : null;
         },
 
         // ============================================

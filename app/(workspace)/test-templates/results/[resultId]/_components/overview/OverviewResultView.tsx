@@ -88,8 +88,7 @@ export function OverviewResultView({ result, template }: BaseResultViewProps) {
   const hasBigFiveData = useMemo(() => {
     const values = Object.values(bigFiveProfile);
     // Check if we have meaningful variance (not all 50s which is the default)
-    const hasVariance = values.some(v => v !== 50);
-    return hasVariance;
+    return values.some(v => v !== 50);
   }, [bigFiveProfile]);
 
   // Check if we have any mapping contributions

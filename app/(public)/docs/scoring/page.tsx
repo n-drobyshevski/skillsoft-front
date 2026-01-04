@@ -22,9 +22,6 @@ import { MobileTocDrawer } from "../_components/MobileTocDrawer";
 import {
   Callout,
   FlowDiagram,
-  Steps,
-  Step,
-  HierarchyDiagram,
   MermaidDiagram,
   MathBlock,
   InlineMath,

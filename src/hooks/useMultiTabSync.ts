@@ -72,12 +72,13 @@ export function useMultiTabSync<T>({
   onRemoteUpdate,
   enabled = true,
 }: UseMultiTabSyncOptions<T>): UseMultiTabSyncReturn<T> {
-  // Generate unique tab ID
-  const tabIdRef = useRef<string>(
+  // Generate unique tab ID using lazy initializer to avoid impure render
+  const [tabId] = useState(() =>
     typeof window !== 'undefined'
       ? `tab-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`
       : 'ssr'
   );
+  const tabIdRef = useRef(tabId);
 
   // State
   const [currentVersion, setCurrentVersion] = useState(1);

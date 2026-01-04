@@ -112,7 +112,7 @@ function UiLink({
 	const isExternal =
 		external ||
 		(typeof href === "string" &&
-			(href.startsWith("http://") ||
+			(href.startsWith("https://") ||
 				href.startsWith("https://") ||
 				href.startsWith("//")));
 

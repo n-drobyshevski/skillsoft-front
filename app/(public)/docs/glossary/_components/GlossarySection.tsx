@@ -74,8 +74,8 @@ export function GlossarySection({
   terms,
   category,
 }: GlossarySectionProps) {
-  const config = categoryConfig[category];
-  const icon = categoryIcons[category];
+  const config = categoryConfig[category as keyof typeof categoryConfig];
+  const icon = categoryIcons[category as keyof typeof categoryIcons];
 
   return (
     <section

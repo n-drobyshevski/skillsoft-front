@@ -17,9 +17,9 @@ interface UserProfileClientProps {
  * - Role change confirmation
  * - Activity refresh
  */
-export default function UserProfileClient({ 
-  user, 
-  children 
+export default function UserProfileClient({
+  user: _user,
+  children
 }: UserProfileClientProps) {
   // Future: Add state management for edit mode, modals, etc.
   

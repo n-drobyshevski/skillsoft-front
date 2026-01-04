@@ -1,13 +1,15 @@
 'use client';
 
-import React from 'react';
-import { ClipboardList, LayoutGrid, TrendingUp } from 'lucide-react';
+import React, { useMemo } from 'react';
+import { ClipboardList, LayoutGrid, Brain, Users } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { Strategy, STRATEGY_CONFIG } from '../strategy-context';
-import { SimulationResult } from '../types';
+import { SimulationResult, Difficulty } from '../types';
 import { JobFitAlignmentCard } from '../JobFitAlignmentCard';
 import { TeamComparisonCard } from '../TeamComparisonCard';
+import { SimulationCombinedRadar } from '../components/SimulationCombinedRadar';
+import { CompetencyDistribution } from '../utils/transformSimulationToRadar';
 
 // ============================================
 // TYPES
@@ -23,86 +25,98 @@ interface StrategyInsightsTabProps {
 }
 
 // ============================================
+// HELPER: Extract competency data with fallback
+// ============================================
+
+/**
+ * Extracts competency distribution data from simulation result,
+ * with fallback from distributionByCompetency to composition field.
+ */
+function extractCompetencyData(result: SimulationResult): CompetencyDistribution[] {
+  // Primary source: distributionByCompetency (full data)
+  if (result?.distributionByCompetency?.length) {
+    return result.distributionByCompetency;
+  }
+
+  // Fallback: composition (legacy format - name -> count mapping)
+  if (result?.composition && Object.keys(result.composition).length > 0) {
+    return Object.entries(result.composition).map(([name, questionCount], index) => ({
+      competencyId: `comp-${index}`,
+      competencyName: name,
+      questionCount: questionCount as number,
+      weight: 1, // Default equal weight when using legacy format
+      difficultyMix: {
+        FOUNDATIONAL: 0,
+        INTERMEDIATE: questionCount as number,
+        ADVANCED: 0,
+        EXPERT: 0,
+      } as Record<Difficulty, number>,
+    }));
+  }
+
+  return [];
+}
+
+// ============================================
 // UNIVERSAL BASELINE INSIGHTS
 // ============================================
 
 function UniversalBaselineInsights({ result }: { result: SimulationResult }) {
   const config = STRATEGY_CONFIG.UNIVERSAL_BASELINE;
-  const competencyData = result.distributionByCompetency || [];
-
-  // Calculate weight percentages
-  const totalWeight = competencyData.reduce((sum, c) => sum + (c.weight || 1), 0);
+  const competencyData = useMemo(() => extractCompetencyData(result), [result]);
 
   return (
     <div className="space-y-3">
-      {/* Competency Profile Preview */}
+      {/* Competency & Personality Radar */}
       <div className={cn('p-3 rounded-xl border', config.border, config.bg)}>
-        <div className="flex items-center gap-2 mb-3">
-          <ClipboardList
-            className={cn('h-4 w-4', config.iconText)}
-            aria-hidden="true"
-          />
-          <span className="text-sm font-medium">Competency Profile Preview</span>
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center gap-2">
+            <ClipboardList
+              className={cn('h-4 w-4', config.iconText)}
+              aria-hidden="true"
+            />
+            <span className="text-sm font-medium">Assessment Profile</span>
+          </div>
+          <Badge variant="outline" className="text-[10px] tabular-nums gap-1">
+            <LayoutGrid className="h-3 w-3" aria-hidden="true" />
+            {competencyData.length} competencies
+          </Badge>
         </div>
 
-        <div className="space-y-2">
-          {/* Total competencies card */}
-          <div className="flex items-center justify-between p-2 rounded-lg bg-primary/5 border border-primary/20">
-            <div className="flex items-center gap-2">
-              <LayoutGrid className="h-4 w-4 text-primary" aria-hidden="true" />
-              <span className="text-sm font-medium">Total Competencies</span>
-            </div>
-            <span className="text-lg font-bold text-primary tabular-nums">
-              {competencyData.length}
-            </span>
-          </div>
+        {/* Combined Radar Chart */}
+        <SimulationCombinedRadar
+          distributionByCompetency={competencyData}
+          showBigFive={true}
+          maxCompetencies={6}
+          variant="default"
+        />
 
-          {/* Top competencies grid */}
-          <div className="grid grid-cols-2 gap-2">
-            {competencyData.slice(0, 4).map((comp) => (
-              <div
-                key={comp.competencyId}
-                className="p-2 rounded-lg bg-muted/50 border"
-              >
-                <span className="text-xs text-muted-foreground block truncate">
-                  {comp.competencyName}
-                </span>
-                <span className="text-sm font-semibold tabular-nums">
-                  {comp.questionCount} questions
-                </span>
-              </div>
-            ))}
+        {/* Legend explanation */}
+        <div className="flex flex-wrap items-center gap-3 mt-2 pt-2 border-t border-border/50">
+          <div className="flex items-center gap-1.5">
+            <div className="w-2.5 h-2.5 rounded-full bg-blue-500" />
+            <span className="text-[10px] text-muted-foreground">Competency Weights</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <div className="w-2.5 h-2.5 rounded-full bg-violet-500" />
+            <span className="text-[10px] text-muted-foreground">Big Five Traits</span>
           </div>
         </div>
-
-        <p className="text-xs text-muted-foreground mt-3">
-          This assessment will generate a competency passport without pass/fail
-          scoring. Each competency will be measured independently.
-        </p>
       </div>
 
-      {/* Coverage Balance */}
-      <div className={cn('p-3 rounded-xl border', config.border, config.bg)}>
-        <div className="flex items-center gap-2 mb-2">
-          <TrendingUp className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
-          <span className="text-sm font-medium">Coverage Balance</span>
-        </div>
-        <div className="flex flex-wrap gap-1.5">
-          {competencyData.map((comp) => {
-            const weightPercent =
-              totalWeight > 0
-                ? Math.round(((comp.weight || 1) / totalWeight) * 100)
-                : 0;
-            return (
-              <Badge
-                key={comp.competencyId}
-                variant="outline"
-                className="text-[10px] tabular-nums"
-              >
-                {comp.competencyName}: {weightPercent}%
-              </Badge>
-            );
-          })}
+      {/* Info card */}
+      <div className={cn('p-3 rounded-xl border bg-muted/30', config.border)}>
+        <div className="flex items-start gap-2">
+          <Brain className="h-4 w-4 text-violet-500 mt-0.5 shrink-0" aria-hidden="true" />
+          <div className="space-y-1">
+            <p className="text-xs text-muted-foreground">
+              The radar chart shows how competencies are distributed in this assessment,
+              with an estimated Big Five personality profile based on the competency mix.
+            </p>
+            <p className="text-[10px] text-muted-foreground/70">
+              Actual personality scores will be refined after O*NET competency mapping.
+            </p>
+          </div>
         </div>
       </div>
     </div>
@@ -120,7 +134,7 @@ function TargetedFitInsights({
   result: SimulationResult;
   onetSocCode?: string;
 }) {
-  const competencyData = result.distributionByCompetency || [];
+  const competencyData = useMemo(() => extractCompetencyData(result), [result]);
 
   // Generate mock gap data based on simulation results
   // In real implementation, this would come from O*NET API comparison
@@ -164,7 +178,7 @@ function DynamicGapInsights({
   teamId?: string;
   teamName?: string;
 }) {
-  const competencyData = result.distributionByCompetency || [];
+  const competencyData = useMemo(() => extractCompetencyData(result), [result]);
 
   // Generate mock comparison data
   // In real implementation, this would come from team data API

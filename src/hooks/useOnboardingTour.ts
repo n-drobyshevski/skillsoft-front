@@ -233,7 +233,7 @@ export function useOnboardingTour(): UseTourReturn {
 // CONTEXT (for app-wide tour state)
 // ============================================
 
-interface TourContextValue extends UseTourReturn {}
+type TourContextValue = UseTourReturn;
 
 const TourContext = createContext<TourContextValue | null>(null);
 

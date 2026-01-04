@@ -63,10 +63,18 @@ interface TouchPoint {
 /**
  * Trigger haptic feedback if available
  */
-function triggerHaptic(style: 'light' | 'medium' | 'heavy' = 'medium') {
+type HapticStyle = 'light' | 'medium' | 'heavy';
+const HAPTIC_PATTERNS: Readonly<Record<HapticStyle, number>> = {
+  light: 10,
+  medium: 25,
+  heavy: 50,
+} as const;
+
+function triggerHaptic(style: HapticStyle = 'medium') {
   if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
-    const patterns = { light: 10, medium: 25, heavy: 50 };
-    navigator.vibrate(patterns[style]);
+    // Type-safe access: style is constrained to HapticStyle type
+    const pattern = HAPTIC_PATTERNS[style];
+    navigator.vibrate(pattern);
   }
 }
 
@@ -239,7 +247,7 @@ export function useSwipeNavigation<T extends HTMLElement = HTMLDivElement>(
    * Handle touch end
    */
   const handleTouchEnd = useCallback(
-    (e: TouchEvent) => {
+    (_e: TouchEvent) => {
       if (disabled || !startPoint.current || !lastPoint.current) {
         setState({
           isSwiping: false,

@@ -207,8 +207,8 @@ export default function IndicatorsPage() {
                 Хороший пример
               </p>
               <p className="text-sm text-foreground">
-                "Структурирует сложную информацию и представляет ее в понятной
-                форме"
+                &quot;Структурирует сложную информацию и представляет ее в понятной
+                форме&quot;
               </p>
               <p className="text-xs text-muted-foreground mt-2">
                 Конкретный, наблюдаемый, измеримый
@@ -220,7 +220,7 @@ export default function IndicatorsPage() {
                 Плохой пример
               </p>
               <p className="text-sm text-foreground">
-                "Хорошо общается с людьми"
+                &quot;Хорошо общается с людьми&quot;
               </p>
               <p className="text-xs text-muted-foreground mt-2">
                 Слишком общий, не наблюдаемый напрямую
@@ -230,9 +230,9 @@ export default function IndicatorsPage() {
 
           <Callout type="tip" title="Совет">
             <p>
-              Используйте глаголы действия: "структурирует", "адаптирует",
-              "инициирует", "анализирует". Избегайте оценочных слов: "хорошо",
-              "эффективно", "качественно".
+              Используйте глаголы действия: &quot;структурирует&quot;, &quot;адаптирует&quot;,
+              &quot;инициирует&quot;, &quot;анализирует&quot;. Избегайте оценочных слов: &quot;хорошо&quot;,
+              &quot;эффективно&quot;, &quot;качественно&quot;.
             </p>
           </Callout>
         </section>

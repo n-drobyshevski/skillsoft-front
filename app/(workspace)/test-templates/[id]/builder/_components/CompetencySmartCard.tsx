@@ -83,7 +83,12 @@ export function CompetencySmartCard({
     isDragging,
   } = useSortable({
     id: competency.id,
-    data: { laneId: laneId || "DEFAULT" },
+    data: {
+      type: 'canvas-item' as const,
+      laneId: laneId || "DEFAULT",
+      name: competency.name,
+      category: competency.category,
+    },
     disabled: disableSortable,
   });
 

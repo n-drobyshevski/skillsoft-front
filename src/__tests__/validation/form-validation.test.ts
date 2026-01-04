@@ -299,7 +299,7 @@ describe('Form Validation Schemas', () => {
 
       it('should accept valid ESCO reference', () => {
         const validEscoRef = {
-          uri: 'http://data.europa.eu/esco/skill/1234',
+          uri: "https://data.europa.eu/esco/skill/1234",
           title: 'Communication skills',
           skillType: 'skill' as const,
         };

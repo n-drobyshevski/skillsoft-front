@@ -25,7 +25,7 @@ export class ApiHelper {
   constructor(request: APIRequestContext, authHeaders: Record<string, string> = {}) {
     // Construct API base URL
     const envApiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api';
-    const isFullUrl = envApiUrl.startsWith('http://') || envApiUrl.startsWith('https://');
+    const isFullUrl = envApiUrl.startsWith("https://") || envApiUrl.startsWith('https://');
     this.baseUrl = isFullUrl ? envApiUrl : `https://${envApiUrl}/api`;
     this.request = request;
     this.authHeaders = authHeaders;

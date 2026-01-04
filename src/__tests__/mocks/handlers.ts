@@ -35,7 +35,7 @@ export const mockCompetencies: Competency[] = [
     lastModified: new Date().toISOString(),
     standardCodes: {
       onetRef: { code: '2.A.1.a', title: 'Oral Comprehension' },
-      escoRef: { uri: 'http://data.europa.eu/esco/skill/1234', title: 'Communication skills' },
+      escoRef: { uri: "https://data.europa.eu/esco/skill/1234", title: 'Communication skills' },
       bigFiveRef: { trait: 'EXTRAVERSION', title: 'Extraversion' },
     },
   },

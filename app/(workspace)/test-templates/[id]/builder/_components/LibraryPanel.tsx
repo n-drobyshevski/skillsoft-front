@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useCallback } from 'react';
+import { useDraggable } from '@dnd-kit/core';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -23,6 +24,7 @@ import {
 import { cn } from '@/lib/utils';
 import { useBlueprintWorkspace } from './BlueprintWorkspaceProvider';
 import { LibraryCompetency, HealthStatus } from '../actions';
+import type { ActiveDragData } from './BuilderDndProvider';
 
 // ============================================
 // TYPES
@@ -109,16 +111,106 @@ function CategoryIcon({ category }: { category: string }) {
 interface CompetencyItemProps {
   competency: LibraryCompetency;
   isSelected: boolean;
-  onDragStart: (e: React.DragEvent) => void;
   onAdd: () => void;
+  /** Enable drag-and-drop (desktop only, disabled for mobile sheet) */
+  enableDrag?: boolean;
 }
 
-function CompetencyItem({
+/**
+ * Draggable version of CompetencyItem - uses dnd-kit useDraggable hook.
+ * Only rendered when inside a DndContext (desktop).
+ */
+function DraggableCompetencyItem({
   competency,
   isSelected,
-  onDragStart,
   onAdd,
-}: CompetencyItemProps) {
+}: Omit<CompetencyItemProps, 'enableDrag'>) {
+  const isCritical = competency.health === 'CRITICAL';
+  const isDisabled = isCritical || isSelected;
+
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    isDragging,
+  } = useDraggable({
+    id: `library-${competency.id}`,
+    disabled: isDisabled,
+    data: {
+      type: 'library-item',
+      competency: competency,
+      name: competency.name,
+      category: competency.category,
+    } satisfies ActiveDragData,
+  });
+
+  return (
+    <div
+      ref={setNodeRef}
+      className={cn(
+        'group flex items-center gap-2 p-2.5 rounded-lg border transition-all duration-150',
+        'border-l-[3px]',
+        competency.health === 'CRITICAL' && 'border-l-red-500 dark:border-l-red-400',
+        competency.health === 'MODERATE' && 'border-l-amber-500 dark:border-l-amber-400',
+        competency.health === 'HEALTHY' && 'border-l-emerald-500 dark:border-l-emerald-400',
+        isDisabled
+          ? 'opacity-50 cursor-not-allowed bg-muted/30'
+          : 'cursor-grab active:cursor-grabbing hover:bg-muted/50 hover:shadow-sm',
+        isSelected && 'ring-1 ring-primary/40 bg-primary/5',
+        isDragging && 'opacity-50 ring-2 ring-primary/40'
+      )}
+      {...attributes}
+      {...listeners}
+    >
+      <GripVertical
+        className={cn(
+          'h-4 w-4 text-muted-foreground/40 shrink-0 transition-opacity',
+          isDisabled ? 'opacity-0' : 'group-hover:text-muted-foreground/80'
+        )}
+      />
+      <CategoryIcon category={competency.category} />
+      <div className="flex-1 min-w-0">
+        <p className="text-sm font-medium leading-tight truncate">{competency.name}</p>
+        <p className="text-[11px] text-muted-foreground truncate">
+          {competency.category.replace(/_/g, ' ').toLowerCase()}
+        </p>
+      </div>
+      <HealthIndicator health={competency.health} />
+      {!isDisabled && (
+        <Button
+          variant="ghost"
+          size="icon"
+          className={cn(
+            'min-h-[44px] min-w-[44px] rounded-lg',
+            'md:h-8 md:w-8 md:min-h-0 md:min-w-0',
+            'md:opacity-60 md:group-hover:opacity-100',
+            'active:scale-95 active:bg-primary/15',
+            'hover:bg-primary/10 hover:text-primary',
+            'transition-all duration-150'
+          )}
+          onClick={(e) => {
+            e.stopPropagation();
+            onAdd();
+          }}
+          onPointerDown={(e) => e.stopPropagation()}
+          aria-label={`Add ${competency.name} to canvas`}
+        >
+          <Plus className="h-4 w-4" />
+        </Button>
+      )}
+    </div>
+  );
+}
+
+/**
+ * Static (non-draggable) version of CompetencyItem.
+ * Used on mobile where drag-drop is not supported.
+ */
+function StaticCompetencyItem({
+  competency,
+  isSelected,
+  onAdd,
+}: Omit<CompetencyItemProps, 'enableDrag'>) {
   const isCritical = competency.health === 'CRITICAL';
   const isDisabled = isCritical || isSelected;
 
@@ -132,48 +224,26 @@ function CompetencyItem({
         competency.health === 'HEALTHY' && 'border-l-emerald-500 dark:border-l-emerald-400',
         isDisabled
           ? 'opacity-50 cursor-not-allowed bg-muted/30'
-          : 'cursor-grab active:cursor-grabbing hover:bg-muted/50 hover:shadow-sm',
+          : 'hover:bg-muted/50 hover:shadow-sm',
         isSelected && 'ring-1 ring-primary/40 bg-primary/5'
       )}
-      draggable={!isDisabled}
-      onDragStart={isDisabled ? undefined : onDragStart}
     >
-      {/* Drag Handle */}
-      <GripVertical
-        className={cn(
-          'h-4 w-4 text-muted-foreground/40 shrink-0 transition-opacity',
-          isDisabled ? 'opacity-0' : 'group-hover:text-muted-foreground/80'
-        )}
-      />
-
-      {/* Category Icon */}
       <CategoryIcon category={competency.category} />
-
-      {/* Content */}
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium leading-tight truncate">
-          {competency.name}
-        </p>
+        <p className="text-sm font-medium leading-tight truncate">{competency.name}</p>
         <p className="text-[11px] text-muted-foreground truncate">
           {competency.category.replace(/_/g, ' ').toLowerCase()}
         </p>
       </div>
-
-      {/* Health Status */}
       <HealthIndicator health={competency.health} />
-
-      {/* Add Button - Always visible on mobile, hover-reveal on desktop */}
       {!isDisabled && (
         <Button
           variant="ghost"
           size="icon"
           className={cn(
-            // Mobile: always visible with proper touch target (44px minimum)
             'min-h-[44px] min-w-[44px] rounded-lg',
-            // Desktop: subtle until hover
             'md:h-8 md:w-8 md:min-h-0 md:min-w-0',
             'md:opacity-60 md:group-hover:opacity-100',
-            // Active state for touch feedback
             'active:scale-95 active:bg-primary/15',
             'hover:bg-primary/10 hover:text-primary',
             'transition-all duration-150'
@@ -191,6 +261,34 @@ function CompetencyItem({
   );
 }
 
+/**
+ * CompetencyItem that renders either draggable or static version based on enableDrag prop.
+ */
+function CompetencyItem({
+  competency,
+  isSelected,
+  onAdd,
+  enableDrag = false,
+}: CompetencyItemProps) {
+  if (enableDrag) {
+    return (
+      <DraggableCompetencyItem
+        competency={competency}
+        isSelected={isSelected}
+        onAdd={onAdd}
+      />
+    );
+  }
+
+  return (
+    <StaticCompetencyItem
+      competency={competency}
+      isSelected={isSelected}
+      onAdd={onAdd}
+    />
+  );
+}
+
 // ============================================
 // CATEGORY GROUP
 // ============================================
@@ -199,16 +297,17 @@ interface CategoryGroupProps {
   category: string;
   competencies: LibraryCompetency[];
   selectedIds: string[];
-  onDragStart: (e: React.DragEvent, competency: LibraryCompetency) => void;
   onAdd: (competency: LibraryCompetency) => void;
+  /** Enable drag-and-drop (desktop only) */
+  enableDrag?: boolean;
 }
 
 function CategoryGroup({
   category,
   competencies,
   selectedIds,
-  onDragStart,
   onAdd,
+  enableDrag = false,
 }: CategoryGroupProps) {
   return (
     <div className="space-y-2">
@@ -227,8 +326,8 @@ function CategoryGroup({
             key={comp.id}
             competency={comp}
             isSelected={selectedIds.includes(comp.id)}
-            onDragStart={(e) => onDragStart(e, comp)}
             onAdd={() => onAdd(comp)}
+            enableDrag={enableDrag}
           />
         ))}
       </div>
@@ -243,6 +342,10 @@ function CategoryGroup({
 export function LibraryPanel({ onAdd }: LibraryPanelProps) {
   const { libraryCompetencies, state, addCompetency } = useBlueprintWorkspace();
   const [searchQuery, setSearchQuery] = useState('');
+
+  // When onAdd is provided (mobile sheet), disable drag
+  // When not provided (desktop panel), enable drag
+  const enableDrag = !onAdd;
 
   const selectedIds = state.competencies.map((c) => c.id);
 
@@ -269,16 +372,7 @@ export function LibraryPanel({ onAdd }: LibraryPanelProps) {
   // Sort categories alphabetically
   const sortedCategories = Object.keys(groupedCompetencies).sort();
 
-  // Handle drag start
-  const handleDragStart = useCallback(
-    (e: React.DragEvent, competency: LibraryCompetency) => {
-      e.dataTransfer.setData('application/json', JSON.stringify(competency));
-      e.dataTransfer.effectAllowed = 'copy';
-    },
-    []
-  );
-
-  // Handle add (click or mobile)
+  // Handle add (click or mobile) - drag is now handled by useDraggable
   const handleAdd = useCallback(
     (competency: LibraryCompetency) => {
       if (onAdd) {
@@ -333,8 +427,8 @@ export function LibraryPanel({ onAdd }: LibraryPanelProps) {
                 category={category}
                 competencies={groupedCompetencies[category]}
                 selectedIds={selectedIds}
-                onDragStart={handleDragStart}
                 onAdd={handleAdd}
+                enableDrag={enableDrag}
               />
             ))
           )}

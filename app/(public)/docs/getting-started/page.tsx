@@ -18,7 +18,6 @@ import {
   TargetIcon,
   ListChecksIcon,
   PlayIcon,
-  UsersIcon,
 } from "lucide-react";
 
 import { DocsBreadcrumb } from "../_components/DocsBreadcrumb";

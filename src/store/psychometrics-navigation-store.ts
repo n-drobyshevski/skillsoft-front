@@ -238,9 +238,10 @@ export const usePsychometricsNavigationStore =
             const currentScrollY =
               typeof window !== 'undefined' ? window.scrollY : 0;
 
-            const label = options.label ?? phaseLabels[phase];
+            // Safe access with explicit type assertion for Record<NavigationPhase, string>
+            const label = options.label ?? (phaseLabels[phase as keyof typeof phaseLabels] || phase);
             const path =
-              options.path ?? phasePaths[phase] + (options.id ?? '');
+              options.path ?? (phasePaths[phase as keyof typeof phasePaths] || '/psychometrics') + (options.id ?? '');
 
             const newEntry: BreadcrumbEntry = {
               phase,
@@ -326,7 +327,9 @@ export const usePsychometricsNavigationStore =
             if (index < 0 || index >= history.length) return;
 
             const newHistory = history.slice(0, index + 1);
-            const targetEntry = newHistory[index];
+            // Safe array access with bounds check already done above
+            const targetEntry = newHistory.at(index);
+            if (!targetEntry) return;
 
             set({
               currentPhase: targetEntry.phase,
@@ -356,7 +359,9 @@ export const usePsychometricsNavigationStore =
           },
 
           getScrollPosition: (phase) => {
-            return get().scrollPositions[phase] ?? 0;
+            const positions = get().scrollPositions;
+            // Safe access for Record<string, number> with type guard
+            return Object.prototype.hasOwnProperty.call(positions, phase) ? positions[phase as keyof typeof positions] ?? 0 : 0;
           },
 
           setTransitioning: (isTransitioning) => {

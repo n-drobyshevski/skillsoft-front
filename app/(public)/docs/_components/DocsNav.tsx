@@ -70,9 +70,6 @@ function NavSectionComponent({
   currentPath,
   onLinkClick,
 }: NavSectionComponentProps) {
-  // Check if any item in this section is active
-  const isActive = section.items.some((item) => currentPath === item.href);
-
   // Keep sections expanded by default
   const [isOpen, setIsOpen] = useState(true);
 

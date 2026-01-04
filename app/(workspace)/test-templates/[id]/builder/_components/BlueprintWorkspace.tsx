@@ -9,6 +9,7 @@ import { Beaker, Library, Layers, Plus, Clock, Target, CheckCircle2, XCircle } f
 import { LibraryPanel } from "./LibraryPanel";
 import { WeightedCanvas } from "./WeightedCanvas";
 import { SimulatorPanel } from "./simulator";
+import { BuilderDndProvider } from "./BuilderDndProvider";
 import { useBlueprintWorkspace } from "./BlueprintWorkspaceProvider";
 import { useNetworkStatus } from "@/hooks/useNetworkStatus";
 import { cn } from "@/lib/utils";
@@ -84,55 +85,57 @@ function DesktopLayout() {
   }
 
   return (
-    <div className="flex h-full w-full overflow-hidden">
-      <ResizablePanelGroup
-        direction="horizontal"
-        className="h-full w-full rounded-xl border bg-background shadow-sm"
-        // autoSaveId persists panel sizes in localStorage
-        autoSaveId="blueprint-workspace-panels"
-        id="blueprint-workspace-layout"
-      >
-        <ResizablePanel
-          defaultSize={20}
-          minSize={15}
-          collapsible
-          className="border-r bg-muted/10 overflow-hidden"
-          id="panel-library"
-          order={1}
+    <BuilderDndProvider>
+      <div className="flex h-full w-full overflow-hidden">
+        <ResizablePanelGroup
+          direction="horizontal"
+          className="h-full w-full rounded-xl border bg-background shadow-sm"
+          // autoSaveId persists panel sizes in localStorage
+          autoSaveId="blueprint-workspace-panels"
+          id="blueprint-workspace-layout"
         >
-          <Suspense fallback={<LibrarySkeleton />}>
-            <LibraryPanel />
-          </Suspense>
-        </ResizablePanel>
+          <ResizablePanel
+            defaultSize={20}
+            minSize={15}
+            collapsible
+            className="border-r bg-muted/10 overflow-hidden"
+            id="panel-library"
+            order={1}
+          >
+            <Suspense fallback={<LibrarySkeleton />}>
+              <LibraryPanel />
+            </Suspense>
+          </ResizablePanel>
 
-        <ResizableHandle withHandle className="bg-border/80" />
+          <ResizableHandle withHandle className="bg-border/80" />
 
-        <ResizablePanel
-          defaultSize={50}
-          minSize={30}
-          className="bg-background overflow-hidden"
-          id="panel-canvas"
-          order={2}
-        >
-          <WeightedCanvas />
-        </ResizablePanel>
+          <ResizablePanel
+            defaultSize={50}
+            minSize={30}
+            className="bg-background overflow-hidden"
+            id="panel-canvas"
+            order={2}
+          >
+            <WeightedCanvas />
+          </ResizablePanel>
 
-        <ResizableHandle withHandle className="bg-border/80" />
+          <ResizableHandle withHandle className="bg-border/80" />
 
-        <ResizablePanel
-          defaultSize={30}
-          minSize={20}
-          collapsible
-          className="border-l bg-muted/10 overflow-hidden"
-          id="panel-simulator"
-          order={3}
-        >
-          <Suspense fallback={<SimulatorSkeleton />}>
-            <SimulatorPanel />
-          </Suspense>
-        </ResizablePanel>
-      </ResizablePanelGroup>
-    </div>
+          <ResizablePanel
+            defaultSize={30}
+            minSize={20}
+            collapsible
+            className="border-l bg-muted/10 overflow-hidden"
+            id="panel-simulator"
+            order={3}
+          >
+            <Suspense fallback={<SimulatorSkeleton />}>
+              <SimulatorPanel />
+            </Suspense>
+          </ResizablePanel>
+        </ResizablePanelGroup>
+      </div>
+    </BuilderDndProvider>
   );
 }
 

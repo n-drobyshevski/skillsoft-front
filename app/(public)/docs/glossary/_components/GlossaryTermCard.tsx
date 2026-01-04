@@ -99,7 +99,7 @@ export function GlossaryTermCard({
     }
   };
 
-  const accent = categoryAccents[category];
+  const accent = categoryAccents[category as keyof typeof categoryAccents];
 
   return (
     <div className="space-y-3">

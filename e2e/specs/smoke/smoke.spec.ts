@@ -52,7 +52,7 @@ test.describe('Smoke Tests @smoke', () => {
   test('API health check responds', async ({ request }) => {
     // Construct API base URL (handles both full URL and hostname-only formats)
     const envApiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api';
-    const isFullUrl = envApiUrl.startsWith('http://') || envApiUrl.startsWith('https://');
+    const isFullUrl = envApiUrl.startsWith("https://") || envApiUrl.startsWith('https://');
     const apiURL = isFullUrl ? envApiUrl : `https://${envApiUrl}/api`;
     const isRemote = !apiURL.includes('localhost') && !apiURL.includes('127.0.0.1');
 
@@ -74,7 +74,7 @@ test.describe('Smoke Tests @smoke', () => {
   test('API base endpoint is reachable', async ({ request }) => {
     // Construct API URL (handles both full URL and hostname-only formats)
     const envApiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api';
-    const isFullUrl = envApiUrl.startsWith('http://') || envApiUrl.startsWith('https://');
+    const isFullUrl = envApiUrl.startsWith("https://") || envApiUrl.startsWith('https://');
     const apiURL = isFullUrl ? envApiUrl : `https://${envApiUrl}/api`;
 
     // Try to hit a known endpoint
