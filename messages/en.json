@@ -3826,6 +3826,172 @@
       "invalidDataFormat": "Invalid data format from server",
       "cannotConnect": "Cannot connect to backend",
       "backendTip": "Tip: Start the backend with: "
+    },
+    "notFound": {
+      "title": "Team Not Found",
+      "description": "The team you're looking for doesn't exist or has been removed.",
+      "backToList": "Back to Teams",
+      "searchTeams": "Search Teams"
+    },
+    "detail": {
+      "memberCount": "{count, plural, =0 {No members} =1 {1 member} other {# members}}",
+      "created": "Created {date}",
+      "noLeader": "No leader assigned",
+      "tabs": {
+        "members": "Members",
+        "profile": "Profile",
+        "gaps": "Skill Gaps"
+      },
+      "actions": {
+        "edit": "Edit",
+        "more": "More",
+        "addMembers": "Add Members",
+        "activate": "Activate",
+        "archive": "Archive"
+      },
+      "stats": {
+        "members": "Members",
+        "leaders": "Leaders",
+        "leader": "Leader",
+        "age": "Team Age",
+        "avgSaturation": "Avg. Saturation",
+        "saturation": "Saturation",
+        "skillGaps": "Skill Gaps",
+        "gaps": "Gaps"
+      },
+      "sections": {
+        "statistics": "Statistics",
+        "teamInfo": "Team Information"
+      },
+      "info": {
+        "leader": "Team Leader",
+        "createdBy": "Created By",
+        "createdAt": "Created At",
+        "activatedAt": "Activated At"
+      },
+      "members": {
+        "role": {
+          "leader": "Leader",
+          "member": "Member"
+        },
+        "joinedAt": "Joined {date}",
+        "search": {
+          "placeholder": "Search members by name or email...",
+          "noResults": "No members found matching \"{query}\""
+        },
+        "count": "Showing {showing} of {total} members",
+        "actions": {
+          "menu": "Member actions",
+          "viewProfile": "View Profile",
+          "makeLeader": "Make Leader",
+          "remove": "Remove from Team",
+          "addMember": "Add Member"
+        },
+        "empty": {
+          "title": "No Team Members",
+          "description": "Add members to your team to start building your team profile.",
+          "action": "Add Members"
+        }
+      },
+      "profile": {
+        "empty": {
+          "title": "No Profile Data",
+          "description": "Team members need to complete assessments before a team profile can be generated."
+        },
+        "summary": {
+          "title": "Profile Summary",
+          "average": "Average",
+          "high": "High (70%+)",
+          "medium": "Medium",
+          "low": "Low (<40%)"
+        },
+        "competencies": {
+          "title": "Competency Saturation",
+          "description": "Showing {count} competencies ranked by team coverage"
+        },
+        "saturation": {
+          "high": "Strong",
+          "medium": "Moderate",
+          "low": "Weak"
+        },
+        "personality": {
+          "title": "Personality Distribution",
+          "description": "Average Big Five personality traits across team members"
+        }
+      },
+      "gaps": {
+        "empty": {
+          "title": "No Skill Gaps",
+          "description": "Great news! Your team has adequate coverage across all assessed competencies."
+        },
+        "noProfile": {
+          "title": "No Profile Available",
+          "description": "Add team members who have completed assessments to analyze skill gaps.",
+          "action": "Add Members"
+        },
+        "summary": {
+          "title": "Gap Summary"
+        },
+        "priority": {
+          "critical": "Critical",
+          "high": "High",
+          "medium": "Medium"
+        },
+        "list": {
+          "title": "Identified Gaps",
+          "description": "Found {count} competencies below the 30% saturation threshold"
+        },
+        "currentSaturation": "Current saturation: {value}%",
+        "saturation": "Saturation",
+        "threshold": "30% threshold",
+        "recommendation": "Consider hiring candidates with this competency. Estimated need: {needed} more team members.",
+        "actions": {
+          "findCandidates": "Find Candidates"
+        }
+      },
+      "actionResults": {
+        "created": "Team created successfully",
+        "updated": "Team updated successfully",
+        "activated": "Team activated successfully",
+        "archived": "Team archived successfully",
+        "memberAdded": "Member added successfully",
+        "membersAdded": "{count} members added successfully",
+        "memberRemoved": "{name} removed from team",
+        "leaderSet": "Team leader updated",
+        "leaderCleared": "Team leader removed",
+        "error": "An error occurred. Please try again."
+      },
+      "confirmations": {
+        "archive": {
+          "title": "Archive Team",
+          "description": "Are you sure you want to archive \"{name}\"? The team will be hidden from active views.",
+          "confirm": "Archive",
+          "cancel": "Cancel"
+        },
+        "removeMember": {
+          "title": "Remove Member",
+          "description": "Are you sure you want to remove {name} from this team?",
+          "confirm": "Remove",
+          "cancel": "Cancel"
+        },
+        "activate": {
+          "title": "Activate Team",
+          "description": "Activate \"{name}\"? Active teams can be used in TEAM_FIT assessments.",
+          "confirm": "Activate",
+          "cancel": "Cancel"
+        }
+      },
+      "addMembers": {
+        "title": "Add Team Members",
+        "description": "Search and select users to add to this team",
+        "search": "Search users by name or email...",
+        "selected": "{count} selected",
+        "noUsers": "No users found",
+        "alreadyMember": "Already a member",
+        "add": "Add Members",
+        "adding": "Adding...",
+        "cancel": "Cancel"
+      }
     }
   },
   "activity": {
