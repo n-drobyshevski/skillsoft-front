@@ -3992,6 +3992,80 @@
         "adding": "Adding...",
         "cancel": "Cancel"
       }
+    },
+    "form": {
+      "createTitle": "Create New Team",
+      "createDescription": "Set up a new team for team-based assessments",
+      "editTitle": "Edit Team",
+      "editDescription": "Update team information",
+      "sections": {
+        "basicInfo": "Basic Information",
+        "basicInfoDescription": "Enter the team name and description",
+        "members": "Team Members",
+        "membersDescription": "Add members to your team (optional)",
+        "leader": "Team Leader",
+        "leaderDescription": "Assign a team leader (optional)",
+        "settings": "Team Settings",
+        "settingsDescription": "Configure team options"
+      },
+      "fields": {
+        "name": "Team Name",
+        "nameDescription": "Choose a clear, identifiable name for the team",
+        "namePlaceholder": "e.g., Engineering Team, Sales Division",
+        "description": "Description",
+        "descriptionDescription": "Provide a brief description of the team's purpose",
+        "descriptionPlaceholder": "Describe the team's goals and responsibilities...",
+        "members": "Team Members",
+        "membersDescription": "Select users to add as team members",
+        "leader": "Team Leader",
+        "leaderDescription": "Select a team member to be the leader",
+        "activateImmediately": "Activate Immediately",
+        "activateImmediatelyDescription": "Make this team active right away (can be changed later)"
+      },
+      "validation": {
+        "nameRequired": "Team name is required",
+        "nameMin": "Team name must be at least 2 characters",
+        "nameMax": "Team name must not exceed 100 characters",
+        "descriptionMax": "Description must not exceed 500 characters"
+      },
+      "memberSearch": {
+        "placeholder": "Search users by name or email...",
+        "noResults": "No users found",
+        "selected": "{count} member(s) selected",
+        "alreadySelected": "Already selected",
+        "searching": "Searching...",
+        "minChars": "Type at least 2 characters to search"
+      },
+      "leaderSelect": {
+        "placeholder": "Select a leader (optional)",
+        "noLeader": "No leader",
+        "mustBeFromMembers": "Leader must be one of the team members"
+      },
+      "preview": {
+        "title": "Team Preview",
+        "noName": "Untitled Team",
+        "noDescription": "No description provided",
+        "memberCount": "{count, plural, =0 {No members} =1 {1 member} other {# members}}",
+        "willBeCreatedAs": "Will be created as",
+        "leaderAssigned": "Leader assigned"
+      },
+      "actions": {
+        "create": "Create Team",
+        "creating": "Creating...",
+        "save": "Save Changes",
+        "saving": "Saving...",
+        "cancel": "Cancel",
+        "reset": "Reset"
+      },
+      "success": {
+        "created": "Team created successfully",
+        "updated": "Team updated successfully"
+      },
+      "errors": {
+        "createFailed": "Failed to create team",
+        "updateFailed": "Failed to update team",
+        "loadFailed": "Failed to load team data"
+      }
     }
   },
   "activity": {
