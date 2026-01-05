@@ -1069,3 +1069,273 @@ export interface CompetencyIssue {
   healthStatus: HealthStatus;
   issues: string[];
 }
+
+// ============================================
+// TEMPLATE VISIBILITY & SHARING TYPES
+// ============================================
+
+/**
+ * Template visibility levels.
+ * Controls who can access the template.
+ */
+export enum TemplateVisibility {
+  /** Only owner and explicitly shared users/teams can access */
+  PRIVATE = 'PRIVATE',
+  /** Any authenticated user can view and use */
+  PUBLIC = 'PUBLIC',
+  /** Anyone with a valid share link (anonymous access allowed) */
+  LINK = 'LINK'
+}
+
+/**
+ * Share permission levels for template access.
+ * Hierarchical: MANAGE includes EDIT, EDIT includes VIEW.
+ */
+export enum SharePermission {
+  /** Can view and use the template for tests */
+  VIEW = 'VIEW',
+  /** Can modify the template content */
+  EDIT = 'EDIT',
+  /** Can manage sharing settings and visibility */
+  MANAGE = 'MANAGE'
+}
+
+/**
+ * Type of grantee for template shares.
+ */
+export enum GranteeType {
+  /** Share with individual user */
+  USER = 'USER',
+  /** Share with team (all members inherit access) */
+  TEAM = 'TEAM'
+}
+
+/**
+ * Visibility information for a template.
+ */
+export interface VisibilityInfo {
+  templateId: string;
+  visibility: TemplateVisibility;
+  visibilityChangedAt?: string;
+  ownerId: string;
+  ownerName?: string;
+  activeSharesCount: number;
+  activeLinksCount: number;
+}
+
+/**
+ * Request to change template visibility.
+ */
+export interface ChangeVisibilityRequest {
+  visibility: TemplateVisibility;
+}
+
+/**
+ * Template share record for user or team grants.
+ */
+export interface TemplateShare {
+  id: string;
+  templateId: string;
+  granteeType: GranteeType;
+  granteeId: string;
+  granteeName?: string;
+  granteeEmail?: string;
+  granteeAvatarUrl?: string;
+  permission: SharePermission;
+  grantedById: string;
+  grantedByName?: string;
+  grantedAt: string;
+  expiresAt?: string;
+  isActive: boolean;
+  revokedAt?: string;
+}
+
+/**
+ * Request to share template with a user.
+ * Either userId or email must be provided.
+ */
+export interface ShareUserRequest {
+  userId?: string;
+  email?: string;
+  permission: SharePermission;
+  expiresAt?: string;
+}
+
+/**
+ * Request to share template with a team.
+ */
+export interface ShareTeamRequest {
+  teamId: string;
+  permission: SharePermission;
+  expiresAt?: string;
+}
+
+/**
+ * Request to update an existing share.
+ */
+export interface UpdateShareRequest {
+  permission: SharePermission;
+  expiresAt?: string;
+}
+
+/**
+ * Bulk share request for multiple users and teams.
+ */
+export interface BulkShareRequest {
+  userShares: ShareUserRequest[];
+  teamShares: ShareTeamRequest[];
+}
+
+/**
+ * Result of bulk share operation.
+ */
+export interface BulkShareResponse {
+  createdCount: number;
+  updatedCount: number;
+  skippedCount: number;
+  failedCount: number;
+  created: TemplateShare[];
+  updated: TemplateShare[];
+  errors: Record<string, string>;
+}
+
+/**
+ * Share link for token-based template access.
+ */
+export interface ShareLink {
+  id: string;
+  templateId: string;
+  token: string;
+  tokenMasked: boolean;
+  permission: SharePermission;
+  label?: string;
+  expiresAt: string;
+  maxUses?: number;
+  usageCount: number;
+  createdById: string;
+  createdByName?: string;
+  createdAt: string;
+  isActive: boolean;
+  revokedAt?: string;
+  lastUsedAt?: string;
+  fullUrl?: string;
+}
+
+/**
+ * Request to create a share link.
+ */
+export interface CreateShareLinkRequest {
+  permission: SharePermission;
+  expiresInDays: number;
+  maxUses?: number;
+  label?: string;
+}
+
+/**
+ * Result of share link validation.
+ */
+export interface LinkValidationResult {
+  valid: boolean;
+  templateId?: string;
+  templateName?: string;
+  permission?: SharePermission;
+  reason?: string;
+}
+
+/**
+ * Link validation error reasons.
+ */
+export const LinkValidationReasons = {
+  NOT_FOUND: 'NOT_FOUND',
+  REVOKED: 'REVOKED',
+  EXPIRED: 'EXPIRED',
+  MAX_USES_REACHED: 'MAX_USES_REACHED',
+  VISIBILITY_MISMATCH: 'VISIBILITY_MISMATCH',
+  TEMPLATE_NOT_FOUND: 'TEMPLATE_NOT_FOUND',
+  TEMPLATE_ARCHIVED: 'TEMPLATE_ARCHIVED',
+  MISSING_TOKEN: 'MISSING_TOKEN'
+} as const;
+
+/**
+ * Link count information.
+ */
+export interface LinkCountInfo {
+  activeCount: number;
+  maxLinks: number;
+}
+
+// ============================================
+// VISIBILITY HELPER FUNCTIONS
+// ============================================
+
+/**
+ * Check if a permission level includes another.
+ * MANAGE includes EDIT and VIEW; EDIT includes VIEW.
+ */
+export function permissionIncludes(
+  userPermission: SharePermission,
+  required: SharePermission
+): boolean {
+  const levels: Record<SharePermission, number> = {
+    [SharePermission.VIEW]: 1,
+    [SharePermission.EDIT]: 2,
+    [SharePermission.MANAGE]: 3
+  };
+  return levels[userPermission] >= levels[required];
+}
+
+/**
+ * Get display text for visibility level.
+ */
+export function getVisibilityDisplayText(visibility: TemplateVisibility): string {
+  switch (visibility) {
+    case TemplateVisibility.PRIVATE:
+      return 'Private';
+    case TemplateVisibility.PUBLIC:
+      return 'Public';
+    case TemplateVisibility.LINK:
+      return 'Anyone with link';
+  }
+}
+
+/**
+ * Get description for visibility level.
+ */
+export function getVisibilityDescription(visibility: TemplateVisibility): string {
+  switch (visibility) {
+    case TemplateVisibility.PRIVATE:
+      return 'Only you and people you share with can access';
+    case TemplateVisibility.PUBLIC:
+      return 'Anyone in the organization can view and use';
+    case TemplateVisibility.LINK:
+      return 'Anyone with the link can access (anonymous allowed)';
+  }
+}
+
+/**
+ * Get display text for permission level.
+ */
+export function getPermissionDisplayText(permission: SharePermission): string {
+  switch (permission) {
+    case SharePermission.VIEW:
+      return 'Viewer';
+    case SharePermission.EDIT:
+      return 'Editor';
+    case SharePermission.MANAGE:
+      return 'Manager';
+  }
+}
+
+/**
+ * Get description for permission level.
+ */
+export function getPermissionDescription(permission: SharePermission): string {
+  switch (permission) {
+    case SharePermission.VIEW:
+      return 'Can view and take tests';
+    case SharePermission.EDIT:
+      return 'Can edit template content';
+    case SharePermission.MANAGE:
+      return 'Can manage sharing settings';
+  }
+}

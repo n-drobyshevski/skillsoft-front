@@ -16,6 +16,7 @@ import { FileText, Send, GitBranch, ChevronRight, Loader2, Play, Eye, Share2 } f
 import { cn } from "@/lib/utils";
 import { useStudioHeader } from "@/context/StudioHeaderContext";
 import { publishTemplate, createNewVersion } from "../actions";
+import { ShareDialog } from "./sharing";
 
 export type TemplateStatus = "DRAFT" | "PUBLISHED" | "ARCHIVED";
 
@@ -131,10 +132,18 @@ export function TemplateHubHeader({
                     Test Drive
                 </Link>
              </Button>
-             <Button variant="ghost" size="sm" className="gap-1.5 h-8 text-xs">
-                <Share2 className="h-3.5 w-3.5" />
-                Invite
-             </Button>
+             <ShareDialog
+                templateId={templateId}
+                templateName={templateName}
+                isOwner={true}
+                canManage={true}
+                trigger={
+                  <Button variant="ghost" size="sm" className="gap-1.5 h-8 text-xs">
+                    <Share2 className="h-3.5 w-3.5" />
+                    Поделиться
+                  </Button>
+                }
+             />
           </div>
 
           {/* Action Buttons */}

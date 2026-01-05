@@ -32,3 +32,29 @@ export {
   prefetchPsychometricsItemDetail,
   prefetchPsychometricsCompetencyDetail,
 } from './usePsychometricsQuery';
+
+// Template Sharing queries
+export {
+  // Query keys for external cache manipulation
+  templateSharingKeys,
+  // Visibility
+  useTemplateVisibility,
+  useChangeVisibility,
+  // Shares
+  useTemplateShares,
+  useShareWithUser,
+  useShareWithTeam,
+  useUpdateShare,
+  useRevokeShare,
+  useBulkShare,
+  // Links
+  useShareLinks,
+  useActiveShareLinks,
+  useCanCreateLink,
+  useLinkCount,
+  useCreateShareLink,
+  useRevokeShareLink,
+  useRevokeAllLinks,
+  // Link Validation (public)
+  useValidateShareLink,
+} from './useTemplateSharingQuery';
