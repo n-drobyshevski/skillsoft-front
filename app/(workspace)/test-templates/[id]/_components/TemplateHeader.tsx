@@ -11,17 +11,18 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
-import { 
-  FileText, 
-  Send, 
+import {
+  FileText,
+  Send,
   ChevronRight,
-  Loader2 
+  Loader2
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useTransition } from 'react';
 import { publishTemplate } from '../actions';
 import { useEffect } from 'react';
 import { useHeader } from '@/context/HeaderContext';
+import { useTranslations } from 'next-intl';
 
 export type TemplateStatus = 'DRAFT' | 'PUBLISHED' | 'ARCHIVED';
 
@@ -71,18 +72,19 @@ export function TemplateHeader({
 }: TemplateHeaderProps) {
   const [isPending, startTransition] = useTransition();
   const { setTitle, setSubtitle, setEntityName } = useHeader();
+  const t = useTranslations('template.header');
 
   useEffect(() => {
     setTitle(templateName);
-    setSubtitle('Управление шаблоном теста');
-    setEntityName('шаблон');
+    setSubtitle(t('subtitle'));
+    setEntityName(t('entity'));
 
     return () => {
       setTitle('');
       setSubtitle('');
       setEntityName('');
     };
-  }, [setEntityName, setSubtitle, setTitle, templateName]);
+  }, [setEntityName, setSubtitle, setTitle, templateName, t]);
 
   const handlePublish = () => {
     startTransition(async () => {
@@ -100,7 +102,7 @@ export function TemplateHeader({
               <BreadcrumbLink asChild>
                 <Link href="/test-templates" className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors">
                   <FileText className="h-4 w-4" />
-                  <span>Templates</span>
+                  <span>{t('breadcrumbTemplates')}</span>
                 </Link>
               </BreadcrumbLink>
             </BreadcrumbItem>
@@ -141,7 +143,7 @@ export function TemplateHeader({
             ) : (
               <Send className="h-4 w-4" />
             )}
-            Publish
+            {t('publish')}
           </Button>
         )}
 

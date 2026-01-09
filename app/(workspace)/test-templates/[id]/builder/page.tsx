@@ -1,4 +1,7 @@
 import React from "react";
+import { getTranslations } from "next-intl/server";
+import { testTemplatesApi } from "@/services/api";
+import { isReservedTestTemplateSegment } from "@/lib/routing-constants";
 import { BlueprintWorkspace } from "./_components/BlueprintWorkspace";
 
 interface BlueprintBuilderPageProps {
@@ -26,14 +29,28 @@ export default async function BlueprintBuilderPage({
 }
 
 /**
- * Metadata for the builder page
+ * Metadata for the builder page with i18n support
  */
 export async function generateMetadata({
   params,
 }: BlueprintBuilderPageProps) {
   const { id } = await params;
+  const t = await getTranslations("template.metadata");
+
+  // Reject reserved route segments
+  if (isReservedTestTemplateSegment(id)) {
+    return {
+      title: t("invalidRoute"),
+      description: t("invalidRouteDescription"),
+    };
+  }
+
+  const template = await testTemplatesApi.getTemplateById(id);
+
   return {
-    title: `Blueprint Builder | Template ${id}`,
-    description: "Build and configure assessment blueprints",
+    title: template
+      ? t("builder", { name: template.name })
+      : t("testTemplate"),
+    description: t("builderDescription"),
   };
 }

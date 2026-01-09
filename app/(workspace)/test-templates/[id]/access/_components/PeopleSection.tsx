@@ -4,6 +4,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Plus, Loader2 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -28,12 +29,10 @@ interface PeopleSectionProps {
   isMobile: boolean;
 }
 
-const shareUserSchema = z.object({
-  email: z.string().email('Valid email required'),
-  permission: z.nativeEnum(SharePermission),
-});
-
-type ShareUserFormValues = z.infer<typeof shareUserSchema>;
+type ShareUserFormValues = {
+  email: string;
+  permission: SharePermission;
+};
 
 /**
  * PeopleSection - User and team sharing management
@@ -50,8 +49,15 @@ export function PeopleSection({
   canManage,
   isMobile,
 }: PeopleSectionProps) {
+  const t = useTranslations('template.access.people');
+  const tToast = useTranslations('template.access.toast');
   const shareWithUser = useShareWithUser();
   const canEdit = isOwner || canManage;
+
+  const shareUserSchema = z.object({
+    email: z.string().email(t('form.validation.invalidEmail')),
+    permission: z.nativeEnum(SharePermission),
+  });
 
   const form = useForm<ShareUserFormValues>({
     resolver: zodResolver(shareUserSchema),
@@ -70,19 +76,19 @@ export function PeopleSection({
           permission: values.permission,
         },
       });
-      toast.success(`Shared with ${values.email}`);
+      toast.success(tToast('sharedWith', { email: values.email }));
       form.reset();
     } catch {
-      toast.error('Failed to share with user');
+      toast.error(tToast('shareFailed'));
     }
   };
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-lg">People with access</CardTitle>
+        <CardTitle className="text-lg">{t('title')}</CardTitle>
         <CardDescription>
-          Share this template with specific users or teams
+          {t('description')}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -107,7 +113,7 @@ export function PeopleSection({
                     <FormItem className="flex-1">
                       <FormControl>
                         <Input
-                          placeholder="Enter email address"
+                          placeholder={t('form.emailPlaceholder')}
                           type="email"
                           className={cn(isMobile && 'text-base h-12')}
                           {...field}
@@ -147,7 +153,7 @@ export function PeopleSection({
                     ) : (
                       <Plus className="h-4 w-4" />
                     )}
-                    {!isMobile && 'Add'}
+                    {!isMobile && t('form.addButton')}
                   </Button>
                 </div>
               </form>

@@ -1,5 +1,6 @@
 import React from 'react';
 import { notFound } from 'next/navigation';
+import { getTranslations } from 'next-intl/server';
 import { testTemplatesApi } from '@/services/api';
 import { TestSession } from '@/types/domain';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -34,6 +35,31 @@ type ExtendedSession = TestSession & {
 interface ResultsPageProps {
   params: Promise<{ id: string }>;
   searchParams: Promise<{ status?: string; search?: string; page?: string }>;
+}
+
+/**
+ * Generate metadata for the results page with i18n support
+ */
+export async function generateMetadata({ params }: ResultsPageProps) {
+  const { id } = await params;
+  const t = await getTranslations('template.metadata');
+
+  // Reject reserved route segments
+  if (isReservedTestTemplateSegment(id)) {
+    return {
+      title: t('invalidRoute'),
+      description: t('invalidRouteDescription'),
+    };
+  }
+
+  const template = await testTemplatesApi.getTemplateById(id);
+
+  return {
+    title: template
+      ? t('results', { name: template.name })
+      : t('testTemplate'),
+    description: t('resultsDescription'),
+  };
 }
 
 async function getResultsData(id: string, filters: { status?: string; search?: string }) {

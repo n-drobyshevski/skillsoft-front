@@ -9,8 +9,9 @@ import {
 } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Eye, Edit, Settings2 } from 'lucide-react';
-import { SharePermission, getPermissionDisplayText } from '@/types/domain';
+import { SharePermission } from '@/types/domain';
 import { cn } from '@/lib/utils';
+import { useTranslations } from 'next-intl';
 
 interface PermissionSelectProps {
   value: SharePermission;
@@ -65,6 +66,7 @@ export function PermissionSelect({
   className,
   size = 'default',
 }: PermissionSelectProps) {
+  const t = useTranslations('enums.permission');
   const config = permissionConfig[value];
   const Icon = config.icon;
 
@@ -85,7 +87,7 @@ export function PermissionSelect({
         <SelectValue>
           <div className="flex items-center gap-2">
             <Icon className={cn('h-3.5 w-3.5', config.color)} />
-            <span>{getPermissionDisplayText(value)}</span>
+            <span>{t(value)}</span>
           </div>
         </SelectValue>
       </SelectTrigger>
@@ -101,7 +103,7 @@ export function PermissionSelect({
             >
               <div className="flex items-center gap-2">
                 <PermIcon className={cn('h-3.5 w-3.5', permConfig.color)} />
-                <span>{getPermissionDisplayText(permission)}</span>
+                <span>{t(permission)}</span>
               </div>
             </SelectItem>
           );
@@ -125,6 +127,7 @@ export function PermissionBadge({
   className,
   size = 'default',
 }: PermissionBadgeProps) {
+  const t = useTranslations('enums.permission');
   const config = permissionConfig[permission];
   const Icon = config.icon;
 
@@ -139,7 +142,7 @@ export function PermissionBadge({
       )}
     >
       <Icon className={cn('h-3 w-3', config.color)} />
-      <span className={config.color}>{getPermissionDisplayText(permission)}</span>
+      <span className={config.color}>{t(permission)}</span>
     </Badge>
   );
 }

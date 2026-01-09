@@ -1,5 +1,6 @@
 import React from 'react';
 import { notFound } from 'next/navigation';
+import { getTranslations } from 'next-intl/server';
 import { testTemplatesApi } from '@/services/api';
 import { TemplateHeader, type TemplateStatus } from './_components/TemplateHeader';
 import { NavTabs } from './_components/NavTabs';
@@ -91,7 +92,7 @@ export default async function TemplateLayout({
 }
 
 /**
- * Generate metadata for the template pages
+ * Generate metadata for the template pages with i18n support
  */
 export async function generateMetadata({
   params,
@@ -99,10 +100,22 @@ export async function generateMetadata({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+  const t = await getTranslations('template.metadata');
+
+  // Reject reserved route segments
+  if (isReservedTestTemplateSegment(id)) {
+    return {
+      title: t('invalidRoute'),
+      description: t('invalidRouteDescription'),
+    };
+  }
+
   const { template } = await getTemplateData(id);
 
   return {
-    title: template ? `${template.name} | Test Templates` : 'Test Template',
-    description: template?.description || 'Manage your test template',
+    title: template
+      ? t('testTemplate').replace(' | SkillSoft', '') + ` - ${template.name}`
+      : t('testTemplate'),
+    description: template?.description || t('defaultDescription'),
   };
 }

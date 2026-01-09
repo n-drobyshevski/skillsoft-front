@@ -43,6 +43,8 @@
     "of": "из",
     "to": "до",
     "from": "от",
+    "startTest": "Начать тест",
+    "testDrive": "Тест-драйв",
     "pagination": {
       "navigation": "Навигация по страницам",
       "pageOf": "Страница {current} из {total}",
@@ -289,7 +291,14 @@
     "enterAnswer": "Введите ваш ответ...",
     "describeSituationHint": "Опишите конкретную ситуацию, что вы сделали, и каков был результат",
     "writeDetailedAnswer": "Напишите развёрнутый ответ на вопрос",
-    "moreChars": "{count, plural, one {ещё # символ} few {ещё # символа} many {ещё # символов} other {ещё # символов}}"
+    "moreChars": "{count, plural, one {ещё # символ} few {ещё # символа} many {ещё # символов} other {ещё # символов}}",
+    "optionSelected": "{option} выбрано",
+    "optionDeselected": "{option} снято",
+    "multipleChoiceInstruction": "Выберите один или несколько вариантов",
+    "selectedCount": "Выбрано: {count}",
+    "scaleValueSelected": "{value} - {label} выбрано",
+    "likertScaleInstruction": "Оцените от {min} до {max}",
+    "likertScaleLabel": "Шкала от {min} до {max}"
   },
   "likert": {
     "stronglyDisagree": "Совершенно не согласен",
@@ -765,6 +774,194 @@
     "teamFitSettings": "Настройки Team Fit",
     "deselectCategory": "Снять выбор",
     "selectCategory": "Выбрать все",
+    "hub": {
+      "tabs": {
+        "overview": "Обзор",
+        "builder": "Конструктор",
+        "activity": "Активность",
+        "access": "Доступ",
+        "settings": "Настройки",
+        "results": "Результаты"
+      },
+      "status": {
+        "published": "Опубликован",
+        "draft": "Черновик",
+        "archived": "В архиве"
+      },
+      "publishedWarning": {
+        "info": "Информация о публикации",
+        "message": "Этот шаблон заблокирован. Создайте новую версию для внесения изменений."
+      },
+      "actions": {
+        "newVersion": "Новая версия",
+        "newVersionShort": "Новая"
+      },
+      "overview": {
+        "configuration": "Конфигурация",
+        "recentActivity": "Последняя активность",
+        "quickStats": "Статистика",
+        "sharing": "Доступ",
+        "noActivity": "Нет активности",
+        "noDescription": "Описание отсутствует",
+        "performance": "Результативность",
+        "hero": {
+          "goToBuilder": "Перейти в конструктор",
+          "createdAt": "Создан: {date}",
+          "updatedAt": "Обновлён: {date}",
+          "noDescription": "Описание отсутствует"
+        },
+        "configurationCard": {
+          "description": "Настройки теста и параметры поведения",
+          "viewInBuilder": "Открыть в конструкторе",
+          "timeLimit": "Ограничение времени",
+          "passScore": "Проходной балл",
+          "questions": "Вопросы",
+          "competencies": "Компетенции",
+          "competenciesSelected": "{count, plural, one {# компетенция выбрана} few {# компетенции выбрано} many {# компетенций выбрано} other {# компетенций выбрано}}",
+          "testBehavior": "Поведение теста",
+          "shuffleQuestions": "Перемешивать вопросы",
+          "shuffleOptions": "Перемешивать варианты ответов",
+          "allowSkipping": "Разрешить пропуск вопросов",
+          "allowBackNav": "Разрешить возврат назад",
+          "showResults": "Показывать результаты сразу",
+          "unlimited": "Без ограничений",
+          "notSet": "Не задано"
+        },
+        "activity": {
+          "viewAll": "Смотреть все",
+          "noActivityDescription": "Активность появится здесь после прохождения теста кандидатами",
+          "eventTypes": {
+            "completed": "Завершено",
+            "abandoned": "Прервано",
+            "timedOut": "Истекло время"
+          }
+        },
+        "sharingCard": {
+          "share": "Поделиться",
+          "peopleShared": "{count, plural, one {# человек} few {# человека} many {# человек} other {# человек}}",
+          "linksActive": "{count, plural, one {# ссылка активна} few {# ссылки активно} many {# ссылок активно} other {# ссылок активно}}",
+          "copyLink": "Копировать ссылку",
+          "linkCopied": "Ссылка скопирована",
+          "copyFailed": "Не удалось скопировать",
+          "linkUnavailable": "Ссылка недоступна",
+          "manageAccess": "Управление доступом",
+          "noActiveLinks": "Нет активных ссылок"
+        }
+      },
+      "stats": {
+        "sessionBreakdown": "Сессии",
+        "passRate": "Прохождение",
+        "avgScore": "Средний балл",
+        "avgDuration": "Среднее время",
+        "lastActivity": "Последняя активность",
+        "target": "Цель",
+        "passed": "прошли",
+        "completed": "Завершено",
+        "abandoned": "Прервано",
+        "timedOut": "Истекло время",
+        "never": "Никогда",
+        "noData": {
+          "title": "Данных пока нет",
+          "description": "Статистика появится после прохождения теста кандидатами",
+          "passingScore": "Проходной балл"
+        }
+      },
+      "results": {
+        "title": "Сессии тестирования",
+        "description": "Все кандидаты, прошедшие или проходящие этот тест",
+        "stats": {
+          "total": "Всего",
+          "done": "Завершено",
+          "active": "Активно",
+          "avgScore": "Средний балл"
+        },
+        "searchPlaceholder": "Поиск кандидатов...",
+        "filters": {
+          "allStatuses": "Все статусы",
+          "completed": "Завершено",
+          "inProgress": "В процессе",
+          "abandoned": "Прервано"
+        },
+        "export": "Экспорт",
+        "noSessions": "Сессий пока нет",
+        "noSessionsDescription": "Сессии появятся здесь, когда кандидаты начнут тест"
+      },
+      "access": {
+        "title": "Доступ",
+        "description": "Управление доступом к шаблону"
+      },
+      "settings": {
+        "title": "Настройки",
+        "description": "Настройка всех параметров шаблона"
+      }
+    },
+    "metadata": {
+      "testTemplate": "Шаблон теста | SkillSoft",
+      "defaultDescription": "Управление шаблоном теста",
+      "overview": "Обзор | {name}",
+      "overviewDescription": "Просмотр обзора и аналитики шаблона",
+      "access": "Доступ и публикация | {name}",
+      "accessDescription": "Управление доступом к шаблону",
+      "activity": "Активность | {name}",
+      "activityDescription": "Просмотр активности кандидатов",
+      "builder": "Конструктор | {name}",
+      "builderDescription": "Создание и настройка структуры теста",
+      "results": "Результаты | {name}",
+      "resultsDescription": "Просмотр результатов и оценок кандидатов",
+      "settings": "Настройки | {name}",
+      "settingsDescription": "Настройка параметров шаблона",
+      "startAssessment": "Начать тестирование | SkillSoft",
+      "startDescription": "Начните оценку компетенций",
+      "invalidRoute": "Неверный маршрут | SkillSoft",
+      "invalidRouteDescription": "Неверный сегмент маршрута"
+    },
+    "loading": {
+      "title": "Шаблоны тестов",
+      "description": "Выберите шаблон для оценки компетенций"
+    },
+    "errors": {
+      "invalidServerData": "Получены некорректные данные от сервера.",
+      "loadingFailed": "Произошла непредвиденная ошибка при загрузке шаблонов.",
+      "failedToLoad": "Не удалось загрузить тест",
+      "failedToLoadDescription": "Не удалось загрузить данные теста. Возможно, это временная проблема.",
+      "failedToStart": "Не удалось начать тестирование. Попробуйте ещё раз.",
+      "failedToStartNew": "Не удалось создать новую сессию. Попробуйте ещё раз.",
+      "notAuthenticated": "Не авторизован",
+      "checkingSession": "Ошибка проверки существующей сессии"
+    },
+    "builder": {
+      "dragToReorder": "Перетащите для изменения порядка",
+      "questions": "{count, plural, one {# вопрос} few {# вопроса} many {# вопросов} other {# вопросов}}",
+      "weight": "Вес",
+      "weightValue": "Вес: {value}x",
+      "collapse": "Свернуть",
+      "expand": "Развернуть",
+      "removeCompetency": "Удалить {name}",
+      "difficulty": "Сложность",
+      "emptyStateTitle": "Выберите профиль должности для начала",
+      "emptyStateDescription": "Ваш холст пуст. Выберите профиль должности и перетащите компетенции сюда, чтобы начать создание структуры теста.",
+      "addCompetenciesFromLibrary": "Добавить компетенции из библиотеки",
+      "competencyStack": "Стек компетенций",
+      "items": "{count, plural, one {# элемент} few {# элемента} many {# элементов} other {# элементов}}",
+      "minutesEstimate": "~{minutes} мин",
+      "pass": "Порог: {score}%",
+      "dropHereToAdd": "Перетащите сюда для добавления",
+      "save": "Сохранить",
+      "undo": "Отменить",
+      "redo": "Повторить"
+    },
+    "start": {
+      "errors": {
+        "failedToLoad": "Не удалось загрузить тест",
+        "failedToLoadDescription": "Не удалось загрузить данные теста. Возможно, это временная проблема."
+      }
+    },
+    "header": {
+      "subtitle": "Управление шаблонами тестов",
+      "entity": "шаблон",
+      "breadcrumbTemplates": "Шаблоны",
+      "publish": "Опубликовать"
+    },
     "history": {
       "title": "Мои результаты",
       "description": "История завершённых тестов и текущих сессий",
@@ -1075,6 +1272,122 @@
         "questions": "Вопросов",
         "answers": "Ответы",
         "percentile": "Перцентиль"
+      }
+    },
+    "access": {
+      "title": "Доступ",
+      "description": "Управление доступом к шаблону",
+      "visibility": {
+        "title": "Видимость",
+        "description": "Контролируйте, кто может обнаружить и получить доступ к этому шаблону",
+        "options": {
+          "private": "Приватный",
+          "privateDesc": "Доступ только у вас и тех, с кем вы поделились",
+          "public": "Публичный",
+          "publicDesc": "Любой в организации может просматривать и использовать",
+          "link": "По ссылке",
+          "linkDesc": "Любой со ссылкой может получить доступ (анонимно)"
+        },
+        "revokeDialog": {
+          "title": "Отозвать активные ссылки?",
+          "message": "Изменение видимости отзовёт {count, plural, one {# активную ссылку} few {# активные ссылки} many {# активных ссылок} other {# активных ссылок}}.",
+          "warning": "Пользователи с этими ссылками больше не смогут получить доступ к шаблону.",
+          "confirm": "Отозвать и изменить"
+        },
+        "changedTo": "Видимость изменена на {visibility}"
+      },
+      "people": {
+        "title": "Люди с доступом",
+        "description": "Поделитесь шаблоном с конкретными пользователями или командами",
+        "form": {
+          "emailPlaceholder": "Введите email адрес",
+          "addButton": "Добавить",
+          "validation": {
+            "invalidEmail": "Введите корректный email"
+          }
+        },
+        "list": {
+          "usersHeader": "Пользователи ({count})",
+          "teamsHeader": "Команды ({count})",
+          "unknownUser": "Неизвестный пользователь",
+          "unknownTeam": "Неизвестная команда",
+          "teamBadge": "Команда",
+          "expiredBadge": "Истёк",
+          "expires": "Истекает {time}",
+          "expiresIn": "Истекает {time}",
+          "failedToLoad": "Не удалось загрузить доступы"
+        },
+        "emptyState": {
+          "title": "Нет пользователей или команд с доступом",
+          "hint": "Поделитесь шаблоном с помощью формы выше"
+        },
+        "removeDialog": {
+          "title": "Удалить доступ",
+          "message": "Вы уверены, что хотите удалить доступ для {name}? Они больше не смогут получить доступ к этому шаблону.",
+          "cancel": "Отмена",
+          "confirm": "Удалить доступ"
+        }
+      },
+      "links": {
+        "title": "Ссылки доступа",
+        "description": "Создавайте ссылки без добавления конкретных пользователей",
+        "subheader": "Ссылки доступа",
+        "usage": "Использовано {active} из {max} ссылок",
+        "createButton": "Создать ссылку",
+        "form": {
+          "permissionLabel": "Разрешение",
+          "permissionDesc": "Что могут делать пользователи по ссылке?",
+          "expiresLabel": "Истекает через",
+          "expiresDesc": "Истекает {date}",
+          "maxUsesLabel": "Макс. использований (опционально)",
+          "maxUsesPlaceholder": "Без ограничений",
+          "maxUsesDesc": "0 = неограниченно",
+          "labelLabel": "Метка (опционально)",
+          "labelPlaceholder": "напр., Кандидаты на собеседование",
+          "labelDesc": "Поможет идентифицировать ссылку",
+          "cancelButton": "Отмена",
+          "submitButton": "Создать ссылку"
+        },
+        "expiration": {
+          "day1": "1 день",
+          "day7": "7 дней",
+          "day14": "14 дней",
+          "day30": "30 дней",
+          "day90": "90 дней",
+          "year1": "1 год"
+        },
+        "listItem": {
+          "usageDisplay": "{count}{max, select, 0 {} other { / {max}}} использований",
+          "uses": "{count}{max, select, 0 {} other { / {max}}} использований",
+          "expired": "Истёк",
+          "expires": "Истекает {time}",
+          "expiresIn": "Истекает {time}",
+          "usedUp": "Исчерпано",
+          "shareLink": "Ссылка"
+        },
+        "emptyState": {
+          "title": "Нет активных ссылок",
+          "hint": "Создайте ссылку для доступа без добавления конкретных пользователей"
+        },
+        "limitWarning": "Достигнут лимит ссылок. Отзовите существующие ссылки для создания новых.",
+        "revokeDialog": {
+          "title": "Отозвать ссылку",
+          "message": "Вы уверены, что хотите отозвать эту ссылку? Пользователи с этой ссылкой больше не смогут получить доступ к шаблону.",
+          "confirm": "Отозвать ссылку"
+        }
+      },
+      "toast": {
+        "sharedWith": "Доступ предоставлен {email}",
+        "shareFailed": "Не удалось предоставить доступ",
+        "permissionUpdated": "Разрешение обновлено",
+        "updateFailed": "Не удалось обновить разрешение",
+        "accessRemoved": "Доступ удалён для {name}",
+        "revokeFailed": "Не удалось отозвать доступ",
+        "linkCreated": "Ссылка создана",
+        "linkCreateFailed": "Не удалось создать ссылку",
+        "linkRevoked": "Ссылка отозвана",
+        "linkRevokeFailed": "Не удалось отозвать ссылку",
+        "visibilityFailed": "Не удалось изменить видимость"
       }
     }
   },
@@ -3279,6 +3592,22 @@
       "banned_DESC": "Пользователь заблокирован навсегда",
       "locked": "Заморожен",
       "locked_DESC": "Учётная запись временно заморожена"
+    },
+    "visibility": {
+      "PRIVATE": "Приватный",
+      "PRIVATE_DESC": "Доступ только у вас и тех, с кем вы поделились",
+      "PUBLIC": "Публичный",
+      "PUBLIC_DESC": "Любой в организации может просматривать и использовать",
+      "LINK": "По ссылке",
+      "LINK_DESC": "Любой со ссылкой может получить доступ (анонимно)"
+    },
+    "permission": {
+      "VIEW": "Просмотр",
+      "VIEW_DESC": "Может просматривать и проходить тесты",
+      "EDIT": "Редактор",
+      "EDIT_DESC": "Может изменять содержимое теста",
+      "MANAGE": "Управляющий",
+      "MANAGE_DESC": "Полный контроль, включая доступ"
     }
   },
   "help": {
@@ -3760,7 +4089,14 @@
       "monthsAgo": "{count, plural, one {# месяц назад} few {# месяца назад} many {# месяцев назад} other {# месяцев назад}}",
       "yearsAgo": "{count, plural, one {# год назад} few {# года назад} many {# лет назад} other {# лет назад}}",
       "never": "Никогда",
-      "justNow": "Только что"
+      "justNow": "Только что",
+      "minutesAgoShort": "{count} мин назад",
+      "hoursAgoShort": "{count} ч назад",
+      "daysAgoShort": "{count} д назад",
+      "weeksAgoShort": "{count} нед назад",
+      "durationMinutes": "{count} мин",
+      "durationHours": "{count} ч",
+      "durationHoursMinutes": "{hours} ч {minutes} мин"
     }
   },
   "teams": {

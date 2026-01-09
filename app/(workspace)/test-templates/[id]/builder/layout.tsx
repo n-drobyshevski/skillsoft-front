@@ -1,6 +1,6 @@
 import React from "react";
 import { notFound } from "next/navigation";
-import { testTemplatesApi, competenciesApi } from "@/services/api";
+import { getBuilderDataCached } from "@/lib/cached-data";
 import { BlueprintWorkspaceProvider } from "./_components/BlueprintWorkspaceProvider";
 import { fromBackendStrategy } from "./strategy-mapping";
 
@@ -16,6 +16,9 @@ import { fromBackendStrategy } from "./strategy-mapping";
  * - template:{id}:settings - Template settings changes
  * - template:{id}:simulation - Simulation cache
  * - competency:inventory - Global competency health heatmap
+ *
+ * Note: Uses cached data functions from @/lib/cached-data for request deduplication.
+ * Multiple calls to getCachedCompetencies() within the same request are deduplicated.
  */
 export const dynamic = 'force-dynamic';
 export const fetchCache = 'default-cache';
@@ -27,40 +30,18 @@ interface BuilderLayoutProps {
 }
 
 /**
- * Fetch template and competency inventory data server-side
- */
-async function getBlueprintData(id: string) {
-  try {
-    const [template, allCompetencies] = await Promise.all([
-      testTemplatesApi.getTemplateById(id),
-      competenciesApi.getAllCompetencies(),
-    ]);
-
-    if (!template) {
-      return { template: null, competencies: [], error: "Template not found" };
-    }
-
-    const activeCompetencies = Array.isArray(allCompetencies)
-      ? allCompetencies.filter((c) => c.isActive)
-      : [];
-
-    return { template, competencies: activeCompetencies, error: null };
-  } catch (error) {
-    console.error("Failed to fetch blueprint data:", error);
-    return { template: null, competencies: [], error: "Failed to load data" };
-  }
-}
-
-/**
  * Builder Layout - Server Component
- * 
+ *
  * This layout fetches data server-side and provides it to the client
  * workspace via context. The layout is designed to be immersive,
  * optionally hiding the global sidebar for a full-screen experience.
+ *
+ * Uses cached data functions for request deduplication - if the overview
+ * page already fetched competencies, this won't make a duplicate request.
  */
 export default async function BuilderLayout({ children, params }: BuilderLayoutProps) {
   const { id } = await params;
-  const { template, competencies, error } = await getBlueprintData(id);
+  const { template, competencies, error } = await getBuilderDataCached(id);
 
   if (!template || error) {
     notFound();

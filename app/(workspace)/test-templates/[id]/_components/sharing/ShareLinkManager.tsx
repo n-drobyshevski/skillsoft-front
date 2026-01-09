@@ -4,6 +4,8 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { useTranslations } from 'next-intl';
+import { useFormattedDates } from '@/hooks/useFormattedDates';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -63,7 +65,7 @@ import {
   useRevokeShareLink,
 } from '@/hooks/queries';
 import { toast } from 'sonner';
-import { formatDistanceToNow, format, addDays } from 'date-fns';
+import { addDays } from 'date-fns';
 
 interface ShareLinkManagerProps {
   templateId: string;
@@ -96,6 +98,10 @@ export function ShareLinkManager({
   canManage = false,
   isMobile = false,
 }: ShareLinkManagerProps) {
+  const t = useTranslations('template.access.links');
+  const tToast = useTranslations('template.access.toast');
+  const { formatRelativeTime, formatDateTime } = useFormattedDates();
+
   const { data: links, isLoading: linksLoading } = useActiveShareLinks(templateId);
   const { data: linkCount } = useLinkCount(templateId);
   const { data: canCreate } = useCanCreateLink(templateId);
@@ -128,11 +134,11 @@ export function ShareLinkManager({
         },
       });
 
-      toast.success('Share link created');
+      toast.success(tToast('linkCreated'));
       setShowCreateForm(false);
       form.reset();
     } catch (error) {
-      toast.error('Failed to create link');
+      toast.error(tToast('linkCreateFailed'));
       console.error('Create link error:', error);
     }
   };
@@ -141,9 +147,9 @@ export function ShareLinkManager({
     setRevoking(linkId);
     try {
       await revokeLink.mutateAsync({ templateId, linkId });
-      toast.success('Link revoked');
+      toast.success(tToast('linkRevoked'));
     } catch (error) {
-      toast.error('Failed to revoke link');
+      toast.error(tToast('linkRevokeFailed'));
       console.error('Revoke link error:', error);
     } finally {
       setRevoking(null);
@@ -159,9 +165,9 @@ export function ShareLinkManager({
       {/* Header with Create Button */}
       <div className="flex items-center justify-between">
         <div className="space-y-1">
-          <h4 className="text-sm font-medium">Share Links</h4>
+          <h4 className="text-sm font-medium">{t('subheader')}</h4>
           <p className="text-xs text-muted-foreground">
-            {activeCount} of {maxLinks} links used
+            {t('usage', { active: activeCount, max: maxLinks })}
           </p>
         </div>
         {canManage && !showCreateForm && (
@@ -173,7 +179,7 @@ export function ShareLinkManager({
             className={cn('gap-1.5', isMobile && 'min-h-[44px]')}
           >
             <Plus className="h-4 w-4" />
-            Create Link
+            {t('createButton')}
           </Button>
         )}
       </div>
@@ -196,7 +202,7 @@ export function ShareLinkManager({
                   name="permission"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Permission</FormLabel>
+                      <FormLabel>{t('form.permissionLabel')}</FormLabel>
                       <FormControl>
                         <PermissionSelect
                           value={field.value}
@@ -205,7 +211,7 @@ export function ShareLinkManager({
                         />
                       </FormControl>
                       <FormDescription>
-                        What can link users do?
+                        {t('form.permissionDesc')}
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
@@ -217,7 +223,7 @@ export function ShareLinkManager({
                   name="expiresInDays"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Expires In</FormLabel>
+                      <FormLabel>{t('form.expiresLabel')}</FormLabel>
                       <Select
                         value={field.value.toString()}
                         onValueChange={(v) => field.onChange(parseInt(v))}
@@ -228,16 +234,16 @@ export function ShareLinkManager({
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="1">1 day</SelectItem>
-                          <SelectItem value="7">7 days</SelectItem>
-                          <SelectItem value="14">14 days</SelectItem>
-                          <SelectItem value="30">30 days</SelectItem>
-                          <SelectItem value="90">90 days</SelectItem>
-                          <SelectItem value="365">1 year</SelectItem>
+                          <SelectItem value="1">{t('expiration.day1')}</SelectItem>
+                          <SelectItem value="7">{t('expiration.day7')}</SelectItem>
+                          <SelectItem value="14">{t('expiration.day14')}</SelectItem>
+                          <SelectItem value="30">{t('expiration.day30')}</SelectItem>
+                          <SelectItem value="90">{t('expiration.day90')}</SelectItem>
+                          <SelectItem value="365">{t('expiration.year1')}</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormDescription>
-                        Expires {format(addDays(new Date(), field.value), 'PPP')}
+                        {t('form.expiresDesc', { date: formatDateTime(addDays(new Date(), field.value)) })}
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
@@ -251,13 +257,13 @@ export function ShareLinkManager({
                   name="maxUses"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Max Uses (Optional)</FormLabel>
+                      <FormLabel>{t('form.maxUsesLabel')}</FormLabel>
                       <FormControl>
                         <Input
                           type="number"
                           min={0}
                           max={1000}
-                          placeholder="Unlimited"
+                          placeholder={t('form.maxUsesPlaceholder')}
                           className={cn(isMobile && 'h-12 text-base')}
                           {...field}
                           value={field.value || ''}
@@ -269,7 +275,7 @@ export function ShareLinkManager({
                         />
                       </FormControl>
                       <FormDescription>
-                        0 = unlimited uses
+                        {t('form.maxUsesDesc')}
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
@@ -281,16 +287,16 @@ export function ShareLinkManager({
                   name="label"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Label (Optional)</FormLabel>
+                      <FormLabel>{t('form.labelLabel')}</FormLabel>
                       <FormControl>
                         <Input
-                          placeholder="e.g., Interview candidates"
+                          placeholder={t('form.labelPlaceholder')}
                           className={cn(isMobile && 'h-12 text-base')}
                           {...field}
                         />
                       </FormControl>
                       <FormDescription>
-                        Help identify this link
+                        {t('form.labelDesc')}
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
@@ -313,7 +319,7 @@ export function ShareLinkManager({
                     form.reset();
                   }}
                 >
-                  Cancel
+                  {t('form.cancelButton')}
                 </Button>
                 <Button
                   type="submit"
@@ -326,7 +332,7 @@ export function ShareLinkManager({
                   ) : (
                     <Link2 className="h-4 w-4" />
                   )}
-                  Create Link
+                  {t('form.submitButton')}
                 </Button>
               </div>
             </form>
@@ -347,15 +353,17 @@ export function ShareLinkManager({
               isRevoking={revoking === link.id}
               isMobile={isMobile}
               onRevoke={() => handleRevokeLink(link.id)}
+              t={t}
+              formatRelativeTime={formatRelativeTime}
             />
           ))}
         </div>
       ) : (
         <div className="text-center py-8 border rounded-lg bg-muted/20">
           <Link2 className="mx-auto h-10 w-10 text-muted-foreground/30 mb-3" />
-          <p className="text-sm text-muted-foreground">No active share links</p>
+          <p className="text-sm text-muted-foreground">{t('emptyState.title')}</p>
           <p className="text-xs text-muted-foreground/70 mt-1">
-            Create a link to share this template without adding specific users
+            {t('emptyState.hint')}
           </p>
         </div>
       )}
@@ -365,7 +373,7 @@ export function ShareLinkManager({
         <div className="flex items-center gap-2 rounded-lg border border-amber-500/50 bg-amber-50 dark:bg-amber-950/30 p-3 text-sm">
           <AlertCircle className="h-4 w-4 text-amber-600 shrink-0" />
           <p className="text-amber-700 dark:text-amber-400">
-            Maximum link limit reached. Revoke existing links to create new ones.
+            {t('limitWarning')}
           </p>
         </div>
       )}
@@ -379,6 +387,8 @@ interface LinkListItemProps {
   isRevoking: boolean;
   isMobile?: boolean;
   onRevoke: () => void;
+  t: ReturnType<typeof useTranslations<'template.access.links'>>;
+  formatRelativeTime: (date: string | Date | null | undefined) => string;
 }
 
 function LinkListItem({
@@ -387,6 +397,8 @@ function LinkListItem({
   isRevoking,
   isMobile = false,
   onRevoke,
+  t,
+  formatRelativeTime,
 }: LinkListItemProps) {
   const isExpired = link.expiresAt && new Date(link.expiresAt) < new Date();
   const isUsedUp = link.maxUses != null && link.usageCount >= link.maxUses;
@@ -409,17 +421,17 @@ function LinkListItem({
           )}
         />
         <span className="text-sm font-medium truncate flex-1">
-          {link.label || 'Share Link'}
+          {link.label || t('listItem.shareLink')}
         </span>
         <PermissionBadge permission={link.permission} size="sm" />
         {isExpired && (
           <Badge variant="destructive" className="text-xs">
-            Expired
+            {t('listItem.expired')}
           </Badge>
         )}
         {isUsedUp && (
           <Badge variant="secondary" className="text-xs">
-            Used Up
+            {t('listItem.usedUp')}
           </Badge>
         )}
       </div>
@@ -428,13 +440,13 @@ function LinkListItem({
       <div className="flex items-center gap-4 text-xs text-muted-foreground">
         <span className="flex items-center gap-1">
           <Eye className="h-3 w-3" />
-          {link.usageCount} {link.maxUses ? `/ ${link.maxUses}` : ''} uses
+          {t('listItem.uses', { count: link.usageCount, max: link.maxUses ?? 0 })}
         </span>
         <span className="flex items-center gap-1">
           <Clock className="h-3 w-3" />
           {isExpired
-            ? 'Expired'
-            : `Expires ${formatDistanceToNow(new Date(link.expiresAt), { addSuffix: true })}`}
+            ? t('listItem.expired')
+            : t('listItem.expiresIn', { time: formatRelativeTime(link.expiresAt) })}
         </span>
       </div>
 
@@ -465,19 +477,18 @@ function LinkListItem({
               </AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader>
-                  <AlertDialogTitle>Revoke Share Link</AlertDialogTitle>
+                  <AlertDialogTitle>{t('revokeDialog.title')}</AlertDialogTitle>
                   <AlertDialogDescription>
-                    Are you sure you want to revoke this link? Anyone with this
-                    link will no longer be able to access the template.
+                    {t('revokeDialog.message')}
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogCancel>{t('form.cancelButton')}</AlertDialogCancel>
                   <AlertDialogAction
                     onClick={onRevoke}
                     className="bg-destructive hover:bg-destructive/90"
                   >
-                    Revoke Link
+                    {t('revokeDialog.confirm')}
                   </AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>

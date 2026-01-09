@@ -1,11 +1,37 @@
 import React from 'react';
 import { notFound } from 'next/navigation';
+import { getTranslations } from 'next-intl/server';
 import { testTemplatesApi } from '@/services/api';
 import { SettingsForm } from './_components/SettingsForm';
 import { isReservedTestTemplateSegment } from '@/lib/routing-constants';
 
 interface SettingsPageProps {
   params: Promise<{ id: string }>;
+}
+
+/**
+ * Generate metadata for the settings page with i18n support
+ */
+export async function generateMetadata({ params }: SettingsPageProps) {
+  const { id } = await params;
+  const t = await getTranslations('template.metadata');
+
+  // Reject reserved route segments
+  if (isReservedTestTemplateSegment(id)) {
+    return {
+      title: t('invalidRoute'),
+      description: t('invalidRouteDescription'),
+    };
+  }
+
+  const template = await testTemplatesApi.getTemplateById(id);
+
+  return {
+    title: template
+      ? t('settings', { name: template.name })
+      : t('testTemplate'),
+    description: t('settingsDescription'),
+  };
 }
 
 async function getTemplateData(id: string) {

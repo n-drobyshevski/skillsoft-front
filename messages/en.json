@@ -43,6 +43,8 @@
     "of": "of",
     "to": "to",
     "from": "from",
+    "startTest": "Start Test",
+    "testDrive": "Test Drive",
     "pagination": {
       "navigation": "Page navigation",
       "pageOf": "Page {current} of {total}",
@@ -289,7 +291,14 @@
     "enterAnswer": "Enter your answer...",
     "describeSituationHint": "Describe a specific situation, what you did, and what was the result",
     "writeDetailedAnswer": "Write a detailed answer to the question",
-    "moreChars": "{count, plural, one {# more character} other {# more characters}}"
+    "moreChars": "{count, plural, one {# more character} other {# more characters}}",
+    "optionSelected": "{option} selected",
+    "optionDeselected": "{option} deselected",
+    "multipleChoiceInstruction": "Select one or more options",
+    "selectedCount": "Selected: {count}",
+    "scaleValueSelected": "{value} - {label} selected",
+    "likertScaleInstruction": "Rate from {min} to {max}",
+    "likertScaleLabel": "Scale from {min} to {max}"
   },
   "likert": {
     "stronglyDisagree": "Strongly Disagree",
@@ -765,6 +774,194 @@
     "teamFitSettings": "Team Fit Settings",
     "deselectCategory": "Deselect",
     "selectCategory": "Select all",
+    "hub": {
+      "tabs": {
+        "overview": "Overview",
+        "builder": "Builder",
+        "activity": "Activity",
+        "access": "Access",
+        "settings": "Settings",
+        "results": "Results"
+      },
+      "status": {
+        "published": "Published",
+        "draft": "Draft",
+        "archived": "Archived"
+      },
+      "publishedWarning": {
+        "info": "Published info",
+        "message": "This blueprint is locked. Create a new version to make changes."
+      },
+      "actions": {
+        "newVersion": "New Version",
+        "newVersionShort": "New"
+      },
+      "overview": {
+        "configuration": "Configuration",
+        "recentActivity": "Recent Activity",
+        "quickStats": "Quick Stats",
+        "sharing": "Sharing",
+        "noActivity": "No recent activity",
+        "noDescription": "No description provided",
+        "performance": "Performance",
+        "hero": {
+          "goToBuilder": "Go to Builder",
+          "createdAt": "Created: {date}",
+          "updatedAt": "Updated: {date}",
+          "noDescription": "No description"
+        },
+        "configurationCard": {
+          "description": "Test settings and behavior options",
+          "viewInBuilder": "View in Builder",
+          "timeLimit": "Time Limit",
+          "passScore": "Pass Score",
+          "questions": "Questions",
+          "competencies": "Competencies",
+          "competenciesSelected": "{count, plural, one {# competency} other {# competencies}} selected",
+          "testBehavior": "Test Behavior",
+          "shuffleQuestions": "Shuffle questions",
+          "shuffleOptions": "Shuffle answer options",
+          "allowSkipping": "Allow skipping questions",
+          "allowBackNav": "Allow back navigation",
+          "showResults": "Show results immediately",
+          "unlimited": "Unlimited",
+          "notSet": "Not set"
+        },
+        "activity": {
+          "viewAll": "View All",
+          "noActivityDescription": "Activity will appear here once candidates complete the test",
+          "eventTypes": {
+            "completed": "Completed",
+            "abandoned": "Abandoned",
+            "timedOut": "Timed Out"
+          }
+        },
+        "sharingCard": {
+          "share": "Share",
+          "peopleShared": "{count, plural, one {# person} other {# people}} shared",
+          "linksActive": "{count, plural, one {# link} other {# links}} active",
+          "copyLink": "Copy Link",
+          "linkCopied": "Link copied to clipboard",
+          "copyFailed": "Failed to copy link",
+          "linkUnavailable": "Link URL not available",
+          "manageAccess": "Manage access settings",
+          "noActiveLinks": "No active share links available"
+        }
+      },
+      "stats": {
+        "sessionBreakdown": "Session Breakdown",
+        "passRate": "Pass Rate",
+        "avgScore": "Avg Score",
+        "avgDuration": "Avg Duration",
+        "lastActivity": "Last Activity",
+        "target": "Target",
+        "passed": "passed",
+        "completed": "Completed",
+        "abandoned": "Abandoned",
+        "timedOut": "Timed Out",
+        "never": "Never",
+        "noData": {
+          "title": "No performance data yet",
+          "description": "Statistics will appear here after candidates complete the test",
+          "passingScore": "Passing score"
+        }
+      },
+      "results": {
+        "title": "Test Sessions",
+        "description": "All candidates who have taken or are taking this test",
+        "stats": {
+          "total": "Total",
+          "done": "Done",
+          "active": "Active",
+          "avgScore": "Avg Score"
+        },
+        "searchPlaceholder": "Search candidates...",
+        "filters": {
+          "allStatuses": "All Statuses",
+          "completed": "Completed",
+          "inProgress": "In Progress",
+          "abandoned": "Abandoned"
+        },
+        "export": "Export",
+        "noSessions": "No test sessions yet",
+        "noSessionsDescription": "Sessions will appear here when candidates start the test"
+      },
+      "access": {
+        "title": "Access",
+        "description": "Manage who can view and use this template"
+      },
+      "settings": {
+        "title": "Settings",
+        "description": "Configure all template settings and behavior options"
+      }
+    },
+    "metadata": {
+      "testTemplate": "Test Template | SkillSoft",
+      "defaultDescription": "Manage your test template",
+      "overview": "Overview | {name}",
+      "overviewDescription": "View template overview and analytics",
+      "access": "Access & Sharing | {name}",
+      "accessDescription": "Manage who can view and use this template",
+      "activity": "Activity | {name}",
+      "activityDescription": "View candidate test activity",
+      "builder": "Blueprint Builder | {name}",
+      "builderDescription": "Build and configure assessment blueprints",
+      "results": "Results | {name}",
+      "resultsDescription": "View test results and candidate scores",
+      "settings": "Settings | {name}",
+      "settingsDescription": "Configure template settings and behavior",
+      "startAssessment": "Start Assessment | SkillSoft",
+      "startDescription": "Begin your competency assessment",
+      "invalidRoute": "Invalid Route | SkillSoft",
+      "invalidRouteDescription": "Invalid route segment"
+    },
+    "loading": {
+      "title": "Test Templates",
+      "description": "Select a template to assess your competencies"
+    },
+    "errors": {
+      "invalidServerData": "Invalid data received from server.",
+      "loadingFailed": "An unexpected error occurred while loading templates.",
+      "failedToLoad": "Failed to Load Assessment",
+      "failedToLoadDescription": "We couldn't load the assessment details. This might be a temporary issue.",
+      "failedToStart": "Failed to start assessment. Please try again.",
+      "failedToStartNew": "Failed to start new session. Please try again.",
+      "notAuthenticated": "Not authenticated",
+      "checkingSession": "Error checking for existing session"
+    },
+    "builder": {
+      "dragToReorder": "Drag to reorder",
+      "questions": "{count, plural, one {# question} other {# questions}}",
+      "weight": "Weight",
+      "weightValue": "Weight: {value}x",
+      "collapse": "Collapse",
+      "expand": "Expand",
+      "removeCompetency": "Remove {name}",
+      "difficulty": "Difficulty",
+      "emptyStateTitle": "Select a Job Profile to begin",
+      "emptyStateDescription": "Your canvas is empty. Choose a job profile and drag competencies here to start building your test blueprint.",
+      "addCompetenciesFromLibrary": "Add competencies from the library",
+      "competencyStack": "Competency Stack",
+      "items": "{count, plural, one {# item} other {# items}}",
+      "minutesEstimate": "~{minutes} min",
+      "pass": "Pass: {score}%",
+      "dropHereToAdd": "Drop here to add",
+      "save": "Save",
+      "undo": "Undo",
+      "redo": "Redo"
+    },
+    "start": {
+      "errors": {
+        "failedToLoad": "Failed to Load Assessment",
+        "failedToLoadDescription": "We couldn't load the assessment details. This might be a temporary issue."
+      }
+    },
+    "header": {
+      "subtitle": "Test Template Management",
+      "entity": "template",
+      "breadcrumbTemplates": "Templates",
+      "publish": "Publish"
+    },
     "history": {
       "title": "My Results",
       "description": "History of completed tests and current sessions",
@@ -1075,6 +1272,122 @@
         "questions": "Questions",
         "answers": "Answers",
         "percentile": "Percentile"
+      }
+    },
+    "access": {
+      "title": "Access",
+      "description": "Manage who can view and use this template",
+      "visibility": {
+        "title": "Visibility",
+        "description": "Control who can discover and access this template",
+        "options": {
+          "private": "Private",
+          "privateDesc": "Only you and people you share with can access",
+          "public": "Public",
+          "publicDesc": "Anyone in the organization can view and use",
+          "link": "Anyone with link",
+          "linkDesc": "Anyone with the link can access (anonymous allowed)"
+        },
+        "revokeDialog": {
+          "title": "Revoke Active Share Links?",
+          "message": "Changing visibility from Link will revoke {count, plural, =1 {# active share link} other {all # active share links}}.",
+          "warning": "Anyone with these links will no longer be able to access this template.",
+          "confirm": "Revoke & Change"
+        },
+        "changedTo": "Visibility changed to {visibility}"
+      },
+      "people": {
+        "title": "People with access",
+        "description": "Share this template with specific users or teams",
+        "form": {
+          "emailPlaceholder": "Enter email address",
+          "addButton": "Add",
+          "validation": {
+            "invalidEmail": "Valid email required"
+          }
+        },
+        "list": {
+          "usersHeader": "Users ({count})",
+          "teamsHeader": "Teams ({count})",
+          "unknownUser": "Unknown User",
+          "unknownTeam": "Unknown Team",
+          "teamBadge": "Team",
+          "expiredBadge": "Expired",
+          "expires": "Expires {time}",
+          "expiresIn": "Expires {time}",
+          "failedToLoad": "Failed to load shares"
+        },
+        "emptyState": {
+          "title": "No users or teams have access",
+          "hint": "Share this template with users or teams using the form above"
+        },
+        "removeDialog": {
+          "title": "Remove Access",
+          "message": "Are you sure you want to remove access for {name}? They will no longer be able to access this template.",
+          "cancel": "Cancel",
+          "confirm": "Remove Access"
+        }
+      },
+      "links": {
+        "title": "Share Links",
+        "description": "Create shareable links that don't require adding specific users",
+        "subheader": "Share Links",
+        "usage": "{active} of {max} links used",
+        "createButton": "Create Link",
+        "form": {
+          "permissionLabel": "Permission",
+          "permissionDesc": "What can link users do?",
+          "expiresLabel": "Expires In",
+          "expiresDesc": "Expires {date}",
+          "maxUsesLabel": "Max Uses (Optional)",
+          "maxUsesPlaceholder": "Unlimited",
+          "maxUsesDesc": "0 = unlimited uses",
+          "labelLabel": "Label (Optional)",
+          "labelPlaceholder": "e.g., Interview candidates",
+          "labelDesc": "Help identify this link",
+          "cancelButton": "Cancel",
+          "submitButton": "Create Link"
+        },
+        "expiration": {
+          "day1": "1 day",
+          "day7": "7 days",
+          "day14": "14 days",
+          "day30": "30 days",
+          "day90": "90 days",
+          "year1": "1 year"
+        },
+        "listItem": {
+          "usageDisplay": "{count}{max, select, 0 {} other { / {max}}} uses",
+          "uses": "{count}{max, select, 0 {} other { / {max}}} uses",
+          "expired": "Expired",
+          "expires": "Expires {time}",
+          "expiresIn": "Expires {time}",
+          "usedUp": "Used Up",
+          "shareLink": "Share Link"
+        },
+        "emptyState": {
+          "title": "No active share links",
+          "hint": "Create a link to share this template without adding specific users"
+        },
+        "limitWarning": "Maximum link limit reached. Revoke existing links to create new ones.",
+        "revokeDialog": {
+          "title": "Revoke Share Link",
+          "message": "Are you sure you want to revoke this link? Anyone with this link will no longer be able to access the template.",
+          "confirm": "Revoke Link"
+        }
+      },
+      "toast": {
+        "sharedWith": "Shared with {email}",
+        "shareFailed": "Failed to share with user",
+        "permissionUpdated": "Permission updated",
+        "updateFailed": "Failed to update permission",
+        "accessRemoved": "Removed access for {name}",
+        "revokeFailed": "Failed to revoke access",
+        "linkCreated": "Share link created",
+        "linkCreateFailed": "Failed to create link",
+        "linkRevoked": "Link revoked",
+        "linkRevokeFailed": "Failed to revoke link",
+        "visibilityFailed": "Failed to change visibility"
       }
     }
   },
@@ -3279,6 +3592,22 @@
       "banned_DESC": "User is permanently blocked from the system",
       "locked": "Locked",
       "locked_DESC": "User account is temporarily locked"
+    },
+    "visibility": {
+      "PRIVATE": "Private",
+      "PRIVATE_DESC": "Only you and people you share with can access",
+      "PUBLIC": "Public",
+      "PUBLIC_DESC": "Anyone in the organization can view and use",
+      "LINK": "Anyone with link",
+      "LINK_DESC": "Anyone with the link can access (anonymous allowed)"
+    },
+    "permission": {
+      "VIEW": "Viewer",
+      "VIEW_DESC": "Can view and take tests",
+      "EDIT": "Editor",
+      "EDIT_DESC": "Can modify test content",
+      "MANAGE": "Manager",
+      "MANAGE_DESC": "Full control including sharing"
     }
   },
   "help": {
@@ -3755,12 +4084,19 @@
     "time": {
       "today": "Today",
       "yesterday": "Yesterday",
-      "daysAgo": "{count} days ago",
-      "weeksAgo": "{count} weeks ago",
-      "monthsAgo": "{count} months ago",
-      "yearsAgo": "{count} years ago",
+      "daysAgo": "{count, plural, one {# day ago} other {# days ago}}",
+      "weeksAgo": "{count, plural, one {# week ago} other {# weeks ago}}",
+      "monthsAgo": "{count, plural, one {# month ago} other {# months ago}}",
+      "yearsAgo": "{count, plural, one {# year ago} other {# years ago}}",
       "never": "Never",
-      "justNow": "Just now"
+      "justNow": "Just now",
+      "minutesAgoShort": "{count}m ago",
+      "hoursAgoShort": "{count}h ago",
+      "daysAgoShort": "{count}d ago",
+      "weeksAgoShort": "{count}w ago",
+      "durationMinutes": "{count}m",
+      "durationHours": "{count}h",
+      "durationHoursMinutes": "{hours}h {minutes}m"
     }
   },
   "teams": {

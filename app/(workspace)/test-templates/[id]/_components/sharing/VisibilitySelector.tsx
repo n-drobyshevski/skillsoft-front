@@ -24,13 +24,10 @@ import {
   Loader2,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import {
-  TemplateVisibility,
-  getVisibilityDisplayText,
-  getVisibilityDescription,
-} from '@/types/domain';
+import { TemplateVisibility } from '@/types/domain';
 import { useChangeVisibility } from '@/hooks/queries';
 import { toast } from 'sonner';
+import { useTranslations } from 'next-intl';
 
 interface VisibilitySelectorProps {
   templateId: string;
@@ -82,6 +79,9 @@ export function VisibilitySelector({
   canManage = false,
   onVisibilityChange,
 }: VisibilitySelectorProps) {
+  const t = useTranslations('template.access.visibility');
+  const tToast = useTranslations('template.access.toast');
+
   const [pendingVisibility, setPendingVisibility] =
     useState<TemplateVisibility | null>(null);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
@@ -116,10 +116,10 @@ export function VisibilitySelector({
         request: { visibility },
       });
 
-      toast.success(`Visibility changed to ${getVisibilityDisplayText(visibility)}`);
+      toast.success(t('changedTo', { visibility: t(`options.${visibility.toLowerCase()}`) }));
       onVisibilityChange?.(visibility);
     } catch (error) {
-      toast.error('Failed to change visibility');
+      toast.error(tToast('visibilityFailed'));
       console.error('Visibility change error:', error);
     }
   };
@@ -186,7 +186,7 @@ export function VisibilitySelector({
                 <div className="flex-1 min-w-0 space-y-1">
                   <div className="flex items-center gap-2">
                     <span className="font-semibold text-sm">
-                      {getVisibilityDisplayText(visibility)}
+                      {t(`options.${visibility.toLowerCase()}`)}
                     </span>
                     {isSelected && (
                       <Check className="h-4 w-4 text-primary animate-in fade-in zoom-in duration-200" />
@@ -199,7 +199,7 @@ export function VisibilitySelector({
                       )}
                   </div>
                   <p className="text-xs text-muted-foreground leading-relaxed">
-                    {getVisibilityDescription(visibility)}
+                    {t(`options.${visibility.toLowerCase()}Desc`)}
                   </p>
                 </div>
 
@@ -220,17 +220,14 @@ export function VisibilitySelector({
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2">
               <AlertTriangle className="h-5 w-5 text-amber-500" />
-              Revoke Active Share Links?
+              {t('revokeDialog.title')}
             </AlertDialogTitle>
             <AlertDialogDescription className="space-y-2">
               <p>
-                Changing visibility from <strong>Link</strong> will revoke all{' '}
-                <strong>{activeLinksCount}</strong> active share link
-                {activeLinksCount !== 1 && 's'}.
+                {t('revokeDialog.message', { count: activeLinksCount })}
               </p>
               <p>
-                Anyone with these links will no longer be able to access this
-                template.
+                {t('revokeDialog.warning')}
               </p>
             </AlertDialogDescription>
           </AlertDialogHeader>
@@ -245,7 +242,7 @@ export function VisibilitySelector({
               {changeVisibility.isPending ? (
                 <Loader2 className="h-4 w-4 animate-spin mr-2" />
               ) : null}
-              Revoke & Change
+              {t('revokeDialog.confirm')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -268,6 +265,7 @@ export function VisibilityBadge({
   className,
   size = 'default',
 }: VisibilityBadgeProps) {
+  const t = useTranslations('template.access.visibility');
   const config = visibilityConfig[visibility];
   const Icon = config.icon;
 
@@ -282,7 +280,7 @@ export function VisibilityBadge({
       )}
     >
       <Icon className={cn('h-3 w-3', config.color)} />
-      <span className={config.color}>{getVisibilityDisplayText(visibility)}</span>
+      <span className={config.color}>{t(`options.${visibility.toLowerCase()}`)}</span>
     </Badge>
   );
 }

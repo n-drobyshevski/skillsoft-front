@@ -40,6 +40,7 @@ import {
   Loader2,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useTranslations } from 'next-intl';
 import { useBlueprintWorkspace } from './BlueprintWorkspaceProvider';
 import { BlueprintCompetency, LibraryCompetency } from '../actions';
 
@@ -52,6 +53,7 @@ interface SortableCompetencyCardProps {
   onRemove: () => void;
   onUpdateWeight: (weight: number) => void;
   isPending: boolean;
+  t: ReturnType<typeof useTranslations<'template.builder'>>;
 }
 
 function SortableCompetencyCard({
@@ -59,6 +61,7 @@ function SortableCompetencyCard({
   onRemove,
   onUpdateWeight,
   isPending,
+  t,
 }: SortableCompetencyCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -98,7 +101,7 @@ function SortableCompetencyCard({
             'hover:bg-muted transition-colors',
             'focus:outline-none focus-visible:ring-2 focus-visible:ring-ring'
           )}
-          aria-label="Drag to reorder"
+          aria-label={t('dragToReorder')}
         >
           <GripVertical className="h-5 w-5 text-muted-foreground/50" />
         </button>
@@ -112,9 +115,9 @@ function SortableCompetencyCard({
             </Badge>
           </div>
           <div className="flex items-center gap-3 mt-1 text-[11px] text-muted-foreground">
-            <span>{competency.questionCount} questions</span>
+            <span>{t('questions', { count: competency.questionCount })}</span>
             <span>•</span>
-            <span>Weight: {competency.weight.toFixed(1)}x</span>
+            <span>{t('weightValue', { value: competency.weight.toFixed(1) })}</span>
           </div>
         </div>
 
@@ -125,7 +128,7 @@ function SortableCompetencyCard({
             size="icon"
             className="h-8 w-8 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
             onClick={() => setIsExpanded(!isExpanded)}
-            aria-label={isExpanded ? 'Collapse' : 'Expand'}
+            aria-label={isExpanded ? t('collapse') : t('expand')}
           >
             {isExpanded ? (
               <ChevronUp className="h-4 w-4" />
@@ -139,7 +142,7 @@ function SortableCompetencyCard({
             size="icon"
             className="h-8 w-8 rounded-lg text-destructive/70 hover:text-destructive hover:bg-destructive/10 opacity-0 group-hover:opacity-100 transition-opacity"
             onClick={onRemove}
-            aria-label={`Remove ${competency.name}`}
+            aria-label={t('removeCompetency', { name: competency.name })}
           >
             <Trash2 className="h-4 w-4" />
           </Button>
@@ -154,7 +157,7 @@ function SortableCompetencyCard({
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <label className="text-xs font-medium text-muted-foreground">
-                  Weight
+                  {t('weight')}
                 </label>
                 <span className="text-xs font-mono bg-muted px-1.5 py-0.5 rounded">
                   {competency.weight.toFixed(1)}x
@@ -172,7 +175,7 @@ function SortableCompetencyCard({
 
             {/* Difficulty indicator */}
             <div className="flex items-center justify-between text-xs">
-              <span className="text-muted-foreground">Difficulty</span>
+              <span className="text-muted-foreground">{t('difficulty')}</span>
               <Badge variant="outline" className="text-[10px]">
                 {competency.difficulty || 'INTERMEDIATE'}
               </Badge>
@@ -208,7 +211,11 @@ function DragOverlayCard({ competency }: { competency: BlueprintCompetency }) {
 // EMPTY STATE
 // ============================================
 
-function EmptyState() {
+interface EmptyStateProps {
+  t: ReturnType<typeof useTranslations<'template.builder'>>;
+}
+
+function EmptyState({ t }: EmptyStateProps) {
   return (
     <div
       className={cn(
@@ -240,13 +247,13 @@ function EmptyState() {
         <circle cx="80" cy="102" r="4" fill="currentColor" opacity="0.2" />
       </svg>
       <h3 className="text-lg font-semibold text-foreground/80">
-        Select a Job Profile to begin
+        {t('emptyStateTitle')}
       </h3>
       <p className="text-sm text-muted-foreground text-center max-w-sm">
-        Your canvas is empty. Choose a job profile and drag competencies here to start building your test blueprint.
+        {t('emptyStateDescription')}
       </p>
       <div className="inline-flex items-center gap-2 text-primary text-sm">
-        <Plus className="h-4 w-4" /> Add competencies from the library
+        <Plus className="h-4 w-4" /> {t('addCompetenciesFromLibrary')}
       </div>
     </div>
   );
@@ -271,6 +278,7 @@ function CanvasLoadingSkeleton() {
 // ============================================
 
 export function Canvas() {
+  const t = useTranslations('template.builder');
   const {
     state,
     isPending,
@@ -438,17 +446,17 @@ export function Canvas() {
       <div className="flex items-center justify-between px-4 py-3 border-b bg-background/50 shrink-0">
         <div className="flex items-center gap-2">
           <Sparkles className="h-4 w-4 text-primary" />
-          <span className="text-sm font-medium">Competency Stack</span>
+          <span className="text-sm font-medium">{t('competencyStack')}</span>
           <Badge variant="secondary" className="text-[10px] ml-1">
-            {state.competencies.length} items
+            {t('items', { count: state.competencies.length })}
           </Badge>
         </div>
         <div className="flex items-center gap-2">
           <div className="hidden sm:flex items-center gap-4 text-[11px] text-muted-foreground mr-2">
             <span>
-              ~{Math.ceil(state.competencies.reduce((s, c) => s + c.questionCount * 1.5, 0))} min
+              {t('minutesEstimate', { minutes: Math.ceil(state.competencies.reduce((s, c) => s + c.questionCount * 1.5, 0)) })}
             </span>
-            <span>Pass: {state.passingScore}%</span>
+            <span>{t('pass', { score: state.passingScore })}</span>
           </div>
           <Button
             variant="ghost"
@@ -456,7 +464,7 @@ export function Canvas() {
             className="h-8 w-8 rounded-lg"
             onClick={handleUndo}
             disabled={!historyState.canUndo || isPending}
-            aria-label="Undo"
+            aria-label={t('undo')}
           >
             <Undo2 className="h-4 w-4" />
           </Button>
@@ -466,7 +474,7 @@ export function Canvas() {
             className="h-8 w-8 rounded-lg"
             onClick={handleRedo}
             disabled={!historyState.canRedo || isPending}
-            aria-label="Redo"
+            aria-label={t('redo')}
           >
             <Redo2 className="h-4 w-4" />
           </Button>
@@ -481,7 +489,7 @@ export function Canvas() {
             ) : (
               <Save className="h-4 w-4" />
             )}
-            Save
+            {t('save')}
           </Button>
         </div>
       </div>
@@ -498,7 +506,7 @@ export function Canvas() {
           onDragLeave={handleDragLeave}
         >
           {state.competencies.length === 0 ? (
-            <EmptyState />
+            <EmptyState t={t} />
           ) : !isMounted ? (
             // Show skeleton until client-side hydration completes
             <CanvasLoadingSkeleton />
@@ -523,6 +531,7 @@ export function Canvas() {
                         updateCompetency(comp.id, { weight })
                       }
                       isPending={isPending}
+                      t={t}
                     />
                   ))}
                 </div>
@@ -544,7 +553,7 @@ export function Canvas() {
                 'bg-primary/5 text-center text-sm text-primary/80'
               )}
             >
-              Drop here to add
+              {t('dropHereToAdd')}
             </div>
           )}
         </div>

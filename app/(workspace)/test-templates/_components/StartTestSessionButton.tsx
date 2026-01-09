@@ -24,13 +24,15 @@ interface StartTestSessionButtonProps {
   templateName: string;
   fullWidth?: boolean;
   variant?: "default" | "hero";
+  size?: "default" | "sm" | "lg" | "icon";
 }
 
 export default function StartTestSessionButton({
   templateId,
   templateName,
   fullWidth = false,
-  variant = "default"
+  variant = "default",
+  size = "lg",
 }: StartTestSessionButtonProps) {
   const router = useRouter();
   const { userId, isSignedIn } = useAuth();
@@ -157,7 +159,7 @@ export default function StartTestSessionButton({
           onClick={handleStartTest}
           disabled={isLoading}
           className={`${fullWidth ? "w-full" : ""} bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary shadow-lg hover:shadow-xl transition-all duration-300 group min-h-11`}
-          size="lg"
+          size={size}
         >
           {isLoading ? (
             <>
@@ -184,7 +186,7 @@ export default function StartTestSessionButton({
         onClick={handleStartTest}
         disabled={isLoading}
         className={`${fullWidth ? "w-full" : ""} shadow-sm hover:shadow-md transition-all group`}
-        size="lg"
+        size={size}
       >
         {isLoading ? (
           <>

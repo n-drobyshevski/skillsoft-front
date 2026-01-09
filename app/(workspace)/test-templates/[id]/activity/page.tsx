@@ -107,17 +107,18 @@ function ActivityListSkeleton() {
 }
 
 /**
- * Metadata for the page
+ * Metadata for the page with i18n support
  */
 export async function generateMetadata({ params }: TemplateActivityPageProps) {
   const { id: templateId } = await params;
-  const t = await getTranslations('activity');
+  const t = await getTranslations('template.metadata');
 
   const template = await testTemplatesApi.getTemplateById(templateId);
 
   return {
     title: template
-      ? `${t('templateActivity')} - ${template.name}`
-      : t('templateActivity'),
+      ? t('activity', { name: template.name })
+      : t('testTemplate'),
+    description: t('activityDescription'),
   };
 }

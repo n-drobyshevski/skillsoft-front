@@ -3,7 +3,11 @@
  * Runs before all tests - sets up jsdom, mocks, and global utilities
  */
 import '@testing-library/jest-dom/vitest';
-import { afterEach, beforeEach, beforeAll, afterAll, vi } from 'vitest';
+import { afterEach, beforeEach, beforeAll, afterAll, vi, expect } from 'vitest';
+import { toHaveNoViolations } from 'jest-axe';
+
+// Extend Vitest expect with jest-axe matchers
+expect.extend(toHaveNoViolations);
 import { cleanup } from '@testing-library/react';
 import { server } from './mocks/server';
 import { resetMockStores } from './mocks/handlers';

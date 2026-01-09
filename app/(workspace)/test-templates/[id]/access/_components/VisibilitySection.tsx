@@ -1,6 +1,7 @@
 'use client';
 
 import { Loader2 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { VisibilitySelector } from '../../_components/sharing/VisibilitySelector';
 import { useTemplateVisibility } from '@/hooks/queries';
@@ -24,14 +25,15 @@ export function VisibilitySection({
   isOwner,
   canManage,
 }: VisibilitySectionProps) {
+  const t = useTranslations('template.access.visibility');
   const { data: visibility, isLoading } = useTemplateVisibility(templateId);
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-lg">Visibility</CardTitle>
+        <CardTitle className="text-lg">{t('title')}</CardTitle>
         <CardDescription>
-          Control who can discover and access this template
+          {t('description')}
         </CardDescription>
       </CardHeader>
       <CardContent>

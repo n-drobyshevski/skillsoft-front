@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import {
@@ -61,6 +62,8 @@ export function UserShareList({
   canManage = false,
   isMobile = false,
 }: UserShareListProps) {
+  const t = useTranslations('template.access.people');
+  const tToast = useTranslations('template.access.toast');
   const { data: shares, isLoading, error } = useTemplateShares(templateId);
   const updateShare = useUpdateShare();
   const revokeShare = useRevokeShare();
@@ -77,9 +80,9 @@ export function UserShareList({
         shareId,
         request: { permission },
       });
-      toast.success('Permission updated');
+      toast.success(tToast('permissionUpdated'));
     } catch (error) {
-      toast.error('Failed to update permission');
+      toast.error(tToast('updateFailed'));
       console.error('Update share error:', error);
     }
   };
@@ -88,9 +91,9 @@ export function UserShareList({
     setRevoking(shareId);
     try {
       await revokeShare.mutateAsync({ templateId, shareId });
-      toast.success(`Removed access for ${granteeName}`);
+      toast.success(tToast('accessRemoved', { name: granteeName }));
     } catch (error) {
-      toast.error('Failed to revoke access');
+      toast.error(tToast('revokeFailed'));
       console.error('Revoke share error:', error);
     } finally {
       setRevoking(null);
@@ -105,7 +108,7 @@ export function UserShareList({
     return (
       <div className="text-center py-8">
         <AlertCircle className="mx-auto h-8 w-8 text-destructive/50 mb-2" />
-        <p className="text-sm text-muted-foreground">Failed to load shares</p>
+        <p className="text-sm text-muted-foreground">{t('list.failedToLoad')}</p>
       </div>
     );
   }
@@ -115,10 +118,10 @@ export function UserShareList({
       <div className="text-center py-8 border rounded-lg bg-muted/20">
         <Users className="mx-auto h-10 w-10 text-muted-foreground/30 mb-3" />
         <p className="text-sm text-muted-foreground">
-          No users or teams have access
+          {t('emptyState.title')}
         </p>
         <p className="text-xs text-muted-foreground/70 mt-1">
-          Share this template with users or teams using the form above
+          {t('emptyState.hint')}
         </p>
       </div>
     );
@@ -134,7 +137,7 @@ export function UserShareList({
       {userShares.length > 0 && (
         <div className="space-y-2">
           <h4 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-            Users ({userShares.length})
+            {t('list.usersHeader', { count: userShares.length })}
           </h4>
           <div className="space-y-1">
             {userShares.map((share) => (
@@ -160,7 +163,7 @@ export function UserShareList({
       {teamShares.length > 0 && (
         <div className="space-y-2">
           <h4 className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-            Teams ({teamShares.length})
+            {t('list.teamsHeader', { count: teamShares.length })}
           </h4>
           <div className="space-y-1">
             {teamShares.map((share) => (
@@ -202,6 +205,7 @@ function ShareListItem({
   onPermissionChange,
   onRevoke,
 }: ShareListItemProps) {
+  const t = useTranslations('template.access.people');
   const isTeam = share.granteeType === GranteeType.TEAM;
   const Icon = isTeam ? Users : User;
   const isExpired = share.expiresAt && new Date(share.expiresAt) < new Date();
@@ -244,17 +248,17 @@ function ShareListItem({
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
           <span className="text-sm font-medium truncate">
-            {share.granteeName || (isTeam ? 'Unknown Team' : 'Unknown User')}
+            {share.granteeName || (isTeam ? t('list.unknownTeam') : t('list.unknownUser'))}
           </span>
           {isTeam && (
             <Badge variant="outline" className="text-xs shrink-0">
               <Users className="h-3 w-3 mr-1" />
-              Team
+              {t('list.teamBadge')}
             </Badge>
           )}
           {isExpired && (
             <Badge variant="destructive" className="text-xs shrink-0">
-              Expired
+              {t('list.expiredBadge')}
             </Badge>
           )}
         </div>
@@ -265,7 +269,7 @@ function ShareListItem({
           {share.expiresAt && !isExpired && (
             <span className="flex items-center gap-1 shrink-0">
               <Clock className="h-3 w-3" />
-              Expires {formatDistanceToNow(new Date(share.expiresAt), { addSuffix: true })}
+              {t('list.expiresIn', { time: formatDistanceToNow(new Date(share.expiresAt), { addSuffix: true }) })}
             </span>
           )}
         </div>
@@ -308,20 +312,18 @@ function ShareListItem({
           </AlertDialogTrigger>
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>Remove Access</AlertDialogTitle>
+              <AlertDialogTitle>{t('removeDialog.title')}</AlertDialogTitle>
               <AlertDialogDescription>
-                Are you sure you want to remove access for{' '}
-                <strong>{share.granteeName}</strong>? They will no longer be
-                able to access this template.
+                {t('removeDialog.message', { name: share.granteeName || t('list.unknownUser') })}
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogCancel>{t('removeDialog.cancel')}</AlertDialogCancel>
               <AlertDialogAction
                 onClick={onRevoke}
                 className="bg-destructive hover:bg-destructive/90"
               >
-                Remove Access
+                {t('removeDialog.confirm')}
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>

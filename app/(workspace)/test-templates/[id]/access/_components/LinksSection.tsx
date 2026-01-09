@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ShareLinkManager } from '../../_components/sharing/ShareLinkManager';
 
@@ -24,12 +25,14 @@ export function LinksSection({
   canManage,
   isMobile,
 }: LinksSectionProps) {
+  const t = useTranslations('template.access.links');
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-lg">Share Links</CardTitle>
+        <CardTitle className="text-lg">{t('title')}</CardTitle>
         <CardDescription>
-          Create shareable links that don&apos;t require adding specific users
+          {t('description')}
         </CardDescription>
       </CardHeader>
       <CardContent>

@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useTransition } from 'react';
 import { useSelectedLayoutSegment } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
@@ -37,7 +38,7 @@ interface NavTabsProps {
 
 /**
  * Navigation tabs for the Test Template Hub
- * * Mobile Layout: 
+ * * Mobile Layout:
  * [ Title ....... Action ]
  * [ Scrollable Tabs...   ]
  * * Desktop Layout (Unchanged):
@@ -46,34 +47,35 @@ interface NavTabsProps {
 export function NavTabs({ baseUrl, status, templateId, templateName }: NavTabsProps) {
   const segment = useSelectedLayoutSegment();
   const [isPending, startTransition] = useTransition();
+  const t = useTranslations('template.hub');
 
   const tabs: NavTab[] = [
     {
-      label: 'Overview',
+      label: t('tabs.overview'),
       href: baseUrl,
       segment: null,
       icon: LayoutDashboard,
     },
     {
-      label: 'Builder',
+      label: t('tabs.builder'),
       href: `${baseUrl}/builder`,
       segment: 'builder',
       icon: Wrench,
     },
     {
-      label: 'Activity',
+      label: t('tabs.activity'),
       href: `${baseUrl}/activity`,
       segment: 'activity',
       icon: Activity,
     },
     {
-      label: 'Access',
+      label: t('tabs.access'),
       href: `${baseUrl}/access`,
       segment: 'access',
       icon: Shield,
     },
     {
-      label: 'Settings',
+      label: t('tabs.settings'),
       href: `${baseUrl}/settings`,
       segment: 'settings',
       icon: Settings,
@@ -97,21 +99,21 @@ export function NavTabs({ baseUrl, status, templateId, templateName }: NavTabsPr
         {status === 'PUBLISHED' && (
           <div className="hidden lg:flex items-center gap-2 text-amber-700 dark:text-amber-200 text-sm whitespace-nowrap">
             <Lock className="h-4 w-4" />
-            <span className="font-medium">Published</span>
+            <span className="font-medium">{t('status.published')}</span>
             <Popover>
               <PopoverTrigger asChild>
                 <Button
                   variant="ghost"
                   size="icon"
                   className="h-6 w-6 text-amber-700/90 dark:text-amber-200/90"
-                  aria-label="Published info"
+                  aria-label={t('publishedWarning.info')}
                   suppressHydrationWarning
                 >
                   <Info className="h-3.5 w-3.5" />
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="text-sm max-w-xs">
-                This blueprint is locked. Create a new version to make changes.
+                {t('publishedWarning.message')}
               </PopoverContent>
             </Popover>
           </div>
@@ -137,8 +139,8 @@ export function NavTabs({ baseUrl, status, templateId, templateName }: NavTabsPr
             ) : (
               <GitBranch className="h-3.5 w-3.5" />
             )}
-            <span className="hidden sm:inline">New Version</span>
-            <span className="inline sm:hidden">New</span>
+            <span className="hidden sm:inline">{t('actions.newVersion')}</span>
+            <span className="inline sm:hidden">{t('actions.newVersionShort')}</span>
           </Button>
         )}
       </div>

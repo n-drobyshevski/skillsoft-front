@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useId, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { SessionQuestion, AnswerValue, QuestionType } from '@/types/domain';
 import { Card, CardContent } from '@/components/ui/card';
@@ -25,10 +25,13 @@ interface QuestionCardProps {
  * - BEHAVIORAL_EXAMPLE: Text area for behavioral descriptions
  * - OPEN_TEXT: Text area for free-form responses
  *
- * Features:
- * - Mobile-responsive design with proper touch targets (min 44x44px)
- * - Accessible with ARIA labels and keyboard navigation
- * - Neutral colorscheme for immersive experience
+ * WCAG AA Accessibility Features:
+ * - Native radio/checkbox inputs for proper screen reader support
+ * - aria-live regions for selection announcements
+ * - Proper focus management and indicators
+ * - Keyboard navigation with arrow keys
+ * - fieldset/legend structure for semantic grouping
+ * - Mobile-responsive with proper touch targets (min 44x44px)
  */
 // Validation constants (exported for use in ImmersivePlayer)
 export const MIN_CHARS_OPEN_TEXT = 20;
@@ -42,9 +45,21 @@ export function QuestionCard({
   validationError,
 }: QuestionCardProps) {
   const t = useTranslations('assessment');
+  const groupId = useId();
 
   // Local state for text input types
   const [textInput, setTextInput] = useState<string>((selectedValue as string) || '');
+
+  // State for screen reader announcements
+  const [announcement, setAnnouncement] = useState<string>('');
+
+  // Handle answer selection with announcement
+  const handleAnswerSelect = useCallback((value: AnswerValue, optionLabel?: string) => {
+    onAnswer(value);
+    if (optionLabel) {
+      setAnnouncement(t('optionSelected', { option: optionLabel }));
+    }
+  }, [onAnswer, t]);
 
   // Question type classification
   const isLikertType = question.questionType === QuestionType.LIKERT ||
@@ -166,121 +181,169 @@ export function QuestionCard({
     );
   };
 
-  // Render Likert scale (responsive grid)
+  // Render Likert scale (responsive grid with native radio inputs)
   const renderLikertScale = () => {
     if (!question.answerOptions || question.answerOptions.length === 0) return null;
 
     return (
-      <div className="space-y-4">
+      <fieldset className="space-y-4">
+        <legend className="sr-only">
+          {question.questionText}. {t('selectScaleValue', {
+            min: question.answerOptions[0]?.value || 1,
+            max: question.answerOptions[question.answerOptions.length - 1]?.value || 5,
+          })}
+        </legend>
+
         {/* Mobile: vertical stack for 5+ options, Tablet+: horizontal grid */}
-        <div className={cn(
-          "grid gap-3",
-          // Responsive grid: vertical on mobile for 5+ options, horizontal on larger screens
-          question.answerOptions.length <= 3 && "grid-cols-1 sm:grid-cols-3",
-          question.answerOptions.length === 4 && "grid-cols-2 sm:grid-cols-4",
-          // Changed: use single column on mobile for 5+ options to avoid cramped layout
-          question.answerOptions.length >= 5 && "grid-cols-1 sm:grid-cols-3 md:grid-cols-5"
-        )}>
+        <div
+          className={cn(
+            "grid gap-3",
+            // Responsive grid: vertical on mobile for 5+ options, horizontal on larger screens
+            question.answerOptions.length <= 3 && "grid-cols-1 sm:grid-cols-3",
+            question.answerOptions.length === 4 && "grid-cols-2 sm:grid-cols-4",
+            // Changed: use single column on mobile for 5+ options to avoid cramped layout
+            question.answerOptions.length >= 5 && "grid-cols-1 sm:grid-cols-3 md:grid-cols-5"
+          )}
+          role="radiogroup"
+          aria-label={t('likertScaleLabel', {
+            min: question.answerOptions[0]?.text ?? question.answerOptions[0]?.value ?? '',
+            max: question.answerOptions[question.answerOptions.length - 1]?.text ?? question.answerOptions[question.answerOptions.length - 1]?.value ?? '',
+          })}
+        >
           {question.answerOptions.map((option) => {
             const optionId = option.id || String(option.value);
+            const inputId = `${groupId}-likert-${optionId}`;
             const optionValue = option.value ?? optionId;
             const isSelected = selectedValue === optionValue ||
                               selectedValue === Number(optionValue) ||
                               (Array.isArray(selectedValue) && selectedValue.includes(String(optionValue)));
+            const optionLabel = option.text || option.label || String(option.value);
 
             return (
-              <button
+              <label
                 key={optionId}
-                onClick={() => onAnswer(optionValue)}
+                htmlFor={inputId}
                 className={cn(
                   // Ensure minimum touch target size: 56px on mobile, 64px on desktop
-                  "flex flex-col items-center justify-center min-h-[56px] sm:min-h-[64px] p-3 sm:p-4 rounded-lg border-2 transition-all duration-200",
+                  "flex flex-col items-center justify-center min-h-[56px] sm:min-h-[64px] p-3 sm:p-4 rounded-lg border-2 transition-all duration-200 cursor-pointer",
                   "hover:border-neutral-600 hover:bg-neutral-800/50 active:scale-95",
-                  "focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500",
+                  "has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-emerald-500/50 has-[:focus-visible]:border-emerald-500",
                   isSelected
                     ? "border-emerald-500 bg-emerald-500/10 text-emerald-400 shadow-lg shadow-emerald-500/20"
                     : "border-neutral-700 bg-neutral-800/30 text-neutral-400"
                 )}
-                aria-pressed={isSelected}
-                aria-label={`${option.label || option.value}: ${option.text || ''}`}
               >
-                <span className="text-xl sm:text-2xl font-bold">{option.value ?? option.label}</span>
+                <input
+                  type="radio"
+                  id={inputId}
+                  name={`${groupId}-likert`}
+                  value={String(optionValue)}
+                  checked={isSelected}
+                  onChange={() => handleAnswerSelect(optionValue, optionLabel)}
+                  className="sr-only peer"
+                  aria-label={`${option.value ?? option.label}: ${optionLabel}`}
+                />
+                <span className="text-xl sm:text-2xl font-bold" aria-hidden="true">
+                  {option.value ?? option.label}
+                </span>
                 {option.label && option.value !== undefined && (
-                  <span className="text-xs sm:text-sm mt-1.5 sm:mt-2 text-center leading-tight opacity-80 line-clamp-2">
+                  <span className="text-xs sm:text-sm mt-1.5 sm:mt-2 text-center leading-tight opacity-80 line-clamp-2" aria-hidden="true">
                     {option.label}
                   </span>
                 )}
                 {option.text && !option.label && (
-                  <span className="text-xs sm:text-sm mt-1.5 sm:mt-2 text-center leading-tight opacity-80 line-clamp-2">
+                  <span className="text-xs sm:text-sm mt-1.5 sm:mt-2 text-center leading-tight opacity-80 line-clamp-2" aria-hidden="true">
                     {option.text}
                   </span>
                 )}
-              </button>
+              </label>
             );
           })}
         </div>
 
         {/* Scale hint */}
-        <p className="text-xs text-neutral-500 text-center">
+        <p className="text-xs text-neutral-500 text-center" aria-hidden="true">
           {t('selectScaleValue', {
             min: question.answerOptions[0]?.value || 1,
             max: question.answerOptions[question.answerOptions.length - 1]?.value || 5,
           })}
         </p>
-      </div>
+      </fieldset>
     );
   };
 
-  // Render standard options (MCQ, SJT)
+  // Render standard options (MCQ, SJT) with native radio inputs
   const renderStandardOptions = () => {
     if (!question.answerOptions || question.answerOptions.length === 0) return null;
 
     return (
-      <div className="space-y-3">
-        {question.answerOptions.map((option, index) => {
-          const optionId = option.id || `option-${index}`;
-          const isSelected = selectedValue === optionId ||
-                            selectedValue === option.value ||
-                            (Array.isArray(selectedValue) && selectedValue.includes(optionId));
+      <fieldset className="space-y-3">
+        <legend className="sr-only">{question.questionText}</legend>
 
-          return (
-            <button
-              key={optionId}
-              onClick={() => onAnswer(optionId)}
-              className={cn(
-                "w-full text-left min-h-[56px] p-4 rounded-lg border-2 transition-all duration-200",
-                "hover:border-neutral-600 hover:bg-neutral-800/50 active:scale-[0.99]",
-                "focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500",
-                isSelected
-                  ? "border-emerald-500 bg-emerald-500/10 shadow-lg shadow-emerald-500/10"
-                  : "border-neutral-700 bg-neutral-800/30"
-              )}
-              aria-pressed={isSelected}
-              aria-label={`Option ${String.fromCharCode(65 + index)}: ${option.text || ''}`}
-            >
-              <div className="flex items-start gap-3">
-                {/* Option indicator */}
-                <span className={cn(
-                  "shrink-0 w-7 h-7 rounded-full border-2 flex items-center justify-center text-xs font-bold transition-all",
+        <div role="radiogroup" aria-label={t('multipleChoice')}>
+          {question.answerOptions.map((option, index) => {
+            const optionId = option.id || `option-${index}`;
+            const inputId = `${groupId}-option-${optionId}`;
+            const isSelected = selectedValue === optionId ||
+                              selectedValue === option.value ||
+                              (Array.isArray(selectedValue) && selectedValue.includes(optionId));
+            const optionLabel = option.label || String.fromCharCode(65 + index);
+            const optionText = option.text || `Option ${optionLabel}`;
+
+            return (
+              <label
+                key={optionId}
+                htmlFor={inputId}
+                className={cn(
+                  "w-full flex items-start text-left min-h-[56px] p-4 rounded-lg border-2 transition-all duration-200 cursor-pointer",
+                  "hover:border-neutral-600 hover:bg-neutral-800/50 active:scale-[0.99]",
+                  "has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-emerald-500/50 has-[:focus-visible]:border-emerald-500",
                   isSelected
-                    ? "border-emerald-500 bg-emerald-500 text-white scale-110"
-                    : "border-neutral-600 text-neutral-500"
-                )}>
-                  {option.label || String.fromCharCode(65 + index)}
-                </span>
+                    ? "border-emerald-500 bg-emerald-500/10 shadow-lg shadow-emerald-500/10"
+                    : "border-neutral-700 bg-neutral-800/30"
+                )}
+              >
+                <input
+                  type="radio"
+                  id={inputId}
+                  name={`${groupId}-options`}
+                  value={optionId}
+                  checked={isSelected}
+                  onChange={() => handleAnswerSelect(optionId, optionText)}
+                  className="sr-only peer"
+                  aria-describedby={`${inputId}-text`}
+                />
 
-                {/* Option text */}
-                <span className={cn(
-                  "text-sm sm:text-base leading-relaxed flex-1",
-                  isSelected ? "text-white font-medium" : "text-neutral-300"
-                )}>
-                  {option.text || `Option ${String.fromCharCode(65 + index)}`}
-                </span>
-              </div>
-            </button>
-          );
-        })}
-      </div>
+                <div className="flex items-start gap-3 w-full">
+                  {/* Option indicator */}
+                  <span
+                    className={cn(
+                      "shrink-0 w-7 h-7 rounded-full border-2 flex items-center justify-center text-xs font-bold transition-all",
+                      isSelected
+                        ? "border-emerald-500 bg-emerald-500 text-white scale-110"
+                        : "border-neutral-600 text-neutral-500"
+                    )}
+                    aria-hidden="true"
+                  >
+                    {optionLabel}
+                  </span>
+
+                  {/* Option text */}
+                  <span
+                    id={`${inputId}-text`}
+                    className={cn(
+                      "text-sm sm:text-base leading-relaxed flex-1",
+                      isSelected ? "text-white font-medium" : "text-neutral-300"
+                    )}
+                  >
+                    {optionText}
+                  </span>
+                </div>
+              </label>
+            );
+          })}
+        </div>
+      </fieldset>
     );
   };
 
@@ -297,6 +360,16 @@ export function QuestionCard({
   return (
     <Card className="bg-neutral-900/50 border-neutral-800 shadow-2xl">
       <CardContent className="p-6 sm:p-8">
+        {/* Live region for selection announcements */}
+        <div
+          role="status"
+          aria-live="polite"
+          aria-atomic="true"
+          className="sr-only"
+        >
+          {announcement}
+        </div>
+
         {/* Question header */}
         <div className="space-y-4 mb-6">
           {/* Mobile: Question number on separate line */}
