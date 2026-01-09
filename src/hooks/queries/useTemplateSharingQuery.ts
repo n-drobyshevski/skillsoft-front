@@ -33,6 +33,7 @@ import type {
   CreateShareLinkRequest,
   UpdateShareRequest,
   BulkShareRequest,
+  SharedTemplatesResponse,
 } from '@/types/domain';
 
 // ============================================================================
@@ -531,6 +532,41 @@ export function useValidateShareLink(
     staleTime: STALE_TIMES.validation,
     enabled: !!token,
     retry: false, // Don't retry on failure for validation
+    ...options,
+  });
+}
+
+// ============================================================================
+// Shared With Me Hooks
+// ============================================================================
+
+/**
+ * Hook to fetch templates shared with the current user
+ */
+export function useSharedWithMe(
+  options?: Omit<
+    UseQueryOptions<SharedTemplatesResponse, Error>,
+    'queryKey' | 'queryFn'
+  >
+) {
+  return useQuery({
+    queryKey: [...templateSharingKeys.all, 'sharedWithMe'] as const,
+    queryFn: () => templateSharingApi.getSharedWithMe(),
+    staleTime: STALE_TIMES.shares,
+    ...options,
+  });
+}
+
+/**
+ * Hook to fetch count of templates shared with current user
+ */
+export function useSharedWithMeCount(
+  options?: Omit<UseQueryOptions<number, Error>, 'queryKey' | 'queryFn'>
+) {
+  return useQuery({
+    queryKey: [...templateSharingKeys.all, 'sharedWithMeCount'] as const,
+    queryFn: () => templateSharingApi.getSharedWithMeCount(),
+    staleTime: STALE_TIMES.shares,
     ...options,
   });
 }

@@ -111,6 +111,7 @@
     "items": {
       "overview": "Overview",
       "availableTests": "Available Tests",
+      "sharedWithMe": "Shared with Me",
       "hiringOverview": "Hiring Overview",
       "studio": "Studio",
       "allTemplates": "All Templates",
@@ -3383,6 +3384,30 @@
       "editDescription": "Update team information and members",
       "profileTitle": "Team Profile - {name}",
       "profileDescription": "View team competency saturation and skill gaps"
+    },
+    "shared": {
+      "title": "Shared with Me",
+      "description": "Templates that have been shared with you by other users."
+    }
+  },
+  "shared": {
+    "title": "Shared with Me",
+    "description": "Templates that colleagues have shared with you",
+    "resultsCount": "{count, plural, one {# template shared with you} other {# templates shared with you}}",
+    "viewTemplate": "View",
+    "takeTest": "Take Test",
+    "permission": {
+      "view": "You can view and take tests with this template",
+      "edit": "You can view, take tests, and edit this template",
+      "manage": "You have full access including sharing settings"
+    },
+    "emptyState": {
+      "title": "No shared templates",
+      "description": "Templates shared with you by other users will appear here."
+    },
+    "error": {
+      "loadFailed": "Failed to load shared templates",
+      "tryAgain": "Try refreshing the page"
     }
   },
   "users": {
@@ -4077,11 +4102,15 @@
     "timedOut": "Timed Out",
     "passed": "Passed",
     "failed": "Failed",
+    "attempts": "attempts",
+    "attempt": "attempt",
     "retry": "Retry",
     "noActivity": "No activity yet",
     "noActivityDescription": "Test completions will appear here",
     "viewAll": "View All",
     "stats": {
+      "title": "Statistics",
+      "description": "Performance overview",
       "totalSessions": "Total Sessions",
       "completedSessions": "Completed",
       "abandonedSessions": "Abandoned",
@@ -4095,9 +4124,11 @@
       "lastActivity": "Last Activity",
       "detailsTitle": "Activity Statistics",
       "detailsDescription": "Detailed breakdown of test activity for this template",
-      "tapForDetails": "Tap for details"
+      "tapForDetails": "Tap for details",
+      "viewFullBreakdown": "View Full Breakdown"
     },
     "filters": {
+      "title": "Filters",
       "status": "Status",
       "allStatuses": "All Statuses",
       "allResults": "All Results",

@@ -1,13 +1,13 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 import { useTranslations } from 'next-intl';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { Loader2, Users, RefreshCw } from 'lucide-react';
+import { Users, RefreshCw } from 'lucide-react';
 import { activityApi } from '@/services/api';
 import {
   ActivityTable,
@@ -17,8 +17,49 @@ import {
   useActivityFilters,
   getDateRangeBounds,
 } from './activity';
-import type { ActivityPage, ActivityFilterParams } from '@/types/activity';
+import type { ActivityPage, ActivityFilterParams, TestActivity, UserResultSummary } from '@/types/activity';
 import { createLogger } from '@/lib/logger';
+
+/**
+ * Groups activities by user, keeping only the latest attempt per user.
+ * @param activities - Raw activity list from API
+ * @returns Array of UserResultSummary sorted by latest activity date
+ */
+function groupByLatestUserAttempt(activities: TestActivity[]): UserResultSummary[] {
+  const userMap = new Map<string, { latest: TestActivity; count: number }>();
+
+  for (const activity of activities) {
+    const existing = userMap.get(activity.clerkUserId);
+    if (!existing || new Date(activity.occurredAt) > new Date(existing.latest.occurredAt)) {
+      userMap.set(activity.clerkUserId, {
+        latest: activity,
+        count: (existing?.count || 0) + 1,
+      });
+    } else {
+      existing.count++;
+    }
+  }
+
+  return Array.from(userMap.values())
+    .map(({ latest, count }) => ({
+      clerkUserId: latest.clerkUserId,
+      userName: latest.userName,
+      userImageUrl: latest.userImageUrl,
+      latestSession: {
+        sessionId: latest.sessionId,
+        eventType: latest.eventType,
+        occurredAt: latest.occurredAt,
+        score: latest.score,
+        passed: latest.passed,
+        timeSpentSeconds: latest.timeSpentSeconds,
+      },
+      totalAttempts: count,
+    }))
+    .sort((a, b) =>
+      new Date(b.latestSession.occurredAt).getTime() -
+      new Date(a.latestSession.occurredAt).getTime()
+    );
+}
 
 const log = createLogger('TemplateActivityTable');
 
@@ -115,18 +156,6 @@ export function TemplateActivityTable({
             <CardTitle className="text-base">{tTable('title')}</CardTitle>
           </div>
 
-          {/* Reset filters button */}
-          {hasActiveFilters && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={resetFilters}
-              className="text-xs h-8"
-            >
-              <RefreshCw className="w-3 h-3 mr-1" />
-              {t('filters.reset')}
-            </Button>
-          )}
         </div>
 
         {/* Filters */}
@@ -137,6 +166,8 @@ export function TemplateActivityTable({
           onPassedChange={setPassed}
           dateRangeValue={filters.dateRange}
           onDateRangeChange={setDateRange}
+          hasActiveFilters={hasActiveFilters}
+          onResetFilters={resetFilters}
           className="mt-3"
         />
       </CardHeader>
@@ -149,31 +180,61 @@ export function TemplateActivityTable({
         ) : !data || data.content.length === 0 ? (
           <EmptyState t={tTable} />
         ) : (
-          <>
-            {/* Desktop: Table View */}
-            <div className="hidden md:block">
-              <ActivityTable data={data.content} />
-            </div>
-
-            {/* Mobile: Card List View */}
-            <div className="md:hidden">
-              <ActivityCardList data={data.content} />
-            </div>
-
-            {/* Pagination */}
-            <ActivityPagination
-              page={filters.page}
-              totalPages={data.totalPages}
-              totalElements={data.totalElements}
-              pageSize={pageSize}
-              onPageChange={setPage}
-              isFirst={data.first}
-              isLast={data.last}
-            />
-          </>
+          <GroupedActivityView
+            data={data}
+            filters={filters}
+            pageSize={pageSize}
+            setPage={setPage}
+          />
         )}
       </CardContent>
     </Card>
+  );
+}
+
+/**
+ * Grouped activity view - groups activities by user and shows latest attempt only
+ */
+function GroupedActivityView({
+  data,
+  filters,
+  pageSize,
+  setPage,
+}: {
+  data: ActivityPage;
+  filters: { page: number };
+  pageSize: number;
+  setPage: (page: number) => void;
+}) {
+  // Group activities by user, keeping only latest attempt per user
+  const groupedData = useMemo(
+    () => groupByLatestUserAttempt(data.content),
+    [data.content]
+  );
+
+  return (
+    <>
+      {/* Desktop: Table View */}
+      <div className="hidden md:block">
+        <ActivityTable data={groupedData} />
+      </div>
+
+      {/* Mobile: Card List View */}
+      <div className="md:hidden">
+        <ActivityCardList data={groupedData} />
+      </div>
+
+      {/* Pagination */}
+      <ActivityPagination
+        page={filters.page}
+        totalPages={data.totalPages}
+        totalElements={data.totalElements}
+        pageSize={pageSize}
+        onPageChange={setPage}
+        isFirst={data.first}
+        isLast={data.last}
+      />
+    </>
   );
 }
 

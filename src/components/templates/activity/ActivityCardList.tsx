@@ -4,35 +4,33 @@ import { cn } from '@/lib/utils';
 import { useTranslations } from 'next-intl';
 import { ActivityCard } from './ActivityCard';
 import { FileQuestion } from 'lucide-react';
-import type { TestActivity } from '@/types/activity';
+import type { UserResultSummary } from '@/types/activity';
 
 export interface ActivityCardListProps {
-  /** Activity data to display */
-  data: TestActivity[];
+  /** User-grouped result data */
+  data: UserResultSummary[];
   /** Optional className */
   className?: string;
 }
 
 /**
- * ActivityCardList - Mobile card list for activity items.
+ * ActivityCardList - Mobile card list for user result summaries.
  *
  * Features:
- * - Renders ActivityCard for each item
+ * - Renders ActivityCard for each user result
  * - Proper spacing between cards
  * - Empty state handling
  * - Touch-optimized layout
  */
 export function ActivityCardList({ data, className }: ActivityCardListProps) {
-  const t = useTranslations('activity');
-
   if (data.length === 0) {
     return <ActivityEmptyState />;
   }
 
   return (
     <div className={cn('space-y-2', className)}>
-      {data.map((activity) => (
-        <ActivityCard key={activity.sessionId} activity={activity} />
+      {data.map((result) => (
+        <ActivityCard key={result.clerkUserId} result={result} />
       ))}
     </div>
   );

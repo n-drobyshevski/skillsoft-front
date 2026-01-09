@@ -77,3 +77,22 @@ export interface ActivityPage {
   last: boolean;
   empty: boolean;
 }
+
+/**
+ * User result summary - represents the latest attempt per user.
+ * Groups TestActivity by clerkUserId, keeping only the most recent.
+ */
+export interface UserResultSummary {
+  clerkUserId: string;
+  userName: string;
+  userImageUrl?: string;
+  latestSession: {
+    sessionId: string;
+    eventType: ActivityEventType;
+    occurredAt: string;
+    score?: number;
+    passed?: boolean;
+    timeSpentSeconds?: number;
+  };
+  totalAttempts: number;
+}

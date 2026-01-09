@@ -45,6 +45,17 @@ export const NAVIGATION_CONFIG: NavigationConfig = {
           labelKey: "items.availableTests",
           icon: "FileStack",
         },
+        {
+          id: "shared-with-me",
+          path: "/shared",
+          labelKey: "items.sharedWithMe",
+          icon: "Share2",
+          badge: {
+            content: { type: "count", key: "sharedTemplates" },
+            variant: "secondary",
+            hideWhenZero: true,
+          },
+        },
       ],
       hasSeparator: false,
     },

@@ -4,58 +4,36 @@ import { cn } from '@/lib/utils';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { useTranslations } from 'next-intl';
-import { CheckCircle, XCircle, Timer } from 'lucide-react';
-import type { TestActivity, ActivityEventType } from '@/types/activity';
-
-/**
- * Status configuration for visual styling
- */
-const STATUS_CONFIG: Record<
-  ActivityEventType,
-  {
-    border: string;
-    icon: typeof CheckCircle;
-    iconColor: string;
-  }
-> = {
-  COMPLETED: {
-    border: 'border-l-emerald-500',
-    icon: CheckCircle,
-    iconColor: 'text-emerald-600 dark:text-emerald-400',
-  },
-  ABANDONED: {
-    border: 'border-l-amber-500',
-    icon: XCircle,
-    iconColor: 'text-amber-600 dark:text-amber-400',
-  },
-  TIMED_OUT: {
-    border: 'border-l-red-500',
-    icon: Timer,
-    iconColor: 'text-red-600 dark:text-red-400',
-  },
-};
+import { Timer } from 'lucide-react';
+import type { UserResultSummary } from '@/types/activity';
 
 export interface ActivityCardProps {
-  /** Activity data to display */
-  activity: TestActivity;
+  /** User result summary */
+  result: UserResultSummary;
   /** Optional className */
   className?: string;
 }
 
 /**
- * ActivityCard - Compact mobile card for displaying activity items.
+ * ActivityCard - Mobile card for displaying user result summary.
  *
  * Features:
- * - Status-colored left border (emerald/amber/red)
- * - Two-row layout: Avatar + Name + StatusIcon, then Score + Badge + Time + Date
+ * - Pass/fail colored left border (emerald for pass, amber for fail)
+ * - Two-row layout: Avatar + Name + Attempts + Badge, then Score + Time + Date
+ * - Prominent score display with color coding
  * - 44px minimum touch targets
  * - Dark mode support
- * - Follows MobileItemCard patterns
  */
-export function ActivityCard({ activity, className }: ActivityCardProps) {
+export function ActivityCard({ result, className }: ActivityCardProps) {
   const t = useTranslations('activity');
-  const config = STATUS_CONFIG[activity.eventType];
-  const StatusIcon = config.icon;
+  const { latestSession } = result;
+
+  // Determine border color based on pass/fail
+  const borderColor = latestSession.passed === undefined
+    ? 'border-l-muted'
+    : latestSession.passed
+      ? 'border-l-emerald-500'
+      : 'border-l-amber-500';
 
   return (
     <div
@@ -64,55 +42,70 @@ export function ActivityCard({ activity, className }: ActivityCardProps) {
         'relative bg-card rounded-lg border shadow-sm',
         // Status border on left
         'border-l-4',
-        config.border,
+        borderColor,
         // Overflow handling
         'overflow-hidden',
         className
       )}
     >
-      {/* Row 1: Avatar + Name + Status Icon */}
+      {/* Row 1: Avatar + Name + Badge */}
       <div className="flex items-center gap-2 p-3 pb-2">
-        <Avatar className="h-8 w-8 shrink-0">
-          {activity.userImageUrl && (
-            <AvatarImage src={activity.userImageUrl} alt={activity.userName} />
+        <Avatar className="h-9 w-9 shrink-0">
+          {result.userImageUrl && (
+            <AvatarImage src={result.userImageUrl} alt={result.userName} />
           )}
           <AvatarFallback className="text-xs bg-muted">
-            {getInitials(activity.userName)}
+            {getInitials(result.userName)}
           </AvatarFallback>
         </Avatar>
+
         <div className="flex-1 min-w-0">
           <span className="font-medium text-sm truncate block">
-            {activity.userName}
+            {result.userName}
           </span>
-          <span className={cn('text-xs flex items-center gap-1', config.iconColor)}>
-            <StatusIcon className="h-3 w-3" />
-            {getStatusLabel(activity.eventType, t)}
-          </span>
+          {result.totalAttempts > 1 && (
+            <span className="text-[10px] text-muted-foreground">
+              {result.totalAttempts} {t('attempts')}
+            </span>
+          )}
         </div>
+
         {/* Result Badge */}
-        {activity.passed !== undefined && (
+        {latestSession.passed !== undefined && (
           <Badge
-            variant={activity.passed ? 'default' : 'secondary'}
+            variant={latestSession.passed ? 'default' : 'secondary'}
             className={cn(
-              'shrink-0 text-[10px] px-1.5 py-0.5',
-              activity.passed && 'bg-emerald-600 hover:bg-emerald-600'
+              'shrink-0 text-[10px] px-2 py-0.5',
+              latestSession.passed && 'bg-emerald-600 hover:bg-emerald-600'
             )}
           >
-            {activity.passed ? t('passed') : t('failed')}
+            {latestSession.passed ? t('passed') : t('failed')}
           </Badge>
         )}
       </div>
 
       {/* Row 2: Score + Time + Date */}
-      <div className="flex items-center gap-3 px-3 pb-3 text-xs text-muted-foreground">
-        <span className="font-semibold text-foreground">
-          {activity.score !== undefined ? `${Math.round(activity.score)}%` : '--'}
+      <div className="flex items-center gap-4 px-3 pb-3 text-xs">
+        {/* Score - Prominent */}
+        <span className={cn(
+          'font-bold text-base',
+          latestSession.passed
+            ? 'text-emerald-600 dark:text-emerald-400'
+            : 'text-foreground'
+        )}>
+          {latestSession.score !== undefined ? `${Math.round(latestSession.score)}%` : '--'}
         </span>
-        <span className="flex items-center gap-1">
+
+        {/* Time */}
+        <span className="flex items-center gap-1 text-muted-foreground">
           <Timer className="h-3 w-3" />
-          {formatDuration(activity.timeSpentSeconds)}
+          {formatDuration(latestSession.timeSpentSeconds)}
         </span>
-        <span className="ml-auto">{formatDate(activity.occurredAt)}</span>
+
+        {/* Date - Right aligned */}
+        <span className="ml-auto text-muted-foreground">
+          {formatDate(latestSession.occurredAt)}
+        </span>
       </div>
     </div>
   );
@@ -127,25 +120,6 @@ function getInitials(name: string): string {
     return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
   }
   return name.substring(0, 2).toUpperCase();
-}
-
-/**
- * Get localized status label
- */
-function getStatusLabel(
-  eventType: ActivityEventType,
-  t: ReturnType<typeof useTranslations<'activity'>>
-): string {
-  switch (eventType) {
-    case 'COMPLETED':
-      return t('completed');
-    case 'ABANDONED':
-      return t('abandoned');
-    case 'TIMED_OUT':
-      return t('timedOut');
-    default:
-      return t('completed');
-  }
 }
 
 /**

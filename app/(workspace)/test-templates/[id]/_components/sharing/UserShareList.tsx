@@ -42,6 +42,8 @@ import { formatDistanceToNow } from 'date-fns';
 interface UserShareListProps {
   templateId: string;
   canManage?: boolean;
+  /** Mobile variant for touch-friendly sizing */
+  isMobile?: boolean;
 }
 
 /**
@@ -54,7 +56,11 @@ interface UserShareListProps {
  * - Expiry date display
  * - Loading and empty states
  */
-export function UserShareList({ templateId, canManage = false }: UserShareListProps) {
+export function UserShareList({
+  templateId,
+  canManage = false,
+  isMobile = false,
+}: UserShareListProps) {
   const { data: shares, isLoading, error } = useTemplateShares(templateId);
   const updateShare = useUpdateShare();
   const revokeShare = useRevokeShare();
@@ -137,6 +143,7 @@ export function UserShareList({ templateId, canManage = false }: UserShareListPr
                 share={share}
                 canManage={canManage}
                 isRevoking={revoking === share.id}
+                isMobile={isMobile}
                 onPermissionChange={(permission) =>
                   handlePermissionChange(share.id, permission)
                 }
@@ -162,6 +169,7 @@ export function UserShareList({ templateId, canManage = false }: UserShareListPr
                 share={share}
                 canManage={canManage}
                 isRevoking={revoking === share.id}
+                isMobile={isMobile}
                 onPermissionChange={(permission) =>
                   handlePermissionChange(share.id, permission)
                 }
@@ -181,6 +189,7 @@ interface ShareListItemProps {
   share: TemplateShare;
   canManage: boolean;
   isRevoking: boolean;
+  isMobile?: boolean;
   onPermissionChange: (permission: SharePermission) => void;
   onRevoke: () => void;
 }
@@ -189,6 +198,7 @@ function ShareListItem({
   share,
   canManage,
   isRevoking,
+  isMobile = false,
   onPermissionChange,
   onRevoke,
 }: ShareListItemProps) {
@@ -211,13 +221,15 @@ function ShareListItem({
   return (
     <div
       className={cn(
-        'flex items-center gap-3 rounded-lg border p-3',
+        'flex items-center gap-3 rounded-lg border',
+        // Mobile: more padding for touch targets
+        isMobile ? 'p-3 min-h-[56px]' : 'p-3',
         'transition-colors hover:bg-muted/50',
         isExpired && 'opacity-60'
       )}
     >
       {/* Avatar */}
-      <Avatar className="h-9 w-9">
+      <Avatar className={cn(isMobile ? 'h-10 w-10' : 'h-9 w-9')}>
         <AvatarImage src={share.granteeAvatarUrl} />
         <AvatarFallback
           className={cn(
@@ -265,11 +277,11 @@ function ShareListItem({
           <PermissionSelect
             value={share.permission}
             onChange={onPermissionChange}
-            size="sm"
+            size={isMobile ? 'default' : 'sm'}
             disabled={!!isExpired}
           />
         ) : (
-          <PermissionBadge permission={share.permission} size="sm" />
+          <PermissionBadge permission={share.permission} size={isMobile ? 'default' : 'sm'} />
         )}
       </div>
 
@@ -280,7 +292,11 @@ function ShareListItem({
             <Button
               variant="ghost"
               size="icon"
-              className="h-8 w-8 text-muted-foreground hover:text-destructive shrink-0"
+              className={cn(
+                'text-muted-foreground hover:text-destructive shrink-0',
+                // Mobile: minimum 44px touch target
+                isMobile ? 'h-11 w-11' : 'h-8 w-8'
+              )}
               disabled={isRevoking}
             >
               {isRevoking ? (

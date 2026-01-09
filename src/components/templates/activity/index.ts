@@ -29,3 +29,6 @@ export type { ActivityPageHeaderProps } from './ActivityPageHeader';
 
 export { StatsDetailSheet } from './StatsDetailSheet';
 export type { StatsDetailSheetProps } from './StatsDetailSheet';
+
+export { ActivityStatsCard } from './ActivityStatsCard';
+export type { ActivityStatsCardProps } from './ActivityStatsCard';

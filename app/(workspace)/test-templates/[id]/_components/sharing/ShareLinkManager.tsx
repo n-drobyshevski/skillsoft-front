@@ -68,6 +68,8 @@ import { formatDistanceToNow, format, addDays } from 'date-fns';
 interface ShareLinkManagerProps {
   templateId: string;
   canManage?: boolean;
+  /** Mobile variant for touch-friendly sizing */
+  isMobile?: boolean;
 }
 
 const createLinkSchema = z.object({
@@ -92,6 +94,7 @@ type CreateLinkFormValues = z.infer<typeof createLinkSchema>;
 export function ShareLinkManager({
   templateId,
   canManage = false,
+  isMobile = false,
 }: ShareLinkManagerProps) {
   const { data: links, isLoading: linksLoading } = useActiveShareLinks(templateId);
   const { data: linkCount } = useLinkCount(templateId);
@@ -164,10 +167,10 @@ export function ShareLinkManager({
         {canManage && !showCreateForm && (
           <Button
             variant="outline"
-            size="sm"
+            size={isMobile ? 'default' : 'sm'}
             onClick={() => setShowCreateForm(true)}
             disabled={!canCreate}
-            className="gap-1.5"
+            className={cn('gap-1.5', isMobile && 'min-h-[44px]')}
           >
             <Plus className="h-4 w-4" />
             Create Link
@@ -177,13 +180,17 @@ export function ShareLinkManager({
 
       {/* Create Link Form */}
       {showCreateForm && canManage && (
-        <div className="rounded-lg border bg-muted/30 p-4 space-y-4">
+        <div className={cn(
+          'rounded-lg border bg-muted/30 space-y-4',
+          isMobile ? 'p-3' : 'p-4'
+        )}>
           <Form {...form}>
             <form
               onSubmit={form.handleSubmit(handleCreateLink)}
               className="space-y-4"
             >
-              <div className="grid gap-4 sm:grid-cols-2">
+              {/* Mobile: single column, Desktop: two columns */}
+              <div className={cn('grid gap-4', !isMobile && 'sm:grid-cols-2')}>
                 <FormField
                   control={form.control}
                   name="permission"
@@ -238,7 +245,7 @@ export function ShareLinkManager({
                 />
               </div>
 
-              <div className="grid gap-4 sm:grid-cols-2">
+              <div className={cn('grid gap-4', !isMobile && 'sm:grid-cols-2')}>
                 <FormField
                   control={form.control}
                   name="maxUses"
@@ -251,6 +258,7 @@ export function ShareLinkManager({
                           min={0}
                           max={1000}
                           placeholder="Unlimited"
+                          className={cn(isMobile && 'h-12 text-base')}
                           {...field}
                           value={field.value || ''}
                           onChange={(e) =>
@@ -277,6 +285,7 @@ export function ShareLinkManager({
                       <FormControl>
                         <Input
                           placeholder="e.g., Interview candidates"
+                          className={cn(isMobile && 'h-12 text-base')}
                           {...field}
                         />
                       </FormControl>
@@ -289,11 +298,16 @@ export function ShareLinkManager({
                 />
               </div>
 
-              <div className="flex justify-end gap-2">
+              <div className={cn(
+                'flex gap-2',
+                // Mobile: full width stacked buttons
+                isMobile ? 'flex-col' : 'justify-end'
+              )}>
                 <Button
                   type="button"
                   variant="outline"
-                  size="sm"
+                  size={isMobile ? 'default' : 'sm'}
+                  className={cn(isMobile && 'min-h-[44px] order-2')}
                   onClick={() => {
                     setShowCreateForm(false);
                     form.reset();
@@ -303,9 +317,9 @@ export function ShareLinkManager({
                 </Button>
                 <Button
                   type="submit"
-                  size="sm"
+                  size={isMobile ? 'default' : 'sm'}
                   disabled={createLink.isPending}
-                  className="gap-1.5"
+                  className={cn('gap-1.5', isMobile && 'min-h-[44px] order-1')}
                 >
                   {createLink.isPending ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
@@ -331,6 +345,7 @@ export function ShareLinkManager({
               link={link}
               canManage={canManage}
               isRevoking={revoking === link.id}
+              isMobile={isMobile}
               onRevoke={() => handleRevokeLink(link.id)}
             />
           ))}
@@ -362,6 +377,7 @@ interface LinkListItemProps {
   link: ShareLink;
   canManage: boolean;
   isRevoking: boolean;
+  isMobile?: boolean;
   onRevoke: () => void;
 }
 
@@ -369,6 +385,7 @@ function LinkListItem({
   link,
   canManage,
   isRevoking,
+  isMobile = false,
   onRevoke,
 }: LinkListItemProps) {
   const isExpired = link.expiresAt && new Date(link.expiresAt) < new Date();
@@ -378,7 +395,8 @@ function LinkListItem({
   return (
     <div
       className={cn(
-        'rounded-lg border p-3 space-y-2',
+        'rounded-lg border space-y-2',
+        isMobile ? 'p-3' : 'p-3',
         isInvalid && 'opacity-60'
       )}
     >
@@ -431,8 +449,11 @@ function LinkListItem({
               <AlertDialogTrigger asChild>
                 <Button
                   variant="ghost"
-                  size="sm"
-                  className="text-muted-foreground hover:text-destructive shrink-0"
+                  size={isMobile ? 'default' : 'sm'}
+                  className={cn(
+                    'text-muted-foreground hover:text-destructive shrink-0',
+                    isMobile && 'min-h-[44px] min-w-[44px]'
+                  )}
                   disabled={isRevoking}
                 >
                   {isRevoking ? (

@@ -25,6 +25,7 @@ export const RESERVED_TEST_TEMPLATE_SEGMENTS = [
   'history',
   'new',
   'take',
+  'access',
 ] as const;
 
 /**

@@ -1698,6 +1698,7 @@ import {
   LinkCountInfo,
   TemplateVisibility,
   SharePermission,
+  SharedTemplatesResponse,
 } from '@/types/domain';
 
 const TEMPLATES_BASE = '/tests/templates';
@@ -1975,5 +1976,49 @@ export const templateSharingApi = {
     return fetchApi(`${TEMPLATES_BASE}/${templateId}/links/count`, {
       authHeaders,
     });
+  },
+
+  // ==================== SHARED WITH ME ====================
+
+  /**
+   * Get templates shared with the current user.
+   * Returns templates where the user has been granted access via shares.
+   *
+   * NOTE: Backend endpoint pending implementation.
+   * Required endpoint: GET /api/v1/tests/templates/shared-with-me
+   * Should return: { items: SharedTemplateItem[], total: number }
+   */
+  getSharedWithMe: async (): Promise<SharedTemplatesResponse> => {
+    try {
+      const authHeaders = await getAuthHeaders();
+      return await fetchApi(`${TEMPLATES_BASE}/shared-with-me`, {
+        tags: ['shared-templates'],
+        revalidate: 60,
+        authHeaders,
+      });
+    } catch {
+      // Graceful fallback if endpoint not yet implemented
+      // Log warning but return empty result to keep UI functional
+      log.warn('getSharedWithMe endpoint not available, returning empty result');
+      return { items: [], total: 0 };
+    }
+  },
+
+  /**
+   * Get count of templates shared with the current user.
+   *
+   * NOTE: Backend endpoint pending implementation.
+   * Required endpoint: GET /api/v1/tests/templates/shared-with-me/count
+   */
+  getSharedWithMeCount: async (): Promise<number> => {
+    try {
+      const authHeaders = await getAuthHeaders();
+      return await fetchApi(`${TEMPLATES_BASE}/shared-with-me/count`, {
+        authHeaders,
+      });
+    } catch {
+      // Graceful fallback if endpoint not yet implemented
+      return 0;
+    }
   },
 };

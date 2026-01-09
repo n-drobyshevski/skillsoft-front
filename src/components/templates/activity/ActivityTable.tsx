@@ -12,36 +12,34 @@ import {
 } from '@/components/ui/table';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { CheckCircle, XCircle, Timer } from 'lucide-react';
-import type { TestActivity, ActivityEventType } from '@/types/activity';
+import type { UserResultSummary } from '@/types/activity';
 
 export interface ActivityTableProps {
-  /** Activity data to display */
-  data: TestActivity[];
+  /** User-grouped result data */
+  data: UserResultSummary[];
   /** Optional className */
   className?: string;
 }
 
 /**
- * ActivityTable - Desktop table view for activity list.
+ * ActivityTable - Desktop table view for user-grouped results.
  *
  * Features:
  * - Clean table layout with proper column widths
- * - User avatar + name column
- * - Status with icon and color
- * - Score, Result badge, Time, Date columns
+ * - User avatar + name with attempt count
+ * - Score with color coding (emerald for pass)
+ * - Pass/Fail badge, Time, Date columns
  */
 export function ActivityTable({ data, className }: ActivityTableProps) {
   const t = useTranslations('activity');
   const tTable = useTranslations('activity.table');
 
   return (
-    <div className={cn('overflow-hidden rounded-md border', className)}>
+    <div className={cn('overflow-hidden', className)}>
       <Table>
         <TableHeader>
           <TableRow>
             <TableHead className="w-[200px]">{tTable('user')}</TableHead>
-            <TableHead className="w-[100px]">{tTable('status')}</TableHead>
             <TableHead className="w-[80px] text-right">{tTable('score')}</TableHead>
             <TableHead className="w-[80px]">{tTable('result')}</TableHead>
             <TableHead className="w-[100px]">{tTable('timeSpent')}</TableHead>
@@ -49,8 +47,8 @@ export function ActivityTable({ data, className }: ActivityTableProps) {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {data.map((activity) => (
-            <ActivityRow key={activity.sessionId} activity={activity} t={t} />
+          {data.map((result) => (
+            <UserResultRow key={result.clerkUserId} result={result} t={t} />
           ))}
         </TableBody>
       </Table>
@@ -59,17 +57,16 @@ export function ActivityTable({ data, className }: ActivityTableProps) {
 }
 
 /**
- * Table row for individual activity
+ * Table row for user result summary
  */
-interface ActivityRowProps {
-  activity: TestActivity;
+interface UserResultRowProps {
+  result: UserResultSummary;
   t: ReturnType<typeof useTranslations<'activity'>>;
 }
 
-function ActivityRow({ activity, t }: ActivityRowProps) {
-  const initials = getInitials(activity.userName);
-  const StatusIcon = getStatusIcon(activity.eventType);
-  const statusColor = getStatusColor(activity.eventType);
+function UserResultRow({ result, t }: UserResultRowProps) {
+  const initials = getInitials(result.userName);
+  const { latestSession } = result;
 
   return (
     <TableRow>
@@ -77,41 +74,47 @@ function ActivityRow({ activity, t }: ActivityRowProps) {
       <TableCell>
         <div className="flex items-center gap-2">
           <Avatar className="h-7 w-7 shrink-0">
-            {activity.userImageUrl && (
-              <AvatarImage src={activity.userImageUrl} alt={activity.userName} />
+            {result.userImageUrl && (
+              <AvatarImage src={result.userImageUrl} alt={result.userName} />
             )}
             <AvatarFallback className="text-[10px] bg-muted">{initials}</AvatarFallback>
           </Avatar>
-          <span className="font-medium text-sm truncate max-w-[150px]">
-            {activity.userName}
-          </span>
-        </div>
-      </TableCell>
-
-      {/* Status */}
-      <TableCell>
-        <div className={cn('flex items-center gap-1.5 text-xs', statusColor)}>
-          <StatusIcon className="w-3.5 h-3.5" />
-          {getStatusLabel(activity.eventType, t)}
+          <div className="flex flex-col">
+            <span className="font-medium text-sm truncate max-w-[150px]">
+              {result.userName}
+            </span>
+            {result.totalAttempts > 1 && (
+              <span className="text-[10px] text-muted-foreground">
+                {result.totalAttempts} {t('attempts')}
+              </span>
+            )}
+          </div>
         </div>
       </TableCell>
 
       {/* Score */}
-      <TableCell className="text-right font-medium">
-        {activity.score !== undefined ? `${Math.round(activity.score)}%` : '-'}
+      <TableCell className="text-right">
+        <span className={cn(
+          'text-lg font-bold',
+          latestSession.passed
+            ? 'text-emerald-600 dark:text-emerald-400'
+            : 'text-foreground'
+        )}>
+          {latestSession.score !== undefined ? `${Math.round(latestSession.score)}%` : '-'}
+        </span>
       </TableCell>
 
-      {/* Result */}
+      {/* Result Badge */}
       <TableCell>
-        {activity.passed !== undefined ? (
+        {latestSession.passed !== undefined ? (
           <Badge
-            variant={activity.passed ? 'default' : 'secondary'}
+            variant={latestSession.passed ? 'default' : 'secondary'}
             className={cn(
               'text-[10px]',
-              activity.passed && 'bg-emerald-600 hover:bg-emerald-600'
+              latestSession.passed && 'bg-emerald-600 hover:bg-emerald-600'
             )}
           >
-            {activity.passed ? t('passed') : t('failed')}
+            {latestSession.passed ? t('passed') : t('failed')}
           </Badge>
         ) : (
           <span className="text-muted-foreground">-</span>
@@ -120,12 +123,12 @@ function ActivityRow({ activity, t }: ActivityRowProps) {
 
       {/* Time Spent */}
       <TableCell className="text-xs text-muted-foreground">
-        {activity.timeSpentSeconds ? formatDuration(activity.timeSpentSeconds) : '-'}
+        {latestSession.timeSpentSeconds ? formatDuration(latestSession.timeSpentSeconds) : '-'}
       </TableCell>
 
       {/* Date */}
       <TableCell className="text-xs text-muted-foreground">
-        {formatDate(activity.occurredAt)}
+        {formatDate(latestSession.occurredAt)}
       </TableCell>
     </TableRow>
   );
@@ -139,48 +142,6 @@ function getInitials(name: string): string {
     return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
   }
   return name.substring(0, 2).toUpperCase();
-}
-
-function getStatusIcon(eventType: ActivityEventType) {
-  switch (eventType) {
-    case 'COMPLETED':
-      return CheckCircle;
-    case 'ABANDONED':
-      return XCircle;
-    case 'TIMED_OUT':
-      return Timer;
-    default:
-      return CheckCircle;
-  }
-}
-
-function getStatusColor(eventType: ActivityEventType): string {
-  switch (eventType) {
-    case 'COMPLETED':
-      return 'text-emerald-600 dark:text-emerald-400';
-    case 'ABANDONED':
-      return 'text-amber-600 dark:text-amber-400';
-    case 'TIMED_OUT':
-      return 'text-red-600 dark:text-red-400';
-    default:
-      return 'text-muted-foreground';
-  }
-}
-
-function getStatusLabel(
-  eventType: ActivityEventType,
-  t: ReturnType<typeof useTranslations<'activity'>>
-): string {
-  switch (eventType) {
-    case 'COMPLETED':
-      return t('completed');
-    case 'ABANDONED':
-      return t('abandoned');
-    case 'TIMED_OUT':
-      return t('timedOut');
-    default:
-      return t('completed');
-  }
 }
 
 function formatDuration(seconds: number): string {

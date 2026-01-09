@@ -1264,6 +1264,48 @@ export interface LinkCountInfo {
   maxLinks: number;
 }
 
+/**
+ * Template shared with the current user.
+ * Combines template summary with sharing metadata.
+ */
+export interface SharedTemplateItem {
+  /** The template details */
+  template: {
+    id: string;
+    name: string;
+    description?: string;
+    goal: AssessmentGoal;
+    competencyCount: number;
+    timeLimitMinutes: number;
+    passingScore: number;
+    isActive: boolean;
+    createdAt: string;
+  };
+  /** Share permission granted to current user */
+  permission: SharePermission;
+  /** Who shared the template */
+  sharedBy: {
+    id: string;
+    name: string;
+    email?: string;
+    avatarUrl?: string;
+  };
+  /** When it was shared */
+  sharedAt: string;
+  /** When access expires (if applicable) */
+  expiresAt?: string;
+  /** Whether the share is still active */
+  isActive: boolean;
+}
+
+/**
+ * Response for listing templates shared with current user.
+ */
+export interface SharedTemplatesResponse {
+  items: SharedTemplateItem[];
+  total: number;
+}
+
 // ============================================
 // VISIBILITY HELPER FUNCTIONS
 // ============================================

@@ -9,13 +9,13 @@ import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover
 import {
   LayoutDashboard,
   Wrench,
-  Users,
   Settings,
   Lock,
   Info,
   GitBranch,
   Loader2,
   Activity,
+  Shield,
   type LucideIcon
 } from 'lucide-react';
 import type { TemplateStatus } from './TemplateHeader';
@@ -61,16 +61,16 @@ export function NavTabs({ baseUrl, status, templateId, templateName }: NavTabsPr
       icon: Wrench,
     },
     {
-      label: 'Candidates',
-      href: `${baseUrl}/results`,
-      segment: 'results',
-      icon: Users,
-    },
-    {
       label: 'Activity',
       href: `${baseUrl}/activity`,
       segment: 'activity',
       icon: Activity,
+    },
+    {
+      label: 'Access',
+      href: `${baseUrl}/access`,
+      segment: 'access',
+      icon: Shield,
     },
     {
       label: 'Settings',

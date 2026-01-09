@@ -57,4 +57,7 @@ export {
   useRevokeAllLinks,
   // Link Validation (public)
   useValidateShareLink,
+  // Shared With Me
+  useSharedWithMe,
+  useSharedWithMeCount,
 } from './useTemplateSharingQuery';
