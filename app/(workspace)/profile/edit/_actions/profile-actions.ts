@@ -89,10 +89,12 @@ export async function updateProfileAction(
 
     return {
       success: true,
-      message: 'Профиль успешно обновлен',
+      message: '', // Success message handled by client-side i18n
     };
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Ошибка при обновлении профиля';
+    // Return the actual error message for toast description
+    // Client will show i18n title, this provides additional context
+    const message = error instanceof Error ? error.message : '';
     return {
       success: false,
       message,
@@ -136,10 +138,12 @@ export async function updatePreferencesAction(
 
     return {
       success: true,
-      message: 'Настройки сохранены',
+      message: '', // Success message handled by client-side i18n
     };
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Ошибка при сохранении настроек';
+    // Return the actual error message for toast description
+    // Client will show i18n title, this provides additional context
+    const message = error instanceof Error ? error.message : '';
     return {
       success: false,
       message,

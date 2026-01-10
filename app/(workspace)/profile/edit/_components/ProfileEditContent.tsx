@@ -1,6 +1,7 @@
 'use client';
 
 import { User, ClipboardCheck, Brain } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { AccountInfoSection } from './AccountInfoSection';
@@ -18,11 +19,11 @@ interface ProfileEditContentProps {
   passport: CompetencyPassport;
 }
 
-// Tab configuration for profile edit
+// Tab configuration for profile edit (labels are translation keys)
 const TAB_CONFIG = [
-  { value: 'account', label: 'Аккаунт', icon: User },
-  { value: 'results', label: 'Результаты', icon: ClipboardCheck },
-  { value: 'passport', label: 'Паспорт', icon: Brain },
+  { value: 'account', labelKey: 'tabs.account', icon: User },
+  { value: 'results', labelKey: 'tabs.results', icon: ClipboardCheck },
+  { value: 'passport', labelKey: 'tabs.passport', icon: Brain },
 ] as const;
 
 /**
@@ -41,11 +42,13 @@ export function ProfileEditContent({
   summary,
   passport,
 }: ProfileEditContentProps) {
+  const t = useTranslations('profile.edit');
+
   return (
     <Tabs defaultValue="account" className="space-y-4 sm:space-y-6">
       {/* Tabs Header - Matches my-tests page styling */}
       <ScrollArea className="w-full">
-        <TabsList className="inline-flex w-max h-11 sm:h-10 p-1 bg-muted/50 rounded-lg gap-1">
+        <TabsList className="inline-flex w-max h-11 sm:h-10 p-1 bg-muted/50 rounded-lg gap-1" aria-label={t('tabs.account') + ', ' + t('tabs.results') + ', ' + t('tabs.passport')}>
           {TAB_CONFIG.map(tab => {
             const Icon = tab.icon;
             return (
@@ -60,7 +63,7 @@ export function ProfileEditContent({
                 )}
               >
                 <Icon className="size-4" />
-                <span>{tab.label}</span>
+                <span>{t(tab.labelKey)}</span>
               </TabsTrigger>
             );
           })}

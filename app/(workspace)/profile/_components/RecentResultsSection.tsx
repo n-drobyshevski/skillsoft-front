@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
+import { useTranslations, useFormatter } from 'next-intl';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -11,27 +12,16 @@ import {
   ChevronRight,
   CheckCircle,
   XCircle,
-  FileText,
 } from 'lucide-react';
-import { formatDistanceToNow } from 'date-fns';
-import { ru } from 'date-fns/locale';
 import type { RecentTestResult } from '@/types/profile';
 import { AssessmentGoal } from '@/types/domain';
 import { cn } from '@/lib/utils';
 import { GoalFilterTabs, type GoalFilter } from './GoalFilterTabs';
+import { ProfileEmptyState } from './ProfileEmptyState';
 
 interface RecentResultsSectionProps {
   results: RecentTestResult[];
 }
-
-/**
- * Goal labels in Russian
- */
-const GOAL_LABELS: Record<AssessmentGoal, string> = {
-  [AssessmentGoal.OVERVIEW]: 'Обзор',
-  [AssessmentGoal.JOB_FIT]: 'Должность',
-  [AssessmentGoal.TEAM_FIT]: 'Команда',
-};
 
 /**
  * Recent Results Section - Client Component
@@ -42,7 +32,16 @@ const GOAL_LABELS: Record<AssessmentGoal, string> = {
  * - Goal-based filtering
  */
 export function RecentResultsSection({ results }: RecentResultsSectionProps) {
+  const t = useTranslations('profile.results');
+  const tAccessibility = useTranslations('profile.accessibility');
   const [goalFilter, setGoalFilter] = useState<GoalFilter>('all');
+
+  // Goal labels from translations
+  const goalLabels: Record<AssessmentGoal, string> = {
+    [AssessmentGoal.OVERVIEW]: t('filterOverview'),
+    [AssessmentGoal.JOB_FIT]: t('filterJobFit'),
+    [AssessmentGoal.TEAM_FIT]: t('filterTeamFit'),
+  };
 
   // Calculate counts for each filter
   const filterCounts = useMemo(() => {
@@ -79,25 +78,15 @@ export function RecentResultsSection({ results }: RecentResultsSectionProps) {
             <div className="p-1.5 sm:p-2 rounded-lg bg-primary/10">
               <ClipboardCheck className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
             </div>
-            Последние результаты
+            {t('title')}
           </CardTitle>
         </CardHeader>
         <CardContent className="px-3 sm:px-6">
-          <div className="text-center py-6 sm:py-8">
-            <div className="w-12 h-12 sm:w-14 sm:h-14 mx-auto rounded-full bg-muted/50 flex items-center justify-center mb-3 sm:mb-4">
-              <FileText className="h-6 w-6 sm:h-7 sm:w-7 text-muted-foreground/30" />
-            </div>
-            <h3 className="text-sm sm:text-base font-medium mb-1.5 sm:mb-2">Пока нет результатов</h3>
-            <p className="text-xs sm:text-sm text-muted-foreground mb-3 sm:mb-4 px-4">
-              Пройдите первый тест, чтобы увидеть свои результаты здесь
-            </p>
-            <Button asChild size="sm" className="text-xs sm:text-sm">
-              <Link href="/test-templates">
-                Начать тестирование
-                <ChevronRight className="ml-1 h-3.5 w-3.5 sm:h-4 sm:w-4" />
-              </Link>
-            </Button>
-          </div>
+          <ProfileEmptyState
+            variant="no-tests"
+            showCta
+            ctaHref="/test-templates"
+          />
         </CardContent>
       </Card>
     );
@@ -111,7 +100,7 @@ export function RecentResultsSection({ results }: RecentResultsSectionProps) {
             <div className="p-1.5 sm:p-2 rounded-lg bg-primary/10">
               <ClipboardCheck className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
             </div>
-            Последние результаты
+            {t('title')}
           </CardTitle>
           {/* Filter container */}
           <div className="flex items-center gap-2 min-w-0">
@@ -120,11 +109,13 @@ export function RecentResultsSection({ results }: RecentResultsSectionProps) {
                 value={goalFilter}
                 onChange={setGoalFilter}
                 counts={filterCounts}
+                allLabel={t('filterAll')}
+                goalLabels={goalLabels}
               />
             </div>
             <Button variant="ghost" size="sm" asChild className="hidden sm:inline-flex shrink-0 text-xs h-7 px-2">
               <Link href="/my-tests">
-                Все
+                {t('filterAll')}
                 <ChevronRight className="ml-0.5 h-3.5 w-3.5" />
               </Link>
             </Button>
@@ -133,28 +124,37 @@ export function RecentResultsSection({ results }: RecentResultsSectionProps) {
       </CardHeader>
 
       <CardContent className="px-3 sm:px-6">
+        {/* Aria-live region for filter results announcement */}
+        <div
+          role="status"
+          aria-live="polite"
+          aria-atomic="true"
+          className="sr-only"
+        >
+          {filteredResults.length === 0
+            ? tAccessibility('noResultsForFilter', { filter: goalFilter === 'all' ? t('filterAll') : goalLabels[goalFilter as AssessmentGoal] })
+            : tAccessibility('showingResults', { count: filteredResults.length })}
+        </div>
+
         {filteredResults.length === 0 ? (
-          <div className="text-center py-4 sm:py-6">
-            <div className="w-10 h-10 sm:w-12 sm:h-12 mx-auto rounded-full bg-muted/50 flex items-center justify-center mb-2 sm:mb-3">
-              <FileText className="h-5 w-5 sm:h-6 sm:w-6 text-muted-foreground/30" />
-            </div>
-            <p className="text-xs sm:text-sm text-muted-foreground">
-              Нет результатов для выбранного фильтра
-            </p>
-          </div>
+          <ProfileEmptyState
+            variant="no-results"
+            showCta={false}
+            className="py-4 sm:py-6"
+          />
         ) : (
           <div className="space-y-2">
             {filteredResults.map((result) => (
-              <ResultRow key={result.resultId} result={result} />
+              <ResultRow key={result.resultId} result={result} goalLabels={goalLabels} />
             ))}
           </div>
         )}
 
         {/* Mobile "All results" button */}
         <div className="mt-3 sm:hidden">
-          <Button variant="outline" size="sm" asChild className="w-full text-xs">
+          <Button variant="outline" size="sm" asChild className="w-full text-xs min-h-[44px] touch-manipulation">
             <Link href="/my-tests">
-              Все результаты
+              {t('viewAll')}
               <ChevronRight className="ml-1 h-3.5 w-3.5" />
             </Link>
           </Button>
@@ -168,15 +168,31 @@ export function RecentResultsSection({ results }: RecentResultsSectionProps) {
 // RESULT ROW COMPONENT
 // ============================================
 
-function ResultRow({ result }: { result: RecentTestResult }) {
+function ResultRow({
+  result,
+  goalLabels
+}: {
+  result: RecentTestResult;
+  goalLabels: Record<AssessmentGoal, string>;
+}) {
+  const t = useTranslations('profile.results');
+  const format = useFormatter();
+
+  // Build accessible label for the result row
+  const statusLabel = result.passed ? t('passed') : t('failed');
+  const ariaLabel = `${result.templateName} - ${statusLabel}, ${t('score')}: ${result.overallPercentage.toFixed(0)}%`;
+
   return (
     <Link
       href={`/test-templates/results/${result.resultId}`}
+      aria-label={ariaLabel}
       className={cn(
         'flex items-center gap-2 sm:gap-3 w-full p-2 sm:p-3 rounded-xl border transition-colors group touch-manipulation overflow-hidden',
+        'min-h-[44px]',
         'hover:bg-muted/50',
-        result.passed 
-          ? 'border-emerald-500/20 bg-emerald-500/5 hover:bg-emerald-500/10' 
+        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
+        result.passed
+          ? 'border-emerald-500/20 bg-emerald-500/5 hover:bg-emerald-500/10'
           : 'border-amber-500/20 bg-amber-500/5 hover:bg-amber-500/10'
       )}
     >
@@ -198,10 +214,7 @@ function ResultRow({ result }: { result: RecentTestResult }) {
           {result.templateName}
         </div>
         <div className="text-[10px] sm:text-xs text-muted-foreground">
-          {formatDistanceToNow(new Date(result.completedAt), {
-            addSuffix: true,
-            locale: ru,
-          })}
+          {format.relativeTime(new Date(result.completedAt))}
         </div>
       </div>
 
@@ -214,7 +227,7 @@ function ResultRow({ result }: { result: RecentTestResult }) {
 
       {/* Goal Badge - Hidden on mobile */}
       <Badge variant="outline" className="text-[10px] sm:text-xs hidden sm:inline-flex py-0 h-5 shrink-0">
-        {GOAL_LABELS[result.goal] || 'Тест'}
+        {goalLabels[result.goal] || result.goal}
       </Badge>
 
       <ChevronRight className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-muted-foreground group-hover:translate-x-1 transition-transform shrink-0" />

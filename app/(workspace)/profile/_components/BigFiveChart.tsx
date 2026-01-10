@@ -14,6 +14,32 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { BigFiveProfile, getBigFiveLabels } from '@/hooks/useBigFiveProjection';
 
 /**
+ * Hook to detect user's reduced motion preference.
+ * Respects the prefers-reduced-motion media query for accessibility.
+ */
+function usePrefersReducedMotion(): boolean {
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+
+  useEffect(() => {
+    // Check if window is available (SSR safety)
+    if (typeof window === 'undefined') return;
+
+    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+    // Set initial value
+    setPrefersReducedMotion(mediaQuery.matches);
+
+    // Listen for changes
+    const handler = (e: MediaQueryListEvent) => setPrefersReducedMotion(e.matches);
+    mediaQuery.addEventListener('change', handler);
+
+    return () => mediaQuery.removeEventListener('change', handler);
+  }, []);
+
+  return prefersReducedMotion;
+}
+
+/**
  * Big Five trait colors - distinct, visually appealing colors for each personality dimension.
  * Matches the existing BigFiveRadar component for consistency.
  */
@@ -140,6 +166,7 @@ export function BigFiveChart({ profile }: BigFiveChartProps) {
   const isMobile = useIsMobile();
   const colors = useComputedColors();
   const labels = getBigFiveLabels();
+  const prefersReducedMotion = usePrefersReducedMotion();
 
   // Radar colors - using indigo for professional appearance
   const radarStroke = '#6366f1';     // indigo-500
@@ -208,8 +235,8 @@ export function BigFiveChart({ profile }: BigFiveChartProps) {
           strokeWidth={2}
           fill="url(#profileBigFiveGradient)"
           fillOpacity={1}
-          isAnimationActive={true}
-          animationDuration={800}
+          isAnimationActive={!prefersReducedMotion}
+          animationDuration={prefersReducedMotion ? 0 : 800}
           animationEasing="ease-out"
         />
 

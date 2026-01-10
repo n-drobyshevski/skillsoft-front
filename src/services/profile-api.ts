@@ -4,8 +4,8 @@
  */
 
 import { cache } from 'react';
-import { testResultsApi } from './api';
-import { TestResult, CompetencyScore, UserStatistics, AssessmentGoal } from '@/types/domain';
+import { testResultsApi, templateSharingApi } from './api';
+import { TestResult, CompetencyScore, UserStatistics, AssessmentGoal, SharedTemplatesResponse } from '@/types/domain';
 import {
   AssessmentSummary,
   CompetencyPassport,
@@ -259,6 +259,25 @@ function projectToBigFive(competencyScores: CompetencyScore[]): BigFiveProfile {
     EMOTIONAL_STABILITY: Math.round(avgScore + (Math.random() * 10 - 5)),
   };
 }
+
+// ============================================
+// SHARED TEMPLATES DATA
+// ============================================
+
+/**
+ * Get templates shared with the current user
+ * Cached for request deduplication
+ */
+export const getSharedTemplates = cache(async (): Promise<SharedTemplatesResponse> => {
+  try {
+    const response = await templateSharingApi.getSharedWithMe();
+    return response || { items: [], total: 0 };
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error('[Profile API] Failed to fetch shared templates:', error);
+    return { items: [], total: 0 };
+  }
+});
 
 // ============================================
 // COMBINED PROFILE DATA

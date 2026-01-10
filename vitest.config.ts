@@ -39,6 +39,8 @@ export default defineConfig({
         'src/lib/**/*.ts',
         'src/store/**/*.ts',
         'src/components/**/*.tsx',
+        'src/app/actions/**/*.{ts,tsx}', // Server actions
+        'app/**/*.{ts,tsx}',             // App router components
       ],
       exclude: [
         'src/**/*.d.ts',

@@ -1,6 +1,7 @@
 'use client';
 
 import dynamic from 'next/dynamic';
+import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -14,6 +15,9 @@ import { Brain, Info, HelpCircle } from 'lucide-react';
 import { BIG_FIVE_INFO, type BigFiveProfile } from '@/hooks/useBigFiveProjection';
 import type { ProjectionConfidence } from '@/types/profile';
 import { cn } from '@/lib/utils';
+import { MobileBigFiveBars } from './MobileBigFiveBars';
+import { ProfileEmptyState } from './ProfileEmptyState';
+import { AccessibleChart } from '@/components/accessibility/AccessibleChart';
 
 // Dynamic import for chart to reduce initial bundle
 const BigFiveRadarChart = dynamic(
@@ -66,6 +70,32 @@ export function PersonalityPassportCard({
   confidence,
   totalAssessments,
 }: PersonalityPassportCardProps) {
+  const t = useTranslations('profile.passport');
+  const tAccessibility = useTranslations('profile.accessibility');
+
+  // Empty state - no assessments to base the profile on
+  if (totalAssessments === 0) {
+    return (
+      <Card className="h-full">
+        <CardHeader className="pb-2 sm:pb-3 px-3 sm:px-6">
+          <CardTitle className="text-base sm:text-lg flex items-center gap-2">
+            <div className="p-1.5 sm:p-2 rounded-lg bg-primary/10">
+              <Brain className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+            </div>
+            {t('title')}
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="px-3 sm:px-6">
+          <ProfileEmptyState
+            variant="no-passport"
+            showCta
+            ctaHref="/test-templates"
+          />
+        </CardContent>
+      </Card>
+    );
+  }
+
   // Find dominant trait (highest score)
   const dominantTrait = TRAIT_ORDER.reduce((max, trait) =>
     // eslint-disable-next-line security/detect-object-injection
@@ -83,13 +113,13 @@ export function PersonalityPassportCard({
               <div className="p-1.5 sm:p-2 rounded-lg bg-primary/10">
                 <Brain className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
               </div>
-              Big Five профиль
+              {t('title')}
             </CardTitle>
             <CardDescription className="mt-1 text-xs sm:text-sm">
-              На основе {totalAssessments} оценок
+              {t('basedOn', { count: totalAssessments })}
             </CardDescription>
           </div>
-          <ConfidenceBadge confidence={confidence} />
+          <ConfidenceBadge confidence={confidence} t={t} />
         </div>
       </CardHeader>
 
@@ -122,7 +152,7 @@ export function PersonalityPassportCard({
                 TRAIT_COLORS[dominantTrait].text
               )}
             >
-              Доминирующая черта
+              {t('dominantTrait')}
             </p>
             <p className="text-[10px] sm:text-xs text-muted-foreground truncate">
               {dominantInfo.short}
@@ -130,21 +160,33 @@ export function PersonalityPassportCard({
           </div>
         </div>
 
-        {/* Radar Chart - Compact on mobile */}
-        <div className="h-[200px] sm:h-[260px]" role="img" aria-label="Радарная диаграмма Big Five профиля">
-          <span className="sr-only">
-            {TRAIT_ORDER.map(trait => {
+        {/* Mobile: Horizontal bars (more touch-friendly) */}
+        <MobileBigFiveBars profile={profile} className="sm:hidden" />
+
+        {/* Desktop: Radar Chart with Accessible Data Table */}
+        <div className="hidden sm:block">
+          <AccessibleChart
+            title={t('title')}
+            description={tAccessibility('chartDescription')}
+            data={TRAIT_ORDER.map(trait => ({
               // eslint-disable-next-line security/detect-object-injection
-              const info = BIG_FIVE_INFO[trait];
+              trait: BIG_FIVE_INFO[trait].short,
               // eslint-disable-next-line security/detect-object-injection
-              return `${info.short}: ${profile[trait]}%`;
-            }).join('. ')}
-          </span>
-          <BigFiveRadarChart profile={profile} />
+              value: profile[trait],
+            }))}
+            columns={[
+              { key: 'trait', label: tAccessibility('traitColumn') },
+              { key: 'value', label: tAccessibility('scoreColumn') }
+            ]}
+          >
+            <div className="h-[260px]">
+              <BigFiveRadarChart profile={profile} />
+            </div>
+          </AccessibleChart>
         </div>
 
-        {/* Trait bars - Compact on mobile */}
-        <div className="space-y-1.5 sm:space-y-2 overflow-hidden">
+        {/* Trait bars with tooltips - Desktop only (MobileBigFiveBars handles mobile) */}
+        <div className="hidden sm:block space-y-2 overflow-hidden">
           {TRAIT_ORDER.map((trait) => {
             // eslint-disable-next-line security/detect-object-injection
             const info = BIG_FIVE_INFO[trait];
@@ -157,17 +199,17 @@ export function PersonalityPassportCard({
               <TooltipProvider key={trait} delayDuration={300}>
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <div className="flex items-center gap-1.5 sm:gap-3 p-1.5 sm:p-2 rounded-lg hover:bg-muted/50 transition-colors cursor-help group touch-manipulation min-h-[44px]">
-                      {/* Trait name - Truncated on mobile */}
-                      <div className="w-16 sm:w-28 shrink-0 min-w-0">
-                        <span className="text-[11px] sm:text-sm font-medium flex items-center gap-1 truncate">
+                    <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted/50 transition-colors cursor-help group touch-manipulation min-h-[44px]">
+                      {/* Trait name */}
+                      <div className="w-28 shrink-0 min-w-0">
+                        <span className="text-sm font-medium flex items-center gap-1 truncate">
                           {info.short}
-                          <HelpCircle className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity hidden sm:inline" />
+                          <HelpCircle className="h-3 w-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
                         </span>
                       </div>
 
-                      {/* Progress bar - Flexible width, no min-width */}
-                      <div className="flex-1 min-w-0 h-1.5 sm:h-2 bg-muted rounded-full overflow-hidden">
+                      {/* Progress bar */}
+                      <div className="flex-1 min-w-0 h-2 bg-muted rounded-full overflow-hidden">
                         <div
                           className={cn('h-full rounded-full transition-all duration-500', colors.bar)}
                           style={{ width: `${score}%` }}
@@ -175,7 +217,7 @@ export function PersonalityPassportCard({
                       </div>
 
                       {/* Score */}
-                      <div className={cn('w-8 sm:w-10 text-right font-bold tabular-nums text-xs sm:text-sm shrink-0', colors.text)}>
+                      <div className={cn('w-10 text-right font-bold tabular-nums text-sm shrink-0', colors.text)}>
                         {score}
                       </div>
                     </div>
@@ -198,27 +240,28 @@ export function PersonalityPassportCard({
 // HELPER COMPONENTS
 // ============================================
 
-function ConfidenceBadge({ confidence }: { confidence: ProjectionConfidence }) {
+interface ConfidenceBadgeProps {
+  confidence: ProjectionConfidence;
+  t: ReturnType<typeof useTranslations<'profile.passport'>>;
+}
+
+function ConfidenceBadge({ confidence, t }: ConfidenceBadgeProps) {
   const config = {
     low: {
-      label: 'Низкая',
       className: 'text-amber-600 bg-amber-100 dark:text-amber-400 dark:bg-amber-900/30',
-      description: 'Пройдите больше тестов для повышения точности',
     },
     medium: {
-      label: 'Средняя',
       className: 'text-blue-600 bg-blue-100 dark:text-blue-400 dark:bg-blue-900/30',
-      description: 'Достаточно данных для базового профиля',
     },
     high: {
-      label: 'Высокая',
       className: 'text-emerald-600 bg-emerald-100 dark:text-emerald-400 dark:bg-emerald-900/30',
-      description: 'Надёжный профиль на основе множества оценок',
     },
   };
 
   // eslint-disable-next-line security/detect-object-injection
-  const { label, className, description } = config[confidence];
+  const { className } = config[confidence];
+  const label = t(`confidence.${confidence}`);
+  const description = t(`confidenceTooltip.${confidence}`);
 
   return (
     <TooltipProvider delayDuration={300}>
@@ -257,14 +300,30 @@ export function PersonalityPassportCardSkeleton() {
         </div>
       </CardHeader>
       <CardContent className="space-y-3 sm:space-y-4 px-3 sm:px-6">
+        {/* Dominant trait callout skeleton */}
         <Skeleton className="h-14 sm:h-16 w-full rounded-xl" />
-        <Skeleton className="h-[200px] sm:h-[260px] w-full rounded-lg" />
-        <div className="space-y-1.5 sm:space-y-2">
+
+        {/* Mobile: Bar skeleton */}
+        <div className="sm:hidden space-y-1">
           {[1, 2, 3, 4, 5].map((i) => (
-            <div key={i} className="flex items-center gap-2 sm:gap-3 p-1.5 sm:p-2">
-              <Skeleton className="h-3 sm:h-4 w-20 sm:w-28" />
-              <Skeleton className="h-1.5 sm:h-2 flex-1 rounded-full" />
-              <Skeleton className="h-3 sm:h-4 w-6 sm:w-8" />
+            <div key={i} className="flex items-center gap-2 min-h-[44px]">
+              <Skeleton className="h-3 w-24" />
+              <Skeleton className="h-2 flex-1 rounded-full" />
+              <Skeleton className="h-3 w-8" />
+            </div>
+          ))}
+        </div>
+
+        {/* Desktop: Radar chart skeleton */}
+        <Skeleton className="hidden sm:block h-[260px] w-full rounded-lg" />
+
+        {/* Desktop: Trait bars skeleton */}
+        <div className="hidden sm:block space-y-2">
+          {[1, 2, 3, 4, 5].map((i) => (
+            <div key={i} className="flex items-center gap-3 p-2">
+              <Skeleton className="h-4 w-28" />
+              <Skeleton className="h-2 flex-1 rounded-full" />
+              <Skeleton className="h-4 w-10" />
             </div>
           ))}
         </div>

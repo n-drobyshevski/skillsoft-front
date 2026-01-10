@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -17,6 +18,7 @@ import {
 } from 'lucide-react';
 import type { TopCompetency } from '@/types/profile';
 import { cn } from '@/lib/utils';
+import { ProfileEmptyState } from './ProfileEmptyState';
 
 interface TopCompetenciesCardProps {
   competencies: TopCompetency[];
@@ -35,6 +37,8 @@ export function TopCompetenciesCard({
   competencies,
   totalAssessments,
 }: TopCompetenciesCardProps) {
+  const t = useTranslations('profile.competencies');
+
   // Empty state
   if (competencies.length === 0) {
     return (
@@ -44,32 +48,22 @@ export function TopCompetenciesCard({
             <div className="p-1.5 sm:p-2 rounded-lg bg-primary/10 shrink-0">
               <Target className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
             </div>
-            <span className="truncate">Топ компетенции</span>
+            <span className="truncate">{t('title')}</span>
           </CardTitle>
         </CardHeader>
         <CardContent className="px-3 sm:px-6">
-          <div className="text-center py-6 sm:py-8">
-            <div className="w-12 h-12 sm:w-14 sm:h-14 mx-auto rounded-full bg-muted/50 flex items-center justify-center mb-3 sm:mb-4">
-              <Trophy className="h-6 w-6 sm:h-7 sm:w-7 text-muted-foreground/30" />
-            </div>
-            <h3 className="text-sm sm:text-base font-medium mb-1.5 sm:mb-2">Пока нет данных</h3>
-            <p className="text-xs sm:text-sm text-muted-foreground mb-3 sm:mb-4 px-4">
-              Пройдите несколько тестов, чтобы увидеть ваши сильные стороны
-            </p>
-            <Button asChild size="sm" className="text-xs sm:text-sm">
-              <Link href="/test-templates">
-                Начать тестирование
-                <ChevronRight className="ml-1 h-3.5 w-3.5 sm:h-4 sm:w-4" />
-              </Link>
-            </Button>
-          </div>
+          <ProfileEmptyState
+            variant="no-competencies"
+            showCta
+            ctaHref="/test-templates"
+          />
         </CardContent>
       </Card>
     );
   }
 
   return (
-    <Card className="h-full flex flex-col">
+    <Card className="h-full flex flex-col transition-all duration-300 hover:shadow-md hover:border-primary/10">
       <CardHeader className="pb-2 sm:pb-3 px-3 sm:px-6">
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0 flex-1">
@@ -77,28 +71,28 @@ export function TopCompetenciesCard({
               <div className="p-1.5 sm:p-2 rounded-lg bg-primary/10 shrink-0">
                 <Target className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
               </div>
-              <span className="truncate">Топ компетенции</span>
+              <span className="truncate">{t('title')}</span>
             </CardTitle>
             <CardDescription className="mt-0.5 sm:mt-1 text-[10px] sm:text-sm ml-8 sm:ml-11">
-              На основе {totalAssessments} оценок
+              {t('basedOn', { count: totalAssessments })}
             </CardDescription>
           </div>
           <Button
             variant="ghost"
             size="sm"
             asChild
-            className="shrink-0 text-xs sm:text-sm h-8 sm:h-9 px-2 sm:px-3 min-h-[44px] min-w-[44px] justify-center"
+            className="shrink-0 text-xs sm:text-sm h-8 sm:h-9 px-2 sm:px-3 min-h-[44px] min-w-[44px] justify-center transition-all duration-200 hover:bg-muted active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:ring-offset-2 group"
           >
-            <Link href="/my-tests">
-              <span className="hidden sm:inline mr-0.5">Все</span>
-              <ChevronRight className="h-4 w-4" />
+            <Link href="/my-tests" aria-label={t('viewAll')}>
+              <span className="hidden sm:inline mr-0.5">{t('viewAll')}</span>
+              <ChevronRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5" aria-hidden="true" />
             </Link>
           </Button>
         </div>
       </CardHeader>
 
       <CardContent className="flex-1 px-3 sm:px-6">
-        <div className="space-y-2 sm:space-y-3">
+        <div className="space-y-2 sm:space-y-3" role="list" aria-label={t('title')}>
           {competencies.map((competency, index) => (
             <CompetencyRow key={competency.competencyId} competency={competency} rank={index + 1} />
           ))}
@@ -113,8 +107,21 @@ export function TopCompetenciesCard({
 // ============================================
 
 function CompetencyRow({ competency, rank }: { competency: TopCompetency; rank: number }) {
+  const t = useTranslations('profile.competencies');
+
   return (
-    <div className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 rounded-xl bg-muted/30 hover:bg-muted/50 transition-colors">
+    <div
+      tabIndex={0}
+      role="listitem"
+      aria-label={`${t('rank')} ${rank}: ${competency.competencyName}, ${competency.averageScore}%`}
+      className={cn(
+        'flex items-center gap-2 sm:gap-3 p-2 sm:p-3 rounded-xl bg-muted/30 group',
+        'transition-all duration-200 cursor-default',
+        'hover:bg-muted/50 hover:shadow-sm hover:-translate-x-0.5',
+        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
+        'active:scale-[0.99]'
+      )}
+    >
       {/* Rank Badge */}
       <RankBadge rank={rank} />
 
@@ -129,7 +136,7 @@ function CompetencyRow({ competency, rank }: { competency: TopCompetency; rank: 
             {competency.category}
           </Badge>
           <span className="text-[9px] sm:text-xs text-muted-foreground">
-            {competency.assessmentCount} оценок
+            {t('assessments', { count: competency.assessmentCount })}
           </span>
         </div>
       </div>
@@ -138,17 +145,24 @@ function CompetencyRow({ competency, rank }: { competency: TopCompetency; rank: 
       <div className="flex flex-col items-end gap-0.5 sm:gap-1 shrink-0">
         <span
           className={cn(
-            'text-base sm:text-lg font-bold tabular-nums',
+            'text-base sm:text-lg font-bold tabular-nums transition-colors duration-200',
             getScoreColor(competency.averageScore)
           )}
         >
           {competency.averageScore}%
         </span>
         {/* Mini progress bar */}
-        <div className="h-1 sm:h-1.5 w-12 sm:w-16 bg-muted rounded-full overflow-hidden">
+        <div
+          className="h-1 sm:h-1.5 w-12 sm:w-16 bg-muted rounded-full overflow-hidden transition-all duration-300 group-hover:w-14 group-hover:sm:w-20"
+          role="progressbar"
+          aria-label={`${competency.competencyName}: ${competency.averageScore}%`}
+          aria-valuenow={competency.averageScore}
+          aria-valuemin={0}
+          aria-valuemax={100}
+        >
           <div
             className={cn(
-              'h-full rounded-full transition-all',
+              'h-full rounded-full transition-all duration-300',
               getProgressBarColor(competency.averageScore)
             )}
             style={{ width: `${competency.averageScore}%` }}
@@ -181,11 +195,12 @@ function RankBadge({ rank }: { rank: number }) {
       className={cn(
         'h-8 w-8 sm:h-10 sm:w-10 rounded-full flex items-center justify-center shrink-0',
         'text-xs sm:text-sm font-bold shadow-sm',
+        'transition-all duration-200 group-hover:scale-110 group-hover:shadow-md',
         style
       )}
     >
       {MedalIcon ? (
-        <MedalIcon className="h-4 w-4 sm:h-5 sm:w-5" />
+        <MedalIcon className="h-4 w-4 sm:h-5 sm:w-5 transition-transform duration-200" />
       ) : (
         rank
       )}
@@ -198,31 +213,33 @@ function RankBadge({ rank }: { rank: number }) {
 // ============================================
 
 function TrendIndicator({ trend }: { trend: 'up' | 'down' | 'stable' }) {
+  const t = useTranslations('profile.competencies');
+
   const config = {
     up: {
       icon: TrendingUp,
       className: 'text-emerald-500',
-      label: 'Рост',
+      labelKey: 'trend.up' as const,
     },
     down: {
       icon: TrendingDown,
       className: 'text-red-500',
-      label: 'Снижение',
+      labelKey: 'trend.down' as const,
     },
     stable: {
       icon: Minus,
       className: 'text-muted-foreground',
-      label: 'Стабильно',
+      labelKey: 'trend.stable' as const,
     },
   };
 
   // eslint-disable-next-line security/detect-object-injection
-  const { icon: Icon, className, label } = config[trend];
+  const { icon: Icon, className, labelKey } = config[trend];
 
   return (
     <>
-      <span className="sr-only">Тренд: {label}</span>
-      <Icon className={cn('h-3 w-3 sm:h-4 sm:w-4 shrink-0', className)} aria-hidden="true" />
+      <span className="sr-only">{t(labelKey)}</span>
+      <Icon className={cn('h-3 w-3 sm:h-4 sm:w-4 shrink-0 transition-all duration-200 group-hover:scale-110', className)} aria-hidden="true" />
     </>
   );
 }

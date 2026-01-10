@@ -1743,6 +1743,17 @@ img {
 	}
 }
 
+/* Utility class for motion-safe animations */
+.motion-safe\:animate-in {
+	animation: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+	.motion-safe\:animate-in {
+		animation: enter 0.3s ease-out;
+	}
+}
+
 /* Modal/Dialog mobile safe area */
 .dialog-mobile-safe {
 	max-height: calc(100vh - env(safe-area-inset-top, 0) - env(safe-area-inset-bottom, 0) - 2rem);

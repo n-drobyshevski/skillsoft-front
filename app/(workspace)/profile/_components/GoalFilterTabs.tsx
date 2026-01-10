@@ -1,6 +1,7 @@
 'use client';
 
-import { useRef, useState, useEffect, useCallback } from 'react';
+import { useRef, useState, useEffect, useCallback, useMemo } from 'react';
+import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 import { AssessmentGoal } from '@/types/domain';
 
@@ -11,19 +12,16 @@ interface GoalFilterTabsProps {
   onChange: (value: GoalFilter) => void;
   counts?: Record<GoalFilter, number>;
   className?: string;
+  /** Optional translated label for "All" filter */
+  allLabel?: string;
+  /** Optional translated labels for goal filters */
+  goalLabels?: Record<AssessmentGoal, string>;
 }
 
 interface FilterOption {
   value: GoalFilter;
   label: string;
 }
-
-const FILTER_OPTIONS: FilterOption[] = [
-  { value: 'all', label: 'Все' },
-  { value: AssessmentGoal.OVERVIEW, label: 'Обзор' },
-  { value: AssessmentGoal.JOB_FIT, label: 'Должность' },
-  { value: AssessmentGoal.TEAM_FIT, label: 'Команда' },
-];
 
 /**
  * Goal Filter Tabs - Mobile-Optimized
@@ -43,10 +41,23 @@ export function GoalFilterTabs({
   onChange,
   counts,
   className,
+  allLabel,
+  goalLabels,
 }: GoalFilterTabsProps) {
+  const t = useTranslations('profile.results');
+  const tAccessibility = useTranslations('profile.accessibility');
   const scrollRef = useRef<HTMLDivElement>(null);
   const [showLeftFade, setShowLeftFade] = useState(false);
   const [showRightFade, setShowRightFade] = useState(false);
+  const [announcedFilter, setAnnouncedFilter] = useState<string>('');
+
+  // Build filter options with translations
+  const filterOptions: FilterOption[] = useMemo(() => [
+    { value: 'all', label: allLabel || t('filterAll') },
+    { value: AssessmentGoal.OVERVIEW, label: goalLabels?.[AssessmentGoal.OVERVIEW] || t('filterOverview') },
+    { value: AssessmentGoal.JOB_FIT, label: goalLabels?.[AssessmentGoal.JOB_FIT] || t('filterJobFit') },
+    { value: AssessmentGoal.TEAM_FIT, label: goalLabels?.[AssessmentGoal.TEAM_FIT] || t('filterTeamFit') },
+  ], [allLabel, goalLabels, t]);
 
   const checkScroll = useCallback(() => {
     if (!scrollRef.current) return;
@@ -70,8 +81,21 @@ export function GoalFilterTabs({
     }
   }, [checkScroll]);
 
+  // Update announced filter when value changes (for screen reader announcement)
+  useEffect(() => {
+    const currentOption = filterOptions.find(opt => opt.value === value);
+    if (currentOption) {
+      setAnnouncedFilter(currentOption.label);
+    }
+  }, [value, filterOptions]);
+
   return (
     <div className={cn('relative', className)}>
+      {/* Aria-live announcement for filter changes */}
+      <span className="sr-only" role="status" aria-live="polite">
+        {announcedFilter && tAccessibility('filterChanged', { filter: announcedFilter })}
+      </span>
+
       {/* Left fade indicator */}
       {showLeftFade && (
         <div className="absolute left-0 top-0 bottom-0 w-4 bg-gradient-to-r from-card to-transparent z-10 pointer-events-none rounded-l-lg" />
@@ -90,9 +114,9 @@ export function GoalFilterTabs({
         <div
           className="inline-flex items-center gap-1 p-1 bg-muted rounded-lg w-max"
           role="tablist"
-          aria-label="Фильтр по типу теста"
+          aria-label={t('title')}
         >
-          {FILTER_OPTIONS.map((option) => {
+          {filterOptions.map((option) => {
             const isActive = value === option.value;
             const count = counts?.[option.value];
 
@@ -105,8 +129,8 @@ export function GoalFilterTabs({
                 className={cn(
                   // Base styles with proper touch targets
                   'relative flex items-center gap-1.5 px-3 py-2 text-xs font-medium rounded-md',
-                  // 40px on mobile, 36px on desktop for touch targets
-                  'min-h-[40px] sm:min-h-[36px]',
+                  // 44px on mobile (WCAG AAA), 36px on desktop for touch targets
+                  'min-h-[44px] sm:min-h-[36px]',
                   // Prevent text wrapping, optimize touch response
                   'whitespace-nowrap touch-manipulation',
                   'transition-all duration-200',

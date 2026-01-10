@@ -1,5 +1,5 @@
 import { test as base, expect, Page, BrowserContext } from '@playwright/test';
-import path from 'path';
+import * as path from 'path';
 
 /**
  * Authentication fixture types.

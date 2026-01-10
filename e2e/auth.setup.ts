@@ -1,6 +1,6 @@
 import { test as setup, expect, type Page } from '@playwright/test';
-import path from 'path';
-import fs from 'fs';
+import * as path from 'path';
+import * as fs from 'fs';
 
 /**
  * Authentication setup for E2E tests.
