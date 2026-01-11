@@ -105,8 +105,8 @@ export function PersonalityPassportCard({
   const dominantInfo = BIG_FIVE_INFO[dominantTrait];
 
   return (
-    <Card className="h-full">
-      <CardHeader className="pb-2 sm:pb-3 px-3 sm:px-6">
+    <Card className="h-full flex flex-col transition-all duration-300 shadow-card hover:shadow-card-hover hover:border-primary/10 isolate">
+      <CardHeader className="pb-3 sm:pb-4 px-4 sm:px-6">
         <div className="flex items-start justify-between gap-2">
           <div>
             <CardTitle className="text-base sm:text-lg flex items-center gap-2">
@@ -123,7 +123,7 @@ export function PersonalityPassportCard({
         </div>
       </CardHeader>
 
-      <CardContent className="space-y-3 sm:space-y-4 px-3 sm:px-6">
+      <CardContent className="flex-1 space-y-3 sm:space-y-4 px-4 sm:px-6 pb-4 sm:pb-6">
         {/* Dominant trait callout - Enhanced with gradient */}
         <div
           className={cn(
@@ -154,7 +154,7 @@ export function PersonalityPassportCard({
             >
               {t('dominantTrait')}
             </p>
-            <p className="text-[10px] sm:text-xs text-muted-foreground truncate">
+            <p className="text-xs-safe text-muted-foreground truncate">
               {dominantInfo.short}
             </p>
           </div>
@@ -164,7 +164,7 @@ export function PersonalityPassportCard({
         <MobileBigFiveBars profile={profile} className="sm:hidden" />
 
         {/* Desktop: Radar Chart with Accessible Data Table */}
-        <div className="hidden sm:block">
+        <div className="hidden sm:block relative z-0">
           <AccessibleChart
             title={t('title')}
             description={tAccessibility('chartDescription')}
@@ -179,7 +179,7 @@ export function PersonalityPassportCard({
               { key: 'value', label: tAccessibility('scoreColumn') }
             ]}
           >
-            <div className="h-[260px]">
+            <div className="h-[260px] overflow-hidden">
               <BigFiveRadarChart profile={profile} />
             </div>
           </AccessibleChart>

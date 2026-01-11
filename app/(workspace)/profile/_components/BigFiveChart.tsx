@@ -241,6 +241,7 @@ export function BigFiveChart({ profile }: BigFiveChartProps) {
         />
 
         <Tooltip
+          wrapperStyle={{ zIndex: 50 }}
           content={({ active, payload }) => {
             if (!active || !payload || !payload[0]) return null;
 

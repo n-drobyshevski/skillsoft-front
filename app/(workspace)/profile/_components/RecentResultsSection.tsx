@@ -93,8 +93,8 @@ export function RecentResultsSection({ results }: RecentResultsSectionProps) {
   }
 
   return (
-    <Card>
-      <CardHeader className="pb-2 sm:pb-3 px-3 sm:px-6">
+    <Card className="transition-all duration-300 shadow-card hover:shadow-card-hover hover:border-primary/10">
+      <CardHeader className="pb-3 sm:pb-4 px-4 sm:px-6">
         <div className="flex flex-col gap-2 sm:gap-3 sm:flex-row sm:items-center sm:justify-between">
           <CardTitle className="text-base sm:text-lg flex items-center gap-2 shrink-0">
             <div className="p-1.5 sm:p-2 rounded-lg bg-primary/10">
@@ -123,7 +123,7 @@ export function RecentResultsSection({ results }: RecentResultsSectionProps) {
         </div>
       </CardHeader>
 
-      <CardContent className="px-3 sm:px-6">
+      <CardContent className="px-4 sm:px-6 pb-4 sm:pb-6">
         {/* Aria-live region for filter results announcement */}
         <div
           role="status"
@@ -213,7 +213,7 @@ function ResultRow({
         <div className="font-medium truncate text-xs sm:text-sm">
           {result.templateName}
         </div>
-        <div className="text-[10px] sm:text-xs text-muted-foreground">
+        <div className="text-xs-safe text-muted-foreground">
           {format.relativeTime(new Date(result.completedAt))}
         </div>
       </div>
@@ -226,7 +226,7 @@ function ResultRow({
       )}
 
       {/* Goal Badge - Hidden on mobile */}
-      <Badge variant="outline" className="text-[10px] sm:text-xs hidden sm:inline-flex py-0 h-5 shrink-0">
+      <Badge variant="outline" className="text-xs-safe hidden sm:inline-flex py-0 h-5 shrink-0">
         {goalLabels[result.goal] || result.goal}
       </Badge>
 

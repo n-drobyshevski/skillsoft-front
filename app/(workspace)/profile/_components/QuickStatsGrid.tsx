@@ -124,7 +124,7 @@ export function QuickStatsGrid({ summary }: QuickStatsGridProps) {
 
   return (
     <div
-      className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4"
+      className="grid grid-cols-2 lg:grid-cols-4 gap-4"
       role="region"
       aria-label={t('regionLabel')}
     >
@@ -137,7 +137,7 @@ export function QuickStatsGrid({ summary }: QuickStatsGridProps) {
         animationDelay={0}
         footer={
           <div className="mt-2 sm:mt-3 space-y-1">
-            <div className="flex justify-between text-[10px] sm:text-xs">
+            <div className="flex justify-between text-xs-safe">
               <span className="text-muted-foreground">{t('profile')}</span>
               <span className="font-medium">
                 <AnimatedCounter value={summary.profileCompleteness} suffix="%" delay={200} />
@@ -175,7 +175,7 @@ export function QuickStatsGrid({ summary }: QuickStatsGridProps) {
           summary.recentScores.length >= 2 && (
             <div className="mt-2 sm:mt-3 pt-2 border-t border-border/50">
               <div className="flex items-center justify-between gap-2">
-                <span className="text-[10px] sm:text-xs text-muted-foreground">{t('trend')}</span>
+                <span className="text-xs-safe text-muted-foreground">{t('trend')}</span>
                 <ScoreSparkline scores={summary.recentScores} height={16} width={60} />
               </div>
             </div>
@@ -322,20 +322,20 @@ function StatCardWithRing({
 
             {/* Label and interpretive badge */}
             <div className="flex flex-wrap items-center gap-1 sm:gap-1.5">
-              <span className="text-[10px] sm:text-xs text-muted-foreground">{label}</span>
+              <span className="text-xs-safe text-muted-foreground">{label}</span>
               {interpretiveLabel && (
-                <span className={cn('text-[9px] sm:text-xs font-medium px-1 sm:px-1.5 py-0.5 rounded', colors.badge)}>
+                <span className={cn('text-xs-safe font-medium px-1 sm:px-1.5 py-0.5 rounded', colors.badge)}>
                   {interpretiveLabel}
                 </span>
               )}
             </div>
 
             {description && (
-              <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5">{description}</p>
+              <p className="text-xs-safe text-muted-foreground mt-0.5">{description}</p>
             )}
 
             {trend && (
-              <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5 hidden sm:block">
+              <p className="text-xs-safe text-muted-foreground mt-0.5 hidden sm:block">
                 {trend.label}
               </p>
             )}
@@ -364,7 +364,7 @@ function TrendBadge({ value, isPositive }: TrendBadgeProps) {
   return (
     <div
       className={cn(
-        'flex items-center gap-0.5 text-[10px] sm:text-xs font-medium rounded-full px-1.5 sm:px-2 py-0.5',
+        'flex items-center gap-0.5 text-xs-safe font-medium rounded-full px-1.5 sm:px-2 py-0.5',
         'transition-all duration-200 hover:scale-105',
         isNeutral
           ? 'bg-muted text-muted-foreground'
@@ -447,7 +447,7 @@ function StatCardNumeric({
             )}>
               <AnimatedCounter value={value} delay={animationDelay} duration={800} />
             </div>
-            <span className="text-[10px] sm:text-xs text-muted-foreground">{label}</span>
+            <span className="text-xs-safe text-muted-foreground">{label}</span>
           </div>
         </div>
 
@@ -508,8 +508,8 @@ function StatCardDate({
             <div className="text-xl sm:text-2xl font-bold tabular-nums text-foreground">
               {formattedDate}
             </div>
-            <span className="text-[10px] sm:text-xs text-muted-foreground">{label}</span>
-            <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5">{yearText}</p>
+            <span className="text-xs-safe text-muted-foreground">{label}</span>
+            <p className="text-xs-safe text-muted-foreground mt-0.5">{yearText}</p>
           </div>
         </div>
       </CardContent>

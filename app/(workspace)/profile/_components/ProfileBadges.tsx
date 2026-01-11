@@ -130,7 +130,7 @@ export function ProfileBadges({
       <Badge
         className={cn(
           roleBadgeStyles[role],
-          'text-[10px] sm:text-xs gap-0.5 sm:gap-1'
+          'text-xs-safe gap-0.5 sm:gap-1'
         )}
       >
         <RoleIcon className="h-2.5 w-2.5 sm:h-3 sm:w-3" aria-hidden="true" />
@@ -142,7 +142,7 @@ export function ProfileBadges({
         <Badge
           className={cn(
             statusBadgeStyles.verified,
-            'text-[10px] sm:text-xs gap-0.5 sm:gap-1'
+            'text-xs-safe gap-0.5 sm:gap-1'
           )}
         >
           <BadgeCheck className="h-2.5 w-2.5 sm:h-3 sm:w-3" aria-hidden="true" />
@@ -155,7 +155,7 @@ export function ProfileBadges({
         <Badge
           className={cn(
             statusBadgeStyles.new,
-            'text-[10px] sm:text-xs gap-0.5 sm:gap-1'
+            'text-xs-safe gap-0.5 sm:gap-1'
           )}
         >
           <Sparkles className="h-2.5 w-2.5 sm:h-3 sm:w-3" aria-hidden="true" />

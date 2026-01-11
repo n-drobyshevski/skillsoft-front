@@ -47,15 +47,15 @@ export function ProfileHeroCard({
   const memberSince = format.relativeTime(userInfo.createdAt);
 
   return (
-    <Card className="relative overflow-hidden transition-all duration-300 hover:shadow-md hover:border-primary/10">
+    <Card className="relative overflow-hidden transition-all duration-300 shadow-card hover:shadow-card-hover hover:border-primary/10">
       {/* Gradient accent bar */}
       <div className="absolute top-0 inset-x-0 h-0.5 sm:h-1 bg-linear-to-r from-primary via-primary/70 to-primary/30" />
 
-      <CardContent className="p-3 sm:p-5 pt-3.5 sm:pt-6">
-        <div className="flex items-center gap-2.5 sm:gap-4">
+      <CardContent className="p-4 sm:p-5 pt-4 sm:pt-6">
+        <div className="flex items-center gap-3 sm:gap-4">
           {/* Avatar with status */}
           <div className="relative shrink-0 group">
-            <Avatar className="h-10 w-10 sm:h-16 sm:w-16 ring-2 ring-primary/10 ring-offset-1 sm:ring-offset-2 ring-offset-background transition-all duration-300 group-hover:ring-primary/30 group-hover:scale-105">
+            <Avatar className="size-12 sm:size-16 ring-2 ring-primary/10 ring-offset-2 ring-offset-background transition-all duration-300 group-hover:ring-primary/30 group-hover:scale-105">
               {userInfo.avatarUrl ? (
                 <Image
                   src={userInfo.avatarUrl}
@@ -82,7 +82,7 @@ export function ProfileHeroCard({
           <div className="flex-1 min-w-0">
             {/* Name row with action button */}
             <div className="flex items-center justify-between gap-2">
-              <h1 className="text-sm sm:text-lg font-semibold tracking-tight truncate">
+              <h1 className="text-base sm:text-lg font-semibold tracking-tight truncate">
                 {fullName}
               </h1>
               
@@ -122,7 +122,7 @@ export function ProfileHeroCard({
             />
 
             {/* Meta Info - Single line on mobile */}
-            <div className="flex items-center gap-2 mt-1 sm:mt-1.5 text-[11px] sm:text-xs text-muted-foreground">
+            <div className="flex items-center gap-2 mt-1.5 sm:mt-2 text-xs-safe text-muted-foreground">
               {userInfo.organizationName ? (
                 <>
                   <span className="flex items-center gap-1">

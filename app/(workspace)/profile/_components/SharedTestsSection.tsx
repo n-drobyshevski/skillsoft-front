@@ -136,8 +136,8 @@ export function SharedTestsSection({ items, total }: SharedTestsSectionProps) {
   }
 
   return (
-    <Card>
-      <CardHeader className="pb-2 sm:pb-3 px-3 sm:px-6">
+    <Card className="transition-all duration-300 shadow-card hover:shadow-card-hover hover:border-primary/10">
+      <CardHeader className="pb-3 sm:pb-4 px-4 sm:px-6">
         <div className="flex flex-col gap-2 sm:gap-3 sm:flex-row sm:items-center sm:justify-between">
           <CardTitle className="text-base sm:text-lg flex items-center gap-2 shrink-0">
             <div
@@ -169,10 +169,10 @@ export function SharedTestsSection({ items, total }: SharedTestsSectionProps) {
         </div>
       </CardHeader>
 
-      <CardContent className="px-3 sm:px-6">
+      <CardContent className="px-4 sm:px-6 pb-4 sm:pb-6">
         {/* Grid layout - responsive */}
         <div
-          className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
+          className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 sm:grid-rows-equal"
           role="list"
           aria-label={t('listLabel')}
         >

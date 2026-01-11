@@ -2695,7 +2695,100 @@ textarea:focus-visible,
 	flex-shrink: 0;
 }
 
-/* Safe text size for mobile (11px minimum) */
+/* ===== PROFILE PAGE LAYOUT UTILITIES ===== */
+
+/* Safe typography scale (WCAG AA minimum 11px) */
+.text-xs-safe {
+	font-size: max(0.6875rem, 11px);
+	line-height: 1.4;
+}
+
+@media (min-width: 640px) {
+	.text-xs-safe {
+		font-size: 0.75rem;
+		/* 12px */
+	}
+}
+
+.text-sm-safe {
+	font-size: max(0.8125rem, 13px);
+	line-height: 1.5;
+}
+
+@media (min-width: 640px) {
+	.text-sm-safe {
+		font-size: 0.875rem;
+		/* 14px */
+	}
+}
+
+/* Standardized card shadows */
+.shadow-card {
+	box-shadow:
+		0 1px 2px rgba(0, 0, 0, 0.04),
+		0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+.shadow-card-hover {
+	box-shadow:
+		0 4px 6px rgba(0, 0, 0, 0.04),
+		0 10px 15px rgba(0, 0, 0, 0.06);
+}
+
+.dark .shadow-card {
+	box-shadow:
+		0 1px 2px rgba(0, 0, 0, 0.2),
+		0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.dark .shadow-card-hover {
+	box-shadow:
+		0 4px 6px rgba(0, 0, 0, 0.2),
+		0 10px 15px rgba(0, 0, 0, 0.3);
+}
+
+/* Subtle hover lift effect */
+.hover-lift-subtle {
+	transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.hover-lift-subtle:hover {
+	transform: translateY(-2px);
+}
+
+/* Spring-like transition timing */
+.transition-spring {
+	transition-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1);
+	transition-duration: 300ms;
+}
+
+/* Standardized card padding utility */
+.card-padding {
+	padding: 1rem;
+}
+
+@media (min-width: 640px) {
+	.card-padding {
+		padding: 1.5rem;
+	}
+}
+
+.card-padding-compact {
+	padding: 0.75rem;
+}
+
+@media (min-width: 640px) {
+	.card-padding-compact {
+		padding: 1rem;
+	}
+}
+
+/* Grid auto-rows for equal heights */
+.grid-rows-equal {
+	grid-auto-rows: 1fr;
+}
+
+/* Legacy alias for backward compatibility */
 .text-mobile-safe {
 	font-size: max(0.6875rem, 11px);
 }

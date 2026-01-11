@@ -146,7 +146,7 @@ export function GoalFilterTabs({
                 {count !== undefined && count > 0 && (
                   <span
                     className={cn(
-                      'px-1.5 py-0.5 text-[10px] font-semibold rounded-full min-w-[18px] text-center tabular-nums',
+                      'px-1.5 py-0.5 text-xs-safe font-semibold rounded-full min-w-[18px] text-center tabular-nums',
                       isActive
                         ? 'bg-primary/10 text-primary'
                         : 'bg-muted-foreground/20 text-muted-foreground'

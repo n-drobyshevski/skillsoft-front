@@ -36,13 +36,12 @@ export async function generateMetadata(): Promise<Metadata> {
 /**
  * Profile Page (Server Component)
  *
- * Mobile-first redesigned with 3-column grid layout matching test-template/[id]/overview:
+ * Mobile-first redesigned with compact 3-column grid layout:
  * - ProfileHeroCard: Enhanced user info with gradient accent
  * - QuickStatsGrid: 4-column stats with gradient backgrounds (full width)
  * - 3-Column Grid (lg:grid-cols-3):
- *   - Main Column (lg:col-span-2): RecentResultsSection
+ *   - Main Column (lg:col-span-2): RecentResultsSection + SharedTestsSection
  *   - Sidebar (1 col): TopCompetenciesCard + PersonalityPassportCard
- * - SharedTestsSection: Tests shared with the user (full width)
  *
  * Mobile order (order utilities for optimal UX):
  * 1. Hero Card - User identity
@@ -50,7 +49,7 @@ export async function generateMetadata(): Promise<Metadata> {
  * 3. Top Competencies - Actionable insights (sidebar, but first on mobile via order-1)
  * 4. Big Five Profile - Personality overview (sidebar)
  * 5. Recent Results - Test history (main column, order-2 on mobile)
- * 6. Shared Tests - Collaborative tests
+ * 6. Shared Tests - Collaborative tests (main column)
  *
  * Performance optimizations:
  * - Preload data fetching before Suspense boundaries
@@ -96,9 +95,9 @@ export default async function ProfilePage() {
   return (
     <main id="main-content" className="min-h-screen bg-muted/30">
       <MainContentAnchor />
-      <div className="container max-w-6xl mx-auto px-2 sm:px-4 py-3 sm:py-6 md:py-8 pb-24 md:pb-8">
+      <div className="container max-w-6xl mx-auto px-4 sm:px-6 py-4 sm:py-6 md:py-8 pb-24 md:pb-8">
         {/* Page Header - Mobile optimized (consistent spacing) */}
-        <header className="mb-6 px-1">
+        <header className="mb-6">
           <div className="flex items-center gap-2 sm:gap-3 mb-1 sm:mb-2">
             <div className="p-2 sm:p-2.5 rounded-xl bg-primary/10">
               <User className="size-5 sm:size-6 text-primary" />
@@ -132,11 +131,17 @@ export default async function ProfilePage() {
 
           {/* 3-Column Grid: Main (2 cols) + Sidebar (1 col) */}
           {/* Mobile order: Sidebar first (competencies, passport) via order-1, then main via order-2 */}
-          <div className="grid gap-6 grid-cols-1 lg:grid-cols-3 animate-in fade-in-0 slide-in-from-bottom-2 duration-300 delay-100 fill-mode-both">
-            {/* Main Column - Recent Results (2 cols on desktop) */}
-            <div className="lg:col-span-2 order-2 lg:order-1">
+          {/* items-start ensures columns don't stretch unnecessarily, preventing content overflow */}
+          <div className="grid gap-6 grid-cols-1 lg:grid-cols-3 lg:items-start animate-in fade-in-0 slide-in-from-bottom-2 duration-300 delay-100 fill-mode-both">
+            {/* Main Column - Recent Results + Shared Tests (2 cols on desktop) */}
+            <div className="lg:col-span-2 order-2 lg:order-1 space-y-6">
               <Suspense fallback={<RecentResultsSectionSkeleton />}>
                 <RecentResultsLoader userId={user.id} />
+              </Suspense>
+
+              {/* Shared Tests - In main column for compact layout */}
+              <Suspense fallback={<SharedTestsSectionSkeleton />}>
+                <SharedTestsLoader />
               </Suspense>
             </div>
 
@@ -151,13 +156,6 @@ export default async function ProfilePage() {
                 <PersonalityPassportLoader userId={user.id} />
               </Suspense>
             </div>
-          </div>
-
-          {/* Shared Tests - Full Width */}
-          <div className="animate-in fade-in-0 slide-in-from-bottom-2 duration-300 delay-150 fill-mode-both">
-            <Suspense fallback={<SharedTestsSectionSkeleton />}>
-              <SharedTestsLoader />
-            </Suspense>
           </div>
         </div>
       </div>

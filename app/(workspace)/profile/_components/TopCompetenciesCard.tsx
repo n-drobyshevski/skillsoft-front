@@ -63,7 +63,7 @@ export function TopCompetenciesCard({
   }
 
   return (
-    <Card className="h-full flex flex-col transition-all duration-300 hover:shadow-md hover:border-primary/10">
+    <Card className="h-full flex flex-col transition-all duration-300 shadow-card hover:shadow-card-hover hover:border-primary/10">
       <CardHeader className="pb-2 sm:pb-3 px-3 sm:px-6">
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0 flex-1">
@@ -73,7 +73,7 @@ export function TopCompetenciesCard({
               </div>
               <span className="truncate">{t('title')}</span>
             </CardTitle>
-            <CardDescription className="mt-0.5 sm:mt-1 text-[10px] sm:text-sm ml-8 sm:ml-11">
+            <CardDescription className="mt-0.5 sm:mt-1 text-xs sm:text-sm ml-8 sm:ml-11">
               {t('basedOn', { count: totalAssessments })}
             </CardDescription>
           </div>
@@ -91,7 +91,7 @@ export function TopCompetenciesCard({
         </div>
       </CardHeader>
 
-      <CardContent className="flex-1 px-3 sm:px-6">
+      <CardContent className="flex-1 px-4 sm:px-6 pb-4 sm:pb-6">
         <div className="space-y-2 sm:space-y-3" role="list" aria-label={t('title')}>
           {competencies.map((competency, index) => (
             <CompetencyRow key={competency.competencyId} competency={competency} rank={index + 1} />
@@ -132,10 +132,10 @@ function CompetencyRow({ competency, rank }: { competency: TopCompetency; rank: 
           <TrendIndicator trend={competency.trend} />
         </div>
         <div className="flex items-center gap-1.5 sm:gap-2 mt-0.5 sm:mt-1">
-          <Badge variant="outline" className="text-[9px] sm:text-xs py-0 h-4 sm:h-5 px-1 sm:px-1.5">
+          <Badge variant="outline" className="text-xs-safe py-0 h-4 sm:h-5 px-1 sm:px-1.5">
             {competency.category}
           </Badge>
-          <span className="text-[9px] sm:text-xs text-muted-foreground">
+          <span className="text-xs-safe text-muted-foreground">
             {t('assessments', { count: competency.assessmentCount })}
           </span>
         </div>
