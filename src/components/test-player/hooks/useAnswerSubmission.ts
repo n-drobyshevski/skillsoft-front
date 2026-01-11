@@ -5,6 +5,7 @@ import { testSessionsClientApi, type ApiError } from '@/services/api.client';
 import { toast } from 'sonner';
 import { MIN_CHARS_OPEN_TEXT, MIN_CHARS_BEHAVIORAL } from '../QuestionCard';
 import { retryWithBackoff, getUserFriendlyErrorMessage, isRetryableError } from '@/utils/retry';
+import { useNavigationState } from './useNavigationState';
 
 /**
  * useAnswerSubmission Hook
@@ -262,6 +263,12 @@ export function useAnswerSubmission({
           },
         }
       );
+
+      // Clear dirty flag after successful submission
+      useNavigationState.getState().markClean(currentQuestion.id);
+      // Update original answer to the submitted value
+      useNavigationState.getState().setOriginalAnswer(currentQuestion.id, value);
+
       return true;
     } catch (error) {
       console.error('Failed to submit answer:', error);
@@ -316,6 +323,12 @@ export function useAnswerSubmission({
           shouldRetry: isRetryableError,
         }
       );
+
+      // Clear dirty flag after successful skip
+      useNavigationState.getState().markClean(currentQuestion.id);
+      // Clear original answer since question was skipped
+      useNavigationState.getState().clearOriginalAnswer(currentQuestion.id);
+
       return true;
     } catch (error) {
       console.error('Failed to skip question:', error);

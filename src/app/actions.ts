@@ -436,21 +436,25 @@ export async function deleteAssessmentQuestion(questionId: string, competencyId?
 }
 
 // Cache revalidation for Test Templates
-const TESTS_PATH = '/tests';
+const TEST_TEMPLATES_PATH = '/test-templates';
 
 export async function revalidateTestTemplateTags(templateId?: string) {
   try {
-    // Invalidate paths
-    revalidatePath(TESTS_PATH);
+    // Invalidate paths - use correct route paths
+    revalidatePath(TEST_TEMPLATES_PATH);
     revalidatePath(HOME_PATH);
+    revalidatePath('/dashboard');
     if (templateId) {
-      revalidatePath(`${TESTS_PATH}/${templateId}`);
-      revalidatePath(`${TESTS_PATH}/${templateId}/edit`);
+      revalidatePath(`${TEST_TEMPLATES_PATH}/${templateId}`);
+      revalidatePath(`${TEST_TEMPLATES_PATH}/${templateId}/settings`);
+      revalidatePath(`${TEST_TEMPLATES_PATH}/${templateId}/builder`);
     }
-    
-    // Invalidate cache tags used by fetchApi
+
+    // Invalidate all cache tags used by fetchApi for test templates
     revalidateTag('test-templates', 'max');
     revalidateTag('test-templates-active', 'max');
+    revalidateTag('test-templates-search', 'max');
+    revalidateTag('test-templates-stats', 'max');
     if (templateId) {
       revalidateTag(`test-template-${templateId}`, 'max');
     }
@@ -463,7 +467,7 @@ export async function deleteTestTemplate(templateId: string) {
   try {
     const authHeaders = await getAuthHeaders();
     // Perform the delete operation
-    await fetchApi(`/v1/tests/templates/${templateId}`, {
+    await fetchApi(`/tests/templates/${templateId}`, {
       method: 'DELETE',
       cache: 'no-store',
       authHeaders,

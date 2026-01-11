@@ -29,12 +29,39 @@ interface BlueprintWorkspaceProps {
 
 function LibrarySkeleton() {
   return (
-    <div className="flex flex-col gap-4 p-4">
-      <Skeleton className="h-10 w-full rounded-lg" />
-      <div className="space-y-2">
-        {Array.from({ length: 8 }).map((_, i) => (
-          <Skeleton key={i} className="h-14 w-full rounded-lg" />
-        ))}
+    <div className="flex flex-col h-full min-h-0 bg-muted/10">
+      {/* Search Header */}
+      <div className="p-3 border-b bg-background/50 space-y-2">
+        <Skeleton className="h-11 w-full rounded-xl" />
+        <div className="flex items-center gap-4">
+          <Skeleton className="h-3 w-16" />
+          <Skeleton className="h-3 w-14" />
+        </div>
+      </div>
+      {/* Category Groups */}
+      <div className="flex-1 p-3 space-y-4 overflow-hidden">
+        <div className="space-y-2">
+          <div className="flex items-center gap-2 px-1">
+            <Skeleton className="h-2.5 w-20" />
+            <Skeleton className="h-2.5 w-6" />
+          </div>
+          <div className="space-y-1.5">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <div
+                key={i}
+                className="flex items-center gap-2 p-2.5 rounded-lg border border-l-[3px] border-l-muted-foreground/20"
+              >
+                <Skeleton className="h-4 w-4 shrink-0" />
+                <Skeleton className="h-7 w-7 rounded-lg shrink-0" />
+                <div className="flex-1 min-w-0 space-y-1.5">
+                  <Skeleton className="h-3.5 w-3/4" />
+                  <Skeleton className="h-2.5 w-1/2" />
+                </div>
+                <Skeleton className="h-6 w-6 rounded-full shrink-0" />
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -42,12 +69,33 @@ function LibrarySkeleton() {
 
 function SimulatorSkeleton() {
   return (
-    <div className="flex flex-col gap-4 p-4">
-      <Skeleton className="h-8 w-2/3 rounded-lg" />
-      <Skeleton className="h-10 w-full rounded-xl" />
-      <div className="space-y-3 mt-2">
-        <Skeleton className="h-20 w-full rounded-xl" />
-        <Skeleton className="h-32 w-full rounded-xl" />
+    <div className="flex flex-col h-full min-h-0 p-3 sm:p-4 space-y-4">
+      {/* Strategy Badge */}
+      <div className="flex items-center gap-2">
+        <Skeleton className="h-6 w-6 rounded-full" />
+        <Skeleton className="h-5 w-24" />
+      </div>
+      {/* Persona Selector */}
+      <div className="grid grid-cols-3 gap-2">
+        {Array.from({ length: 3 }).map((_, i) => (
+          <div
+            key={i}
+            className="flex flex-col items-center gap-1.5 p-3 rounded-xl border min-h-[72px]"
+          >
+            <Skeleton className="h-5 w-5" />
+            <Skeleton className="h-3 w-12" />
+          </div>
+        ))}
+      </div>
+      {/* Run CTA */}
+      <Skeleton className="h-11 w-full rounded-xl" />
+      {/* Score Display */}
+      <div className="p-4 rounded-xl border space-y-3">
+        <div className="flex items-center justify-between">
+          <Skeleton className="h-4 w-20" />
+          <Skeleton className="h-6 w-16 rounded-full" />
+        </div>
+        <Skeleton className="h-12 w-full rounded-lg" />
       </div>
     </div>
   );
@@ -57,14 +105,66 @@ function SimulatorSkeleton() {
 function DesktopSkeleton() {
   return (
     <div className="flex h-full w-full gap-px overflow-hidden rounded-xl border bg-background shadow-sm">
-      <div className="w-[20%] border-r bg-muted/10">
+      {/* Library Panel */}
+      <div className="w-[20%] min-w-[200px] border-r bg-muted/10 overflow-hidden">
         <LibrarySkeleton />
       </div>
-      <div className="w-[50%] bg-background">
-        {/* Empty canvas area */}
+      {/* Resize Handle */}
+      <div className="w-1 bg-border/50 flex items-center justify-center">
+        <div className="w-1 h-8 rounded-full bg-muted-foreground/20" />
       </div>
-      <div className="w-[30%] border-l bg-muted/10">
+      {/* Canvas Panel */}
+      <div className="w-[50%] min-w-[300px] bg-background overflow-hidden">
+        <CanvasSkeleton />
+      </div>
+      {/* Resize Handle */}
+      <div className="w-1 bg-border/50 flex items-center justify-center">
+        <div className="w-1 h-8 rounded-full bg-muted-foreground/20" />
+      </div>
+      {/* Simulator Panel */}
+      <div className="w-[30%] min-w-[250px] border-l bg-muted/10 overflow-hidden">
         <SimulatorSkeleton />
+      </div>
+    </div>
+  );
+}
+
+function CanvasSkeleton() {
+  return (
+    <div className="flex flex-col h-full min-h-0">
+      {/* Header */}
+      <div className="flex items-center justify-between px-4 py-3 border-b bg-background/50 shrink-0">
+        <div className="flex items-center gap-2">
+          <Skeleton className="h-4 w-4" />
+          <Skeleton className="h-4 w-28" />
+          <Skeleton className="h-5 w-6 rounded-full" />
+        </div>
+        <div className="flex items-center gap-2">
+          <Skeleton className="h-4 w-16" />
+          <Skeleton className="h-8 w-8 rounded-lg" />
+          <Skeleton className="h-8 w-8 rounded-lg" />
+          <Skeleton className="h-8 w-20 rounded-lg" />
+        </div>
+      </div>
+      {/* Competency Cards */}
+      <div className="flex-1 p-4 space-y-4 overflow-hidden">
+        {Array.from({ length: 3 }).map((_, i) => (
+          <div key={i} className="rounded-xl border bg-card p-4 space-y-3">
+            <div className="flex items-center gap-3">
+              <Skeleton className="h-5 w-4 shrink-0" />
+              <Skeleton className="h-10 w-10 rounded-lg shrink-0" />
+              <div className="flex-1 space-y-1.5">
+                <Skeleton className="h-4 w-3/4" />
+                <div className="flex items-center gap-2">
+                  <Skeleton className="h-3 w-16" />
+                  <Skeleton className="h-5 w-12 rounded-full" />
+                </div>
+              </div>
+              <Skeleton className="h-8 w-8 rounded-lg" />
+              <Skeleton className="h-8 w-8 rounded-lg" />
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );

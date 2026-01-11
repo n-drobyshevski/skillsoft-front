@@ -33,6 +33,12 @@ export {
   prefetchPsychometricsCompetencyDetail,
 } from './usePsychometricsQuery';
 
+// Suggested Users queries
+export {
+  suggestedUsersKeys,
+  useSuggestedUsers,
+} from './useSuggestedUsers';
+
 // Template Sharing queries
 export {
   // Query keys for external cache manipulation

@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState } from "react";
+import React, { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -19,9 +20,10 @@ import {
   MoreVertical,
   Settings,
   ChevronRight,
+  Trash2,
+  Loader2,
 } from "lucide-react";
 import StartTestSessionButton from "./StartTestSessionButton";
-import StartTestDriveButton from "./StartTestDriveButton";
 import MobileTemplateActions from "./MobileTemplateActions";
 import {
   DropdownMenu,
@@ -30,9 +32,21 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 import { useTranslations } from 'next-intl';
+import { toast } from 'sonner';
+import { deleteTestTemplate } from '@/app/actions';
 
 interface TestTemplateCardProps {
   template: TestTemplateSummary;
@@ -205,12 +219,35 @@ function DesktopTemplateCard({
   isRecommended: boolean;
   goalConfig: ReturnType<typeof getGoalConfig>;
 }) {
+  const router = useRouter();
   const t = useTranslations('template');
   const tCommon = useTranslations('common');
   const GoalIcon = goalConfig.icon;
   const goalInfo = template.goal ? AssessmentGoalInfo[template.goal] : AssessmentGoalInfo[AssessmentGoal.OVERVIEW];
 
+  // Delete dialog state
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [isDeleting, startDeleteTransition] = useTransition();
+
+  const handleDelete = () => {
+    startDeleteTransition(async () => {
+      try {
+        await deleteTestTemplate(template.id);
+        toast.success(t('testDeleted'), {
+          description: t('testDeletedDescription', { name: template.name }),
+        });
+        setDeleteDialogOpen(false);
+        router.refresh();
+      } catch (error) {
+        toast.error(t('deleteError'), {
+          description: error instanceof Error ? error.message : t('deleteErrorDescription'),
+        });
+      }
+    });
+  };
+
   return (
+    <>
     <Card
       className={cn(
         "group flex flex-col h-full bg-card overflow-hidden",
@@ -295,13 +332,13 @@ function DesktopTemplateCard({
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
-                    <div className="px-2 py-1.5">
-                      <StartTestDriveButton
-                        templateId={template.id}
-                        templateName={template.name}
-                        fullWidth
-                      />
-                    </div>
+                    <DropdownMenuItem
+                      className="text-destructive focus:text-destructive cursor-pointer"
+                      onClick={() => setDeleteDialogOpen(true)}
+                    >
+                      <Trash2 className="mr-2 h-4 w-4" />
+                      {tCommon('delete')}
+                    </DropdownMenuItem>
                   </>
                 )}
               </DropdownMenuContent>
@@ -343,26 +380,54 @@ function DesktopTemplateCard({
         </div>
       </CardContent>
 
-      <CardFooter className="p-4 pt-2 mt-auto flex flex-col gap-2">
-        {/* Primary Action: Start Test */}
+      <CardFooter className="p-4 pt-2 mt-auto">
         <StartTestSessionButton
           templateId={template.id}
           templateName={template.name}
           fullWidth
           variant="hero"
         />
-
-        {/* HR Mode: Test Drive button */}
-        {canEdit && (
-          <StartTestDriveButton
-            templateId={template.id}
-            templateName={template.name}
-            fullWidth
-            className="h-9"
-          />
-        )}
       </CardFooter>
     </Card>
+
+    {/* Delete Confirmation Dialog */}
+    {canEdit && (
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t('deleteTest')}</AlertDialogTitle>
+            <AlertDialogDescription asChild>
+              <div className="space-y-2 text-sm text-muted-foreground">
+                <span className="block">
+                  {t('deleteConfirmation')} <strong>&quot;{template.name}&quot;</strong>?
+                </span>
+                <span className="block text-muted-foreground/80">
+                  {t('deleteWarning')}
+                </span>
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>{tCommon('cancel')}</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDelete}
+              disabled={isDeleting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {isDeleting ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  {t('deleting')}
+                </>
+              ) : (
+                tCommon('delete')
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    )}
+    </>
   );
 }
 

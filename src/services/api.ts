@@ -613,6 +613,19 @@ const getAllUsersCached = cache(async (): Promise<User[] | null> => {
 export const usersApi = {
   getAllUsers: getAllUsersCached,
 
+  /**
+   * Get all active users - client-side compatible version
+   * Used by useSuggestedUsers hook for quick picks
+   */
+  getActiveUsers: async (): Promise<User[]> => {
+    const authHeaders = await getAuthHeaders();
+    const users = await fetchApi<User[] | null>(USERS_ENDPOINT, {
+      cache: 'no-store',
+      authHeaders,
+    });
+    return users ?? [];
+  },
+
   getUserById: async (userId: string): Promise<User | null> => {
     const authHeaders = await getAuthHeaders();
     return fetchApi(`${USERS_ENDPOINT}/${userId}`, {

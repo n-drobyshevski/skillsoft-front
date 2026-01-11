@@ -742,6 +742,11 @@ export interface TestTemplate {
   showResultsImmediately: boolean;
   createdAt: string;
   updatedAt: string;
+  /**
+   * Indicates whether the template has a valid typed blueprint for test assembly.
+   * Frontend should disable "Start Test" button when this is false.
+   */
+  hasValidBlueprint?: boolean;
 }
 
 export interface TestTemplateSummary {

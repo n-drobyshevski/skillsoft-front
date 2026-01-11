@@ -22,6 +22,12 @@ interface QuestionNavigationProps {
   onNext: () => void;
   onSkip: () => void;
   validationError?: string | null;
+  /** Whether auto-save is in progress during back navigation */
+  isSavingBack?: boolean;
+  /** Optional reason why back navigation is disabled (shown in tooltip) */
+  backDisabledReason?: string | null;
+  /** Whether there are unsaved changes on current question */
+  hasUnsavedChanges?: boolean;
 }
 
 /**
@@ -44,8 +50,15 @@ export function QuestionNavigation({
   onNext,
   onSkip,
   validationError,
+  isSavingBack = false,
+  backDisabledReason,
+  hasUnsavedChanges = false,
 }: QuestionNavigationProps) {
   const t = useTranslations('assessment');
+
+  // Determine back button state
+  const isBackDisabled = !canGoBack || isSubmitting || isSavingBack;
+  const showBackTooltip = !canGoBack && backDisabledReason && !isSubmitting;
 
   const nextButtonContent = isSubmitting ? (
     <>
@@ -75,20 +88,41 @@ export function QuestionNavigation({
         </div>
       )}
       <div className="max-w-3xl mx-auto px-3 sm:px-4 py-3 sm:py-4 flex items-center justify-between gap-2 sm:gap-4">
-        {/* Back Button */}
-        <Button
-          variant="ghost"
-          onClick={onPrevious}
-          disabled={!canGoBack || isSubmitting}
-          className={cn(
-            "text-neutral-400 hover:text-white hover:bg-neutral-800",
-            !canGoBack && "opacity-0 pointer-events-none"
-          )}
-          aria-label="Go to previous question"
-        >
-          <ChevronLeft className="w-4 h-4 mr-1" aria-hidden="true" />
-          {t('back')}
-        </Button>
+        {/* Back Button with loading state and optional tooltip */}
+        <TooltipProvider>
+          <Tooltip open={showBackTooltip ? undefined : false}>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                onClick={onPrevious}
+                disabled={isBackDisabled}
+                className={cn(
+                  "text-neutral-400 hover:text-white hover:bg-neutral-800 transition-all duration-200",
+                  !canGoBack && "opacity-0 pointer-events-none",
+                  isSavingBack && "opacity-70"
+                )}
+                aria-label={isSavingBack ? "Saving answer before going back" : "Go to previous question"}
+                aria-describedby={showBackTooltip ? "back-disabled-tooltip" : undefined}
+              >
+                {isSavingBack ? (
+                  <Loader2 className="w-4 h-4 mr-1 animate-spin" aria-hidden="true" />
+                ) : (
+                  <ChevronLeft className="w-4 h-4 mr-1" aria-hidden="true" />
+                )}
+                {isSavingBack ? t('saving') : t('back')}
+                {/* Unsaved changes indicator */}
+                {hasUnsavedChanges && !isSavingBack && canGoBack && (
+                  <span className="ml-1.5 w-1.5 h-1.5 rounded-full bg-amber-500" aria-label="Unsaved changes" />
+                )}
+              </Button>
+            </TooltipTrigger>
+            {showBackTooltip && (
+              <TooltipContent id="back-disabled-tooltip" side="right" className="bg-neutral-800 border-neutral-700 text-neutral-300">
+                <p>{backDisabledReason}</p>
+              </TooltipContent>
+            )}
+          </Tooltip>
+        </TooltipProvider>
 
         {/* Center section with keyboard hints and skip button */}
         <div className="flex items-center gap-2 sm:gap-4">

@@ -185,13 +185,17 @@ export function QuestionCard({
   const renderLikertScale = () => {
     if (!question.answerOptions || question.answerOptions.length === 0) return null;
 
+    const totalOptions = question.answerOptions.length;
+    const scaleHintId = `${groupId}-scale-hint`;
+
     return (
-      <fieldset className="space-y-4">
+      <fieldset className="space-y-4" lang="ru">
+        {/* Screen reader legend with full context */}
         <legend className="sr-only">
           {question.questionText}. {t('selectScaleValue', {
             min: question.answerOptions[0]?.value || 1,
-            max: question.answerOptions[question.answerOptions.length - 1]?.value || 5,
-          })}
+            max: question.answerOptions[totalOptions - 1]?.value || 5,
+          })}. {t('useNumberKeys', { max: totalOptions })}
         </legend>
 
         {/* Mobile: vertical stack for 5+ options, Tablet+: horizontal grid */}
@@ -199,33 +203,35 @@ export function QuestionCard({
           className={cn(
             "grid gap-3",
             // Responsive grid: vertical on mobile for 5+ options, horizontal on larger screens
-            question.answerOptions.length <= 3 && "grid-cols-1 sm:grid-cols-3",
-            question.answerOptions.length === 4 && "grid-cols-2 sm:grid-cols-4",
+            totalOptions <= 3 && "grid-cols-1 sm:grid-cols-3",
+            totalOptions === 4 && "grid-cols-2 sm:grid-cols-4",
             // Changed: use single column on mobile for 5+ options to avoid cramped layout
-            question.answerOptions.length >= 5 && "grid-cols-1 sm:grid-cols-3 md:grid-cols-5"
+            totalOptions >= 5 && "grid-cols-1 sm:grid-cols-3 md:grid-cols-5"
           )}
           role="radiogroup"
-          aria-label={t('likertScaleLabel', {
-            min: question.answerOptions[0]?.text ?? question.answerOptions[0]?.value ?? '',
-            max: question.answerOptions[question.answerOptions.length - 1]?.text ?? question.answerOptions[question.answerOptions.length - 1]?.value ?? '',
-          })}
+          aria-describedby={scaleHintId}
         >
-          {question.answerOptions.map((option) => {
+          {question.answerOptions.map((option, index) => {
             const optionId = option.id || String(option.value);
             const inputId = `${groupId}-likert-${optionId}`;
-            const optionValue = option.value ?? optionId;
-            const isSelected = selectedValue === optionValue ||
-                              selectedValue === Number(optionValue) ||
-                              (Array.isArray(selectedValue) && selectedValue.includes(String(optionValue)));
-            const optionLabel = option.text || option.label || String(option.value);
+            const optionNumber = option.value ?? (index + 1);
+            const isSelected = selectedValue === optionNumber ||
+                              selectedValue === Number(optionNumber) ||
+                              (Array.isArray(selectedValue) && selectedValue.includes(String(optionNumber)));
+            const optionLabel = option.text || option.label || String(optionNumber);
 
             return (
               <label
                 key={optionId}
                 htmlFor={inputId}
                 className={cn(
-                  // Ensure minimum touch target size: 56px on mobile, 64px on desktop
-                  "flex flex-col items-center justify-center min-h-[56px] sm:min-h-[64px] p-3 sm:p-4 rounded-lg border-2 transition-all duration-200 cursor-pointer",
+                  // Responsive touch targets and box sizing:
+                  // - Mobile (1-col): 64px height, full width - room for larger text
+                  // - Tablet (3-col): 80px height, moderate width
+                  // - Desktop (5-col): 88px height, constrained width - taller for text
+                  "flex flex-col items-center justify-center",
+                  "min-h-[64px] sm:min-h-[80px] md:min-h-[88px]",
+                  "p-2 sm:p-3 rounded-lg border-2 transition-all duration-200 cursor-pointer",
                   "hover:border-neutral-600 hover:bg-neutral-800/50 active:scale-95",
                   "has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-emerald-500/50 has-[:focus-visible]:border-emerald-500",
                   isSelected
@@ -237,23 +243,43 @@ export function QuestionCard({
                   type="radio"
                   id={inputId}
                   name={`${groupId}-likert`}
-                  value={String(optionValue)}
+                  value={String(optionNumber)}
                   checked={isSelected}
-                  onChange={() => handleAnswerSelect(optionValue, optionLabel)}
+                  onChange={() => handleAnswerSelect(optionNumber, optionLabel)}
                   className="sr-only peer"
-                  aria-label={`${option.value ?? option.label}: ${optionLabel}`}
+                  aria-label={t('likertOptionLabel', {
+                    value: optionNumber,
+                    total: totalOptions,
+                    label: optionLabel,
+                  })}
+                  aria-keyshortcuts={String(optionNumber)}
                 />
-                <span className="text-xl sm:text-2xl font-bold" aria-hidden="true">
-                  {option.value ?? option.label}
+                {/* Always show numeric value - either option.value or index-based number */}
+                <span className="text-lg sm:text-xl font-bold" aria-hidden="true">
+                  {optionNumber}
                 </span>
-                {option.label && option.value !== undefined && (
-                  <span className="text-xs sm:text-sm mt-1.5 sm:mt-2 text-center leading-tight opacity-80 line-clamp-2" aria-hidden="true">
-                    {option.label}
-                  </span>
-                )}
-                {option.text && !option.label && (
-                  <span className="text-xs sm:text-sm mt-1.5 sm:mt-2 text-center leading-tight opacity-80 line-clamp-2" aria-hidden="true">
-                    {option.text}
+                {/* Label text - responsive sizing for accessibility:
+                    - Mobile (1-col): 14px (text-sm) - plenty of horizontal space
+                    - Tablet (3-col): 12px (text-xs) - meets WCAG AA minimum
+                    - Desktop (5-col): 11px - most constrained, number is primary indicator */}
+                {(option.label || option.text) && (
+                  <span
+                    className={cn(
+                      "mt-1 sm:mt-1.5 text-center max-w-full px-0.5",
+                      // Responsive text sizing - larger on mobile where we have more space
+                      "text-sm sm:text-xs md:text-[11px]",
+                      // Responsive line height - relaxed on mobile for readability
+                      "leading-normal sm:leading-tight",
+                      // Responsive line clamping - more lines where we have vertical space
+                      "line-clamp-2 sm:line-clamp-3 md:line-clamp-2",
+                      // Ensure proper text wrapping for Cyrillic
+                      "break-words hyphens-auto",
+                      // Good contrast - no opacity reduction
+                      isSelected ? "text-emerald-300" : "text-neutral-300"
+                    )}
+                    aria-hidden="true"
+                  >
+                    {option.label || option.text}
                   </span>
                 )}
               </label>
@@ -261,11 +287,14 @@ export function QuestionCard({
           })}
         </div>
 
-        {/* Scale hint */}
-        <p className="text-xs text-neutral-500 text-center" aria-hidden="true">
+        {/* Scale hint - accessible to screen readers via aria-describedby */}
+        <p
+          id={scaleHintId}
+          className="text-xs text-neutral-400 text-center"
+        >
           {t('selectScaleValue', {
             min: question.answerOptions[0]?.value || 1,
-            max: question.answerOptions[question.answerOptions.length - 1]?.value || 5,
+            max: question.answerOptions[totalOptions - 1]?.value || 5,
           })}
         </p>
       </fieldset>
@@ -284,8 +313,9 @@ export function QuestionCard({
           {question.answerOptions.map((option, index) => {
             const optionId = option.id || `option-${index}`;
             const inputId = `${groupId}-option-${optionId}`;
+            // Fix: Only compare option.value when it's defined to avoid undefined === undefined matching all options
             const isSelected = selectedValue === optionId ||
-                              selectedValue === option.value ||
+                              (option.value != null && selectedValue === option.value) ||
                               (Array.isArray(selectedValue) && selectedValue.includes(optionId));
             const optionLabel = option.label || String.fromCharCode(65 + index);
             const optionText = option.text || `Option ${optionLabel}`;

@@ -174,7 +174,7 @@ interface RowComponentProps {
 }
 
 const createRowRenderer = (questions: SimulationResult['sampleQuestions']) => {
-  // eslint-disable-next-line react/display-name
+   
   return function RowRenderer(props: RowComponentProps): ReactElement {
     const { index, style, ariaAttributes } = props;
     const question = questions[index];

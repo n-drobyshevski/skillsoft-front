@@ -2,9 +2,12 @@
 
 import * as React from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { useAuth } from '@clerk/nextjs';
 import { Check, ChevronsUpDown, Search, User as UserIcon, Loader2 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { useDebounce } from '@/hooks/use-debounce';
 import { useBreakpoint } from '@/hooks/use-breakpoint';
+import { useSuggestedUsers } from '@/hooks/queries';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import {
@@ -28,8 +31,35 @@ import {
   DrawerTrigger,
 } from '@/components/ui/drawer';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { usersApi } from '@/services/api';
+import { Skeleton } from '@/components/ui/skeleton';
 import type { User } from '@/types/user';
+import { UserRole } from '@/types/user';
+
+// API Version - defaults to v1
+const API_VERSION = process.env.NEXT_PUBLIC_API_VERSION || 'v1';
+
+const getApiBaseUrl = () => {
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+  if (!apiUrl) {
+    return `http://localhost:8080/api/${API_VERSION}`;
+  }
+  const protocol = apiUrl.includes('localhost') || apiUrl.includes('127.0.0.1') ? 'http' : 'https';
+  return `${protocol}://${apiUrl}/api/${API_VERSION}`;
+};
+
+/**
+ * Map Clerk organization role to application UserRole
+ */
+function mapOrgRoleToUserRole(orgRole: string | undefined | null): UserRole {
+  if (!orgRole) return UserRole.USER;
+  const roleName = orgRole.replace('org:', '').toLowerCase();
+  switch (roleName) {
+    case 'admin': return UserRole.ADMIN;
+    case 'hr_manager': return UserRole.HR_MANAGER;
+    case 'hr_specialist': return UserRole.HR_SPECIALIST;
+    default: return UserRole.USER;
+  }
+}
 
 interface UserPickerProps {
   /** Currently selected user email (for display) */
@@ -73,31 +103,77 @@ export function UserPicker({
   className,
   excludeEmails = [],
 }: UserPickerProps) {
+  const t = useTranslations('template.access.people.form');
   const [open, setOpen] = React.useState(false);
   const [searchQuery, setSearchQuery] = React.useState('');
   const debouncedQuery = useDebounce(searchQuery, 300);
 
   const { isMobileOrTablet, isHydrated } = useBreakpoint();
+  const { userId, orgRole, isSignedIn } = useAuth();
 
-  // Search users query
+  // Build auth headers for client-side API calls
+  const authHeaders = React.useMemo(() => {
+    if (!userId) return null;
+    const role = mapOrgRoleToUserRole(orgRole);
+    return {
+      'X-User-Id': userId,
+      'X-User-Role': role,
+    };
+  }, [userId, orgRole]);
+
+  // Suggested users for quick picks
+  const {
+    users: suggestedUsers,
+    isLoading: suggestedLoading,
+    hasUsers: hasSuggested,
+  } = useSuggestedUsers(excludeEmails, 3);
+
+  // Search users query - using client-side auth
   const {
     data: users = [],
     isLoading,
     isFetching,
   } = useQuery({
     queryKey: ['users', 'search', debouncedQuery],
-    queryFn: () => usersApi.searchUsers(debouncedQuery),
-    enabled: debouncedQuery.length >= 2,
+    queryFn: async () => {
+      if (!authHeaders) return [];
+
+      const response = await fetch(
+        `${getApiBaseUrl()}/users/search?query=${encodeURIComponent(debouncedQuery)}`,
+        {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            ...authHeaders,
+          },
+          mode: 'cors',
+          credentials: 'include',
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`Failed to search users: ${response.status}`);
+      }
+
+      return response.json() as Promise<User[]>;
+    },
+    enabled: isSignedIn && !!authHeaders && debouncedQuery.length >= 2,
     staleTime: 30000, // 30 seconds
   });
 
-  // Filter out excluded emails
+  // Filter out excluded users (by email or username) and current user
   const filteredUsers = React.useMemo(() => {
     const excludeSet = new Set(excludeEmails.map((e) => e.toLowerCase()));
-    return users.filter(
-      (user) => user.email && !excludeSet.has(user.email.toLowerCase())
-    );
-  }, [users, excludeEmails]);
+    return users.filter((user) => {
+      // Exclude current user
+      if (user.clerkId === userId) return false;
+      // Check email exclusion
+      if (user.email && excludeSet.has(user.email.toLowerCase())) return false;
+      // Check username exclusion
+      if (user.username && excludeSet.has(user.username.toLowerCase())) return false;
+      return true;
+    });
+  }, [users, excludeEmails, userId]);
 
   const handleSelect = (user: User) => {
     onSelect(user);
@@ -124,9 +200,54 @@ export function UserPicker({
     return 'U';
   };
 
+  // Quick picks section component
+  const quickPicksSection = (suggestedLoading || hasSuggested) && !searchQuery && (
+    <div className="px-3 py-2 border-b">
+      <p className="text-xs font-medium text-muted-foreground mb-2">
+        {t('suggestions')}
+      </p>
+      {suggestedLoading ? (
+        <div className="flex gap-2">
+          {[1, 2, 3].map((i) => (
+            <Skeleton key={i} className="h-9 w-24 rounded-full" />
+          ))}
+        </div>
+      ) : (
+        <div className="flex flex-wrap gap-2">
+          {suggestedUsers.map((user) => (
+            <button
+              key={user.id}
+              type="button"
+              onClick={() => handleSelect(user)}
+              className={cn(
+                'inline-flex items-center gap-2 rounded-full border px-3 py-1.5',
+                'hover:bg-accent hover:border-accent-foreground/20 transition-colors',
+                'cursor-pointer',
+                isMobileOrTablet && 'min-h-[44px] px-4'
+              )}
+            >
+              <Avatar className={cn('h-6 w-6', isMobileOrTablet && 'h-7 w-7')}>
+                <AvatarImage src={user.imageUrl} alt={getDisplayName(user)} />
+                <AvatarFallback className="bg-blue-100 text-blue-700 text-[10px]">
+                  {getInitials(user)}
+                </AvatarFallback>
+              </Avatar>
+              <span className="text-sm font-medium truncate max-w-[100px]">
+                {user.firstName || user.email?.split('@')[0] || 'User'}
+              </span>
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+
   // Shared command content
   const commandContent = (
     <Command shouldFilter={false} className="w-full">
+      {/* Quick picks - show when not searching */}
+      {quickPicksSection}
+
       <CommandInput
         placeholder={placeholder}
         value={searchQuery}
@@ -143,10 +264,10 @@ export function UserPicker({
           </div>
         ) : searchQuery.length < 2 ? (
           <div className="py-6 text-center text-sm text-muted-foreground">
-            Type at least 2 characters to search
+            {t('searchHint')}
           </div>
         ) : filteredUsers.length === 0 ? (
-          <CommandEmpty>No users found</CommandEmpty>
+          <CommandEmpty>{t('noUsersFound')}</CommandEmpty>
         ) : (
           <CommandGroup>
             {filteredUsers.map((user) => (

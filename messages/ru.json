@@ -43,8 +43,9 @@
     "of": "из",
     "to": "до",
     "from": "от",
-    "startTest": "Начать тест",
+    "startTest": "Начать",
     "testDrive": "Тест-драйв",
+    "questionsShort": "вопр.",
     "pagination": {
       "navigation": "Навигация по страницам",
       "pageOf": "Страница {current} из {total}",
@@ -115,7 +116,7 @@
       "availableTests": "Доступные тесты",
       "sharedWithMe": "Доступные мне",
       "hiringOverview": "Обзор найма",
-      "studio": "Студия",
+      "studio": "Шаблоны тестов",
       "allTemplates": "Все шаблоны",
       "sessionHistory": "История сессий",
       "psychometrics": "Психометрика",
@@ -298,7 +299,18 @@
     "selectedCount": "Выбрано: {count}",
     "scaleValueSelected": "{value} - {label} выбрано",
     "likertScaleInstruction": "Оцените от {min} до {max}",
-    "likertScaleLabel": "Шкала от {min} до {max}"
+    "likertScaleLabel": "Шкала от {min} до {max}",
+    "likertOptionLabel": "Вариант {value} из {total}: {label}",
+    "useNumberKeys": "Нажмите клавиши от 1 до {max} для выбора",
+    "navigationError": {
+      "title": "Не удалось сохранить ответ",
+      "defaultMessage": "Произошла ошибка при сохранении ответа. Пожалуйста, попробуйте снова.",
+      "unsavedChangesWarning": "Ваш ответ ещё не сохранён",
+      "stayOnQuestion": "Остаться на вопросе",
+      "continueWithoutSaving": "Продолжить без сохранения",
+      "retry": "Попробовать снова",
+      "retrying": "Повторяем..."
+    }
   },
   "likert": {
     "stronglyDisagree": "Совершенно не согласен",
@@ -772,6 +784,8 @@
     "overviewSettings": "Настройки Universal Baseline",
     "jobFitSettings": "Настройки Job Fit",
     "teamFitSettings": "Настройки Team Fit",
+    "goalConfig": "Настройки сценария",
+    "goalConfigDesc": "Настройки, специфичные для выбранной цели оценки",
     "deselectCategory": "Снять выбор",
     "selectCategory": "Выбрать все",
     "hub": {
@@ -1103,11 +1117,16 @@
     },
     "testSession": {
       "loginRequired": "Необходимо войти в систему для прохождения теста",
-      "testDriveLoginRequired": "Необходимо войти в систему для тест-драйва"
+      "testDriveLoginRequired": "Необходимо войти в систему для тест-драйва",
+      "blueprintRequired": {
+        "title": "Требуется конфигурация",
+        "description": "Этот шаблон требует настройки конфигурации перед запуском теста. Перейдите на вкладку «Конфигурация» и добавьте хотя бы одну компетенцию.",
+        "button": "Настроить"
+      }
     },
     "testDrive": {
-      "button": "Тест-драйв",
-      "buttonShort": "Тест",
+      "button": "HR Тест-драйв",
+      "buttonShort": "HR",
       "loading": "Загрузка..."
     },
     "errorDisplay": {
@@ -1148,6 +1167,8 @@
         "competenciesDescription": "Выбор навыков",
         "settings": "Настройки",
         "settingsDescription": "Параметры теста",
+        "visibility": "Видимость",
+        "visibilityDescription": "Настройки доступа",
         "review": "Обзор",
         "reviewDescription": "Итого"
       },
@@ -1201,6 +1222,56 @@
         "agreeablenessDesc": "Сотрудничество, эмпатия, доверие",
         "emotionalStability": "Эмоциональная стабильность",
         "emotionalStabilityDesc": "Спокойствие, стрессоустойчивость, уравновешенность"
+      },
+      "visibility": {
+        "title": "Кто может видеть этот шаблон?",
+        "private": "Приватный",
+        "privateDesc": "Только вы и те, с кем вы поделились",
+        "public": "Публичный",
+        "publicDesc": "Все в вашей организации",
+        "link": "По ссылке",
+        "linkDesc": "Любой, у кого есть ссылка",
+        "note": "Вы можете поделиться с конкретными людьми после сохранения.",
+        "reviewLabel": "Видимость"
+      },
+      "visibilityChangeFailed": "Шаблон создан, но не удалось изменить видимость. Вы можете обновить её на странице доступа."
+    },
+    "saveConfirmation": {
+      "confirmTitle": "Создать шаблон?",
+      "confirmDescription": "Проверьте настройки шаблона перед созданием.",
+      "savingTitle": "Создание шаблона...",
+      "savingDescription": "Пожалуйста, подождите, пока мы создаём ваш шаблон.",
+      "successTitle": "Шаблон создан!",
+      "successDescription": "Ваш шаблон успешно создан.",
+      "errorTitle": "Ошибка создания",
+      "genericError": "Произошла непредвиденная ошибка. Попробуйте ещё раз.",
+      "retryAttempt": "Попытка {current} из {max}",
+      "maxRetriesReached": "Достигнуто максимальное количество попыток. Попробуйте позже.",
+      "confirm": "Создать шаблон",
+      "creating": "Создание...",
+      "goBack": "Назад",
+      "retry": "Повторить",
+      "redirecting": "Переход к вашему шаблону...",
+      "competencies": "компетенций",
+      "questionsPerIndicator": "В/индикатор",
+      "minutes": "мин",
+      "passingScore": "для прохождения",
+      "showResultsYes": "Показывать результаты",
+      "showResultsNo": "Скрывать результаты",
+      "shuffleQuestions": "Перемешать вопросы",
+      "shuffleOptions": "Перемешать варианты",
+      "allowSkip": "Можно пропускать",
+      "allowBack": "Можно возвращаться",
+      "visibilityChangeFailed": "Шаблон создан, но не удалось изменить видимость.",
+      "goals": {
+        "OVERVIEW": "Обзор",
+        "JOB_FIT": "Соответствие должности",
+        "TEAM_FIT": "Соответствие команде"
+      },
+      "visibility": {
+        "PRIVATE": "Приватный",
+        "PUBLIC": "Публичный",
+        "LINK": "По ссылке"
       }
     },
     "resultsView": {
@@ -1300,8 +1371,17 @@
         "title": "Люди с доступом",
         "description": "Поделитесь шаблоном с конкретными пользователями или командами",
         "form": {
+          "tabs": {
+            "email": "По Email",
+            "systemUser": "Пользователь"
+          },
           "emailPlaceholder": "Введите email адрес",
+          "userPlaceholder": "Поиск пользователей...",
+          "selectedUser": "Выбран: {name}",
           "addButton": "Добавить",
+          "suggestions": "Рекомендуемые",
+          "searchHint": "Введите минимум 2 символа для поиска",
+          "noUsersFound": "Пользователи не найдены",
           "validation": {
             "invalidEmail": "Введите корректный email"
           }
@@ -4127,7 +4207,12 @@
       "weeksAgoShort": "{count} нед назад",
       "durationMinutes": "{count} мин",
       "durationHours": "{count} ч",
-      "durationHoursMinutes": "{hours} ч {minutes} мин"
+      "durationHoursMinutes": "{hours} ч {minutes} мин",
+      "tomorrow": "Завтра",
+      "inDays": "{count, plural, one {через # день} few {через # дня} many {через # дней} other {через # дней}}",
+      "inWeeks": "{count, plural, one {через # неделю} few {через # недели} many {через # недель} other {через # недель}}",
+      "inMonths": "{count, plural, one {через # месяц} few {через # месяца} many {через # месяцев} other {через # месяцев}}",
+      "inYears": "{count, plural, one {через # год} few {через # года} many {через # лет} other {через # лет}}"
     }
   },
   "teams": {
@@ -4929,6 +5014,83 @@
       "competencyList": "Топ компетенции по баллам",
       "competencyItem": "{name}, ранг {rank}, балл {score}%",
       "resultItem": "{name} - {status}, Балл: {score}%"
+    }
+  },
+  "anonymousTest": {
+    "info": {
+      "questions": "Вопросы",
+      "timeLimit": "Ограничение времени",
+      "minutes": "{count} мин",
+      "noTimeLimit": "Без ограничений"
+    },
+    "feature": {
+      "skipQuestions": "Вы можете пропускать вопросы",
+      "backNavigation": "Вы можете вернуться к предыдущим вопросам"
+    },
+    "privacy": {
+      "title": "Уведомление о конфиденциальности",
+      "description": "Ваши ответы анонимны. Только ваше имя будет передано администратору теста."
+    },
+    "action": {
+      "startTest": "Начать тест",
+      "starting": "Запуск...",
+      "tryAgain": "Попробовать снова",
+      "previous": "Назад",
+      "next": "Далее",
+      "skip": "Пропустить",
+      "finish": "Завершить",
+      "closeWindow": "Закрыть окно"
+    },
+    "error": {
+      "invalidLink": "Неверная ссылка",
+      "noToken": "Токен ссылки не предоставлен.",
+      "linkNotFound": "Ссылка не найдена",
+      "linkNotFoundDesc": "Эта ссылка не существует или была удалена.",
+      "linkExpired": "Ссылка истекла",
+      "linkExpiredDesc": "Срок действия этой ссылки истёк.",
+      "linkRevoked": "Ссылка отозвана",
+      "linkRevokedDesc": "Эта ссылка была отозвана владельцем.",
+      "linkMaxUses": "Лимит использований",
+      "linkMaxUsesDesc": "Эта ссылка достигла максимального количества использований.",
+      "testNotReady": "Тест недоступен",
+      "testNotReadyDesc": "Этот тест в данный момент недоступен. Пожалуйста, свяжитесь с администратором.",
+      "rateLimited": "Слишком много попыток",
+      "rateLimitedDesc": "Вы сделали слишком много запросов. Пожалуйста, подождите несколько минут и попробуйте снова.",
+      "genericTitle": "Что-то пошло не так",
+      "genericDesc": "Произошла непредвиденная ошибка. Пожалуйста, попробуйте снова.",
+      "nameRequired": "Имя и фамилия обязательны.",
+      "timeUp": "Время вышло! Пожалуйста, отправьте ваши ответы."
+    },
+    "progress": {
+      "question": "Вопрос"
+    },
+    "complete": {
+      "title": "Завершение теста",
+      "description": "Пожалуйста, укажите ваши данные для отправки результатов.",
+      "firstName": "Имя",
+      "firstNamePlaceholder": "Введите ваше имя",
+      "lastName": "Фамилия",
+      "lastNamePlaceholder": "Введите вашу фамилию",
+      "email": "Email (необязательно)",
+      "emailPlaceholder": "Введите ваш email",
+      "notes": "Заметки (необязательно)",
+      "notesPlaceholder": "Дополнительные заметки",
+      "submit": "Отправить результаты",
+      "submitting": "Отправка..."
+    },
+    "confirm": {
+      "title": "Отправить тест?",
+      "description": "Вы уверены, что хотите отправить тест? После отправки вы не сможете изменить свои ответы.",
+      "cancel": "Отмена",
+      "proceed": "Отправить тест"
+    },
+    "result": {
+      "passedTitle": "Поздравляем!",
+      "failedTitle": "Тест завершён",
+      "thankYou": "Спасибо за прохождение теста.",
+      "correct": "правильных ответов",
+      "timeTaken": "общее время",
+      "breakdown": "Разбор по компетенциям"
     }
   }
 }

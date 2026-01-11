@@ -1,5 +1,7 @@
 'use client';
 
+import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import {
   Eye,
   Pencil,
@@ -7,6 +9,8 @@ import {
   Clock,
   Target,
   BookOpen,
+  Trash2,
+  Loader2,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -18,10 +22,21 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from "@/components/ui/drawer";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { AssessmentGoal, AssessmentGoalInfo, TestTemplateSummary } from "@/types/domain";
-import StartTestDriveButton from "./StartTestDriveButton";
 import StartTestSessionButton from "./StartTestSessionButton";
 import { useTranslations } from 'next-intl';
+import { toast } from 'sonner';
+import { deleteTestTemplate } from '@/app/actions';
 
 interface MobileTemplateActionsProps {
   template: TestTemplateSummary;
@@ -46,7 +61,7 @@ function formatDuration(minutes: number, t: ReturnType<typeof useTranslations>):
  * Features:
  * - Template info with stats
  * - Primary CTA: Start Test
- * - Secondary actions: View Details, Edit (if canEdit), Test Drive (if canEdit)
+ * - Secondary actions: View Details, Edit (if canEdit)
  * - Full-width action buttons (48px height for touch targets)
  */
 export default function MobileTemplateActions({
@@ -55,13 +70,37 @@ export default function MobileTemplateActions({
   open,
   onOpenChange,
 }: MobileTemplateActionsProps) {
+  const router = useRouter();
   const t = useTranslations('template');
   const tCommon = useTranslations('common');
   const goalInfo = template.goal
     ? AssessmentGoalInfo[template.goal]
     : AssessmentGoalInfo[AssessmentGoal.OVERVIEW];
 
+  // Delete dialog state
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [isDeleting, startDeleteTransition] = useTransition();
+
+  const handleDelete = () => {
+    startDeleteTransition(async () => {
+      try {
+        await deleteTestTemplate(template.id);
+        toast.success(t('testDeleted'), {
+          description: t('testDeletedDescription', { name: template.name }),
+        });
+        setDeleteDialogOpen(false);
+        onOpenChange(false);
+        router.refresh();
+      } catch (error) {
+        toast.error(t('deleteError'), {
+          description: error instanceof Error ? error.message : t('deleteErrorDescription'),
+        });
+      }
+    });
+  };
+
   return (
+    <>
     <Drawer open={open} onOpenChange={onOpenChange}>
       <DrawerContent className="max-h-[85vh]">
         {/* Header */}
@@ -115,53 +154,95 @@ export default function MobileTemplateActions({
               </Button>
             </Link>
 
-            {canEdit ? (
-              <StartTestDriveButton
-                templateId={template.id}
-                templateName={template.name}
-                fullWidth
-                className="h-11"
-              />
-            ) : (
-              <Button
-                variant="outline"
-                className="w-full h-11 justify-center gap-2 text-sm font-medium"
-                onClick={() => onOpenChange(false)}
-              >
-                {tCommon('cancel')}
-              </Button>
-            )}
+            <Button
+              variant="outline"
+              className="w-full h-11 justify-center gap-2 text-sm font-medium"
+              onClick={() => onOpenChange(false)}
+            >
+              {tCommon('cancel')}
+            </Button>
           </div>
 
           {/* Edit Actions - Only for editors */}
           {canEdit && (
-            <div className="grid grid-cols-2 gap-2">
-              <Link href={`/test-templates/${template.id}/settings`} className="block no-underline">
-                <Button
-                  variant="outline"
-                  className="w-full h-11 justify-center gap-2 text-sm font-medium"
-                  onClick={() => onOpenChange(false)}
-                >
-                  <Settings className="h-4 w-4" />
-                  {t('settings')}
-                </Button>
-              </Link>
+            <>
+              <div className="grid grid-cols-2 gap-2">
+                <Link href={`/test-templates/${template.id}/settings`} className="block no-underline">
+                  <Button
+                    variant="outline"
+                    className="w-full h-11 justify-center gap-2 text-sm font-medium"
+                    onClick={() => onOpenChange(false)}
+                  >
+                    <Settings className="h-4 w-4" />
+                    {t('settings')}
+                  </Button>
+                </Link>
 
-              <Link href={`/test-templates/${template.id}/builder`} className="block no-underline">
-                <Button
-                  variant="outline"
-                  className="w-full h-11 justify-center gap-2 text-sm font-medium"
-                  onClick={() => onOpenChange(false)}
-                >
-                  <Pencil className="h-4 w-4" />
-                  {tCommon('edit')}
-                </Button>
-              </Link>
-            </div>
+                <Link href={`/test-templates/${template.id}/builder`} className="block no-underline">
+                  <Button
+                    variant="outline"
+                    className="w-full h-11 justify-center gap-2 text-sm font-medium"
+                    onClick={() => onOpenChange(false)}
+                  >
+                    <Pencil className="h-4 w-4" />
+                    {tCommon('edit')}
+                  </Button>
+                </Link>
+              </div>
+
+              {/* Delete Action */}
+              <Button
+                variant="outline"
+                className="w-full h-11 justify-center gap-2 text-sm font-medium text-destructive border-destructive/30 hover:bg-destructive/10 hover:text-destructive hover:border-destructive/50"
+                onClick={() => setDeleteDialogOpen(true)}
+              >
+                <Trash2 className="h-4 w-4" />
+                {tCommon('delete')}
+              </Button>
+            </>
           )}
         </div>
 
       </DrawerContent>
     </Drawer>
+
+    {/* Delete Confirmation Dialog */}
+    {canEdit && (
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t('deleteTest')}</AlertDialogTitle>
+            <AlertDialogDescription asChild>
+              <div className="space-y-2 text-sm text-muted-foreground">
+                <span className="block">
+                  {t('deleteConfirmation')} <strong>&quot;{template.name}&quot;</strong>?
+                </span>
+                <span className="block text-muted-foreground/80">
+                  {t('deleteWarning')}
+                </span>
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>{tCommon('cancel')}</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDelete}
+              disabled={isDeleting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {isDeleting ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  {t('deleting')}
+                </>
+              ) : (
+                tCommon('delete')
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    )}
+    </>
   );
 }

@@ -15,8 +15,14 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { testSessionsApi } from "@/services/api";
-import { Loader2, AlertTriangle, PlayCircle, Rocket } from "lucide-react";
+import { Loader2, AlertTriangle, PlayCircle, Rocket, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 
 interface StartTestSessionButtonProps {
@@ -25,6 +31,11 @@ interface StartTestSessionButtonProps {
   fullWidth?: boolean;
   variant?: "default" | "hero";
   size?: "default" | "sm" | "lg" | "icon";
+  /**
+   * Whether the template has a valid blueprint for test assembly.
+   * When false, the button is disabled with a helpful tooltip.
+   */
+  hasValidBlueprint?: boolean;
 }
 
 export default function StartTestSessionButton({
@@ -33,6 +44,7 @@ export default function StartTestSessionButton({
   fullWidth = false,
   variant = "default",
   size = "lg",
+  hasValidBlueprint = true, // Default to true for backward compatibility
 }: StartTestSessionButtonProps) {
   const router = useRouter();
   const { userId, isSignedIn } = useAuth();
@@ -43,6 +55,9 @@ export default function StartTestSessionButton({
 
   const t = useTranslations('template');
   const tCommon = useTranslations('common');
+
+  // Blueprint validation - prevent starting tests without valid blueprint
+  const blueprintMissing = hasValidBlueprint === false;
 
   const handleStartTest = async () => {
     if (!isSignedIn || !userId) {
@@ -124,6 +139,7 @@ export default function StartTestSessionButton({
   };
 
   const isLoading = isPending || isChecking;
+  const isDisabled = isLoading || blueprintMissing;
 
   // Shared dialog component
   const alertDialog = (
@@ -151,55 +167,101 @@ export default function StartTestSessionButton({
     </AlertDialog>
   );
 
+  // Helper to wrap button in tooltip when blueprint is missing
+  const wrapWithBlueprintTooltip = (button: React.ReactNode) => {
+    if (!blueprintMissing) return button;
+
+    return (
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <span className={fullWidth ? "w-full" : "inline-block"}>
+              {button}
+            </span>
+          </TooltipTrigger>
+          <TooltipContent side="top" className="max-w-xs">
+            <div className="flex items-start gap-2">
+              <AlertCircle className="h-4 w-4 text-amber-500 mt-0.5 shrink-0" />
+              <div>
+                <p className="font-medium">{t('testSession.blueprintRequired.title')}</p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {t('testSession.blueprintRequired.description')}
+                </p>
+              </div>
+            </div>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+    );
+  };
+
   // Hero variant - prominent, gradient styling
   if (variant === "hero") {
+    const heroButton = (
+      <Button
+        onClick={handleStartTest}
+        disabled={isDisabled}
+        className={`${fullWidth ? "w-full" : ""} bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary shadow-lg hover:shadow-xl transition-all duration-300 group min-h-11 ${blueprintMissing ? "opacity-50 cursor-not-allowed" : ""}`}
+        size={size}
+      >
+        {isLoading ? (
+          <>
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            {t('take.loading.preparing')}
+          </>
+        ) : blueprintMissing ? (
+          <>
+            <AlertCircle className="mr-2 h-4 w-4 text-amber-500" />
+            <span className="font-semibold">{t('testSession.blueprintRequired.button')}</span>
+          </>
+        ) : (
+          <>
+            <Rocket className="mr-2 h-4 w-4 transition-transform group-hover:scale-110 group-hover:-rotate-12" />
+            <span className="font-semibold">{tCommon('startTest')}</span>
+            <PlayCircle className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+          </>
+        )}
+      </Button>
+    );
+
     return (
       <>
-        <Button
-          onClick={handleStartTest}
-          disabled={isLoading}
-          className={`${fullWidth ? "w-full" : ""} bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary shadow-lg hover:shadow-xl transition-all duration-300 group min-h-11`}
-          size={size}
-        >
-          {isLoading ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              {t('take.loading.preparing')}
-            </>
-          ) : (
-            <>
-              <Rocket className="mr-2 h-4 w-4 transition-transform group-hover:scale-110 group-hover:-rotate-12" />
-              <span className="font-semibold">{t('testDrive.button')}</span>
-              <PlayCircle className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-0.5" />
-            </>
-          )}
-        </Button>
+        {wrapWithBlueprintTooltip(heroButton)}
         {alertDialog}
       </>
     );
   }
 
   // Default variant - standard button
+  const defaultButton = (
+    <Button
+      onClick={handleStartTest}
+      disabled={isDisabled}
+      className={`${fullWidth ? "w-full" : ""} shadow-sm hover:shadow-md transition-all group ${blueprintMissing ? "opacity-50 cursor-not-allowed" : ""}`}
+      size={size}
+    >
+      {isLoading ? (
+        <>
+          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          {tCommon('loading')}
+        </>
+      ) : blueprintMissing ? (
+        <>
+          <AlertCircle className="mr-2 h-4 w-4 text-amber-500" />
+          <span className="font-medium">{t('testSession.blueprintRequired.button')}</span>
+        </>
+      ) : (
+        <>
+          <PlayCircle className="mr-2 h-4 w-4 transition-transform group-hover:scale-110" />
+          <span className="font-medium">{tCommon('startTest')}</span>
+        </>
+      )}
+    </Button>
+  );
+
   return (
     <>
-      <Button
-        onClick={handleStartTest}
-        disabled={isLoading}
-        className={`${fullWidth ? "w-full" : ""} shadow-sm hover:shadow-md transition-all group`}
-        size={size}
-      >
-        {isLoading ? (
-          <>
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            {tCommon('loading')}
-          </>
-        ) : (
-          <>
-            <PlayCircle className="mr-2 h-4 w-4 transition-transform group-hover:scale-110" />
-            <span className="font-medium">{tCommon('startTest')}</span>
-          </>
-        )}
-      </Button>
+      {wrapWithBlueprintTooltip(defaultButton)}
       {alertDialog}
     </>
   );

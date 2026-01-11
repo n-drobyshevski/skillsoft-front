@@ -1,53 +1,35 @@
-import React from "react";
-import PageHeader from "@/components/common/PageHeader";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import React from 'react';
+import { Skeleton } from '@/components/ui/skeleton';
+import TestTemplatesGridSkeleton from './_components/TestTemplatesGridSkeleton';
 
 /**
  * Loading skeleton for test templates page
- * Provides instant visual feedback during route loading
+ * Matches the actual page structure:
+ * - Header with title, description, and action buttons
+ * - TestTemplatesGridSkeleton for filters and card grid
  */
 export default function Loading() {
   return (
-    <div className="flex flex-1 flex-col gap-4 p-4 pt-6 md:gap-6 md:p-6">
-      <PageHeader
-        title="Шаблоны тестов"
-        description="Выберите шаблон для оценки ваших компетенций"
-      />
-      
-      {/* Action buttons skeleton */}
-      <div className="flex items-center gap-2">
-        <Skeleton className="h-9 w-32" />
-        <Skeleton className="h-9 w-36" />
+    <div className="flex flex-1 flex-col gap-3 sm:gap-4 p-2 sm:p-4 md:p-6">
+      {/* Header Skeleton - matches TemplatesPageHeader */}
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        {/* Title and Description */}
+        <div className="space-y-1.5">
+          <Skeleton className="h-7 sm:h-8 w-40 sm:w-48" />
+          <Skeleton className="h-4 w-56 sm:w-72" />
+        </div>
+
+        {/* Action Buttons */}
+        <div className="flex items-center gap-2 mt-2 sm:mt-0">
+          {/* History Button */}
+          <Skeleton className="h-9 w-full sm:w-28 rounded-md" />
+          {/* Create Button (show on tablet+) */}
+          <Skeleton className="hidden sm:block h-9 w-32 rounded-md" />
+        </div>
       </div>
-      
-      {/* Grid of template cards skeleton */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {Array.from({ length: 6 }).map((_, i) => (
-          <Card key={i} className="card-modern">
-            <CardHeader className="pb-3">
-              <div className="flex items-start justify-between">
-                <Skeleton className="h-6 w-3/4" />
-                <Skeleton className="h-5 w-16 rounded-full" />
-              </div>
-              <Skeleton className="h-4 w-full mt-2" />
-              <Skeleton className="h-4 w-2/3 mt-1" />
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div className="flex items-center gap-4">
-                <Skeleton className="h-4 w-20" />
-                <Skeleton className="h-4 w-24" />
-              </div>
-              <div className="flex flex-wrap gap-1">
-                {Array.from({ length: 3 }).map((_, j) => (
-                  <Skeleton key={j} className="h-5 w-16 rounded-full" />
-                ))}
-              </div>
-              <Skeleton className="h-9 w-full mt-2" />
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+
+      {/* Grid Skeleton - uses responsive TestTemplatesGridSkeleton */}
+      <TestTemplatesGridSkeleton />
     </div>
   );
 }

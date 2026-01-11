@@ -66,6 +66,7 @@ import { cn } from '@/lib/utils';
 import { AssessmentGoal, AssessmentGoalInfo, TestTemplate } from '@/types/domain';
 import { updateTemplateSettings, archiveTemplate, deleteTemplate } from '../../actions';
 import { useTranslations } from 'next-intl';
+import { GoalConfigSection } from './GoalConfigSection';
 
 // Validation schema for all settings
 const settingsSchema = z.object({
@@ -81,7 +82,42 @@ const settingsSchema = z.object({
   allowSkip: z.boolean(),
   allowBackNavigation: z.boolean(),
   showResultsImmediately: z.boolean(),
-});
+  // Blueprint fields for OVERVIEW goal
+  includeBigFive: z.boolean().optional(),
+  preferredDifficulty: z.enum(['BASIC', 'INTERMEDIATE', 'ADVANCED']).optional(),
+  // Blueprint fields for JOB_FIT goal
+  onetSocCode: z.string().optional(),
+  strictnessLevel: z.number().min(0).max(100).optional(),
+  enableDeltaTesting: z.boolean().optional(),
+  candidateClerkUserId: z.string().optional(),
+  // Blueprint fields for TEAM_FIT goal
+  teamId: z.string().optional(),
+  saturationThreshold: z.number().min(0.3).max(0.9).optional(),
+}).refine(
+  (data) => {
+    // For JOB_FIT, onetSocCode must be valid format if provided
+    if (data.goal === AssessmentGoal.JOB_FIT && data.onetSocCode) {
+      return /^\d{2}-\d{4}\.\d{2}$/.test(data.onetSocCode);
+    }
+    return true;
+  },
+  {
+    message: 'Invalid O*NET SOC code format (expected XX-XXXX.XX)',
+    path: ['onetSocCode'],
+  }
+).refine(
+  (data) => {
+    // For TEAM_FIT, teamId must be a valid UUID if provided
+    if (data.goal === AssessmentGoal.TEAM_FIT && data.teamId) {
+      return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(data.teamId);
+    }
+    return true;
+  },
+  {
+    message: 'Invalid team ID',
+    path: ['teamId'],
+  }
+);
 
 type SettingsFormValues = z.infer<typeof settingsSchema>;
 
@@ -111,6 +147,9 @@ export function SettingsForm({ template }: SettingsFormProps) {
   const t = useTranslations('template');
   const tCommon = useTranslations('common');
 
+  // Extract blueprint values with sensible defaults
+  const blueprint = template.blueprint || {};
+
   const form = useForm<SettingsFormValues>({
     resolver: zodResolver(settingsSchema),
     defaultValues: {
@@ -126,6 +165,17 @@ export function SettingsForm({ template }: SettingsFormProps) {
       allowSkip: template.allowSkip,
       allowBackNavigation: template.allowBackNavigation,
       showResultsImmediately: template.showResultsImmediately,
+      // Blueprint fields for OVERVIEW goal
+      includeBigFive: (blueprint.include_big_five as boolean) ?? true,
+      preferredDifficulty: (blueprint.preferred_difficulty as 'BASIC' | 'INTERMEDIATE' | 'ADVANCED') ?? 'INTERMEDIATE',
+      // Blueprint fields for JOB_FIT goal
+      onetSocCode: (blueprint.onet_soc_code as string) ?? '',
+      strictnessLevel: (blueprint.strictness_level as number) ?? 60,
+      enableDeltaTesting: (blueprint.enable_delta_testing as boolean) ?? false,
+      candidateClerkUserId: (blueprint.candidate_clerk_user_id as string) ?? '',
+      // Blueprint fields for TEAM_FIT goal
+      teamId: (blueprint.team_id as string) ?? '',
+      saturationThreshold: (blueprint.saturation_threshold as number) ?? 0.7,
     },
     mode: 'onBlur',
   });
@@ -262,7 +312,10 @@ export function SettingsForm({ template }: SettingsFormProps) {
                           className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
                         >
                           {Object.values(AssessmentGoal).map((goal) => {
+                            // Safe: goal is from Object.values(AssessmentGoal), a typed enum
+                            // eslint-disable-next-line security/detect-object-injection
                             const info = AssessmentGoalInfo[goal];
+                            // eslint-disable-next-line security/detect-object-injection
                             const config = goalConfig[goal];
                             const GoalIcon = config.icon;
                             const isSelected = field.value === goal;
@@ -315,6 +368,11 @@ export function SettingsForm({ template }: SettingsFormProps) {
                 />
               </CardContent>
             </Card>
+
+            {/* Section 2.5: Goal-Specific Configuration */}
+            <GoalConfigSection
+              selectedCompetencyCount={template.competencyIds?.length || 0}
+            />
 
             {/* Section 3: Test Configuration */}
             <Card>

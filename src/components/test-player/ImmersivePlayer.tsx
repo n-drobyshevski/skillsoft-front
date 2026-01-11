@@ -22,6 +22,8 @@ import {
 } from '@/store/review-store';
 import { toast } from 'sonner';
 import { retryWithBackoff, getUserFriendlyErrorMessage, isRetryableError } from '@/utils/retry';
+import { useNavigationState, areAnswersEqual, createNavigationError, type NavigationError } from './hooks/useNavigationState';
+import { NavigationErrorDialog } from './components';
 import { useSwipeNavigation, useReducedMotion } from '@/hooks/use-swipe-navigation';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
@@ -148,6 +150,15 @@ export function ImmersivePlayer({ session, initialQuestion, authHeaders, testDri
   const [showAbandonDialog, setShowAbandonDialog] = useState(false);
   const [showTimeoutDialog, setShowTimeoutDialog] = useState(false);
 
+  // Navigation error dialog state
+  const [showNavigationError, setShowNavigationError] = useState(false);
+  const [navigationError, setNavigationError] = useState<NavigationError | null>(null);
+  const [isRetryingNavigation, setIsRetryingNavigation] = useState(false);
+  const [pendingNavigation, setPendingNavigation] = useState<{
+    direction: 'forward' | 'backward';
+    targetIndex?: number;
+  } | null>(null);
+
   // Answer Summary Review state
   const [showSummary, setShowSummary] = useState(false);
   const [summaryAnswers, setSummaryAnswers] = useState<AnswerSummaryItem[]>([]);
@@ -180,6 +191,52 @@ export function ImmersivePlayer({ session, initialQuestion, authHeaders, testDri
     enterImmersiveMode();
     return () => exitImmersiveMode();
   }, [enterImmersiveMode, exitImmersiveMode]);
+
+  // Initialize dirty tracking on mount
+  useEffect(() => {
+    const questionId = initialQuestion.question?.id;
+    if (questionId) {
+      // Extract initial answer value
+      let initialValue: string | number | string[] | undefined;
+      if (initialQuestion.previousAnswer) {
+        if (initialQuestion.previousAnswer.likertValue !== undefined) {
+          initialValue = initialQuestion.previousAnswer.likertValue;
+        } else if (initialQuestion.previousAnswer.textResponse) {
+          initialValue = initialQuestion.previousAnswer.textResponse;
+        } else if (initialQuestion.previousAnswer.selectedOptionIds?.length) {
+          initialValue = initialQuestion.previousAnswer.selectedOptionIds.length === 1
+            ? initialQuestion.previousAnswer.selectedOptionIds[0]
+            : initialQuestion.previousAnswer.selectedOptionIds;
+        }
+      }
+      // Store original answer for dirty tracking
+      useNavigationState.getState().setOriginalAnswer(questionId, initialValue);
+    }
+
+    // Cleanup on unmount
+    return () => {
+      useNavigationState.getState().clearAllDirty();
+      useNavigationState.getState().clearAllOriginalAnswers();
+    };
+    // Only run on mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Track dirty state when currentAnswer changes
+  useEffect(() => {
+    const questionId = state.currentQuestion?.id;
+    if (!questionId) return;
+
+    const navStore = useNavigationState.getState();
+    const originalAnswer = navStore.getOriginalAnswer(questionId);
+
+    // Mark dirty if current answer differs from original
+    if (!areAnswersEqual(currentAnswer, originalAnswer)) {
+      navStore.markDirty(questionId);
+    } else {
+      navStore.markClean(questionId);
+    }
+  }, [currentAnswer, state.currentQuestion?.id]);
 
   // Enable/disable test-drive mode based on prop
   useEffect(() => {
@@ -499,6 +556,25 @@ export function ImmersivePlayer({ session, initialQuestion, authHeaders, testDri
 
         // Clear validation errors for new question
         setValidationError(null);
+
+        // Store original answer for dirty tracking
+        const questionId = response.question?.id;
+        if (questionId) {
+          let answerValue: string | number | string[] | undefined;
+          if (response.previousAnswer) {
+            if (response.previousAnswer.likertValue !== undefined) {
+              answerValue = response.previousAnswer.likertValue;
+            } else if (response.previousAnswer.textResponse) {
+              answerValue = response.previousAnswer.textResponse;
+            } else if (response.previousAnswer.selectedOptionIds?.length) {
+              answerValue = response.previousAnswer.selectedOptionIds.length === 1
+                ? response.previousAnswer.selectedOptionIds[0]
+                : response.previousAnswer.selectedOptionIds;
+            }
+          }
+          useNavigationState.getState().setOriginalAnswer(questionId, answerValue);
+          useNavigationState.getState().markClean(questionId);
+        }
       }
     } catch (error) {
       // eslint-disable-next-line no-console
@@ -608,44 +684,133 @@ export function ImmersivePlayer({ session, initialQuestion, authHeaders, testDri
   }, [state.isSubmitting, state.questionIndex, state.totalQuestions, currentQuestion, currentAnswer, buildAnswerRequest, session.id, loadQuestion, authHeaders, validateAnswer, router]);
 
   /**
-   * Navigate to previous question
+   * Navigate to previous question with auto-save
+   *
+   * If the current answer has unsaved changes (is dirty), automatically
+   * saves the answer before navigating backward. This prevents data loss
+   * when the user clicks the back button.
    */
   const handlePrevious = useCallback(async () => {
     if (!state.allowBackNavigation || state.isSubmitting) return;
+    if (state.questionIndex <= 0) return; // Already at first question
 
     setState(prev => ({ ...prev, isSubmitting: true }));
 
+    const questionId = currentQuestion?.id;
+    const navStore = useNavigationState.getState();
+
     try {
+      // Check if current answer has unsaved changes
+      const isDirty = questionId ? navStore.isDirty(questionId) : false;
+
+      // Auto-save if dirty and answer exists
+      if (isDirty && currentAnswer !== undefined && currentQuestion) {
+        // Validate before saving (but don't block navigation for invalid answers)
+        const validation = validateAnswer(currentAnswer);
+
+        if (validation.valid) {
+          // Save the answer
+          const request = buildAnswerRequest(currentAnswer);
+          await retryWithBackoff(
+            () => testSessionsClientApi.submitAnswer(session.id, request, authHeaders),
+            {
+              maxRetries: 2,
+              initialDelayMs: 500,
+              shouldRetry: isRetryableError,
+              onRetry: (_error, attempt) => {
+                toast.info(`Сохранение... (попытка ${attempt}/2)`, { duration: 1500 });
+              },
+            }
+          );
+
+          // Mark as clean after successful save
+          if (questionId) {
+            navStore.markClean(questionId);
+            navStore.setOriginalAnswer(questionId, currentAnswer);
+          }
+
+          // Update question state to answered if not already
+          setState(prev => {
+            const currentState = prev.questionStates[prev.questionIndex];
+            if (currentState === 'current' || currentState === 'pending') {
+              const newQuestionStates = [...prev.questionStates];
+              newQuestionStates[prev.questionIndex] = 'answered';
+              return {
+                ...prev,
+                answeredCount: prev.answeredCount + 1,
+                questionStates: newQuestionStates,
+              };
+            }
+            return prev;
+          });
+        } else {
+          // Answer is invalid - warn but still allow navigation
+          // eslint-disable-next-line no-console
+          console.log('[handlePrevious] Skipping auto-save: answer invalid', validation.error);
+        }
+      }
+
+      // Navigate to previous question
       const prevIndex = state.questionIndex - 1;
       await testSessionsClientApi.navigateToQuestion(session.id, prevIndex, authHeaders);
       await loadQuestion('backward');
+
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error('Failed to navigate back:', error);
       const apiError = error as ApiError;
 
-      // Handle session state errors
+      // Handle session state errors - these are terminal, redirect immediately
       if (apiError.status === 400 || apiError.status === 403) {
         const errorMessage = apiError.message || '';
         if (errorMessage.toLowerCase().includes('abandon')) {
           toast.error('Сессия была отменена');
+          navStore.clearAllDirty();
           router.push('/test-templates');
+          setState(prev => ({ ...prev, isSubmitting: false }));
           return;
         } else if (errorMessage.toLowerCase().includes('complet')) {
           toast.info('Тест уже завершён');
+          navStore.clearAllDirty();
           router.push('/test-templates');
+          setState(prev => ({ ...prev, isSubmitting: false }));
           return;
         }
       }
 
-      toast.error('Не удалось вернуться к предыдущему вопросу');
+      // Show error dialog for retryable errors
+      const navError = createNavigationError(apiError, {
+        fromIndex: state.questionIndex,
+        toIndex: state.questionIndex - 1,
+        direction: 'backward',
+        questionId: currentQuestion?.id || null,
+      });
+      setNavigationError(navError);
+      setPendingNavigation({ direction: 'backward', targetIndex: state.questionIndex - 1 });
+      setShowNavigationError(true);
     }
 
     setState(prev => ({ ...prev, isSubmitting: false }));
-  }, [state.allowBackNavigation, state.isSubmitting, state.questionIndex, session.id, loadQuestion, authHeaders, router]);
+  }, [
+    state.allowBackNavigation,
+    state.isSubmitting,
+    state.questionIndex,
+    currentQuestion,
+    currentAnswer,
+    validateAnswer,
+    buildAnswerRequest,
+    session.id,
+    loadQuestion,
+    authHeaders,
+    router,
+  ]);
 
   /**
-   * Navigate to a specific question by index (for dot navigation)
+   * Navigate to a specific question by index (for dot navigation) with auto-save
+   *
+   * If the current answer has unsaved changes (is dirty), automatically
+   * saves the answer before navigating. This prevents data loss when using
+   * the progress dots to jump between questions.
    */
   const handleNavigateToQuestion = useCallback(async (targetIndex: number) => {
     if (!state.allowBackNavigation || state.isSubmitting) return;
@@ -659,33 +824,115 @@ export function ImmersivePlayer({ session, initialQuestion, authHeaders, testDri
     setState(prev => ({ ...prev, isSubmitting: true }));
 
     const direction = targetIndex > state.questionIndex ? 'forward' : 'backward';
+    const questionId = currentQuestion?.id;
+    const navStore = useNavigationState.getState();
 
     try {
+      // Check if current answer has unsaved changes
+      const isDirty = questionId ? navStore.isDirty(questionId) : false;
+
+      // Auto-save if dirty and answer exists
+      if (isDirty && currentAnswer !== undefined && currentQuestion) {
+        // Validate before saving (but don't block navigation for invalid answers)
+        const validation = validateAnswer(currentAnswer);
+
+        if (validation.valid) {
+          // Save the answer
+          const request = buildAnswerRequest(currentAnswer);
+          await retryWithBackoff(
+            () => testSessionsClientApi.submitAnswer(session.id, request, authHeaders),
+            {
+              maxRetries: 2,
+              initialDelayMs: 500,
+              shouldRetry: isRetryableError,
+              onRetry: (_error, attempt) => {
+                toast.info(`Сохранение... (попытка ${attempt}/2)`, { duration: 1500 });
+              },
+            }
+          );
+
+          // Mark as clean after successful save
+          if (questionId) {
+            navStore.markClean(questionId);
+            navStore.setOriginalAnswer(questionId, currentAnswer);
+          }
+
+          // Update question state to answered if not already
+          setState(prev => {
+            const currentState = prev.questionStates[prev.questionIndex];
+            if (currentState === 'current' || currentState === 'pending') {
+              const newQuestionStates = [...prev.questionStates];
+              newQuestionStates[prev.questionIndex] = 'answered';
+              return {
+                ...prev,
+                answeredCount: prev.answeredCount + 1,
+                questionStates: newQuestionStates,
+              };
+            }
+            return prev;
+          });
+        } else {
+          // Answer is invalid - warn but still allow navigation
+          // eslint-disable-next-line no-console
+          console.log('[handleNavigateToQuestion] Skipping auto-save: answer invalid', validation.error);
+        }
+      }
+
+      // Navigate to target question
       await testSessionsClientApi.navigateToQuestion(session.id, targetIndex, authHeaders);
       await loadQuestion(direction);
+
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error('Failed to navigate to question:', error);
       const apiError = error as ApiError;
 
+      // Handle session state errors - these are terminal, redirect immediately
       if (apiError.status === 400 || apiError.status === 403) {
         const errorMessage = apiError.message || '';
         if (errorMessage.toLowerCase().includes('abandon')) {
           toast.error('Сессия была отменена');
+          navStore.clearAllDirty();
           router.push('/test-templates');
+          setState(prev => ({ ...prev, isSubmitting: false }));
           return;
         } else if (errorMessage.toLowerCase().includes('complet')) {
           toast.info('Тест уже завершён');
+          navStore.clearAllDirty();
           router.push('/test-templates');
+          setState(prev => ({ ...prev, isSubmitting: false }));
           return;
         }
       }
 
-      toast.error('Не удалось перейти к вопросу');
+      // Show error dialog for retryable errors
+      const navError = createNavigationError(apiError, {
+        fromIndex: state.questionIndex,
+        toIndex: targetIndex,
+        direction,
+        questionId: currentQuestion?.id || null,
+      });
+      setNavigationError(navError);
+      setPendingNavigation({ direction, targetIndex });
+      setShowNavigationError(true);
     }
 
     setState(prev => ({ ...prev, isSubmitting: false }));
-  }, [state.allowBackNavigation, state.isSubmitting, state.questionIndex, state.totalQuestions, state.questionStates, session.id, loadQuestion, authHeaders, router]);
+  }, [
+    state.allowBackNavigation,
+    state.isSubmitting,
+    state.questionIndex,
+    state.totalQuestions,
+    state.questionStates,
+    currentQuestion,
+    currentAnswer,
+    validateAnswer,
+    buildAnswerRequest,
+    session.id,
+    loadQuestion,
+    authHeaders,
+    router,
+  ]);
 
   /**
    * Skip current question without answering
@@ -835,6 +1082,149 @@ export function ImmersivePlayer({ session, initialQuestion, authHeaders, testDri
       setShowAbandonDialog(false);
     }
   }, [session.id, authHeaders, router]);
+
+  /**
+   * Retry failed navigation (with auto-save)
+   * Attempts the same navigation operation that failed
+   */
+  const handleRetryNavigation = useCallback(async () => {
+    if (!pendingNavigation) return;
+
+    setIsRetryingNavigation(true);
+
+    const { direction, targetIndex } = pendingNavigation;
+    const navStore = useNavigationState.getState();
+    const questionId = currentQuestion?.id;
+
+    try {
+      // Check if current answer has unsaved changes
+      const isDirty = questionId ? navStore.isDirty(questionId) : false;
+
+      // Auto-save if dirty and answer exists
+      if (isDirty && currentAnswer !== undefined && currentQuestion) {
+        const validation = validateAnswer(currentAnswer);
+
+        if (validation.valid) {
+          const request = buildAnswerRequest(currentAnswer);
+          await retryWithBackoff(
+            () => testSessionsClientApi.submitAnswer(session.id, request, authHeaders),
+            {
+              maxRetries: 2,
+              initialDelayMs: 500,
+              shouldRetry: isRetryableError,
+            }
+          );
+
+          if (questionId) {
+            navStore.markClean(questionId);
+            navStore.setOriginalAnswer(questionId, currentAnswer);
+          }
+
+          // Update question state to answered
+          setState(prev => {
+            const currentState = prev.questionStates[prev.questionIndex];
+            if (currentState === 'current' || currentState === 'pending') {
+              const newQuestionStates = [...prev.questionStates];
+              newQuestionStates[prev.questionIndex] = 'answered';
+              return {
+                ...prev,
+                answeredCount: prev.answeredCount + 1,
+                questionStates: newQuestionStates,
+              };
+            }
+            return prev;
+          });
+        }
+      }
+
+      // Navigate to target question
+      const navIndex = targetIndex ?? (direction === 'backward' ? state.questionIndex - 1 : state.questionIndex + 1);
+      await testSessionsClientApi.navigateToQuestion(session.id, navIndex, authHeaders);
+      await loadQuestion(direction);
+
+      // Success - close dialog and clear state
+      setShowNavigationError(false);
+      setNavigationError(null);
+      setPendingNavigation(null);
+      toast.success('Ответ сохранён');
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error('Retry failed:', error);
+      const apiError = error as ApiError;
+
+      // Update error state for display
+      const navError = createNavigationError(apiError, {
+        fromIndex: state.questionIndex,
+        toIndex: pendingNavigation.targetIndex ?? (pendingNavigation.direction === 'backward' ? state.questionIndex - 1 : state.questionIndex + 1),
+        direction: pendingNavigation.direction,
+        questionId: currentQuestion?.id || null,
+      });
+      setNavigationError(navError);
+    } finally {
+      setIsRetryingNavigation(false);
+    }
+  }, [
+    pendingNavigation,
+    currentQuestion,
+    currentAnswer,
+    validateAnswer,
+    buildAnswerRequest,
+    session.id,
+    authHeaders,
+    loadQuestion,
+    state.questionIndex,
+  ]);
+
+  /**
+   * Dismiss navigation error dialog
+   * User stays on current question without navigating
+   */
+  const handleDismissNavigationError = useCallback(() => {
+    setShowNavigationError(false);
+    setNavigationError(null);
+    setPendingNavigation(null);
+  }, []);
+
+  /**
+   * Continue navigation without saving
+   * Discards current answer changes and proceeds with navigation
+   */
+  const handleContinueWithoutSaving = useCallback(async () => {
+    if (!pendingNavigation) return;
+
+    const { direction, targetIndex } = pendingNavigation;
+    const navStore = useNavigationState.getState();
+    const questionId = currentQuestion?.id;
+
+    try {
+      // Clear dirty flag - we're intentionally discarding changes
+      if (questionId) {
+        navStore.markClean(questionId);
+      }
+
+      // Navigate to target question
+      const navIndex = targetIndex ?? (direction === 'backward' ? state.questionIndex - 1 : state.questionIndex + 1);
+      await testSessionsClientApi.navigateToQuestion(session.id, navIndex, authHeaders);
+      await loadQuestion(direction);
+
+      // Success - close dialog and clear state
+      setShowNavigationError(false);
+      setNavigationError(null);
+      setPendingNavigation(null);
+      toast.info('Изменения не сохранены');
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error('Continue without saving failed:', error);
+      toast.error('Не удалось перейти к вопросу');
+    }
+  }, [
+    pendingNavigation,
+    currentQuestion?.id,
+    session.id,
+    authHeaders,
+    loadQuestion,
+    state.questionIndex,
+  ]);
 
   /**
    * Enter answer summary review screen
@@ -1304,6 +1694,14 @@ export function ImmersivePlayer({ session, initialQuestion, authHeaders, testDri
         onNext={handleNext}
         onSkip={handleSkip}
         validationError={validationError}
+        hasUnsavedChanges={currentQuestion?.id ? useNavigationState.getState().isDirty(currentQuestion.id) : false}
+        backDisabledReason={
+          !state.allowBackNavigation
+            ? 'Возврат к предыдущим вопросам отключён для этого теста'
+            : state.questionIndex <= 0
+              ? 'Это первый вопрос'
+              : undefined
+        }
       />
 
       {/* Completion Dialog */}
@@ -1360,6 +1758,18 @@ export function ImmersivePlayer({ session, initialQuestion, authHeaders, testDri
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Navigation Error Dialog */}
+      <NavigationErrorDialog
+        open={showNavigationError}
+        onOpenChange={setShowNavigationError}
+        error={navigationError}
+        onRetry={handleRetryNavigation}
+        onDismiss={handleDismissNavigationError}
+        onContinueWithoutSaving={handleContinueWithoutSaving}
+        isRetrying={isRetryingNavigation}
+        hasUnsavedChanges={currentQuestion?.id ? useNavigationState.getState().isDirty(currentQuestion.id) : false}
+      />
 
       {/* Test-Drive Mode Components */}
       <InsightsToggle />

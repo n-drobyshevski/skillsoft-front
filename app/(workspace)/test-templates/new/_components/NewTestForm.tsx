@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useTransition, useMemo, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useMemo, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -31,9 +31,11 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import { testTemplatesApi } from '@/services/api';
-import { CreateTestTemplateRequest, TestTemplateBlueprint } from '@/types/domain';
+import { testTemplatesApi, templateSharingApi } from '@/services/api';
+import { CreateTestTemplateRequest, TestTemplateBlueprint, TemplateVisibility } from '@/types/domain';
 import { AssessmentGoal, AssessmentGoalInfo } from '@/types/domain';
+import { useConfirmSaveWorkflow } from '@/hooks/useConfirmSaveWorkflow';
+import { TemplateSaveConfirmation, TemplateSummary } from './TemplateSaveConfirmation';
 import {
   GoalSelector,
   OverviewConfigPanel,
@@ -41,14 +43,14 @@ import {
   TeamFitConfigPanel,
 } from '@/components/blueprint-config';
 import { toast } from 'sonner';
-import { 
-  Loader2, 
-  ArrowLeft, 
+import {
+  Loader2,
+  ArrowLeft,
   ArrowRight,
-  Check, 
-  FileText, 
-  Target, 
-  Settings, 
+  Check,
+  FileText,
+  Target,
+  Settings,
   Eye,
   Clock,
   HelpCircle,
@@ -72,7 +74,10 @@ import {
   Heart,
   Shield,
   Brain,
-  Zap
+  Zap,
+  Globe,
+  Lock,
+  Link2
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
@@ -119,6 +124,8 @@ const formSchema = z.object({
   allowSkip: z.boolean(),
   allowBackNavigation: z.boolean(),
   showResultsImmediately: z.boolean(),
+  // Visibility setting
+  visibility: z.nativeEnum(TemplateVisibility),
   // Goal-specific fields (OVERVIEW)
   includeBigFive: z.boolean().optional(),
   preferredDifficulty: z.enum(['BASIC', 'INTERMEDIATE', 'ADVANCED']).optional(),
@@ -142,7 +149,8 @@ const STEPS = [
   { id: 1, titleKey: 'basic', descKey: 'basicDescription', icon: FileText },
   { id: 2, titleKey: 'competencies', descKey: 'competenciesDescription', icon: Target },
   { id: 3, titleKey: 'settings', descKey: 'settingsDescription', icon: Settings },
-  { id: 4, titleKey: 'review', descKey: 'reviewDescription', icon: Eye },
+  { id: 4, titleKey: 'visibility', descKey: 'visibilityDescription', icon: Users },
+  { id: 5, titleKey: 'review', descKey: 'reviewDescription', icon: Eye },
 ] as const;
 
 // ============================================================================
@@ -158,7 +166,7 @@ function StepIndicator({ currentStep, totalSteps }: { currentStep: number; total
   return (
     <div className="mb-6 md:mb-10 px-1">
       {/* Desktop Stepper */}
-      <div className="hidden md:grid md:grid-cols-4 gap-2 mb-4">
+      <div className="hidden md:grid md:grid-cols-5 gap-2 mb-4">
         {STEPS.map((step, index) => {
           const Icon = step.icon;
           const isActive = step.id === currentStep;
@@ -838,11 +846,127 @@ function ConfigurationStep({ form }: { form: any }) {
 }
 
 // ============================================================================
-// Step 4: Review
+// Step 4: Visibility
+// ============================================================================
+
+const visibilityConfig = {
+  [TemplateVisibility.PRIVATE]: {
+    icon: Lock,
+    color: 'text-slate-600 dark:text-slate-400',
+    bgColor: 'bg-slate-50 dark:bg-slate-950/30',
+    borderColor: 'border-slate-400 dark:border-slate-600',
+  },
+  [TemplateVisibility.PUBLIC]: {
+    icon: Globe,
+    color: 'text-emerald-600 dark:text-emerald-400',
+    bgColor: 'bg-emerald-50 dark:bg-emerald-950/30',
+    borderColor: 'border-emerald-500',
+  },
+  [TemplateVisibility.LINK]: {
+    icon: Link2,
+    color: 'text-blue-600 dark:text-blue-400',
+    bgColor: 'bg-blue-50 dark:bg-blue-950/30',
+    borderColor: 'border-blue-500',
+  },
+};
+
+function VisibilityStep({ form }: { form: any }) {
+  const t = useTranslations('template.newForm.visibility');
+
+  const options = [
+    { value: TemplateVisibility.PRIVATE, titleKey: 'private', descKey: 'privateDesc' },
+    { value: TemplateVisibility.PUBLIC, titleKey: 'public', descKey: 'publicDesc' },
+    { value: TemplateVisibility.LINK, titleKey: 'link', descKey: 'linkDesc' },
+  ];
+
+  return (
+    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+      <div className="space-y-2">
+        <h3 className="text-lg font-semibold tracking-tight">{t('title')}</h3>
+        <p className="text-sm text-muted-foreground">{t('note')}</p>
+      </div>
+
+      <FormField
+        control={form.control}
+        name="visibility"
+        render={({ field }) => (
+          <FormItem>
+            <FormControl>
+              <RadioGroup
+                value={field.value}
+                onValueChange={field.onChange}
+                className="grid gap-3"
+              >
+                {options.map((option) => {
+                  const config = visibilityConfig[option.value];
+                  const Icon = config.icon;
+                  const isSelected = field.value === option.value;
+
+                  return (
+                    <div key={option.value} className="relative">
+                      <RadioGroupItem
+                        value={option.value}
+                        id={`visibility-${option.value}`}
+                        className="sr-only"
+                      />
+                      <Label
+                        htmlFor={`visibility-${option.value}`}
+                        className={cn(
+                          'flex items-start gap-4 rounded-xl border-2 p-4 cursor-pointer',
+                          'transition-all duration-200 ease-out',
+                          'hover:shadow-md hover:-translate-y-0.5',
+                          isSelected
+                            ? `${config.borderColor} ${config.bgColor} shadow-sm`
+                            : 'border-border hover:border-primary/50 bg-card'
+                        )}
+                      >
+                        <div
+                          className={cn(
+                            'p-2.5 rounded-lg transition-colors shrink-0',
+                            isSelected ? 'bg-white/50 dark:bg-black/20' : 'bg-muted'
+                          )}
+                        >
+                          <Icon
+                            className={cn(
+                              'h-5 w-5 transition-colors',
+                              isSelected ? config.color : 'text-muted-foreground'
+                            )}
+                          />
+                        </div>
+
+                        <div className="flex-1 min-w-0 space-y-1">
+                          <div className="flex items-center gap-2">
+                            <span className="font-semibold text-sm">
+                              {t(option.titleKey)}
+                            </span>
+                            {isSelected && (
+                              <Check className="h-4 w-4 text-primary animate-in fade-in zoom-in duration-200" />
+                            )}
+                          </div>
+                          <p className="text-xs text-muted-foreground leading-relaxed">
+                            {t(option.descKey)}
+                          </p>
+                        </div>
+                      </Label>
+                    </div>
+                  );
+                })}
+              </RadioGroup>
+            </FormControl>
+          </FormItem>
+        )}
+      />
+    </div>
+  );
+}
+
+// ============================================================================
+// Step 5: Review
 // ============================================================================
 
 function ReviewStep({ form, competencies }: NewTestFormProps & { form: any }) {
   const t = useTranslations('template.newForm');
+  const tVisibility = useTranslations('template.newForm.visibility');
   const tTemplate = useTranslations('template');
   const values = form.getValues();
   const selectedCompetencies = competencies.filter(c => values.competencyIds.includes(c.id));
@@ -851,6 +975,13 @@ function ReviewStep({ form, competencies }: NewTestFormProps & { form: any }) {
     { labelKey: 'timeShort', value: `${values.timeLimitMinutes} ${tTemplate('minutes')}`, icon: Clock },
     { labelKey: 'thresholdShort', value: `${values.passingScore}%`, icon: Percent },
   ];
+
+  // Get visibility display info
+  const visConfig = visibilityConfig[values.visibility as TemplateVisibility];
+  const VisibilityIcon = visConfig?.icon || Lock;
+  const visibilityLabel = values.visibility === TemplateVisibility.PRIVATE ? tVisibility('private')
+    : values.visibility === TemplateVisibility.PUBLIC ? tVisibility('public')
+    : tVisibility('link');
 
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -861,8 +992,14 @@ function ReviewStep({ form, competencies }: NewTestFormProps & { form: any }) {
             <div className="p-3 bg-background rounded-xl shadow-sm shrink-0 text-primary">
               <FileText className="h-6 w-6" />
             </div>
-            <div>
-               <h3 className="font-bold text-xl break-words leading-tight mb-1">{values.name}</h3>
+            <div className="flex-1">
+               <div className="flex items-center gap-2 mb-1">
+                 <h3 className="font-bold text-xl break-words leading-tight">{values.name}</h3>
+                 <Badge variant="secondary" className={cn('gap-1.5 font-normal', visConfig?.bgColor)}>
+                   <VisibilityIcon className={cn('h-3 w-3', visConfig?.color)} />
+                   <span className={visConfig?.color}>{visibilityLabel}</span>
+                 </Badge>
+               </div>
                <p className="text-sm text-muted-foreground line-clamp-2">{values.description || t('noDescription')}</p>
             </div>
           </div>
@@ -916,17 +1053,101 @@ function ReviewStep({ form, competencies }: NewTestFormProps & { form: any }) {
 
 export default function NewTestForm({ competencies }: NewTestFormProps) {
   const router = useRouter();
-  const [isPending, startTransition] = useTransition();
   const [currentStep, setCurrentStep] = useState(1);
   const t = useTranslations('template');
   const tCommon = useTranslations('common');
-  
+  const tSaveConfirmation = useTranslations('template.saveConfirmation');
+
+  // Confirmation workflow for save operation
+  const saveWorkflow = useConfirmSaveWorkflow<FormValues, { id: string }>({
+    saveFn: async (values) => {
+      // Build goal-specific blueprint
+      const blueprint: TestTemplateBlueprint = {};
+
+      if (values.goal === AssessmentGoal.OVERVIEW) {
+        blueprint.include_big_five = values.includeBigFive;
+        blueprint.preferred_difficulty = values.preferredDifficulty;
+      } else if (values.goal === AssessmentGoal.JOB_FIT) {
+        blueprint.onet_soc_code = values.onetSocCode;
+        blueprint.strictness_level = values.strictnessLevel;
+        blueprint.enable_delta_testing = values.enableDeltaTesting;
+      } else if (values.goal === AssessmentGoal.TEAM_FIT) {
+        blueprint.team_id = values.teamId;
+        blueprint.saturation_threshold = values.saturationThreshold;
+      }
+
+      // Create template request with blueprint
+      const request: CreateTestTemplateRequest = {
+        name: values.name,
+        description: values.description,
+        goal: values.goal,
+        blueprint,
+        competencyIds: values.competencyIds,
+        questionsPerIndicator: values.questionsPerIndicator,
+        timeLimitMinutes: values.timeLimitMinutes,
+        passingScore: values.passingScore,
+        shuffleQuestions: values.shuffleQuestions,
+        shuffleOptions: values.shuffleOptions,
+        allowSkip: values.allowSkip,
+        allowBackNavigation: values.allowBackNavigation,
+        showResultsImmediately: values.showResultsImmediately,
+      };
+
+      const template = await testTemplatesApi.createTemplate(request) as { id: string };
+
+      // Apply visibility if not PRIVATE (default)
+      if (values.visibility !== TemplateVisibility.PRIVATE) {
+        try {
+          await templateSharingApi.changeVisibility(template.id, {
+            visibility: values.visibility,
+          });
+        } catch (visibilityError) {
+          // Non-critical: template created, visibility change failed
+          console.error('Visibility change failed:', visibilityError);
+          toast.warning(tSaveConfirmation('visibilityChangeFailed'));
+        }
+      }
+
+      return template;
+    },
+    getResultId: (result) => result.id,
+    onSuccess: () => {
+      toast.success(t('testCreated'));
+    },
+    onError: (error) => {
+      // Error is shown in the dialog, no additional toast needed
+      console.error('Template creation failed:', error);
+    },
+    redirectPath: '/test-templates/{id}',
+    maxRetries: 3,
+    successDelay: 1500,
+  });
+
+  // Build template summary for the confirmation dialog
+  const getTemplateSummary = useCallback((values: FormValues): TemplateSummary => ({
+    name: values.name,
+    description: values.description,
+    goal: values.goal,
+    competencyCount: values.competencyIds.length,
+    questionsPerIndicator: values.questionsPerIndicator,
+    timeLimitMinutes: values.timeLimitMinutes,
+    passingScore: values.passingScore,
+    visibility: values.visibility,
+    shuffleQuestions: values.shuffleQuestions,
+    shuffleOptions: values.shuffleOptions,
+    allowSkip: values.allowSkip,
+    allowBackNavigation: values.allowBackNavigation,
+    showResultsImmediately: values.showResultsImmediately,
+  }), []);
+
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: '', description: '', goal: AssessmentGoal.OVERVIEW, competencyIds: [],
       questionsPerIndicator: 2, timeLimitMinutes: 30, passingScore: 70,
       shuffleQuestions: true, shuffleOptions: true, allowSkip: false, allowBackNavigation: true, showResultsImmediately: true,
+      // Visibility setting
+      visibility: TemplateVisibility.PRIVATE,
       // Goal-specific defaults
       includeBigFive: true,
       preferredDifficulty: 'INTERMEDIATE',
@@ -949,54 +1170,19 @@ export default function NewTestForm({ competencies }: NewTestFormProps) {
     if (currentStep === 1) fields = ['name', 'description', 'goal'];
     if (currentStep === 2) fields = ['competencyIds'];
     if (currentStep === 3) fields = ['questionsPerIndicator', 'timeLimitMinutes', 'passingScore'];
-    
+    // Step 4 (visibility) doesn't need validation - always has valid default
+
     const isValid = await form.trigger(fields);
     if (isValid && currentStep < STEPS.length) setCurrentStep(prev => prev + 1);
   };
 
-  const handleSubmit = async (values: FormValues) => {
-    startTransition(async () => {
-      try {
-        // Build goal-specific blueprint
-        const blueprint: TestTemplateBlueprint = {};
-
-        if (values.goal === AssessmentGoal.OVERVIEW) {
-          blueprint.include_big_five = values.includeBigFive;
-          blueprint.preferred_difficulty = values.preferredDifficulty;
-        } else if (values.goal === AssessmentGoal.JOB_FIT) {
-          blueprint.onet_soc_code = values.onetSocCode;
-          blueprint.strictness_level = values.strictnessLevel;
-          blueprint.enable_delta_testing = values.enableDeltaTesting;
-        } else if (values.goal === AssessmentGoal.TEAM_FIT) {
-          blueprint.team_id = values.teamId;
-          blueprint.saturation_threshold = values.saturationThreshold;
-        }
-
-        // Create template request with blueprint
-        const request: CreateTestTemplateRequest = {
-          name: values.name,
-          description: values.description,
-          goal: values.goal,
-          blueprint,
-          competencyIds: values.competencyIds,
-          questionsPerIndicator: values.questionsPerIndicator,
-          timeLimitMinutes: values.timeLimitMinutes,
-          passingScore: values.passingScore,
-          shuffleQuestions: values.shuffleQuestions,
-          shuffleOptions: values.shuffleOptions,
-          allowSkip: values.allowSkip,
-          allowBackNavigation: values.allowBackNavigation,
-          showResultsImmediately: values.showResultsImmediately,
-        };
-
-        const template = await testTemplatesApi.createTemplate(request) as { id: string };
-        toast.success(t('testCreated'));
-        router.push(`/test-templates/${template.id}`);
-      } catch (e: any) {
-        toast.error(e?.message || t('creationError'));
-      }
-    });
+  // Form submission opens the confirmation dialog instead of directly saving
+  const handleSubmit = (values: FormValues) => {
+    saveWorkflow.requestSave(values);
   };
+
+  // Check if we're in a saving/processing state
+  const isPending = saveWorkflow.isSaving;
 
   return (
     <div className="w-full max-w-5xl mx-auto relative min-h-screen pb-32 md:pb-10">
@@ -1009,7 +1195,8 @@ export default function NewTestForm({ competencies }: NewTestFormProps) {
               {currentStep === 1 && <BasicInfoStep form={form} />}
               {currentStep === 2 && <CompetenciesStep form={form} competencies={competencies} />}
               {currentStep === 3 && <ConfigurationStep form={form} />}
-              {currentStep === 4 && <ReviewStep form={form} competencies={competencies} />}
+              {currentStep === 4 && <VisibilityStep form={form} />}
+              {currentStep === 5 && <ReviewStep form={form} competencies={competencies} />}
             </CardContent>
           </Card>
 
@@ -1046,6 +1233,24 @@ export default function NewTestForm({ competencies }: NewTestFormProps) {
           </div>
         </form>
       </Form>
+
+      {/* Confirmation Dialog */}
+      <TemplateSaveConfirmation
+        open={saveWorkflow.isDialogOpen}
+        onOpenChange={(open) => !open && saveWorkflow.cancelSave()}
+        state={saveWorkflow.context.state}
+        templateData={
+          saveWorkflow.context.pendingData
+            ? getTemplateSummary(saveWorkflow.context.pendingData)
+            : null
+        }
+        error={saveWorkflow.context.error}
+        retryCount={saveWorkflow.context.retryCount}
+        maxRetries={3}
+        onConfirm={saveWorkflow.confirmSave}
+        onCancel={saveWorkflow.cancelSave}
+        onRetry={saveWorkflow.retrySave}
+      />
     </div>
   );
 }

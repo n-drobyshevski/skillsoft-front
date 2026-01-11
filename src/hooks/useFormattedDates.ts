@@ -41,6 +41,9 @@ interface FormattedDatesReturn {
   /** Short relative time for compact displays ("5m ago", "2h ago", "3d ago") */
   formatRelativeTimeShort: (date: DateInput) => string;
 
+  /** Future relative time for expiration dates ("in 2 days" / "через 2 дня") */
+  formatFutureRelativeTime: (date: DateInput) => string;
+
   /** Format duration from seconds ("5m", "1h 30m") */
   formatDuration: (seconds: number | undefined | null) => string;
 
@@ -235,6 +238,63 @@ export function useFormattedDates(): FormattedDatesReturn {
   );
 
   /**
+   * Format future relative time for expiration dates
+   * English: "Tomorrow", "in 2 days", "in 1 week"
+   * Russian: "Завтра", "через 2 дня", "через 1 неделю"
+   *
+   * For past dates, returns "Expired" style messaging
+   */
+  const formatFutureRelativeTime = useCallback(
+    (date: DateInput): string => {
+      const parsed = parseDate(date);
+      if (!parsed) return t('never');
+
+      const now = new Date();
+      const diffMs = parsed.getTime() - now.getTime();
+
+      // Handle past dates (already expired)
+      if (diffMs < 0) return t('justNow');
+
+      const diffSeconds = Math.floor(diffMs / 1000);
+      const diffMinutes = Math.floor(diffSeconds / 60);
+      const diffHours = Math.floor(diffMinutes / 60);
+      const diffDays = Math.floor(diffHours / 24);
+      const diffWeeks = Math.floor(diffDays / 7);
+      const diffMonths = Math.floor(diffDays / 30);
+      const diffYears = Math.floor(diffDays / 365);
+
+      // Less than 24 hours - show "today" or hours
+      if (diffDays === 0) {
+        return t('today');
+      }
+
+      // Tomorrow (1 day)
+      if (diffDays === 1) {
+        return t('tomorrow');
+      }
+
+      // Days (2-6 days)
+      if (diffDays < 7) {
+        return t('inDays', { count: diffDays });
+      }
+
+      // Weeks (1-4 weeks)
+      if (diffDays < 30) {
+        return t('inWeeks', { count: diffWeeks });
+      }
+
+      // Months (1-11 months)
+      if (diffDays < 365) {
+        return t('inMonths', { count: diffMonths });
+      }
+
+      // Years
+      return t('inYears', { count: diffYears });
+    },
+    [t]
+  );
+
+  /**
    * Format duration from seconds
    * English: "5m", "1h", "1h 30m"
    * Russian: "5 мин", "1 ч", "1 ч 30 мин"
@@ -320,13 +380,14 @@ export function useFormattedDates(): FormattedDatesReturn {
       formatDateTime,
       formatRelativeTime,
       formatRelativeTimeShort,
+      formatFutureRelativeTime,
       formatDuration,
       formatShortDate,
       formatFullDate,
       formatTime,
       locale,
     }),
-    [formatDate, formatDateTime, formatRelativeTime, formatRelativeTimeShort, formatDuration, formatShortDate, formatFullDate, formatTime, locale]
+    [formatDate, formatDateTime, formatRelativeTime, formatRelativeTimeShort, formatFutureRelativeTime, formatDuration, formatShortDate, formatFullDate, formatTime, locale]
   );
 }
 

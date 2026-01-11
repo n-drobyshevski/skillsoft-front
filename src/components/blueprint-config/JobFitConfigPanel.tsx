@@ -88,9 +88,9 @@ export function JobFitConfigPanel({
   // Handle delta config change
   const handleDeltaConfigChange = useCallback(
     (config: DeltaConfig) => {
-      // Update form field
-      form.setValue('enableDeltaTesting', config.enabled);
-      form.setValue('candidateClerkUserId', candidateClerkUserId || '');
+      // Update form field with shouldDirty to enable save button
+      form.setValue('enableDeltaTesting', config.enabled, { shouldDirty: true });
+      form.setValue('candidateClerkUserId', candidateClerkUserId || '', { shouldDirty: true });
       // Notify parent
       onDeltaConfigChange?.(config);
     },
@@ -100,7 +100,7 @@ export function JobFitConfigPanel({
   // Handle O*NET selection
   const handleONetChange = useCallback(
     (socCode: string | undefined, profile?: ONetProfile) => {
-      form.setValue('onetSocCode', socCode || '');
+      form.setValue('onetSocCode', socCode || '', { shouldDirty: true });
       if (profile) {
         setOnetProfile(profile);
         // Auto-expand benchmark preview when profile loads

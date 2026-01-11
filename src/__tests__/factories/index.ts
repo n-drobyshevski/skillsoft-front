@@ -166,7 +166,7 @@ export function createMockCompetency(overrides?: Partial<Competency>): Competenc
     lastModified: new Date().toISOString(),
     standardCodes: {
       onetRef: { code: '2.B.1.a', title: 'Social Perceptiveness' },
-      escoRef: { uri: 'http://data.europa.eu/esco/skill/test', title: 'Test skill' },
+      escoRef: { uri: "https://data.europa.eu/esco/skill/test", title: 'Test skill' },
       bigFiveRef: { trait: 'CONSCIENTIOUSNESS', title: 'Conscientiousness' },
     },
     ...overrides,

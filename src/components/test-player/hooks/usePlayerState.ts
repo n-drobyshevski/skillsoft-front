@@ -1,8 +1,9 @@
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import { TestSession, SessionQuestion, CurrentQuestionResponse, TestAnswer, QuestionType } from '@/types/domain';
 import { testSessionsClientApi, type ApiError } from '@/services/api.client';
 import { toast } from 'sonner';
 import { retryWithBackoff, getUserFriendlyErrorMessage, isRetryableError } from '@/utils/retry';
+import { useNavigationState, areAnswersEqual } from './useNavigationState';
 
 /**
  * usePlayerState Hook
@@ -72,6 +73,23 @@ export interface UsePlayerStateReturn {
 
   /** Increment skipped count */
   incrementSkipped: () => void;
+
+  // ========== Dirty Tracking Integration ==========
+
+  /** Original answer value when question was loaded (for dirty detection) */
+  originalAnswer: string | number | string[] | undefined;
+
+  /** Whether current answer differs from original (has unsaved changes) */
+  hasUnsavedChanges: boolean;
+
+  /** Check if the current question has unsaved changes */
+  isDirty: () => boolean;
+
+  /** Mark current answer as saved (clears dirty flag) */
+  markAnswerSaved: () => void;
+
+  /** Clear all dirty tracking state (e.g., on session end) */
+  clearDirtyTracking: () => void;
 }
 
 /**
@@ -100,7 +118,7 @@ function initializeQuestionStates(
 /**
  * Extract answer value from TestAnswer object
  */
-function extractAnswerValue(answer: TestAnswer | undefined): string | number | string[] | undefined {
+export function extractAnswerValue(answer: TestAnswer | undefined): string | number | string[] | undefined {
   if (!answer) return undefined;
 
   if (answer.likertValue !== undefined) {
@@ -151,6 +169,19 @@ export function usePlayerState({
   // Track answer timing
   const questionStartTime = useRef(Date.now());
 
+  // ========== Dirty Tracking Integration ==========
+
+  // Store original answer on mount for dirty detection
+  useEffect(() => {
+    const questionId = initialQuestion.question?.id;
+    if (questionId) {
+      const originalValue = extractAnswerValue(initialQuestion.previousAnswer);
+      useNavigationState.getState().setOriginalAnswer(questionId, originalValue);
+    }
+    // Only run on mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const getTimeSpent = useCallback(() => {
     return Math.floor((Date.now() - questionStartTime.current) / 1000);
   }, []);
@@ -174,8 +205,17 @@ export function usePlayerState({
         direction,
       }));
 
-      setCurrentAnswer(extractAnswerValue(response.previousAnswer));
+      const answerValue = extractAnswerValue(response.previousAnswer);
+      setCurrentAnswer(answerValue);
       questionStartTime.current = Date.now();
+
+      // Store original answer for dirty tracking
+      const questionId = response.question?.id;
+      if (questionId) {
+        useNavigationState.getState().setOriginalAnswer(questionId, answerValue);
+        // Mark as clean since we just loaded it
+        useNavigationState.getState().markClean(questionId);
+      }
     },
     []
   );
@@ -262,6 +302,59 @@ export function usePlayerState({
     }));
   }, []);
 
+  // ========== Dirty Tracking: Monitor Answer Changes ==========
+
+  // Track dirty state when currentAnswer changes
+  useEffect(() => {
+    const questionId = state.currentQuestion?.id;
+    if (!questionId) return;
+
+    const navStore = useNavigationState.getState();
+    const originalAnswer = navStore.getOriginalAnswer(questionId);
+
+    // Mark dirty if current answer differs from original
+    if (!areAnswersEqual(currentAnswer, originalAnswer)) {
+      navStore.markDirty(questionId);
+    } else {
+      navStore.markClean(questionId);
+    }
+  }, [currentAnswer, state.currentQuestion?.id]);
+
+  // Get original answer from navigation state
+  const originalAnswer = useMemo(() => {
+    const questionId = state.currentQuestion?.id;
+    if (!questionId) return undefined;
+    return useNavigationState.getState().getOriginalAnswer(questionId);
+  }, [state.currentQuestion?.id, currentAnswer]); // Re-compute when answer changes
+
+  // Computed: has unsaved changes
+  const hasUnsavedChanges = useMemo(() => {
+    return !areAnswersEqual(currentAnswer, originalAnswer);
+  }, [currentAnswer, originalAnswer]);
+
+  // Check if current question is dirty
+  const isDirty = useCallback(() => {
+    const questionId = state.currentQuestion?.id;
+    if (!questionId) return false;
+    return useNavigationState.getState().isDirty(questionId);
+  }, [state.currentQuestion?.id]);
+
+  // Mark current answer as saved (clears dirty flag)
+  const markAnswerSaved = useCallback(() => {
+    const questionId = state.currentQuestion?.id;
+    if (questionId) {
+      useNavigationState.getState().markClean(questionId);
+      // Also update original answer to current value
+      useNavigationState.getState().setOriginalAnswer(questionId, currentAnswer);
+    }
+  }, [state.currentQuestion?.id, currentAnswer]);
+
+  // Clear all dirty tracking (e.g., on session end)
+  const clearDirtyTracking = useCallback(() => {
+    useNavigationState.getState().clearAllDirty();
+    useNavigationState.getState().clearAllOriginalAnswers();
+  }, []);
+
   return {
     state,
     currentAnswer,
@@ -275,6 +368,12 @@ export function usePlayerState({
     markSkipped,
     incrementAnswered,
     incrementSkipped,
+    // Dirty tracking
+    originalAnswer,
+    hasUnsavedChanges,
+    isDirty,
+    markAnswerSaved,
+    clearDirtyTracking,
   };
 }
 

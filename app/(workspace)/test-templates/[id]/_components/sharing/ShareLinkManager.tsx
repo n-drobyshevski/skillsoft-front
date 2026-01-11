@@ -100,7 +100,7 @@ export function ShareLinkManager({
 }: ShareLinkManagerProps) {
   const t = useTranslations('template.access.links');
   const tToast = useTranslations('template.access.toast');
-  const { formatRelativeTime, formatDateTime } = useFormattedDates();
+  const { formatRelativeTime, formatFutureRelativeTime, formatDateTime } = useFormattedDates();
 
   const { data: links, isLoading: linksLoading } = useActiveShareLinks(templateId);
   const { data: linkCount } = useLinkCount(templateId);
@@ -354,7 +354,7 @@ export function ShareLinkManager({
               isMobile={isMobile}
               onRevoke={() => handleRevokeLink(link.id)}
               t={t}
-              formatRelativeTime={formatRelativeTime}
+              formatFutureRelativeTime={formatFutureRelativeTime}
             />
           ))}
         </div>
@@ -388,7 +388,7 @@ interface LinkListItemProps {
   isMobile?: boolean;
   onRevoke: () => void;
   t: ReturnType<typeof useTranslations<'template.access.links'>>;
-  formatRelativeTime: (date: string | Date | null | undefined) => string;
+  formatFutureRelativeTime: (date: string | Date | null | undefined) => string;
 }
 
 function LinkListItem({
@@ -398,7 +398,7 @@ function LinkListItem({
   isMobile = false,
   onRevoke,
   t,
-  formatRelativeTime,
+  formatFutureRelativeTime,
 }: LinkListItemProps) {
   const isExpired = link.expiresAt && new Date(link.expiresAt) < new Date();
   const isUsedUp = link.maxUses != null && link.usageCount >= link.maxUses;
@@ -446,7 +446,7 @@ function LinkListItem({
           <Clock className="h-3 w-3" />
           {isExpired
             ? t('listItem.expired')
-            : t('listItem.expiresIn', { time: formatRelativeTime(link.expiresAt) })}
+            : t('listItem.expiresIn', { time: formatFutureRelativeTime(link.expiresAt) })}
         </span>
       </div>
 
