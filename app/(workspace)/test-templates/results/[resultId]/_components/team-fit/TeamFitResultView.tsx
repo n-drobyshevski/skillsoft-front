@@ -300,6 +300,7 @@ export function TeamFitResultView({ result, template }: BaseResultViewProps) {
         {/* Detailed competency breakdown - Mobile-First */}
         <CompetencyProfile
           competencies={competencyScores}
+          resultId={result.id}
           showPassFail={true}
           passingScore={passingScore}
         />

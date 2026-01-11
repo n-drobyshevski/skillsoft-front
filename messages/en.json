@@ -1297,6 +1297,8 @@
       },
       "showMore": "Show {count} more",
       "showLess": "Show less",
+      "questionLoadError": "Failed to load question details",
+      "retry": "Retry",
       "overview": {
         "profileOverview": "Profile Overview",
         "assessmentResults": "Assessment results",

@@ -802,6 +802,7 @@ import {
   CurrentQuestionResponse,
   UserStatistics,
   TemplateStatistics,
+  QuestionScore,
 } from '@/types/domain';
 
 // Test endpoints - paths are relative to the v1 base URL
@@ -1172,6 +1173,22 @@ export const testResultsApi = {
     return fetchApi(`${TEST_RESULTS_BASE}/template/${templateId}/statistics`, {
       tags: [`template-statistics-${templateId}`],
       revalidate: 60,
+      authHeaders,
+    });
+  },
+
+  /**
+   * Get question-level scores for a specific indicator within a result.
+   * Lazy-loaded when user expands an indicator row in the results view.
+   * Includes correct answers for learning/review purposes.
+   */
+  getIndicatorQuestionScores: async (
+    resultId: string,
+    indicatorId: string
+  ): Promise<QuestionScore[]> => {
+    const authHeaders = await getAuthHeaders();
+    return fetchApi(`${TEST_RESULTS_BASE}/${resultId}/indicators/${indicatorId}/questions`, {
+      cache: 'no-store',
       authHeaders,
     });
   },

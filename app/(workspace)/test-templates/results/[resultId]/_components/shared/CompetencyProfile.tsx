@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -21,9 +21,12 @@ import {
   XCircle,
   Clock,
   Layers,
+  Loader2,
+  AlertCircle,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import type { CompetencyScore, IndicatorScore } from '@/types/domain';
+import type { CompetencyScore, IndicatorScore, QuestionScore } from '@/types/domain';
+import { testResultsApi } from '@/services/api';
 
 // ============================================================================
 // Types
@@ -31,6 +34,7 @@ import type { CompetencyScore, IndicatorScore } from '@/types/domain';
 
 interface CompetencyProfileProps {
   competencies: CompetencyScore[];
+  resultId: string;
   showPassFail?: boolean;
   passingScore?: number;
   className?: string;
@@ -110,12 +114,13 @@ const RANK_BADGE_DEFAULT = 'bg-muted text-muted-foreground';
 
 interface CompetencyDetailsProps {
   competency: CompetencyScore;
+  resultId: string;
   showPassFail: boolean;
   passingScore: number;
   t: ReturnType<typeof useTranslations<'template.resultsView'>>;
 }
 
-function CompetencyDetails({ competency, showPassFail, passingScore, t }: CompetencyDetailsProps) {
+function CompetencyDetails({ competency, resultId, showPassFail, passingScore, t }: CompetencyDetailsProps) {
   const [expandedIndicator, setExpandedIndicator] = useState<string | null>(null);
   const hasIndicators = competency.indicatorScores && competency.indicatorScores.length > 0;
 
@@ -159,6 +164,7 @@ function CompetencyDetails({ competency, showPassFail, passingScore, t }: Compet
               <IndicatorRow
                 key={indicator.indicatorId}
                 indicator={indicator}
+                resultId={resultId}
                 showPassFail={showPassFail}
                 passingScore={passingScore}
                 isExpanded={expandedIndicator === indicator.indicatorId}
@@ -180,11 +186,12 @@ function CompetencyDetails({ competency, showPassFail, passingScore, t }: Compet
 }
 
 // ============================================================================
-// Indicator Row Component (with expandable questions)
+// Indicator Row Component (with lazy-loaded expandable questions)
 // ============================================================================
 
 interface IndicatorRowProps {
   indicator: IndicatorScore;
+  resultId: string;
   showPassFail: boolean;
   passingScore: number;
   isExpanded: boolean;
@@ -192,14 +199,62 @@ interface IndicatorRowProps {
   t: ReturnType<typeof useTranslations<'template.resultsView'>>;
 }
 
-function IndicatorRow({ indicator, showPassFail, passingScore, isExpanded, onToggle, t }: IndicatorRowProps) {
+function IndicatorRow({ indicator, resultId, showPassFail, passingScore, isExpanded, onToggle, t }: IndicatorRowProps) {
   const percentage = Math.round(indicator.percentage);
   const config = showPassFail
     ? TIER_CONFIG[getTier(percentage, showPassFail, passingScore)]
     : (percentage >= passingScore ? NEUTRAL_CONFIG.strength : NEUTRAL_CONFIG.developing);
 
-  const hasQuestions = indicator.questionScores && indicator.questionScores.length > 0;
-  const questionsCount = indicator.questionsAnswered || indicator.questionScores?.length || 0;
+  // State for lazy-loaded question scores
+  const [questionScores, setQuestionScores] = useState<QuestionScore[] | null>(
+    indicator.questionScores || null
+  );
+  const [isLoading, setIsLoading] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
+
+  const questionsCount = indicator.questionsAnswered || questionScores?.length || 0;
+  const hasQuestions = questionsCount > 0;
+
+  // Lazy-load questions when expanding
+  const handleToggle = useCallback(async () => {
+    // If already have questions loaded, just toggle
+    if (questionScores && questionScores.length > 0) {
+      onToggle();
+      return;
+    }
+
+    // If no questions count, nothing to load
+    if (!hasQuestions) {
+      return;
+    }
+
+    // If we're collapsing, just toggle
+    if (isExpanded) {
+      onToggle();
+      return;
+    }
+
+    // Fetch question scores on first expand
+    setIsLoading(true);
+    setLoadError(null);
+
+    try {
+      const scores = await testResultsApi.getIndicatorQuestionScores(
+        resultId,
+        indicator.indicatorId
+      );
+      setQuestionScores(scores);
+      onToggle();
+    } catch (error) {
+      console.error('Failed to load question scores:', error);
+      setLoadError(t('questionLoadError'));
+    } finally {
+      setIsLoading(false);
+    }
+  }, [questionScores, hasQuestions, isExpanded, resultId, indicator.indicatorId, onToggle, t]);
+
+  const displayQuestions = questionScores || indicator.questionScores;
+  const hasLoadedQuestions = displayQuestions && displayQuestions.length > 0;
 
   return (
     <div className={cn(
@@ -209,12 +264,12 @@ function IndicatorRow({ indicator, showPassFail, passingScore, isExpanded, onTog
       {/* Indicator Header */}
       <button
         type="button"
-        onClick={hasQuestions ? onToggle : undefined}
-        disabled={!hasQuestions}
+        onClick={handleToggle}
+        disabled={!hasQuestions || isLoading}
         className={cn(
           'w-full p-2.5 flex items-center gap-2 text-left',
-          hasQuestions && 'cursor-pointer',
-          !hasQuestions && 'cursor-default'
+          hasQuestions && !isLoading && 'cursor-pointer',
+          (!hasQuestions || isLoading) && 'cursor-default'
         )}
       >
         {/* Progress indicator dot */}
@@ -225,13 +280,18 @@ function IndicatorRow({ indicator, showPassFail, passingScore, isExpanded, onTog
           {indicator.indicatorTitle}
         </div>
 
+        {/* Loading indicator */}
+        {isLoading && (
+          <Loader2 className="h-4 w-4 animate-spin text-muted-foreground shrink-0" />
+        )}
+
         {/* Questions count */}
-        {questionsCount > 0 && (
+        {questionsCount > 0 && !isLoading && (
           <span className="text-xs text-muted-foreground shrink-0">
             {questionsCount} {t('questionShort')}
           </span>
         )}
-        
+
         {/* Progress bar */}
         <div className="w-14 h-1.5 bg-muted/50 rounded-full overflow-hidden shrink-0">
           <div
@@ -239,51 +299,68 @@ function IndicatorRow({ indicator, showPassFail, passingScore, isExpanded, onTog
             style={{ width: `${percentage}%` }}
           />
         </div>
-        
+
         {/* Score */}
         <span className={cn('text-sm font-semibold tabular-nums w-10 text-right shrink-0', config.color)}>
           {percentage}%
         </span>
-        
+
         {/* Expand icon */}
-        {hasQuestions && (
+        {hasQuestions && !isLoading && (
           <ChevronDown className={cn(
             'h-4 w-4 text-muted-foreground transition-transform shrink-0',
             isExpanded && 'rotate-180'
           )} />
         )}
       </button>
-      
+
+      {/* Error state */}
+      {loadError && (
+        <div className="px-2.5 pb-2.5">
+          <div className="flex items-center gap-2 p-2 bg-destructive/10 rounded-md text-xs text-destructive">
+            <AlertCircle className="h-4 w-4 shrink-0" />
+            <span>{loadError}</span>
+            <button
+              type="button"
+              onClick={handleToggle}
+              className="ml-auto text-xs underline hover:no-underline"
+            >
+              {t('retry')}
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Question Details */}
-      {isExpanded && hasQuestions && (
+      {isExpanded && hasLoadedQuestions && (
         <div className="px-2.5 pb-2.5 space-y-1.5">
           <div className="h-px bg-border/50 mb-2" />
-          {indicator.questionScores!.map((question, qIndex) => {
-            const qPercentage = question.maxScore > 0 
-              ? Math.round((question.score / question.maxScore) * 100) 
+          {displayQuestions!.map((question, qIndex) => {
+            const qPercentage = question.maxScore > 0
+              ? Math.round((question.score / question.maxScore) * 100)
               : 0;
             const isPassed = qPercentage >= passingScore;
-            
+
             return (
-              <div 
-                key={question.questionId} 
+              <div
+                key={question.questionId}
                 className="flex items-start gap-2 p-2 bg-background/50 rounded-md text-xs"
               >
                 {/* Question number & status icon */}
                 <div className="flex items-center gap-1.5 shrink-0">
                   <span className="text-muted-foreground">Q{qIndex + 1}</span>
                   {showPassFail && (
-                    isPassed 
+                    isPassed
                       ? <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
                       : <XCircle className="h-3.5 w-3.5 text-amber-500" />
                   )}
                 </div>
-                
+
                 {/* Question text */}
                 <div className="flex-1 min-w-0 text-muted-foreground line-clamp-2">
                   {question.questionText}
                 </div>
-                
+
                 {/* Score & time */}
                 <div className="flex items-center gap-2 shrink-0">
                   {question.timeSpentSeconds > 0 && (
@@ -292,8 +369,8 @@ function IndicatorRow({ indicator, showPassFail, passingScore, isExpanded, onTog
                       <span>{Math.round(question.timeSpentSeconds)}с</span>
                     </div>
                   )}
-                  <Badge 
-                    variant="secondary" 
+                  <Badge
+                    variant="secondary"
                     className={cn(
                       'text-xs px-1.5 py-0',
                       isPassed ? 'bg-emerald-500/10 text-emerald-600' : 'bg-amber-500/10 text-amber-600'
@@ -366,6 +443,7 @@ function SummaryStats({ competencies, t }: SummaryStatsProps) {
 
 interface MobileCompetencyCardProps {
   competency: CompetencyScore;
+  resultId: string;
   rank: number;
   showPassFail: boolean;
   passingScore: number;
@@ -374,7 +452,7 @@ interface MobileCompetencyCardProps {
   t: ReturnType<typeof useTranslations<'template.resultsView'>>;
 }
 
-function MobileCompetencyCard({ competency, rank, showPassFail, passingScore, isExpanded, onToggle, t }: MobileCompetencyCardProps) {
+function MobileCompetencyCard({ competency, resultId, rank, showPassFail, passingScore, isExpanded, onToggle, t }: MobileCompetencyCardProps) {
   const percentage = Math.round(competency.percentage);
   const tier = getTier(percentage, showPassFail, passingScore);
   const config = showPassFail ? TIER_CONFIG[tier] : (percentage >= passingScore ? NEUTRAL_CONFIG.strength : NEUTRAL_CONFIG.developing);
@@ -449,6 +527,7 @@ function MobileCompetencyCard({ competency, rank, showPassFail, passingScore, is
           <div className="pt-3">
             <CompetencyDetails
               competency={competency}
+              resultId={resultId}
               showPassFail={showPassFail}
               passingScore={passingScore}
               t={t}
@@ -466,13 +545,14 @@ function MobileCompetencyCard({ competency, rank, showPassFail, passingScore, is
 
 interface DesktopCompetencyRowProps {
   competency: CompetencyScore;
+  resultId: string;
   rank: number;
   showPassFail: boolean;
   passingScore: number;
   t: ReturnType<typeof useTranslations<'template.resultsView'>>;
 }
 
-function DesktopCompetencyRow({ competency, rank, showPassFail, passingScore, t }: DesktopCompetencyRowProps) {
+function DesktopCompetencyRow({ competency, resultId, rank, showPassFail, passingScore, t }: DesktopCompetencyRowProps) {
   const percentage = Math.round(competency.percentage);
   const tier = getTier(percentage, showPassFail, passingScore);
   const config = showPassFail ? TIER_CONFIG[tier] : (percentage >= passingScore ? NEUTRAL_CONFIG.strength : NEUTRAL_CONFIG.developing);
@@ -526,6 +606,7 @@ function DesktopCompetencyRow({ competency, rank, showPassFail, passingScore, t 
         <div className="ml-12 p-4 bg-background/50 rounded-lg border">
           <CompetencyDetails
             competency={competency}
+            resultId={resultId}
             showPassFail={showPassFail}
             passingScore={passingScore}
             t={t}
@@ -542,6 +623,7 @@ function DesktopCompetencyRow({ competency, rank, showPassFail, passingScore, t 
 
 export function CompetencyProfile({
   competencies,
+  resultId,
   showPassFail = false,
   passingScore = 70,
   className,
@@ -593,6 +675,7 @@ export function CompetencyProfile({
             <MobileCompetencyCard
               key={comp.competencyId}
               competency={comp}
+              resultId={resultId}
               rank={index + 1}
               showPassFail={showPassFail}
               passingScore={passingScore}
@@ -623,6 +706,7 @@ export function CompetencyProfile({
               <DesktopCompetencyRow
                 key={comp.competencyId}
                 competency={comp}
+                resultId={resultId}
                 rank={index + 1}
                 showPassFail={showPassFail}
                 passingScore={passingScore}

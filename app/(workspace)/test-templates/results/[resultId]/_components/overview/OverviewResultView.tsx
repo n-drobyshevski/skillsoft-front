@@ -361,6 +361,7 @@ export function OverviewResultView({ result, template }: BaseResultViewProps) {
         {/* Competency Profile - Mobile-First Unified Component */}
         <CompetencyProfile
           competencies={competencyScores}
+          resultId={result.id}
           showPassFail={false}
         />
 

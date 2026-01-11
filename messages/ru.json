@@ -1297,6 +1297,8 @@
       },
       "showMore": "Показать ещё {count}",
       "showLess": "Скрыть",
+      "questionLoadError": "Не удалось загрузить детали вопроса",
+      "retry": "Повторить",
       "overview": {
         "profileOverview": "Обзор профиля",
         "assessmentResults": "Результаты оценки",
