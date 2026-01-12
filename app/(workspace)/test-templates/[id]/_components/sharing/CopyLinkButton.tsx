@@ -147,11 +147,11 @@ export function ShareUrlDisplay({
   // Construct the full share URL
   const origin = typeof window !== 'undefined' ? window.location.origin : '';
   const base = baseUrl || origin;
-  const fullUrl = `${base}/shared/test/${token}`;
+  const fullUrl = `${base}/take/${token}`;
 
   // For masked tokens, show a placeholder
   const displayUrl = masked
-    ? `${base}/shared/test/${'*'.repeat(8)}...`
+    ? `${base}/take/${'*'.repeat(8)}...`
     : fullUrl;
 
   return (

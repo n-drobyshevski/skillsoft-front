@@ -1471,11 +1471,13 @@ export const teamsApi = {
 
     try {
       const authHeaders = await getAuthHeaders();
-      return await fetchApi(TEAMS_BASE, {
+      // Backend returns a Spring Page object, extract content array
+      const pageResponse = await fetchApi<{ content: Team[] }>(TEAMS_BASE, {
         tags: ['teams'],
         revalidate: 60, // Cache for 1 minute
         authHeaders,
       });
+      return pageResponse?.content || [];
     } catch (error) {
       console.warn('Teams API not available, using mock data:', error);
       return MOCK_TEAMS;
@@ -1511,6 +1513,7 @@ export const teamsApi = {
         tags: [`team-profile-${teamId}`],
         revalidate: 60, // Cache for 1 minute
         authHeaders,
+        silentStatusCodes: [404], // Team profile may not exist for non-ACTIVE teams
       });
     } catch (error) {
       console.warn('Team profile API not available, using mock data:', error);

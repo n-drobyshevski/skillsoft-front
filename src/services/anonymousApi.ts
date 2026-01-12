@@ -187,7 +187,12 @@ async function fetchWithSessionToken(
   const token = accessToken || getStoredSessionCredentials().accessToken;
 
   if (!token && !endpoint.includes('/sessions') && options.method !== 'POST') {
-    throw createApiError('Session token not found', 401, 'UNAUTHORIZED', 'SESSION_TOKEN_MISSING');
+    throw createApiError('Session token not found', 401, {
+      status: 401,
+      code: 'SESSION_TOKEN_MISSING',
+      message: 'Session token not found',
+      details: 'No session token available for authentication',
+    });
   }
 
   const headers: Record<string, string> = {
@@ -218,8 +223,11 @@ async function handleErrorResponse(response: Response): Promise<never> {
     throw createApiError(
       `Request failed with status ${response.status}`,
       response.status,
-      'UNKNOWN',
-      'UNKNOWN'
+      {
+        status: response.status,
+        message: `Request failed with status ${response.status}`,
+        code: 'UNKNOWN',
+      }
     );
   }
 
@@ -227,16 +235,18 @@ async function handleErrorResponse(response: Response): Promise<never> {
     throw createApiError(
       errorData.message,
       response.status,
-      errorData.category || 'UNKNOWN',
-      errorData.code || 'UNKNOWN'
+      errorData
     );
   }
 
   throw createApiError(
     `Request failed with status ${response.status}`,
     response.status,
-    'UNKNOWN',
-    'UNKNOWN'
+    {
+      status: response.status,
+      message: `Request failed with status ${response.status}`,
+      code: 'UNKNOWN',
+    }
   );
 }
 
@@ -273,7 +283,7 @@ export async function createAnonymousSession(shareToken: string): Promise<Anonym
     if (error instanceof Error && 'status' in error) {
       throw error; // Re-throw ApiError
     }
-    throw createNetworkError((error as Error).message);
+    throw createNetworkError(error instanceof Error ? error : undefined);
   }
 }
 
@@ -298,7 +308,7 @@ export async function getAnonymousSession(
     if (error instanceof Error && 'status' in error) {
       throw error;
     }
-    throw createNetworkError((error as Error).message);
+    throw createNetworkError(error instanceof Error ? error : undefined);
   }
 }
 
@@ -323,7 +333,7 @@ export async function getCurrentQuestion(
     if (error instanceof Error && 'status' in error) {
       throw error;
     }
-    throw createNetworkError((error as Error).message);
+    throw createNetworkError(error instanceof Error ? error : undefined);
   }
 }
 
@@ -351,7 +361,7 @@ export async function submitAnswer(
     if (error instanceof Error && 'status' in error) {
       throw error;
     }
-    throw createNetworkError((error as Error).message);
+    throw createNetworkError(error instanceof Error ? error : undefined);
   }
 }
 
@@ -379,7 +389,7 @@ export async function navigateToQuestion(
     if (error instanceof Error && 'status' in error) {
       throw error;
     }
-    throw createNetworkError((error as Error).message);
+    throw createNetworkError(error instanceof Error ? error : undefined);
   }
 }
 
@@ -407,7 +417,7 @@ export async function updateTimeRemaining(
     if (error instanceof Error && 'status' in error) {
       throw error;
     }
-    throw createNetworkError((error as Error).message);
+    throw createNetworkError(error instanceof Error ? error : undefined);
   }
 }
 
@@ -434,7 +444,7 @@ export async function completeSession(
     if (error instanceof Error && 'status' in error) {
       throw error;
     }
-    throw createNetworkError((error as Error).message);
+    throw createNetworkError(error instanceof Error ? error : undefined);
   }
 }
 
@@ -459,7 +469,7 @@ export async function getResult(
     if (error instanceof Error && 'status' in error) {
       throw error;
     }
-    throw createNetworkError((error as Error).message);
+    throw createNetworkError(error instanceof Error ? error : undefined);
   }
 }
 

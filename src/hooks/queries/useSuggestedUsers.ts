@@ -41,10 +41,12 @@ function mapOrgRoleToUserRole(orgRole: string | undefined | null): UserRole {
   switch (roleName) {
     case 'admin':
       return UserRole.ADMIN;
+    case 'editor':
+      return UserRole.EDITOR;
     case 'hr_manager':
-      return UserRole.HR_MANAGER;
+      return UserRole.EDITOR;
     case 'hr_specialist':
-      return UserRole.HR_SPECIALIST;
+      return UserRole.EDITOR;
     default:
       return UserRole.USER;
   }

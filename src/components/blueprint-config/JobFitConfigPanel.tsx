@@ -2,6 +2,7 @@
 
 import React, { useState, useCallback } from 'react';
 import { useFormContext } from 'react-hook-form';
+import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Slider } from '@/components/ui/slider';
 import { Badge } from '@/components/ui/badge';
@@ -19,6 +20,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from '@/components/ui/collapsible';
+import { HelpTooltip } from '@/components/ui/help-tooltip';
 import { cn } from '@/lib/utils';
 import {
   Briefcase,
@@ -76,6 +78,7 @@ export function JobFitConfigPanel({
   className,
 }: JobFitConfigPanelProps) {
   const form = useFormContext();
+  const t = useTranslations('help.scenario.jobFit');
   const [onetProfile, setOnetProfile] = useState<ONetProfile | null>(null);
   const [benchmarkOpen, setBenchmarkOpen] = useState(false);
 
@@ -125,6 +128,7 @@ export function JobFitConfigPanel({
             <FormLabel className="flex items-center gap-2">
               <Briefcase className="h-4 w-4 text-blue-500" />
               Target Job Role
+              <HelpTooltip content={t('onetRole')} variant="info" />
             </FormLabel>
             <FormControl>
               <ONetSearchCombobox
@@ -153,7 +157,10 @@ export function JobFitConfigPanel({
                 >
                   <div className="flex items-center gap-2">
                     <CheckCircle2 className="h-4 w-4 text-blue-500" />
-                    <CardTitle className="text-sm">Benchmark Preview</CardTitle>
+                    <CardTitle className="text-sm flex items-center gap-1.5">
+                      Benchmark Preview
+                      <HelpTooltip content={t('benchmark')} variant="info" size="sm" />
+                    </CardTitle>
                     <Badge variant="secondary" className="h-5 text-[10px]">
                       {onetProfile.benchmarks.length} competencies
                     </Badge>
@@ -198,6 +205,7 @@ export function JobFitConfigPanel({
               <FormLabel className="flex items-center gap-2">
                 <SlidersHorizontal className="h-4 w-4 text-muted-foreground" />
                 Strictness Level
+                <HelpTooltip content={t('strictness.description')} variant="help" />
               </FormLabel>
               <Badge variant="outline" className={cn('text-xs', strictnessInfo.color)}>
                 {strictnessInfo.label}

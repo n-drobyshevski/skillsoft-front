@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { useFormContext } from 'react-hook-form';
+import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Slider } from '@/components/ui/slider';
 import { Badge } from '@/components/ui/badge';
@@ -20,6 +21,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
+import { HelpTooltip } from '@/components/ui/help-tooltip';
 import { cn } from '@/lib/utils';
 import {
   Users,
@@ -89,6 +97,7 @@ function getSaturationBadgeVariant(
 
 export function TeamFitConfigPanel({ className }: TeamFitConfigPanelProps) {
   const form = useFormContext();
+  const t = useTranslations('help.scenario.teamFit');
   const [teams, setTeams] = useState<Team[]>([]);
   const [teamProfile, setTeamProfile] = useState<TeamProfile | null>(null);
   const [isLoadingTeams, setIsLoadingTeams] = useState(false);
@@ -166,6 +175,7 @@ export function TeamFitConfigPanel({ className }: TeamFitConfigPanelProps) {
             <FormLabel className="flex items-center gap-2">
               <Users className="h-4 w-4 text-purple-500" />
               Target Team
+              <HelpTooltip content={t('team')} variant="help" />
             </FormLabel>
             <Select value={field.value || ''} onValueChange={field.onChange}>
               <FormControl>
@@ -285,12 +295,21 @@ export function TeamFitConfigPanel({ className }: TeamFitConfigPanelProps) {
                             style={{ width: `${value * 100}%` }}
                           />
                         </div>
-                        <Badge
-                          variant={getSaturationBadgeVariant(status)}
-                          className="h-4 text-[9px] px-1.5"
-                        >
-                          {status === 'critical' ? 'Critical' : 'Gap'}
-                        </Badge>
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Badge
+                                variant={getSaturationBadgeVariant(status)}
+                                className="h-4 text-[9px] px-1.5 cursor-help"
+                              >
+                                {status === 'critical' ? 'Critical' : 'Gap'}
+                              </Badge>
+                            </TooltipTrigger>
+                            <TooltipContent side="left" className="max-w-xs text-xs">
+                              {t(`gapStatus.${status}`)}
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
                       </div>
                     </div>
                   );
@@ -310,6 +329,7 @@ export function TeamFitConfigPanel({ className }: TeamFitConfigPanelProps) {
               <FormLabel className="flex items-center gap-2">
                 <BarChart3 className="h-4 w-4 text-muted-foreground" />
                 Gap Threshold
+                <HelpTooltip content={t('saturation.description')} variant="help" />
               </FormLabel>
               <Badge variant="outline" className="text-xs font-mono">
                 {((field.value ?? 0.7) * 100).toFixed(0)}%
@@ -344,7 +364,10 @@ export function TeamFitConfigPanel({ className }: TeamFitConfigPanelProps) {
           <div className="flex items-start gap-3">
             <UserPlus className="h-5 w-5 text-purple-500 shrink-0 mt-0.5" />
             <div>
-              <p className="text-sm font-medium">Team Fit Assessment</p>
+              <p className="text-sm font-medium flex items-center gap-1.5">
+                Team Fit Assessment
+                <HelpTooltip content={t('assessment')} variant="tip" size="sm" />
+              </p>
               <p className="text-xs text-muted-foreground mt-1">
                 Candidates will be assessed on undersaturated competencies to find the best
                 fit for your team&apos;s current skill gaps.

@@ -1,38 +1,36 @@
 'use client';
 
-import React, { useEffect, useState, useCallback, useRef } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import {
   anonymousTestApi,
-  type AnonymousSessionResponse,
-  type AnonymousCurrentQuestion,
-  type AnonymousTakerInfo,
+  type AnonymousTakerInfo as ApiTakerInfo,
   type AnonymousTestResult,
   type ApiError,
 } from '@/services/anonymousApi';
 import { useUIStore } from '@/store/ui-store';
+import { TestSessionProvider } from '@/context/test-session-context';
+import { createAnonymousAdapter, type AnonymousTakerInfo, type CompletionResult } from '@/adapters';
+import { ImmersivePlayer } from '@/components/test-player/ImmersivePlayer';
+import { TestSession, CurrentQuestionResponse, SessionStatus, QuestionType, DifficultyLevel } from '@/types/domain';
+import { type ApiError as ClientApiError } from '@/services/api.client';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import {
-  ChevronLeft,
-  ChevronRight,
   Clock,
   Send,
   Loader2,
@@ -44,13 +42,19 @@ import {
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 
-type PageStatus = 'loading' | 'ready' | 'completing' | 'completed' | 'error';
+type PageStatus = 'loading' | 'ready' | 'error';
 
 /**
  * Anonymous Test Session Page
  *
- * The main test-taking interface for anonymous users.
- * Uses session access tokens for authentication.
+ * Uses the ImmersivePlayer component for a consistent test-taking experience
+ * between authenticated and anonymous users.
+ *
+ * Flow:
+ * 1. Load session and question data
+ * 2. Show ImmersivePlayer for test-taking
+ * 3. On completion, show taker info dialog
+ * 4. Submit and show inline results
  */
 export default function AnonymousTestSessionPage() {
   const router = useRouter();
@@ -65,42 +69,45 @@ export default function AnonymousTestSessionPage() {
 
   // State
   const [status, setStatus] = useState<PageStatus>('loading');
-  const [session, setSession] = useState<AnonymousSessionResponse | null>(null);
-  const [currentQuestion, setCurrentQuestion] = useState<AnonymousCurrentQuestion | null>(null);
-  const [selectedOption, setSelectedOption] = useState<string | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [timeRemaining, setTimeRemaining] = useState<number | null>(null);
-  const [result, setResult] = useState<AnonymousTestResult | null>(null);
+  const [session, setSession] = useState<TestSession | null>(null);
+  const [currentQuestion, setCurrentQuestion] = useState<CurrentQuestionResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  // Completion form state
-  const [showCompletionForm, setShowCompletionForm] = useState(false);
+  // Completion flow state
+  const [showTakerInfoDialog, setShowTakerInfoDialog] = useState(false);
+  const [pendingResult, setPendingResult] = useState<CompletionResult | null>(null);
   const [takerInfo, setTakerInfo] = useState<AnonymousTakerInfo>({
     firstName: '',
     lastName: '',
     email: '',
     notes: '',
   });
+  const [isSubmittingInfo, setIsSubmittingInfo] = useState(false);
 
-  // Confirm submit dialog
-  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  // Final results state
+  const [finalResult, setFinalResult] = useState<AnonymousTestResult | null>(null);
 
-  // Timer ref
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
-  const syncIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  // Get access token from storage
+  const accessToken = useMemo(() => {
+    const credentials = anonymousTestApi.getCredentials();
+    return credentials.accessToken;
+  }, []);
+
+  // Create adapter - memoized to prevent unnecessary recreations
+  const adapter = useMemo(() => {
+    if (!accessToken) return null;
+    return createAnonymousAdapter(accessToken);
+  }, [accessToken]);
 
   // Enter immersive mode on mount
   useEffect(() => {
     enterImmersiveMode();
-    return () => {
-      exitImmersiveMode();
-      if (timerRef.current) clearInterval(timerRef.current);
-      if (syncIntervalRef.current) clearInterval(syncIntervalRef.current);
-    };
+    return () => exitImmersiveMode();
   }, [enterImmersiveMode, exitImmersiveMode]);
 
   /**
    * Load the session and current question.
+   * Normalizes anonymous API responses to match the authenticated API types.
    */
   const loadSession = useCallback(async () => {
     try {
@@ -111,23 +118,61 @@ export default function AnonymousTestSessionPage() {
         return;
       }
 
+      // Load session and question data in parallel
       const [sessionData, questionData] = await Promise.all([
         anonymousTestApi.getSession(sessionId, credentials.accessToken),
         anonymousTestApi.getCurrentQuestion(sessionId, credentials.accessToken),
       ]);
 
-      setSession(sessionData);
-      setCurrentQuestion(questionData);
-      setTimeRemaining(questionData.timeRemainingSeconds);
+      // Normalize session data to TestSession type
+      const normalizedSession: TestSession = {
+        id: sessionData.sessionId,
+        templateId: sessionData.template.id,
+        templateName: sessionData.template.name,
+        clerkUserId: '', // Anonymous sessions don't have a Clerk user
+        status: 'IN_PROGRESS' as SessionStatus,
+        currentQuestionIndex: questionData.currentIndex,
+        questionOrder: [], // Not exposed in anonymous API
+        totalQuestions: sessionData.template.questionCount,
+        answeredQuestions: 0, // Not tracked in anonymous API
+        createdAt: new Date().toISOString(),
+      };
 
-      // Restore previous answer if exists
-      const prevAnswer = questionData.previousAnswer;
-      if (prevAnswer && prevAnswer.selectedOptionIds && prevAnswer.selectedOptionIds.length > 0) {
-        setSelectedOption(prevAnswer.selectedOptionIds[0]);
-      } else {
-        setSelectedOption(null);
-      }
+      // Normalize question data to CurrentQuestionResponse type
+      const normalizedQuestion: CurrentQuestionResponse = {
+        sessionId: sessionId,
+        question: {
+          id: questionData.question.id,
+          questionText: questionData.question.questionText,
+          questionType: questionData.question.questionType as QuestionType,
+          answerOptions: questionData.question.answerOptions.map((opt, idx) => ({
+            id: opt.id || `option-${idx}`,
+            text: opt.text,
+            score: opt.score,
+          })),
+          difficultyLevel: (questionData.question.difficultyLevel || 'INTERMEDIATE') as DifficultyLevel,
+          timeLimit: questionData.question.timeLimit ?? undefined,
+          behavioralIndicatorId: '',
+          competencyId: undefined,
+        },
+        questionIndex: questionData.currentIndex,
+        totalQuestions: questionData.totalQuestions,
+        previousAnswer: questionData.previousAnswer?.selectedOptionIds?.length
+          ? {
+              sessionId: sessionId,
+              questionId: questionData.question.id,
+              selectedOptionIds: questionData.previousAnswer.selectedOptionIds,
+              timeSpentSeconds: 0,
+              isSkipped: false,
+            }
+          : undefined,
+        allowSkip: questionData.allowSkip,
+        allowBackNavigation: questionData.allowBackNavigation,
+        timeRemainingSeconds: questionData.timeRemainingSeconds ?? undefined,
+      };
 
+      setSession(normalizedSession);
+      setCurrentQuestion(normalizedQuestion);
       setStatus('ready');
     } catch (err) {
       const apiError = err as ApiError;
@@ -147,187 +192,77 @@ export default function AnonymousTestSessionPage() {
   }, [loadSession]);
 
   /**
-   * Start the timer if time limit is set.
+   * Handle test completion from ImmersivePlayer.
+   * This intercepts the completion to show the taker info dialog.
    */
-  useEffect(() => {
-    if (timeRemaining === null || timeRemaining <= 0) return;
-
-    timerRef.current = setInterval(() => {
-      setTimeRemaining((prev) => {
-        if (prev === null || prev <= 1) {
-          if (timerRef.current) clearInterval(timerRef.current);
-          handleTimeUp();
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-
-    // Sync time with server every 30 seconds
-    syncIntervalRef.current = setInterval(() => {
-      const credentials = anonymousTestApi.getCredentials();
-      if (credentials.accessToken && timeRemaining !== null) {
-        anonymousTestApi.updateTimeRemaining(
-          sessionId,
-          timeRemaining,
-          credentials.accessToken
-        ).catch(() => {
-          // Ignore sync errors
-        });
-      }
-    }, 30000);
-
-    return () => {
-      if (timerRef.current) clearInterval(timerRef.current);
-      if (syncIntervalRef.current) clearInterval(syncIntervalRef.current);
-    };
-  }, [timeRemaining, sessionId]);
+  const handleReadyToComplete = useCallback((result: CompletionResult) => {
+    // Store the pending result and show taker info dialog
+    setPendingResult(result);
+    setShowTakerInfoDialog(true);
+  }, []);
 
   /**
-   * Handle time running out.
+   * Submit taker info and complete the session.
    */
-  const handleTimeUp = useCallback(() => {
-    toast.error(t('error.timeUp'));
-    // The server will handle time-out calculation when we try to complete
-    setShowCompletionForm(true);
-  }, [t]);
-
-  /**
-   * Submit answer and move to next question.
-   */
-  const handleSubmitAnswer = useCallback(async () => {
-    if (!currentQuestion || !selectedOption) return;
-
-    setIsSubmitting(true);
-    try {
-      const credentials = anonymousTestApi.getCredentials();
-      if (!credentials.accessToken) throw new Error('No session token');
-
-      // Extract option index from ID (e.g., "option-0" -> 0)
-      const optionIndex = parseInt(selectedOption.replace('option-', ''), 10);
-
-      await anonymousTestApi.submitAnswer(
-        sessionId,
-        currentQuestion.question.id,
-        optionIndex,
-        credentials.accessToken
-      );
-
-      // Check if this was the last question
-      if (currentQuestion.currentIndex >= currentQuestion.totalQuestions - 1) {
-        setShowConfirmDialog(true);
-      } else {
-        // Navigate to next question
-        await anonymousTestApi.navigateToQuestion(
-          sessionId,
-          currentQuestion.currentIndex + 1,
-          credentials.accessToken
-        );
-        // Reload question
-        await loadSession();
-      }
-    } catch (err) {
-      const apiError = err as ApiError;
-      toast.error(apiError.message);
-    } finally {
-      setIsSubmitting(false);
-    }
-  }, [currentQuestion, selectedOption, sessionId, loadSession]);
-
-  /**
-   * Navigate to previous question.
-   */
-  const handlePrevious = useCallback(async () => {
-    if (!currentQuestion || currentQuestion.currentIndex <= 0) return;
-    if (!currentQuestion.allowBackNavigation) return;
-
-    setIsSubmitting(true);
-    try {
-      const credentials = anonymousTestApi.getCredentials();
-      if (!credentials.accessToken) throw new Error('No session token');
-
-      await anonymousTestApi.navigateToQuestion(
-        sessionId,
-        currentQuestion.currentIndex - 1,
-        credentials.accessToken
-      );
-      await loadSession();
-    } catch (err) {
-      const apiError = err as ApiError;
-      toast.error(apiError.message);
-    } finally {
-      setIsSubmitting(false);
-    }
-  }, [currentQuestion, sessionId, loadSession]);
-
-  /**
-   * Skip current question.
-   */
-  const handleSkip = useCallback(async () => {
-    if (!currentQuestion) return;
-    if (!currentQuestion.allowSkip) return;
-
-    setIsSubmitting(true);
-    try {
-      const credentials = anonymousTestApi.getCredentials();
-      if (!credentials.accessToken) throw new Error('No session token');
-
-      if (currentQuestion.currentIndex >= currentQuestion.totalQuestions - 1) {
-        setShowConfirmDialog(true);
-      } else {
-        await anonymousTestApi.navigateToQuestion(
-          sessionId,
-          currentQuestion.currentIndex + 1,
-          credentials.accessToken
-        );
-        await loadSession();
-      }
-    } catch (err) {
-      const apiError = err as ApiError;
-      toast.error(apiError.message);
-    } finally {
-      setIsSubmitting(false);
-    }
-  }, [currentQuestion, sessionId, loadSession]);
-
-  /**
-   * Complete the test with taker information.
-   */
-  const handleComplete = useCallback(async () => {
+  const handleSubmitTakerInfo = useCallback(async () => {
     if (!takerInfo.firstName || !takerInfo.lastName) {
       toast.error(t('error.nameRequired'));
       return;
     }
 
-    setStatus('completing');
+    if (!adapter) {
+      toast.error(t('error.sessionExpired'));
+      return;
+    }
+
+    setIsSubmittingInfo(true);
     try {
-      const credentials = anonymousTestApi.getCredentials();
-      if (!credentials.accessToken) throw new Error('No session token');
+      // Complete the session with taker info
+      const result = await adapter.completeSession(sessionId, takerInfo);
 
-      const resultData = await anonymousTestApi.completeSession(
-        sessionId,
-        takerInfo,
-        credentials.accessToken
-      );
+      // Set final result for display
+      if (result.inlineResult) {
+        setFinalResult({
+          id: result.inlineResult.id,
+          sessionId: result.inlineResult.sessionId,
+          overallPercentage: result.inlineResult.overallPercentage,
+          totalCorrect: result.inlineResult.totalCorrect,
+          totalQuestions: result.inlineResult.totalQuestions,
+          totalTimeSeconds: result.inlineResult.totalTimeSeconds,
+          passed: result.inlineResult.passed,
+          competencyBreakdown: result.inlineResult.competencyBreakdown,
+        });
+      }
 
-      setResult(resultData);
-      setStatus('completed');
-      setShowCompletionForm(false);
+      setShowTakerInfoDialog(false);
     } catch (err) {
       const apiError = err as ApiError;
       toast.error(apiError.message);
-      setStatus('ready');
+    } finally {
+      setIsSubmittingInfo(false);
     }
-  }, [sessionId, takerInfo, t]);
+  }, [sessionId, takerInfo, adapter, t]);
 
   /**
-   * Format time remaining as MM:SS.
+   * Handle abandon from ImmersivePlayer.
    */
-  const formatTime = (seconds: number): string => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
-  };
+  const handleAbandon = useCallback(() => {
+    anonymousTestApi.clearCredentials();
+    router.replace(`/take/${token}`);
+  }, [router, token]);
+
+  /**
+   * Handle errors from ImmersivePlayer.
+   */
+  const handleError = useCallback((apiError: ClientApiError) => {
+    if (apiError.status === 401 || apiError.status === 410) {
+      anonymousTestApi.clearCredentials();
+      router.replace(`/take/${token}`);
+    } else {
+      setError(apiError.message);
+      setStatus('error');
+    }
+  }, [router, token]);
 
   // Loading state
   if (status === 'loading') {
@@ -373,9 +308,9 @@ export default function AnonymousTestSessionPage() {
     );
   }
 
-  // Completed state - show results
-  if (status === 'completed' && result) {
-    const passed = result.passed;
+  // Completed state - show inline results
+  if (finalResult) {
+    const passed = finalResult.passed;
     return (
       <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-background to-muted/30">
         <Card className="w-full max-w-lg">
@@ -402,10 +337,10 @@ export default function AnonymousTestSessionPage() {
             {/* Score */}
             <div className="text-center">
               <p className="text-5xl font-bold text-primary">
-                {result.overallPercentage.toFixed(0)}%
+                {finalResult.overallPercentage.toFixed(0)}%
               </p>
               <p className="text-sm text-muted-foreground mt-2">
-                {result.totalCorrect} / {result.totalQuestions} {t('result.correct')}
+                {finalResult.totalCorrect} / {finalResult.totalQuestions} {t('result.correct')}
               </p>
             </div>
 
@@ -413,15 +348,15 @@ export default function AnonymousTestSessionPage() {
             <div className="flex items-center justify-center gap-2 text-muted-foreground">
               <Clock className="h-4 w-4" />
               <span>
-                {Math.floor(result.totalTimeSeconds / 60)}:{(result.totalTimeSeconds % 60).toString().padStart(2, '0')} {t('result.timeTaken')}
+                {Math.floor(finalResult.totalTimeSeconds / 60)}:{(finalResult.totalTimeSeconds % 60).toString().padStart(2, '0')} {t('result.timeTaken')}
               </span>
             </div>
 
             {/* Competency breakdown */}
-            {result.competencyBreakdown && result.competencyBreakdown.length > 0 && (
+            {finalResult.competencyBreakdown && finalResult.competencyBreakdown.length > 0 && (
               <div className="space-y-3">
                 <h3 className="font-medium text-sm">{t('result.breakdown')}</h3>
-                {result.competencyBreakdown.map((comp) => (
+                {finalResult.competencyBreakdown.map((comp) => (
                   <div key={comp.competencyId} className="space-y-1">
                     <div className="flex justify-between text-sm">
                       <span>{comp.competencyName}</span>
@@ -451,218 +386,99 @@ export default function AnonymousTestSessionPage() {
     );
   }
 
-  // Completion form
-  if (showCompletionForm) {
+  // Main test-taking interface - use ImmersivePlayer
+  if (status === 'ready' && session && currentQuestion && adapter) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-background to-muted/30">
-        <Card className="w-full max-w-lg">
-          <CardHeader className="text-center">
-            <div className="mx-auto w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-              <Send className="h-8 w-8 text-primary" />
-            </div>
-            <CardTitle>{t('complete.title')}</CardTitle>
-            <CardDescription>{t('complete.description')}</CardDescription>
-          </CardHeader>
+      <>
+        <TestSessionProvider adapter={adapter}>
+          <ImmersivePlayer
+            session={session}
+            initialQuestion={currentQuestion}
+            testDriveMode={false} // HR-only feature
+            onComplete={handleReadyToComplete}
+            onAbandon={handleAbandon}
+            onError={handleError}
+          />
+        </TestSessionProvider>
 
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+        {/* Taker Info Dialog */}
+        <Dialog open={showTakerInfoDialog} onOpenChange={setShowTakerInfoDialog}>
+          <DialogContent className="sm:max-w-lg">
+            <DialogHeader className="text-center">
+              <div className="mx-auto w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+                <Send className="h-8 w-8 text-primary" />
+              </div>
+              <DialogTitle>{t('complete.title')}</DialogTitle>
+              <DialogDescription>{t('complete.description')}</DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-4 py-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="firstName">{t('complete.firstName')} *</Label>
+                  <Input
+                    id="firstName"
+                    value={takerInfo.firstName}
+                    onChange={(e) => setTakerInfo({ ...takerInfo, firstName: e.target.value })}
+                    placeholder={t('complete.firstNamePlaceholder')}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="lastName">{t('complete.lastName')} *</Label>
+                  <Input
+                    id="lastName"
+                    value={takerInfo.lastName}
+                    onChange={(e) => setTakerInfo({ ...takerInfo, lastName: e.target.value })}
+                    placeholder={t('complete.lastNamePlaceholder')}
+                  />
+                </div>
+              </div>
+
               <div className="space-y-2">
-                <Label htmlFor="firstName">{t('complete.firstName')} *</Label>
+                <Label htmlFor="email">{t('complete.email')}</Label>
                 <Input
-                  id="firstName"
-                  value={takerInfo.firstName}
-                  onChange={(e) => setTakerInfo({ ...takerInfo, firstName: e.target.value })}
-                  placeholder={t('complete.firstNamePlaceholder')}
+                  id="email"
+                  type="email"
+                  value={takerInfo.email || ''}
+                  onChange={(e) => setTakerInfo({ ...takerInfo, email: e.target.value })}
+                  placeholder={t('complete.emailPlaceholder')}
                 />
               </div>
+
               <div className="space-y-2">
-                <Label htmlFor="lastName">{t('complete.lastName')} *</Label>
-                <Input
-                  id="lastName"
-                  value={takerInfo.lastName}
-                  onChange={(e) => setTakerInfo({ ...takerInfo, lastName: e.target.value })}
-                  placeholder={t('complete.lastNamePlaceholder')}
+                <Label htmlFor="notes">{t('complete.notes')}</Label>
+                <Textarea
+                  id="notes"
+                  value={takerInfo.notes || ''}
+                  onChange={(e) => setTakerInfo({ ...takerInfo, notes: e.target.value })}
+                  placeholder={t('complete.notesPlaceholder')}
+                  rows={3}
                 />
               </div>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="email">{t('complete.email')}</Label>
-              <Input
-                id="email"
-                type="email"
-                value={takerInfo.email}
-                onChange={(e) => setTakerInfo({ ...takerInfo, email: e.target.value })}
-                placeholder={t('complete.emailPlaceholder')}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="notes">{t('complete.notes')}</Label>
-              <Textarea
-                id="notes"
-                value={takerInfo.notes}
-                onChange={(e) => setTakerInfo({ ...takerInfo, notes: e.target.value })}
-                placeholder={t('complete.notesPlaceholder')}
-                rows={3}
-              />
-            </div>
-          </CardContent>
-
-          <CardFooter>
-            <Button
-              onClick={handleComplete}
-              className="w-full"
-              disabled={status === 'completing' || !takerInfo.firstName || !takerInfo.lastName}
-            >
-              {status === 'completing' ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  {t('complete.submitting')}
-                </>
-              ) : (
-                <>
-                  <Send className="mr-2 h-4 w-4" />
-                  {t('complete.submit')}
-                </>
-              )}
-            </Button>
-          </CardFooter>
-        </Card>
-      </div>
-    );
-  }
-
-  // Main test-taking interface
-  if (status === 'ready' && session && currentQuestion) {
-    const { question } = currentQuestion;
-    const progress = ((currentQuestion.currentIndex + 1) / currentQuestion.totalQuestions) * 100;
-
-    return (
-      <div className="min-h-screen flex flex-col bg-background">
-        {/* Header with progress and timer */}
-        <div className="sticky top-0 z-10 bg-background border-b px-4 py-3">
-          <div className="max-w-3xl mx-auto flex items-center justify-between">
-            <div className="flex-1">
-              <Progress value={progress} className="h-2" />
-              <p className="text-xs text-muted-foreground mt-1">
-                {t('progress.question')} {currentQuestion.currentIndex + 1} / {currentQuestion.totalQuestions}
-              </p>
-            </div>
-            {timeRemaining !== null && (
-              <div className={cn(
-                "flex items-center gap-2 ml-4 px-3 py-1 rounded-full",
-                timeRemaining < 60 ? "bg-destructive/10 text-destructive" : "bg-muted"
-              )}>
-                <Clock className="h-4 w-4" />
-                <span className="font-mono font-medium">{formatTime(timeRemaining)}</span>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Question content */}
-        <div className="flex-1 p-4 overflow-auto">
-          <div className="max-w-3xl mx-auto">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg leading-relaxed">
-                  {question.questionText}
-                </CardTitle>
-              </CardHeader>
-
-              <CardContent>
-                <RadioGroup
-                  value={selectedOption || ''}
-                  onValueChange={setSelectedOption}
-                  className="space-y-3"
-                >
-                  {question.answerOptions.map((option) => (
-                    <label
-                      key={option.id}
-                      className={cn(
-                        "flex items-start space-x-3 p-4 rounded-lg border cursor-pointer transition-colors",
-                        selectedOption === option.id
-                          ? "border-primary bg-primary/5"
-                          : "border-border hover:border-primary/50 hover:bg-muted/50"
-                      )}
-                    >
-                      <RadioGroupItem value={option.id} className="mt-0.5" />
-                      <span className="text-sm leading-relaxed">{option.text}</span>
-                    </label>
-                  ))}
-                </RadioGroup>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-
-        {/* Footer with navigation */}
-        <div className="sticky bottom-0 z-10 bg-background border-t px-4 py-3">
-          <div className="max-w-3xl mx-auto flex items-center justify-between gap-4">
-            <Button
-              variant="outline"
-              onClick={handlePrevious}
-              disabled={
-                isSubmitting ||
-                currentQuestion.currentIndex <= 0 ||
-                !currentQuestion.allowBackNavigation
-              }
-            >
-              <ChevronLeft className="mr-1 h-4 w-4" />
-              {t('action.previous')}
-            </Button>
-
-            <div className="flex gap-2">
-              {currentQuestion.allowSkip && (
-                <Button variant="ghost" onClick={handleSkip} disabled={isSubmitting}>
-                  {t('action.skip')}
-                </Button>
-              )}
-
+            <DialogFooter>
               <Button
-                onClick={handleSubmitAnswer}
-                disabled={isSubmitting || !selectedOption}
+                onClick={handleSubmitTakerInfo}
+                className="w-full"
+                disabled={isSubmittingInfo || !takerInfo.firstName || !takerInfo.lastName}
               >
-                {isSubmitting ? (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                ) : currentQuestion.currentIndex >= currentQuestion.totalQuestions - 1 ? (
+                {isSubmittingInfo ? (
                   <>
-                    {t('action.finish')}
-                    <CheckCircle className="ml-2 h-4 w-4" />
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    {t('complete.submitting')}
                   </>
                 ) : (
                   <>
-                    {t('action.next')}
-                    <ChevronRight className="ml-1 h-4 w-4" />
+                    <Send className="mr-2 h-4 w-4" />
+                    {t('complete.submit')}
                   </>
                 )}
               </Button>
-            </div>
-          </div>
-        </div>
-
-        {/* Confirm completion dialog */}
-        <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>{t('confirm.title')}</AlertDialogTitle>
-              <AlertDialogDescription>
-                {t('confirm.description')}
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>{t('confirm.cancel')}</AlertDialogCancel>
-              <AlertDialogAction onClick={() => {
-                setShowConfirmDialog(false);
-                setShowCompletionForm(true);
-              }}>
-                {t('confirm.proceed')}
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-      </div>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </>
     );
   }
 

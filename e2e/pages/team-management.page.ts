@@ -789,6 +789,7 @@ export class TeamManagementPage extends BasePage {
 
     const statCard = statMap[statType];
     const valueElement = statCard.locator('.text-2xl, .font-bold').first();
-    return valueElement.textContent() ?? '';
+    const text = await valueElement.textContent();
+    return text ?? '';
   }
 }

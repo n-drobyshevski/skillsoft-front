@@ -6,6 +6,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { TestSession, SessionQuestion, CurrentQuestionResponse, TestAnswer, SubmitAnswerRequest, QuestionType } from '@/types/domain';
 import { testSessionsClientApi, type ApiError } from '@/services/api.client';
 import { competenciesApi, behavioralIndicatorsApi } from '@/services/api';
+import { useTestSession, useTestSessionAdapter, useSessionFeatures } from '@/context/test-session-context';
+import type { CompletionResult, AnonymousTakerInfo } from '@/adapters';
 import { EnhancedSessionHeader } from '@/components/layout/enhanced-session-header';
 import { QuestionCard, MIN_CHARS_OPEN_TEXT, MIN_CHARS_BEHAVIORAL } from './QuestionCard';
 import { QuestionNavigation } from './QuestionNavigation';
@@ -43,9 +45,28 @@ import { TestDriveInsights, InsightsToggle } from './insights';
 interface ImmersivePlayerProps {
   session: TestSession;
   initialQuestion: CurrentQuestionResponse;
-  authHeaders: Record<string, string>;
+  /**
+   * @deprecated Use TestSessionProvider with adapter instead.
+   * Auth headers for backward compatibility during migration.
+   */
+  authHeaders?: Record<string, string>;
   /** Enable test-drive mode for HR insights panel */
   testDriveMode?: boolean;
+  /**
+   * Called when test is completed successfully.
+   * If not provided, defaults to router.push to results page.
+   */
+  onComplete?: (result: CompletionResult) => void;
+  /**
+   * Called when test is abandoned.
+   * If not provided, defaults to router.push to templates page.
+   */
+  onAbandon?: () => void;
+  /**
+   * Called on terminal errors.
+   * If not provided, shows toast and redirects.
+   */
+  onError?: (error: ApiError) => void;
 }
 
 /** Question state for progress tracking */
@@ -78,10 +99,35 @@ interface PlayerState {
  * - Error handling with retry
  * - Multiple dialog states
  */
-export function ImmersivePlayer({ session, initialQuestion, authHeaders, testDriveMode = false }: ImmersivePlayerProps) {
+export function ImmersivePlayer({
+  session,
+  initialQuestion,
+  authHeaders,
+  testDriveMode = false,
+  onComplete,
+  onAbandon,
+  onError,
+}: ImmersivePlayerProps) {
   const router = useRouter();
   const enterImmersiveMode = useUIStore((state) => state.enterImmersiveMode);
   const exitImmersiveMode = useUIStore((state) => state.exitImmersiveMode);
+
+  // Try to get adapter from context (new pattern)
+  // Falls back to null if not wrapped in TestSessionProvider (legacy mode)
+  let adapter: ReturnType<typeof useTestSessionAdapter> | null = null;
+  let sessionFeatures = { supportsTestDrive: true, supportsAnswerReview: true, requiresTakerInfo: false };
+  try {
+    adapter = useTestSessionAdapter();
+    sessionFeatures = useSessionFeatures();
+  } catch {
+    // Not wrapped in TestSessionProvider - use legacy authHeaders mode
+  }
+
+  // Legacy mode: create a shim adapter from authHeaders
+  const effectiveAuthHeaders = authHeaders || { 'X-User-Id': '' };
+
+  // Determine if test-drive is actually available
+  const testDriveAvailable = testDriveMode && sessionFeatures.supportsTestDrive;
 
   // Test-drive mode store actions
   const enableTestDrive = useTestDriveStore((state) => state.enableTestDriveMode);
@@ -238,17 +284,17 @@ export function ImmersivePlayer({ session, initialQuestion, authHeaders, testDri
     }
   }, [currentAnswer, state.currentQuestion?.id]);
 
-  // Enable/disable test-drive mode based on prop
+  // Enable/disable test-drive mode based on prop and adapter support
   useEffect(() => {
-    if (testDriveMode) {
+    if (testDriveAvailable) {
       enableTestDrive();
     }
     return () => {
-      if (testDriveMode) {
+      if (testDriveAvailable) {
         disableTestDrive();
       }
     };
-  }, [testDriveMode, enableTestDrive, disableTestDrive]);
+  }, [testDriveAvailable, enableTestDrive, disableTestDrive]);
 
   // Update test-drive question data when current question changes
   useEffect(() => {
@@ -501,11 +547,14 @@ export function ImmersivePlayer({ session, initialQuestion, authHeaders, testDri
 
   /**
    * Fetch and display question at given index with retry logic
+   * Supports both adapter pattern (new) and legacy authHeaders pattern.
    */
   const loadQuestion = useCallback(async (direction: 'forward' | 'backward') => {
     try {
       const response = await retryWithBackoff(
-        () => testSessionsClientApi.getCurrentQuestion(session.id, authHeaders),
+        () => adapter
+          ? adapter.getCurrentQuestion(session.id)
+          : testSessionsClientApi.getCurrentQuestion(session.id, effectiveAuthHeaders),
         {
           maxRetries: 3,
           initialDelayMs: 1000,
@@ -600,7 +649,7 @@ export function ImmersivePlayer({ session, initialQuestion, authHeaders, testDri
       toast.error(getUserFriendlyErrorMessage(error));
     }
     questionStartTime.current = Date.now();
-  }, [session.id, authHeaders, router]);
+  }, [session.id, adapter, effectiveAuthHeaders, router, onError]);
 
   /**
    * Navigate to next question
@@ -624,7 +673,11 @@ export function ImmersivePlayer({ session, initialQuestion, authHeaders, testDri
       // Submit answer
       if (currentQuestion && currentAnswer !== undefined) {
         const request = buildAnswerRequest(currentAnswer);
-        await testSessionsClientApi.submitAnswer(session.id, request, authHeaders);
+        if (adapter) {
+          await adapter.submitAnswer(session.id, request);
+        } else {
+          await testSessionsClientApi.submitAnswer(session.id, request, effectiveAuthHeaders);
+        }
 
         // Update question states - mark current as answered
         setState(prev => {
@@ -652,7 +705,11 @@ export function ImmersivePlayer({ session, initialQuestion, authHeaders, testDri
 
       // Navigate to next question
       const nextIndex = state.questionIndex + 1;
-      await testSessionsClientApi.navigateToQuestion(session.id, nextIndex, authHeaders);
+      if (adapter) {
+        await adapter.navigateToQuestion(session.id, nextIndex);
+      } else {
+        await testSessionsClientApi.navigateToQuestion(session.id, nextIndex, effectiveAuthHeaders);
+      }
       await loadQuestion('forward');
     } catch (error) {
       // eslint-disable-next-line no-console
@@ -681,7 +738,7 @@ export function ImmersivePlayer({ session, initialQuestion, authHeaders, testDri
 
     setState(prev => ({ ...prev, isSubmitting: false }));
   // eslint-disable-next-line react-hooks/exhaustive-deps -- handleEnterSummary is defined after handleNext but stable
-  }, [state.isSubmitting, state.questionIndex, state.totalQuestions, currentQuestion, currentAnswer, buildAnswerRequest, session.id, loadQuestion, authHeaders, validateAnswer, router]);
+  }, [state.isSubmitting, state.questionIndex, state.totalQuestions, currentQuestion, currentAnswer, buildAnswerRequest, session.id, loadQuestion, adapter, effectiveAuthHeaders, validateAnswer, router]);
 
   /**
    * Navigate to previous question with auto-save
@@ -712,7 +769,9 @@ export function ImmersivePlayer({ session, initialQuestion, authHeaders, testDri
           // Save the answer
           const request = buildAnswerRequest(currentAnswer);
           await retryWithBackoff(
-            () => testSessionsClientApi.submitAnswer(session.id, request, authHeaders),
+            () => adapter
+              ? adapter.submitAnswer(session.id, request)
+              : testSessionsClientApi.submitAnswer(session.id, request, effectiveAuthHeaders),
             {
               maxRetries: 2,
               initialDelayMs: 500,
@@ -752,7 +811,11 @@ export function ImmersivePlayer({ session, initialQuestion, authHeaders, testDri
 
       // Navigate to previous question
       const prevIndex = state.questionIndex - 1;
-      await testSessionsClientApi.navigateToQuestion(session.id, prevIndex, authHeaders);
+      if (adapter) {
+        await adapter.navigateToQuestion(session.id, prevIndex);
+      } else {
+        await testSessionsClientApi.navigateToQuestion(session.id, prevIndex, effectiveAuthHeaders);
+      }
       await loadQuestion('backward');
 
     } catch (error) {
@@ -801,7 +864,8 @@ export function ImmersivePlayer({ session, initialQuestion, authHeaders, testDri
     buildAnswerRequest,
     session.id,
     loadQuestion,
-    authHeaders,
+    adapter,
+    effectiveAuthHeaders,
     router,
   ]);
 
@@ -840,7 +904,9 @@ export function ImmersivePlayer({ session, initialQuestion, authHeaders, testDri
           // Save the answer
           const request = buildAnswerRequest(currentAnswer);
           await retryWithBackoff(
-            () => testSessionsClientApi.submitAnswer(session.id, request, authHeaders),
+            () => adapter
+              ? adapter.submitAnswer(session.id, request)
+              : testSessionsClientApi.submitAnswer(session.id, request, effectiveAuthHeaders),
             {
               maxRetries: 2,
               initialDelayMs: 500,
@@ -879,7 +945,11 @@ export function ImmersivePlayer({ session, initialQuestion, authHeaders, testDri
       }
 
       // Navigate to target question
-      await testSessionsClientApi.navigateToQuestion(session.id, targetIndex, authHeaders);
+      if (adapter) {
+        await adapter.navigateToQuestion(session.id, targetIndex);
+      } else {
+        await testSessionsClientApi.navigateToQuestion(session.id, targetIndex, effectiveAuthHeaders);
+      }
       await loadQuestion(direction);
 
     } catch (error) {
@@ -930,7 +1000,8 @@ export function ImmersivePlayer({ session, initialQuestion, authHeaders, testDri
     buildAnswerRequest,
     session.id,
     loadQuestion,
-    authHeaders,
+    adapter,
+    effectiveAuthHeaders,
     router,
   ]);
 
@@ -957,7 +1028,11 @@ export function ImmersivePlayer({ session, initialQuestion, authHeaders, testDri
           timeSpentSeconds: Math.floor((Date.now() - questionStartTime.current) / 1000),
           skip: true,
         };
-        await testSessionsClientApi.submitAnswer(session.id, request, authHeaders);
+        if (adapter) {
+          await adapter.submitAnswer(session.id, request);
+        } else {
+          await testSessionsClientApi.submitAnswer(session.id, request, effectiveAuthHeaders);
+        }
       }
 
       // Update question states - mark current as skipped
@@ -977,7 +1052,11 @@ export function ImmersivePlayer({ session, initialQuestion, authHeaders, testDri
 
       // Navigate to next question
       const nextIndex = state.questionIndex + 1;
-      await testSessionsClientApi.navigateToQuestion(session.id, nextIndex, authHeaders);
+      if (adapter) {
+        await adapter.navigateToQuestion(session.id, nextIndex);
+      } else {
+        await testSessionsClientApi.navigateToQuestion(session.id, nextIndex, effectiveAuthHeaders);
+      }
       await loadQuestion('forward');
 
       // Clear answer for next question
@@ -1005,11 +1084,12 @@ export function ImmersivePlayer({ session, initialQuestion, authHeaders, testDri
     }
 
     setState(prev => ({ ...prev, isSubmitting: false }));
-  }, [state.allowSkip, state.isSubmitting, state.questionIndex, state.totalQuestions, currentQuestion, session.id, loadQuestion, authHeaders, router]);
+  }, [state.allowSkip, state.isSubmitting, state.questionIndex, state.totalQuestions, currentQuestion, session.id, loadQuestion, adapter, effectiveAuthHeaders, router]);
 
   /**
    * Handle test completion
    * Includes session status validation and graceful error handling
+   * Supports both adapter pattern (new) and legacy authHeaders pattern.
    */
   const handleComplete = useCallback(async () => {
     if (state.isSubmitting) return;
@@ -1020,11 +1100,30 @@ export function ImmersivePlayer({ session, initialQuestion, authHeaders, testDri
       // Submit current answer if exists
       if (currentQuestion && currentAnswer !== undefined) {
         const request = buildAnswerRequest(currentAnswer);
-        await testSessionsClientApi.submitAnswer(session.id, request, authHeaders);
+        if (adapter) {
+          await adapter.submitAnswer(session.id, request);
+        } else {
+          await testSessionsClientApi.submitAnswer(session.id, request, effectiveAuthHeaders);
+        }
       }
 
-      const result = await testSessionsClientApi.completeSession(session.id, authHeaders);
-      router.push(`/test-templates/results/${result.id}`);
+      // Complete the session
+      let completionResult: CompletionResult;
+      if (adapter) {
+        // Note: For anonymous mode, taker info is collected by the parent page
+        // via the onComplete callback which will show a dialog
+        completionResult = await adapter.completeSession(session.id);
+      } else {
+        const result = await testSessionsClientApi.completeSession(session.id, effectiveAuthHeaders);
+        completionResult = { resultId: result.id };
+      }
+
+      // Use callback if provided, otherwise default navigation
+      if (onComplete) {
+        onComplete(completionResult);
+      } else {
+        router.push(`/test-templates/results/${completionResult.resultId}`);
+      }
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error('Failed to complete session:', error);
@@ -1034,31 +1133,47 @@ export function ImmersivePlayer({ session, initialQuestion, authHeaders, testDri
       // Handle "session not in progress" - session state changed
       if (errorMessage.includes('not in progress') || errorMessage.includes('cannot complete')) {
         try {
-          const currentSession = await testSessionsClientApi.getSessionById(session.id, authHeaders);
+          let currentSession;
+          if (adapter) {
+            currentSession = await adapter.getSession(session.id);
+          } else {
+            currentSession = await testSessionsClientApi.getSessionById(session.id, effectiveAuthHeaders);
+          }
           if (currentSession?.status === 'COMPLETED') {
             toast.info('Тест уже завершён');
-            // Redirect to test templates - user can find their results in history
-            router.push('/test-templates');
+            if (onError) {
+              onError(apiError);
+            } else {
+              router.push('/test-templates');
+            }
             return;
           }
         } catch {
           // Ignore fetch error
         }
         toast.error('Тест не может быть завершён');
-        router.push('/test-templates');
+        if (onError) {
+          onError(apiError);
+        } else {
+          router.push('/test-templates');
+        }
         return;
       }
 
       if (errorMessage.includes('abandon')) {
         toast.error('Сессия была отменена');
-        router.push('/test-templates');
+        if (onError) {
+          onError(apiError);
+        } else {
+          router.push('/test-templates');
+        }
         return;
       }
 
       toast.error('Не удалось завершить тест');
       setState(prev => ({ ...prev, isSubmitting: false }));
     }
-  }, [session.id, router, currentQuestion, currentAnswer, buildAnswerRequest, authHeaders, state.isSubmitting]);
+  }, [session.id, router, currentQuestion, currentAnswer, buildAnswerRequest, adapter, effectiveAuthHeaders, state.isSubmitting, onComplete, onError]);
 
   /**
    * Handle exit/abandon
@@ -1069,11 +1184,21 @@ export function ImmersivePlayer({ session, initialQuestion, authHeaders, testDri
 
   /**
    * Abandon the test
+   * Supports both adapter pattern (new) and legacy authHeaders pattern.
    */
   const handleAbandonTest = useCallback(async () => {
     try {
-      await testSessionsClientApi.abandonSession(session.id, authHeaders);
-      router.push('/test-templates');
+      if (adapter) {
+        await adapter.abandonSession(session.id);
+      } else {
+        await testSessionsClientApi.abandonSession(session.id, effectiveAuthHeaders);
+      }
+      // Use callback if provided, otherwise default navigation
+      if (onAbandon) {
+        onAbandon();
+      } else {
+        router.push('/test-templates');
+      }
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error('Failed to abandon test:', error);
@@ -1081,7 +1206,7 @@ export function ImmersivePlayer({ session, initialQuestion, authHeaders, testDri
     } finally {
       setShowAbandonDialog(false);
     }
-  }, [session.id, authHeaders, router]);
+  }, [session.id, adapter, effectiveAuthHeaders, router, onAbandon]);
 
   /**
    * Retry failed navigation (with auto-save)
@@ -1107,7 +1232,9 @@ export function ImmersivePlayer({ session, initialQuestion, authHeaders, testDri
         if (validation.valid) {
           const request = buildAnswerRequest(currentAnswer);
           await retryWithBackoff(
-            () => testSessionsClientApi.submitAnswer(session.id, request, authHeaders),
+            () => adapter
+              ? adapter.submitAnswer(session.id, request)
+              : testSessionsClientApi.submitAnswer(session.id, request, effectiveAuthHeaders),
             {
               maxRetries: 2,
               initialDelayMs: 500,
@@ -1139,7 +1266,11 @@ export function ImmersivePlayer({ session, initialQuestion, authHeaders, testDri
 
       // Navigate to target question
       const navIndex = targetIndex ?? (direction === 'backward' ? state.questionIndex - 1 : state.questionIndex + 1);
-      await testSessionsClientApi.navigateToQuestion(session.id, navIndex, authHeaders);
+      if (adapter) {
+        await adapter.navigateToQuestion(session.id, navIndex);
+      } else {
+        await testSessionsClientApi.navigateToQuestion(session.id, navIndex, effectiveAuthHeaders);
+      }
       await loadQuestion(direction);
 
       // Success - close dialog and clear state
@@ -1170,7 +1301,8 @@ export function ImmersivePlayer({ session, initialQuestion, authHeaders, testDri
     validateAnswer,
     buildAnswerRequest,
     session.id,
-    authHeaders,
+    adapter,
+    effectiveAuthHeaders,
     loadQuestion,
     state.questionIndex,
   ]);
@@ -1204,7 +1336,11 @@ export function ImmersivePlayer({ session, initialQuestion, authHeaders, testDri
 
       // Navigate to target question
       const navIndex = targetIndex ?? (direction === 'backward' ? state.questionIndex - 1 : state.questionIndex + 1);
-      await testSessionsClientApi.navigateToQuestion(session.id, navIndex, authHeaders);
+      if (adapter) {
+        await adapter.navigateToQuestion(session.id, navIndex);
+      } else {
+        await testSessionsClientApi.navigateToQuestion(session.id, navIndex, effectiveAuthHeaders);
+      }
       await loadQuestion(direction);
 
       // Success - close dialog and clear state
@@ -1221,7 +1357,8 @@ export function ImmersivePlayer({ session, initialQuestion, authHeaders, testDri
     pendingNavigation,
     currentQuestion?.id,
     session.id,
-    authHeaders,
+    adapter,
+    effectiveAuthHeaders,
     loadQuestion,
     state.questionIndex,
   ]);
@@ -1229,13 +1366,16 @@ export function ImmersivePlayer({ session, initialQuestion, authHeaders, testDri
   /**
    * Enter answer summary review screen
    * Fetches all answers and builds summary items for display
+   * Supports both adapter pattern (new) and legacy authHeaders pattern.
    */
   const handleEnterSummary = useCallback(async () => {
     setState(prev => ({ ...prev, isSubmitting: true }));
 
     try {
       // Fetch all answers for the session
-      const answers = await testSessionsClientApi.getSessionAnswers(session.id, authHeaders);
+      const answers = adapter
+        ? await adapter.getSessionAnswers(session.id)
+        : await testSessionsClientApi.getSessionAnswers(session.id, effectiveAuthHeaders);
 
       // Build answer summary items from answers
       // Each answer has questionId which maps to the question order
@@ -1284,7 +1424,7 @@ export function ImmersivePlayer({ session, initialQuestion, authHeaders, testDri
     }
 
     setState(prev => ({ ...prev, isSubmitting: false }));
-  }, [session.id, session.questionOrder, authHeaders, enterReviewPhase]);
+  }, [session.id, session.questionOrder, adapter, effectiveAuthHeaders, enterReviewPhase]);
 
   /**
    * Format answer for display in summary
@@ -1349,6 +1489,7 @@ export function ImmersivePlayer({ session, initialQuestion, authHeaders, testDri
   /**
    * Handle editing an answer from the summary screen
    * Navigates back to the specific question
+   * Supports both adapter pattern (new) and legacy authHeaders pattern.
    */
   const handleEditFromSummary = useCallback(async (questionId: string, questionIndex: number) => {
     setShowSummary(false);
@@ -1357,7 +1498,11 @@ export function ImmersivePlayer({ session, initialQuestion, authHeaders, testDri
 
     try {
       // Navigate to the question
-      await testSessionsClientApi.navigateToQuestion(session.id, questionIndex, authHeaders);
+      if (adapter) {
+        await adapter.navigateToQuestion(session.id, questionIndex);
+      } else {
+        await testSessionsClientApi.navigateToQuestion(session.id, questionIndex, effectiveAuthHeaders);
+      }
       await loadQuestion(questionIndex < state.questionIndex ? 'backward' : 'forward');
 
       // Mark that we came from summary (for return behavior)
@@ -1371,7 +1516,7 @@ export function ImmersivePlayer({ session, initialQuestion, authHeaders, testDri
     }
 
     setState(prev => ({ ...prev, isSubmitting: false }));
-  }, [session.id, authHeaders, state.questionIndex, loadQuestion]);
+  }, [session.id, adapter, effectiveAuthHeaders, state.questionIndex, loadQuestion]);
 
   /**
    * Handle going back from summary to continue answering
@@ -1384,6 +1529,7 @@ export function ImmersivePlayer({ session, initialQuestion, authHeaders, testDri
   /**
    * Handle submission from the summary screen
    * Includes pre-flight session status check and graceful error handling
+   * Supports both adapter pattern (new) and legacy authHeaders pattern.
    */
   const handleSubmitFromSummary = useCallback(async () => {
     // Prevent double-submission
@@ -1396,12 +1542,18 @@ export function ImmersivePlayer({ session, initialQuestion, authHeaders, testDri
 
     try {
       // Pre-flight check: verify session is still in a completable state
-      const currentSession = await testSessionsClientApi.getSessionById(session.id, authHeaders);
+      const currentSession = adapter
+        ? await adapter.getSession(session.id)
+        : await testSessionsClientApi.getSessionById(session.id, effectiveAuthHeaders);
 
       if (!currentSession) {
         // Session was deleted
         toast.error('Сессия не найдена. Возможно, она была удалена.');
-        router.push('/test-templates');
+        if (onError) {
+          onError({ message: 'Session not found', status: 404 } as ApiError);
+        } else {
+          router.push('/test-templates');
+        }
         return;
       }
 
@@ -1409,32 +1561,60 @@ export function ImmersivePlayer({ session, initialQuestion, authHeaders, testDri
       if (currentSession.status === 'COMPLETED') {
         // Session was already completed (maybe in another tab or timeout auto-complete)
         toast.info('Тест уже был завершён');
-        router.push('/test-templates');
+        if (onError) {
+          onError({ message: 'Session already completed', status: 400 } as ApiError);
+        } else {
+          router.push('/test-templates');
+        }
         return;
       }
 
       if (currentSession.status === 'ABANDONED') {
         toast.error('Сессия была отменена');
-        router.push('/test-templates');
+        if (onError) {
+          onError({ message: 'Session was abandoned', status: 400 } as ApiError);
+        } else {
+          router.push('/test-templates');
+        }
         return;
       }
 
       if (currentSession.status === 'TIMED_OUT') {
         toast.warning('Время выполнения теста истекло');
-        router.push('/test-templates');
+        if (onError) {
+          onError({ message: 'Session timed out', status: 400 } as ApiError);
+        } else {
+          router.push('/test-templates');
+        }
         return;
       }
 
       if (currentSession.status !== 'IN_PROGRESS' && currentSession.status !== 'NOT_STARTED') {
         toast.error(`Невозможно завершить тест в статусе: ${currentSession.status}`);
-        router.push('/test-templates');
+        if (onError) {
+          onError({ message: `Invalid session status: ${currentSession.status}`, status: 400 } as ApiError);
+        } else {
+          router.push('/test-templates');
+        }
         return;
       }
 
       // Session is in valid state - proceed with completion
-      const result = await testSessionsClientApi.completeSession(session.id, authHeaders);
+      let completionResult: CompletionResult;
+      if (adapter) {
+        completionResult = await adapter.completeSession(session.id);
+      } else {
+        const result = await testSessionsClientApi.completeSession(session.id, effectiveAuthHeaders);
+        completionResult = { resultId: result.id };
+      }
       completeSubmission();
-      router.push(`/test-templates/results/${result.id}`);
+
+      // Use callback if provided, otherwise default navigation
+      if (onComplete) {
+        onComplete(completionResult);
+      } else {
+        router.push(`/test-templates/results/${completionResult.resultId}`);
+      }
     } catch (error) {
       console.error('Failed to complete session from summary:', error);
       const apiError = error as ApiError;
@@ -1444,29 +1624,47 @@ export function ImmersivePlayer({ session, initialQuestion, authHeaders, testDri
       if (errorMessage.includes('not in progress') || errorMessage.includes('cannot complete')) {
         // Session state changed - try to determine what happened
         try {
-          const currentSession = await testSessionsClientApi.getSessionById(session.id, authHeaders);
+          const currentSession = adapter
+            ? await adapter.getSession(session.id)
+            : await testSessionsClientApi.getSessionById(session.id, effectiveAuthHeaders);
           if (currentSession?.status === 'COMPLETED') {
             toast.info('Тест уже завершён');
-            router.push('/test-templates');
+            if (onError) {
+              onError(apiError);
+            } else {
+              router.push('/test-templates');
+            }
             return;
           }
         } catch {
           // Ignore secondary fetch error
         }
         toast.error('Тест не может быть завершён. Возможно, он уже был завершён или отменён.');
-        router.push('/test-templates');
+        if (onError) {
+          onError(apiError);
+        } else {
+          router.push('/test-templates');
+        }
         return;
       }
 
       if (errorMessage.includes('abandon')) {
         toast.error('Сессия была отменена');
-        router.push('/test-templates');
+        if (onError) {
+          onError(apiError);
+        } else {
+          router.push('/test-templates');
+        }
         return;
       }
 
       if (errorMessage.includes('timed out') || errorMessage.includes('expired')) {
         toast.warning('Время выполнения теста истекло');
-        router.push('/test-templates');
+        if (onError) {
+          onError(apiError);
+        } else {
+          router.push('/test-templates');
+        }
         return;
       }
 
@@ -1487,7 +1685,7 @@ export function ImmersivePlayer({ session, initialQuestion, authHeaders, testDri
     } finally {
       setIsSummarySubmitting(false);
     }
-  }, [session.id, authHeaders, router, startSubmission, completeSubmission, failSubmission, isSummarySubmitting]);
+  }, [session.id, adapter, effectiveAuthHeaders, router, startSubmission, completeSubmission, failSubmission, isSummarySubmitting, onComplete, onError]);
 
   // Check if skip is available (not last question and allowSkip is enabled)
   const canSkip = state.allowSkip && state.questionIndex + 1 < state.totalQuestions;

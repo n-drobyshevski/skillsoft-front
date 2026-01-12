@@ -8,6 +8,7 @@ import { useTranslations } from 'next-intl';
 import { useDebounce } from '@/hooks/use-debounce';
 import { useBreakpoint } from '@/hooks/use-breakpoint';
 import { useSuggestedUsers } from '@/hooks/queries';
+import { usersApi } from '@/services/api';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import {
@@ -55,8 +56,9 @@ function mapOrgRoleToUserRole(orgRole: string | undefined | null): UserRole {
   const roleName = orgRole.replace('org:', '').toLowerCase();
   switch (roleName) {
     case 'admin': return UserRole.ADMIN;
-    case 'hr_manager': return UserRole.HR_MANAGER;
-    case 'hr_specialist': return UserRole.HR_SPECIALIST;
+    case 'editor': return UserRole.EDITOR;
+    case 'hr_manager': return UserRole.EDITOR;
+    case 'hr_specialist': return UserRole.EDITOR;
     default: return UserRole.USER;
   }
 }

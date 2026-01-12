@@ -2,6 +2,7 @@
 
 import React, { useMemo } from 'react';
 import { useFormContext } from 'react-hook-form';
+import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
@@ -19,6 +20,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
+import { HelpTooltip } from '@/components/ui/help-tooltip';
 import { cn } from '@/lib/utils';
 import {
   Brain,
@@ -62,6 +70,7 @@ export function OverviewConfigPanel({
   className,
 }: OverviewConfigPanelProps) {
   const form = useFormContext();
+  const t = useTranslations('help.scenario.overview');
 
   // Calculate estimated questions and time
   const estimatedQuestions = useMemo(() => {
@@ -89,7 +98,10 @@ export function OverviewConfigPanel({
                 <Brain className="h-5 w-5 text-purple-600 dark:text-purple-400" />
               </div>
               <div>
-                <CardTitle className="text-base">Big Five Personality</CardTitle>
+                <CardTitle className="text-base flex items-center gap-1.5">
+                  Big Five Personality
+                  <HelpTooltip content={t('bigFive.description')} variant="info" size="sm" />
+                </CardTitle>
                 <CardDescription className="text-xs mt-0.5">
                   Include OCEAN personality profiling in results
                 </CardDescription>
@@ -116,20 +128,30 @@ export function OverviewConfigPanel({
             <div className="grid grid-cols-5 gap-2">
               {BIG_FIVE_TRAITS.map((trait) => {
                 const Icon = trait.icon;
+                const traitKey = trait.key === 'EMOTIONAL_STABILITY'
+                  ? 'emotionalStability'
+                  : trait.key.toLowerCase() as 'openness' | 'conscientiousness' | 'extraversion' | 'agreeableness';
                 return (
-                  <div
-                    key={trait.key}
-                    className={cn(
-                      'flex flex-col items-center p-2 rounded-lg text-center',
-                      trait.bg
-                    )}
-                    title={trait.fullName}
-                  >
-                    <Icon className={cn('h-4 w-4 mb-1', trait.color)} />
-                    <span className="text-[10px] font-medium text-muted-foreground">
-                      {trait.name}
-                    </span>
-                  </div>
+                  <TooltipProvider key={trait.key}>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div
+                          className={cn(
+                            'flex flex-col items-center p-2 rounded-lg text-center cursor-help',
+                            trait.bg
+                          )}
+                        >
+                          <Icon className={cn('h-4 w-4 mb-1', trait.color)} />
+                          <span className="text-[10px] font-medium text-muted-foreground">
+                            {trait.name}
+                          </span>
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent side="bottom" className="max-w-xs text-xs">
+                        {t(`bigFive.traits.${traitKey}`)}
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
                 );
               })}
             </div>
@@ -146,6 +168,7 @@ export function OverviewConfigPanel({
             <FormLabel className="flex items-center gap-2">
               <BarChart3 className="h-4 w-4 text-muted-foreground" />
               Preferred Difficulty
+              <HelpTooltip content={t('difficulty.description')} variant="help" />
             </FormLabel>
             <Select value={field.value || 'INTERMEDIATE'} onValueChange={field.onChange}>
               <FormControl>
@@ -194,6 +217,7 @@ export function OverviewConfigPanel({
             <div className="flex items-center gap-2 text-sm">
               <Target className="h-4 w-4 text-primary" />
               <span>{selectedCompetencyCount} competencies selected</span>
+              <HelpTooltip content={t('estimation.questions')} variant="info" size="sm" />
             </div>
             <Badge variant="outline" className="font-mono">
               ~{estimatedQuestions} questions
@@ -203,6 +227,7 @@ export function OverviewConfigPanel({
             <div className="flex items-center gap-2 text-sm">
               <Clock className="h-4 w-4 text-muted-foreground" />
               <span>Estimated duration</span>
+              <HelpTooltip content={t('estimation.duration')} variant="info" size="sm" />
             </div>
             <Badge variant="secondary">~{estimatedTime} min</Badge>
           </div>

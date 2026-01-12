@@ -33,6 +33,8 @@ import {
 import { toast } from 'sonner';
 import { retryWithBackoff, getUserFriendlyErrorMessage, isRetryableError } from '@/utils/retry';
 import { ImmersivePlayer } from '@/components/test-player/ImmersivePlayer';
+import { TestSessionProvider } from '@/context/test-session-context';
+import { createAuthenticatedAdapter } from '@/adapters';
 
 // Loading status type for clearer state management
 type LoadingStatus =
@@ -96,6 +98,25 @@ export default function TestTakePage() {
     if (!userId) return {};
     return { 'X-User-Id': userId };
   }, [userId]);
+
+  // Create adapter for the player - memoized to prevent unnecessary recreations
+  const adapter = useMemo(() => {
+    if (!userId) return null;
+    return createAuthenticatedAdapter(userId);
+  }, [userId]);
+
+  // Completion and abandon handlers for ImmersivePlayer callbacks
+  const handleComplete = useCallback((result: { resultId?: string }) => {
+    if (result.resultId) {
+      router.push(`/test-templates/results/${result.resultId}`);
+    } else {
+      router.push('/test-templates');
+    }
+  }, [router]);
+
+  const handleAbandon = useCallback(() => {
+    router.push('/test-templates');
+  }, [router]);
 
   // Load session data - main loading logic with retry support
   const loadSessionData = useCallback(async (currentUserId: string, isManualRetry = false) => {
@@ -488,6 +509,23 @@ export default function TestTakePage() {
   }
 
   // Render ImmersivePlayer with loaded data
+  // If adapter is available, use new pattern with TestSessionProvider
+  // Otherwise fall back to legacy authHeaders mode
+  if (adapter) {
+    return (
+      <TestSessionProvider adapter={adapter}>
+        <ImmersivePlayer
+          session={session}
+          initialQuestion={currentQuestion}
+          testDriveMode={testDriveMode}
+          onComplete={handleComplete}
+          onAbandon={handleAbandon}
+        />
+      </TestSessionProvider>
+    );
+  }
+
+  // Fallback to legacy mode (should rarely happen)
   return (
     <ImmersivePlayer
       session={session}
