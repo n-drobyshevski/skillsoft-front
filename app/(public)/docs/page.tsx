@@ -1,4 +1,7 @@
+'use cache';
+
 import { Metadata } from "next";
+import { cacheLife } from "next/cache";
 import Link from "next/link";
 import {
   BookOpenIcon,
@@ -18,10 +21,6 @@ import { DocsToc } from "./_components/DocsToc";
 import { DocsFooterNav } from "./_components/DocsFooterNav";
 import { MobileTocDrawer } from "./_components/MobileTocDrawer";
 import { Callout } from "./_components/mdx";
-
-// Route segment configuration for static generation
-export const dynamic = "force-static";
-export const revalidate = 3600;
 
 export const metadata: Metadata = {
   title: "Документация | SkillSoft",
@@ -140,7 +139,8 @@ const colorClasses = {
   },
 };
 
-export default function DocsPage() {
+export default async function DocsPage() {
+  cacheLife('max');
   return (
     <div className="docs-content">
       {/* Mobile TOC Drawer */}

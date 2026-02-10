@@ -1,4 +1,7 @@
+'use cache';
+
 import { Metadata } from "next";
+import { cacheLife } from "next/cache";
 import Link from "next/link";
 import { ArrowRightIcon, LayersIcon, TargetIcon, HelpCircleIcon } from "lucide-react";
 
@@ -6,10 +9,6 @@ import { DocsBreadcrumb } from "../_components/DocsBreadcrumb";
 import { DocsFooterNav } from "../_components/DocsFooterNav";
 import { DocsToc } from "../_components/DocsToc";
 import { Callout, HierarchyDiagram } from "../_components/mdx";
-
-// Route segment configuration for static generation
-export const dynamic = "force-static";
-export const revalidate = 3600;
 
 export const metadata: Metadata = {
   title: "Создание контента | Документация | SkillSoft",
@@ -44,7 +43,9 @@ const contentTypes = [
   },
 ];
 
-export default function AuthoringPage() {
+export default async function AuthoringPage() {
+  cacheLife('max');
+
   return (
     <div className="docs-content">
       <DocsBreadcrumb />

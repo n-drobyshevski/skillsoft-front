@@ -14,9 +14,6 @@ import {
 } from '@/services/profile-api';
 import type { ProfileUserInfo } from '@/types/profile';
 
-// ISR: Revalidate every 60 seconds
-export const revalidate = 60;
-
 // SEO Metadata - Dynamic for i18n
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('profile.edit');

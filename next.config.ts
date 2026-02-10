@@ -6,10 +6,9 @@ const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts');
 const nextConfig: NextConfig = {
 	// Enable React Compiler for automatic memoization (Next.js 16)
 	reactCompiler: true,
-	// Temporarily disabled cacheComponents due to Clerk compatibility issues
-	// TODO: Re-enable when Clerk fully supports Next.js 16 cacheComponents
-	// See: https://github.com/clerk/javascript/pull/7119
-	cacheComponents: false,
+	// PPR enabled via Cache Components (Next.js 16)
+	// Clerk @clerk/nextjs v6.35+ supports this configuration.
+	cacheComponents: true,
 	turbopack: {
 		root: __dirname,
 	},
@@ -42,16 +41,14 @@ const nextConfig: NextConfig = {
 			revalidate: 3600, // Revalidate every hour
 			expire: 7200,    // Expire after 2 hours
 		},
+		// Static content: docs pages, marketing pages (1 hour revalidation, 24h expire)
+		staticContent: {
+			stale: 3600,      // Allow stale for 1 hour
+			revalidate: 3600, // Revalidate every hour
+			expire: 86400,    // Expire after 24 hours
+		},
 	},
 	experimental: {
-		// ========================================================================
-		// Partial Prerendering (PPR) - DISABLED
-		// ========================================================================
-		// PPR requires cacheComponents which is incompatible with Clerk
-		// TODO: Re-enable when Clerk supports Next.js 16 cacheComponents
-		// See: https://github.com/clerk/javascript/pull/7119
-		// ppr: 'incremental',
-
 		// ========================================================================
 		// Turbopack Filesystem Cache (Beta) - Speeds up dev restarts
 		// ========================================================================

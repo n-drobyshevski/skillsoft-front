@@ -1,41 +1,34 @@
 /**
  * Dashboard API Cache - Server-side caching for dashboard data.
  *
- * Provides aggregated dashboard data fetching with caching via unstable_cache.
+ * Provides aggregated dashboard data fetching with caching via 'use cache'.
  * Reduces N+1 API calls by batching data requirements.
  *
- * Note: Uses unstable_cache because cacheComponents is disabled in next.config.ts
- * due to Clerk compatibility.
+ * Uses function-level 'use cache' (not file-level) because getDashboardDataFresh
+ * must remain uncached for post-mutation fresh fetches.
  */
 
-import { unstable_cache } from 'next/cache';
+import { cacheLife, cacheTag } from 'next/cache';
 import {
   competenciesApi,
   testTemplatesApi,
   usersApi,
   assessmentQuestionsApi,
-  psychometricsApi,
 } from '@/services/api';
 import { getPsychometricsDashboardCached } from '@/services/api.cache.psychometrics';
-import type { Competency, TestTemplateSummary, TestSession } from '@/types/domain';
+import type { Competency, TestTemplateSummary } from '@/types/domain';
 import type { UserStats, User } from '@/types/user';
 import type { PsychometricHealthReport } from '@/types/psychometrics';
 import type {
   DashboardSummary,
   DashboardStats,
-  DashboardUserInfo,
   PsychometricSummary,
-  RecentCompletion
 } from '@/types/dashboard';
 import { calculatePsychometricSummary } from '@/types/dashboard';
 
-// Cache revalidation times (in seconds)
-const REALTIME_REVALIDATE = 30; // 30 seconds for real-time data
-const DASHBOARD_REVALIDATE = 60; // 1 minute for dashboard overview
-
 /**
  * Fetch all dashboard data in parallel.
- * This is the internal fetcher used by the cached function.
+ * Shared implementation used by both cached and fresh variants.
  */
 async function fetchDashboardData(
   clerkUserId?: string,
@@ -154,27 +147,24 @@ function calculateAverageIndicators(competencies: Competency[]): number {
 /**
  * Cached dashboard data fetcher.
  *
- * Uses Next.js unstable_cache for server-side caching.
- * Cache invalidation tags: 'dashboard', 'competencies', 'templates', etc.
+ * Uses function-level 'use cache' with realtime profile.
+ * clerkUserId and userRole automatically become part of the cache key,
+ * so different roles get separate cache entries (max 3: ADMIN, EDITOR, USER).
  *
- * @param clerkUserId - Current user's Clerk ID (optional)
+ * @param clerkUserId - Current user's Clerk ID (optional, part of cache key)
  * @param userRole - Current user's role for conditional data fetching
  * @returns DashboardSummary with all dashboard data
- *
- * @example
- * ```tsx
- * // In a server component
- * const dashboardData = await getDashboardDataCached(userId, 'ADMIN');
- * ```
  */
-export const getDashboardDataCached = unstable_cache(
-  fetchDashboardData,
-  ['dashboard-summary'],
-  {
-    revalidate: DASHBOARD_REVALIDATE,
-    tags: ['dashboard', 'competencies', 'templates', 'questions'],
-  }
-);
+export async function getDashboardDataCached(
+  clerkUserId?: string,
+  userRole?: 'ADMIN' | 'EDITOR' | 'USER'
+): Promise<DashboardSummary> {
+  'use cache';
+  cacheLife('realtime');
+  cacheTag('dashboard', 'competencies', 'templates', 'questions');
+
+  return fetchDashboardData(clerkUserId, userRole);
+}
 
 /**
  * Fetch dashboard data without caching.
@@ -192,6 +182,10 @@ export async function getDashboardDataFresh(
  * Useful for polling or quick refresh.
  */
 export async function getDashboardStatsCached(): Promise<DashboardStats | null> {
+  'use cache';
+  cacheLife('realtime');
+  cacheTag('dashboard-stats');
+
   try {
     const [competencies, templates, questions] = await Promise.all([
       competenciesApi.getAllCompetencies().catch(() => []),

@@ -8,9 +8,6 @@ import { MyTestsContent } from './_components/MyTestsContent';
 import { ContentSkeleton } from './_components/ContentSkeleton';
 import { ClipboardList } from 'lucide-react';
 
-// ISR: Revalidate every 60 seconds
-export const revalidate = 60;
-
 // Dynamic page metadata with i18n
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("metadata.myTests");

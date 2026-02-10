@@ -62,7 +62,7 @@ export function FooterSection() {
         {/* Bottom */}
         <div className="flex flex-col md:flex-row justify-between items-center gap-4 mt-12 md:mt-16 pt-8 border-t border-border/50">
           <p className="text-sm text-muted-foreground">
-            &copy; {new Date().getFullYear()} SkillSoft. Все права защищены.
+            &copy; 2026 SkillSoft. Все права защищены.
           </p>
           <div className="flex gap-6 text-sm text-muted-foreground">
             <a href="#" className="hover:text-foreground transition-colors">

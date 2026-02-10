@@ -1,13 +1,12 @@
+'use cache';
+
 import { Metadata } from "next";
+import { cacheLife } from "next/cache";
 
 import { DocsBreadcrumb } from "../../_components/DocsBreadcrumb";
 import { DocsFooterNav } from "../../_components/DocsFooterNav";
 import { DocsToc } from "../../_components/DocsToc";
 import { Callout, Steps, Step } from "../../_components/mdx";
-
-// Route segment configuration for static generation
-export const dynamic = "force-static";
-export const revalidate = 3600;
 
 export const metadata: Metadata = {
   title: "Компетенции | Создание контента | Документация | SkillSoft",
@@ -22,7 +21,9 @@ const tocItems = [
   { id: "best-practices", title: "Рекомендации", level: 2 },
 ];
 
-export default function CompetenciesPage() {
+export default async function CompetenciesPage() {
+  cacheLife('max');
+
   return (
     <div className="docs-content">
       <DocsBreadcrumb />

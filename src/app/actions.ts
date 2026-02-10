@@ -1,6 +1,6 @@
 'use server'
 
-import { revalidatePath, revalidateTag } from 'next/cache';
+import { revalidatePath, revalidateTag, updateTag } from 'next/cache';
 
 interface ApiError extends Error {
   status?: number;
@@ -30,12 +30,13 @@ export async function revalidateCompetencyTags(competencyId?: string) {
       revalidatePath(`/hr/competencies/${competencyId}`);
     }
 
-    // Invalidate cache tags used by 'use cache' functions
-    // Using 'max' profile for stale-while-revalidate semantics (Next.js 16)
-    revalidateTag('competencies', 'max');
+    // Immediate invalidation for primary entity (read-your-own-writes)
+    updateTag('competencies');
     if (competencyId) {
-      revalidateTag(`competency-${competencyId}`, 'max');
+      updateTag(`competency-${competencyId}`);
     }
+    // Dashboard uses eventual consistency (background revalidation)
+    revalidateTag('dashboard', 'max');
   } catch {
     // Error revalidating competency paths - silently fail in production
   }
@@ -71,11 +72,11 @@ export async function revalidateDocsTags(slug?: string): Promise<{ success: bool
     // Инвалидируем sitemap, так как контент документации влияет на него
     revalidatePath(SITEMAP_PATH);
 
-    // Invalidate cache tags (using 'max' profile for stale-while-revalidate in Next.js 16)
-    // Инвалидируем теги кеша (используем профиль 'max' для stale-while-revalidate в Next.js 16)
-    revalidateTag('docs', 'max');
+    // Immediate invalidation for docs content (read-your-own-writes)
+    // Немедленная инвалидация контента документации
+    updateTag('docs');
     if (slug) {
-      revalidateTag(`docs-${slug}`, 'max');
+      updateTag(`docs-${slug}`);
     }
 
     return {
@@ -108,13 +109,14 @@ export async function revalidatePsychometricsTags(questionId?: string) {
       revalidatePath(`${PSYCHOMETRICS_PATH}/flagged/${questionId}`);
     }
 
-    // Invalidate cache tags (using 'max' profile for stale-while-revalidate)
-    revalidateTag('psychometrics-items', 'max');
-    revalidateTag('psychometrics-dashboard', 'max');
-    revalidateTag('psychometrics-flagged', 'max');
+    // Immediate invalidation for primary psychometrics data
+    updateTag('psychometrics-items');
+    updateTag('psychometrics-flagged');
     if (questionId) {
-      revalidateTag(`psychometrics-item-${questionId}`, 'max');
+      updateTag(`psychometrics-item-${questionId}`);
     }
+    // Dashboard stats use eventual consistency
+    revalidateTag('psychometrics-dashboard', 'max');
   } catch {
     // Silently fail in production
   }
@@ -314,13 +316,13 @@ export async function revalidateUserTags(userId?: string) {
       revalidatePath(`${USERS_PATH}/${userId}`);
     }
     
-    // Invalidate cache tags used by 'use cache' functions
-    // Using 'max' profile for stale-while-revalidate semantics (Next.js 16)
-    revalidateTag('users', 'max');
-    revalidateTag('users-stats', 'max');
+    // Immediate invalidation for primary user data
+    updateTag('users');
     if (userId) {
-      revalidateTag(`user-${userId}`, 'max');
+      updateTag(`user-${userId}`);
     }
+    // User stats use eventual consistency
+    revalidateTag('users-stats', 'max');
   } catch {
     // Error revalidating user paths - silently fail in production
   }
@@ -450,14 +452,15 @@ export async function revalidateTestTemplateTags(templateId?: string) {
       revalidatePath(`${TEST_TEMPLATES_PATH}/${templateId}/builder`);
     }
 
-    // Invalidate all cache tags used by fetchApi for test templates
-    revalidateTag('test-templates', 'max');
-    revalidateTag('test-templates-active', 'max');
-    revalidateTag('test-templates-search', 'max');
-    revalidateTag('test-templates-stats', 'max');
+    // Immediate invalidation for primary template data
+    updateTag('test-templates');
+    updateTag('test-templates-active');
+    updateTag('test-templates-search');
     if (templateId) {
-      revalidateTag(`test-template-${templateId}`, 'max');
+      updateTag(`test-template-${templateId}`);
     }
+    // Template stats use eventual consistency
+    revalidateTag('test-templates-stats', 'max');
   } catch {
     // Error revalidating test template paths - silently fail in production
   }

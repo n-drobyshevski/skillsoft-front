@@ -1,12 +1,10 @@
+'use cache';
+
 import { Suspense } from "react";
+import { cacheLife } from "next/cache";
 import { DocsNavServer } from "./_components/DocsNavServer";
 import { DocsNavSkeleton } from "./_components/DocsNavSkeleton";
 import { MobileDocsNavWrapper } from "./_components/DocsNavWrapper";
-
-// Route segment configuration for ISR
-// Note: dynamic = "force-static" removed from layout to avoid conflicts with client components
-// Individual pages use force-static; layout uses ISR revalidation
-export const revalidate = 3600;
 
 export const metadata = {
   title: "Документация | SkillSoft",
@@ -29,11 +27,12 @@ export const metadata = {
  * Uses server component navigation (DocsNavServer) for SSR support
  * with client-side active state highlighting.
  */
-export default function DocsLayout({
+export default async function DocsLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  cacheLife('max');
   return (
     <div className="relative flex min-h-[calc(100vh-3.5rem)] max-w-[100vw] overflow-x-hidden">
       {/* Left Sidebar - Server-rendered navigation with streaming */}

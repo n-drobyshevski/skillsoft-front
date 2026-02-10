@@ -12,6 +12,7 @@ import { QueryProvider } from "@/components/providers/QueryProvider";
 import { Toaster } from "@/components/ui/sonner";
 import { shadcn } from '@clerk/themes';
 import { SkipLinks, MainContentAnchor } from "@/components/accessibility";
+import { HtmlLangSetter } from "@/components/providers/HtmlLangSetter";
 
 export const metadata: Metadata = {
 	title: "SkillSoft - Competency Management",
@@ -84,65 +85,65 @@ const clerkAppearance = {
 };
 
 /**
- * Root Layout
+ * Root providers that require request-time data (locale, messages, auth).
  *
- * Provides ClerkProvider for authentication, NextIntlClientProvider for i18n,
- * and ThemeProvider via LayoutProvider.
- * Route-specific layouts handle sidebar/header:
- * - (auth)/ - Minimal layout for sign-in/sign-up
- * - (workspace)/ - Full dashboard layout with sidebar
- *
- * Note: ClerkProvider uses dynamic prop for Next.js 16 cacheComponents compatibility.
- * This tells Clerk to defer auth state resolution to runtime.
+ * These are inside <Suspense> so that getLocale()/getMessages() (which read
+ * headers/cookies) don't block the static HTML shell from being prerendered.
  */
-export default async function RootLayout({
-	children,
-}: Readonly<{
-	children: React.ReactNode;
-}>) {
-	const publishableKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
-
-	// Get locale and messages for i18n
+async function RootProviders({ children }: { children: React.ReactNode }) {
 	const locale = await getLocale();
 	const messages = await getMessages();
+	const publishableKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
 
-	// Always return the HTML structure, conditionally wrap with ClerkProvider
 	if (publishableKey && publishableKey.trim() !== '') {
 		return (
-			<ClerkProvider
-				appearance={clerkAppearance}
-				dynamic
-			>
-				<html lang={locale} suppressHydrationWarning className="mobile-container">
-					<body className="mobile-container" suppressHydrationWarning>
-						<NextIntlClientProvider messages={messages} locale={locale}>
-							<Suspense fallback={<AuthLoadingFallback />}>
-								<LayoutContent>{children}</LayoutContent>
-							</Suspense>
-						</NextIntlClientProvider>
-						<Analytics />
-					</body>
-				</html>
+			<ClerkProvider appearance={clerkAppearance}>
+				<NextIntlClientProvider messages={messages} locale={locale}>
+					<HtmlLangSetter locale={locale} />
+					<LayoutContent>{children}</LayoutContent>
+				</NextIntlClientProvider>
 			</ClerkProvider>
 		);
 	}
 
 	// Fallback without ClerkProvider (for development without Clerk keys)
 	return (
-		<html lang={locale} suppressHydrationWarning className="mobile-container">
+		<NextIntlClientProvider messages={messages} locale={locale}>
+			<HtmlLangSetter locale={locale} />
+			<LayoutProvider>
+				<QueryProvider>
+					<SkipLinks />
+					<MainContentAnchor />
+					{children}
+					<Toaster richColors />
+				</QueryProvider>
+			</LayoutProvider>
+		</NextIntlClientProvider>
+	);
+}
+
+/**
+ * Root Layout
+ *
+ * PPR Strategy:
+ * - <html> and <body> are the static shell (prerendered at build time).
+ * - All dynamic data (locale, auth, messages) is fetched inside RootProviders,
+ *   which is wrapped in <Suspense> so it doesn't block the static shell.
+ * - Route-specific layouts handle sidebar/header:
+ *   - (auth)/ - Minimal layout for sign-in/sign-up
+ *   - (workspace)/ - Full dashboard layout with sidebar
+ */
+export default function RootLayout({
+	children,
+}: Readonly<{
+	children: React.ReactNode;
+}>) {
+	return (
+		<html lang="en" suppressHydrationWarning className="mobile-container">
 			<body className="mobile-container" suppressHydrationWarning>
-				<NextIntlClientProvider messages={messages} locale={locale}>
-					<LayoutProvider>
-						<QueryProvider>
-							{/* Skip links for keyboard navigation (WCAG 2.4.1) */}
-							<SkipLinks />
-							{/* Main content anchor for skip link target */}
-							<MainContentAnchor />
-							{children}
-							<Toaster richColors />
-						</QueryProvider>
-					</LayoutProvider>
-				</NextIntlClientProvider>
+				<Suspense fallback={<AuthLoadingFallback />}>
+					<RootProviders>{children}</RootProviders>
+				</Suspense>
 				<Analytics />
 			</body>
 		</html>

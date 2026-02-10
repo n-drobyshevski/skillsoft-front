@@ -21,9 +21,6 @@ import type { ProfileUserInfo } from '@/types/profile';
 import type { Metadata } from 'next';
 import { UserRole } from '@/types/user';
 
-// ISR: Revalidate every 60 seconds
-export const revalidate = 60;
-
 // Dynamic metadata with i18n
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('profile.page');

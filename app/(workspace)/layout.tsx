@@ -1,22 +1,12 @@
-"use client";
-
-import { useAuth } from "@clerk/nextjs";
-import { redirect } from "next/navigation";
 import { Suspense } from "react";
-import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
-import { AppSidebar } from "@/components/layout/app-sidebar";
-import { SiteHeader } from "@/components/layout/site-header";
-import { MobileBottomNav } from "@/components/layout/mobile-bottom-nav";
-import { HeaderProvider } from "@/src/context/HeaderContext";
-import { BreadcrumbProvider } from "@/src/context/BreadcrumbContext";
-import { LensInitializer } from "@/components/providers/LensInitializer";
+import { auth } from "@clerk/nextjs/server";
+import { ClerkProvider } from "@clerk/nextjs";
+import { redirect } from "next/navigation";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ViewModeProvider, useViewMode, shouldBeFocused } from "@/src/context/ViewModeContext";
-import { usePathname } from "next/navigation";
-import { cn } from "@/lib/utils";
+import WorkspaceShell from "./_components/WorkspaceShell";
 
 /**
- * Sidebar skeleton shown while auth loads
+ * Sidebar skeleton shown as part of the PPR static shell
  */
 function SidebarSkeleton() {
   return (
@@ -36,7 +26,7 @@ function SidebarSkeleton() {
 }
 
 /**
- * Header skeleton shown while auth loads
+ * Header skeleton shown as part of the PPR static shell
  */
 function HeaderSkeleton() {
   return (
@@ -66,126 +56,71 @@ function ContentSkeleton() {
 }
 
 /**
- * Inner layout component that consumes ViewModeContext
- * Handles the "Zen Mode" transitions and "Focused Mode" for IDE-like pages
+ * Full workspace skeleton - used as PPR static shell / Suspense fallback
  */
-function WorkspaceLayoutContent({ children }: { children: React.ReactNode }) {
-  const pathname = usePathname();
-  const { viewMode, isTransitioning } = useViewMode();
-  const isImmersive = viewMode === "immersive";
-  // Focused mode: keeps sidebar visible but constrains height (e.g., builder page)
-  const isFocused = shouldBeFocused(pathname);
-
+function WorkspaceSkeleton() {
   return (
-    <SidebarProvider
-      defaultOpen={false}
-      style={{
-        "--sidebar-width": "15rem",
-        "--sidebar-width-mobile": "16rem",
-      } as React.CSSProperties}
-    >
-      {/* Sidebar - hidden in immersive mode with smooth transition */}
-      <div
-        className={cn(
-          "transition-all duration-300 ease-in-out",
-          isImmersive && "opacity-0 pointer-events-none w-0 overflow-hidden"
-        )}
-        aria-hidden={isImmersive}
-      >
-        {!isImmersive && <AppSidebar />}
-      </div>
-
-      <SidebarInset
-        className={cn(
-          "flex flex-col bg-background mobile-container",
-          "transition-all duration-300 ease-in-out",
-          // Immersive: full viewport, no sidebar
-          // Focused: constrained height for scroll containment (builder, etc.)
-          // Default: min-height allows natural document flow
-          isImmersive ? "ml-0 p-0 h-dvh" : isFocused ? "h-dvh overflow-hidden" : "min-h-screen",
-          isTransitioning && "will-change-transform"
-        )}
-      >
-        {/* Header - hidden in immersive mode */}
-        <div
-          className={cn(
-            "transition-all duration-300 ease-in-out shrink-0",
-            isImmersive && "opacity-0 h-0 overflow-hidden pointer-events-none"
-          )}
-          aria-hidden={isImmersive}
-        >
-          {!isImmersive && <SiteHeader />}
-        </div>
-
-        <main
-          id="main-content"
-          className={cn(
-            "flex flex-1 flex-col focus:outline-none overflow-hidden mobile-container min-h-0",
-            "transition-all duration-300 ease-in-out",
-            (isImmersive || isFocused) && "max-w-full h-full"
-          )}
-          tabIndex={-1}
-          role="main"
-        >
-          <Suspense fallback={<ContentSkeleton />}>
-            {children}
-          </Suspense>
+    <div className="flex min-h-screen">
+      <SidebarSkeleton />
+      <div className="flex flex-1 flex-col">
+        <HeaderSkeleton />
+        <main className="flex flex-1 flex-col">
+          <ContentSkeleton />
         </main>
-
-        {/* Mobile bottom navigation - hidden in immersive mode (also auto-hides on focused paths) */}
-        <MobileBottomNav hidden={isImmersive} />
-      </SidebarInset>
-    </SidebarProvider>
+      </div>
+    </div>
   );
 }
 
 /**
- * Workspace Layout
- * 
+ * Server-side auth gate.
+ *
+ * auth() is a dynamic API that reads request data (cookies/headers).
+ * It MUST be inside <Suspense> for PPR compatibility.
+ *
+ * The proxy.ts already handles redirects for unauthenticated users at the
+ * middleware level. This AuthGate is defense-in-depth for edge cases
+ * (e.g., expired session during client-side navigation).
+ */
+async function AuthGate({ children }: { children: React.ReactNode }) {
+  const { userId } = await auth();
+
+  if (!userId) {
+    redirect("/sign-in");
+  }
+
+  return <>{children}</>;
+}
+
+/**
+ * Workspace Layout (Server Component)
+ *
  * Layout for all authenticated workspace routes.
  * Includes sidebar, header, and lens context for role-based views.
- * 
- * Next.js 16 behavior: Layouts preserve state, remain interactive,
- * and do not re-render during navigation.
+ *
+ * PPR Strategy:
+ * - WorkspaceSkeleton is the static shell (sidebar, header, content placeholders)
+ * - AuthGate checks auth server-side (dynamic, deferred via Suspense)
+ * - ClerkProvider dynamic provides runtime auth context to client components
+ *   (useAuth, useUser hooks in sidebar, header, LensInitializer)
+ * - WorkspaceShell handles client-side providers and interactive layout
+ *
+ * @see https://clerk.com/docs/guides/development/rendering-modes
  */
 export default function WorkspaceLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const { isSignedIn, isLoaded } = useAuth();
-
-  // Wait for auth to load - show skeleton layout
-  if (!isLoaded) {
-    return (
-      <div className="flex min-h-screen">
-        <SidebarSkeleton />
-        <div className="flex flex-1 flex-col">
-          <HeaderSkeleton />
-          <main className="flex flex-1 flex-col">
-            <ContentSkeleton />
-          </main>
-        </div>
-      </div>
-    );
-  }
-
-  // Redirect to sign-in if not authenticated
-  if (!isSignedIn) {
-    redirect("/sign-in");
-  }
-
   return (
-    <ViewModeProvider>
-      {/* LensInitializer must render BEFORE sidebar to prevent flash of wrong content */}
-      <LensInitializer />
-      <HeaderProvider>
-        <BreadcrumbProvider>
-          <WorkspaceLayoutContent>
+    <Suspense fallback={<WorkspaceSkeleton />}>
+      <AuthGate>
+        <ClerkProvider dynamic>
+          <WorkspaceShell>
             {children}
-          </WorkspaceLayoutContent>
-        </BreadcrumbProvider>
-      </HeaderProvider>
-    </ViewModeProvider>
+          </WorkspaceShell>
+        </ClerkProvider>
+      </AuthGate>
+    </Suspense>
   );
 }

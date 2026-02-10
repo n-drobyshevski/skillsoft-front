@@ -1,4 +1,7 @@
+'use cache';
+
 import { Metadata } from "next";
+import { cacheLife } from "next/cache";
 import {
   Zap,
   Users,
@@ -36,10 +39,6 @@ import {
   CollapsibleSection,
 } from "../_components/mdx";
 
-// Route segment configuration for static generation
-export const dynamic = "force-static";
-export const revalidate = 3600;
-
 export const metadata: Metadata = {
   title: "Сборка тестов | Документация | SkillSoft",
   description:
@@ -60,7 +59,9 @@ const tocItems = [
   { id: "examples", title: "Примеры конфигурации", level: 2 },
 ];
 
-export default function TestBuildingPage() {
+export default async function TestBuildingPage() {
+  cacheLife('max');
+
   return (
     <div className="docs-content">
       <DocsBreadcrumb />

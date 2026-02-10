@@ -1,19 +1,22 @@
 /**
  * My Tests Page API Cache - Server-side caching for user sessions and results.
  *
- * Provides cached data fetching for the my-tests page using Next.js unstable_cache.
- * Uses user-specific cache keys to ensure proper data isolation per user.
+ * Provides cached data fetching for the my-tests page using 'use cache'.
+ * Uses user-specific cache keys (via function params) for data isolation.
  *
- * IMPORTANT: Auth headers must be obtained OUTSIDE of unstable_cache and passed in.
- * This is because headers() is a dynamic data source that cannot be used inside
- * cached functions. See: https://nextjs.org/docs/app/api-reference/functions/unstable_cache
+ * IMPORTANT: Auth headers must be resolved by the CALLER and passed as params.
+ * This is because auth() is a dynamic API that cannot be called inside 'use cache'.
  *
- * Revalidation times:
- * - Sessions: 30s (real-time needs - users expect to see new assignments quickly)
- * - Results: 60s (results don't change frequently after completion)
+ * Uses function-level 'use cache' (not file-level) because getMyTestsDataCached
+ * must remain uncached — it orchestrates cached sub-calls and returns a Map
+ * (non-serializable by cache).
+ *
+ * Cache profiles:
+ * - Sessions: realtime (30s) — users expect to see new assignments quickly
+ * - Results: entityData (60s) — results don't change frequently after completion
  */
 
-import { unstable_cache } from 'next/cache';
+import { cacheLife, cacheTag } from 'next/cache';
 import { TestSessionSummary, TestResult } from '@/types/domain';
 import { getAuthHeaders } from './roleApi';
 
@@ -37,10 +40,6 @@ const getApiBaseUrl = () => {
 const TEST_SESSIONS_BASE = '/tests/sessions';
 const TEST_RESULTS_BASE = '/tests/results';
 
-// Cache revalidation times (in seconds)
-const SESSION_REVALIDATE = 30; // 30 seconds - sessions need real-time updates
-const RESULTS_REVALIDATE = 60; // 60 seconds - results are more stable
-
 // ============================================================================
 // User Sessions
 // ============================================================================
@@ -52,15 +51,26 @@ interface PaginatedResponse<T> {
 }
 
 /**
- * Internal fetch function for user sessions.
- * Auth headers must be passed in (cannot call getAuthHeaders inside cached function).
+ * Cached user sessions fetcher.
+ *
+ * Auth headers are passed as params (become part of cache key).
+ * clerkUserId, page, size, and authHeaders all form the cache key automatically.
+ *
+ * Cache tags allow on-demand invalidation when:
+ * - A new test is assigned to the user
+ * - A test session status changes
+ * - A test is completed
  */
-async function fetchUserSessions(
+export async function getUserSessionsCached(
   clerkUserId: string,
   authHeaders: AuthHeaders,
   page: number = 0,
   size: number = 100
 ): Promise<PaginatedResponse<TestSessionSummary> | null> {
+  'use cache';
+  cacheLife('realtime');
+  cacheTag('user-sessions', `user-sessions-${clerkUserId}`);
+
   try {
     const response = await fetch(
       `${getApiBaseUrl()}${TEST_SESSIONS_BASE}/user/${clerkUserId}?page=${page}&size=${size}`,
@@ -69,7 +79,6 @@ async function fetchUserSessions(
           'Content-Type': 'application/json',
           ...authHeaders,
         },
-        next: { revalidate: SESSION_REVALIDATE },
       }
     );
 
@@ -80,63 +89,26 @@ async function fetchUserSessions(
   }
 }
 
-/**
- * Cached user sessions fetcher.
- *
- * Uses user-specific cache key for data isolation.
- * Cache tags allow on-demand invalidation when:
- * - A new test is assigned to the user
- * - A test session status changes
- * - A test is completed
- *
- * IMPORTANT: Auth headers are obtained OUTSIDE the cache scope to comply with
- * Next.js unstable_cache requirements (no dynamic data sources inside cache).
- *
- * @param userId - Clerk user ID
- * @param page - Page number (0-indexed)
- * @param size - Page size (default: 100)
- * @returns Paginated user sessions or null on error
- *
- * @example
- * ```tsx
- * // In a server component
- * const sessions = await getUserSessionsCached(userId);
- * ```
- */
-export async function getUserSessionsCached(
-  userId: string,
-  page: number = 0,
-  size: number = 100
-): Promise<PaginatedResponse<TestSessionSummary> | null> {
-  // Get auth headers OUTSIDE the cache scope (required by Next.js)
-  const authHeaders = await getAuthHeaders();
-
-  const cachedFetch = unstable_cache(
-    () => fetchUserSessions(userId, authHeaders, page, size),
-    ['user-sessions', userId, String(page), String(size)],
-    {
-      revalidate: SESSION_REVALIDATE,
-      tags: ['user-sessions', `user-sessions-${userId}`],
-    }
-  );
-
-  return cachedFetch();
-}
-
 // ============================================================================
 // User Results
 // ============================================================================
 
 /**
- * Internal fetch function for user results.
- * Auth headers must be passed in (cannot call getAuthHeaders inside cached function).
+ * Cached user results fetcher.
+ *
+ * Auth headers are passed as params (become part of cache key).
+ * Cache tags allow on-demand invalidation when a test is completed.
  */
-async function fetchUserResults(
+export async function getUserResultsCached(
   clerkUserId: string,
   authHeaders: AuthHeaders,
   page: number = 0,
   size: number = 100
 ): Promise<PaginatedResponse<TestResult> | null> {
+  'use cache';
+  cacheLife('entityData');
+  cacheTag('user-results', `user-results-${clerkUserId}`);
+
   try {
     const response = await fetch(
       `${getApiBaseUrl()}${TEST_RESULTS_BASE}/user/${clerkUserId}?page=${page}&size=${size}`,
@@ -145,7 +117,6 @@ async function fetchUserResults(
           'Content-Type': 'application/json',
           ...authHeaders,
         },
-        next: { revalidate: RESULTS_REVALIDATE },
       }
     );
 
@@ -154,46 +125,6 @@ async function fetchUserResults(
   } catch {
     return null;
   }
-}
-
-/**
- * Cached user results fetcher.
- *
- * Uses user-specific cache key for data isolation.
- * Cache tags allow on-demand invalidation when a test is completed.
- *
- * IMPORTANT: Auth headers are obtained OUTSIDE the cache scope to comply with
- * Next.js unstable_cache requirements (no dynamic data sources inside cache).
- *
- * @param userId - Clerk user ID
- * @param page - Page number (0-indexed)
- * @param size - Page size (default: 100)
- * @returns Paginated user results or null on error
- *
- * @example
- * ```tsx
- * // In a server component
- * const results = await getUserResultsCached(userId);
- * ```
- */
-export async function getUserResultsCached(
-  userId: string,
-  page: number = 0,
-  size: number = 100
-): Promise<PaginatedResponse<TestResult> | null> {
-  // Get auth headers OUTSIDE the cache scope (required by Next.js)
-  const authHeaders = await getAuthHeaders();
-
-  const cachedFetch = unstable_cache(
-    () => fetchUserResults(userId, authHeaders, page, size),
-    ['user-results', userId, String(page), String(size)],
-    {
-      revalidate: RESULTS_REVALIDATE,
-      tags: ['user-results', `user-results-${userId}`],
-    }
-  );
-
-  return cachedFetch();
 }
 
 // ============================================================================
@@ -210,14 +141,23 @@ export interface MyTestsData {
  * Fetch both sessions and results in parallel.
  * This is the primary data fetcher for the my-tests page.
  *
+ * NOT cached itself — orchestrates cached sub-calls and returns a Map
+ * (non-serializable). Individual fetchers handle their own caching.
+ *
+ * Resolves auth headers internally via getAuthHeaders() since this function
+ * is NOT inside 'use cache' and can safely call dynamic APIs.
+ *
  * @param userId - Clerk user ID
  * @returns Combined sessions and results data
  */
 export async function getMyTestsDataCached(userId: string): Promise<MyTestsData> {
+  // Resolve auth headers here (outside 'use cache' scope) and pass to cached functions
+  const authHeaders = await getAuthHeaders();
+
   // Fetch in parallel for optimal performance
   const [sessionsResponse, resultsResponse] = await Promise.all([
-    getUserSessionsCached(userId),
-    getUserResultsCached(userId),
+    getUserSessionsCached(userId, authHeaders),
+    getUserResultsCached(userId, authHeaders),
   ]);
 
   const sessions = sessionsResponse?.content || [];

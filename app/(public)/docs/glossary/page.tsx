@@ -1,4 +1,7 @@
+'use cache';
+
 import { Metadata } from "next";
+import { cacheLife } from "next/cache";
 
 import { DocsBreadcrumb } from "../_components/DocsBreadcrumb";
 import { DocsFooterNav } from "../_components/DocsFooterNav";
@@ -7,10 +10,6 @@ import { GlossarySection } from "./_components/GlossarySection";
 import { MobileSectionNav } from "./_components/MobileSectionNav";
 import { GlossarySearchClient } from "./_components/GlossarySearchClient";
 import { glossarySections } from "./_components/glossary-data";
-
-// Route segment configuration for static generation
-export const dynamic = "force-static";
-export const revalidate = 3600;
 
 export const metadata: Metadata = {
   title: "Глоссарий | Документация | SkillSoft",
@@ -24,7 +23,9 @@ const tocItems = [
   { id: "technical-terms", title: "Технические термины", level: 2 },
 ];
 
-export default function GlossaryPage() {
+export default async function GlossaryPage() {
+  cacheLife('max');
+
   return (
     <>
       {/* Skip link for accessibility */}

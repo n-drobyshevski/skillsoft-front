@@ -1,4 +1,7 @@
+'use cache';
+
 import { Metadata } from "next";
+import { cacheLife } from "next/cache";
 import {
   Zap,
   FileText,
@@ -36,10 +39,6 @@ import {
   ResponsiveDiagram,
 } from "../_components/mdx";
 
-// Route segment configuration for static generation
-export const dynamic = "force-static";
-export const revalidate = 3600;
-
 export const metadata: Metadata = {
   title: "Как работает система | Документация | SkillSoft",
   description:
@@ -62,7 +61,9 @@ const tocItems = [
   { id: "external", title: "Внешние сервисы", level: 2 },
 ];
 
-export default function HowItWorksPage() {
+export default async function HowItWorksPage() {
+  cacheLife('max');
+
   return (
     <div className="docs-content">
       <DocsBreadcrumb />

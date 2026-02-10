@@ -1,20 +1,20 @@
+'use cache';
 /**
  * Server-side Cached API Functions
  *
- * This file uses Next.js's unstable_cache for data fetching caching.
- * These functions are server-only and cannot be imported by Client Components.
+ * Uses Next.js 16 'use cache' directive for cross-request caching.
+ * Cache profiles are defined in next.config.ts cacheLife.
  *
- * Note: Using unstable_cache instead of 'use cache' directive because
- * cacheComponents is disabled in next.config.ts due to Clerk compatibility.
+ * With 'use cache' at file level, ALL exported async functions are cached.
+ * Function arguments automatically become part of the cache key.
  *
- * Revalidation times (matching next.config.ts cacheLife profiles):
- * - realtime: 30s (user sessions, stats)
- * - entityData: 300s / 5min (competencies, questions)
- * - userData: 900s / 15min (profiles, roles)
- * - referenceData: 3600s / 1hr (standards, categories)
+ * Profiles used:
+ * - realtime: 30s stale, 30s revalidate, 60s expire
+ * - entityData: 60s stale, 300s revalidate, 600s expire
+ * - userData: 300s stale, 900s revalidate, 1800s expire
  */
 
-import { unstable_cache } from 'next/cache';
+import { cacheLife, cacheTag } from 'next/cache';
 import { Competency, BehavioralIndicator, AssessmentQuestion } from '@/types/domain';
 import { User } from '@/types/user';
 
@@ -29,23 +29,21 @@ const QUESTIONS_ENDPOINT = '/questions';
 const INDICATORS_ENDPOINT = '/behavioral-indicators';
 const USERS_ENDPOINT = '/users';
 
-// Cache revalidation times (in seconds)
-const REALTIME_REVALIDATE = 30;
-const ENTITY_DATA_REVALIDATE = 300; // 5 minutes
-const USER_DATA_REVALIDATE = 900; // 15 minutes
-
 // ============================================================================
 // Competencies
 // ============================================================================
 
 /**
- * Internal fetch function for competencies list
+ * Cached competencies list fetcher
+ * Uses entityData profile (5 min revalidation)
  */
-async function fetchCompetencies(): Promise<Competency[] | null> {
+export async function getCompetenciesCached(): Promise<Competency[] | null> {
+    cacheLife('entityData');
+    cacheTag('competencies');
+
     try {
         const response = await fetch(`${getApiBaseUrl()}${COMPETENCIES_ENDPOINT}`, {
             headers: { 'Content-Type': 'application/json' },
-            next: { revalidate: ENTITY_DATA_REVALIDATE },
         });
 
         if (!response.ok) return null;
@@ -56,26 +54,16 @@ async function fetchCompetencies(): Promise<Competency[] | null> {
 }
 
 /**
- * Cached competencies list fetcher
- * Uses 5 minute revalidation
+ * Cached single competency fetcher
+ * Uses entityData profile with entity-specific tag
  */
-export const getCompetenciesCached = unstable_cache(
-    fetchCompetencies,
-    ['competencies'],
-    {
-        revalidate: ENTITY_DATA_REVALIDATE,
-        tags: ['competencies'],
-    }
-);
+export async function getCompetencyCached(id: string): Promise<Competency | null> {
+    cacheLife('entityData');
+    cacheTag('competencies', `competency-${id}`);
 
-/**
- * Internal fetch function for single competency
- */
-async function fetchCompetency(id: string): Promise<Competency | null> {
     try {
         const response = await fetch(`${getApiBaseUrl()}${COMPETENCIES_ENDPOINT}/${id}`, {
             headers: { 'Content-Type': 'application/json' },
-            next: { revalidate: ENTITY_DATA_REVALIDATE },
         });
 
         if (!response.ok) return null;
@@ -85,34 +73,20 @@ async function fetchCompetency(id: string): Promise<Competency | null> {
     }
 }
 
-/**
- * Cached single competency fetcher
- */
-export async function getCompetencyCached(id: string): Promise<Competency | null> {
-    const cachedFetch = unstable_cache(
-        () => fetchCompetency(id),
-        ['competency', id],
-        {
-            revalidate: ENTITY_DATA_REVALIDATE,
-            tags: ['competencies', `competency-${id}`],
-        }
-    );
-
-    return cachedFetch();
-}
-
 // ============================================================================
 // Behavioral Indicators
 // ============================================================================
 
 /**
- * Internal fetch function for behavioral indicators list
+ * Cached behavioral indicators list fetcher
  */
-async function fetchIndicators(): Promise<BehavioralIndicator[] | null> {
+export async function getIndicatorsCached(): Promise<BehavioralIndicator[] | null> {
+    cacheLife('entityData');
+    cacheTag('indicators');
+
     try {
         const response = await fetch(`${getApiBaseUrl()}${INDICATORS_ENDPOINT}`, {
             headers: { 'Content-Type': 'application/json' },
-            next: { revalidate: ENTITY_DATA_REVALIDATE },
         });
 
         if (!response.ok) return null;
@@ -123,25 +97,15 @@ async function fetchIndicators(): Promise<BehavioralIndicator[] | null> {
 }
 
 /**
- * Cached behavioral indicators list fetcher
+ * Cached single indicator fetcher
  */
-export const getIndicatorsCached = unstable_cache(
-    fetchIndicators,
-    ['indicators'],
-    {
-        revalidate: ENTITY_DATA_REVALIDATE,
-        tags: ['indicators'],
-    }
-);
+export async function getIndicatorCached(id: string): Promise<BehavioralIndicator | null> {
+    cacheLife('entityData');
+    cacheTag('indicators', `indicator-${id}`);
 
-/**
- * Internal fetch function for single indicator
- */
-async function fetchIndicator(id: string): Promise<BehavioralIndicator | null> {
     try {
         const response = await fetch(`${getApiBaseUrl()}${INDICATORS_ENDPOINT}/${id}`, {
             headers: { 'Content-Type': 'application/json' },
-            next: { revalidate: ENTITY_DATA_REVALIDATE },
         });
 
         if (!response.ok) return null;
@@ -151,34 +115,20 @@ async function fetchIndicator(id: string): Promise<BehavioralIndicator | null> {
     }
 }
 
-/**
- * Cached single indicator fetcher
- */
-export async function getIndicatorCached(id: string): Promise<BehavioralIndicator | null> {
-    const cachedFetch = unstable_cache(
-        () => fetchIndicator(id),
-        ['indicator', id],
-        {
-            revalidate: ENTITY_DATA_REVALIDATE,
-            tags: ['indicators', `indicator-${id}`],
-        }
-    );
-
-    return cachedFetch();
-}
-
 // ============================================================================
 // Assessment Questions
 // ============================================================================
 
 /**
- * Internal fetch function for questions list
+ * Cached questions list fetcher
  */
-async function fetchQuestions(): Promise<AssessmentQuestion[] | null> {
+export async function getQuestionsCached(): Promise<AssessmentQuestion[] | null> {
+    cacheLife('entityData');
+    cacheTag('questions');
+
     try {
         const response = await fetch(`${getApiBaseUrl()}${QUESTIONS_ENDPOINT}`, {
             headers: { 'Content-Type': 'application/json' },
-            next: { revalidate: ENTITY_DATA_REVALIDATE },
         });
 
         if (!response.ok) return null;
@@ -189,25 +139,15 @@ async function fetchQuestions(): Promise<AssessmentQuestion[] | null> {
 }
 
 /**
- * Cached questions list fetcher
+ * Cached single question fetcher
  */
-export const getQuestionsCached = unstable_cache(
-    fetchQuestions,
-    ['questions'],
-    {
-        revalidate: ENTITY_DATA_REVALIDATE,
-        tags: ['questions'],
-    }
-);
+export async function getQuestionCached(id: string): Promise<AssessmentQuestion | null> {
+    cacheLife('entityData');
+    cacheTag('questions', `question-${id}`);
 
-/**
- * Internal fetch function for single question
- */
-async function fetchQuestion(id: string): Promise<AssessmentQuestion | null> {
     try {
         const response = await fetch(`${getApiBaseUrl()}${QUESTIONS_ENDPOINT}/${id}`, {
             headers: { 'Content-Type': 'application/json' },
-            next: { revalidate: ENTITY_DATA_REVALIDATE },
         });
 
         if (!response.ok) return null;
@@ -215,22 +155,6 @@ async function fetchQuestion(id: string): Promise<AssessmentQuestion | null> {
     } catch {
         return null;
     }
-}
-
-/**
- * Cached single question fetcher
- */
-export async function getQuestionCached(id: string): Promise<AssessmentQuestion | null> {
-    const cachedFetch = unstable_cache(
-        () => fetchQuestion(id),
-        ['question', id],
-        {
-            revalidate: ENTITY_DATA_REVALIDATE,
-            tags: ['questions', `question-${id}`],
-        }
-    );
-
-    return cachedFetch();
 }
 
 // ============================================================================
@@ -242,13 +166,17 @@ export async function getQuestionCached(id: string): Promise<AssessmentQuestion 
 // The functions below are only useful for public/anonymous user listing if the API allows it.
 
 /**
- * Internal fetch function for users list
+ * Cached users list fetcher (requires public API endpoint)
+ * Uses userData profile (15 min revalidation)
+ * @deprecated User APIs typically require auth - use usersApi.getAllUsers() instead
  */
-async function fetchUsers(): Promise<User[] | null> {
+export async function getUsersCached(): Promise<User[] | null> {
+    cacheLife('userData');
+    cacheTag('users');
+
     try {
         const response = await fetch(`${getApiBaseUrl()}${USERS_ENDPOINT}`, {
             headers: { 'Content-Type': 'application/json' },
-            next: { revalidate: USER_DATA_REVALIDATE },
         });
 
         if (!response.ok) return null;
@@ -257,20 +185,6 @@ async function fetchUsers(): Promise<User[] | null> {
         return null;
     }
 }
-
-/**
- * Cached users list fetcher (requires public API endpoint)
- * Uses 15 minute revalidation
- * @deprecated User APIs typically require auth - use usersApi.getAllUsers() instead
- */
-export const getUsersCached = unstable_cache(
-    fetchUsers,
-    ['users'],
-    {
-        revalidate: USER_DATA_REVALIDATE,
-        tags: ['users'],
-    }
-);
 
 // ============================================================================
 // Stats (Real-time data)
@@ -284,23 +198,19 @@ interface DashboardStats {
 }
 
 /**
- * Internal fetch function for dashboard stats
+ * Cached dashboard stats fetcher
+ * Uses realtime profile (30s revalidation) for frequently updating data
  */
-async function fetchDashboardStats(): Promise<DashboardStats | null> {
+export async function getDashboardStatsCached(): Promise<DashboardStats | null> {
+    cacheLife('realtime');
+    cacheTag('dashboard-stats');
+
     try {
         const [competencies, indicators, questions, users] = await Promise.all([
-            fetch(`${getApiBaseUrl()}${COMPETENCIES_ENDPOINT}/count`, {
-                next: { revalidate: REALTIME_REVALIDATE },
-            }),
-            fetch(`${getApiBaseUrl()}${INDICATORS_ENDPOINT}/count`, {
-                next: { revalidate: REALTIME_REVALIDATE },
-            }),
-            fetch(`${getApiBaseUrl()}${QUESTIONS_ENDPOINT}/count`, {
-                next: { revalidate: REALTIME_REVALIDATE },
-            }),
-            fetch(`${getApiBaseUrl()}${USERS_ENDPOINT}/count`, {
-                next: { revalidate: REALTIME_REVALIDATE },
-            }),
+            fetch(`${getApiBaseUrl()}${COMPETENCIES_ENDPOINT}/count`),
+            fetch(`${getApiBaseUrl()}${INDICATORS_ENDPOINT}/count`),
+            fetch(`${getApiBaseUrl()}${QUESTIONS_ENDPOINT}/count`),
+            fetch(`${getApiBaseUrl()}${USERS_ENDPOINT}/count`),
         ]);
 
         // Handle potential failures gracefully
@@ -320,16 +230,3 @@ async function fetchDashboardStats(): Promise<DashboardStats | null> {
         return null;
     }
 }
-
-/**
- * Cached dashboard stats fetcher
- * Uses 30 second revalidation for frequently updating data
- */
-export const getDashboardStatsCached = unstable_cache(
-    fetchDashboardStats,
-    ['dashboard-stats'],
-    {
-        revalidate: REALTIME_REVALIDATE,
-        tags: ['dashboard-stats'],
-    }
-);

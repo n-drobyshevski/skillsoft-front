@@ -4,25 +4,6 @@ import { getBuilderDataCached } from "@/lib/cached-data";
 import { BlueprintWorkspaceProvider } from "./_components/BlueprintWorkspaceProvider";
 import { fromBackendStrategy } from "./strategy-mapping";
 
-/**
- * Route Segment Config - Next.js 16 hybrid caching strategy
- *
- * - dynamic: 'force-dynamic' - Required for auth-protected API calls
- * - fetchCache: 'default-cache' - Allow individual fetch() calls to specify caching
- * - runtime: 'nodejs' - Use Node.js runtime for server-side data fetching
- *
- * Individual fetch calls in actions.ts use granular cache tags for surgical invalidation:
- * - template:{id}:blueprint - Blueprint structure changes
- * - template:{id}:settings - Template settings changes
- * - template:{id}:simulation - Simulation cache
- * - competency:inventory - Global competency health heatmap
- *
- * Note: Uses cached data functions from @/lib/cached-data for request deduplication.
- * Multiple calls to getCachedCompetencies() within the same request are deduplicated.
- */
-export const dynamic = 'force-dynamic';
-export const fetchCache = 'default-cache';
-export const runtime = 'nodejs';
 
 interface BuilderLayoutProps {
   children: React.ReactNode;

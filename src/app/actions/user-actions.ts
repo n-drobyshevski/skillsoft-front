@@ -1,6 +1,6 @@
 'use server';
 
-import { revalidatePath, revalidateTag } from 'next/cache';
+import { revalidatePath, revalidateTag, updateTag } from 'next/cache';
 import { clerkClient } from '@clerk/nextjs/server';
 import { UserRole } from '@/types/user';
 
@@ -200,15 +200,16 @@ async function revalidateUserCache(userId?: string, clerkId?: string) {
       revalidatePath(`/users/${clerkId}/edit`);
     }
 
-    // Tags
-    revalidateTag('users', 'max');
-    revalidateTag('users-stats', 'max');
+    // Immediate invalidation for primary user data (read-your-own-writes)
+    updateTag('users');
     if (userId) {
-      revalidateTag(`user-${userId}`, 'max');
+      updateTag(`user-${userId}`);
     }
     if (clerkId) {
-      revalidateTag(`user-clerk-${clerkId}`, 'max');
+      updateTag(`user-clerk-${clerkId}`);
     }
+    // User stats use eventual consistency
+    revalidateTag('users-stats', 'max');
   } catch {
     // Revalidation errors shouldn't fail the operation - silently continue
   }

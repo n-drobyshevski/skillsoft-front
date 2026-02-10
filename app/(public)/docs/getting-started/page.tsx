@@ -1,4 +1,7 @@
+'use cache';
+
 import { Metadata } from "next";
+import { cacheLife } from "next/cache";
 import Link from "next/link";
 import {
   RocketIcon,
@@ -25,10 +28,6 @@ import { DocsFooterNav } from "../_components/DocsFooterNav";
 import { DocsToc } from "../_components/DocsToc";
 import { MobileTocDrawer } from "../_components/MobileTocDrawer";
 import { Callout } from "../_components/mdx";
-
-// Route segment configuration for static generation
-export const dynamic = "force-static";
-export const revalidate = 3600;
 
 export const metadata: Metadata = {
   title: "Быстрый старт | Документация | SkillSoft",
@@ -190,7 +189,9 @@ function StepTimeline({
   );
 }
 
-export default function GettingStartedPage() {
+export default async function GettingStartedPage() {
+  cacheLife('max');
+
   return (
     <div className="docs-content">
       {/* Mobile TOC Drawer */}
