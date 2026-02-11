@@ -11,15 +11,15 @@
  */
 
 import { auth } from '@clerk/nextjs/server';
-import type { UserRole } from '@/app/types/globals.d';
+import { UserRole } from '@/types/user';
 
 /**
  * Role hierarchy - higher number means more permissions.
  */
 const ROLE_HIERARCHY: Record<UserRole, number> = {
-  USER: 1,
-  EDITOR: 2,
-  ADMIN: 3,
+  [UserRole.USER]: 1,
+  [UserRole.EDITOR]: 2,
+  [UserRole.ADMIN]: 3,
 };
 
 /**
@@ -33,11 +33,11 @@ function mapOrgRole(orgRole: string | undefined): UserRole | null {
   
   switch (orgRole) {
     case 'org:admin':
-      return 'ADMIN';
+      return UserRole.ADMIN;
     case 'org:editor':
-      return 'EDITOR';
+      return UserRole.EDITOR;
     case 'org:member':
-      return 'USER';
+      return UserRole.USER;
     default:
       return null;
   }
@@ -60,7 +60,7 @@ async function getEffectiveRole(): Promise<UserRole> {
   const metadataRole = sessionClaims?.metadata?.role as UserRole | undefined;
   
   // Priority: Organization role > metadata role > default USER
-  return mappedOrgRole ?? metadataRole ?? 'USER';
+  return mappedOrgRole ?? metadataRole ?? UserRole.USER;
 }
 
 /**
@@ -109,10 +109,11 @@ export async function getUserRole(): Promise<UserRole | null> {
  */
 export async function hasMinimumRole(minimumRole: UserRole): Promise<boolean> {
   const userRole = await getEffectiveRole();
-  
-  const userLevel = ROLE_HIERARCHY[userRole] || 0;
-  const requiredLevel = ROLE_HIERARCHY[minimumRole] || 0;
-  
+
+  // Safe access with explicit type assertion for Record<UserRole, number>
+  const userLevel = ROLE_HIERARCHY[userRole as keyof typeof ROLE_HIERARCHY] ?? 0;
+  const requiredLevel = ROLE_HIERARCHY[minimumRole as keyof typeof ROLE_HIERARCHY] ?? 0;
+
   return userLevel >= requiredLevel;
 }
 
@@ -135,7 +136,7 @@ export async function hasAnyRole(roles: UserRole[]): Promise<boolean> {
  * Shorthand for checkRole('ADMIN').
  */
 export async function isAdmin(): Promise<boolean> {
-  return checkRole('ADMIN');
+  return checkRole(UserRole.ADMIN);
 }
 
 /**
@@ -143,7 +144,7 @@ export async function isAdmin(): Promise<boolean> {
  * Shorthand for hasAnyRole(['ADMIN', 'EDITOR']).
  */
 export async function canEdit(): Promise<boolean> {
-  return hasAnyRole(['ADMIN', 'EDITOR']);
+  return hasAnyRole([UserRole.ADMIN, UserRole.EDITOR]);
 }
 
 /**
@@ -151,11 +152,12 @@ export async function canEdit(): Promise<boolean> {
  */
 export function getRoleDisplayName(role: UserRole): string {
   const names: Record<UserRole, string> = {
-    ADMIN: 'Administrator',
-    EDITOR: 'Editor',
-    USER: 'User',
+    [UserRole.ADMIN]: 'Administrator',
+    [UserRole.EDITOR]: 'Editor',
+    [UserRole.USER]: 'User',
   };
-  return names[role] || 'Unknown';
+  // Safe access with explicit type assertion for Record<UserRole, string>
+  return names[role as keyof typeof names] ?? 'Unknown';
 }
 
 /**
@@ -163,9 +165,10 @@ export function getRoleDisplayName(role: UserRole): string {
  */
 export function getRoleBadgeVariant(role: UserRole): 'default' | 'secondary' | 'destructive' | 'outline' {
   const variants: Record<UserRole, 'default' | 'secondary' | 'destructive' | 'outline'> = {
-    ADMIN: 'destructive',
-    EDITOR: 'default',
-    USER: 'secondary',
+    [UserRole.ADMIN]: 'destructive',
+    [UserRole.EDITOR]: 'default',
+    [UserRole.USER]: 'secondary',
   };
-  return variants[role] || 'outline';
+  // Safe access with explicit type assertion for Record<UserRole, variant>
+  return variants[role as keyof typeof variants] ?? 'outline';
 }

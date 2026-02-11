@@ -1,0 +1,320 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "onet_to_bigfive_map",
+  "title": "O*NET Work Styles to Big Five Personality Mapping",
+  "description": "Maps O*NET Work Styles (1.C.x.x) to Big Five personality dimensions. Based on established psychometric research correlating O*NET occupational characteristics with the Five-Factor Model (FFM/OCEAN).",
+  "version": "1.0.0",
+  "lastUpdated": "2025-11-29",
+  "references": [
+    "Costa, P.T. & McCrae, R.R. (1992). Revised NEO Personality Inventory (NEO-PI-R)",
+    "Barrick, M.R. & Mount, M.K. (1991). The Big Five Personality Dimensions and Job Performance",
+    "Judge, T.A. et al. (2002). Personality and Leadership: A Qualitative and Quantitative Review"
+  ],
+  "bigFiveDefinitions": {
+    "OPENNESS": {
+      "code": "O",
+      "name": "Openness to Experience",
+      "description": "Reflects imagination, creativity, curiosity, and willingness to explore new ideas",
+      "facets": ["Fantasy", "Aesthetics", "Feelings", "Actions", "Ideas", "Values"]
+    },
+    "CONSCIENTIOUSNESS": {
+      "code": "C",
+      "name": "Conscientiousness",
+      "description": "Reflects self-discipline, orderliness, dutifulness, and goal-directed behavior",
+      "facets": ["Competence", "Order", "Dutifulness", "Achievement Striving", "Self-Discipline", "Deliberation"]
+    },
+    "EXTRAVERSION": {
+      "code": "E",
+      "name": "Extraversion",
+      "description": "Reflects sociability, assertiveness, positive emotionality, and energy",
+      "facets": ["Warmth", "Gregariousness", "Assertiveness", "Activity", "Excitement Seeking", "Positive Emotions"]
+    },
+    "AGREEABLENESS": {
+      "code": "A",
+      "name": "Agreeableness",
+      "description": "Reflects cooperation, trust, empathy, and concern for others",
+      "facets": ["Trust", "Straightforwardness", "Altruism", "Compliance", "Modesty", "Tender-Mindedness"]
+    },
+    "EMOTIONAL_STABILITY": {
+      "code": "ES",
+      "name": "Emotional Stability (Low Neuroticism)",
+      "description": "Reflects calmness, emotional resilience, and ability to handle stress",
+      "facets": ["Anxiety (inv)", "Hostility (inv)", "Depression (inv)", "Self-Consciousness (inv)", "Impulsiveness (inv)", "Vulnerability (inv)"]
+    }
+  },
+  "mappings": {
+    "1.C.1.a": {
+      "elementId": "1.C.1.a",
+      "elementName": "Achievement/Effort",
+      "description": "Job requires establishing and maintaining personally challenging achievement goals and exerting effort toward mastering tasks",
+      "primaryBigFive": "CONSCIENTIOUSNESS",
+      "primaryFacet": "Achievement Striving",
+      "primaryWeight": 0.85,
+      "secondaryBigFive": "EXTRAVERSION",
+      "secondaryFacet": "Activity",
+      "secondaryWeight": 0.35,
+      "rationale": "Achievement orientation is a core facet of Conscientiousness, with secondary links to Extraversion's activity/energy component"
+    },
+    "1.C.1.b": {
+      "elementId": "1.C.1.b",
+      "elementName": "Persistence",
+      "description": "Job requires persistence in the face of obstacles",
+      "primaryBigFive": "CONSCIENTIOUSNESS",
+      "primaryFacet": "Self-Discipline",
+      "primaryWeight": 0.90,
+      "secondaryBigFive": "EMOTIONAL_STABILITY",
+      "secondaryFacet": "Vulnerability (inv)",
+      "secondaryWeight": 0.30,
+      "rationale": "Persistence directly maps to Conscientiousness self-discipline; also requires emotional resilience"
+    },
+    "1.C.1.c": {
+      "elementId": "1.C.1.c",
+      "elementName": "Initiative",
+      "description": "Job requires a willingness to take on responsibilities and challenges",
+      "primaryBigFive": "EXTRAVERSION",
+      "primaryFacet": "Assertiveness",
+      "primaryWeight": 0.70,
+      "secondaryBigFive": "CONSCIENTIOUSNESS",
+      "secondaryFacet": "Achievement Striving",
+      "secondaryWeight": 0.50,
+      "rationale": "Initiative reflects Extraversion's assertiveness and proactivity, with Conscientiousness driving goal pursuit"
+    },
+    "1.C.2.b": {
+      "elementId": "1.C.2.b",
+      "elementName": "Leadership",
+      "description": "Job requires a willingness to lead, take charge, and offer opinions and direction",
+      "primaryBigFive": "EXTRAVERSION",
+      "primaryFacet": "Assertiveness",
+      "primaryWeight": 0.80,
+      "secondaryBigFive": "CONSCIENTIOUSNESS",
+      "secondaryFacet": "Competence",
+      "secondaryWeight": 0.40,
+      "tertiaryBigFive": "OPENNESS",
+      "tertiaryFacet": "Ideas",
+      "tertiaryWeight": 0.25,
+      "rationale": "Leadership strongly correlates with Extraversion (assertiveness, dominance) and Conscientiousness (organization, reliability)"
+    },
+    "1.C.3.a": {
+      "elementId": "1.C.3.a",
+      "elementName": "Cooperation",
+      "description": "Job requires being pleasant with others on the job and displaying a good-natured, cooperative attitude",
+      "primaryBigFive": "AGREEABLENESS",
+      "primaryFacet": "Compliance",
+      "primaryWeight": 0.85,
+      "secondaryBigFive": "EXTRAVERSION",
+      "secondaryFacet": "Warmth",
+      "secondaryWeight": 0.30,
+      "rationale": "Cooperation is a defining characteristic of Agreeableness, with interpersonal warmth from Extraversion"
+    },
+    "1.C.3.b": {
+      "elementId": "1.C.3.b",
+      "elementName": "Concern for Others",
+      "description": "Job requires being sensitive to others' needs and feelings and being understanding and helpful on the job",
+      "primaryBigFive": "AGREEABLENESS",
+      "primaryFacet": "Tender-Mindedness",
+      "primaryWeight": 0.90,
+      "secondaryBigFive": "AGREEABLENESS",
+      "secondaryFacet": "Altruism",
+      "secondaryWeight": 0.70,
+      "rationale": "Empathy and concern for others are core Agreeableness facets (tender-mindedness, altruism)"
+    },
+    "1.C.3.c": {
+      "elementId": "1.C.3.c",
+      "elementName": "Social Orientation",
+      "description": "Job requires preferring to work with others rather than alone, and being personally connected with others on the job",
+      "primaryBigFive": "EXTRAVERSION",
+      "primaryFacet": "Gregariousness",
+      "primaryWeight": 0.90,
+      "secondaryBigFive": "AGREEABLENESS",
+      "secondaryFacet": "Trust",
+      "secondaryWeight": 0.35,
+      "rationale": "Social orientation directly reflects Extraversion's gregariousness and need for social interaction"
+    },
+    "1.C.4.a": {
+      "elementId": "1.C.4.a",
+      "elementName": "Self-Control",
+      "description": "Job requires maintaining composure, keeping emotions in check, controlling anger, and avoiding aggressive behavior",
+      "primaryBigFive": "EMOTIONAL_STABILITY",
+      "primaryFacet": "Hostility (inv)",
+      "primaryWeight": 0.85,
+      "secondaryBigFive": "AGREEABLENESS",
+      "secondaryFacet": "Compliance",
+      "secondaryWeight": 0.45,
+      "tertiaryBigFive": "CONSCIENTIOUSNESS",
+      "tertiaryFacet": "Deliberation",
+      "tertiaryWeight": 0.30,
+      "rationale": "Self-control maps to Emotional Stability (low anger/hostility) and Agreeableness (non-aggression)"
+    },
+    "1.C.4.b": {
+      "elementId": "1.C.4.b",
+      "elementName": "Stress Tolerance",
+      "description": "Job requires accepting criticism and dealing calmly and effectively with high-stress situations",
+      "primaryBigFive": "EMOTIONAL_STABILITY",
+      "primaryFacet": "Vulnerability (inv)",
+      "primaryWeight": 0.95,
+      "secondaryBigFive": "EMOTIONAL_STABILITY",
+      "secondaryFacet": "Anxiety (inv)",
+      "secondaryWeight": 0.80,
+      "rationale": "Stress tolerance is the defining characteristic of Emotional Stability (low neuroticism)"
+    },
+    "1.C.4.c": {
+      "elementId": "1.C.4.c",
+      "elementName": "Adaptability/Flexibility",
+      "description": "Job requires being open to change (positive or negative) and to considerable variety in the workplace",
+      "primaryBigFive": "OPENNESS",
+      "primaryFacet": "Actions",
+      "primaryWeight": 0.75,
+      "secondaryBigFive": "EMOTIONAL_STABILITY",
+      "secondaryFacet": "Vulnerability (inv)",
+      "secondaryWeight": 0.40,
+      "tertiaryBigFive": "AGREEABLENESS",
+      "tertiaryFacet": "Compliance",
+      "tertiaryWeight": 0.25,
+      "rationale": "Adaptability reflects Openness to new experiences and change, with Emotional Stability supporting flexibility under pressure"
+    },
+    "1.C.5.a": {
+      "elementId": "1.C.5.a",
+      "elementName": "Dependability",
+      "description": "Job requires being reliable, responsible, and dependable, and fulfilling obligations",
+      "primaryBigFive": "CONSCIENTIOUSNESS",
+      "primaryFacet": "Dutifulness",
+      "primaryWeight": 0.95,
+      "secondaryBigFive": "CONSCIENTIOUSNESS",
+      "secondaryFacet": "Self-Discipline",
+      "secondaryWeight": 0.75,
+      "rationale": "Dependability is a core expression of Conscientiousness - dutifulness and reliability"
+    },
+    "1.C.5.b": {
+      "elementId": "1.C.5.b",
+      "elementName": "Attention to Detail",
+      "description": "Job requires being careful about detail and thorough in completing work tasks",
+      "primaryBigFive": "CONSCIENTIOUSNESS",
+      "primaryFacet": "Order",
+      "primaryWeight": 0.90,
+      "secondaryBigFive": "CONSCIENTIOUSNESS",
+      "secondaryFacet": "Competence",
+      "secondaryWeight": 0.60,
+      "rationale": "Attention to detail maps directly to Conscientiousness orderliness and thoroughness facets"
+    },
+    "1.C.5.c": {
+      "elementId": "1.C.5.c",
+      "elementName": "Integrity",
+      "description": "Job requires being honest and ethical",
+      "primaryBigFive": "CONSCIENTIOUSNESS",
+      "primaryFacet": "Dutifulness",
+      "primaryWeight": 0.70,
+      "secondaryBigFive": "AGREEABLENESS",
+      "secondaryFacet": "Straightforwardness",
+      "secondaryWeight": 0.65,
+      "rationale": "Integrity involves Conscientiousness (following rules, duty) and Agreeableness (honesty, sincerity)"
+    },
+    "1.C.6": {
+      "elementId": "1.C.6",
+      "elementName": "Independence",
+      "description": "Job requires developing one's own ways of doing things, guiding oneself with little or no supervision, and depending on oneself to get things done",
+      "primaryBigFive": "OPENNESS",
+      "primaryFacet": "Actions",
+      "primaryWeight": 0.60,
+      "secondaryBigFive": "CONSCIENTIOUSNESS",
+      "secondaryFacet": "Self-Discipline",
+      "secondaryWeight": 0.55,
+      "tertiaryBigFive": "EXTRAVERSION",
+      "tertiaryFacet": "Assertiveness",
+      "tertiaryWeight": 0.30,
+      "rationale": "Independence reflects Openness (self-direction), Conscientiousness (self-discipline), and some Extraversion (assertiveness)"
+    },
+    "1.C.7.a": {
+      "elementId": "1.C.7.a",
+      "elementName": "Innovation",
+      "description": "Job requires creativity and alternative thinking to develop new ideas for and answers to work-related problems",
+      "primaryBigFive": "OPENNESS",
+      "primaryFacet": "Ideas",
+      "primaryWeight": 0.95,
+      "secondaryBigFive": "OPENNESS",
+      "secondaryFacet": "Fantasy",
+      "secondaryWeight": 0.70,
+      "rationale": "Innovation is the quintessential expression of Openness - creativity, imagination, and novel ideas"
+    },
+    "1.C.7.b": {
+      "elementId": "1.C.7.b",
+      "elementName": "Analytical Thinking",
+      "description": "Job requires analyzing information and using logic to address work-related issues and problems",
+      "primaryBigFive": "OPENNESS",
+      "primaryFacet": "Ideas",
+      "primaryWeight": 0.70,
+      "secondaryBigFive": "CONSCIENTIOUSNESS",
+      "secondaryFacet": "Deliberation",
+      "secondaryWeight": 0.55,
+      "rationale": "Analytical thinking maps to Openness (intellectual curiosity) and Conscientiousness (careful deliberation)"
+    }
+  },
+  "reverseMappings": {
+    "OPENNESS": {
+      "primary": ["1.C.7.a", "1.C.4.c", "1.C.7.b", "1.C.6"],
+      "secondary": ["1.C.2.b"],
+      "description": "Openness is primarily measured through Innovation, Adaptability, Analytical Thinking, and Independence"
+    },
+    "CONSCIENTIOUSNESS": {
+      "primary": ["1.C.5.a", "1.C.1.b", "1.C.5.b", "1.C.1.a", "1.C.5.c"],
+      "secondary": ["1.C.1.c", "1.C.2.b", "1.C.6", "1.C.7.b"],
+      "description": "Conscientiousness is primarily measured through Dependability, Persistence, Attention to Detail, Achievement/Effort, and Integrity"
+    },
+    "EXTRAVERSION": {
+      "primary": ["1.C.3.c", "1.C.2.b", "1.C.1.c"],
+      "secondary": ["1.C.1.a", "1.C.3.a", "1.C.6"],
+      "description": "Extraversion is primarily measured through Social Orientation, Leadership, and Initiative"
+    },
+    "AGREEABLENESS": {
+      "primary": ["1.C.3.b", "1.C.3.a"],
+      "secondary": ["1.C.5.c", "1.C.4.a", "1.C.3.c", "1.C.4.c"],
+      "description": "Agreeableness is primarily measured through Concern for Others and Cooperation"
+    },
+    "EMOTIONAL_STABILITY": {
+      "primary": ["1.C.4.b", "1.C.4.a"],
+      "secondary": ["1.C.1.b", "1.C.4.c"],
+      "description": "Emotional Stability is primarily measured through Stress Tolerance and Self-Control"
+    }
+  },
+  "aggregationWeights": {
+    "description": "Weights for aggregating O*NET Work Styles scores into Big Five dimension scores. Uses weighted average based on correlation strength.",
+    "OPENNESS": {
+      "1.C.7.a": 0.30,
+      "1.C.4.c": 0.25,
+      "1.C.7.b": 0.20,
+      "1.C.6": 0.15,
+      "1.C.2.b": 0.10
+    },
+    "CONSCIENTIOUSNESS": {
+      "1.C.5.a": 0.22,
+      "1.C.1.b": 0.20,
+      "1.C.5.b": 0.18,
+      "1.C.1.a": 0.18,
+      "1.C.5.c": 0.12,
+      "1.C.6": 0.10
+    },
+    "EXTRAVERSION": {
+      "1.C.3.c": 0.35,
+      "1.C.2.b": 0.30,
+      "1.C.1.c": 0.25,
+      "1.C.1.a": 0.10
+    },
+    "AGREEABLENESS": {
+      "1.C.3.b": 0.35,
+      "1.C.3.a": 0.30,
+      "1.C.5.c": 0.15,
+      "1.C.4.a": 0.12,
+      "1.C.4.c": 0.08
+    },
+    "EMOTIONAL_STABILITY": {
+      "1.C.4.b": 0.50,
+      "1.C.4.a": 0.30,
+      "1.C.1.b": 0.12,
+      "1.C.4.c": 0.08
+    }
+  },
+  "utilities": {
+    "getElementsByBigFive": "Filter mappings where primaryBigFive or secondaryBigFive matches the given dimension",
+    "calculateBigFiveScore": "Sum of (elementScore * aggregationWeight) for each element in the dimension's aggregationWeights",
+    "getPrimaryMapping": "Return the primaryBigFive dimension for a given O*NET element ID"
+  }
+}

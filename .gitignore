@@ -17,9 +17,15 @@
 .nyc_output/
 /cypress/videos/
 /cypress/screenshots/
+
+# Playwright
 /test-results/
 /playwright-report/
+/blob-report/
 /playwright/.cache/
+/playwright/.auth/
+.last-run.json
+# Note: e2e/specs/visual/*-snapshots/ are committed for CI visual regression baseline
 
 # Next.js
 /.next/

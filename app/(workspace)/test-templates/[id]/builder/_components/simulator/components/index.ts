@@ -1,0 +1,21 @@
+/**
+ * Simulator Components Index
+ *
+ * Centralized exports for decomposed simulator components.
+ */
+
+// Phase 1 (P0): Core decomposed components
+export { SimulatorHeader, default as SimulatorHeaderDefault } from './SimulatorHeader';
+export { SimulatorResults, default as SimulatorResultsDefault } from './SimulatorResults';
+export { SimulatorTabs, default as SimulatorTabsDefault } from './SimulatorTabs';
+export { SimulatorMobile, default as SimulatorMobileDefault } from './SimulatorMobile';
+
+// Phase 3 (P1): Two-phase UI components
+export { PreflightWarningsAlert, default as PreflightWarningsAlertDefault } from './PreflightWarningsAlert';
+export { ConfigurePhase, default as ConfigurePhaseDefault } from './ConfigurePhase';
+export { ResultsPhase, default as ResultsPhaseDefault } from './ResultsPhase';
+
+// Phase 4 (P1): Mobile priority stack components
+export { FineTuneSheet, default as FineTuneSheetDefault } from './FineTuneSheet';
+export { StrategyPrimaryInsight, default as StrategyPrimaryInsightDefault } from './StrategyPrimaryInsight';
+export { MobilePriorityStack, default as MobilePriorityStackDefault } from './MobilePriorityStack';

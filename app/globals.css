@@ -12,6 +12,11 @@ html {
 	border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
+.dark .glass {
+	background: rgba(0, 0, 0, 0.2);
+	border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
 /* Subtle animations for modern UI */
 @keyframes float {
 
@@ -371,6 +376,20 @@ html {
 		0 20px 40px rgba(0, 0, 0, 0.06);
 }
 
+.dark .shadow-modern {
+	box-shadow:
+		0 0 0 1px rgba(255, 255, 255, 0.03),
+		0 2px 4px rgba(0, 0, 0, 0.2),
+		0 12px 24px rgba(0, 0, 0, 0.3);
+}
+
+.dark .shadow-modern-lg {
+	box-shadow:
+		0 0 0 1px rgba(255, 255, 255, 0.03),
+		0 8px 16px rgba(0, 0, 0, 0.3),
+		0 20px 40px rgba(0, 0, 0, 0.4);
+}
+
 /* Responsive spacing utilities */
 .space-modern>*+* {
 	margin-top: clamp(1rem, 3vw, 2rem);
@@ -429,6 +448,16 @@ html {
 	transform: translateY(-4px);
 }
 
+.dark .card-modern {
+	background: rgba(255, 255, 255, 0.02);
+	border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.dark .card-modern:hover {
+	background: rgba(255, 255, 255, 0.05);
+	border-color: rgba(255, 255, 255, 0.12);
+}
+
 /* Minimalist loading states */
 .loading-modern {
 	position: relative;
@@ -454,6 +483,38 @@ html {
 	100% {
 		left: 100%;
 	}
+}
+
+/* Shimmer animation for progress bars */
+@keyframes shimmer {
+	0% {
+		transform: translateX(-100%);
+	}
+
+	100% {
+		transform: translateX(100%);
+	}
+}
+
+.animate-shimmer {
+	animation: shimmer 2s infinite;
+}
+
+/* Tab underline slide animation for TestDriveInsights */
+@keyframes tab-underline-slide {
+	from {
+		transform: scaleX(0);
+		opacity: 0;
+	}
+
+	to {
+		transform: scaleX(1);
+		opacity: 1;
+	}
+}
+
+.animate-tab-underline-slide {
+	animation: tab-underline-slide 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Modern focus styles */
@@ -556,6 +617,9 @@ html {
 @variant container (container-type: inline-size);
 
 @theme inline {
+	/* Custom breakpoint for extra-small screens (480px+) */
+	--breakpoint-xs: 480px;
+
 	--color-background: var(--background);
 	--color-foreground: var(--foreground);
 	--font-sans: var(--font-geist-sans);
@@ -852,6 +916,33 @@ html {
 		max-width: 100vw;
 		overscroll-behavior: none;
 	}
+
+	/*
+	 * Modern anchor link styling with semi-transparent underline
+	 * Applies to content links only, excludes UI components via data-slot and class patterns
+	 */
+	a:where(:not([role="button"]):not([data-slot]):not(.no-underline):not(nav a):not([class*="button"]):not([class*="btn"]):not([class*="sidebar"]):not([class*="menu"]):not([class*="nav"]):not([class*="breadcrumb"])) {
+		text-decoration-line: underline;
+		text-decoration-thickness: 2px;
+		text-underline-offset: 4px;
+		text-decoration-color: oklch(from currentColor l c h / 0.5);
+		transition:
+			text-decoration-color 200ms ease-in-out,
+			color 200ms ease-in-out;
+	}
+
+	/* Fully opaque underline on hover */
+	a:where(:not([role="button"]):not([data-slot]):not(.no-underline):not(nav a):not([class*="button"]):not([class*="btn"]):not([class*="sidebar"]):not([class*="menu"]):not([class*="nav"]):not([class*="breadcrumb"])):hover {
+		text-decoration-color: currentColor;
+	}
+
+	/* Focus state for accessibility */
+	a:where(:not([role="button"]):not([data-slot]):not(.no-underline):not(nav a):not([class*="button"]):not([class*="btn"]):not([class*="sidebar"]):not([class*="menu"]):not([class*="nav"]):not([class*="breadcrumb"])):focus-visible {
+		text-decoration-color: currentColor;
+		outline: 2px solid hsl(var(--ring));
+		outline-offset: 2px;
+		border-radius: 2px;
+	}
 }
 
 #root {
@@ -1070,7 +1161,7 @@ html {
 	}
 
 	/* Flexible layout utilities for dashboard cards */
-	@media (max-width: 480px) {
+	@media (max-width: 400px) {
 		.flex-1 {
 			min-width: 100% !important;
 		}
@@ -1308,11 +1399,21 @@ html {
 /* Improve button touch targets on mobile */
 @media (max-width: 768px) {
 
-	button,
-	[role="button"],
+	/* Exclude Switch and Checkbox from forced sizing - they have their own dimensions */
+	button:not([data-slot="switch"]):not([data-slot="checkbox"]),
+	[role="button"]:not([data-slot="switch"]):not([data-slot="checkbox"]),
 	.touch-target {
 		min-height: 44px;
 		min-width: 44px;
+	}
+
+	/* Reset sizing for switch and checkbox to prevent deformation */
+	[data-slot="switch"],
+	[data-slot="checkbox"],
+	[role="switch"],
+	[role="checkbox"] {
+		min-height: unset !important;
+		min-width: unset !important;
 	}
 
 	/* Improve link touch targets */
@@ -1323,7 +1424,7 @@ html {
 	}
 
 	/* Enhance form elements */
-	input,
+	input:not([type="checkbox"]):not([type="radio"]),
 	textarea,
 	select {
 		min-height: 48px;
@@ -1410,5 +1511,1303 @@ img {
 
 	.mobile-space>*+* {
 		margin-top: 1rem;
+	}
+}
+
+/* Confetti Animation */
+@keyframes fall {
+	0% {
+		transform: translateY(-20px) rotate(0deg);
+		opacity: 1;
+	}
+
+	100% {
+		transform: translateY(200px) rotate(360deg);
+		opacity: 0;
+	}
+}
+
+.animate-fall {
+	animation-name: fall;
+	animation-timing-function: linear;
+	animation-fill-mode: forwards;
+}
+
+/* ===== TEST RESULTS PAGE ENHANCEMENTS ===== */
+
+/* Gentle bounce animation for success icons */
+@keyframes bounce-gentle {
+
+	0%,
+	100% {
+		transform: translateY(0);
+	}
+
+	50% {
+		transform: translateY(-10px);
+	}
+}
+
+.animate-bounce-gentle {
+	animation: bounce-gentle 2s ease-in-out infinite;
+}
+
+/* Gentle pulse animation for attention icons */
+@keyframes pulse-gentle {
+
+	0%,
+	100% {
+		opacity: 1;
+		transform: scale(1);
+	}
+
+	50% {
+		opacity: 0.8;
+		transform: scale(1.05);
+	}
+}
+
+.animate-pulse-gentle {
+	animation: pulse-gentle 3s ease-in-out infinite;
+}
+
+/* Score hero typography class */
+.score-hero {
+	font-size: clamp(3rem, 12vw, 5rem);
+	font-weight: 800;
+	line-height: 1;
+	letter-spacing: -0.02em;
+	font-variant-numeric: tabular-nums;
+}
+
+/* Staggered fade-in animations for sequential reveals */
+.animate-fadeInUp-1 {
+	animation: fade-in-up 0.6s ease-out 0.1s both;
+}
+
+.animate-fadeInUp-2 {
+	animation: fade-in-up 0.6s ease-out 0.2s both;
+}
+
+.animate-fadeInUp-3 {
+	animation: fade-in-up 0.6s ease-out 0.3s both;
+}
+
+.animate-fadeInUp-4 {
+	animation: fade-in-up 0.6s ease-out 0.4s both;
+}
+
+.animate-fadeInUp-5 {
+	animation: fade-in-up 0.6s ease-out 0.5s both;
+}
+
+/* Shimmer effect for progress bars */
+.progress-shimmer {
+	position: relative;
+	overflow: hidden;
+}
+
+.progress-shimmer::after {
+	content: '';
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+	animation: shimmer 2s infinite;
+}
+
+/* Responsive stat value typography */
+.stat-value {
+	font-size: clamp(1.5rem, 5vw, 2.25rem);
+	font-weight: 700;
+	font-variant-numeric: tabular-nums;
+	line-height: 1.2;
+}
+
+/* ===== MOBILE RESPONSIVENESS UTILITIES ===== */
+
+/* Safe area inset utilities for notched devices (iPhone X+, Android notch) */
+.safe-area-inset-all {
+	padding-top: env(safe-area-inset-top, 0);
+	padding-bottom: env(safe-area-inset-bottom, 0);
+	padding-left: env(safe-area-inset-left, 0);
+	padding-right: env(safe-area-inset-right, 0);
+}
+
+.pb-safe {
+	padding-bottom: max(1rem, env(safe-area-inset-bottom, 1rem));
+}
+
+.pt-safe {
+	padding-top: max(1rem, env(safe-area-inset-top, 1rem));
+}
+
+.px-safe {
+	padding-left: max(1rem, env(safe-area-inset-left, 1rem));
+	padding-right: max(1rem, env(safe-area-inset-right, 1rem));
+}
+
+/* Touch-friendly minimum sizes (44px is Apple HIG minimum) */
+.touch-target-min {
+	min-height: 44px;
+	min-width: 44px;
+}
+
+/* Mobile font size protection - prevents iOS zoom on input focus */
+@layer base {
+	@media (max-width: 768px) {
+
+		input[type="text"],
+		input[type="email"],
+		input[type="password"],
+		input[type="number"],
+		input[type="tel"],
+		input[type="url"],
+		input[type="search"],
+		textarea,
+		select {
+			font-size: 16px !important;
+		}
+	}
+}
+
+/* Touch manipulation - improves touch scrolling and tap response */
+.touch-action-pan {
+	touch-action: pan-x pan-y;
+}
+
+.touch-action-none {
+	touch-action: none;
+}
+
+/* Momentum scrolling for containers */
+.scroll-momentum {
+	-webkit-overflow-scrolling: touch;
+	scroll-behavior: smooth;
+	overscroll-behavior: contain;
+}
+
+/* Prevent text selection on mobile buttons and interactive elements */
+.select-none-mobile {
+	-webkit-user-select: none;
+	user-select: none;
+	-webkit-touch-callout: none;
+}
+
+/* Mobile-optimized button press feedback */
+.press-feedback {
+	transition: transform 75ms ease-out, opacity 75ms ease-out;
+}
+
+.press-feedback:active {
+	transform: scale(0.97);
+	opacity: 0.9;
+}
+
+/* Mobile viewport height fix (accounts for browser chrome) */
+.h-screen-mobile {
+	height: 100vh;
+	height: 100dvh;
+}
+
+.min-h-screen-mobile {
+	min-height: 100vh;
+	min-height: 100dvh;
+}
+
+/* Immersive mode adjustments for mobile */
+@media (max-width: 640px) {
+	.immersive-content {
+		padding-left: 1rem;
+		padding-right: 1rem;
+		padding-bottom: max(1rem, env(safe-area-inset-bottom, 1rem));
+	}
+
+	.immersive-footer {
+		padding-bottom: max(0.75rem, env(safe-area-inset-bottom, 0.75rem));
+	}
+}
+
+/* Reduced motion animations for mobile (smaller distances) */
+@media (max-width: 640px) {
+	.motion-reduce-mobile {
+		--animation-distance: 100px;
+	}
+}
+
+@media (min-width: 641px) {
+	.motion-reduce-mobile {
+		--animation-distance: 300px;
+	}
+}
+
+/* Utility class for motion-safe animations */
+.motion-safe\:animate-in {
+	animation: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+	.motion-safe\:animate-in {
+		animation: enter 0.3s ease-out;
+	}
+}
+
+/* Modal/Dialog mobile safe area */
+.dialog-mobile-safe {
+	max-height: calc(100vh - env(safe-area-inset-top, 0) - env(safe-area-inset-bottom, 0) - 2rem);
+	max-height: calc(100dvh - env(safe-area-inset-top, 0) - env(safe-area-inset-bottom, 0) - 2rem);
+}
+
+/* ===== ACCESSIBILITY: REDUCED MOTION SUPPORT ===== */
+
+/* Respect user's reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+
+	*,
+	*::before,
+	*::after {
+		animation-duration: 0.01ms !important;
+		animation-iteration-count: 1 !important;
+		transition-duration: 0.01ms !important;
+		scroll-behavior: auto !important;
+	}
+
+	/* Disable specific animations */
+	.animate-float,
+	.animate-pulse-glow,
+	.animate-gradient,
+	.animate-fade-in-up,
+	.animate-scale-in,
+	.animate-lens-flash,
+	.animate-lens-glow-emerald,
+	.animate-lens-glow-blue,
+	.animate-lens-glow-violet,
+	.animate-shimmer,
+	.animate-bounce-gentle,
+	.animate-pulse-gentle,
+	.animate-fall,
+	.progress-shimmer::after {
+		animation: none !important;
+	}
+
+	/* Disable hover transforms */
+	.hover-lift:hover,
+	.card-modern:hover,
+	.press-feedback:active {
+		transform: none !important;
+	}
+}
+
+/* ===== GPU ACCELERATION UTILITIES ===== */
+
+/* Force GPU acceleration for smoother animations */
+.gpu-accelerated {
+	transform: translateZ(0);
+	backface-visibility: hidden;
+	perspective: 1000px;
+}
+
+/* Optimize will-change for animated elements */
+.will-change-transform {
+	will-change: transform;
+}
+
+.will-change-opacity {
+	will-change: opacity;
+}
+
+.will-change-auto {
+	will-change: auto;
+}
+
+/* Combined will-change for common animation patterns */
+.will-change-slide {
+	will-change: transform, opacity;
+}
+
+/* Hardware-accelerated transform origin */
+.transform-gpu {
+	transform: translate3d(0, 0, 0);
+}
+
+/* ===== SWIPE GESTURE UTILITIES ===== */
+
+/* Prevent accidental text selection during swipe */
+.swipe-container {
+	-webkit-user-select: none;
+	user-select: none;
+	-webkit-touch-callout: none;
+	touch-action: pan-y pinch-zoom;
+}
+
+/* Allow horizontal swipe navigation */
+.swipe-horizontal {
+	touch-action: pan-x pan-y;
+	-webkit-overflow-scrolling: touch;
+}
+
+/* Swipe feedback indicator */
+.swipe-indicator {
+	position: absolute;
+	top: 50%;
+	transform: translateY(-50%);
+	opacity: 0;
+	transition: opacity 150ms ease-out;
+	pointer-events: none;
+}
+
+.swipe-indicator.visible {
+	opacity: 1;
+}
+
+.swipe-indicator-left {
+	left: 1rem;
+}
+
+.swipe-indicator-right {
+	right: 1rem;
+}
+
+/* Mobile-specific animation optimizations */
+@media (max-width: 640px) {
+
+	/* Reduce animation complexity on mobile */
+	.mobile-animation-optimized {
+		animation-timing-function: linear !important;
+	}
+
+	/* Shorter transitions for snappier feel */
+	.mobile-transition-fast {
+		transition-duration: 150ms !important;
+	}
+
+	/* Reduce shadow complexity during animations */
+	.mobile-shadow-reduced:active {
+		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+	}
+}
+
+/* ===== ACCESSIBILITY: FOCUS INDICATORS ===== */
+
+/* Global focus-visible styles for all interactive elements */
+:focus-visible {
+	outline: 2px solid hsl(var(--ring));
+	outline-offset: 2px;
+}
+
+/* Remove default focus ring on touch devices when not using keyboard */
+@media (hover: none) and (pointer: coarse) {
+	:focus:not(:focus-visible) {
+		outline: none;
+	}
+}
+
+/* Enhanced focus visibility with ring effect for interactive elements */
+button:focus-visible,
+[role="button"]:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[tabindex]:not([tabindex="-1"]):focus-visible {
+	outline: 2px solid hsl(var(--ring));
+	outline-offset: 2px;
+	box-shadow: 0 0 0 4px hsl(var(--ring) / 0.15);
+}
+
+/* Focused card styling */
+.focus-card:focus-visible,
+[data-slot="card"]:focus-visible {
+	outline: 2px solid hsl(var(--ring));
+	outline-offset: 2px;
+	box-shadow: 0 0 0 4px hsl(var(--ring) / 0.1);
+}
+
+/* ===== ACCESSIBILITY: HIGH CONTRAST MODE ===== */
+
+@media (prefers-contrast: high) {
+	:root {
+		/* Increase text contrast */
+		--muted-foreground: oklch(0.30 0.015 264);
+		--border: oklch(0.70 0.01 264);
+		--ring: oklch(0.35 0.15 264);
+
+		/* Stronger shadows for depth perception */
+		--card: oklch(1 0 0);
+	}
+
+	.dark {
+		--muted-foreground: oklch(0.85 0.01 0);
+		--border: oklch(0.45 0.01 0);
+		--ring: oklch(0.75 0.15 264);
+	}
+
+	/* Ensure sufficient contrast for muted text */
+	.text-muted-foreground {
+		color: hsl(var(--foreground) / 0.8);
+	}
+
+	/* Stronger focus indicators */
+	:focus-visible {
+		outline: 3px solid hsl(var(--ring));
+		outline-offset: 2px;
+	}
+
+	/* More visible borders */
+	[data-slot="card"],
+	[data-slot="input"],
+	button,
+	input,
+	select,
+	textarea {
+		border-width: 2px;
+	}
+}
+
+/* ===== ACCESSIBILITY: TOUCH TARGET SPACING ===== */
+
+/* Utility for minimum 8px spacing between touch targets */
+.touch-spacing {
+	display: flex;
+	gap: 8px;
+}
+
+.touch-spacing-vertical {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+/* Enhanced spacing for mobile */
+@media (max-width: 640px) {
+	.touch-spacing {
+		gap: 12px;
+	}
+
+	.touch-spacing-vertical {
+		gap: 12px;
+	}
+}
+
+/* Button group with proper spacing */
+.button-group {
+	display: flex;
+	gap: 8px;
+	flex-wrap: wrap;
+}
+
+@media (max-width: 640px) {
+	.button-group {
+		gap: 12px;
+	}
+}
+
+/* ===== ACCESSIBILITY: SKIP LINK ===== */
+
+.skip-link {
+	position: absolute;
+	top: -100%;
+	left: 1rem;
+	background: hsl(var(--background));
+	color: hsl(var(--foreground));
+	padding: 0.75rem 1.5rem;
+	z-index: 9999;
+	border: 2px solid hsl(var(--ring));
+	border-radius: var(--radius);
+	font-weight: 600;
+	font-size: 0.875rem;
+	text-decoration: none;
+	transition: top 0.2s ease-in-out;
+	box-shadow: 0 4px 12px hsl(var(--foreground) / 0.1);
+}
+
+.skip-link:focus {
+	top: 1rem;
+	outline: none;
+}
+
+/* ===== ACCESSIBILITY: SCREEN READER FOCUSABLE ===== */
+
+.sr-only-focusable:not(:focus):not(:focus-within) {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	padding: 0;
+	margin: -1px;
+	overflow: hidden;
+	clip: rect(0, 0, 0, 0);
+	white-space: nowrap;
+	border: 0;
+}
+
+.sr-only-focusable:focus,
+.sr-only-focusable:focus-within {
+	position: static;
+	width: auto;
+	height: auto;
+	padding: 0.5rem 1rem;
+	margin: 0;
+	overflow: visible;
+	clip: auto;
+	white-space: normal;
+	background: hsl(var(--background));
+	border: 2px solid hsl(var(--ring));
+	border-radius: var(--radius);
+}
+
+/* ===== SCROLLBAR UTILITIES ===== */
+
+/* Hide scrollbar but keep scrolling functionality */
+.scrollbar-hide {
+	-ms-overflow-style: none;
+	/* IE and Edge */
+	scrollbar-width: none;
+	/* Firefox */
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+	display: none;
+	/* Chrome, Safari, Opera */
+}
+
+/* ===== DOCUMENTATION MOBILE STYLES ===== */
+
+/* Fluid typography scale for documentation */
+:root {
+	/* Base sizes using clamp() for fluid scaling */
+	--doc-font-xs: clamp(0.6875rem, 0.625rem + 0.25vw, 0.75rem);
+	/* 11-12px */
+	--doc-font-sm: clamp(0.8125rem, 0.75rem + 0.25vw, 0.875rem);
+	/* 13-14px */
+	--doc-font-base: clamp(0.875rem, 0.8125rem + 0.25vw, 1rem);
+	/* 14-16px */
+	--doc-font-lg: clamp(1rem, 0.9375rem + 0.25vw, 1.125rem);
+	/* 16-18px */
+	--doc-font-xl: clamp(1.125rem, 1rem + 0.5vw, 1.25rem);
+	/* 18-20px */
+	--doc-font-2xl: clamp(1.25rem, 1.125rem + 0.5vw, 1.5rem);
+	/* 20-24px */
+	--doc-font-3xl: clamp(1.5rem, 1.25rem + 1vw, 1.875rem);
+	/* 24-30px */
+	--doc-font-code: clamp(0.75rem, 0.6875rem + 0.25vw, 0.875rem);
+	/* 12-14px */
+	--doc-line-height: 1.7;
+	--doc-line-height-code: 1.5;
+}
+
+/* Documentation prose container */
+.docs-prose {
+	font-size: var(--doc-font-base);
+	line-height: var(--doc-line-height);
+}
+
+.docs-prose h1 {
+	font-size: var(--doc-font-3xl);
+	font-weight: 700;
+	line-height: 1.2;
+	letter-spacing: -0.02em;
+}
+
+.docs-prose h2 {
+	font-size: var(--doc-font-2xl);
+	font-weight: 600;
+	line-height: 1.3;
+	letter-spacing: -0.01em;
+}
+
+.docs-prose h3 {
+	font-size: var(--doc-font-xl);
+	font-weight: 600;
+	line-height: 1.4;
+}
+
+.docs-prose h4 {
+	font-size: var(--doc-font-lg);
+	font-weight: 600;
+	line-height: 1.4;
+}
+
+.docs-prose code {
+	font-size: var(--doc-font-code);
+	line-height: var(--doc-line-height-code);
+}
+
+/* Documentation content container with safe bottom padding for mobile TOC */
+.docs-content {
+	position: relative;
+}
+
+@media (max-width: 1023px) {
+	.docs-content {
+		padding-bottom: 100px;
+	}
+}
+
+/* Mobile-first table improvements for documentation */
+.docs-table {
+	width: 100%;
+	border-collapse: collapse;
+}
+
+@media (max-width: 767px) {
+	.docs-table {
+		font-size: var(--doc-font-sm);
+	}
+
+	.docs-table th,
+	.docs-table td {
+		padding: 0.5rem 0.75rem;
+	}
+
+	/* Enable horizontal scroll on mobile */
+	.docs-table-container {
+		overflow-x: auto;
+		-webkit-overflow-scrolling: touch;
+		margin: 0 -1rem;
+		padding: 0 1rem;
+	}
+}
+
+/* Documentation card grid responsive layout */
+.docs-card-grid {
+	display: grid;
+	gap: 1rem;
+	grid-template-columns: 1fr;
+}
+
+@media (min-width: 640px) {
+	.docs-card-grid {
+		grid-template-columns: repeat(2, 1fr);
+	}
+}
+
+@media (min-width: 1024px) {
+	.docs-card-grid {
+		grid-template-columns: repeat(3, 1fr);
+	}
+}
+
+/* Flow diagram mobile responsiveness */
+.docs-flow-diagram {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.5rem;
+	justify-content: center;
+	align-items: center;
+}
+
+@media (max-width: 639px) {
+	.docs-flow-diagram {
+		flex-direction: column;
+	}
+
+	.docs-flow-diagram .flow-arrow {
+		transform: rotate(90deg);
+	}
+}
+
+/* Touch-friendly spacing for documentation elements */
+.docs-touch-spacing> :not(:last-child) {
+	margin-bottom: 0.75rem;
+}
+
+@media (min-width: 768px) {
+	.docs-touch-spacing> :not(:last-child) {
+		margin-bottom: 1rem;
+	}
+}
+
+/* Documentation section with proper mobile padding */
+.docs-section {
+	scroll-margin-top: 5rem;
+	padding-top: 1.5rem;
+}
+
+@media (min-width: 768px) {
+	.docs-section {
+		padding-top: 2rem;
+	}
+}
+
+/* Code block mobile optimization */
+.docs-code-block {
+	font-size: var(--doc-font-code);
+	line-height: var(--doc-line-height-code);
+	tab-size: 2;
+}
+
+/* Mermaid diagram mobile handling */
+.mermaid-container {
+	overflow-x: auto;
+	-webkit-overflow-scrolling: touch;
+}
+
+@media (max-width: 639px) {
+	.mermaid-container svg {
+		min-width: 100%;
+		height: auto;
+	}
+}
+
+/* Safe area handling for documentation mobile TOC */
+.docs-mobile-toc-safe {
+	padding-bottom: env(safe-area-inset-bottom, 0);
+}
+
+/* ===== ACCESSIBILITY: LIVE REGION UTILITIES ===== */
+
+/* Visually hidden but announced by screen readers */
+.live-region-polite {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	padding: 0;
+	margin: -1px;
+	overflow: hidden;
+	clip: rect(0, 0, 0, 0);
+	white-space: nowrap;
+	border: 0;
+}
+
+/* Status messages that appear visually */
+.status-message {
+	padding: 0.75rem 1rem;
+	border-radius: var(--radius);
+	font-size: 0.875rem;
+	font-weight: 500;
+}
+
+.status-message[aria-live="polite"] {
+	background: hsl(var(--muted));
+	color: hsl(var(--muted-foreground));
+}
+
+.status-message[aria-live="assertive"] {
+	background: hsl(var(--destructive) / 0.1);
+	color: hsl(var(--destructive));
+}
+
+/* ===== GLOSSARY PAGE PREMIUM ANIMATIONS ===== */
+
+/* Spring-based accordion animation */
+@keyframes glossary-accordion-down {
+	from {
+		height: 0;
+		opacity: 0;
+		transform: translateY(-4px);
+	}
+
+	to {
+		height: var(--radix-accordion-content-height);
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+@keyframes glossary-accordion-up {
+	from {
+		height: var(--radix-accordion-content-height);
+		opacity: 1;
+		transform: translateY(0);
+	}
+
+	to {
+		height: 0;
+		opacity: 0;
+		transform: translateY(-4px);
+	}
+}
+
+/* Glossary term card animations */
+.glossary-accordion-content[data-state="open"] {
+	animation: glossary-accordion-down 280ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.glossary-accordion-content[data-state="closed"] {
+	animation: glossary-accordion-up 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Stagger animation for glossary terms */
+.glossary-term-stagger:nth-child(1) {
+	animation-delay: 0ms;
+}
+
+.glossary-term-stagger:nth-child(2) {
+	animation-delay: 50ms;
+}
+
+.glossary-term-stagger:nth-child(3) {
+	animation-delay: 100ms;
+}
+
+.glossary-term-stagger:nth-child(4) {
+	animation-delay: 150ms;
+}
+
+.glossary-term-stagger:nth-child(5) {
+	animation-delay: 200ms;
+}
+
+/* Category gradient backgrounds */
+.glossary-category-domain {
+	background: linear-gradient(135deg, oklch(0.95 0.02 160) 0%, oklch(0.98 0.01 160) 100%);
+}
+
+.glossary-category-psychometric {
+	background: linear-gradient(135deg, oklch(0.95 0.02 290) 0%, oklch(0.98 0.01 290) 100%);
+}
+
+.glossary-category-technical {
+	background: linear-gradient(135deg, oklch(0.95 0.02 240) 0%, oklch(0.98 0.01 240) 100%);
+}
+
+.dark .glossary-category-domain {
+	background: linear-gradient(135deg, oklch(0.20 0.02 160) 0%, oklch(0.18 0.01 160) 100%);
+}
+
+.dark .glossary-category-psychometric {
+	background: linear-gradient(135deg, oklch(0.20 0.02 290) 0%, oklch(0.18 0.01 290) 100%);
+}
+
+.dark .glossary-category-technical {
+	background: linear-gradient(135deg, oklch(0.20 0.02 240) 0%, oklch(0.18 0.01 240) 100%);
+}
+
+/* High contrast mode for glossary */
+@media (prefers-contrast: more) {
+	.glossary-term-card {
+		border-width: 2px;
+		border-color: currentColor;
+	}
+
+	.glossary-term-card[data-state="open"] {
+		border-left-width: 4px;
+		background-color: transparent;
+	}
+
+	.glossary-category-badge {
+		border: 2px solid currentColor;
+		background-color: transparent !important;
+	}
+
+	.glossary-related-term {
+		border: 1px solid currentColor;
+		background-color: transparent !important;
+	}
+}
+
+/* Glossary skip link */
+.glossary-skip-link {
+	position: absolute;
+	top: -40px;
+	left: 0;
+	padding: 8px 16px;
+	background: hsl(var(--background));
+	border: 2px solid hsl(var(--primary));
+	z-index: 100;
+	transition: top 0.2s;
+}
+
+.glossary-skip-link:focus {
+	top: 0;
+}
+
+/* Copy feedback animation */
+@keyframes copy-success {
+	0% {
+		transform: scale(1);
+	}
+
+	50% {
+		transform: scale(1.1);
+	}
+
+	100% {
+		transform: scale(1);
+	}
+}
+
+.animate-copy-success {
+	animation: copy-success 300ms ease-out;
+}
+
+/* ===== BLUEPRINT BUILDER ENHANCEMENTS ===== */
+
+/* Extra-small screen overflow prevention (<480px) */
+@media (max-width: 479px) {
+
+	/* Force all flex children to respect container bounds */
+	.flex-1 {
+		min-width: 0 !important;
+	}
+
+	/* Prevent any element from causing horizontal overflow */
+	[class*="Card"],
+	[class*="card"],
+	[data-slot="card"] {
+		max-width: 100% !important;
+		overflow: hidden !important;
+		word-wrap: break-word !important;
+	}
+
+	/* Force competency cards to stay within bounds */
+	.group.rounded-xl {
+		max-width: 100% !important;
+		box-sizing: border-box !important;
+	}
+
+	/* Ensure buttons don't accumulate to overflow */
+	button {
+		flex-shrink: 0;
+	}
+}
+
+/* Touch-friendly slider thumbs for coarse pointer devices (touch screens) */
+@media (pointer: coarse) {
+
+	[data-slot="slider-thumb"],
+	[role="slider"] span[data-radix-collection-item],
+	.slider-thumb {
+		width: 24px !important;
+		height: 24px !important;
+		min-width: 24px !important;
+		min-height: 24px !important;
+	}
+}
+
+/* Card expansion animation for smooth reveal */
+@keyframes card-content-expand {
+	from {
+		opacity: 0;
+		max-height: 0;
+		transform: translateY(-8px);
+	}
+
+	to {
+		opacity: 1;
+		max-height: 1000px;
+		transform: translateY(0);
+	}
+}
+
+@keyframes card-content-collapse {
+	from {
+		opacity: 1;
+		max-height: 1000px;
+		transform: translateY(0);
+	}
+
+	to {
+		opacity: 0;
+		max-height: 0;
+		transform: translateY(-8px);
+	}
+}
+
+.animate-card-expand {
+	animation: card-content-expand 200ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.animate-card-collapse {
+	animation: card-content-collapse 150ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+/* Tab content crossfade animation */
+@keyframes tab-content-fade-in {
+	from {
+		opacity: 0;
+		transform: translateY(4px);
+	}
+
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+[data-state="active"][data-slot="tabs-content"],
+[data-radix-tabs-content][data-state="active"] {
+	animation: tab-content-fade-in 150ms ease-out;
+}
+
+/* Slider value change feedback pulse */
+@keyframes slider-thumb-pulse {
+	0% {
+		transform: scale(1);
+	}
+
+	50% {
+		transform: scale(1.15);
+	}
+
+	100% {
+		transform: scale(1);
+	}
+}
+
+.slider-thumb-pulse {
+	animation: slider-thumb-pulse 100ms ease-out;
+}
+
+/* Blueprint canvas drop zone highlight */
+@keyframes drop-zone-pulse {
+
+	0%,
+	100% {
+		border-color: hsl(var(--primary) / 0.6);
+		background-color: hsl(var(--primary) / 0.05);
+	}
+
+	50% {
+		border-color: hsl(var(--primary) / 0.8);
+		background-color: hsl(var(--primary) / 0.1);
+	}
+}
+
+.drop-zone-active {
+	animation: drop-zone-pulse 1s ease-in-out infinite;
+}
+
+/* Save status indicator animations */
+@keyframes save-status-saving {
+	0% {
+		opacity: 0.7;
+	}
+
+	50% {
+		opacity: 1;
+	}
+
+	100% {
+		opacity: 0.7;
+	}
+}
+
+.save-status-saving {
+	animation: save-status-saving 1.5s ease-in-out infinite;
+}
+
+@keyframes save-status-saved {
+	from {
+		transform: scale(0.8);
+		opacity: 0;
+	}
+
+	to {
+		transform: scale(1);
+		opacity: 1;
+	}
+}
+
+.save-status-saved {
+	animation: save-status-saved 200ms ease-out;
+}
+
+/* Phase 2.4: Mobile tab slide transitions */
+@keyframes slide-in-from-left {
+	from {
+		opacity: 0;
+		transform: translateX(-20px);
+	}
+
+	to {
+		opacity: 1;
+		transform: translateX(0);
+	}
+}
+
+@keyframes slide-in-from-right {
+	from {
+		opacity: 0;
+		transform: translateX(20px);
+	}
+
+	to {
+		opacity: 1;
+		transform: translateX(0);
+	}
+}
+
+.animate-slide-in-left {
+	animation: slide-in-from-left 200ms ease-out;
+}
+
+.animate-slide-in-right {
+	animation: slide-in-from-right 200ms ease-out;
+}
+
+/* ===== MOBILE-FIRST UTILITY CLASSES ===== */
+
+/* Touch-friendly interactive elements */
+.touch-manipulation {
+	touch-action: manipulation;
+}
+
+/* Minimum touch target size (WCAG 2.1 Level AAA) */
+.touch-target {
+	min-height: 44px;
+	min-width: 44px;
+}
+
+/* Hide scrollbar but keep scroll functionality */
+.scrollbar-hide {
+	scrollbar-width: none;
+	-ms-overflow-style: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+	display: none;
+}
+
+/* Mobile card styling */
+.card-mobile {
+	@apply flex items-center gap-3 p-4 rounded-xl border bg-card;
+	min-height: 72px;
+}
+
+.card-mobile:hover {
+	@apply bg-accent/50;
+}
+
+.card-mobile:active {
+	transform: scale(0.98);
+}
+
+/* Snap scroll container */
+.snap-scroll-x {
+	display: flex;
+	gap: 1rem;
+	overflow-x: auto;
+	scroll-snap-type: x mandatory;
+	scroll-padding: 1rem;
+	-webkit-overflow-scrolling: touch;
+	scrollbar-width: none;
+}
+
+.snap-scroll-x::-webkit-scrollbar {
+	display: none;
+}
+
+.snap-scroll-x > * {
+	scroll-snap-align: start;
+	flex-shrink: 0;
+}
+
+/* ===== PROFILE PAGE LAYOUT UTILITIES ===== */
+
+/* Safe typography scale (WCAG AA minimum 11px) */
+.text-xs-safe {
+	font-size: max(0.6875rem, 11px);
+	line-height: 1.4;
+}
+
+@media (min-width: 640px) {
+	.text-xs-safe {
+		font-size: 0.75rem;
+		/* 12px */
+	}
+}
+
+.text-sm-safe {
+	font-size: max(0.8125rem, 13px);
+	line-height: 1.5;
+}
+
+@media (min-width: 640px) {
+	.text-sm-safe {
+		font-size: 0.875rem;
+		/* 14px */
+	}
+}
+
+/* Standardized card shadows */
+.shadow-card {
+	box-shadow:
+		0 1px 2px rgba(0, 0, 0, 0.04),
+		0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+.shadow-card-hover {
+	box-shadow:
+		0 4px 6px rgba(0, 0, 0, 0.04),
+		0 10px 15px rgba(0, 0, 0, 0.06);
+}
+
+.dark .shadow-card {
+	box-shadow:
+		0 1px 2px rgba(0, 0, 0, 0.2),
+		0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.dark .shadow-card-hover {
+	box-shadow:
+		0 4px 6px rgba(0, 0, 0, 0.2),
+		0 10px 15px rgba(0, 0, 0, 0.3);
+}
+
+/* Subtle hover lift effect */
+.hover-lift-subtle {
+	transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.hover-lift-subtle:hover {
+	transform: translateY(-2px);
+}
+
+/* Spring-like transition timing */
+.transition-spring {
+	transition-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1);
+	transition-duration: 300ms;
+}
+
+/* Standardized card padding utility */
+.card-padding {
+	padding: 1rem;
+}
+
+@media (min-width: 640px) {
+	.card-padding {
+		padding: 1.5rem;
+	}
+}
+
+.card-padding-compact {
+	padding: 0.75rem;
+}
+
+@media (min-width: 640px) {
+	.card-padding-compact {
+		padding: 1rem;
+	}
+}
+
+/* Grid auto-rows for equal heights */
+.grid-rows-equal {
+	grid-auto-rows: 1fr;
+}
+
+/* Legacy alias for backward compatibility */
+.text-mobile-safe {
+	font-size: max(0.6875rem, 11px);
+}
+
+/* Press feedback for touch interactions */
+@media (hover: none) and (pointer: coarse) {
+	.press-feedback:active {
+		transform: scale(0.98);
+		transition: transform 100ms ease-out;
+	}
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+	.snap-scroll-x {
+		scroll-behavior: auto;
+	}
+
+	.press-feedback:active {
+		transform: none;
 	}
 }

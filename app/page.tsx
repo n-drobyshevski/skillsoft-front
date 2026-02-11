@@ -1,115 +1,190 @@
-import { Suspense } from "react";
-import { Metadata } from "next";
-import { Button } from "@/components/ui/button";
-import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { 
-  CheckCircle, 
-  TrendingUp, 
-  Users, 
-  Target, 
-  BarChart3, 
-  Shield, 
-  Globe,
-  ArrowRight,
-  Sparkles,
-  Award,
-  LineChart,
-  Rocket
-} from "lucide-react";
-import { AuthHandlerClient } from "./components/auth-handler-client";
-import { LandingPageContent } from "./components/landing-page-content";
+import { Suspense } from 'react';
+import { Metadata } from 'next';
+import { getTranslations } from 'next-intl/server';
+import { AuthHandlerClient } from '@/components/auth/auth-handler-client';
+import {
+  LandingHeader,
+  HeroSection,
+  PsychometricsShowcase,
+  AssessmentTypesSection,
+  StandardsSection,
+  HowItWorksSection,
+  StatsSection,
+  CTASection,
+  FooterSection,
+  MobileStickyCTA,
+} from './_components/landing';
 
-// Enhanced metadata for SEO with metadataBase
-export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://skillsoft.com'),
-  title: "SkillSoft - Professional Development & Competency Management Platform",
-  description: "Transform your career with SkillSoft's intelligent competency platform. Track skills, master competencies, and accelerate professional growth with precision analytics and personalized development paths.",
-  keywords: [
-    "professional development", 
-    "competency management", 
-    "skill tracking", 
-    "career growth", 
-    "employee development", 
-    "performance management",
-    "learning platform",
-    "talent development",
-    "skills assessment",
-    "enterprise training"
-  ],
-  authors: [{ name: "SkillSoft Team" }],
-  creator: "SkillSoft",
-  publisher: "SkillSoft",
-  formatDetection: {
-    email: false,
-    address: false,
-    telephone: false,
-  },
-  openGraph: {
-    title: "SkillSoft - Transform Your Professional Journey",
-    description: "Accelerate your career with intelligent competency management, skill tracking, and personalized development paths.",
-    url: "/",
-    siteName: "SkillSoft",
-    type: "website",
-    images: [
-      {
-        url: "/og-image.png",
-        width: 1200,
-        height: 630,
-        alt: "SkillSoft - Professional Development Platform",
-        type: "image/png",
-      },
-    ],
-    locale: "en_US",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "SkillSoft - Professional Development Platform",
-    description: "Transform your career with intelligent competency management and skill tracking.",
-    images: ["/twitter-image.png"],
-    creator: "@SkillSoft",
-  },
-  robots: {
-    index: true,
-    follow: true,
-    nocache: false,
-    googleBot: {
+// Dynamic metadata for SEO with i18n support
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('landing.metadata');
+
+  return {
+    metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://skillsoft.app'),
+    title: t('title'),
+    description: t('description'),
+    keywords: t.raw('keywords') as string[],
+    authors: [{ name: 'SkillSoft' }],
+    creator: 'SkillSoft',
+    publisher: 'SkillSoft',
+    formatDetection: {
+      email: false,
+      address: false,
+      telephone: false,
+    },
+    openGraph: {
+      title: t('ogTitle'),
+      description: t('ogDescription'),
+      url: '/',
+      siteName: 'SkillSoft',
+      type: 'website',
+      images: [
+        {
+          url: '/og-landing.png',
+          width: 1200,
+          height: 630,
+          alt: t('ogImageAlt'),
+          type: 'image/png',
+        },
+      ],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: t('twitterTitle'),
+      description: t('twitterDescription'),
+      images: ['/twitter-landing.png'],
+      creator: '@SkillSoftApp',
+    },
+    robots: {
       index: true,
       follow: true,
-      noimageindex: false,
-      "max-video-preview": -1,
-      "max-image-preview": "large",
-      "max-snippet": -1,
+      googleBot: {
+        index: true,
+        follow: true,
+        'max-video-preview': -1,
+        'max-image-preview': 'large',
+        'max-snippet': -1,
+      },
     },
-  },
-  verification: {
-    google: "google-verification-token", // Replace with actual token
-    yandex: "yandex-verification-token", // Replace with actual token
-  },
-  alternates: {
-    canonical: "/",
-    languages: {
-      'en-US': '/en-US',
-      'en-GB': '/en-GB',
+    alternates: {
+      canonical: '/',
+      languages: {
+        'ru-RU': '/',
+        'en-US': '/en',
+      },
     },
-  },
-  category: "technology",
-};
+    category: 'technology',
+  };
+}
 
-// Enable static generation for better performance
-// This page will be statically generated at build time
-export const revalidate = 3600; // Revalidate every hour
+// JSON-LD Structured Data with i18n
+async function StructuredData() {
+  const t = await getTranslations('landing.metadata.jsonLd');
+  const faq = t.raw('faq') as Array<{ question: string; answer: string }>;
+
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'Organization',
+        '@id': 'https://skillsoft.app/#organization',
+        name: 'SkillSoft',
+        url: 'https://skillsoft.app',
+        logo: {
+          '@type': 'ImageObject',
+          url: 'https://skillsoft.app/logo.png',
+          width: 512,
+          height: 512,
+        },
+      },
+      {
+        '@type': 'SoftwareApplication',
+        '@id': 'https://skillsoft.app/#software',
+        name: t('softwareName'),
+        applicationCategory: 'BusinessApplication',
+        operatingSystem: 'Web Browser',
+        offers: {
+          '@type': 'Offer',
+          price: '0',
+          priceCurrency: 'USD',
+          description: t('offerDescription'),
+        },
+        featureList: t.raw('features') as string[],
+      },
+      {
+        '@type': 'WebPage',
+        '@id': 'https://skillsoft.app/#webpage',
+        url: 'https://skillsoft.app',
+        name: t('webPageName'),
+        isPartOf: { '@id': 'https://skillsoft.app/#website' },
+        about: { '@id': 'https://skillsoft.app/#organization' },
+        description: t('webPageDescription'),
+      },
+      {
+        '@type': 'FAQPage',
+        mainEntity: faq.map((item) => ({
+          '@type': 'Question',
+          name: item.question,
+          acceptedAnswer: {
+            '@type': 'Answer',
+            text: item.answer,
+          },
+        })),
+      },
+    ],
+  };
+
+  return (
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+    />
+  );
+}
 
 export default function HomePage() {
   return (
     <div className="min-h-screen w-full bg-background overflow-x-hidden">
+      {/* Structured Data for SEO */}
+      <StructuredData />
+
       {/* Client-side authentication handler */}
       <Suspense fallback={null}>
         <AuthHandlerClient />
       </Suspense>
-      
-      {/* Server-rendered landing page content */}
-      <LandingPageContent />
+
+      {/* Client Component - Interactive Header */}
+      <LandingHeader />
+
+      {/* Server-rendered landing page sections */}
+      <main>
+        {/* Hero with interactive demo - above the fold, critical path */}
+        <HeroSection />
+
+        {/* Psychometrics showcase with reliability gauges */}
+        <PsychometricsShowcase />
+
+        {/* Assessment types (Likert, SJT, MCQ) */}
+        <AssessmentTypesSection />
+
+        {/* International standards (ESCO, O*NET, Big Five) */}
+        <StandardsSection />
+
+        {/* How it works - 3 step process */}
+        <HowItWorksSection />
+
+        {/* Stats section with animated counters */}
+        <StatsSection />
+
+        {/* Final CTA */}
+        <CTASection />
+      </main>
+
+      {/* Footer */}
+      <FooterSection />
+
+      {/* Mobile sticky CTA */}
+      <MobileStickyCTA />
     </div>
   );
 }

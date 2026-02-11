@@ -170,7 +170,7 @@ function Sidebar({
       <div
         data-slot="sidebar"
         className={cn(
-          "bg-sidebar text-sidebar-foreground flex h-full w-(--sidebar-width) flex-col",
+          "bg-sidebar text-sidebar-foreground flex h-full w-(--sidebar-width) flex-col overflow-hidden",
           className
         )}
         {...props}
@@ -251,7 +251,7 @@ function Sidebar({
         <div
           data-sidebar="sidebar"
           data-slot="sidebar-inner"
-          className="bg-sidebar group-data-[variant=floating]:border-sidebar-border flex h-full w-full flex-col group-data-[variant=floating]:rounded-lg group-data-[variant=floating]:border group-data-[variant=floating]:shadow-sm"
+          className="bg-sidebar group-data-[variant=floating]:border-sidebar-border flex h-full w-full flex-col overflow-hidden group-data-[variant=floating]:rounded-lg group-data-[variant=floating]:border group-data-[variant=floating]:shadow-sm"
         >
           {children}
         </div>
@@ -275,7 +275,7 @@ function SidebarTrigger({
       size={isMobile ? "default" : "icon"}
       className={cn(
         "size-9 md:size-7",
-        isMobile && "w-full justify-start md:w-auto md:justify-center",
+        isMobile && "\justify-start md:w-auto md:justify-center",
         className
       )}
       onClick={(event) => {
@@ -285,7 +285,6 @@ function SidebarTrigger({
       {...props}
     >
       <PanelLeftIcon className="size-5 md:size-4" />
-      {isMobile && <span className="ml-2 md:hidden">Menu</span>}
       <span className="sr-only">Toggle Sidebar</span>
     </Button>
   );
@@ -391,7 +390,7 @@ function SidebarContent({ className, ...props }: React.ComponentProps<"div">) {
       data-slot="sidebar-content"
       data-sidebar="content"
       className={cn(
-        "flex min-h-0 flex-1 flex-col gap-2 overflow-auto group-data-[collapsible=icon]:overflow-hidden",
+        "flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto overflow-x-hidden group-data-[collapsible=icon]:overflow-hidden",
         className
       )}
       {...props}
@@ -550,7 +549,7 @@ function SidebarMenuButton({
   }
 
   return (
-    <Tooltip>
+    <Tooltip autoHideDuration={3000}>
       <TooltipTrigger asChild>{button}</TooltipTrigger>
       <TooltipContent
         side="right"

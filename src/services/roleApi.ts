@@ -14,7 +14,7 @@
 'use server';
 
 import { auth } from '@clerk/nextjs/server';
-import type { UserRole } from '@/app/types/globals.d';
+import { UserRole } from '@/types/user';
 
 /**
  * Get the role from Clerk organization role string.
@@ -24,11 +24,11 @@ function mapOrgRole(orgRole: string | undefined): UserRole | null {
   
   switch (orgRole) {
     case 'org:admin':
-      return 'ADMIN';
+      return UserRole.ADMIN;
     case 'org:editor':
-      return 'EDITOR';
+      return UserRole.EDITOR;
     case 'org:member':
-      return 'USER';
+      return UserRole.USER;
     default:
       return null;
   }
@@ -52,27 +52,75 @@ export async function getAuthHeaders(): Promise<Record<string, string>> {
   try {
     const authResult = await auth();
     const { userId, sessionClaims, orgRole } = authResult;
-    
+
     if (!userId) {
+      console.warn('[Auth] No userId found in Clerk session');
       return {};
     }
-    
+
     // Get role from auth object (orgRole comes from Clerk organization)
     // orgRole is directly on auth result, NOT in sessionClaims
     const metadataRole = sessionClaims?.metadata?.role as UserRole | undefined;
-    
+
     // Priority: Organization role > metadata role > default USER
     const mappedRole = mapOrgRole(orgRole as string | undefined);
-    const userRole: UserRole = mappedRole ?? metadataRole ?? 'USER';
-    
+    const userRole: UserRole = mappedRole ?? metadataRole ?? UserRole.USER;
+
+    // Debug logging (only in development)
+    if (process.env.NODE_ENV === 'development') {
+      console.log('[Auth] Headers generated:', {
+        userId: userId.substring(0, 8) + '...',
+        role: userRole,
+        source: mappedRole ? 'orgRole' : metadataRole ? 'metadata' : 'default'
+      });
+    }
+
     return {
       'X-User-Id': userId,
       'X-User-Role': userRole,
     };
-  } catch {
+  } catch (error) {
+    // Log the error in development
+    if (process.env.NODE_ENV === 'development') {
+      console.error('[Auth] Failed to get auth headers:', error);
+    }
     // Silent fail - return empty headers if auth fails
     return {};
   }
+}
+
+/**
+ * Get the current user's role from Clerk session.
+ * Useful for server components that need to conditionally render based on role.
+ * 
+ * @returns The user's role or 'USER' as default
+ */
+export async function getCurrentUserRole(): Promise<UserRole> {
+  try {
+    const authResult = await auth();
+    const { userId, sessionClaims, orgRole } = authResult;
+    
+    if (!userId) {
+      return UserRole.USER;
+    }
+    
+    const metadataRole = sessionClaims?.metadata?.role as UserRole | undefined;
+    const mappedRole = mapOrgRole(orgRole as string | undefined);
+    
+    return mappedRole ?? metadataRole ?? UserRole.USER;
+  } catch {
+    return UserRole.USER;
+  }
+}
+
+/**
+ * Check if current user has admin or editor role (can create/edit content).
+ * 
+ * @returns True if user is ADMIN or EDITOR
+ */
+export async function canCreateContent(): Promise<boolean> {
+  const role = await getCurrentUserRole();
+  return role === UserRole.ADMIN || role === UserRole.EDITOR;
 }
 
 /**

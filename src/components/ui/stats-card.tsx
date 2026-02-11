@@ -4,8 +4,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import React from "react";
-import { LucideProps, TrendingUp, TrendingDown } from "lucide-react";
+import { LucideProps, TrendingUp, TrendingDown, ArrowUpRight } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import Link from "next/link";
 
 interface StatsCardProps {
   title: string;
@@ -19,10 +20,11 @@ interface StatsCardProps {
     label: string;
     isPositive?: boolean;
   };
-  variant?: "default" | "success" | "warning" | "info" | "destructive";
+  variant?: "default" | "success" | "warning" | "info" | "destructive" | "primary" | "blue" | "green" | "purple";
   size?: "sm" | "md" | "lg";
   loading?: boolean;
   onClick?: () => void;
+  href?: string;
   className?: string;
   children?: React.ReactNode;
 }
@@ -33,6 +35,35 @@ const variantStyles = {
   warning: "border-yellow-200 bg-yellow-50 dark:border-yellow-800 dark:bg-yellow-950/30",
   info: "border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-950/30",
   destructive: "border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-950/30",
+  primary: "",
+  blue: "",
+  green: "",
+  purple: "",
+};
+
+// Icon background colors for different variants
+const iconBgStyles = {
+  default: "bg-muted",
+  success: "bg-green-500/10",
+  warning: "bg-yellow-500/10",
+  info: "bg-blue-500/10",
+  destructive: "bg-red-500/10",
+  primary: "bg-primary/10",
+  blue: "bg-blue-500/10",
+  green: "bg-emerald-500/10",
+  purple: "bg-purple-500/10",
+};
+
+const iconColorStyles = {
+  default: "text-muted-foreground",
+  success: "text-green-600 dark:text-green-400",
+  warning: "text-yellow-600 dark:text-yellow-400",
+  info: "text-blue-600 dark:text-blue-400",
+  destructive: "text-red-600 dark:text-red-400",
+  primary: "text-primary",
+  blue: "text-blue-600 dark:text-blue-400",
+  green: "text-emerald-600 dark:text-emerald-400",
+  purple: "text-purple-600 dark:text-purple-400",
 };
 
 const sizeStyles = {
@@ -72,6 +103,7 @@ export function StatsCard({
   size = "md",
   loading = false,
   onClick,
+  href,
   className,
   children,
 }: StatsCardProps) {
@@ -88,19 +120,8 @@ export function StatsCard({
     }
   };
   
-  const getVariantStyles = (variant: "default" | "success" | "warning" | "info" | "destructive") => {
-    switch (variant) {
-      case "success":
-        return variantStyles.success;
-      case "warning":
-        return variantStyles.warning;
-      case "info":
-        return variantStyles.info;
-      case "destructive":
-        return variantStyles.destructive;
-      default:
-        return variantStyles.default;
-    }
+  const getVariantStyles = (variant: keyof typeof variantStyles) => {
+    return variantStyles[variant] || variantStyles.default;
   };
 
   const styles = getStyles(size);
@@ -120,13 +141,15 @@ export function StatsCard({
     );
   }
 
-  return (
+  const isInteractive = !!onClick || !!href;
+
+  const cardContent = (
     <Card 
       className={cn(
         styles.card,
         getVariantStyles(variant),
-        "relative transition-all duration-200",
-        onClick && "cursor-pointer hover:shadow-lg active:scale-[0.98]",
+        "relative transition-all duration-200 group",
+        isInteractive && "cursor-pointer hover:shadow-md active:scale-[0.99]",
         className
       )}
       onClick={onClick}
@@ -135,14 +158,30 @@ export function StatsCard({
         "flex flex-row items-center justify-between space-y-0",
         styles.header
       )}>
-        <CardTitle className={cn(styles.title, "line-clamp-2")}>
-          {title}
-          <span className="sr-only">, value is {value}</span>
-        </CardTitle>
-        {Icon && (
-          <Icon 
-            className={cn(styles.icon, "text-muted-foreground shrink-0 ml-2")} 
-            aria-hidden="true" 
+        <div className="flex items-center gap-3">
+          {Icon && (
+            <div className={cn(
+              "w-10 h-10 rounded-xl flex items-center justify-center shrink-0",
+              iconBgStyles[variant] || iconBgStyles.default
+            )}>
+              <Icon 
+                className={cn(
+                  "h-5 w-5",
+                  iconColorStyles[variant] || iconColorStyles.default
+                )} 
+                aria-hidden="true" 
+              />
+            </div>
+          )}
+          <CardTitle className={cn(styles.title, "line-clamp-2")}>
+            {title}
+            <span className="sr-only">, value is {value}</span>
+          </CardTitle>
+        </div>
+        {isInteractive && (
+          <ArrowUpRight 
+            className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" 
+            aria-hidden="true"
           />
         )}
       </CardHeader>
@@ -192,6 +231,12 @@ export function StatsCard({
       </CardContent>
     </Card>
   );
+
+  if (href) {
+    return <Link href={href}>{cardContent}</Link>;
+  }
+
+  return cardContent;
 }
 
 export default StatsCard;
