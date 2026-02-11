@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 
 interface InteractiveDemoProps {
@@ -10,6 +11,7 @@ interface InteractiveDemoProps {
 export function InteractiveDemo({ className }: InteractiveDemoProps) {
   const [selectedValue, setSelectedValue] = useState<number | null>(null);
   const [showFeedback, setShowFeedback] = useState(false);
+  const t = useTranslations('landing.demo');
 
   const handleSelect = (value: number) => {
     setSelectedValue(value);
@@ -21,21 +23,21 @@ export function InteractiveDemo({ className }: InteractiveDemoProps) {
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <span className="text-xs font-medium px-2.5 py-1 rounded-md bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
-          Пример вопроса
+          {t('badge')}
         </span>
-        <span className="text-xs text-muted-foreground">Коммуникация</span>
+        <span className="text-xs text-muted-foreground">{t('competency')}</span>
       </div>
 
       {/* Question */}
       <p className="text-sm font-medium mb-6 leading-relaxed">
-        Я внимательно слушаю других и задаю уточняющие вопросы для лучшего понимания.
+        {t('question')}
       </p>
 
       {/* Likert Scale */}
       <div className="space-y-3">
         <div className="flex items-center justify-between text-xs text-muted-foreground">
-          <span>Не согласен</span>
-          <span>Согласен</span>
+          <span>{t('disagree')}</span>
+          <span>{t('agree')}</span>
         </div>
         <div className="flex items-center justify-center gap-2">
           {[1, 2, 3, 4, 5].map((value) => (
@@ -51,7 +53,7 @@ export function InteractiveDemo({ className }: InteractiveDemoProps) {
                   ? 'border-primary bg-primary/10 text-primary'
                   : 'border-muted text-muted-foreground'
               )}
-              aria-label={`Оценка ${value} из 5`}
+              aria-label={t('ratingLabel', { value })}
             >
               {value}
             </button>
@@ -63,10 +65,10 @@ export function InteractiveDemo({ className }: InteractiveDemoProps) {
       {showFeedback && selectedValue && (
         <div className="mt-4 p-3 rounded-lg bg-primary/5 border border-primary/20 text-xs text-center">
           <span className="text-primary font-medium">
-            Ответ записан: {selectedValue}/5
+            {t('recorded', { value: selectedValue })}
           </span>
           <p className="text-muted-foreground mt-1">
-            Этот ответ относится к компетенции «Коммуникация»
+            {t('competencyNote')}
           </p>
         </div>
       )}
@@ -78,13 +80,14 @@ export function MiniResultsPreview({ className }: { className?: string }) {
   const score = 87;
   const passing = true;
   const strokeDashoffset = 157 * (1 - score / 100);
+  const t = useTranslations('landing.demo');
 
   return (
     <div className={cn('w-full max-w-sm p-6 rounded-2xl bg-card border border-border/50 shadow-lg', className)}>
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <span className="text-xs font-medium px-2.5 py-1 rounded-md bg-blue-500/10 text-blue-600 dark:text-blue-400">
-          Результаты оценки
+          {t('resultsTitle')}
         </span>
         <span
           className={cn(
@@ -94,7 +97,7 @@ export function MiniResultsPreview({ className }: { className?: string }) {
               : 'bg-red-500/10 text-red-600 dark:text-red-400'
           )}
         >
-          {passing ? 'Пройдено' : 'Требует развития'}
+          {passing ? t('passed') : t('needsDevelopment')}
         </span>
       </div>
 
@@ -125,14 +128,14 @@ export function MiniResultsPreview({ className }: { className?: string }) {
 
         <div className="text-center">
           <span className="text-3xl font-bold tabular-nums">{score}%</span>
-          <p className="text-xs text-muted-foreground mt-1">Соответствие должности</p>
+          <p className="text-xs text-muted-foreground mt-1">{t('jobFit')}</p>
         </div>
       </div>
 
       {/* Mini gap bars */}
       <div className="mt-6 space-y-2">
         <div className="flex items-center justify-between text-xs">
-          <span className="text-muted-foreground">Коммуникация</span>
+          <span className="text-muted-foreground">{t('communication')}</span>
           <span className="font-medium">92%</span>
         </div>
         <div className="h-1.5 rounded-full bg-muted/30 overflow-hidden">

@@ -1,7 +1,10 @@
 import Link from 'next/link';
+import { getTranslations } from 'next-intl/server';
 import { Sparkles } from 'lucide-react';
 
-export function FooterSection() {
+export async function FooterSection() {
+  const t = await getTranslations('landing.footer');
+
   return (
     <footer className="border-t border-border/50 bg-muted/20">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-12 md:py-16">
@@ -15,45 +18,44 @@ export function FooterSection() {
               <span className="text-lg font-semibold">SkillSoft</span>
             </Link>
             <p className="text-muted-foreground text-sm max-w-xs leading-relaxed">
-              Интеллектуальная платформа для научно обоснованной оценки гибких навыков
-              и профессионального развития.
+              {t('description')}
             </p>
           </div>
 
           {/* Product Links */}
           <div className="space-y-4">
-            <h4 className="font-semibold text-sm">Продукт</h4>
+            <h4 className="font-semibold text-sm">{t('product')}</h4>
             <nav className="space-y-3 text-sm text-muted-foreground">
               <a href="#features" className="block hover:text-foreground transition-colors">
-                Возможности
+                {t('features')}
               </a>
               <a href="#how-it-works" className="block hover:text-foreground transition-colors">
-                Как это работает
+                {t('howItWorks')}
               </a>
               <a href="#standards" className="block hover:text-foreground transition-colors">
-                Стандарты
+                {t('standards')}
               </a>
               <a href="#" className="block hover:text-foreground transition-colors">
-                Интеграции
+                {t('integrations')}
               </a>
             </nav>
           </div>
 
           {/* Company Links */}
           <div className="space-y-4">
-            <h4 className="font-semibold text-sm">Компания</h4>
+            <h4 className="font-semibold text-sm">{t('company')}</h4>
             <nav className="space-y-3 text-sm text-muted-foreground">
               <a href="#" className="block hover:text-foreground transition-colors">
-                О нас
+                {t('about')}
               </a>
               <a href="#" className="block hover:text-foreground transition-colors">
-                Блог
+                {t('blog')}
               </a>
               <a href="#" className="block hover:text-foreground transition-colors">
-                Карьера
+                {t('careers')}
               </a>
               <a href="#" className="block hover:text-foreground transition-colors">
-                Контакты
+                {t('contact')}
               </a>
             </nav>
           </div>
@@ -62,17 +64,17 @@ export function FooterSection() {
         {/* Bottom */}
         <div className="flex flex-col md:flex-row justify-between items-center gap-4 mt-12 md:mt-16 pt-8 border-t border-border/50">
           <p className="text-sm text-muted-foreground">
-            &copy; 2026 SkillSoft. Все права защищены.
+            {t('copyright')}
           </p>
           <div className="flex gap-6 text-sm text-muted-foreground">
             <a href="#" className="hover:text-foreground transition-colors">
-              Конфиденциальность
+              {t('privacy')}
             </a>
             <a href="#" className="hover:text-foreground transition-colors">
-              Условия
+              {t('terms')}
             </a>
             <a href="#" className="hover:text-foreground transition-colors">
-              Cookies
+              {t('cookies')}
             </a>
           </div>
         </div>

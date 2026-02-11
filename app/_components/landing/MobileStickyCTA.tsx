@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -9,6 +10,7 @@ import { cn } from '@/lib/utils';
 export function MobileStickyCTA() {
   const [isVisible, setIsVisible] = useState(false);
   const [isDismissed, setIsDismissed] = useState(false);
+  const t = useTranslations('landing.mobile');
 
   useEffect(() => {
     const handleScroll = () => {
@@ -36,14 +38,14 @@ export function MobileStickyCTA() {
       <div className="flex items-center gap-3">
         <Link href="/sign-up" className="flex-1">
           <Button className="w-full h-12 text-base">
-            Начать бесплатно
+            {t('ctaStart')}
             <ArrowRight className="ml-2 w-4 h-4" />
           </Button>
         </Link>
         <button
           onClick={() => setIsDismissed(true)}
           className="p-2 text-muted-foreground hover:text-foreground transition-colors"
-          aria-label="Закрыть"
+          aria-label={t('close')}
         >
           <X className="w-5 h-5" />
         </button>

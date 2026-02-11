@@ -5150,5 +5150,262 @@
       "timeTaken": "total time",
       "breakdown": "Competency Breakdown"
     }
+  },
+  "landing": {
+    "header": {
+      "features": "Features",
+      "howItWorks": "How It Works",
+      "standards": "Standards",
+      "signIn": "Sign In",
+      "getStarted": "Get Started",
+      "openMenu": "Open menu",
+      "closeMenu": "Close menu"
+    },
+    "hero": {
+      "badge": "Psychometric Assessment Platform",
+      "headlinePart1": "Science-Based",
+      "headlinePart2": "Soft Skills Assessment",
+      "subheading": "Precise competency measurement. Talent-to-position matching. Building high-performance teams driven by data.",
+      "ctaStart": "Start for Free",
+      "ctaDemo": "Watch Demo",
+      "trustFree": "30-day free trial",
+      "trustSecurity": "Data Security",
+      "trustUsers": "2,500+ professionals",
+      "standardsLabel": "Based on international standards"
+    },
+    "psychometrics": {
+      "badge": "Psychometrics",
+      "title": "Built on a",
+      "titleHighlight": "Scientific Foundation",
+      "subtitle": "Classical Test Theory ensures statistical validity and reliability for every assessment.",
+      "reliability": {
+        "title": "Reliability Monitoring",
+        "desc": "Cronbach's Alpha calculated in real time. Automatic alerts when reliability drops."
+      },
+      "validity": {
+        "title": "Validity Metrics",
+        "desc": "Discrimination and difficulty indices ensure differentiation between competency levels.",
+        "discrimination": "Discrimination",
+        "difficulty": "Difficulty"
+      },
+      "quality": {
+        "title": "Quality Control",
+        "desc": "Automatic flagging and disabling of underperforming items.",
+        "validated": "Validated",
+        "passing": "Passing",
+        "underReview": "Under Review",
+        "critical": "Critical"
+      },
+      "pipeline": {
+        "title": "Item Validation Pipeline",
+        "pending": "PENDING",
+        "valid": "VALID",
+        "review": "UNDER REVIEW",
+        "disabled": "DISABLED"
+      },
+      "gauge": {
+        "excellent": "Excellent",
+        "good": "Good",
+        "acceptable": "Acceptable",
+        "needsReview": "Needs Review"
+      }
+    },
+    "assessments": {
+      "badge": "Question Types",
+      "title": "Try the",
+      "titleHighlight": "Assessment Formats",
+      "subtitle": "Three scientifically validated question types. Click to experience each format.",
+      "reset": "Reset",
+      "likert": {
+        "label": "Likert Scale",
+        "question": "I easily adapt to changes in work processes",
+        "instruction": "Select your level of agreement:",
+        "ratingLabel": "Rating {value} out of 5",
+        "disagree": "Disagree",
+        "agree": "Agree",
+        "recorded": "Response recorded: {value}/5",
+        "avgTime": "30 sec average"
+      },
+      "sjt": {
+        "label": "Situational Judgment",
+        "question": "A colleague is making mistakes on a project. What do you do?",
+        "instruction": "Choose the best option:",
+        "optionA": "Solve the problem yourself",
+        "optionB": "Discuss the situation privately",
+        "optionC": "Escalate to management",
+        "correct": "Excellent! This is the optimal approach.",
+        "incorrect": "Not bad, but there's a more effective option.",
+        "avgTime": "180 sec average"
+      },
+      "mcq": {
+        "label": "Multiple Choice",
+        "question": "Which competency describes the ability to motivate a team?",
+        "instruction": "Select one answer:",
+        "optCommunication": "Communication",
+        "optLeadership": "Leadership",
+        "optAdaptability": "Adaptability",
+        "correct": "Correct! Leadership includes team motivation.",
+        "incorrect": "Try again — think about motivation.",
+        "avgTime": "60 sec average"
+      }
+    },
+    "standards": {
+      "badge": "International Standards",
+      "title": "Aligned with",
+      "titleHighlight": "Global Standards",
+      "subtitle": "Three internationally recognized standards for comprehensive skills assessment.",
+      "esco": {
+        "full": "European Skills Classification",
+        "desc": "Multilingual classification of skills, competencies, and occupations of the EU.",
+        "metric": "2,945",
+        "metricLabel": "skills",
+        "badge": "EU Standard"
+      },
+      "onet": {
+        "full": "US Occupational Information",
+        "desc": "The primary source of occupational information from the US Department of Labor.",
+        "metric": "974",
+        "metricLabel": "occupations",
+        "badge": "US DOL"
+      },
+      "bigFive": {
+        "full": "OCEAN Personality Model",
+        "desc": "The most validated personality model for mapping traits and competencies.",
+        "metric": "5",
+        "metricLabel": "dimensions",
+        "badge": "Psychology"
+      },
+      "integration": {
+        "title": "How Standards Work Together",
+        "step1Title": "Job Profile",
+        "step1Desc": "Import from O*NET",
+        "step2Title": "Skills Mapping",
+        "step2Desc": "Link to ESCO taxonomy",
+        "step3Title": "Assessment",
+        "step3Desc": "Validated questions",
+        "step4Title": "Analytics",
+        "step4Desc": "Big Five projection"
+      }
+    },
+    "howItWorks": {
+      "badge": "How It Works",
+      "title": "Simple steps to",
+      "titleHighlight": "better hiring",
+      "subtitle": "From job requirements to data-driven hiring decisions in three simple steps.",
+      "step1": {
+        "title": "Define Requirements",
+        "desc": "Select competencies from our library or import job profiles from O*NET. Create tests in minutes."
+      },
+      "step2": {
+        "title": "Conduct Assessment",
+        "desc": "Candidates answer scientifically validated questions. Adaptive testing adjusts to their level."
+      },
+      "step3": {
+        "title": "Analyze Results",
+        "desc": "Get job-fit scores, team compatibility analysis, and a competency passport with recommendations."
+      }
+    },
+    "stats": {
+      "users": "Active Users",
+      "organizations": "Organizations",
+      "satisfaction": "Satisfaction",
+      "productivity": "Productivity Growth"
+    },
+    "cta": {
+      "badge": "Ready for Change?",
+      "titlePart1": "Build a Team",
+      "titlePart2": "Driven by Data",
+      "subtitle": "Join thousands of HR professionals using validated tests to make better hiring decisions.",
+      "ctaStart": "Start for Free",
+      "ctaDemo": "Schedule a Demo",
+      "trustFree": "30-day free trial",
+      "trustSecurity": "Enterprise Security",
+      "trustSupport": "24/7 Support"
+    },
+    "footer": {
+      "description": "An intelligent platform for science-based soft skills assessment and professional development.",
+      "product": "Product",
+      "features": "Features",
+      "howItWorks": "How It Works",
+      "standards": "Standards",
+      "integrations": "Integrations",
+      "company": "Company",
+      "about": "About Us",
+      "blog": "Blog",
+      "careers": "Careers",
+      "contact": "Contact",
+      "copyright": "© 2026 SkillSoft. All rights reserved.",
+      "privacy": "Privacy",
+      "terms": "Terms",
+      "cookies": "Cookies"
+    },
+    "demo": {
+      "badge": "Sample Question",
+      "competency": "Communication",
+      "question": "I listen attentively to others and ask clarifying questions for better understanding.",
+      "disagree": "Disagree",
+      "agree": "Agree",
+      "ratingLabel": "Rating {value} out of 5",
+      "recorded": "Response recorded: {value}/5",
+      "competencyNote": "This response relates to the \"Communication\" competency",
+      "resultsTitle": "Assessment Results",
+      "passed": "Passed",
+      "needsDevelopment": "Needs Development",
+      "jobFit": "Job Fit",
+      "communication": "Communication"
+    },
+    "mobile": {
+      "ctaStart": "Start for Free",
+      "close": "Close"
+    },
+    "metadata": {
+      "title": "SkillSoft - Scientific Soft Skills Assessment Platform",
+      "description": "Assess soft skills with psychometrically validated tests. Job-fit analysis, team compatibility assessment, and competency mapping based on ESCO, O*NET, and Big Five standards.",
+      "ogTitle": "SkillSoft - Scientific Soft Skills Assessment",
+      "ogDescription": "Psychometrically validated tests for job-fit assessment, team compatibility, and competency development.",
+      "ogImageAlt": "SkillSoft Assessment Platform",
+      "twitterTitle": "SkillSoft - Scientific Soft Skills Assessment",
+      "twitterDescription": "Job-fit analysis and team compatibility based on psychometric science.",
+      "jsonLd": {
+        "softwareName": "SkillSoft Assessment Platform",
+        "offerDescription": "30-day free trial",
+        "features": [
+          "Psychometric test validation",
+          "Job-fit analysis with O*NET integration",
+          "Team compatibility assessment",
+          "Big Five personality mapping",
+          "Competency model management"
+        ],
+        "webPageName": "SkillSoft - Scientific Soft Skills Assessment Platform",
+        "webPageDescription": "Psychometrically validated soft skills tests for hiring and employee development.",
+        "faq": [
+          {
+            "question": "What is psychometric validation?",
+            "answer": "Psychometric validation ensures reliable competency measurement through statistical analysis of item difficulty, discrimination, and internal consistency."
+          },
+          {
+            "question": "How does job-fit analysis work?",
+            "answer": "Job-fit analysis compares candidate competency scores against O*NET occupational benchmarks to identify skill gaps and assess role suitability."
+          }
+        ]
+      },
+      "keywords": [
+        "soft skills assessment",
+        "psychometric testing",
+        "competency assessment",
+        "job-fit analysis",
+        "team compatibility",
+        "ESCO competencies",
+        "O*NET skills",
+        "Big Five personality",
+        "HR assessment tools",
+        "employee development",
+        "talent assessment",
+        "competency management",
+        "behavioral assessment",
+        "skills validation",
+        "hiring assessment"
+      ]
+    }
   }
 }

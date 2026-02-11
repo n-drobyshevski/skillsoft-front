@@ -1,19 +1,16 @@
+import { getTranslations } from 'next-intl/server';
 import { AnimatedCounter } from './AnimatedCounter';
 
-interface Stat {
-  value: number;
-  suffix: string;
-  label: string;
-}
+export async function StatsSection() {
+  const t = await getTranslations('landing.stats');
 
-const stats: Stat[] = [
-  { value: 2500, suffix: '+', label: 'Активных пользователей' },
-  { value: 150, suffix: '+', label: 'Организаций' },
-  { value: 98, suffix: '%', label: 'Удовлетворённость' },
-  { value: 45, suffix: '%', label: 'Рост продуктивности' },
-];
+  const stats = [
+    { value: 2500, suffix: '+', label: t('users') },
+    { value: 150, suffix: '+', label: t('organizations') },
+    { value: 98, suffix: '%', label: t('satisfaction') },
+    { value: 45, suffix: '%', label: t('productivity') },
+  ];
 
-export function StatsSection() {
   return (
     <section className="py-16 md:py-24 bg-gradient-to-br from-primary to-primary/90">
       <div className="max-w-6xl mx-auto px-4 sm:px-6">

@@ -1,24 +1,35 @@
+import { getTranslations } from 'next-intl/server';
 import { Badge } from '@/components/ui/badge';
 import { Activity, BarChart3, Target, ArrowRight } from 'lucide-react';
 import { ReliabilityGauge } from './ReliabilityGauge';
 import { ScrollReveal } from './ScrollReveal';
 import { cn } from '@/lib/utils';
 
-export function PsychometricsShowcase() {
+export async function PsychometricsShowcase() {
+  const t = await getTranslations('landing.psychometrics');
+
   return (
     <section id="features" className="py-16 md:py-32 bg-muted/30">
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
         <ScrollReveal className="text-center space-y-4 mb-12 md:mb-20">
-          <Badge variant="outline" className="mb-4">Психометрика</Badge>
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight">Построено на <span className="text-primary">научном фундаменте</span></h2>
-          <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto">Классическая теория тестов обеспечивает статистическую валидность и надёжность каждой оценки.</p>
+          <Badge variant="outline" className="mb-4">{t('badge')}</Badge>
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight">{t('title')} <span className="text-primary">{t('titleHighlight')}</span></h2>
+          <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto">{t('subtitle')}</p>
         </ScrollReveal>
         <div className="grid md:grid-cols-3 gap-6">
-          <ScrollReveal delay={0}><FeatureCard icon={Activity} color="bg-emerald-500" title="Мониторинг надёжности" desc="Альфа Кронбаха рассчитывается в реальном времени. Автоматические оповещения при снижении надёжности."><ReliabilityGauge value={0.87} /></FeatureCard></ScrollReveal>
-          <ScrollReveal delay={100}><FeatureCard icon={BarChart3} color="bg-blue-500" title="Метрики валидности" desc="Показатели дискриминативности и сложности обеспечивают различение уровней компетенций."><ValidityBars /></FeatureCard></ScrollReveal>
-          <ScrollReveal delay={200}><FeatureCard icon={Target} color="bg-violet-500" title="Контроль качества" desc="Автоматическая маркировка и отключение неэффективных вопросов."><QualityStats /></FeatureCard></ScrollReveal>
+          <ScrollReveal delay={0}><FeatureCard icon={Activity} color="bg-emerald-500" title={t('reliability.title')} desc={t('reliability.desc')}><ReliabilityGauge value={0.87} /></FeatureCard></ScrollReveal>
+          <ScrollReveal delay={100}><FeatureCard icon={BarChart3} color="bg-blue-500" title={t('validity.title')} desc={t('validity.desc')}><ValidityBars discriminationLabel={t('validity.discrimination')} difficultyLabel={t('validity.difficulty')} /></FeatureCard></ScrollReveal>
+          <ScrollReveal delay={200}><FeatureCard icon={Target} color="bg-violet-500" title={t('quality.title')} desc={t('quality.desc')}><QualityStats validatedLabel={t('quality.validated')} passingLabel={t('quality.passing')} underReviewLabel={t('quality.underReview')} criticalLabel={t('quality.critical')} /></FeatureCard></ScrollReveal>
         </div>
-        <ScrollReveal delay={300} className="mt-8"><StatusPipeline /></ScrollReveal>
+        <ScrollReveal delay={300} className="mt-8">
+          <StatusPipeline
+            title={t('pipeline.title')}
+            pendingLabel={t('pipeline.pending')}
+            validLabel={t('pipeline.valid')}
+            reviewLabel={t('pipeline.review')}
+            disabledLabel={t('pipeline.disabled')}
+          />
+        </ScrollReveal>
       </div>
     </section>
   );
@@ -35,11 +46,11 @@ function FeatureCard({ icon: Icon, color, title, desc, children }: { icon: React
   );
 }
 
-function ValidityBars() {
+function ValidityBars({ discriminationLabel, difficultyLabel }: { discriminationLabel: string; difficultyLabel: string }) {
   return (
     <div className="space-y-3">
-      <ValidityBar label="Дискриминативность" value={0.42} threshold={0.25} />
-      <ValidityBar label="Сложность" value={0.65} threshold={0.2} max={0.9} />
+      <ValidityBar label={discriminationLabel} value={0.42} threshold={0.25} />
+      <ValidityBar label={difficultyLabel} value={0.65} threshold={0.2} max={0.9} />
     </div>
   );
 }
@@ -58,8 +69,8 @@ function ValidityBar({ label, value, threshold, max = 1 }: { label: string; valu
   );
 }
 
-function QualityStats() {
-  const stats = [{ v: '2 500+', l: 'Валидировано', c: 'emerald' }, { v: '98%', l: 'Проходят', c: 'blue' }, { v: '<3%', l: 'На проверке', c: 'amber' }, { v: '0', l: 'Критичных', c: 'emerald' }];
+function QualityStats({ validatedLabel, passingLabel, underReviewLabel, criticalLabel }: { validatedLabel: string; passingLabel: string; underReviewLabel: string; criticalLabel: string }) {
+  const stats = [{ v: '2 500+', l: validatedLabel, c: 'emerald' }, { v: '98%', l: passingLabel, c: 'blue' }, { v: '<3%', l: underReviewLabel, c: 'amber' }, { v: '0', l: criticalLabel, c: 'emerald' }];
   return (
     <div className="grid grid-cols-2 gap-4 text-center">
       {stats.map((s) => (
@@ -69,11 +80,11 @@ function QualityStats() {
   );
 }
 
-function StatusPipeline() {
-  const items = [{ l: 'ОЖИДАЕТ', n: 45, c: 'muted' }, { l: 'ВАЛИДНЫЙ', n: 2312, c: 'emerald' }, { l: 'НА ПРОВЕРКЕ', n: 28, c: 'amber' }, { l: 'ОТКЛЮЧЁН', n: 115, c: 'slate' }];
+function StatusPipeline({ title, pendingLabel, validLabel, reviewLabel, disabledLabel }: { title: string; pendingLabel: string; validLabel: string; reviewLabel: string; disabledLabel: string }) {
+  const items = [{ l: pendingLabel, n: 45, c: 'muted' }, { l: validLabel, n: 2312, c: 'emerald' }, { l: reviewLabel, n: 28, c: 'amber' }, { l: disabledLabel, n: 115, c: 'slate' }];
   return (
     <div className="p-6 rounded-2xl bg-background border border-border/50">
-      <h4 className="text-sm font-medium mb-4 text-center">Конвейер валидации вопросов</h4>
+      <h4 className="text-sm font-medium mb-4 text-center">{title}</h4>
       <div className="flex flex-wrap items-center justify-center gap-2 md:gap-4">
         {items.map((i, idx) => (
           <div key={i.l} className="flex items-center gap-2">

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { Badge } from '@/components/ui/badge';
 import { Clock, CircleDot, MessageSquare, CheckSquare, CheckCircle, RotateCcw } from 'lucide-react';
 import { ScrollReveal } from './ScrollReveal';
@@ -9,16 +10,18 @@ import { cn } from '@/lib/utils';
 const typeColors = { likert: 'bg-emerald-500', sjt: 'bg-amber-500', mcq: 'bg-blue-500' };
 
 export function AssessmentTypesSection() {
+  const t = useTranslations('landing.assessments');
+
   return (
     <section className="py-16 md:py-32">
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
         <ScrollReveal className="text-center space-y-4 mb-12 md:mb-20">
-          <Badge variant="outline" className="mb-4">Типы вопросов</Badge>
+          <Badge variant="outline" className="mb-4">{t('badge')}</Badge>
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight">
-            Попробуйте <span className="text-primary">форматы оценки</span>
+            {t('title')} <span className="text-primary">{t('titleHighlight')}</span>
           </h2>
           <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto">
-            Три научно обоснованных типа вопросов. Нажмите, чтобы испытать каждый формат.
+            {t('subtitle')}
           </p>
         </ScrollReveal>
         <div className="grid md:grid-cols-3 gap-6">
@@ -40,6 +43,7 @@ export function AssessmentTypesSection() {
 function InteractiveLikertCard() {
   const [selected, setSelected] = useState<number | null>(null);
   const [isAnswered, setIsAnswered] = useState(false);
+  const t = useTranslations('landing.assessments');
 
   const handleSelect = (value: number) => {
     setSelected(value);
@@ -60,14 +64,14 @@ function InteractiveLikertCard() {
     )}>
       <div className="flex items-center justify-between mb-4">
         <div className={cn('px-2.5 py-1 rounded-md text-xs font-medium text-white flex items-center gap-1.5', typeColors.likert)}>
-          <CircleDot className="w-3.5 h-3.5" />Шкала Лайкерта
+          <CircleDot className="w-3.5 h-3.5" />{t('likert.label')}
         </div>
         <div className="flex items-center gap-2">
           {isAnswered && (
             <button
               onClick={handleReset}
               className="p-1 rounded-md hover:bg-muted transition-colors"
-              aria-label="Сбросить"
+              aria-label={t('reset')}
             >
               <RotateCcw className="w-3.5 h-3.5 text-muted-foreground" />
             </button>
@@ -76,8 +80,8 @@ function InteractiveLikertCard() {
         </div>
       </div>
 
-      <p className="text-sm font-medium mb-2">Я легко адаптируюсь к изменениям в рабочих процессах</p>
-      <p className="text-xs text-muted-foreground mb-4">Выберите степень согласия:</p>
+      <p className="text-sm font-medium mb-2">{t('likert.question')}</p>
+      <p className="text-xs text-muted-foreground mb-4">{t('likert.instruction')}</p>
 
       <div className="space-y-3 mb-4">
         <div className="flex items-center justify-between gap-1.5">
@@ -92,15 +96,15 @@ function InteractiveLikertCard() {
                   ? 'border-emerald-500 bg-emerald-500 text-white scale-110 shadow-md'
                   : 'border-muted text-muted-foreground hover:border-emerald-300 hover:bg-emerald-50 dark:hover:bg-emerald-950'
               )}
-              aria-label={`Оценка ${n} из 5`}
+              aria-label={t('likert.ratingLabel', { value: n })}
             >
               {n}
             </button>
           ))}
         </div>
         <div className="flex justify-between text-[10px] text-muted-foreground">
-          <span>Не согласен</span>
-          <span>Согласен</span>
+          <span>{t('likert.disagree')}</span>
+          <span>{t('likert.agree')}</span>
         </div>
       </div>
 
@@ -109,7 +113,7 @@ function InteractiveLikertCard() {
           <div className="flex items-center gap-2 text-xs">
             <CheckCircle className="w-4 h-4 text-emerald-500" />
             <span className="font-medium text-emerald-700 dark:text-emerald-400">
-              Ответ записан: {selected}/5
+              {t('likert.recorded', { value: selected })}
             </span>
           </div>
         </div>
@@ -117,7 +121,7 @@ function InteractiveLikertCard() {
 
       <div className="flex items-center gap-2 text-xs text-muted-foreground pt-4 border-t border-border/50">
         <Clock className="w-3.5 h-3.5" />
-        <span>30 сек в среднем</span>
+        <span>{t('likert.avgTime')}</span>
       </div>
     </div>
   );
@@ -126,11 +130,12 @@ function InteractiveLikertCard() {
 function InteractiveSJTCard() {
   const [selected, setSelected] = useState<string | null>(null);
   const [isAnswered, setIsAnswered] = useState(false);
+  const t = useTranslations('landing.assessments');
 
   const opts = [
-    { l: 'A', t: 'Решить проблему самостоятельно', correct: false },
-    { l: 'B', t: 'Обсудить ситуацию наедине', correct: true },
-    { l: 'C', t: 'Эскалировать руководителю', correct: false },
+    { l: 'A', t: t('sjt.optionA'), correct: false },
+    { l: 'B', t: t('sjt.optionB'), correct: true },
+    { l: 'C', t: t('sjt.optionC'), correct: false },
   ];
 
   const handleSelect = (letter: string) => {
@@ -152,14 +157,14 @@ function InteractiveSJTCard() {
     )}>
       <div className="flex items-center justify-between mb-4">
         <div className={cn('px-2.5 py-1 rounded-md text-xs font-medium text-white flex items-center gap-1.5', typeColors.sjt)}>
-          <MessageSquare className="w-3.5 h-3.5" />Ситуационные задачи
+          <MessageSquare className="w-3.5 h-3.5" />{t('sjt.label')}
         </div>
         <div className="flex items-center gap-2">
           {isAnswered && (
             <button
               onClick={handleReset}
               className="p-1 rounded-md hover:bg-muted transition-colors"
-              aria-label="Сбросить"
+              aria-label={t('reset')}
             >
               <RotateCcw className="w-3.5 h-3.5 text-muted-foreground" />
             </button>
@@ -168,8 +173,8 @@ function InteractiveSJTCard() {
         </div>
       </div>
 
-      <p className="text-sm font-medium mb-2">Коллега допускает ошибки в проекте. Ваши действия?</p>
-      <p className="text-xs text-muted-foreground mb-4">Выберите лучший вариант:</p>
+      <p className="text-sm font-medium mb-2">{t('sjt.question')}</p>
+      <p className="text-xs text-muted-foreground mb-4">{t('sjt.instruction')}</p>
 
       <div className="space-y-2 mb-4">
         {opts.map((o) => (
@@ -227,8 +232,8 @@ function InteractiveSJTCard() {
                 : 'text-amber-700 dark:text-amber-400'
             )}>
               {opts.find(o => o.l === selected)?.correct
-                ? 'Отлично! Это оптимальный подход.'
-                : 'Неплохо, но есть более эффективный вариант.'}
+                ? t('sjt.correct')
+                : t('sjt.incorrect')}
             </span>
           </div>
         </div>
@@ -236,7 +241,7 @@ function InteractiveSJTCard() {
 
       <div className="flex items-center gap-2 text-xs text-muted-foreground pt-4 border-t border-border/50">
         <Clock className="w-3.5 h-3.5" />
-        <span>180 сек в среднем</span>
+        <span>{t('sjt.avgTime')}</span>
       </div>
     </div>
   );
@@ -245,11 +250,12 @@ function InteractiveSJTCard() {
 function InteractiveMCQCard() {
   const [selected, setSelected] = useState<number | null>(null);
   const [isAnswered, setIsAnswered] = useState(false);
+  const t = useTranslations('landing.assessments');
 
   const opts = [
-    { text: 'Коммуникация', correct: false },
-    { text: 'Лидерство', correct: true },
-    { text: 'Адаптивность', correct: false },
+    { text: t('mcq.optCommunication'), correct: false },
+    { text: t('mcq.optLeadership'), correct: true },
+    { text: t('mcq.optAdaptability'), correct: false },
   ];
 
   const handleSelect = (index: number) => {
@@ -271,14 +277,14 @@ function InteractiveMCQCard() {
     )}>
       <div className="flex items-center justify-between mb-4">
         <div className={cn('px-2.5 py-1 rounded-md text-xs font-medium text-white flex items-center gap-1.5', typeColors.mcq)}>
-          <CheckSquare className="w-3.5 h-3.5" />Выбор ответа
+          <CheckSquare className="w-3.5 h-3.5" />{t('mcq.label')}
         </div>
         <div className="flex items-center gap-2">
           {isAnswered && (
             <button
               onClick={handleReset}
               className="p-1 rounded-md hover:bg-muted transition-colors"
-              aria-label="Сбросить"
+              aria-label={t('reset')}
             >
               <RotateCcw className="w-3.5 h-3.5 text-muted-foreground" />
             </button>
@@ -287,8 +293,8 @@ function InteractiveMCQCard() {
         </div>
       </div>
 
-      <p className="text-sm font-medium mb-2">Какая компетенция описывает способность мотивировать команду?</p>
-      <p className="text-xs text-muted-foreground mb-4">Выберите один ответ:</p>
+      <p className="text-sm font-medium mb-2">{t('mcq.question')}</p>
+      <p className="text-xs text-muted-foreground mb-4">{t('mcq.instruction')}</p>
 
       <div className="space-y-2 mb-4">
         {opts.map((o, i) => (
@@ -349,8 +355,8 @@ function InteractiveMCQCard() {
                 : 'text-blue-700 dark:text-blue-400'
             )}>
               {opts[selected].correct
-                ? 'Верно! Лидерство включает мотивацию команды.'
-                : 'Попробуйте ещё раз — подумайте о мотивации.'}
+                ? t('mcq.correct')
+                : t('mcq.incorrect')}
             </span>
           </div>
         </div>
@@ -358,7 +364,7 @@ function InteractiveMCQCard() {
 
       <div className="flex items-center gap-2 text-xs text-muted-foreground pt-4 border-t border-border/50">
         <Clock className="w-3.5 h-3.5" />
-        <span>60 сек в среднем</span>
+        <span>{t('mcq.avgTime')}</span>
       </div>
     </div>
   );

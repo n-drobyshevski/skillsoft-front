@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { getTranslations } from 'next-intl/server';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -13,7 +14,9 @@ import {
 } from 'lucide-react';
 import { InteractiveDemo, MiniResultsPreview } from './InteractiveDemo';
 
-export function HeroSection() {
+export async function HeroSection() {
+  const t = await getTranslations('landing.hero');
+
   return (
     <section className="relative min-h-screen flex items-center pt-16">
       {/* Subtle Background Gradient */}
@@ -31,19 +34,18 @@ export function HeroSection() {
               className="px-4 py-1.5 text-sm font-medium bg-primary/10 text-primary border-primary/20 hover:bg-primary/15 transition-colors"
             >
               <BrainCircuit className="w-3.5 h-3.5 mr-1.5" />
-              Платформа психометрической оценки
+              {t('badge')}
             </Badge>
           </div>
 
           {/* Headline */}
           <div className="space-y-4">
             <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.1]">
-              Научно обоснованная
-              <span className="block text-primary">оценка гибких навыков</span>
+              {t('headlinePart1')}
+              <span className="block text-primary">{t('headlinePart2')}</span>
             </h1>
             <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-              Точное измерение компетенций. Подбор талантов на позиции.
-              Формирование высокоэффективных команд на основе данных.
+              {t('subheading')}
             </p>
           </div>
 
@@ -51,13 +53,13 @@ export function HeroSection() {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link href="/sign-up">
               <Button size="lg" className="h-12 px-8 text-base">
-                Начать бесплатно
+                {t('ctaStart')}
                 <ArrowRight className="ml-2 w-4 h-4" />
               </Button>
             </Link>
             <Button variant="outline" size="lg" className="h-12 px-8 text-base group">
               <Play className="mr-2 w-4 h-4 group-hover:scale-110 transition-transform" />
-              Смотреть демо
+              {t('ctaDemo')}
             </Button>
           </div>
 
@@ -65,21 +67,21 @@ export function HeroSection() {
           <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-3 pt-4 text-sm text-muted-foreground">
             <div className="flex items-center gap-2">
               <CheckCircle className="w-4 h-4 text-emerald-500" />
-              <span>30 дней бесплатно</span>
+              <span>{t('trustFree')}</span>
             </div>
             <div className="flex items-center gap-2">
               <Shield className="w-4 h-4 text-blue-500" />
-              <span>Безопасность данных</span>
+              <span>{t('trustSecurity')}</span>
             </div>
             <div className="flex items-center gap-2">
               <Users className="w-4 h-4 text-violet-500" />
-              <span>2 500+ специалистов</span>
+              <span>{t('trustUsers')}</span>
             </div>
           </div>
 
           {/* Standards Trust Bar */}
           <div className="pt-6">
-            <p className="text-xs text-muted-foreground mb-3">На основе международных стандартов</p>
+            <p className="text-xs text-muted-foreground mb-3">{t('standardsLabel')}</p>
             <div className="flex flex-wrap items-center justify-center gap-3">
               <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-indigo-500/30 text-xs font-medium text-indigo-600 dark:text-indigo-400 hover:bg-indigo-500/10 transition-colors">
                 <Globe className="w-3.5 h-3.5" />

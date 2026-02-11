@@ -2,13 +2,16 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
+import { LanguageSwitcher, LanguageToggle } from '@/components/language-switcher';
 import { cn } from '@/lib/utils';
 import { ArrowRight, Sparkles, Menu, X } from 'lucide-react';
 
 export function LandingHeader() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const t = useTranslations('landing.header');
 
   useEffect(() => {
     const handleScroll = () => {
@@ -44,32 +47,33 @@ export function LandingHeader() {
               href="#features"
               className="text-sm text-muted-foreground hover:text-foreground transition-colors"
             >
-              Возможности
+              {t('features')}
             </a>
             <a
               href="#how-it-works"
               className="text-sm text-muted-foreground hover:text-foreground transition-colors"
             >
-              Как это работает
+              {t('howItWorks')}
             </a>
             <a
               href="#standards"
               className="text-sm text-muted-foreground hover:text-foreground transition-colors"
             >
-              Стандарты
+              {t('standards')}
             </a>
           </nav>
 
           {/* Desktop CTA Buttons */}
           <div className="hidden md:flex items-center gap-3">
+            <LanguageSwitcher />
             <Link href="/sign-in">
               <Button variant="ghost" size="sm" className="text-sm">
-                Войти
+                {t('signIn')}
               </Button>
             </Link>
             <Link href="/sign-up">
               <Button size="sm" className="text-sm">
-                Начать
+                {t('getStarted')}
                 <ArrowRight className="ml-1.5 w-3.5 h-3.5" />
               </Button>
             </Link>
@@ -79,7 +83,7 @@ export function LandingHeader() {
           <button
             className="md:hidden p-2 -mr-2"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
+            aria-label={mobileMenuOpen ? t('closeMenu') : t('openMenu')}
           >
             {mobileMenuOpen ? (
               <X className="w-6 h-6" />
@@ -99,31 +103,32 @@ export function LandingHeader() {
               className="block text-sm text-muted-foreground hover:text-foreground transition-colors"
               onClick={() => setMobileMenuOpen(false)}
             >
-              Возможности
+              {t('features')}
             </a>
             <a
               href="#how-it-works"
               className="block text-sm text-muted-foreground hover:text-foreground transition-colors"
               onClick={() => setMobileMenuOpen(false)}
             >
-              Как это работает
+              {t('howItWorks')}
             </a>
             <a
               href="#standards"
               className="block text-sm text-muted-foreground hover:text-foreground transition-colors"
               onClick={() => setMobileMenuOpen(false)}
             >
-              Стандарты
+              {t('standards')}
             </a>
             <div className="flex flex-col gap-2 pt-4 border-t border-border">
+              <LanguageToggle className="self-start" />
               <Link href="/sign-in" onClick={() => setMobileMenuOpen(false)}>
                 <Button variant="outline" className="w-full">
-                  Войти
+                  {t('signIn')}
                 </Button>
               </Link>
               <Link href="/sign-up" onClick={() => setMobileMenuOpen(false)}>
                 <Button className="w-full">
-                  Начать
+                  {t('getStarted')}
                   <ArrowRight className="ml-1.5 w-3.5 h-3.5" />
                 </Button>
               </Link>

@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, useRef } from 'react';
+import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 
 interface ReliabilityGaugeProps {
@@ -12,9 +13,10 @@ export function ReliabilityGauge({ value, className }: ReliabilityGaugeProps) {
   const [animatedValue, setAnimatedValue] = useState(0);
   const [hasAnimated, setHasAnimated] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+  const t = useTranslations('landing.psychometrics.gauge');
 
   const getColor = (v: number) => (v >= 0.8 ? '#10b981' : v >= 0.7 ? '#3b82f6' : v >= 0.6 ? '#f59e0b' : '#ef4444');
-  const getLabel = (v: number) => (v >= 0.8 ? 'Excellent' : v >= 0.7 ? 'Good' : v >= 0.6 ? 'Acceptable' : 'Needs Review');
+  const getLabel = (v: number) => (v >= 0.8 ? t('excellent') : v >= 0.7 ? t('good') : v >= 0.6 ? t('acceptable') : t('needsReview'));
 
   useEffect(() => {
     if (hasAnimated || typeof window === 'undefined') return;

@@ -1,29 +1,29 @@
+import { getTranslations } from 'next-intl/server';
 import { Badge } from '@/components/ui/badge';
 import { Layers, TrendingUp, Award } from 'lucide-react';
 import { ScrollReveal } from './ScrollReveal';
 
-export function HowItWorksSection() {
+export async function HowItWorksSection() {
+  const t = await getTranslations('landing.howItWorks');
+
   const steps = [
     {
       step: '01',
       icon: Layers,
-      title: 'Определите требования',
-      description:
-        'Выберите компетенции из нашей базы или импортируйте профили должностей из O*NET. Создавайте тесты за минуты.',
+      title: t('step1.title'),
+      description: t('step1.desc'),
     },
     {
       step: '02',
       icon: TrendingUp,
-      title: 'Проведите оценку',
-      description:
-        'Кандидаты отвечают на научно валидированные вопросы. Адаптивное тестирование подстраивается под уровень.',
+      title: t('step2.title'),
+      description: t('step2.desc'),
     },
     {
       step: '03',
       icon: Award,
-      title: 'Анализируйте результаты',
-      description:
-        'Получите оценку соответствия, анализ командной совместимости и паспорт компетенций с рекомендациями.',
+      title: t('step3.title'),
+      description: t('step3.desc'),
     },
   ];
 
@@ -32,13 +32,13 @@ export function HowItWorksSection() {
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
         {/* Section Header */}
         <ScrollReveal className="text-center space-y-4 mb-12 md:mb-20">
-          <Badge variant="outline" className="mb-4">Как это работает</Badge>
+          <Badge variant="outline" className="mb-4">{t('badge')}</Badge>
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight">
-            Простые шаги к{' '}
-            <span className="text-primary">лучшему найму</span>
+            {t('title')}{' '}
+            <span className="text-primary">{t('titleHighlight')}</span>
           </h2>
           <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto">
-            От требований к должности до обоснованных решений по найму за три простых шага.
+            {t('subtitle')}
           </p>
         </ScrollReveal>
 
