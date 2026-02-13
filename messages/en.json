@@ -5369,43 +5369,43 @@
       "jsonLd": {
         "softwareName": "SkillSoft Assessment Platform",
         "offerDescription": "30-day free trial",
-        "features": [
-          "Psychometric test validation",
-          "Job-fit analysis with O*NET integration",
-          "Team compatibility assessment",
-          "Big Five personality mapping",
-          "Competency model management"
-        ],
+        "features": {
+          "0": "Psychometric test validation",
+          "1": "Job-fit analysis with O*NET integration",
+          "2": "Team compatibility assessment",
+          "3": "Big Five personality mapping",
+          "4": "Competency model management"
+        },
         "webPageName": "SkillSoft - Scientific Soft Skills Assessment Platform",
         "webPageDescription": "Psychometrically validated soft skills tests for hiring and employee development.",
-        "faq": [
-          {
+        "faq": {
+          "0": {
             "question": "What is psychometric validation?",
             "answer": "Psychometric validation ensures reliable competency measurement through statistical analysis of item difficulty, discrimination, and internal consistency."
           },
-          {
+          "1": {
             "question": "How does job-fit analysis work?",
             "answer": "Job-fit analysis compares candidate competency scores against O*NET occupational benchmarks to identify skill gaps and assess role suitability."
           }
-        ]
+        }
       },
-      "keywords": [
-        "soft skills assessment",
-        "psychometric testing",
-        "competency assessment",
-        "job-fit analysis",
-        "team compatibility",
-        "ESCO competencies",
-        "O*NET skills",
-        "Big Five personality",
-        "HR assessment tools",
-        "employee development",
-        "talent assessment",
-        "competency management",
-        "behavioral assessment",
-        "skills validation",
-        "hiring assessment"
-      ]
+      "keywords": {
+        "0": "soft skills assessment",
+        "1": "psychometric testing",
+        "2": "competency assessment",
+        "3": "job-fit analysis",
+        "4": "team compatibility",
+        "5": "ESCO competencies",
+        "6": "O*NET skills",
+        "7": "Big Five personality",
+        "8": "HR assessment tools",
+        "9": "employee development",
+        "10": "talent assessment",
+        "11": "competency management",
+        "12": "behavioral assessment",
+        "13": "skills validation",
+        "14": "hiring assessment"
+      }
     }
   }
 }

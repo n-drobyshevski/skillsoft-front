@@ -57,13 +57,16 @@ interface AutoSaveReturn {
   isOffline: boolean;
 }
 
+// Module-level constant for the default comparison function
+const defaultCompareKey = <T>(d: T): string => JSON.stringify(d);
+
 export function useAutoSave<T>({
   data,
   onSave,
   debounceMs = 2000,
   maxWaitMs = 10000,
   enabled = true,
-  compareKey = (d) => JSON.stringify(d),
+  compareKey = defaultCompareKey,
   onSuccess,
   onError,
   retry = {},
@@ -85,6 +88,20 @@ export function useAutoSave<T>({
     typeof navigator !== 'undefined' ? !navigator.onLine : false
   );
 
+  // Callback refs - store the latest values to avoid stale closures and unstable references
+  const onSaveRef = useRef(onSave);
+  const compareKeyRef = useRef(compareKey);
+  const onSuccessRef = useRef(onSuccess);
+  const onErrorRef = useRef(onError);
+  const isOfflineRef = useRef(isOffline);
+
+  // Update refs on every render so they always point to the latest values
+  onSaveRef.current = onSave;
+  compareKeyRef.current = compareKey;
+  onSuccessRef.current = onSuccess;
+  onErrorRef.current = onError;
+  isOfflineRef.current = isOffline;
+
   // Refs for stable values across renders
   const lastSavedKeyRef = useRef<string>('');
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -97,6 +114,9 @@ export function useAutoSave<T>({
   useEffect(() => {
     const handleOnline = () => {
       setIsOffline(false);
+      // Immediately update the ref so executeSave sees the correct value
+      // before the next render cycle
+      isOfflineRef.current = false;
       // When coming back online, trigger a save if there are unsaved changes
       if (hasUnsavedChanges && isMountedRef.current) {
         setStatus('pending');
@@ -109,6 +129,7 @@ export function useAutoSave<T>({
 
     const handleOffline = () => {
       setIsOffline(true);
+      isOfflineRef.current = true;
       setStatus('offline');
     };
 
@@ -153,9 +174,9 @@ export function useAutoSave<T>({
   // Initialize last saved key on mount
   useEffect(() => {
     if (!lastSavedKeyRef.current) {
-      lastSavedKeyRef.current = compareKey(data);
+      lastSavedKeyRef.current = compareKeyRef.current(data);
     }
-  }, [data, compareKey]);
+  }, [data]);
 
   const clearTimers = useCallback(() => {
     if (debounceTimerRef.current) {
@@ -183,8 +204,8 @@ export function useAutoSave<T>({
 
   const executeSave = useCallback(
     async (attemptNumber = 0): Promise<boolean> => {
-      // Don't save while offline
-      if (isOffline) {
+      // Don't save while offline - read from ref
+      if (isOfflineRef.current) {
         setStatus('offline');
         return false;
       }
@@ -194,7 +215,7 @@ export function useAutoSave<T>({
         clearTimers();
       }
 
-      const currentKey = compareKey(pendingDataRef.current);
+      const currentKey = compareKeyRef.current(pendingDataRef.current);
 
       // Skip if no changes
       if (currentKey === lastSavedKeyRef.current) {
@@ -212,7 +233,7 @@ export function useAutoSave<T>({
       }
 
       try {
-        const success = await onSave(pendingDataRef.current);
+        const success = await onSaveRef.current(pendingDataRef.current);
 
         if (!isMountedRef.current) return success;
 
@@ -222,7 +243,7 @@ export function useAutoSave<T>({
           setLastSaved(new Date());
           setHasUnsavedChanges(false);
           setRetryAttempt(0);
-          onSuccess?.();
+          onSuccessRef.current?.();
 
           // Reset to idle after showing "saved" briefly
           setTimeout(() => {
@@ -252,7 +273,7 @@ export function useAutoSave<T>({
           // Max retries exceeded
           setStatus('error');
           setRetryAttempt(0);
-          onError?.(new Error('Save failed after multiple attempts'));
+          onErrorRef.current?.(new Error('Save failed after multiple attempts'));
           return false;
         }
       } catch (error) {
@@ -275,16 +296,11 @@ export function useAutoSave<T>({
         // Max retries exceeded
         setStatus('error');
         setRetryAttempt(0);
-        onError?.(error);
+        onErrorRef.current?.(error);
         return false;
       }
     },
     [
-      isOffline,
-      compareKey,
-      onSave,
-      onSuccess,
-      onError,
       clearTimers,
       maxAttempts,
       calculateRetryDelay,
@@ -295,7 +311,7 @@ export function useAutoSave<T>({
     if (!enabled) return;
 
     // If offline, just mark as having unsaved changes
-    if (isOffline) {
+    if (isOfflineRef.current) {
       setStatus('offline');
       setHasUnsavedChanges(true);
       return;
@@ -320,17 +336,17 @@ export function useAutoSave<T>({
         void executeSave();
       }, maxWaitMs);
     }
-  }, [enabled, isOffline, debounceMs, maxWaitMs, executeSave]);
+  }, [enabled, debounceMs, maxWaitMs, executeSave]);
 
   // Track data changes
   useEffect(() => {
     pendingDataRef.current = data;
-    const currentKey = compareKey(data);
+    const currentKey = compareKeyRef.current(data);
 
     if (currentKey !== lastSavedKeyRef.current) {
       scheduleAutoSave();
     }
-  }, [data, compareKey, scheduleAutoSave]);
+  }, [data, scheduleAutoSave]);
 
   const saveNow = useCallback(async () => {
     return executeSave();

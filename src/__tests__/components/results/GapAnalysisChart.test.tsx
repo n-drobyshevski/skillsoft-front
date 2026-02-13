@@ -296,13 +296,7 @@ describe('GapBar', () => {
     index: 0,
   };
 
-  // Note: GapBar uses Radix UI Tooltip and framer-motion which require matchMedia
-  // The first render in this describe block can fail due to timing issues with
-  // framer-motion initialization. We render GapAnalysisChart first as a warmup.
-
-  // This test absorbs the framer-motion timing issue on first render
-  // See: https://github.com/framer/motion/issues/204
-  it.fails('warmup: framer-motion initialization (expected to fail)', () => {
+  it('should render GapAnalysisChart with single data point', () => {
     render(<GapAnalysisChart data={[mockGapData[0]]} showLegend={false} />);
     expect(screen.getByText('Communication')).toBeInTheDocument();
   });

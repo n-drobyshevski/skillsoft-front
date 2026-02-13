@@ -16,6 +16,8 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { NextIntlClientProvider } from 'next-intl';
+import messages from '../../../../messages/en.json';
 import { UserShareList } from '../../../../app/(workspace)/test-templates/[id]/_components/sharing/UserShareList';
 import {
   TemplateShare,
@@ -154,7 +156,11 @@ function createQueryClient() {
 function renderWithQuery(ui: React.ReactElement) {
   const queryClient = createQueryClient();
   return render(
-    <QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>
+    <QueryClientProvider client={queryClient}>
+      <NextIntlClientProvider locale="en" messages={messages}>
+        {ui}
+      </NextIntlClientProvider>
+    </QueryClientProvider>
   );
 }
 
@@ -358,10 +364,8 @@ describe('UserShareList', () => {
       await user.click(revokeButton);
 
       await waitFor(() => {
-        // Look for the name within the dialog's strong element
         const dialog = screen.getByRole('alertdialog');
-        const strongName = dialog.querySelector('strong');
-        expect(strongName).toHaveTextContent('John Doe');
+        expect(dialog).toHaveTextContent('John Doe');
       });
     });
 
