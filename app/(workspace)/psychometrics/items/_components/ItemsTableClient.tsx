@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useState, useTransition, useRef, useEffect } from 'react';
+import { useState, useTransition, useRef, useEffect } from 'react';
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { toast } from 'sonner';
@@ -162,55 +162,46 @@ export function ItemsTableClient({
   } = useBatchSelection<ItemStatistics>();
 
   // Build URL with search params
-  const buildUrl = useCallback(
-    (params: Record<string, string | undefined>) => {
-      const newParams = new URLSearchParams(searchParams.toString());
+  const buildUrl = (params: Record<string, string | undefined>) => {
+    const newParams = new URLSearchParams(searchParams.toString());
 
-      Object.entries(params).forEach(([key, value]) => {
-        if (value && value !== 'all') {
-          newParams.set(key, value);
-        } else {
-          newParams.delete(key);
-        }
-      });
+    Object.entries(params).forEach(([key, value]) => {
+      if (value && value !== 'all') {
+        newParams.set(key, value);
+      } else {
+        newParams.delete(key);
+      }
+    });
 
-      const queryString = newParams.toString();
-      return `${pathname}${queryString ? `?${queryString}` : ''}`;
-    },
-    [searchParams, pathname]
-  );
+    const queryString = newParams.toString();
+    return `${pathname}${queryString ? `?${queryString}` : ''}`;
+  };
 
   // Handle tab change with optimistic update
-  const handleTabChange = useCallback(
-    (value: string) => {
-      const newTab = value as StatusTabValue;
+  const handleTabChange = (value: string) => {
+    const newTab = value as StatusTabValue;
 
-      // Optimistic UI update
-      setOptimisticTab(newTab);
-      clearSelection();
+    // Optimistic UI update
+    setOptimisticTab(newTab);
+    clearSelection();
 
-      // Background URL sync
-      startTransition(() => {
-        router.push(buildUrl({
-          status: newTab === 'all' ? undefined : newTab,
-          page: '0'
-        }), { scroll: false });
-      });
-    },
-    [router, buildUrl, clearSelection]
-  );
+    // Background URL sync
+    startTransition(() => {
+      router.push(buildUrl({
+        status: newTab === 'all' ? undefined : newTab,
+        page: '0'
+      }), { scroll: false });
+    });
+  };
 
   // Prefetch tab routes on hover
-  const handleTabHover = useCallback(
-    (tabValue: StatusTabValue) => {
-      if (tabValue === activeTab) return;
-      router.prefetch(buildUrl({
-        status: tabValue === 'all' ? undefined : tabValue,
-        page: '0'
-      }));
-    },
-    [router, buildUrl, activeTab]
-  );
+  const handleTabHover = (tabValue: StatusTabValue) => {
+    if (tabValue === activeTab) return;
+    router.prefetch(buildUrl({
+      status: tabValue === 'all' ? undefined : tabValue,
+      page: '0'
+    }));
+  };
 
   const handleCompetencyChange = (value: string) => {
     clearSelection();
@@ -229,41 +220,38 @@ export function ItemsTableClient({
   };
 
   // Debounced search handler (300ms delay)
-  const handleSearchChange = useCallback(
-    (value: string) => {
-      setSearchInput(value);
+  const handleSearchChange = (value: string) => {
+    setSearchInput(value);
 
-      // Clear existing timeout
-      if (searchTimeoutRef.current) {
-        clearTimeout(searchTimeoutRef.current);
-      }
+    // Clear existing timeout
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
 
-      // Debounce URL update
-      searchTimeoutRef.current = setTimeout(() => {
-        clearSelection();
-        startTransition(() => {
-          router.push(
-            buildUrl({
-              search: value.trim() || undefined,
-              page: '0',
-            }),
-            { scroll: false }
-          );
-        });
-      }, 300);
-    },
-    [router, buildUrl, clearSelection]
-  );
+    // Debounce URL update
+    searchTimeoutRef.current = setTimeout(() => {
+      clearSelection();
+      startTransition(() => {
+        router.push(
+          buildUrl({
+            search: value.trim() || undefined,
+            page: '0',
+          }),
+          { scroll: false }
+        );
+      });
+    }, 300);
+  };
 
   // Clear search
-  const handleClearSearch = useCallback(() => {
+  const handleClearSearch = () => {
     setSearchInput('');
     if (searchTimeoutRef.current) {
       clearTimeout(searchTimeoutRef.current);
     }
     clearSelection();
     router.push(buildUrl({ search: undefined, page: '0' }), { scroll: false });
-  }, [router, buildUrl, clearSelection]);
+  };
 
   // Cleanup timeout on unmount
   useEffect(() => {
@@ -277,15 +265,10 @@ export function ItemsTableClient({
   const { content: items, totalElements, totalPages, number: pageNumber, first, last } = initialItems;
 
   // Prefetch item detail on row hover for faster navigation
-  const handleRowPrefetch = useCallback(
-    (questionId: string) => {
-      // Prefetch React Query data
-      prefetchPsychometricsItemDetail(queryClient, questionId);
-      // Prefetch Next.js route
-      router.prefetch(`/psychometrics/items/${questionId}`);
-    },
-    [queryClient, router]
-  );
+  const handleRowPrefetch = (questionId: string) => {
+    prefetchPsychometricsItemDetail(queryClient, questionId);
+    router.prefetch(`/psychometrics/items/${questionId}`);
+  };
 
   // Batch action handlers
   const handleRetire = async () => {

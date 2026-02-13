@@ -1,7 +1,11 @@
 import type { NextConfig } from "next";
 import createNextIntlPlugin from 'next-intl/plugin';
+import bundleAnalyzer from '@next/bundle-analyzer';
 
 const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts');
+const withBundleAnalyzer = bundleAnalyzer({
+	enabled: process.env.ANALYZE === 'true',
+});
 
 const nextConfig: NextConfig = {
 	// Enable React Compiler for automatic memoization (Next.js 16)
@@ -167,6 +171,10 @@ const nextConfig: NextConfig = {
 					{
 						key: "Content-Security-Policy",
 						value: "worker-src 'self' blob:;"
+					},
+					{
+						key: "Strict-Transport-Security",
+						value: "max-age=63072000; includeSubDomains; preload"
 					}
 				],
 			},
@@ -191,4 +199,4 @@ const nextConfig: NextConfig = {
 	reactStrictMode: true,
 };
 
-export default withNextIntl(nextConfig);
+export default withBundleAnalyzer(withNextIntl(nextConfig));

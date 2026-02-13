@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
@@ -124,18 +124,17 @@ export default function UsersTable({ users }: UsersTableProps) {
 
 
   // Filter data by role
-  const filteredData = useMemo(() => {
-    if (roleFilter === "all") return users;
-    return users.filter(user => user.role === roleFilter);
-  }, [users, roleFilter]);
+  const filteredData = roleFilter === "all"
+    ? users
+    : users.filter(user => user.role === roleFilter);
 
   // Role counts for tabs
-  const roleCounts = useMemo(() => ({
+  const roleCounts = {
     all: users.length,
     [UserRole.ADMIN]: users.filter(u => u.role === UserRole.ADMIN).length,
     [UserRole.EDITOR]: users.filter(u => u.role === UserRole.EDITOR).length,
     [UserRole.USER]: users.filter(u => u.role === UserRole.USER).length,
-  }), [users]);
+  };
 
   const columns: ColumnDef<User>[] = [
     {

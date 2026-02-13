@@ -157,7 +157,7 @@ export function useAutoSave<T>({
     }
   }, [data, compareKey]);
 
-  const clearTimers = useCallback(() => {
+  const clearTimers = () => {
     if (debounceTimerRef.current) {
       clearTimeout(debounceTimerRef.current);
       debounceTimerRef.current = null;
@@ -170,16 +170,13 @@ export function useAutoSave<T>({
       clearTimeout(retryTimerRef.current);
       retryTimerRef.current = null;
     }
-  }, []);
+  };
 
   // Calculate delay for exponential backoff
-  const calculateRetryDelay = useCallback(
-    (attempt: number) => {
-      const delay = baseDelayMs * Math.pow(multiplier, attempt);
-      return Math.min(delay, maxDelayMs);
-    },
-    [baseDelayMs, multiplier, maxDelayMs]
-  );
+  const calculateRetryDelay = (attempt: number) => {
+    const delay = baseDelayMs * Math.pow(multiplier, attempt);
+    return Math.min(delay, maxDelayMs);
+  };
 
   const executeSave = useCallback(
     async (attemptNumber = 0): Promise<boolean> => {
@@ -332,9 +329,9 @@ export function useAutoSave<T>({
     }
   }, [data, compareKey, scheduleAutoSave]);
 
-  const saveNow = useCallback(async () => {
+  const saveNow = async () => {
     return executeSave();
-  }, [executeSave]);
+  };
 
   const cancel = useCallback(() => {
     clearTimers();

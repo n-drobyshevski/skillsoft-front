@@ -1,6 +1,5 @@
 'use client';
 
-import { useMemo } from 'react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -89,12 +88,10 @@ export function SharedTestsSection({ items, total }: SharedTestsSectionProps) {
   const tCommon = useTranslations('common');
 
   // Sort by most recently shared
-  const sortedItems = useMemo(() => {
-    return [...items]
-      .filter((item) => item.isActive)
-      .sort((a, b) => new Date(b.sharedAt).getTime() - new Date(a.sharedAt).getTime())
-      .slice(0, 6); // Show max 6 on profile page
-  }, [items]);
+  const sortedItems = [...items]
+    .filter((item) => item.isActive)
+    .sort((a, b) => new Date(b.sharedAt).getTime() - new Date(a.sharedAt).getTime())
+    .slice(0, 6); // Show max 6 on profile page
 
   // Empty state
   if (items.length === 0) {

@@ -3,10 +3,11 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
+import { SignedIn, SignedOut } from '@clerk/nextjs';
 import { Button } from '@/components/ui/button';
 import { LanguageSwitcher, LanguageToggle } from '@/components/language-switcher';
 import { cn } from '@/lib/utils';
-import { ArrowRight, Sparkles, Menu, X } from 'lucide-react';
+import { ArrowRight, LayoutDashboard, Sparkles, Menu, X } from 'lucide-react';
 
 export function LandingHeader() {
   const [scrolled, setScrolled] = useState(false);
@@ -66,17 +67,27 @@ export function LandingHeader() {
           {/* Desktop CTA Buttons */}
           <div className="hidden md:flex items-center gap-3">
             <LanguageSwitcher />
-            <Link href="/sign-in">
-              <Button variant="ghost" size="sm" className="text-sm">
-                {t('signIn')}
-              </Button>
-            </Link>
-            <Link href="/sign-up">
-              <Button size="sm" className="text-sm">
-                {t('getStarted')}
-                <ArrowRight className="ml-1.5 w-3.5 h-3.5" />
-              </Button>
-            </Link>
+            <SignedOut>
+              <Link href="/sign-in">
+                <Button variant="ghost" size="sm" className="text-sm">
+                  {t('signIn')}
+                </Button>
+              </Link>
+              <Link href="/sign-up">
+                <Button size="sm" className="text-sm">
+                  {t('getStarted')}
+                  <ArrowRight className="ml-1.5 w-3.5 h-3.5" />
+                </Button>
+              </Link>
+            </SignedOut>
+            <SignedIn>
+              <Link href="/dashboard">
+                <Button size="sm" className="text-sm">
+                  <LayoutDashboard className="mr-1.5 w-3.5 h-3.5" />
+                  {t('goToDashboard')}
+                </Button>
+              </Link>
+            </SignedIn>
           </div>
 
           {/* Mobile Menu Button */}
@@ -97,7 +108,7 @@ export function LandingHeader() {
       {/* Mobile Menu */}
       {mobileMenuOpen && (
         <div className="md:hidden bg-background border-b border-border">
-          <nav className="max-w-6xl mx-auto px-4 sm:px-6 py-4 space-y-4">
+          <nav className="max-w-6xl mx-auto px-4 sm:px-6 py-3 space-y-3">
             <a
               href="#features"
               className="block text-sm text-muted-foreground hover:text-foreground transition-colors"
@@ -121,17 +132,27 @@ export function LandingHeader() {
             </a>
             <div className="flex flex-col gap-2 pt-4 border-t border-border">
               <LanguageToggle className="self-start" />
-              <Link href="/sign-in" onClick={() => setMobileMenuOpen(false)}>
-                <Button variant="outline" className="w-full">
-                  {t('signIn')}
-                </Button>
-              </Link>
-              <Link href="/sign-up" onClick={() => setMobileMenuOpen(false)}>
-                <Button className="w-full">
-                  {t('getStarted')}
-                  <ArrowRight className="ml-1.5 w-3.5 h-3.5" />
-                </Button>
-              </Link>
+              <SignedOut>
+                <Link href="/sign-in" onClick={() => setMobileMenuOpen(false)}>
+                  <Button variant="outline" className="w-full">
+                    {t('signIn')}
+                  </Button>
+                </Link>
+                <Link href="/sign-up" onClick={() => setMobileMenuOpen(false)}>
+                  <Button className="w-full">
+                    {t('getStarted')}
+                    <ArrowRight className="ml-1.5 w-3.5 h-3.5" />
+                  </Button>
+                </Link>
+              </SignedOut>
+              <SignedIn>
+                <Link href="/dashboard" onClick={() => setMobileMenuOpen(false)}>
+                  <Button className="w-full">
+                    <LayoutDashboard className="mr-1.5 w-4 h-4" />
+                    {t('goToDashboard')}
+                  </Button>
+                </Link>
+              </SignedIn>
             </div>
           </nav>
         </div>

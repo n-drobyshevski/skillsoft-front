@@ -3,7 +3,7 @@
 import { useEffect, useCallback, useRef, useSyncExternalStore } from 'react';
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
-import type { BlueprintCompetency } from '@/app/(workspace)/test-templates/[id]/builder/actions';
+import type { BlueprintCompetency } from '../../app/(workspace)/test-templates/[id]/builder/actions';
 
 /**
  * Blueprint History Hook - Phase 4.1 Workflow Formalization

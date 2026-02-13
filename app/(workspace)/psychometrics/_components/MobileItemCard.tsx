@@ -1,7 +1,6 @@
 'use client';
 
 import Link from 'next/link';
-import { useCallback } from 'react';
 import { cn } from '@/lib/utils';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ItemStatistics, ItemValidityStatus, ItemValidityStatusDisplay } from '@/types/psychometrics';
@@ -82,9 +81,9 @@ export function MobileItemCard({
   const fmt = (v: number | null | undefined): string => v != null ? v.toFixed(2) : '–';
 
   // Prefetch on touch start for mobile optimization
-  const handlePrefetch = useCallback(() => {
+  const handlePrefetch = () => {
     onPrefetch?.(item.questionId);
-  }, [onPrefetch, item.questionId]);
+  };
 
   return (
     <div

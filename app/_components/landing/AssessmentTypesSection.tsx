@@ -13,18 +13,18 @@ export function AssessmentTypesSection() {
   const t = useTranslations('landing.assessments');
 
   return (
-    <section className="py-16 md:py-32">
+    <section className="py-10 md:py-32">
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
-        <ScrollReveal className="text-center space-y-4 mb-12 md:mb-20">
-          <Badge variant="outline" className="mb-4">{t('badge')}</Badge>
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight">
+        <ScrollReveal className="text-center space-y-3 mb-8 md:mb-20">
+          <Badge variant="outline" className="mb-2 md:mb-4">{t('badge')}</Badge>
+          <h2 className="text-2xl sm:text-4xl md:text-5xl font-bold tracking-tight">
             {t('title')} <span className="text-primary">{t('titleHighlight')}</span>
           </h2>
-          <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto">
+          <p className="text-sm sm:text-lg text-muted-foreground max-w-2xl mx-auto">
             {t('subtitle')}
           </p>
         </ScrollReveal>
-        <div className="grid md:grid-cols-3 gap-6">
+        <div className="grid md:grid-cols-3 gap-4 md:gap-6">
           <ScrollReveal delay={0}>
             <InteractiveLikertCard />
           </ScrollReveal>
@@ -57,7 +57,7 @@ function InteractiveLikertCard() {
 
   return (
     <div className={cn(
-      'h-full p-6 rounded-2xl bg-card border-2 transition-all duration-300',
+      'h-full p-4 md:p-6 rounded-xl md:rounded-2xl bg-card border-2 transition-all duration-300',
       isAnswered
         ? 'border-emerald-500/50 shadow-lg shadow-emerald-500/10'
         : 'border-border/50 hover:border-border hover:shadow-lg'
@@ -150,7 +150,7 @@ function InteractiveSJTCard() {
 
   return (
     <div className={cn(
-      'h-full p-6 rounded-2xl bg-card border-2 transition-all duration-300',
+      'h-full p-4 md:p-6 rounded-xl md:rounded-2xl bg-card border-2 transition-all duration-300',
       isAnswered
         ? 'border-amber-500/50 shadow-lg shadow-amber-500/10'
         : 'border-border/50 hover:border-border hover:shadow-lg'
@@ -270,7 +270,7 @@ function InteractiveMCQCard() {
 
   return (
     <div className={cn(
-      'h-full p-6 rounded-2xl bg-card border-2 transition-all duration-300',
+      'h-full p-4 md:p-6 rounded-xl md:rounded-2xl bg-card border-2 transition-all duration-300',
       isAnswered
         ? 'border-blue-500/50 shadow-lg shadow-blue-500/10'
         : 'border-border/50 hover:border-border hover:shadow-lg'

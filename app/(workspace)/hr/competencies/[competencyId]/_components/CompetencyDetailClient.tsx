@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { EntityDetailHeader } from '@/components/common/EntityDetailHeader';
-import { deleteCompetency } from '@/src/app/actions';
+import { deleteCompetency } from '@/app/actions';
 import { levelToColor, approvalStatusToColor } from '@/lib/ui-utils';
 import type { Competency } from '@/types/domain';
 import { useTranslations } from 'next-intl';

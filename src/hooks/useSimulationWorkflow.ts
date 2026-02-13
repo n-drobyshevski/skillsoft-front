@@ -180,35 +180,35 @@ export function useSimulationWorkflow<TState, TProfile, TResult>({
   }, [debouncedAutoState, enableAutoSimulate, onAutoSimulate, runSimulation]);
 
   // Trigger auto-simulation (debounced)
-  const triggerAutoSimulate = useCallback((state: TState, profile: TProfile) => {
+  const triggerAutoSimulate = (state: TState, profile: TProfile) => {
     setAutoSimulateState({ state, profile });
-  }, []);
+  };
 
   // Set baseline for comparison
-  const setBaseline = useCallback((result: TResult | null) => {
+  const setBaseline = (result: TResult | null) => {
     setComparison({
       baseline: result,
       comparison: null,
       diff: undefined,
     });
-  }, []);
+  };
 
   // Clear comparison mode
-  const clearComparison = useCallback(() => {
+  const clearComparison = () => {
     setComparison({
       baseline: null,
       comparison: null,
       diff: undefined,
     });
-  }, []);
+  };
 
   // Cancel pending simulations
-  const cancelPending = useCallback(() => {
+  const cancelPending = () => {
     queueRef.current = [];
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
     }
-  }, []);
+  };
 
   return {
     isSimulating,

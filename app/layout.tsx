@@ -3,6 +3,7 @@ import "./globals.css";
 import * as React from "react";
 import { Suspense } from "react";
 import { Metadata, Viewport } from "next";
+import { Inter } from "next/font/google";
 import { ClerkProvider } from '@clerk/nextjs';
 import { Analytics } from '@vercel/analytics/next';
 import { NextIntlClientProvider } from 'next-intl';
@@ -13,6 +14,12 @@ import { Toaster } from "@/components/ui/sonner";
 import { shadcn } from '@clerk/themes';
 import { SkipLinks, MainContentAnchor } from "@/components/accessibility";
 import { HtmlLangSetter } from "@/components/providers/HtmlLangSetter";
+
+const inter = Inter({
+	subsets: ["latin", "cyrillic"],
+	display: "swap",
+	variable: "--font-inter",
+});
 
 export const metadata: Metadata = {
 	title: "SkillSoft - Competency Management",
@@ -139,7 +146,7 @@ export default function RootLayout({
 	children: React.ReactNode;
 }>) {
 	return (
-		<html lang="en" suppressHydrationWarning className="mobile-container">
+		<html lang="en" suppressHydrationWarning className={`${inter.variable} mobile-container`}>
 			<body className="mobile-container" suppressHydrationWarning>
 				<Suspense fallback={<AuthLoadingFallback />}>
 					<RootProviders>{children}</RootProviders>

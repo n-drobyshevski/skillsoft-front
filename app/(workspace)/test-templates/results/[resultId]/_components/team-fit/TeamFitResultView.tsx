@@ -1,6 +1,7 @@
 'use client';
 
-import { useMemo } from 'react';
+
+
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import {
   BarChart3,
@@ -39,31 +40,20 @@ export function TeamFitResultView({ result, template }: BaseResultViewProps) {
   const bigFiveData = bigFiveToArray(bigFiveProfile);
 
   // Transform competency scores to team saturation data for radar visualization
-  // Using simulated team data for demo - in production, fetch real team saturation
-  const teamSaturationData = useMemo(() => {
-    return toTeamSaturationDataSimulated(competencyScores, 55, 20);
-  }, [competencyScores]);
+  const teamSaturationData = toTeamSaturationDataSimulated(competencyScores, 55, 20);
 
   // Calculate team contribution insights
-  const insights = useMemo(() => {
-    const strengths = competencyScores.filter(c => c.percentage >= 70);
-    const developing = competencyScores.filter(c => c.percentage < 50);
-    const avgScore = competencyScores.length > 0
-      ? Math.round(competencyScores.reduce((sum, c) => sum + c.percentage, 0) / competencyScores.length)
-      : 0;
-
-    // Simulated complementary skills (in real implementation, compare against team average)
-    const complementary = strengths.slice(0, 3);
-    const gapAreas = developing.slice(0, 3);
-
-    return { strengths, developing, avgScore, complementary, gapAreas };
-  }, [competencyScores]);
+  const strengths = competencyScores.filter(c => c.percentage >= 70);
+  const developing = competencyScores.filter(c => c.percentage < 50);
+  const avgScore = competencyScores.length > 0
+    ? Math.round(competencyScores.reduce((sum, c) => sum + c.percentage, 0) / competencyScores.length)
+    : 0;
+  const complementary = strengths.slice(0, 3);
+  const gapAreas = developing.slice(0, 3);
+  const insights = { strengths, developing, avgScore, complementary, gapAreas };
 
   // Check if we have Big Five data
-  const hasBigFiveData = useMemo(() => {
-    const values = Object.values(bigFiveProfile);
-    return values.some(v => v !== 50);
-  }, [bigFiveProfile]);
+  const hasBigFiveData = Object.values(bigFiveProfile).some(v => v !== 50);
 
   return (
     <div className="min-h-screen bg-muted/30 py-3 sm:py-4 md:py-8">

@@ -279,15 +279,12 @@ export function BuilderDndProvider({ children }: BuilderDndProviderProps) {
   // Context Value
   // ----------------------------------------
 
-  const contextValue: BuilderDndContextValue = useMemo(
-    () => ({
-      insertionTarget,
-      activeDragData,
-      isDragging: activeId !== null,
-      activeId,
-    }),
-    [insertionTarget, activeDragData, activeId]
-  );
+  const contextValue: BuilderDndContextValue = {
+    insertionTarget,
+    activeDragData,
+    isDragging: activeId !== null,
+    activeId,
+  };
 
   // Find the active competency for overlay (for canvas items)
   const activeCanvasCompetency =

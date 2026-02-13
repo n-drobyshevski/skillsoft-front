@@ -19,7 +19,7 @@ export function InteractiveDemo({ className }: InteractiveDemoProps) {
   };
 
   return (
-    <div className={cn('w-full max-w-sm p-6 rounded-2xl bg-card border border-border/50 shadow-lg', className)}>
+    <div className={cn('w-full max-w-sm p-4 md:p-6 rounded-xl md:rounded-2xl bg-card border border-border/50 shadow-lg', className)}>
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <span className="text-xs font-medium px-2.5 py-1 rounded-md bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
@@ -29,7 +29,7 @@ export function InteractiveDemo({ className }: InteractiveDemoProps) {
       </div>
 
       {/* Question */}
-      <p className="text-sm font-medium mb-6 leading-relaxed">
+      <p className="text-sm font-medium mb-4 md:mb-6 leading-relaxed">
         {t('question')}
       </p>
 
@@ -83,9 +83,9 @@ export function MiniResultsPreview({ className }: { className?: string }) {
   const t = useTranslations('landing.demo');
 
   return (
-    <div className={cn('w-full max-w-sm p-6 rounded-2xl bg-card border border-border/50 shadow-lg', className)}>
+    <div className={cn('w-full max-w-sm p-4 md:p-6 rounded-xl md:rounded-2xl bg-card border border-border/50 shadow-lg', className)}>
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-4 md:mb-6">
         <span className="text-xs font-medium px-2.5 py-1 rounded-md bg-blue-500/10 text-blue-600 dark:text-blue-400">
           {t('resultsTitle')}
         </span>

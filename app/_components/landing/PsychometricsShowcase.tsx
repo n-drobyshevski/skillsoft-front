@@ -9,19 +9,19 @@ export async function PsychometricsShowcase() {
   const t = await getTranslations('landing.psychometrics');
 
   return (
-    <section id="features" className="py-16 md:py-32 bg-muted/30">
+    <section id="features" className="py-10 md:py-32 bg-muted/30">
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
-        <ScrollReveal className="text-center space-y-4 mb-12 md:mb-20">
-          <Badge variant="outline" className="mb-4">{t('badge')}</Badge>
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight">{t('title')} <span className="text-primary">{t('titleHighlight')}</span></h2>
-          <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto">{t('subtitle')}</p>
+        <ScrollReveal className="text-center space-y-3 mb-8 md:mb-20">
+          <Badge variant="outline" className="mb-2 md:mb-4">{t('badge')}</Badge>
+          <h2 className="text-2xl sm:text-4xl md:text-5xl font-bold tracking-tight">{t('title')} <span className="text-primary">{t('titleHighlight')}</span></h2>
+          <p className="text-sm sm:text-lg text-muted-foreground max-w-2xl mx-auto">{t('subtitle')}</p>
         </ScrollReveal>
-        <div className="grid md:grid-cols-3 gap-6">
+        <div className="grid md:grid-cols-3 gap-4 md:gap-6">
           <ScrollReveal delay={0}><FeatureCard icon={Activity} color="bg-emerald-500" title={t('reliability.title')} desc={t('reliability.desc')}><ReliabilityGauge value={0.87} /></FeatureCard></ScrollReveal>
           <ScrollReveal delay={100}><FeatureCard icon={BarChart3} color="bg-blue-500" title={t('validity.title')} desc={t('validity.desc')}><ValidityBars discriminationLabel={t('validity.discrimination')} difficultyLabel={t('validity.difficulty')} /></FeatureCard></ScrollReveal>
           <ScrollReveal delay={200}><FeatureCard icon={Target} color="bg-violet-500" title={t('quality.title')} desc={t('quality.desc')}><QualityStats validatedLabel={t('quality.validated')} passingLabel={t('quality.passing')} underReviewLabel={t('quality.underReview')} criticalLabel={t('quality.critical')} /></FeatureCard></ScrollReveal>
         </div>
-        <ScrollReveal delay={300} className="mt-8">
+        <ScrollReveal delay={300} className="mt-6 md:mt-8">
           <StatusPipeline
             title={t('pipeline.title')}
             pendingLabel={t('pipeline.pending')}
@@ -37,11 +37,11 @@ export async function PsychometricsShowcase() {
 
 function FeatureCard({ icon: Icon, color, title, desc, children }: { icon: React.ComponentType<{ className?: string }>; color: string; title: string; desc: string; children: React.ReactNode }) {
   return (
-    <div className="h-full p-6 md:p-8 rounded-2xl bg-background border border-border/50 hover:border-border hover:shadow-lg transition-all">
-      <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-4" style={{ backgroundColor: color.includes('emerald') ? '#10b981' : color.includes('blue') ? '#3b82f6' : '#8b5cf6' }}><Icon className="w-6 h-6 text-white" /></div>
-      <h3 className="text-lg font-semibold mb-2">{title}</h3>
-      <p className="text-sm text-muted-foreground leading-relaxed mb-4">{desc}</p>
-      <div className="pt-4 border-t border-border/50">{children}</div>
+    <div className="h-full p-4 md:p-8 rounded-xl md:rounded-2xl bg-background border border-border/50 hover:border-border hover:shadow-lg transition-all">
+      <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl flex items-center justify-center mb-3 md:mb-4" style={{ backgroundColor: color.includes('emerald') ? '#10b981' : color.includes('blue') ? '#3b82f6' : '#8b5cf6' }}><Icon className="w-5 h-5 md:w-6 md:h-6 text-white" /></div>
+      <h3 className="text-base md:text-lg font-semibold mb-1.5 md:mb-2">{title}</h3>
+      <p className="text-sm text-muted-foreground leading-relaxed mb-3 md:mb-4">{desc}</p>
+      <div className="pt-3 md:pt-4 border-t border-border/50">{children}</div>
     </div>
   );
 }
@@ -83,7 +83,7 @@ function QualityStats({ validatedLabel, passingLabel, underReviewLabel, critical
 function StatusPipeline({ title, pendingLabel, validLabel, reviewLabel, disabledLabel }: { title: string; pendingLabel: string; validLabel: string; reviewLabel: string; disabledLabel: string }) {
   const items = [{ l: pendingLabel, n: 45, c: 'muted' }, { l: validLabel, n: 2312, c: 'emerald' }, { l: reviewLabel, n: 28, c: 'amber' }, { l: disabledLabel, n: 115, c: 'slate' }];
   return (
-    <div className="p-6 rounded-2xl bg-background border border-border/50">
+    <div className="p-4 md:p-6 rounded-xl md:rounded-2xl bg-background border border-border/50">
       <h4 className="text-sm font-medium mb-4 text-center">{title}</h4>
       <div className="flex flex-wrap items-center justify-center gap-2 md:gap-4">
         {items.map((i, idx) => (

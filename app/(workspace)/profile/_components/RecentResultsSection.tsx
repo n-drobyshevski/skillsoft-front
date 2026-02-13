@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import { useTranslations, useFormatter } from 'next-intl';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -44,30 +44,23 @@ export function RecentResultsSection({ results }: RecentResultsSectionProps) {
   };
 
   // Calculate counts for each filter
-  const filterCounts = useMemo(() => {
-    const counts: Record<GoalFilter, number> = {
-      all: results.length,
-      [AssessmentGoal.OVERVIEW]: 0,
-      [AssessmentGoal.JOB_FIT]: 0,
-      [AssessmentGoal.TEAM_FIT]: 0,
-    };
+  const filterCounts: Record<GoalFilter, number> = {
+    all: results.length,
+    [AssessmentGoal.OVERVIEW]: 0,
+    [AssessmentGoal.JOB_FIT]: 0,
+    [AssessmentGoal.TEAM_FIT]: 0,
+  };
 
-    results.forEach((result) => {
-      if (result.goal in counts) {
-        counts[result.goal as AssessmentGoal]++;
-      }
-    });
-
-    return counts;
-  }, [results]);
+  results.forEach((result) => {
+    if (result.goal in filterCounts) {
+      filterCounts[result.goal as AssessmentGoal]++;
+    }
+  });
 
   // Filter results based on selected goal
-  const filteredResults = useMemo(() => {
-    if (goalFilter === 'all') {
-      return results;
-    }
-    return results.filter((result) => result.goal === goalFilter);
-  }, [results, goalFilter]);
+  const filteredResults = goalFilter === 'all'
+    ? results
+    : results.filter((result) => result.goal === goalFilter);
 
   // Empty state (no results at all)
   if (results.length === 0) {

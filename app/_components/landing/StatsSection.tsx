@@ -12,15 +12,15 @@ export async function StatsSection() {
   ];
 
   return (
-    <section className="py-16 md:py-24 bg-gradient-to-br from-primary to-primary/90">
+    <section className="py-10 md:py-24 bg-gradient-to-br from-primary to-primary/90">
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-8">
           {stats.map((stat) => (
             <div key={stat.label} className="text-center">
-              <div className="text-4xl sm:text-5xl font-extrabold text-primary-foreground">
+              <div className="text-3xl sm:text-5xl font-extrabold text-primary-foreground">
                 <AnimatedCounter end={stat.value} suffix={stat.suffix} />
               </div>
-              <div className="mt-2 text-sm text-primary-foreground/80">{stat.label}</div>
+              <div className="mt-1 text-xs sm:mt-2 sm:text-sm text-primary-foreground/80">{stat.label}</div>
             </div>
           ))}
         </div>

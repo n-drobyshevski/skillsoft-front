@@ -3,8 +3,9 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
+import { SignedIn, SignedOut } from '@clerk/nextjs';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, X } from 'lucide-react';
+import { ArrowRight, LayoutDashboard, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export function MobileStickyCTA() {
@@ -30,18 +31,28 @@ export function MobileStickyCTA() {
       className={cn(
         'fixed bottom-0 left-0 right-0 z-40 md:hidden',
         'bg-background/95 backdrop-blur-lg border-t border-border',
-        'p-4 safe-area-inset-bottom',
+        'px-4 py-3 safe-area-inset-bottom',
         'transition-transform duration-300',
         isVisible ? 'translate-y-0' : 'translate-y-full'
       )}
     >
       <div className="flex items-center gap-3">
-        <Link href="/sign-up" className="flex-1">
-          <Button className="w-full h-12 text-base">
-            {t('ctaStart')}
-            <ArrowRight className="ml-2 w-4 h-4" />
-          </Button>
-        </Link>
+        <SignedOut>
+          <Link href="/sign-up" className="flex-1">
+            <Button className="w-full h-11 text-base">
+              {t('ctaStart')}
+              <ArrowRight className="ml-2 w-4 h-4" />
+            </Button>
+          </Link>
+        </SignedOut>
+        <SignedIn>
+          <Link href="/dashboard" className="flex-1">
+            <Button className="w-full h-11 text-base">
+              <LayoutDashboard className="mr-2 w-4 h-4" />
+              {t('ctaDashboard')}
+            </Button>
+          </Link>
+        </SignedIn>
         <button
           onClick={() => setIsDismissed(true)}
           className="p-2 text-muted-foreground hover:text-foreground transition-colors"

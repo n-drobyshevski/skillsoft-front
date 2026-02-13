@@ -1,7 +1,7 @@
 'use client';
 /* eslint-disable security/detect-object-injection -- Safe: accessing typed Record with enum keys */
 
-import React, { useState, useCallback, useMemo, useRef, useEffect, useTransition } from "react";
+import React, { useState, useRef, useEffect, useTransition } from "react";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Input } from "@/components/ui/input";
@@ -97,98 +97,84 @@ export default function TemplateFilters({
   const debouncedSearch = useDebounce(searchQuery, 300);
 
   // Calculate goal counts for badge display
-  const goalCounts = useMemo(() => {
-    const counts: Record<GoalFilter, number> = {
-      ALL: templates.length,
-      [AssessmentGoal.OVERVIEW]: 0,
-      [AssessmentGoal.JOB_FIT]: 0,
-      [AssessmentGoal.TEAM_FIT]: 0,
-    };
+  const goalCounts: Record<GoalFilter, number> = {
+    ALL: templates.length,
+    [AssessmentGoal.OVERVIEW]: 0,
+    [AssessmentGoal.JOB_FIT]: 0,
+    [AssessmentGoal.TEAM_FIT]: 0,
+  };
 
-    templates.forEach(template => {
-      if (template.goal) {
-        counts[template.goal]++;
-      }
-    });
-
-    return counts;
-  }, [templates]);
+  templates.forEach(template => {
+    if (template.goal) {
+      goalCounts[template.goal]++;
+    }
+  });
 
   // Filter templates based on search and goal
-  const filteredTemplates = useMemo(() => {
-    let result = templates;
+  let filteredTemplates = templates;
 
-    // Filter by goal
-    if (activeTab !== 'ALL') {
-      result = result.filter(t => t.goal === activeTab);
-    }
+  // Filter by goal
+  if (activeTab !== 'ALL') {
+    filteredTemplates = filteredTemplates.filter(t => t.goal === activeTab);
+  }
 
-    // Filter by search query (name and description)
-    if (debouncedSearch.trim()) {
-      const query = debouncedSearch.toLowerCase();
-      result = result.filter(t =>
-        t.name.toLowerCase().includes(query) ||
-        (t.description?.toLowerCase().includes(query))
-      );
-    }
-
-    return result;
-  }, [templates, activeTab, debouncedSearch]);
+  // Filter by search query (name and description)
+  if (debouncedSearch.trim()) {
+    const query = debouncedSearch.toLowerCase();
+    filteredTemplates = filteredTemplates.filter(t =>
+      t.name.toLowerCase().includes(query) ||
+      (t.description?.toLowerCase().includes(query))
+    );
+  }
 
   // Notify parent of filtered results - use ref to avoid dependency on callback
   useEffect(() => {
     onFilteredTemplatesChangeRef.current(filteredTemplates);
   }, [filteredTemplates]);
 
-  const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
-  }, []);
+  };
 
-  const handleClearSearch = useCallback(() => {
+  const handleClearSearch = () => {
     setSearchQuery('');
-  }, []);
+  };
 
   // Handle tab change - instant UI update, background URL sync
-  const handleTabChange = useCallback(
-    (value: string) => {
-      const newTab = value as GoalFilter;
+  const handleTabChange = (value: string) => {
+    const newTab = value as GoalFilter;
 
-      // Immediate UI update (optimistic)
-      setOptimisticTab(newTab);
+    // Immediate UI update (optimistic)
+    setOptimisticTab(newTab);
 
-      // Background URL sync using transition (non-blocking)
-      startTransition(() => {
-        const params = new URLSearchParams(searchParams.toString());
-        if (newTab === 'ALL') {
-          params.delete('goal'); // Clean URL for default tab
-        } else {
-          params.set('goal', newTab);
-        }
-        const queryString = params.toString();
-        router.push(`${pathname}${queryString ? `?${queryString}` : ''}`, {
-          scroll: false,
-        });
-      });
-    },
-    [router, pathname, searchParams]
-  );
-
-  // Prefetch tab routes on hover/focus for faster navigation
-  const handleTabHover = useCallback(
-    (tabValue: GoalFilter) => {
-      if (tabValue === activeTab) return; // Skip current tab
-
+    // Background URL sync using transition (non-blocking)
+    startTransition(() => {
       const params = new URLSearchParams(searchParams.toString());
-      if (tabValue === 'ALL') {
-        params.delete('goal');
+      if (newTab === 'ALL') {
+        params.delete('goal'); // Clean URL for default tab
       } else {
-        params.set('goal', tabValue);
+        params.set('goal', newTab);
       }
       const queryString = params.toString();
-      router.prefetch(`${pathname}${queryString ? `?${queryString}` : ''}`);
-    },
-    [router, pathname, searchParams, activeTab]
-  );
+      router.push(`${pathname}${queryString ? `?${queryString}` : ''}`, {
+        scroll: false,
+      });
+    });
+  };
+
+  // Prefetch tab routes on hover/focus for faster navigation
+  const handleTabHover = (tabValue: GoalFilter) => {
+    if (tabValue === activeTab) return; // Skip current tab
+
+    const params = new URLSearchParams(searchParams.toString());
+    if (tabValue === 'ALL') {
+      params.delete('goal');
+    } else {
+      params.set('goal', tabValue);
+    }
+    const queryString = params.toString();
+    router.prefetch(`${pathname}${queryString ? `?${queryString}` : ''}`);
+  };
 
   return (
     <div className={cn("space-y-3", className)}>

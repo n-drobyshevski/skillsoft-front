@@ -186,9 +186,9 @@ export function useSagaOperations<TResult = unknown, TSnapshot = unknown>(
   const retryCountRef = useRef<Map<string, number>>(new Map());
 
   // Reset retry counts
-  const resetRetryCounts = useCallback(() => {
+  const resetRetryCounts = () => {
     retryCountRef.current.clear();
-  }, []);
+  };
 
   // Ref to hold the executeItem implementation for recursive calls
   const executeItemRef = useRef<((itemId: string) => Promise<SagaOperationResult<TResult>>) | null>(null);
@@ -369,13 +369,10 @@ export function useSagaOperations<TResult = unknown, TSnapshot = unknown>(
   );
 
   // Main execute function
-  const execute = useCallback(
-    (itemIds: string[]): Promise<SagaState<TResult, TSnapshot>> => {
-      resetRetryCounts();
-      return executeBatch(itemIds);
-    },
-    [executeBatch, resetRetryCounts]
-  );
+  const execute = (itemIds: string[]): Promise<SagaState<TResult, TSnapshot>> => {
+    resetRetryCounts();
+    return executeBatch(itemIds);
+  };
 
   // Retry failed items
   const retryFailed = useCallback((): Promise<SagaState<TResult, TSnapshot>> => {
@@ -432,10 +429,10 @@ export function useSagaOperations<TResult = unknown, TSnapshot = unknown>(
   }, [state, onRollbackItem, onRollbackComplete]);
 
   // Cancel ongoing operation
-  const cancel = useCallback(() => {
+  const cancel = () => {
     cancelledRef.current = true;
     setState((prev) => ({ ...prev, status: 'idle' }));
-  }, []);
+  };
 
   // Reset saga state
   const reset = useCallback(() => {

@@ -356,9 +356,9 @@ export function Canvas() {
   );
 
   // Handle drag start (internal reorder)
-  const handleDragStart = useCallback((event: DragStartEvent) => {
+  const handleDragStart = (event: DragStartEvent) => {
     setActiveId(event.active.id as string);
-  }, []);
+  };
 
   // Handle drag end (internal reorder)
   const handleDragEnd = useCallback(
@@ -394,16 +394,16 @@ export function Canvas() {
     [addCompetency]
   );
 
-  const handleDragOver = useCallback((e: React.DragEvent) => {
+  const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragOver(true);
-  }, []);
+  };
 
-  const handleDragLeave = useCallback(() => {
+  const handleDragLeave = () => {
     setIsDragOver(false);
-  }, []);
+  };
 
-  const handleUndo = useCallback(() => {
+  const handleUndo = () => {
     if (historyRef.current.length < 2) return;
 
     const current = historyRef.current.pop();
@@ -420,9 +420,9 @@ export function Canvas() {
       canUndo: historyRef.current.length > 1,
       canRedo: futureRef.current.length > 0,
     });
-  }, [setCompetencies]);
+  };
 
-  const handleRedo = useCallback(() => {
+  const handleRedo = () => {
     const next = futureRef.current.pop();
     if (!next) return;
 
@@ -434,11 +434,11 @@ export function Canvas() {
       canUndo: historyRef.current.length > 1,
       canRedo: futureRef.current.length > 0,
     });
-  }, [setCompetencies]);
+  };
 
-  const handleSave = useCallback(() => {
+  const handleSave = () => {
     void saveBlueprint();
-  }, [saveBlueprint]);
+  };
 
   return (
     <div className="flex flex-col h-full min-h-0 overflow-hidden">

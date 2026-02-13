@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "build:analyze": "cross-env ANALYZE=true next build",
     "postinstall": "patch-package",
     "start": "next start",
     "lint": "eslint .",
@@ -92,6 +93,7 @@
   },
   "devDependencies": {
     "@microsoft/eslint-plugin-sdl": "^1.1.0",
+    "@next/bundle-analyzer": "^16.1.6",
     "@playwright/test": "^1.51.0",
     "@tailwindcss/postcss": "^4",
     "@tanstack/react-query-devtools": "^5.91.2",
@@ -111,7 +113,7 @@
     "@vitest/coverage-v8": "^4.0.15",
     "@vitest/ui": "^4.0.15",
     "babel-plugin-react-compiler": "^1.0.0",
-    "baseline-browser-mapping": "^2.8.32",
+    "baseline-browser-mapping": "^2.9.19",
     "cross-env": "^10.1.0",
     "dotenv": "^16.4.5",
     "eslint": "^9",

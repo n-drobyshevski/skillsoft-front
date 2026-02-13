@@ -1,6 +1,5 @@
 'use client';
 
-import { useMemo } from 'react';
 import {
   AreaChart,
   Area,
@@ -34,12 +33,10 @@ export function ScoreSparkline({
   width = 64,
 }: ScoreSparklineProps) {
   // Transform scores to chart data
-  const data = useMemo(() => {
-    return scores.map((score, index) => ({
-      index,
-      score,
-    }));
-  }, [scores]);
+  const data = scores.map((score, index) => ({
+    index,
+    score,
+  }));
 
   // Don't render if insufficient data
   if (scores.length < 2) {

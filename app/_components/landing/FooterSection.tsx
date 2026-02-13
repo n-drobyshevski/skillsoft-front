@@ -7,10 +7,10 @@ export async function FooterSection() {
 
   return (
     <footer className="border-t border-border/50 bg-muted/20">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-12 md:py-16">
-        <div className="grid md:grid-cols-4 gap-8 md:gap-12">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 md:py-16">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-12">
           {/* Brand */}
-          <div className="md:col-span-2 space-y-4">
+          <div className="col-span-2 space-y-4">
             <Link href="/" className="flex items-center gap-2.5">
               <div className="w-9 h-9 bg-primary rounded-xl flex items-center justify-center">
                 <Sparkles className="w-5 h-5 text-primary-foreground" />
@@ -23,9 +23,9 @@ export async function FooterSection() {
           </div>
 
           {/* Product Links */}
-          <div className="space-y-4">
+          <div className="space-y-3 md:space-y-4">
             <h4 className="font-semibold text-sm">{t('product')}</h4>
-            <nav className="space-y-3 text-sm text-muted-foreground">
+            <nav className="space-y-2 md:space-y-3 text-sm text-muted-foreground">
               <a href="#features" className="block hover:text-foreground transition-colors">
                 {t('features')}
               </a>
@@ -42,9 +42,9 @@ export async function FooterSection() {
           </div>
 
           {/* Company Links */}
-          <div className="space-y-4">
+          <div className="space-y-3 md:space-y-4">
             <h4 className="font-semibold text-sm">{t('company')}</h4>
-            <nav className="space-y-3 text-sm text-muted-foreground">
+            <nav className="space-y-2 md:space-y-3 text-sm text-muted-foreground">
               <a href="#" className="block hover:text-foreground transition-colors">
                 {t('about')}
               </a>
@@ -62,7 +62,7 @@ export async function FooterSection() {
         </div>
 
         {/* Bottom */}
-        <div className="flex flex-col md:flex-row justify-between items-center gap-4 mt-12 md:mt-16 pt-8 border-t border-border/50">
+        <div className="flex flex-col md:flex-row justify-between items-center gap-4 mt-8 md:mt-16 pt-6 md:pt-8 border-t border-border/50">
           <p className="text-sm text-muted-foreground">
             {t('copyright')}
           </p>

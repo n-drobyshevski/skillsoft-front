@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useMemo, useCallback, Suspense } from 'react';
+import React, { useState, useEffect, useCallback, Suspense } from 'react';
 import { BehavioralIndicator, AssessmentQuestion } from '@/types/domain';
 import { assessmentQuestionsApi } from '@/services/api';
 import { questionDifficultyToColor, questionTypeToColor } from '@/lib/ui-utils';
@@ -310,83 +310,66 @@ export function IndicatorQuestionsManager({
     fetchQuestions();
   }, [fetchQuestions]);
 
-  // Enhanced filtering and sorting with useMemo for performance
-  const filteredCurrentQuestions = useMemo(() => {
-    const filtered = currentIndicatorQuestions.filter(question => {
-      // Search filter
-      if (currentFilters.search && !question.questionText.toLowerCase().includes(currentFilters.search.toLowerCase())) {
-        return false;
-      }
-      
-      // Type filter
-      if (currentFilters.type !== 'all' && question.questionType !== currentFilters.type) {
-        return false;
-      }
-      
-      // Difficulty filter
-      if (currentFilters.difficulty !== 'all' && question.difficultyLevel !== currentFilters.difficulty) {
-        return false;
-      }
-      
-      return true;
-    });
+  // Filtering and sorting
+  const filtered = currentIndicatorQuestions.filter(question => {
+    if (currentFilters.search && !question.questionText.toLowerCase().includes(currentFilters.search.toLowerCase())) {
+      return false;
+    }
+    if (currentFilters.type !== 'all' && question.questionType !== currentFilters.type) {
+      return false;
+    }
+    if (currentFilters.difficulty !== 'all' && question.difficultyLevel !== currentFilters.difficulty) {
+      return false;
+    }
+    return true;
+  });
 
-    // Sorting
-    filtered.sort((a, b) => {
-      const aValue = a[sortConfig.key];
-      const bValue = b[sortConfig.key];
-      
-      if (aValue === null || aValue === undefined) return 1;
-      if (bValue === null || bValue === undefined) return -1;
-      
-      const comparison = aValue < bValue ? -1 : aValue > bValue ? 1 : 0;
-      return sortConfig.direction === 'asc' ? comparison : -comparison;
-    });
+  filtered.sort((a, b) => {
+    const aValue = a[sortConfig.key];
+    const bValue = b[sortConfig.key];
 
-    return filtered;
-  }, [currentIndicatorQuestions, currentFilters, sortConfig]);
+    if (aValue === null || aValue === undefined) return 1;
+    if (bValue === null || bValue === undefined) return -1;
+
+    const comparison = aValue < bValue ? -1 : aValue > bValue ? 1 : 0;
+    return sortConfig.direction === 'asc' ? comparison : -comparison;
+  });
+
+  const filteredCurrentQuestions = filtered;
 
   // Statistics calculation
-  const stats = useMemo((): QuestionStats => {
-    const byType: Record<string, number> = {};
-    const byDifficulty: Record<string, number> = {};
-    
-    allQuestions.forEach(question => {
-      byType[question.questionType] = (byType[question.questionType] || 0) + 1;
-      byDifficulty[question.difficultyLevel] = (byDifficulty[question.difficultyLevel] || 0) + 1;
-    });
+  const byType: Record<string, number> = {};
+  const byDifficulty: Record<string, number> = {};
 
-    return {
-      currentIndicator: currentIndicatorQuestions.length,
-      otherIndicators: 0,
-      unassigned: 0,
-      byType,
-      byDifficulty
-    };
-  }, [allQuestions, currentIndicatorQuestions]);
+  allQuestions.forEach(question => {
+    byType[question.questionType] = (byType[question.questionType] || 0) + 1;
+    byDifficulty[question.difficultyLevel] = (byDifficulty[question.difficultyLevel] || 0) + 1;
+  });
 
-  // Enhanced interaction handlers
-  const handleSort = useCallback((key: keyof AssessmentQuestion) => {
+  const stats: QuestionStats = {
+    currentIndicator: currentIndicatorQuestions.length,
+    otherIndicators: 0,
+    unassigned: 0,
+    byType,
+    byDifficulty
+  };
+
+  // Interaction handlers
+  const handleSort = (key: keyof AssessmentQuestion) => {
     setSortConfig(current => ({
       key,
       direction: current.key === key && current.direction === 'asc' ? 'desc' : 'asc'
     }));
-  }, []);
+  };
 
-  // Handle opening question details drawer
-  const handleViewQuestion = useCallback((question: AssessmentQuestion) => {
+  const handleViewQuestion = (question: AssessmentQuestion) => {
     setSelectedQuestion(question);
     setDrawerOpen(true);
-  }, []);
+  };
 
   // Get unique values for filter dropdowns
-  const uniqueTypes = useMemo(() => 
-    [...new Set(allQuestions.map(q => q.questionType))], [allQuestions]
-  );
-  
-  const uniqueDifficulties = useMemo(() => 
-    [...new Set(allQuestions.map(q => q.difficultyLevel))], [allQuestions]
-  );
+  const uniqueTypes = [...new Set(allQuestions.map(q => q.questionType))];
+  const uniqueDifficulties = [...new Set(allQuestions.map(q => q.difficultyLevel))];
 
   // Error state
   if (error) {

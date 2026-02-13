@@ -117,7 +117,7 @@ export function useUndoableAction<TAction, TResult = void>(
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   // Clear expired actions
-  const clearExpired = useCallback(() => {
+  const clearExpired = () => {
     const now = Date.now();
     setUndoStack((prev) => {
       const expired = prev.filter((entry) => entry.expiresAt <= now);
@@ -128,7 +128,7 @@ export function useUndoableAction<TAction, TResult = void>(
 
       return valid;
     });
-  }, [onExpire]);
+  };
 
   // Update countdown timer
   useEffect(() => {
@@ -225,10 +225,10 @@ export function useUndoableAction<TAction, TResult = void>(
   }, [undoStack, onUndo, onUndoError, clearExpired]);
 
   // Clear all undo history
-  const clearStack = useCallback(() => {
+  const clearStack = () => {
     setUndoStack([]);
     setCountdown(0);
-  }, []);
+  };
 
   return {
     execute,
@@ -261,15 +261,12 @@ export function useSingleUndo<TAction>(config: {
   const windowMs = config.windowMs ?? 30_000;
 
   // Track the action
-  const track = useCallback(
-    (actionData: TAction) => {
-      setAction({
-        data: actionData,
-        expiresAt: Date.now() + windowMs,
-      });
-    },
-    [windowMs]
-  );
+  const track = (actionData: TAction) => {
+    setAction({
+      data: actionData,
+      expiresAt: Date.now() + windowMs,
+    });
+  };
 
   // Update countdown
   useEffect(() => {
@@ -313,10 +310,10 @@ export function useSingleUndo<TAction>(config: {
   }, [action, config]);
 
   // Clear
-  const clear = useCallback(() => {
+  const clear = () => {
     setAction(null);
     setCountdown(0);
-  }, []);
+  };
 
   return {
     track,

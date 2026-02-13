@@ -14,7 +14,7 @@ import { SidebarTrigger } from "@/components/ui/sidebar";
 
 import { useHeader } from "@/context/HeaderContext";
 import { useBreadcrumbs } from "@/lib/breadcrumbs";
-import { useBreadcrumbContext } from "@/src/context/BreadcrumbContext";
+import { useBreadcrumbContext } from "@/context/BreadcrumbContext";
 
 export default function Header() {
   const { title, subtitle, entityName } = useHeader();

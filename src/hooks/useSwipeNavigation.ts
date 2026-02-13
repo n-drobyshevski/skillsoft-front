@@ -136,21 +136,18 @@ export function useSwipeNavigation<T extends HTMLElement = HTMLDivElement>(
   /**
    * Calculate swipe direction from delta
    */
-  const getDirection = useCallback(
-    (deltaX: number, deltaY: number): SwipeDirection => {
-      const absX = Math.abs(deltaX);
-      const absY = Math.abs(deltaY);
+  const getDirection = (deltaX: number, deltaY: number): SwipeDirection => {
+    const absX = Math.abs(deltaX);
+    const absY = Math.abs(deltaY);
 
-      if (horizontal && absX > absY && absX > 10) {
-        return deltaX > 0 ? 'right' : 'left';
-      }
-      if (vertical && absY > absX && absY > 10) {
-        return deltaY > 0 ? 'down' : 'up';
-      }
-      return null;
-    },
-    [horizontal, vertical]
-  );
+    if (horizontal && absX > absY && absX > 10) {
+      return deltaX > 0 ? 'right' : 'left';
+    }
+    if (vertical && absY > absX && absY > 10) {
+      return deltaY > 0 ? 'down' : 'up';
+    }
+    return null;
+  };
 
   /**
    * Handle touch start
@@ -329,7 +326,7 @@ export function useSwipeNavigation<T extends HTMLElement = HTMLDivElement>(
   /**
    * Manual reset function
    */
-  const reset = useCallback(() => {
+  const reset = () => {
     startPoint.current = null;
     lastPoint.current = null;
     isEdgeSwipe.current = false;
@@ -340,7 +337,7 @@ export function useSwipeNavigation<T extends HTMLElement = HTMLDivElement>(
       progress: 0,
       thresholdMet: false,
     });
-  }, []);
+  };
 
   return {
     /** Ref to attach to swipeable element */

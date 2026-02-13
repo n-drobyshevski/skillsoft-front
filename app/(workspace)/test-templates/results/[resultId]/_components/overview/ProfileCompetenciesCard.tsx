@@ -1,6 +1,5 @@
 'use client';
 
-import { useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { BarChart3 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -20,23 +19,16 @@ export function ProfileCompetenciesCard({
   showAsProfile = true
 }: ProfileCompetenciesCardProps) {
   // Sort by percentage descending
-  const sortedCompetencies = useMemo(
-    () => [...competencies].sort((a, b) => b.percentage - a.percentage),
-    [competencies]
-  );
+  const sortedCompetencies = [...competencies].sort((a, b) => b.percentage - a.percentage);
 
   // Calculate stats
-  const stats = useMemo(() => {
-    if (competencies.length === 0) return { avg: 0, strongest: null, developing: null };
-
-    const avg = Math.round(
-      competencies.reduce((sum, c) => sum + c.percentage, 0) / competencies.length
-    );
-    const strongest = sortedCompetencies[0];
-    const developing = sortedCompetencies[sortedCompetencies.length - 1];
-
-    return { avg, strongest, developing };
-  }, [competencies, sortedCompetencies]);
+  const stats = competencies.length === 0
+    ? { avg: 0, strongest: null as typeof competencies[0] | null, developing: null as typeof competencies[0] | null }
+    : {
+        avg: Math.round(competencies.reduce((sum, c) => sum + c.percentage, 0) / competencies.length),
+        strongest: sortedCompetencies[0],
+        developing: sortedCompetencies[sortedCompetencies.length - 1],
+      };
 
   if (competencies.length === 0) {
     return null;

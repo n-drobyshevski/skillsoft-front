@@ -283,52 +283,36 @@ export function BlueprintWorkspaceProvider({
   );
 
   // Reorder competencies via drag-drop (auto-saved)
-  const reorderCompetencies = useCallback(
-    (fromIndex: number, toIndex: number) => {
-      if (fromIndex === toIndex) return;
+  const reorderCompetencies = (fromIndex: number, toIndex: number) => {
+    if (fromIndex === toIndex) return;
 
-      // Update local state (triggers auto-save)
-      setLocalState((prev) => {
-        const newCompetencies = [...prev.competencies];
-        const [moved] = newCompetencies.splice(fromIndex, 1);
-        newCompetencies.splice(toIndex, 0, moved);
-        return { ...prev, competencies: newCompetencies };
-      });
-    },
-    []
-  );
+    setLocalState((prev) => {
+      const newCompetencies = [...prev.competencies];
+      const [moved] = newCompetencies.splice(fromIndex, 1);
+      newCompetencies.splice(toIndex, 0, moved);
+      return { ...prev, competencies: newCompetencies };
+    });
+  };
 
   // Update single competency properties (auto-saved)
-  const updateCompetency = useCallback(
-    (competencyId: string, updates: Partial<BlueprintCompetency>) => {
-      // Update local state (triggers auto-save)
-      setLocalState((prev) => ({
-        ...prev,
-        competencies: prev.competencies.map((c) =>
-          c.id === competencyId ? { ...c, ...updates } : c
-        ),
-      }));
-    },
-    []
-  );
+  const updateCompetency = (competencyId: string, updates: Partial<BlueprintCompetency>) => {
+    setLocalState((prev) => ({
+      ...prev,
+      competencies: prev.competencies.map((c) =>
+        c.id === competencyId ? { ...c, ...updates } : c
+      ),
+    }));
+  };
 
   // Replace full competency list - used for undo/redo (auto-saved)
-  const setCompetencies = useCallback(
-    (competencies: BlueprintCompetency[]) => {
-      // Update local state (triggers auto-save)
-      setLocalState((prev) => ({ ...prev, competencies }));
-    },
-    []
-  );
+  const setCompetencies = (competencies: BlueprintCompetency[]) => {
+    setLocalState((prev) => ({ ...prev, competencies }));
+  };
 
   // Update blueprint settings - strategy, time limit, etc. (auto-saved)
-  const updateSettings = useCallback(
-    (settings: Partial<BlueprintState>) => {
-      // Update local state (triggers auto-save)
-      setLocalState((prev) => ({ ...prev, ...settings }));
-    },
-    []
-  );
+  const updateSettings = (settings: Partial<BlueprintState>) => {
+    setLocalState((prev) => ({ ...prev, ...settings }));
+  };
 
   // Run simulation with persona
   const runSimulation = useCallback(

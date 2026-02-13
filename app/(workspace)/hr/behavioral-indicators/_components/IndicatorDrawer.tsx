@@ -26,7 +26,7 @@ import QuestionCard from "./QuestionCard";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { CompetencyHoverCard } from "../[indicatorId]/_components/CompetencyHoverCard";
 import { DeleteConfirmationDialog } from "@/components/feedback/DeleteConfirmationDialog";
-import { deleteIndicator } from "@/src/app/actions";
+import { deleteIndicator } from "@/app/actions";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 

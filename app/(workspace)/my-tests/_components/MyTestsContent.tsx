@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useCallback, useTransition, useState } from 'react';
+import { useMemo, useTransition, useState } from 'react';
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
@@ -55,70 +55,62 @@ export function MyTestsContent({ sessions, initialTab = 'all' }: MyTestsContentP
   const activeTab = optimisticTab;
 
   // Handle tab change - instant UI update, background URL sync
-  const handleTabChange = useCallback(
-    (value: string) => {
-      const newTab = value as TabValue;
+  const handleTabChange = (value: string) => {
+    const newTab = value as TabValue;
 
-      // Immediate UI update (optimistic)
-      setOptimisticTab(newTab);
+    // Immediate UI update (optimistic)
+    setOptimisticTab(newTab);
 
-      // Background URL sync using transition (non-blocking)
-      startTransition(() => {
-        const params = new URLSearchParams(searchParams.toString());
-        if (newTab === 'all') {
-          params.delete('tab'); // Clean URL for default tab
-        } else {
-          params.set('tab', newTab);
-        }
-        const queryString = params.toString();
-        router.push(`${pathname}${queryString ? `?${queryString}` : ''}`, {
-          scroll: false,
-        });
-      });
-    },
-    [router, pathname, searchParams]
-  );
-
-  // Prefetch tab routes on hover/focus for faster navigation
-  const handleTabHover = useCallback(
-    (tabValue: TabValue) => {
-      if (tabValue === activeTab) return; // Skip current tab
-
+    // Background URL sync using transition (non-blocking)
+    startTransition(() => {
       const params = new URLSearchParams(searchParams.toString());
-      if (tabValue === 'all') {
-        params.delete('tab');
+      if (newTab === 'all') {
+        params.delete('tab'); // Clean URL for default tab
       } else {
-        params.set('tab', tabValue);
+        params.set('tab', newTab);
       }
       const queryString = params.toString();
-      router.prefetch(`${pathname}${queryString ? `?${queryString}` : ''}`);
-    },
-    [router, pathname, searchParams, activeTab]
-  );
+      router.push(`${pathname}${queryString ? `?${queryString}` : ''}`, {
+        scroll: false,
+      });
+    });
+  };
+
+  // Prefetch tab routes on hover/focus for faster navigation
+  const handleTabHover = (tabValue: TabValue) => {
+    if (tabValue === activeTab) return; // Skip current tab
+
+    const params = new URLSearchParams(searchParams.toString());
+    if (tabValue === 'all') {
+      params.delete('tab');
+    } else {
+      params.set('tab', tabValue);
+    }
+    const queryString = params.toString();
+    router.prefetch(`${pathname}${queryString ? `?${queryString}` : ''}`);
+  };
 
   // Group sessions by status for tab filtering
-  const sessionsByStatus = useMemo(() => {
-    return {
-      all: sessions,
-      pending: sessions.filter(s => s.status === SessionStatus.NOT_STARTED),
-      in_progress: sessions.filter(s => s.status === SessionStatus.IN_PROGRESS),
-      completed: sessions.filter(s =>
-        s.status === SessionStatus.COMPLETED ||
-        s.status === SessionStatus.ABANDONED ||
-        s.status === SessionStatus.TIMED_OUT
-      ),
-    };
-  }, [sessions]);
+  const sessionsByStatus = {
+    all: sessions,
+    pending: sessions.filter(s => s.status === SessionStatus.NOT_STARTED),
+    in_progress: sessions.filter(s => s.status === SessionStatus.IN_PROGRESS),
+    completed: sessions.filter(s =>
+      s.status === SessionStatus.COMPLETED ||
+      s.status === SessionStatus.ABANDONED ||
+      s.status === SessionStatus.TIMED_OUT
+    ),
+  };
 
   // Helper function to get sessions for a tab value (avoids object injection lint warning)
-  const getSessionsForTab = useCallback((tab: TabValue) => {
+  const getSessionsForTab = (tab: TabValue) => {
     switch (tab) {
       case 'all': return sessionsByStatus.all;
       case 'pending': return sessionsByStatus.pending;
       case 'in_progress': return sessionsByStatus.in_progress;
       case 'completed': return sessionsByStatus.completed;
     }
-  }, [sessionsByStatus]);
+  };
 
   // Lazy tab content computation - only compute grouping for active tab
   // This defers expensive groupSessionsByTemplate until tab is actually displayed
@@ -128,7 +120,7 @@ export function MyTestsContent({ sessions, initialTab = 'all' }: MyTestsContentP
   }, [sessions]); // Reset cache when sessions change
 
   // Get grouped data for a specific tab (lazy computation with caching)
-  const getGroupedForTab = useCallback((tab: TabValue): TemplateGroupData[] => {
+  const getGroupedForTab = (tab: TabValue): TemplateGroupData[] => {
     // Return from cache if available
     if (groupedByTabCache[tab]) {
       return groupedByTabCache[tab]!;
@@ -144,20 +136,18 @@ export function MyTestsContent({ sessions, initialTab = 'all' }: MyTestsContentP
     const grouped = groupSessionsByTemplate(tabSessions);
     groupedByTabCache[tab] = grouped;
     return grouped;
-  }, [getSessionsForTab, groupedByTabCache]);
+  };
 
   // Only compute grouping for the currently active tab
-  const groupedByTemplate = useMemo(() => {
-    return getGroupedForTab(activeTab);
-  }, [activeTab, getGroupedForTab]);
+  const groupedByTemplate = getGroupedForTab(activeTab);
 
   // Count badges
-  const counts = useMemo(() => ({
+  const counts = {
     all: sessions.length,
     pending: sessionsByStatus.pending.length,
     in_progress: sessionsByStatus.in_progress.length,
     completed: sessionsByStatus.completed.length,
-  }), [sessions.length, sessionsByStatus]);
+  };
 
   if (sessions.length === 0) {
     return <EmptyState type="no_tests" />;

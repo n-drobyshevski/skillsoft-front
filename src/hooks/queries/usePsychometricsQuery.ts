@@ -75,12 +75,13 @@ export const psychometricsKeys = {
 // Query Options - Reusable configuration for different data types
 // ============================================================================
 
+// Aligned with server-side cacheLife profiles (see QueryProvider.tsx QUERY_STALE_TIMES)
 const STALE_TIMES = {
-  dashboard: 60 * 1000,       // 1 minute - dashboard changes frequently
-  items: 2 * 60 * 1000,       // 2 minutes - item data relatively stable
-  competencies: 5 * 60 * 1000, // 5 minutes - competency data stable
-  bigFive: 10 * 60 * 1000,    // 10 minutes - personality traits very stable
-  flagged: 60 * 1000,         // 1 minute - flagged items important to stay fresh
+  dashboard: 60 * 1000,        // entityData tier - dashboard changes with assessments
+  items: 60 * 1000,            // entityData tier - item data tied to entity changes
+  competencies: 5 * 60 * 1000, // userData tier - competency reliability is stable
+  bigFive: 10 * 60 * 1000,     // referenceData tier - personality traits very stable
+  flagged: 60 * 1000,          // entityData tier - flagged items important to stay fresh
 };
 
 // ============================================================================

@@ -5158,6 +5158,7 @@
       "standards": "Standards",
       "signIn": "Sign In",
       "getStarted": "Get Started",
+      "goToDashboard": "Go to Dashboard",
       "openMenu": "Open menu",
       "closeMenu": "Close menu"
     },
@@ -5167,6 +5168,7 @@
       "headlinePart2": "Soft Skills Assessment",
       "subheading": "Precise competency measurement. Talent-to-position matching. Building high-performance teams driven by data.",
       "ctaStart": "Start for Free",
+      "ctaDashboard": "Go to Dashboard",
       "ctaDemo": "Watch Demo",
       "trustFree": "30-day free trial",
       "trustSecurity": "Data Security",
@@ -5317,6 +5319,7 @@
       "titlePart2": "Driven by Data",
       "subtitle": "Join thousands of HR professionals using validated tests to make better hiring decisions.",
       "ctaStart": "Start for Free",
+      "ctaDashboard": "Go to Dashboard",
       "ctaDemo": "Schedule a Demo",
       "trustFree": "30-day free trial",
       "trustSecurity": "Enterprise Security",
@@ -5356,6 +5359,7 @@
     },
     "mobile": {
       "ctaStart": "Start for Free",
+      "ctaDashboard": "Go to Dashboard",
       "close": "Close"
     },
     "metadata": {

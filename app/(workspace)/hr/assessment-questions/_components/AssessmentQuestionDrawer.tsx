@@ -12,10 +12,10 @@ import {
 import { AssessmentQuestion, BehavioralIndicator, Competency } from "@/types/domain";
 import { competenciesApi, behavioralIndicatorsApi } from "@/services/api";
 import { questionDifficultyToColor } from "@/lib/ui-utils";
-import { CompetencyHoverCard } from "@/app/(workspace)/hr/behavioral-indicators/[indicatorId]/_components/CompetencyHoverCard";
+import { CompetencyHoverCard } from "../../behavioral-indicators/[indicatorId]/_components/CompetencyHoverCard";
 import { IndicatorHoverCard } from "@/components/feedback/IndicatorHoverCard";
 import { DeleteConfirmationDialog } from "@/components/feedback/DeleteConfirmationDialog";
-import { deleteAssessmentQuestion } from "@/src/app/actions";
+import { deleteAssessmentQuestion } from "@/app/actions";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";

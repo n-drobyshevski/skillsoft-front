@@ -1,6 +1,6 @@
 'use client';
 
-import { useTransition, useEffect, useCallback, useState, useRef, useOptimistic } from 'react';
+import { useTransition, useEffect, useState, useRef, useOptimistic } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm, useWatch, UseFormReturn } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -186,22 +186,22 @@ function useFormAutosave(
   }, [debouncedValues, form.formState.isDirty, fullStorageKey]);
 
   // Clear draft from storage
-  const clearDraft = useCallback(() => {
+  const clearDraft = () => {
     localStorage.removeItem(fullStorageKey);
     setHasDraft(false);
     setShowDraftBanner(false);
-  }, [fullStorageKey]);
+  };
 
   // Discard draft and reset form to original values
-  const discardDraft = useCallback(() => {
+  const discardDraft = () => {
     clearDraft();
     form.reset(defaultValues);
-  }, [clearDraft, form, defaultValues]);
+  };
 
   // Dismiss the draft banner without discarding
-  const dismissDraftBanner = useCallback(() => {
+  const dismissDraftBanner = () => {
     setShowDraftBanner(false);
-  }, []);
+  };
 
   return { hasDraft, clearDraft, discardDraft, dismissDraftBanner, showDraftBanner };
 }
@@ -245,25 +245,25 @@ function useUnsavedChangesWarning(
   }, [isDirty]);
 
   // Confirm navigation - clear draft and navigate to profile
-  const confirmNavigation = useCallback(() => {
+  const confirmNavigation = () => {
     setShowDialog(false);
     clearDraft();
     router.push('/profile');
-  }, [router, clearDraft]);
+  };
 
   // Cancel navigation - close dialog
-  const cancelNavigation = useCallback(() => {
+  const cancelNavigation = () => {
     setShowDialog(false);
-  }, []);
+  };
 
   // Handle cancel button click
-  const handleCancelClick = useCallback(() => {
+  const handleCancelClick = () => {
     if (isDirty) {
       setShowDialog(true);
     } else {
       router.push('/profile');
     }
-  }, [isDirty, router]);
+  };
 
   return {
     showDialog,

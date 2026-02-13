@@ -6,7 +6,7 @@ import { toast } from 'sonner';
 import { EntityDetailHeader } from "@/components/common/EntityDetailHeader";
 import { deleteIndicator } from "@/app/actions";
 import { approvalStatusToColor, observabilityLevelToColor, formatObservabilityLevel } from "@/components/common/entity-utils";
-import { useBreadcrumbContext } from '@/src/context/BreadcrumbContext';
+import { useBreadcrumbContext } from '@/context/BreadcrumbContext';
 import type { BehavioralIndicator } from "@/types/domain";
 
 interface IndicatorDetailClientProps {

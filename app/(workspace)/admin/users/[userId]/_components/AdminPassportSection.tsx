@@ -13,7 +13,7 @@ import { useTranslations } from 'next-intl';
 
 // Dynamic import for chart to reduce initial bundle
 const BigFiveRadarChart = dynamic(
-  () => import('@/app/(workspace)/profile/_components/BigFiveChart').then((mod) => mod.BigFiveChart),
+  () => import('../../../../profile/_components/BigFiveChart').then((mod) => mod.BigFiveChart),
   {
     loading: () => <Skeleton className="h-[280px] w-full" />,
     ssr: false,

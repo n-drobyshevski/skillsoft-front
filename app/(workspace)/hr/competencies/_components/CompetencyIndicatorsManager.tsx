@@ -51,8 +51,8 @@ import {
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
-import IndicatorDrawer from '@/app/(workspace)/hr/behavioral-indicators/_components/IndicatorDrawer';
-import { WeightAdjustmentModal } from '@/app/(workspace)/hr/behavioral-indicators/_components/WeightAdjustmentModal';
+import IndicatorDrawer from '../../behavioral-indicators/_components/IndicatorDrawer';
+import { WeightAdjustmentModal } from '../../behavioral-indicators/_components/WeightAdjustmentModal';
 import Link from 'next/link';
 
 // Constants

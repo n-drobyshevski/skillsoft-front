@@ -34,7 +34,7 @@ import {
 } from "lucide-react";
 import { IndicatorHoverCard } from "@/components/feedback/IndicatorHoverCard";
 import { DeleteConfirmationDialog } from "@/components/feedback/DeleteConfirmationDialog";
-import { deleteCompetency } from "@/src/app/actions";
+import { deleteCompetency } from "@/app/actions";
 import { toast } from "sonner";
 import { useState } from "react";
 import { useRouter } from "next/navigation";

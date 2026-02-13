@@ -1,6 +1,5 @@
 'use client';
 
-import { useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Card, CardContent } from '@/components/ui/card';
@@ -47,9 +46,9 @@ export function QuickNavCard({
   const Icon = iconMap[icon];
 
   // Prefetch on hover/touch
-  const handlePrefetch = useCallback(() => {
+  const handlePrefetch = () => {
     router.prefetch(href);
-  }, [router, href]);
+  };
 
   return (
     <Link

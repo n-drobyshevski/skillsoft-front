@@ -26,7 +26,7 @@ import type {
   AssessmentQuestion,
 } from "@/types/domain";
 import { DifficultyLevel } from "@/types/domain";
-import AssessmentQuestionDrawer from "@/app/(workspace)/hr/assessment-questions/_components/AssessmentQuestionDrawer";
+import AssessmentQuestionDrawer from "../../../assessment-questions/_components/AssessmentQuestionDrawer";
 import { CompetencyHoverCard } from "./CompetencyHoverCard";
 
 interface IndicatorPageProps {

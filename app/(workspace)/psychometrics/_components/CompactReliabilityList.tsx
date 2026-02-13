@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -32,22 +32,19 @@ export function CompactReliabilityList({
   const [isExpanded, setIsExpanded] = useState(false);
 
   // Sort competencies: worst reliability first (exception-first pattern)
-  const sortedCompetencies = useMemo(() => {
-    return [...competencies].sort((a, b) => {
-      // Items with null alpha go first (need attention)
-      if (a.cronbachAlpha == null && b.cronbachAlpha != null) return -1;
-      if (a.cronbachAlpha != null && b.cronbachAlpha == null) return 1;
-      if (a.cronbachAlpha == null && b.cronbachAlpha == null) return 0;
-      // Sort by alpha ascending (worst first)
-      return (a.cronbachAlpha ?? 0) - (b.cronbachAlpha ?? 0);
-    });
-  }, [competencies]);
+  const sortedCompetencies = [...competencies].sort((a, b) => {
+    // Items with null alpha go first (need attention)
+    if (a.cronbachAlpha == null && b.cronbachAlpha != null) return -1;
+    if (a.cronbachAlpha != null && b.cronbachAlpha == null) return 1;
+    if (a.cronbachAlpha == null && b.cronbachAlpha == null) return 0;
+    // Sort by alpha ascending (worst first)
+    return (a.cronbachAlpha ?? 0) - (b.cronbachAlpha ?? 0);
+  });
 
   // Filter competencies if a filter is active
-  const filteredCompetencies = useMemo(() => {
-    if (!activeFilter) return sortedCompetencies;
-    return sortedCompetencies.filter(comp => categorizeReliability(comp) === activeFilter);
-  }, [sortedCompetencies, activeFilter]);
+  const filteredCompetencies = !activeFilter
+    ? sortedCompetencies
+    : sortedCompetencies.filter(comp => categorizeReliability(comp) === activeFilter);
 
   // Determine visible items based on expansion state
   const visibleItems = isExpanded ? filteredCompetencies : filteredCompetencies.slice(0, maxItems);

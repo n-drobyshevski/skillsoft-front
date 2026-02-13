@@ -6,7 +6,7 @@ import { toast } from 'sonner';
 import { EntityDetailHeader } from '@/components/common/EntityDetailHeader';
 import { deleteAssessmentQuestion } from '@/app/actions';
 import { difficultyLevelToColor } from '@/components/common/entity-utils';
-import { useBreadcrumbContext } from '@/src/context/BreadcrumbContext';
+import { useBreadcrumbContext } from '@/context/BreadcrumbContext';
 import type { AssessmentQuestion, BehavioralIndicator, Competency } from '@/types/domain';
 
 interface QuestionDetailClientProps {

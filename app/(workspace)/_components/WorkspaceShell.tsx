@@ -6,11 +6,11 @@ import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/layout/app-sidebar";
 import { SiteHeader } from "@/components/layout/site-header";
 import { MobileBottomNav } from "@/components/layout/mobile-bottom-nav";
-import { HeaderProvider } from "@/src/context/HeaderContext";
-import { BreadcrumbProvider } from "@/src/context/BreadcrumbContext";
+import { HeaderProvider } from "@/context/HeaderContext";
+import { BreadcrumbProvider } from "@/context/BreadcrumbContext";
 import { LensInitializer } from "@/components/providers/LensInitializer";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ViewModeProvider, useViewMode, shouldBeFocused } from "@/src/context/ViewModeContext";
+import { ViewModeProvider, useViewMode, shouldBeFocused } from "@/context/ViewModeContext";
 import { cn } from "@/lib/utils";
 
 /**

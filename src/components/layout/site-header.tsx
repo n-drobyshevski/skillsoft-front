@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/breadcrumb";
 import { Search, Bell } from "lucide-react";
 import { usePathname } from "next/navigation";
-import { useBreadcrumbContext } from "@/src/context/BreadcrumbContext";
+import { useBreadcrumbContext } from "@/context/BreadcrumbContext";
 import { SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
 import { CompactAuthModals, FullAuthModals } from "@/components/auth/auth-modals";
 import { ClientOnly } from "@/components/common/ClientOnly";

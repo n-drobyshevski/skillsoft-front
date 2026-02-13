@@ -21,18 +21,18 @@ export async function StandardsSection() {
   ];
 
   return (
-    <section id="standards" className="py-16 md:py-32 bg-muted/30">
+    <section id="standards" className="py-10 md:py-32 bg-muted/30">
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
-        <ScrollReveal className="text-center space-y-4 mb-12 md:mb-20">
-          <Badge variant="outline" className="mb-4">{t('badge')}</Badge>
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight">{t('title')} <span className="text-primary">{t('titleHighlight')}</span></h2>
-          <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto">{t('subtitle')}</p>
+        <ScrollReveal className="text-center space-y-3 mb-8 md:mb-20">
+          <Badge variant="outline" className="mb-2 md:mb-4">{t('badge')}</Badge>
+          <h2 className="text-2xl sm:text-4xl md:text-5xl font-bold tracking-tight">{t('title')} <span className="text-primary">{t('titleHighlight')}</span></h2>
+          <p className="text-sm sm:text-lg text-muted-foreground max-w-2xl mx-auto">{t('subtitle')}</p>
         </ScrollReveal>
-        <div className="grid md:grid-cols-3 gap-6">
+        <div className="grid md:grid-cols-3 gap-4 md:gap-6">
           {standards.map((s, i) => (
             <ScrollReveal key={s.name} delay={i * 100}>
-              <div className="h-full p-6 rounded-2xl bg-background border border-border/50 text-center hover:border-border hover:shadow-lg transition-all">
-                <div className={cn('w-12 h-12 mx-auto rounded-xl flex items-center justify-center mb-4', s.bg)}><s.icon className="w-6 h-6 text-white" /></div>
+              <div className="h-full p-4 md:p-6 rounded-xl md:rounded-2xl bg-background border border-border/50 text-center hover:border-border hover:shadow-lg transition-all">
+                <div className={cn('w-10 h-10 md:w-12 md:h-12 mx-auto rounded-xl flex items-center justify-center mb-3 md:mb-4', s.bg)}><s.icon className="w-5 h-5 md:w-6 md:h-6 text-white" /></div>
                 <h3 className="text-xl font-semibold mb-1">{s.name}</h3>
                 <p className="text-sm text-muted-foreground mb-3">{s.full}</p>
                 <p className="text-sm text-muted-foreground mb-4">{s.desc}</p>
@@ -42,10 +42,10 @@ export async function StandardsSection() {
             </ScrollReveal>
           ))}
         </div>
-        <ScrollReveal delay={300} className="mt-12">
-          <div className="p-6 md:p-8 rounded-2xl bg-background border border-border/50">
-            <h4 className="text-sm font-medium mb-6 text-center">{t('integration.title')}</h4>
-            <div className="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-8">
+        <ScrollReveal delay={300} className="mt-8 md:mt-12">
+          <div className="p-4 md:p-8 rounded-xl md:rounded-2xl bg-background border border-border/50">
+            <h4 className="text-sm font-medium mb-4 md:mb-6 text-center">{t('integration.title')}</h4>
+            <div className="grid grid-cols-2 md:flex md:items-center md:justify-center gap-4 md:gap-8">
               {integrationSteps.map((step, i, arr) => (
                 <div key={step.n} className="flex items-center gap-4">
                   <div className="flex flex-col items-center text-center max-w-[120px]">

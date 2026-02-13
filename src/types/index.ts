@@ -1,25 +1,266 @@
 /**
  * Centralized type exports for Skillsoft application.
  * Import from '@/types' for all type needs.
+ *
+ * Uses explicit re-exports instead of `export *` to enable tree-shaking
+ * of runtime values (enums, functions, constants).
+ * Types are stripped at compile time regardless, but explicit exports
+ * help bundlers eliminate unused runtime code.
  */
 
-// Domain types (competencies, indicators, questions, tests)
-export * from './domain';
+// ============================================
+// Domain types - enums, interfaces, helpers
+// ============================================
+export {
+  // Enums (runtime values)
+  CompetencyCategory,
+  ObservabilityLevel,
+  ApprovalStatus,
+  ContextScope,
+  IndicatorMeasurementType,
+  QuestionType,
+  DifficultyLevel,
+  SessionStatus,
+  AssessmentGoal,
+  TemplateVisibility,
+  SharePermission,
+  GranteeType,
+  // Constants (runtime values)
+  AssessmentGoalInfo,
+  BigFiveInfo,
+  BIG_FIVE_DIMENSIONS,
+  LinkValidationReasons,
+  // Helper functions (runtime values)
+  isPrimaryQuestionType,
+  supportsVectorWeights,
+  getEffectiveBigFive,
+  getEffectiveDimension,
+  getBigFiveRef,
+  getOnetRef,
+  getOnetCode,
+  getEscoRef,
+  getEscoUri,
+  hasTripleStandardMapping,
+  getQuestionTags,
+  questionHasTag,
+  isContextNeutral,
+  permissionIncludes,
+  getVisibilityDisplayText,
+  getVisibilityDescription,
+  getPermissionDisplayText,
+  getPermissionDescription,
+} from './domain';
+export type {
+  BigFiveDimension,
+  OnetRefDto,
+  EscoRefDto,
+  BigFiveRefDto,
+  StandardCodesDto,
+  ONetJobTitle,
+  ONetBenchmark,
+  ONetProfile,
+  Team,
+  TeamMemberSkill,
+  TeamProfile,
+  BigFiveProfileScores,
+  CompetencyPassport,
+  OverviewBlueprintConfig,
+  JobFitBlueprintConfig,
+  TeamFitBlueprintConfig,
+  GoalSpecificConfig,
+  AssemblyPhase,
+  AssemblyProgress,
+  BehavioralIndicator,
+  QuestionMetadata,
+  AnswerOption,
+  AssessmentQuestion,
+  Competency,
+  DashboardStats,
+  TestTemplateBlueprint,
+  TestTemplate,
+  TestTemplateSummary,
+  CreateTestTemplateRequest,
+  UpdateTestTemplateRequest,
+  TestSession,
+  TestSessionSummary,
+  StartTestSessionRequest,
+  SessionQuestion,
+  CurrentQuestionResponse,
+  TestAnswer,
+  SubmitAnswerRequest,
+  ResultStatus,
+  TeamFitExtendedMetrics,
+  TestResult,
+  CompetencyScore,
+  IndicatorScore,
+  QuestionScore,
+  UserStatistics,
+  TemplateStatistics,
+  HealthStatus,
+  CompetencyReadiness,
+  TemplateReadinessResponse,
+  CompetencyIssue,
+  VisibilityInfo,
+  ChangeVisibilityRequest,
+  TemplateShare,
+  ShareLink,
+  LinkValidationResult,
+  LinkCountInfo,
+  CreateShareLinkRequest,
+  ShareUserRequest,
+  ShareTeamRequest,
+  UpdateShareRequest,
+  BulkShareRequest,
+  BulkShareResponse,
+  SharedTemplateItem,
+  SharedTemplatesResponse,
+  AnswerValue,
+  // Legacy types (backwards compat)
+  LegacyTestSession,
+  OnetReference,
+  EscoReference,
+  BigFiveCategory,
+  StandardCodeMapping,
+  TripleStandardCodes,
+  StandardCodes,
+} from './domain';
 
-// User types (authentication, roles)
-export * from './user';
+// ============================================
+// User types - authentication, roles
+// ============================================
+export {
+  UserRole,
+  getUserFullName,
+  canUserAccess,
+  getUserStatusKey,
+  getUserStatus,
+  getStatusBadgeVariant,
+  getUserInitials,
+  getRoleBadgeColor,
+  getRoleDisplayName,
+} from './user';
+export type {
+  UserStatusKey,
+  User,
+  UserStats,
+  UserCreateInput,
+  UserUpdateInput,
+} from './user';
 
-// Team types (team management, TEAM_FIT scenarios)
-export * from './team';
+// ============================================
+// Team types - team management
+// ============================================
+export {
+  TeamStatus,
+  TeamMemberRole,
+  getTeamStatusKey,
+  getTeamStatusBadgeVariant,
+  getMemberRoleBadgeVariant,
+  getTeamMemberInitials,
+  formatSaturation,
+  getSaturationColor,
+} from './team';
+export type {
+  TeamUserSummary,
+  ManagedTeamMember,
+  ManagedTeamSummary,
+  ManagedTeam,
+  TeamMemberProfileSummary,
+  CompetencySaturation,
+  SkillGap,
+  ManagedTeamProfile,
+  CreateTeamRequest,
+  UpdateTeamRequest,
+  AddMembersRequest,
+  SetLeaderRequest,
+  ActivationResult,
+  MemberAdditionResult,
+  LeaderChangeResult,
+  FitScoreResult,
+  TeamStats,
+  PageResponse,
+} from './team';
 
-// Skills types (ESCO, O*NET, search)
-export * from './skills';
+// ============================================
+// Skills types - ESCO, O*NET, search
+// ============================================
+export type {
+  ESCOSkillRaw,
+  ESCOSkill,
+  ESCOReuseLevel,
+  ONetAbilityRaw,
+  ONetWorkStyleRaw,
+  ONetKnowledgeRaw,
+  ONetElement,
+  ONetOccupation,
+  ONetCategory,
+  UnifiedSkill,
+  SkillSearchResult,
+  SkillSearchMatch,
+  SkillSearchFilters,
+  SkillSearchConfig,
+  BigFiveCode,
+  BigFiveMapping,
+  BigFiveProfile,
+  SkillRecommendation,
+  SkillMapperState,
+} from './skills';
 
-// Error types (API errors, validation errors)
-export * from './errors';
+// ============================================
+// Error types - API errors, validation
+// ============================================
+export {
+  ErrorCategory,
+  ErrorCode,
+  ErrorAction,
+  getErrorCategory,
+  isRetryableError,
+  getSuggestedAction,
+  createApiError,
+  createNetworkError,
+  getUserFriendlyMessage,
+  getErrorTitle,
+  isApiError,
+  isBackendErrorResponse,
+} from './errors';
+export type {
+  ValidationError,
+  BackendErrorResponse,
+  ApiError,
+} from './errors';
 
-// Result visualization types (Phase 4)
-export * from './results';
+// ============================================
+// Result visualization types
+// ============================================
+export type {
+  ScoreCircleVariant,
+  ScoreCircleSize,
+  ScoreCircleProps,
+  ScoreCircleSizeConfig,
+  GapDataPoint,
+  GapStatus,
+  GapAnalysisChartProps,
+  GapSummary,
+  TeamSaturationDataPoint,
+  TeamContributionType,
+  TeamSaturationRadarProps,
+  TeamFitAnalysis,
+  RecommendationPriority,
+  ResourceType,
+  DevelopmentRecommendation,
+  DevelopmentResource,
+  DevelopmentRecommendationsProps,
+  BigFiveTraitData,
+  BigFiveProfileProps,
+  GapTransformOptions,
+  TeamSaturationTransformOptions,
+  RecommendationGeneratorOptions,
+  ChartAnimationState,
+  ChartHoverState,
+  ChartInteractionCallbacks,
+} from './results';
 
-// Global types (Clerk session, RBAC)
+// ============================================
+// Global types - Clerk session, RBAC
+// ============================================
 export { ROLE_HIERARCHY, ROUTE_PERMISSIONS } from './globals.d';
