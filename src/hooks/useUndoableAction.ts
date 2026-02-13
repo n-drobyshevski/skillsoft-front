@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 /**
  * useUndoableAction Hook
@@ -165,38 +165,35 @@ export function useUndoableAction<TAction, TResult = void>(
   }, [undoStack, clearExpired]);
 
   // Execute an action
-  const execute = useCallback(
-    async (action: TAction): Promise<TResult> => {
-      setIsExecuting(true);
+  const execute = async (action: TAction): Promise<TResult> => {
+    setIsExecuting(true);
 
-      try {
-        const result = await onExecute(action);
+    try {
+      const result = await onExecute(action);
 
-        const entry: UndoableActionEntry<TAction, TResult> = {
-          id: crypto.randomUUID(),
-          action,
-          result,
-          timestamp: Date.now(),
-          expiresAt: Date.now() + windowMs,
-        };
+      const entry: UndoableActionEntry<TAction, TResult> = {
+        id: crypto.randomUUID(),
+        action,
+        result,
+        timestamp: Date.now(),
+        expiresAt: Date.now() + windowMs,
+      };
 
-        setUndoStack((prev) => {
-          // Clear expired entries and add new one
-          const now = Date.now();
-          const valid = prev.filter((e) => e.expiresAt > now);
-          return [entry, ...valid].slice(0, maxStackSize);
-        });
+      setUndoStack((prev) => {
+        // Clear expired entries and add new one
+        const now = Date.now();
+        const valid = prev.filter((e) => e.expiresAt > now);
+        return [entry, ...valid].slice(0, maxStackSize);
+      });
 
-        return result;
-      } finally {
-        setIsExecuting(false);
-      }
-    },
-    [onExecute, windowMs, maxStackSize]
-  );
+      return result;
+    } finally {
+      setIsExecuting(false);
+    }
+  };
 
   // Undo the last action
-  const undo = useCallback(async (): Promise<boolean> => {
+  const undo = async (): Promise<boolean> => {
     clearExpired();
 
     if (undoStack.length === 0) {
@@ -222,7 +219,7 @@ export function useUndoableAction<TAction, TResult = void>(
     } finally {
       setIsUndoing(false);
     }
-  }, [undoStack, onUndo, onUndoError, clearExpired]);
+  };
 
   // Clear all undo history
   const clearStack = () => {
@@ -291,7 +288,7 @@ export function useSingleUndo<TAction>(config: {
   }, [action]);
 
   // Undo
-  const undo = useCallback(async () => {
+  const undo = async () => {
     if (!action || action.expiresAt <= Date.now()) {
       setAction(null);
       return false;
@@ -307,7 +304,7 @@ export function useSingleUndo<TAction>(config: {
     } finally {
       setIsUndoing(false);
     }
-  }, [action, config]);
+  };
 
   // Clear
   const clear = () => {

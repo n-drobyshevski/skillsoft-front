@@ -8,7 +8,6 @@
  * - Priority ordering
  */
 
-import { useMemo } from 'react';
 import { useActiveLens, useUserRole } from '@/hooks/useLens';
 import {
   WIDGET_REGISTRY,
@@ -50,34 +49,32 @@ export function useDashboardWidgets(data: DashboardSummary | null): WidgetConfig
   const activeLens = useActiveLens();
   const userRole = useUserRole();
 
-  return useMemo(() => {
-    return Object.values(WIDGET_REGISTRY)
-      // Filter by lens visibility
-      .filter((config) => config.lenses.includes(activeLens))
+  return Object.values(WIDGET_REGISTRY)
+    // Filter by lens visibility
+    .filter((config) => config.lenses.includes(activeLens))
 
-      // Filter by minimum role requirement
-      .filter((config) => {
-        if (!config.minRole) return true;
-        const minRoleLevel = ROLE_HIERARCHY[config.minRole] ?? 0;
-        const userRoleLevel = ROLE_HIERARCHY[userRole] ?? 0;
-        return userRoleLevel >= minRoleLevel;
-      })
+    // Filter by minimum role requirement
+    .filter((config) => {
+      if (!config.minRole) return true;
+      const minRoleLevel = ROLE_HIERARCHY[config.minRole] ?? 0;
+      const userRoleLevel = ROLE_HIERARCHY[userRole] ?? 0;
+      return userRoleLevel >= minRoleLevel;
+    })
 
-      // Filter by data availability
-      .filter((config) => {
-        if (!config.requiresData || !config.dataKey || !data) return true;
-        const value = data[config.dataKey];
+    // Filter by data availability
+    .filter((config) => {
+      if (!config.requiresData || !config.dataKey || !data) return true;
+      const value = data[config.dataKey];
 
-        // Check if data exists and is not empty
-        if (value === null || value === undefined) return false;
-        if (Array.isArray(value) && value.length === 0) return false;
+      // Check if data exists and is not empty
+      if (value === null || value === undefined) return false;
+      if (Array.isArray(value) && value.length === 0) return false;
 
-        return true;
-      })
+      return true;
+    })
 
-      // Sort by priority (lower = higher priority)
-      .sort((a, b) => a.priority - b.priority);
-  }, [activeLens, userRole, data]);
+    // Sort by priority (lower = higher priority)
+    .sort((a, b) => a.priority - b.priority);
 }
 
 /**
@@ -86,7 +83,7 @@ export function useDashboardWidgets(data: DashboardSummary | null): WidgetConfig
  */
 export function useDashboardWidgetIds(data: DashboardSummary | null): string[] {
   const widgets = useDashboardWidgets(data);
-  return useMemo(() => widgets.map((w) => w.id), [widgets]);
+  return widgets.map((w) => w.id);
 }
 
 /**
@@ -97,10 +94,7 @@ export function useWidgetVisible(
   data: DashboardSummary | null
 ): boolean {
   const widgets = useDashboardWidgets(data);
-  return useMemo(
-    () => widgets.some((w) => w.id === widgetId),
-    [widgets, widgetId]
-  );
+  return widgets.some((w) => w.id === widgetId);
 }
 
 /**
@@ -112,10 +106,7 @@ export function useMobileHighPriorityWidgets(
 ): WidgetConfig[] {
   const widgets = useDashboardWidgets(data);
 
-  return useMemo(
-    () => widgets.filter((w) => w.mobilePriority === 'high'),
-    [widgets]
-  );
+  return widgets.filter((w) => w.mobilePriority === 'high');
 }
 
 /**
@@ -126,12 +117,8 @@ export function useMobileCollapsedWidgets(
 ): WidgetConfig[] {
   const widgets = useDashboardWidgets(data);
 
-  return useMemo(
-    () =>
-      widgets.filter(
-        (w) => w.collapsedByDefault || w.mobilePriority === 'low'
-      ),
-    [widgets]
+  return widgets.filter(
+    (w) => w.collapsedByDefault || w.mobilePriority === 'low'
   );
 }
 

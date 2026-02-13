@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useCallback, useMemo, useRef, useEffect } from 'react';
+import { useRef, useEffect } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import { SummaryHero } from './SummaryHero';
 import { FilterBar } from './FilterBar';
@@ -73,25 +73,20 @@ export function AnswerSummaryScreen({
   const cancelSubmission = useReviewStore((state) => state.cancelSubmission);
 
   // Calculate stats
-  const stats = useMemo(() => {
-    return {
+  const stats = {
       total: answers.length,
       answered: answers.filter((a) => a.status === 'answered').length,
       skipped: answers.filter((a) => a.status === 'skipped').length,
       flagged: answers.filter((a) => a.status === 'flagged').length,
     };
-  }, [answers]);
 
   // Filter answers based on active filter
-  const filteredAnswers = useMemo(() => {
-    if (activeFilter === 'all') {
-      return answers;
-    }
-    return answers.filter((item) => item.status === activeFilter);
-  }, [answers, activeFilter]);
+  const filteredAnswers = activeFilter === 'all'
+      ? answers
+      : answers.filter((item) => item.status === activeFilter);
 
   // Sort filtered answers
-  const sortedAnswers = useMemo(() => {
+  const sortedAnswers = (() => {
     const sorted = [...filteredAnswers];
 
     switch (sortOrder) {
@@ -116,15 +111,15 @@ export function AnswerSummaryScreen({
     }
 
     return sorted;
-  }, [filteredAnswers, sortOrder]);
+  })();
 
   // Filter counts for FilterBar
-  const filterCounts = useMemo(() => ({
+  const filterCounts = {
     all: answers.length,
     answered: stats.answered,
     skipped: stats.skipped,
     flagged: stats.flagged,
-  }), [answers.length, stats]);
+  };
 
   // Restore scroll position on mount
   useEffect(() => {
@@ -134,31 +129,31 @@ export function AnswerSummaryScreen({
   }, [scrollPosition]);
 
   // Handle edit - save scroll position before navigating
-  const handleEditAnswer = useCallback((questionId: string, questionIndex: number) => {
+  const handleEditAnswer = (questionId: string, questionIndex: number) => {
     if (scrollRef.current) {
       saveScrollPosition(scrollRef.current.scrollTop);
     }
     onEditAnswer(questionId, questionIndex);
-  }, [saveScrollPosition, onEditAnswer]);
+  };
 
   // Handle review skipped - filter to skipped and scroll to top
-  const handleReviewSkipped = useCallback(() => {
+  const handleReviewSkipped = () => {
     setActiveFilter('skipped');
     if (scrollRef.current) {
       scrollRef.current.scrollTop = 0;
     }
-  }, [setActiveFilter]);
+  };
 
   // Handle retry submission
-  const handleRetry = useCallback(() => {
+  const handleRetry = () => {
     retrySubmission();
     onSubmit();
-  }, [retrySubmission, onSubmit]);
+  };
 
   // Handle cancel submission
-  const handleCancelSubmission = useCallback(() => {
+  const handleCancelSubmission = () => {
     cancelSubmission();
-  }, [cancelSubmission]);
+  };
 
   const isAllAnswered = stats.answered >= stats.total;
   const hasSkipped = stats.skipped > 0;

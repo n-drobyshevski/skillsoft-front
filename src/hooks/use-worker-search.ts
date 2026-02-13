@@ -17,10 +17,8 @@
 import {
   useState,
   useEffect,
-  useCallback,
   useRef,
   useDeferredValue,
-  useMemo,
 } from 'react';
 import type { IFuseOptions } from 'fuse.js';
 import type {
@@ -219,16 +217,10 @@ export function useWorkerSearch(
   const pendingSearchRef = useRef<string | null>(null);
 
   // Worker support check
-  const workerSupported = useMemo(
-    () => useWorker && isWorkerSupported(),
-    [useWorker]
-  );
+  const workerSupported = useWorker && isWorkerSupported();
 
   // Filter skills
-  const filteredSkills = useMemo(
-    () => applyFilters(skills, filters),
-    [skills, filters]
-  );
+  const filteredSkills = applyFilters(skills, filters);
 
   // Initialize worker
   useEffect(() => {
@@ -378,25 +370,25 @@ export function useWorkerSearch(
   }, [deferredQuery, limit, isIndexReady, workerSupported, filteredSkills, threshold]);
 
   // Actions
-  const setQuery = useCallback((newQuery: string) => {
+  const setQuery = (newQuery: string) => {
     setQueryState(newQuery);
-  }, []);
+  };
 
-  const clearQuery = useCallback(() => {
+  const clearQuery = () => {
     setQueryState('');
     setResults([]);
     setSearchTime(0);
-  }, []);
+  };
 
-  const setFilters = useCallback((newFilters: SkillSearchFilters) => {
+  const setFilters = (newFilters: SkillSearchFilters) => {
     setFiltersState(newFilters);
-  }, []);
+  };
 
-  const clearFilters = useCallback(() => {
+  const clearFilters = () => {
     setFiltersState({});
-  }, []);
+  };
 
-  const rebuildIndex = useCallback(() => {
+  const rebuildIndex = () => {
     if (!workerSupported || !workerRef.current) return;
 
     setIsIndexing(true);
@@ -412,13 +404,13 @@ export function useWorkerSearch(
     };
 
     workerRef.current.postMessage(message);
-  }, [filteredSkills, threshold, workerSupported]);
+  };
 
   /**
    * Get context-aware recommendations based on a seed text
    * Used to recommend ESCO skills based on selected O*NET skill name
    */
-  const recommend = useCallback((seedText: string, standard: 'onet' | 'esco' = 'esco') => {
+  const recommend = (seedText: string, standard: 'onet' | 'esco' = 'esco') => {
     if (!seedText.trim()) {
       setRecommendations([]);
       return;
@@ -462,11 +454,11 @@ export function useWorkerSearch(
         setRecommendations(transformedResults);
       });
     }
-  }, [workerSupported, isIndexReady, filteredSkills, threshold]);
+  };
 
-  const clearRecommendations = useCallback(() => {
+  const clearRecommendations = () => {
     setRecommendations([]);
-  }, []);
+  };
 
   return {
     state: {

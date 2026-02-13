@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { testSessionsApi, assemblyApi } from '@/services/api';
 import type { AssemblyProgress, AssemblyPhase, TestSession } from '@/types/domain';
 
@@ -93,13 +93,13 @@ export function useAssemblyProgress(
   const isMountedRef = useRef(true);
 
   // Cleanup function
-  const cleanup = useCallback(() => {
+  const cleanup = () => {
     if (pollIntervalRef.current) {
       clearInterval(pollIntervalRef.current);
       pollIntervalRef.current = null;
     }
     pollCountRef.current = 0;
-  }, []);
+  };
 
   // Cleanup on unmount
   useEffect(() => {
@@ -111,7 +111,7 @@ export function useAssemblyProgress(
   }, [cleanup]);
 
   // Poll for progress updates
-  const pollProgress = useCallback(async () => {
+  const pollProgress = async () => {
     if (!templateIdRef.current || !isMountedRef.current) return;
 
     pollCountRef.current += 1;
@@ -196,71 +196,68 @@ export function useAssemblyProgress(
       // Continue polling on error - backend may still be processing
       console.warn('Error polling assembly progress:', err);
     }
-  }, [cleanup, options]);
+  };
 
   // Start the assembly process
-  const startAssembly = useCallback(
-    async (templateId: string, clerkUserId?: string | null) => {
-      // Store refs for polling and retry
-      templateIdRef.current = templateId;
-      clerkUserIdRef.current = clerkUserId || '';
-      sessionIdRef.current = null;
+  const startAssembly = async (templateId: string, clerkUserId?: string | null) => {
+    // Store refs for polling and retry
+    templateIdRef.current = templateId;
+    clerkUserIdRef.current = clerkUserId || '';
+    sessionIdRef.current = null;
 
-      // Reset state
-      setState({
-        ...initialState,
-        isAssembling: true,
-        phase: 'INITIALIZING',
+    // Reset state
+    setState({
+      ...initialState,
+      isAssembling: true,
+      phase: 'INITIALIZING',
+    });
+
+    // Cleanup any existing polling
+    cleanup();
+
+    try {
+      // Start the session (this triggers backend assembly)
+      const session = await testSessionsApi.startSession({
+        templateId,
+        clerkUserId: clerkUserId || '',
       });
 
-      // Cleanup any existing polling
+      if (!isMountedRef.current) return;
+
+      sessionIdRef.current = session.id;
+
+      setState((prev) => ({
+        ...prev,
+        sessionId: session.id,
+      }));
+
+      // Start polling for progress
+      pollIntervalRef.current = setInterval(
+        pollProgress,
+        POLLING_CONFIG.ACTIVE_INTERVAL_MS
+      );
+
+      // Also poll immediately
+      pollProgress();
+    } catch (err) {
       cleanup();
+      if (!isMountedRef.current) return;
 
-      try {
-        // Start the session (this triggers backend assembly)
-        const session = await testSessionsApi.startSession({
-          templateId,
-          clerkUserId: clerkUserId || '',
-        });
-
-        if (!isMountedRef.current) return;
-
-        sessionIdRef.current = session.id;
-
-        setState((prev) => ({
-          ...prev,
-          sessionId: session.id,
-        }));
-
-        // Start polling for progress
-        pollIntervalRef.current = setInterval(
-          pollProgress,
-          POLLING_CONFIG.ACTIVE_INTERVAL_MS
-        );
-
-        // Also poll immediately
-        pollProgress();
-      } catch (err) {
-        cleanup();
-        if (!isMountedRef.current) return;
-
-        const errorMessage =
-          err instanceof Error ? err.message : 'Failed to start assembly';
-        setState((prev) => ({
-          ...prev,
-          phase: 'FAILED',
-          isFailed: true,
-          isAssembling: false,
-          error: errorMessage,
-        }));
-        options.onError?.(errorMessage);
-      }
-    },
-    [cleanup, pollProgress, options]
-  );
+      const errorMessage =
+        err instanceof Error ? err.message : 'Failed to start assembly';
+      setState((prev) => ({
+        ...prev,
+        phase: 'FAILED',
+        isFailed: true,
+        isAssembling: false,
+        error: errorMessage,
+      }));
+      options.onError?.(errorMessage);
+    }
+  };
 
   // Retry failed assembly
-  const retry = useCallback(async () => {
+  const retry = async () => {
     if (state.retryCount >= POLLING_CONFIG.MAX_RETRIES) {
       setState((prev) => ({
         ...prev,
@@ -283,16 +280,16 @@ export function useAssemblyProgress(
     }));
 
     await startAssembly(templateIdRef.current, clerkUserIdRef.current);
-  }, [state.retryCount, startAssembly]);
+  };
 
   // Reset to initial state
-  const reset = useCallback(() => {
+  const reset = () => {
     cleanup();
     setState(initialState);
     templateIdRef.current = '';
     clerkUserIdRef.current = '';
     sessionIdRef.current = null;
-  }, [cleanup]);
+  };
 
   return {
     ...state,

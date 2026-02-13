@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Undo2, X, Loader2, CheckCircle, AlertCircle } from 'lucide-react';
@@ -241,16 +241,15 @@ export function useUndoToast<TAction>(
   const expiresAtRef = React.useRef<number>(0);
 
   // Cleanup function
-  const cleanup = useCallback(() => {
+  const cleanup = () => {
     if (intervalRef.current) {
       clearInterval(intervalRef.current);
       intervalRef.current = null;
     }
-  }, []);
+  };
 
   // Show the toast
-  const showUndo = useCallback(
-    (action: TAction, msg: string) => {
+  const showUndo = (action: TAction, msg: string) => {
       cleanup();
 
       actionRef.current = action;
@@ -276,19 +275,17 @@ export function useUndoToast<TAction>(
           setCountdown(remaining);
         }
       }, 1000);
-    },
-    [windowMs, totalDuration, cleanup, onExpire]
-  );
+    };
 
   // Hide the toast
-  const hideUndo = useCallback(() => {
+  const hideUndo = () => {
     cleanup();
     setIsVisible(false);
     actionRef.current = null;
-  }, [cleanup]);
+  };
 
   // Handle undo click
-  const handleUndo = useCallback(async () => {
+  const handleUndo = async () => {
     if (!actionRef.current || isUndoing) return;
 
     setIsUndoing(true);
@@ -309,7 +306,7 @@ export function useUndoToast<TAction>(
         hideUndo();
       }, 2000);
     }
-  }, [onUndo, isUndoing, hideUndo]);
+  };
 
   // Cleanup on unmount
   useEffect(() => {
@@ -317,8 +314,7 @@ export function useUndoToast<TAction>(
   }, [cleanup]);
 
   // The toast component
-  const UndoToastComponent: React.FC = useCallback(
-    () => (
+  const UndoToastComponent: React.FC = () => (
       <UndoToast
         isVisible={isVisible}
         message={message}
@@ -330,19 +326,7 @@ export function useUndoToast<TAction>(
         undoSuccess={undoSuccess}
         position={position}
       />
-    ),
-    [
-      isVisible,
-      message,
-      countdown,
-      totalDuration,
-      handleUndo,
-      hideUndo,
-      isUndoing,
-      undoSuccess,
-      position,
-    ]
-  );
+    );
 
   return {
     showUndo,

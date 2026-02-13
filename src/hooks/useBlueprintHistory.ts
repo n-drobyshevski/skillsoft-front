@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useCallback, useRef, useSyncExternalStore } from 'react';
+import { useEffect, useRef, useSyncExternalStore } from 'react';
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import type { BlueprintCompetency } from '../../app/(workspace)/test-templates/[id]/builder/actions';
@@ -246,43 +246,37 @@ export function useBlueprintHistory({
   }, [scope, templateId]);
 
   // Initialize on first call (must be called with initial competencies)
-  const initializeHistory = useCallback(
-    (competencies: BlueprintCompetency[]) => {
-      if (!initializedRef.current) {
-        store.getState().initialize(competencies, templateId, maxHistory);
-        initializedRef.current = true;
-      }
-    },
-    [templateId, maxHistory]
-  );
+  const initializeHistory = (competencies: BlueprintCompetency[]) => {
+    if (!initializedRef.current) {
+      store.getState().initialize(competencies, templateId, maxHistory);
+      initializedRef.current = true;
+    }
+  };
 
   // Track a change
-  const trackChange = useCallback(
-    (competencies: BlueprintCompetency[], actionType: HistoryActionType, description?: string) => {
-      // Auto-initialize if needed
-      if (!initializedRef.current) {
-        initializeHistory(competencies);
-        return;
-      }
-      store.getState().push(competencies, actionType, description);
-    },
-    [initializeHistory]
-  );
+  const trackChange = (competencies: BlueprintCompetency[], actionType: HistoryActionType, description?: string) => {
+    // Auto-initialize if needed
+    if (!initializedRef.current) {
+      initializeHistory(competencies);
+      return;
+    }
+    store.getState().push(competencies, actionType, description);
+  };
 
   // Undo action
-  const undo = useCallback(() => {
+  const undo = () => {
     return store.getState().undo();
-  }, []);
+  };
 
   // Redo action
-  const redo = useCallback(() => {
+  const redo = () => {
     return store.getState().redo();
-  }, []);
+  };
 
   // Clear history
-  const clear = useCallback(() => {
+  const clear = () => {
     store.getState().clear();
-  }, []);
+  };
 
   return {
     trackChange,

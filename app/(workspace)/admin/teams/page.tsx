@@ -18,7 +18,7 @@ import {
   Archive,
   AlertTriangle,
 } from "lucide-react";
-import { teamsApi } from "@/services/teams-api";
+import { getTeamsPageDataCached } from "@/services/api.cache.teams";
 import PageHeader from "@/components/common/PageHeader";
 import TeamsTableWrapper from "./_components/TeamsTableWrapper";
 
@@ -36,23 +36,11 @@ export async function generateMetadata(): Promise<Metadata> {
 
 async function getTeamsData(t: (key: string) => string) {
   try {
-    const response = await teamsApi.getTeams({ size: 100 });
-    if (!response || !Array.isArray(response.content)) {
-      if (response === null) {
-        return { teams: [], stats: null, error: t('errors.backendUnavailable') };
-      }
+    const { teams, stats } = await getTeamsPageDataCached();
+    if (!Array.isArray(teams)) {
       return { teams: [], stats: null, error: t('errors.invalidDataFormat') };
     }
-
-    // Also fetch stats
-    let stats: TeamStats | null = null;
-    try {
-      stats = await teamsApi.getStats();
-    } catch {
-      // Stats are optional, don't fail the page
-    }
-
-    return { teams: response.content, stats, error: null };
+    return { teams, stats, error: null };
   } catch (err) {
     const message = err instanceof Error ? err.message : t('errors.loadingTeams');
     if (message.includes('ECONNREFUSED') || message.includes('fetch failed') || message.includes('CORS')) {

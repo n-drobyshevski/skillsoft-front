@@ -29,6 +29,7 @@ import {
   getPsychometricsItemsCached,
   getPsychometricsCompetenciesCached,
 } from '@/services/api.cache.psychometrics';
+import { getAuthHeaders } from '@/services/roleApi';
 import { ErrorCategory, ErrorAction } from '@/types/errors';
 
 // PPR disabled - requires cacheComponents which is incompatible with Clerk
@@ -94,7 +95,8 @@ function ReliabilityGaugesSkeleton() {
 // Uses sample of 300 items for efficient visualization (statistically representative)
 async function ItemQualityScatterWrapper() {
   const t = await getTranslations('psychometrics');
-  const itemsPage = await getPsychometricsItemsCached({ size: 300 });
+  const authHeaders = await getAuthHeaders();
+  const itemsPage = await getPsychometricsItemsCached(authHeaders, { size: 300 });
   const items = itemsPage?.content ?? [];
 
   if (items.length === 0) {
@@ -120,7 +122,8 @@ async function ItemQualityScatterWrapper() {
 // Uses sample of 300 items for efficient distribution histograms
 async function MetricDistributionWrapper() {
   const t = await getTranslations('psychometrics');
-  const itemsPage = await getPsychometricsItemsCached({ size: 300 });
+  const authHeaders = await getAuthHeaders();
+  const itemsPage = await getPsychometricsItemsCached(authHeaders, { size: 300 });
   const items = itemsPage?.content ?? [];
 
   if (items.length === 0) {
@@ -145,7 +148,8 @@ async function MetricDistributionWrapper() {
 // Async wrapper for ReliabilityGauges - uses client component for mobile detection
 async function ReliabilityGaugesWrapper() {
   const t = await getTranslations('psychometrics');
-  const competenciesPage = await getPsychometricsCompetenciesCached({ size: 100 });
+  const authHeaders = await getAuthHeaders();
+  const competenciesPage = await getPsychometricsCompetenciesCached(authHeaders, { size: 100 });
   const competencies = competenciesPage?.content ?? [];
 
   return (
@@ -165,7 +169,8 @@ async function AnalyticsZoneWrapper({
 }: {
   children: React.ReactNode;
 }) {
-  const itemsPage = await getPsychometricsItemsCached({ size: 300 });
+  const authHeaders = await getAuthHeaders();
+  const itemsPage = await getPsychometricsItemsCached(authHeaders, { size: 300 });
   const items = itemsPage?.content ?? [];
 
   return (
@@ -177,7 +182,8 @@ async function AnalyticsZoneWrapper({
 
 export default async function PsychometricsPage() {
   // Fetch dashboard report first (fast data for immediate render)
-  const report = await getPsychometricsDashboardCached();
+  const authHeaders = await getAuthHeaders();
+  const report = await getPsychometricsDashboardCached(authHeaders);
   const t = await getTranslations('psychometrics');
   const locale = await getLocale();
 

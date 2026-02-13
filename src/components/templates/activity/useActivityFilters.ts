@@ -1,6 +1,5 @@
 'use client';
 
-import { useCallback, useMemo } from 'react';
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import type { ActivityEventType } from '@/types/activity';
 
@@ -98,11 +97,10 @@ export function useActivityFilters() {
   const pathname = usePathname();
 
   // Parse current filters from URL
-  const filters = useMemo(() => parseFiltersFromParams(searchParams), [searchParams]);
+  const filters = parseFiltersFromParams(searchParams);
 
   // Update URL with new params
-  const updateParams = useCallback(
-    (updates: Partial<ActivityFilters>, resetPage = false) => {
+  const updateParams = (updates: Partial<ActivityFilters>, resetPage = false) => {
       const params = new URLSearchParams(searchParams.toString());
 
       // Apply updates
@@ -124,51 +122,35 @@ export function useActivityFilters() {
 
       // Use replace to avoid adding to history for filter changes
       router.replace(newUrl, { scroll: false });
-    },
-    [searchParams, router, pathname]
-  );
+    };
 
   // Filter setters
-  const setStatus = useCallback(
-    (status: ActivityEventType | 'all') => {
+  const setStatus = (status: ActivityEventType | 'all') => {
       updateParams({ status }, true);
-    },
-    [updateParams]
-  );
+    };
 
-  const setPassed = useCallback(
-    (passed: 'all' | 'true' | 'false') => {
+  const setPassed = (passed: 'all' | 'true' | 'false') => {
       updateParams({ passed }, true);
-    },
-    [updateParams]
-  );
+    };
 
-  const setDateRange = useCallback(
-    (dateRange: DateRangeValue) => {
+  const setDateRange = (dateRange: DateRangeValue) => {
       updateParams({ dateRange }, true);
-    },
-    [updateParams]
-  );
+    };
 
-  const setPage = useCallback(
-    (page: number) => {
+  const setPage = (page: number) => {
       updateParams({ page }, false);
-    },
-    [updateParams]
-  );
+    };
 
-  const resetFilters = useCallback(() => {
+  const resetFilters = () => {
     router.replace(pathname, { scroll: false });
-  }, [router, pathname]);
+  };
 
   // Check if any filters are active
-  const hasActiveFilters = useMemo(() => {
-    return (
+  const hasActiveFilters = (
       filters.status !== 'all' ||
       filters.passed !== 'all' ||
       filters.dateRange !== 'all'
     );
-  }, [filters]);
 
   return {
     filters,

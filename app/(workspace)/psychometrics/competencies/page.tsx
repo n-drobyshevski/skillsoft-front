@@ -6,6 +6,7 @@ import { ReliabilityStatus, CompetencyReliability, Page } from '@/types/psychome
 import { ErrorCategory, ErrorAction } from '@/types/errors';
 import { CompetenciesTableClient } from './_components/CompetenciesTableClient';
 import { getPsychometricsCompetenciesCached } from '@/services/api.cache.psychometrics';
+import { getAuthHeaders } from '@/services/roleApi';
 
 export const metadata: Metadata = {
   title: 'Competency Reliability - Psychometrics - SkillSoft',
@@ -36,7 +37,8 @@ async function getCompetenciesData(searchParams: Awaited<PageProps['searchParams
   const page = searchParams.page ? parseInt(searchParams.page, 10) : 0;
   const size = searchParams.size ? parseInt(searchParams.size, 10) : 20;
 
-  const data = await getPsychometricsCompetenciesCached({ status, page, size });
+  const authHeaders = await getAuthHeaders();
+  const data = await getPsychometricsCompetenciesCached(authHeaders, { status, page, size });
 
   return {
     competencies: data ?? EMPTY_PAGE,

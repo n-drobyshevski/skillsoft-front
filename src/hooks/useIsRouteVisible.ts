@@ -1,6 +1,6 @@
 import { useLensStore } from "@/store/lens-store";
 import { selectIsRouteVisible, selectActiveLens } from "@/store/lens-selectors";
-import { useMemo, useRef } from "react";
+import { useRef } from "react";
 
 /**
  * Hook to check if a route is visible in the current lens
@@ -23,9 +23,8 @@ import { useMemo, useRef } from "react";
  * @returns Boolean indicating if route is visible
  */
 export function useIsRouteVisible(route: string): boolean {
-  // Create a memoized selector for this specific route
-  // This prevents creating a new function on every render
-  const selector = useMemo(() => selectIsRouteVisible(route), [route]);
+  // Create a selector for this specific route
+  const selector = selectIsRouteVisible(route);
 
   return useLensStore(selector);
 }
@@ -117,15 +116,13 @@ export function useFilterVisibleRoutes<T>(
   getRoute: (item: T) => string
 ): T[] {
   // Get visibility for all routes
-  const routes = useMemo(() => items.map(getRoute), [items, getRoute]);
+  const routes = items.map(getRoute);
   const visibility = useAreRoutesVisible(routes);
 
   // Filter items based on visibility
-  return useMemo(() => {
-    return items.filter((item) => {
-      const route = getRoute(item);
-      // Safe access: route is derived from items via getRoute function
-      return Object.hasOwn(visibility, route) ? visibility[route] : false;
-    });
-  }, [items, visibility, getRoute]);
+  return items.filter((item) => {
+    const route = getRoute(item);
+    // Safe access: route is derived from items via getRoute function
+    return Object.hasOwn(visibility, route) ? visibility[route] : false;
+  });
 }

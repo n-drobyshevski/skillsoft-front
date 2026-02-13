@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -151,7 +151,7 @@ export function KeyboardShortcutsModal({
   const setOpen = onOpenChange ?? setInternalOpen;
 
   // Handle `?` key to open the modal
-  const handleKeyDown = useCallback((event: KeyboardEvent) => {
+  const handleKeyDown = (event: KeyboardEvent) => {
     // Don't trigger if typing in an input
     if (
       event.target instanceof HTMLInputElement ||
@@ -171,7 +171,7 @@ export function KeyboardShortcutsModal({
     if (event.key === 'Escape' && isOpen) {
       setOpen(false);
     }
-  }, [isOpen, setOpen]);
+  };
 
   // Register keyboard listener
   useEffect(() => {
@@ -182,7 +182,7 @@ export function KeyboardShortcutsModal({
   }, [enableKeyboardTrigger, handleKeyDown]);
 
   // Group shortcuts by category
-  const groupedShortcuts = React.useMemo(() => {
+  const groupedShortcuts = (() => {
     const groups: Record<string, ShortcutDefinition[]> = {};
 
     shortcuts.forEach((shortcut) => {
@@ -194,7 +194,7 @@ export function KeyboardShortcutsModal({
     });
 
     return groups;
-  }, [shortcuts]);
+  })();
 
   const categoryNames = Object.keys(groupedShortcuts);
 
@@ -272,15 +272,15 @@ export function useKeyboardShortcuts(initialShortcuts: ShortcutDefinition[]) {
   const [isOpen, setIsOpen] = useState(false);
   const [shortcuts, setShortcuts] = useState(initialShortcuts);
 
-  const addShortcut = useCallback((shortcut: ShortcutDefinition) => {
+  const addShortcut = (shortcut: ShortcutDefinition) => {
     setShortcuts((prev) => [...prev, shortcut]);
-  }, []);
+  };
 
-  const removeShortcut = useCallback((keys: string[]) => {
+  const removeShortcut = (keys: string[]) => {
     setShortcuts((prev) =>
       prev.filter((s) => JSON.stringify(s.keys) !== JSON.stringify(keys))
     );
-  }, []);
+  };
 
   return {
     isOpen,

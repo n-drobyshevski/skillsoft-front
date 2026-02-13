@@ -16,6 +16,7 @@ import {
   BigFiveClientWrapper,
 } from './_components';
 import { getPsychometricsBigFiveCached } from '@/services/api.cache.psychometrics';
+import { getAuthHeaders } from '@/services/roleApi';
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('psychometrics.bigFivePage');
@@ -32,7 +33,8 @@ async function getBigFiveData(): Promise<{
   reliabilityData: BigFiveReliability[];
   error: string | null;
 }> {
-  const data = await getPsychometricsBigFiveCached();
+  const authHeaders = await getAuthHeaders();
+  const data = await getPsychometricsBigFiveCached(authHeaders);
 
   return {
     reliabilityData: data ?? [],

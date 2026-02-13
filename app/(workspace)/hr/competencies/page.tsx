@@ -3,7 +3,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
-import { competenciesApi } from "@/services/api";
+import { getCompetenciesCached } from "@/services/api.cache";
 import FlexibleStatsCards from "@/components/data-display/FlexibleStatsCards";
 import PageHeader from "@/components/common/PageHeader";
 import CompetenciesTable from "./_components/CompetenciesTable";
@@ -26,7 +26,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 async function getCompetenciesData() {
   try {
-    const competencies = await competenciesApi.getAllCompetencies();
+    const competencies = await getCompetenciesCached();
     if (!Array.isArray(competencies)) {
       return { competencies: [] };
     }

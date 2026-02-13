@@ -1,4 +1,4 @@
-import { useRef, useCallback, useEffect, useState } from 'react';
+import { useRef, useEffect, useState } from 'react';
 
 interface SwipeConfig {
   /** Minimum horizontal distance (px) to trigger swipe. Default: 50 */
@@ -82,7 +82,7 @@ export function useSwipeNavigation(config: SwipeConfig = {}) {
   /**
    * Calculate swipe metrics
    */
-  const calculateSwipe = useCallback(() => {
+  const calculateSwipe = () => {
     if (!touchStartRef.current || !touchEndRef.current) {
       return null;
     }
@@ -105,133 +105,109 @@ export function useSwipeNavigation(config: SwipeConfig = {}) {
       isValidSwipe: absX >= minSwipeDistance && absY <= maxVerticalDistance,
       isQuickFlick: velocity >= minVelocity && absX >= minSwipeDistance / 2,
     };
-  }, [minSwipeDistance, maxVerticalDistance, minVelocity]);
+  };
 
   /**
    * Handle touch start
    */
-  const handleTouchStart = useCallback(
-    (e: React.TouchEvent | TouchEvent) => {
-      if (!enabled) return;
+  const handleTouchStart = (e: React.TouchEvent | TouchEvent) => {
+    if (!enabled) return;
 
-      const touch = e.touches[0];
-      touchStartRef.current = {
-        x: touch.clientX,
-        y: touch.clientY,
-        time: Date.now(),
-      };
-      touchEndRef.current = null;
+    const touch = e.touches[0];
+    touchStartRef.current = {
+      x: touch.clientX,
+      y: touch.clientY,
+      time: Date.now(),
+    };
+    touchEndRef.current = null;
+    isSwipingRef.current = false;
+
+    setSwipeState({
+      isSwiping: false,
+      direction: 0,
+      offsetX: 0,
+    });
+  };
+
+  /**
+   * Handle touch move
+   */
+  const handleTouchMove = (e: React.TouchEvent | TouchEvent) => {
+    if (!enabled || !touchStartRef.current) return;
+
+    const touch = e.touches[0];
+    touchEndRef.current = {
+      x: touch.clientX,
+      y: touch.clientY,
+      time: Date.now(),
+    };
+
+    const deltaX = touch.clientX - touchStartRef.current.x;
+    const deltaY = touch.clientY - touchStartRef.current.y;
+    const absX = Math.abs(deltaX);
+    const absY = Math.abs(deltaY);
+
+    // Only track as swipe if more horizontal than vertical
+    if (absX > absY && absX > 10) {
+      isSwipingRef.current = true;
+
+      // Prevent default scrolling during horizontal swipe
+      if (preventDefault && absX > minSwipeDistance / 2) {
+        e.preventDefault();
+      }
+
+      // Calculate direction indicator (-1 for left, 1 for right)
+      const direction: -1 | 0 | 1 = deltaX > 0 ? 1 : deltaX < 0 ? -1 : 0;
+
+      setSwipeState({
+        isSwiping: true,
+        direction,
+        offsetX: deltaX,
+      });
+    } else if (absY > absX) {
+      // Vertical scroll detected, cancel swipe tracking
       isSwipingRef.current = false;
-
       setSwipeState({
         isSwiping: false,
         direction: 0,
         offsetX: 0,
       });
-    },
-    [enabled]
-  );
+    }
+  };
 
   /**
-   * Handle touch move
+   * Handle touch end
    */
-  const handleTouchMove = useCallback(
-    (e: React.TouchEvent | TouchEvent) => {
-      if (!enabled || !touchStartRef.current) return;
+  const handleTouchEnd = (e: React.TouchEvent | TouchEvent) => {
+    if (!enabled || !touchStartRef.current) return;
 
-      const touch = e.touches[0];
+    // Use last known touch position if touchEnd wasn't captured
+    if (!touchEndRef.current && e.changedTouches?.[0]) {
+      const touch = e.changedTouches[0];
       touchEndRef.current = {
         x: touch.clientX,
         y: touch.clientY,
         time: Date.now(),
       };
+    }
 
-      const deltaX = touch.clientX - touchStartRef.current.x;
-      const deltaY = touch.clientY - touchStartRef.current.y;
-      const absX = Math.abs(deltaX);
-      const absY = Math.abs(deltaY);
+    const swipe = calculateSwipe();
 
-      // Only track as swipe if more horizontal than vertical
-      if (absX > absY && absX > 10) {
-        isSwipingRef.current = true;
+    if (swipe && isSwipingRef.current) {
+      const isValidSwipe = swipe.isValidSwipe || swipe.isQuickFlick;
 
-        // Prevent default scrolling during horizontal swipe
-        if (preventDefault && absX > minSwipeDistance / 2) {
-          e.preventDefault();
-        }
-
-        // Calculate direction indicator (-1 for left, 1 for right)
-        const direction: -1 | 0 | 1 = deltaX > 0 ? 1 : deltaX < 0 ? -1 : 0;
-
-        setSwipeState({
-          isSwiping: true,
-          direction,
-          offsetX: deltaX,
-        });
-      } else if (absY > absX) {
-        // Vertical scroll detected, cancel swipe tracking
-        isSwipingRef.current = false;
-        setSwipeState({
-          isSwiping: false,
-          direction: 0,
-          offsetX: 0,
-        });
-      }
-    },
-    [enabled, preventDefault, minSwipeDistance]
-  );
-
-  /**
-   * Handle touch end
-   */
-  const handleTouchEnd = useCallback(
-    (e: React.TouchEvent | TouchEvent) => {
-      if (!enabled || !touchStartRef.current) return;
-
-      // Use last known touch position if touchEnd wasn't captured
-      if (!touchEndRef.current && e.changedTouches?.[0]) {
-        const touch = e.changedTouches[0];
-        touchEndRef.current = {
-          x: touch.clientX,
-          y: touch.clientY,
-          time: Date.now(),
-        };
-      }
-
-      const swipe = calculateSwipe();
-
-      if (swipe && isSwipingRef.current) {
-        const isValidSwipe = swipe.isValidSwipe || swipe.isQuickFlick;
-
-        if (isValidSwipe && swipe.isHorizontal) {
-          if (swipe.deltaX < 0 && onSwipeLeft) {
-            // Swiped left -> go to next
-            onSwipeLeft();
-          } else if (swipe.deltaX > 0 && onSwipeRight) {
-            // Swiped right -> go to previous
-            onSwipeRight();
-          }
+      if (isValidSwipe && swipe.isHorizontal) {
+        if (swipe.deltaX < 0 && onSwipeLeft) {
+          // Swiped left -> go to next
+          onSwipeLeft();
+        } else if (swipe.deltaX > 0 && onSwipeRight) {
+          // Swiped right -> go to previous
+          onSwipeRight();
         }
       }
+    }
 
-      // Reset state
-      touchStartRef.current = null;
-      touchEndRef.current = null;
-      isSwipingRef.current = false;
-
-      setSwipeState({
-        isSwiping: false,
-        direction: 0,
-        offsetX: 0,
-      });
-    },
-    [enabled, calculateSwipe, onSwipeLeft, onSwipeRight]
-  );
-
-  /**
-   * Handle touch cancel (e.g., interrupted by system gesture)
-   */
-  const handleTouchCancel = useCallback(() => {
+    // Reset state
     touchStartRef.current = null;
     touchEndRef.current = null;
     isSwipingRef.current = false;
@@ -241,7 +217,22 @@ export function useSwipeNavigation(config: SwipeConfig = {}) {
       direction: 0,
       offsetX: 0,
     });
-  }, []);
+  };
+
+  /**
+   * Handle touch cancel (e.g., interrupted by system gesture)
+   */
+  const handleTouchCancel = () => {
+    touchStartRef.current = null;
+    touchEndRef.current = null;
+    isSwipingRef.current = false;
+
+    setSwipeState({
+      isSwiping: false,
+      direction: 0,
+      offsetX: 0,
+    });
+  };
 
   /**
    * Event handlers object for spreading onto elements
@@ -256,29 +247,26 @@ export function useSwipeNavigation(config: SwipeConfig = {}) {
   /**
    * Ref callback for attaching to native elements
    */
-  const attachToRef = useCallback(
-    (element: HTMLElement | null) => {
-      if (!element || !enabled) return;
+  const attachToRef = (element: HTMLElement | null) => {
+    if (!element || !enabled) return;
 
-      const touchStartHandler = (e: TouchEvent) => handleTouchStart(e);
-      const touchMoveHandler = (e: TouchEvent) => handleTouchMove(e);
-      const touchEndHandler = (e: TouchEvent) => handleTouchEnd(e);
-      const touchCancelHandler = () => handleTouchCancel();
+    const touchStartHandler = (e: TouchEvent) => handleTouchStart(e);
+    const touchMoveHandler = (e: TouchEvent) => handleTouchMove(e);
+    const touchEndHandler = (e: TouchEvent) => handleTouchEnd(e);
+    const touchCancelHandler = () => handleTouchCancel();
 
-      element.addEventListener('touchstart', touchStartHandler, { passive: true });
-      element.addEventListener('touchmove', touchMoveHandler, { passive: !preventDefault });
-      element.addEventListener('touchend', touchEndHandler, { passive: true });
-      element.addEventListener('touchcancel', touchCancelHandler, { passive: true });
+    element.addEventListener('touchstart', touchStartHandler, { passive: true });
+    element.addEventListener('touchmove', touchMoveHandler, { passive: !preventDefault });
+    element.addEventListener('touchend', touchEndHandler, { passive: true });
+    element.addEventListener('touchcancel', touchCancelHandler, { passive: true });
 
-      return () => {
-        element.removeEventListener('touchstart', touchStartHandler);
-        element.removeEventListener('touchmove', touchMoveHandler);
-        element.removeEventListener('touchend', touchEndHandler);
-        element.removeEventListener('touchcancel', touchCancelHandler);
-      };
-    },
-    [enabled, handleTouchStart, handleTouchMove, handleTouchEnd, handleTouchCancel, preventDefault]
-  );
+    return () => {
+      element.removeEventListener('touchstart', touchStartHandler);
+      element.removeEventListener('touchmove', touchMoveHandler);
+      element.removeEventListener('touchend', touchEndHandler);
+      element.removeEventListener('touchcancel', touchCancelHandler);
+    };
+  };
 
   return {
     /** Current swipe state for visual feedback */

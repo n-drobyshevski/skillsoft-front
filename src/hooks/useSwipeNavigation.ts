@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState, useCallback, useEffect } from 'react';
+import { useRef, useState, useEffect } from 'react';
 
 /**
  * Swipe navigation direction
@@ -152,137 +152,83 @@ export function useSwipeNavigation<T extends HTMLElement = HTMLDivElement>(
   /**
    * Handle touch start
    */
-  const handleTouchStart = useCallback(
-    (e: TouchEvent) => {
-      if (disabled) return;
+  const handleTouchStart = (e: TouchEvent) => {
+    if (disabled) return;
 
-      const touch = e.touches[0];
-      const point: TouchPoint = {
-        x: touch.clientX,
-        y: touch.clientY,
-        time: Date.now(),
-      };
+    const touch = e.touches[0];
+    const point: TouchPoint = {
+      x: touch.clientX,
+      y: touch.clientY,
+      time: Date.now(),
+    };
 
-      // Check if starting from edge
-      if (edgeZone > 0) {
-        const isLeftEdge = touch.clientX < edgeZone;
-        const isRightEdge = touch.clientX > window.innerWidth - edgeZone;
-        isEdgeSwipe.current = isLeftEdge || isRightEdge;
-      } else {
-        isEdgeSwipe.current = true; // No edge detection, all swipes valid
-      }
+    // Check if starting from edge
+    if (edgeZone > 0) {
+      const isLeftEdge = touch.clientX < edgeZone;
+      const isRightEdge = touch.clientX > window.innerWidth - edgeZone;
+      isEdgeSwipe.current = isLeftEdge || isRightEdge;
+    } else {
+      isEdgeSwipe.current = true; // No edge detection, all swipes valid
+    }
 
-      startPoint.current = point;
-      lastPoint.current = point;
-    },
-    [disabled, edgeZone]
-  );
+    startPoint.current = point;
+    lastPoint.current = point;
+  };
 
   /**
    * Handle touch move
    */
-  const handleTouchMove = useCallback(
-    (e: TouchEvent) => {
-      if (disabled || !startPoint.current) return;
+  const handleTouchMove = (e: TouchEvent) => {
+    if (disabled || !startPoint.current) return;
 
-      // Only proceed if edge swipe requirement is met
-      if (edgeZone > 0 && !isEdgeSwipe.current) return;
+    // Only proceed if edge swipe requirement is met
+    if (edgeZone > 0 && !isEdgeSwipe.current) return;
 
-      const touch = e.touches[0];
-      const deltaX = touch.clientX - startPoint.current.x;
-      const deltaY = touch.clientY - startPoint.current.y;
-      const direction = getDirection(deltaX, deltaY);
+    const touch = e.touches[0];
+    const deltaX = touch.clientX - startPoint.current.x;
+    const deltaY = touch.clientY - startPoint.current.y;
+    const direction = getDirection(deltaX, deltaY);
 
-      // Calculate distance based on direction
-      const distance = horizontal
-        ? Math.abs(deltaX)
-        : vertical
-          ? Math.abs(deltaY)
-          : 0;
+    // Calculate distance based on direction
+    const distance = horizontal
+      ? Math.abs(deltaX)
+      : vertical
+        ? Math.abs(deltaY)
+        : 0;
 
-      const progress = Math.min(distance / threshold, 1);
-      const thresholdMet = distance >= threshold;
+    const progress = Math.min(distance / threshold, 1);
+    const thresholdMet = distance >= threshold;
 
-      // Update state
-      const newState: SwipeState = {
-        isSwiping: direction !== null,
-        direction,
-        distance,
-        progress,
-        thresholdMet,
-      };
+    // Update state
+    const newState: SwipeState = {
+      isSwiping: direction !== null,
+      direction,
+      distance,
+      progress,
+      thresholdMet,
+    };
 
-      setState(newState);
+    setState(newState);
 
-      // Callbacks
-      if (!state.isSwiping && direction) {
-        onSwipeStart?.();
-      }
-      onSwipeProgress?.(newState);
+    // Callbacks
+    if (!state.isSwiping && direction) {
+      onSwipeStart?.();
+    }
+    onSwipeProgress?.(newState);
 
-      // Update last point for velocity calculation
-      lastPoint.current = {
-        x: touch.clientX,
-        y: touch.clientY,
-        time: Date.now(),
-      };
-    },
-    [
-      disabled,
-      edgeZone,
-      getDirection,
-      horizontal,
-      vertical,
-      threshold,
-      state.isSwiping,
-      onSwipeStart,
-      onSwipeProgress,
-    ]
-  );
+    // Update last point for velocity calculation
+    lastPoint.current = {
+      x: touch.clientX,
+      y: touch.clientY,
+      time: Date.now(),
+    };
+  };
 
   /**
    * Handle touch end
    */
-  const handleTouchEnd = useCallback(
-    (_e: TouchEvent) => {
-      if (disabled || !startPoint.current || !lastPoint.current) {
-        setState({
-          isSwiping: false,
-          direction: null,
-          distance: 0,
-          progress: 0,
-          thresholdMet: false,
-        });
-        return;
-      }
-
-      const deltaX = lastPoint.current.x - startPoint.current.x;
-      const deltaY = lastPoint.current.y - startPoint.current.y;
-      const deltaTime = lastPoint.current.time - startPoint.current.time;
-      const direction = getDirection(deltaX, deltaY);
-
-      // Calculate velocity (px/ms)
-      const velocity = horizontal
-        ? Math.abs(deltaX) / Math.max(deltaTime, 1)
-        : Math.abs(deltaY) / Math.max(deltaTime, 1);
-
-      const distance = horizontal ? Math.abs(deltaX) : Math.abs(deltaY);
-      const confirmed =
-        (distance >= threshold || velocity >= velocityThreshold) &&
-        direction !== null;
-
-      // Trigger callbacks
-      if (confirmed && direction) {
-        if (enableHaptics) triggerHaptic('medium');
-        onSwipe?.(direction);
-      }
-      onSwipeEnd?.(direction, confirmed);
-
-      // Reset state
-      startPoint.current = null;
-      lastPoint.current = null;
-      isEdgeSwipe.current = false;
-
+  const handleTouchEnd = (_e: TouchEvent) => {
+    if (disabled || !startPoint.current || !lastPoint.current) {
       setState({
         isSwiping: false,
         direction: null,
@@ -290,18 +236,44 @@ export function useSwipeNavigation<T extends HTMLElement = HTMLDivElement>(
         progress: 0,
         thresholdMet: false,
       });
-    },
-    [
-      disabled,
-      getDirection,
-      horizontal,
-      threshold,
-      velocityThreshold,
-      enableHaptics,
-      onSwipe,
-      onSwipeEnd,
-    ]
-  );
+      return;
+    }
+
+    const deltaX = lastPoint.current.x - startPoint.current.x;
+    const deltaY = lastPoint.current.y - startPoint.current.y;
+    const deltaTime = lastPoint.current.time - startPoint.current.time;
+    const direction = getDirection(deltaX, deltaY);
+
+    // Calculate velocity (px/ms)
+    const velocity = horizontal
+      ? Math.abs(deltaX) / Math.max(deltaTime, 1)
+      : Math.abs(deltaY) / Math.max(deltaTime, 1);
+
+    const distance = horizontal ? Math.abs(deltaX) : Math.abs(deltaY);
+    const confirmed =
+      (distance >= threshold || velocity >= velocityThreshold) &&
+      direction !== null;
+
+    // Trigger callbacks
+    if (confirmed && direction) {
+      if (enableHaptics) triggerHaptic('medium');
+      onSwipe?.(direction);
+    }
+    onSwipeEnd?.(direction, confirmed);
+
+    // Reset state
+    startPoint.current = null;
+    lastPoint.current = null;
+    isEdgeSwipe.current = false;
+
+    setState({
+      isSwiping: false,
+      direction: null,
+      distance: 0,
+      progress: 0,
+      thresholdMet: false,
+    });
+  };
 
   /**
    * Attach touch event listeners

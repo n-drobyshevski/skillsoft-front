@@ -24,7 +24,6 @@
  */
 
 import { useFormatter, useLocale, useTranslations } from 'next-intl';
-import { useCallback, useMemo } from 'react';
 
 type DateInput = string | Date | null | undefined;
 
@@ -92,35 +91,29 @@ export function useFormattedDates(): FormattedDatesReturn {
    * English: "Jan 5, 2024"
    * Russian: "5 янв. 2024"
    */
-  const formatDate = useCallback(
-    (date: DateInput): string => {
-      const parsed = parseDate(date);
-      if (!parsed) return t('never');
+  const formatDate = (date: DateInput): string => {
+    const parsed = parseDate(date);
+    if (!parsed) return t('never');
 
-      return format.dateTime(parsed, {
-        dateStyle: 'medium',
-      });
-    },
-    [format, t]
-  );
+    return format.dateTime(parsed, {
+      dateStyle: 'medium',
+    });
+  };
 
   /**
    * Format with date and time
    * English: "Jan 5, 2024, 3:30 PM"
    * Russian: "5 янв. 2024, 15:30"
    */
-  const formatDateTime = useCallback(
-    (date: DateInput): string => {
-      const parsed = parseDate(date);
-      if (!parsed) return t('never');
+  const formatDateTime = (date: DateInput): string => {
+    const parsed = parseDate(date);
+    if (!parsed) return t('never');
 
-      return format.dateTime(parsed, {
-        dateStyle: 'medium',
-        timeStyle: 'short',
-      });
-    },
-    [format, t]
-  );
+    return format.dateTime(parsed, {
+      dateStyle: 'medium',
+      timeStyle: 'short',
+    });
+  };
 
   /**
    * Format as relative time using translation keys
@@ -129,113 +122,107 @@ export function useFormattedDates(): FormattedDatesReturn {
    *
    * Uses ICU MessageFormat for proper Russian pluralization
    */
-  const formatRelativeTime = useCallback(
-    (date: DateInput): string => {
-      const parsed = parseDate(date);
-      if (!parsed) return t('never');
+  const formatRelativeTime = (date: DateInput): string => {
+    const parsed = parseDate(date);
+    if (!parsed) return t('never');
 
-      const now = new Date();
-      const diffMs = now.getTime() - parsed.getTime();
+    const now = new Date();
+    const diffMs = now.getTime() - parsed.getTime();
 
-      // Handle future dates
-      if (diffMs < 0) return t('justNow');
+    // Handle future dates
+    if (diffMs < 0) return t('justNow');
 
-      const diffSeconds = Math.floor(diffMs / 1000);
-      const diffMinutes = Math.floor(diffSeconds / 60);
-      const diffHours = Math.floor(diffMinutes / 60);
-      const diffDays = Math.floor(diffHours / 24);
-      const diffWeeks = Math.floor(diffDays / 7);
-      const diffMonths = Math.floor(diffDays / 30);
-      const diffYears = Math.floor(diffDays / 365);
+    const diffSeconds = Math.floor(diffMs / 1000);
+    const diffMinutes = Math.floor(diffSeconds / 60);
+    const diffHours = Math.floor(diffMinutes / 60);
+    const diffDays = Math.floor(diffHours / 24);
+    const diffWeeks = Math.floor(diffDays / 7);
+    const diffMonths = Math.floor(diffDays / 30);
+    const diffYears = Math.floor(diffDays / 365);
 
-      // Just now (less than 1 minute)
-      if (diffMinutes < 1) {
-        return t('justNow');
-      }
+    // Just now (less than 1 minute)
+    if (diffMinutes < 1) {
+      return t('justNow');
+    }
 
-      // Today (same calendar day)
-      if (diffDays === 0) {
-        return t('today');
-      }
+    // Today (same calendar day)
+    if (diffDays === 0) {
+      return t('today');
+    }
 
-      // Yesterday
-      if (diffDays === 1) {
-        return t('yesterday');
-      }
+    // Yesterday
+    if (diffDays === 1) {
+      return t('yesterday');
+    }
 
-      // Days ago (2-6 days)
-      if (diffDays < 7) {
-        return t('daysAgo', { count: diffDays });
-      }
+    // Days ago (2-6 days)
+    if (diffDays < 7) {
+      return t('daysAgo', { count: diffDays });
+    }
 
-      // Weeks ago (1-4 weeks)
-      if (diffDays < 30) {
-        return t('weeksAgo', { count: diffWeeks });
-      }
+    // Weeks ago (1-4 weeks)
+    if (diffDays < 30) {
+      return t('weeksAgo', { count: diffWeeks });
+    }
 
-      // Months ago (1-11 months)
-      if (diffDays < 365) {
-        return t('monthsAgo', { count: diffMonths });
-      }
+    // Months ago (1-11 months)
+    if (diffDays < 365) {
+      return t('monthsAgo', { count: diffMonths });
+    }
 
-      // Years ago
-      return t('yearsAgo', { count: diffYears });
-    },
-    [t]
-  );
+    // Years ago
+    return t('yearsAgo', { count: diffYears });
+  };
 
   /**
    * Format as short relative time for compact displays
    * English: "5m ago", "2h ago", "3d ago"
    * Russian: "5 мин назад", "2 ч назад", "3 д назад"
    */
-  const formatRelativeTimeShort = useCallback(
-    (date: DateInput): string => {
-      const parsed = parseDate(date);
-      if (!parsed) return t('never');
+  const formatRelativeTimeShort = (date: DateInput): string => {
+    const parsed = parseDate(date);
+    if (!parsed) return t('never');
 
-      const now = new Date();
-      const diffMs = now.getTime() - parsed.getTime();
+    const now = new Date();
+    const diffMs = now.getTime() - parsed.getTime();
 
-      // Handle future dates
-      if (diffMs < 0) return t('justNow');
+    // Handle future dates
+    if (diffMs < 0) return t('justNow');
 
-      const diffSeconds = Math.floor(diffMs / 1000);
-      const diffMinutes = Math.floor(diffSeconds / 60);
-      const diffHours = Math.floor(diffMinutes / 60);
-      const diffDays = Math.floor(diffHours / 24);
-      const diffWeeks = Math.floor(diffDays / 7);
+    const diffSeconds = Math.floor(diffMs / 1000);
+    const diffMinutes = Math.floor(diffSeconds / 60);
+    const diffHours = Math.floor(diffMinutes / 60);
+    const diffDays = Math.floor(diffHours / 24);
+    const diffWeeks = Math.floor(diffDays / 7);
 
-      // Just now (less than 1 minute)
-      if (diffMinutes < 1) {
-        return t('justNow');
-      }
+    // Just now (less than 1 minute)
+    if (diffMinutes < 1) {
+      return t('justNow');
+    }
 
-      // Minutes ago (1-59 minutes)
-      if (diffMinutes < 60) {
-        return t('minutesAgoShort', { count: diffMinutes });
-      }
+    // Minutes ago (1-59 minutes)
+    if (diffMinutes < 60) {
+      return t('minutesAgoShort', { count: diffMinutes });
+    }
 
-      // Hours ago (1-23 hours)
-      if (diffHours < 24) {
-        return t('hoursAgoShort', { count: diffHours });
-      }
+    // Hours ago (1-23 hours)
+    if (diffHours < 24) {
+      return t('hoursAgoShort', { count: diffHours });
+    }
 
-      // Days ago (1-6 days)
-      if (diffDays < 7) {
-        return t('daysAgoShort', { count: diffDays });
-      }
+    // Days ago (1-6 days)
+    if (diffDays < 7) {
+      return t('daysAgoShort', { count: diffDays });
+    }
 
-      // Weeks ago or fallback to localized date
-      if (diffDays < 30) {
-        return t('weeksAgoShort', { count: diffWeeks });
-      }
+    // Weeks ago or fallback to localized date
+    if (diffDays < 30) {
+      return t('weeksAgoShort', { count: diffWeeks });
+    }
 
-      // Fallback to short date format for older dates
-      return format.dateTime(parsed, { dateStyle: 'short' });
-    },
-    [format, t]
-  );
+    // Fallback to short date format for older dates
+    return format.dateTime(parsed, { dateStyle: 'short' });
+  };
 
   /**
    * Format future relative time for expiration dates
@@ -244,151 +231,133 @@ export function useFormattedDates(): FormattedDatesReturn {
    *
    * For past dates, returns "Expired" style messaging
    */
-  const formatFutureRelativeTime = useCallback(
-    (date: DateInput): string => {
-      const parsed = parseDate(date);
-      if (!parsed) return t('never');
+  const formatFutureRelativeTime = (date: DateInput): string => {
+    const parsed = parseDate(date);
+    if (!parsed) return t('never');
 
-      const now = new Date();
-      const diffMs = parsed.getTime() - now.getTime();
+    const now = new Date();
+    const diffMs = parsed.getTime() - now.getTime();
 
-      // Handle past dates (already expired)
-      if (diffMs < 0) return t('justNow');
+    // Handle past dates (already expired)
+    if (diffMs < 0) return t('justNow');
 
-      const diffSeconds = Math.floor(diffMs / 1000);
-      const diffMinutes = Math.floor(diffSeconds / 60);
-      const diffHours = Math.floor(diffMinutes / 60);
-      const diffDays = Math.floor(diffHours / 24);
-      const diffWeeks = Math.floor(diffDays / 7);
-      const diffMonths = Math.floor(diffDays / 30);
-      const diffYears = Math.floor(diffDays / 365);
+    const diffSeconds = Math.floor(diffMs / 1000);
+    const diffMinutes = Math.floor(diffSeconds / 60);
+    const diffHours = Math.floor(diffMinutes / 60);
+    const diffDays = Math.floor(diffHours / 24);
+    const diffWeeks = Math.floor(diffDays / 7);
+    const diffMonths = Math.floor(diffDays / 30);
+    const diffYears = Math.floor(diffDays / 365);
 
-      // Less than 24 hours - show "today" or hours
-      if (diffDays === 0) {
-        return t('today');
-      }
+    // Less than 24 hours - show "today" or hours
+    if (diffDays === 0) {
+      return t('today');
+    }
 
-      // Tomorrow (1 day)
-      if (diffDays === 1) {
-        return t('tomorrow');
-      }
+    // Tomorrow (1 day)
+    if (diffDays === 1) {
+      return t('tomorrow');
+    }
 
-      // Days (2-6 days)
-      if (diffDays < 7) {
-        return t('inDays', { count: diffDays });
-      }
+    // Days (2-6 days)
+    if (diffDays < 7) {
+      return t('inDays', { count: diffDays });
+    }
 
-      // Weeks (1-4 weeks)
-      if (diffDays < 30) {
-        return t('inWeeks', { count: diffWeeks });
-      }
+    // Weeks (1-4 weeks)
+    if (diffDays < 30) {
+      return t('inWeeks', { count: diffWeeks });
+    }
 
-      // Months (1-11 months)
-      if (diffDays < 365) {
-        return t('inMonths', { count: diffMonths });
-      }
+    // Months (1-11 months)
+    if (diffDays < 365) {
+      return t('inMonths', { count: diffMonths });
+    }
 
-      // Years
-      return t('inYears', { count: diffYears });
-    },
-    [t]
-  );
+    // Years
+    return t('inYears', { count: diffYears });
+  };
 
   /**
    * Format duration from seconds
    * English: "5m", "1h", "1h 30m"
    * Russian: "5 мин", "1 ч", "1 ч 30 мин"
    */
-  const formatDuration = useCallback(
-    (seconds: number | undefined | null): string => {
-      if (seconds === undefined || seconds === null || seconds < 0) {
-        return t('never');
-      }
+  const formatDuration = (seconds: number | undefined | null): string => {
+    if (seconds === undefined || seconds === null || seconds < 0) {
+      return t('never');
+    }
 
-      const totalMinutes = Math.round(seconds / 60);
+    const totalMinutes = Math.round(seconds / 60);
 
-      if (totalMinutes < 60) {
-        return t('durationMinutes', { count: totalMinutes || 1 });
-      }
+    if (totalMinutes < 60) {
+      return t('durationMinutes', { count: totalMinutes || 1 });
+    }
 
-      const hours = Math.floor(totalMinutes / 60);
-      const remainingMinutes = totalMinutes % 60;
+    const hours = Math.floor(totalMinutes / 60);
+    const remainingMinutes = totalMinutes % 60;
 
-      if (remainingMinutes === 0) {
-        return t('durationHours', { count: hours });
-      }
+    if (remainingMinutes === 0) {
+      return t('durationHours', { count: hours });
+    }
 
-      return t('durationHoursMinutes', { hours, minutes: remainingMinutes });
-    },
-    [t]
-  );
+    return t('durationHoursMinutes', { hours, minutes: remainingMinutes });
+  };
 
   /**
    * Format as short date for compact displays
    * English: "1/5/24"
    * Russian: "05.01.24"
    */
-  const formatShortDate = useCallback(
-    (date: DateInput): string => {
-      const parsed = parseDate(date);
-      if (!parsed) return t('never');
+  const formatShortDate = (date: DateInput): string => {
+    const parsed = parseDate(date);
+    if (!parsed) return t('never');
 
-      return format.dateTime(parsed, {
-        dateStyle: 'short',
-      });
-    },
-    [format, t]
-  );
+    return format.dateTime(parsed, {
+      dateStyle: 'short',
+    });
+  };
 
   /**
    * Format as full date
    * English: "January 5, 2024"
    * Russian: "5 января 2024 г."
    */
-  const formatFullDate = useCallback(
-    (date: DateInput): string => {
-      const parsed = parseDate(date);
-      if (!parsed) return t('never');
+  const formatFullDate = (date: DateInput): string => {
+    const parsed = parseDate(date);
+    if (!parsed) return t('never');
 
-      return format.dateTime(parsed, {
-        dateStyle: 'long',
-      });
-    },
-    [format, t]
-  );
+    return format.dateTime(parsed, {
+      dateStyle: 'long',
+    });
+  };
 
   /**
    * Format time only
    * English: "3:30 PM"
    * Russian: "15:30"
    */
-  const formatTime = useCallback(
-    (date: DateInput): string => {
-      const parsed = parseDate(date);
-      if (!parsed) return t('never');
+  const formatTime = (date: DateInput): string => {
+    const parsed = parseDate(date);
+    if (!parsed) return t('never');
 
-      return format.dateTime(parsed, {
-        timeStyle: 'short',
-      });
-    },
-    [format, t]
-  );
+    return format.dateTime(parsed, {
+      timeStyle: 'short',
+    });
+  };
 
-  return useMemo(
-    () => ({
-      formatDate,
-      formatDateTime,
-      formatRelativeTime,
-      formatRelativeTimeShort,
-      formatFutureRelativeTime,
-      formatDuration,
-      formatShortDate,
-      formatFullDate,
-      formatTime,
-      locale,
-    }),
-    [formatDate, formatDateTime, formatRelativeTime, formatRelativeTimeShort, formatFutureRelativeTime, formatDuration, formatShortDate, formatFullDate, formatTime, locale]
-  );
+  return {
+    formatDate,
+    formatDateTime,
+    formatRelativeTime,
+    formatRelativeTimeShort,
+    formatFutureRelativeTime,
+    formatDuration,
+    formatShortDate,
+    formatFullDate,
+    formatTime,
+    locale,
+  };
 }
 
 /**

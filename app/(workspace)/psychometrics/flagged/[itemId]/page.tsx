@@ -7,6 +7,7 @@ import {
   getPsychometricsItemDetailCached,
   getPsychometricsFlaggedItemsCached,
 } from '@/services/api.cache.psychometrics';
+import { getAuthHeaders } from '@/services/roleApi';
 import PageHeader from '@/components/common/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -54,7 +55,8 @@ interface PageProps {
 }
 
 async function getItemDetail(questionId: string, errorMessage: string) {
-  const item = await getPsychometricsItemDetailCached(questionId);
+  const authHeaders = await getAuthHeaders();
+  const item = await getPsychometricsItemDetailCached(questionId, authHeaders);
   return {
     item,
     error: item === null ? errorMessage : null,
@@ -62,7 +64,8 @@ async function getItemDetail(questionId: string, errorMessage: string) {
 }
 
 async function getSimilarFlaggedItems() {
-  const items = await getPsychometricsFlaggedItemsCached();
+  const authHeaders = await getAuthHeaders();
+  const items = await getPsychometricsFlaggedItemsCached(authHeaders);
   return { items: items ?? [], error: null };
 }
 

@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { TestSession, SessionQuestion, CurrentQuestionResponse, TestAnswer, QuestionType } from '@/types/domain';
 import { testSessionsClientApi, type ApiError } from '@/services/api.client';
 import { toast } from 'sonner';
@@ -182,17 +182,16 @@ export function usePlayerState({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const getTimeSpent = useCallback(() => {
+  const getTimeSpent = () => {
     return Math.floor((Date.now() - questionStartTime.current) / 1000);
-  }, []);
+  };
 
-  const resetQuestionTimer = useCallback(() => {
+  const resetQuestionTimer = () => {
     questionStartTime.current = Date.now();
-  }, []);
+  };
 
   // Update state from API response
-  const updateFromResponse = useCallback(
-    (response: CurrentQuestionResponse, direction: 'forward' | 'backward') => {
+  const updateFromResponse = (response: CurrentQuestionResponse, direction: 'forward' | 'backward') => {
       setState((prev) => ({
         ...prev,
         currentQuestion: response.question,
@@ -216,13 +215,10 @@ export function usePlayerState({
         // Mark as clean since we just loaded it
         useNavigationState.getState().markClean(questionId);
       }
-    },
-    []
-  );
+    };
 
   // Load question with retry logic
-  const loadQuestion = useCallback(
-    async (direction: 'forward' | 'backward') => {
+  const loadQuestion = async (direction: 'forward' | 'backward') => {
       try {
         const response = await retryWithBackoff(
           () => testSessionsClientApi.getCurrentQuestion(session.id, authHeaders),
@@ -249,16 +245,14 @@ export function usePlayerState({
           toast.error(getUserFriendlyErrorMessage(error));
         }
       }
-    },
-    [session.id, authHeaders, updateFromResponse, onNavigationError]
-  );
+    };
 
   // State update helpers
-  const setSubmitting = useCallback((isSubmitting: boolean) => {
+  const setSubmitting = (isSubmitting: boolean) => {
     setState((prev) => ({ ...prev, isSubmitting }));
-  }, []);
+  };
 
-  const markAnswered = useCallback(() => {
+  const markAnswered = () => {
     setState((prev) => {
       const newQuestionStates = [...prev.questionStates];
       newQuestionStates[prev.questionIndex] = 'answered';
@@ -271,9 +265,9 @@ export function usePlayerState({
         questionStates: newQuestionStates,
       };
     });
-  }, []);
+  };
 
-  const markSkipped = useCallback(() => {
+  const markSkipped = () => {
     setState((prev) => {
       const newQuestionStates = [...prev.questionStates];
       newQuestionStates[prev.questionIndex] = 'skipped';
@@ -286,21 +280,21 @@ export function usePlayerState({
         questionStates: newQuestionStates,
       };
     });
-  }, []);
+  };
 
-  const incrementAnswered = useCallback(() => {
+  const incrementAnswered = () => {
     setState((prev) => ({
       ...prev,
       answeredCount: prev.answeredCount + 1,
     }));
-  }, []);
+  };
 
-  const incrementSkipped = useCallback(() => {
+  const incrementSkipped = () => {
     setState((prev) => ({
       ...prev,
       skippedCount: prev.skippedCount + 1,
     }));
-  }, []);
+  };
 
   // ========== Dirty Tracking: Monitor Answer Changes ==========
 
@@ -321,39 +315,37 @@ export function usePlayerState({
   }, [currentAnswer, state.currentQuestion?.id]);
 
   // Get original answer from navigation state
-  const originalAnswer = useMemo(() => {
+  const originalAnswer = (() => {
     const questionId = state.currentQuestion?.id;
     if (!questionId) return undefined;
     return useNavigationState.getState().getOriginalAnswer(questionId);
-  }, [state.currentQuestion?.id, currentAnswer]); // Re-compute when answer changes
+  })();
 
   // Computed: has unsaved changes
-  const hasUnsavedChanges = useMemo(() => {
-    return !areAnswersEqual(currentAnswer, originalAnswer);
-  }, [currentAnswer, originalAnswer]);
+  const hasUnsavedChanges = !areAnswersEqual(currentAnswer, originalAnswer);
 
   // Check if current question is dirty
-  const isDirty = useCallback(() => {
+  const isDirty = () => {
     const questionId = state.currentQuestion?.id;
     if (!questionId) return false;
     return useNavigationState.getState().isDirty(questionId);
-  }, [state.currentQuestion?.id]);
+  };
 
   // Mark current answer as saved (clears dirty flag)
-  const markAnswerSaved = useCallback(() => {
+  const markAnswerSaved = () => {
     const questionId = state.currentQuestion?.id;
     if (questionId) {
       useNavigationState.getState().markClean(questionId);
       // Also update original answer to current value
       useNavigationState.getState().setOriginalAnswer(questionId, currentAnswer);
     }
-  }, [state.currentQuestion?.id, currentAnswer]);
+  };
 
   // Clear all dirty tracking (e.g., on session end)
-  const clearDirtyTracking = useCallback(() => {
+  const clearDirtyTracking = () => {
     useNavigationState.getState().clearAllDirty();
     useNavigationState.getState().clearAllOriginalAnswers();
-  }, []);
+  };
 
   return {
     state,

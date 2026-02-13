@@ -5,6 +5,7 @@ import { getTranslations } from 'next-intl/server';
 import { cn } from '@/lib/utils';
 import { UiLink } from '@/components/ui/ui-link';
 import { getPsychometricsCompetencyDetailCached } from '@/services/api.cache.psychometrics';
+import { getAuthHeaders } from '@/services/roleApi';
 import PageHeader from '@/components/common/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -37,7 +38,8 @@ interface PageProps {
 }
 
 async function getCompetencyDetail(competencyId: string, errorMessage: string) {
-  const detail = await getPsychometricsCompetencyDetailCached(competencyId);
+  const authHeaders = await getAuthHeaders();
+  const detail = await getPsychometricsCompetencyDetailCached(competencyId, authHeaders);
   return {
     detail,
     error: detail === null ? errorMessage : null,

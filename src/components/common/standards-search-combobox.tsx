@@ -177,15 +177,15 @@ function StandardSearchPopover({
   const categories = isOnet ? ONET_CATEGORIES : ESCO_CATEGORIES;
   
   // Filter skills by source and category
-  const filteredSkills = React.useMemo(() => {
+  const filteredSkills = (() => {
     let filtered = skills.filter(s => s.source === type);
-    
+
     if (categoryFilter !== 'all') {
       filtered = filtered.filter(s => {
         const category = s.category?.toLowerCase() || '';
         // Handle different naming conventions
         if (isOnet) {
-          return category === categoryFilter || 
+          return category === categoryFilter ||
                  category.includes(categoryFilter) ||
                  (categoryFilter === 'work-style' && category.includes('style')) ||
                  (categoryFilter === 'work-activity' && category.includes('activity'));
@@ -194,7 +194,7 @@ function StandardSearchPopover({
           const metadata = s.metadata as { type?: string; reuseLevel?: string } | undefined;
           const skillType = metadata?.type?.toLowerCase() || '';
           const reuseLevel = metadata?.reuseLevel?.toLowerCase() || '';
-          
+
           if (categoryFilter === 'transversal') {
             return reuseLevel === 'transversal' || skillType === 'transversal';
           }
@@ -202,9 +202,9 @@ function StandardSearchPopover({
         }
       });
     }
-    
+
     return filtered;
-  }, [skills, type, categoryFilter, isOnet]);
+  })();
   
   // Use worker search
   const { state, actions } = useWorkerSearch(filteredSkills, {
@@ -226,7 +226,7 @@ function StandardSearchPopover({
   }, [contextSeed, state.isIndexReady, type, recommend, clearRecommendations]);
   
   // Check if a skill is selected
-  const isSelected = React.useCallback((skill: UnifiedSkill): boolean => {
+  const isSelected = (skill: UnifiedSkill): boolean => {
     if (!selectedValue) return false;
     if (isOnet) {
       const onetRef = selectedValue as OnetRefDto;
@@ -235,17 +235,17 @@ function StandardSearchPopover({
       const escoRef = selectedValue as EscoRefDto;
       return skill.uri === escoRef.uri || skill.id === escoRef.uri;
     }
-  }, [selectedValue, isOnet]);
+  };
   
   // Handle selection
-  const handleSelect = React.useCallback((skill: UnifiedSkill) => {
+  const handleSelect = (skill: UnifiedSkill) => {
     onSelect(skill);
     setOpen(false);
     setQuery('');
-  }, [onSelect, setQuery]);
+  };
   
   // Deduplicate results by name
-  const dedupedResults = React.useMemo(() => {
+  const dedupedResults = (() => {
     const seen = new Set<string>();
     return state.results.filter(r => {
       const name = r.item.name.toLowerCase();
@@ -253,10 +253,10 @@ function StandardSearchPopover({
       seen.add(name);
       return true;
     });
-  }, [state.results]);
+  })();
   
   // Deduplicate recommendations by name
-  const dedupedRecommendations = React.useMemo(() => {
+  const dedupedRecommendations = (() => {
     const seen = new Set<string>();
     return state.recommendations.filter(r => {
       const name = r.item.name.toLowerCase();
@@ -264,7 +264,7 @@ function StandardSearchPopover({
       seen.add(name);
       return true;
     });
-  }, [state.recommendations]);
+  })();
   
   // Determine what to show: search results or recommendations
   const hasSearchQuery = state.query.trim().length > 0;
@@ -610,7 +610,7 @@ export function StandardsSearchCombobox({
   }, [value, bigFiveMapping.bigFive, bigFiveMapping.dimension, bigFiveMapping.hasMapping]);
 
   // Handle Big Five change (manual override)
-  const handleBigFiveChange = React.useCallback((bigFive: BigFiveDimension | null) => {
+  const handleBigFiveChange = (bigFive: BigFiveDimension | null) => {
     const newValue: StandardCodesDto = { ...(value || {}) };
     if (bigFive) {
       newValue.bigFiveRef = {
@@ -623,14 +623,14 @@ export function StandardsSearchCombobox({
     }
     console.log('[StandardsSearchCombobox] handleBigFiveChange:', { bigFive, newValue });
     onChange(newValue);
-  }, [value, onChange, bigFiveMapping.dimension]);
+  };
 
   // Handle O*NET selection - also auto-applies Big Five mapping
-  const handleOnetSelect = React.useCallback((skill: UnifiedSkill) => {
+  const handleOnetSelect = (skill: UnifiedSkill) => {
     const newValue: StandardCodesDto = { ...value };
     const onetRef = mapToOnetRef(skill);
     newValue.onetRef = onetRef;
-    
+
     // Auto-apply Big Five mapping if available
     const mapping = getBigFiveMapping(onetRef.code);
     if (mapping.hasMapping && mapping.bigFive) {
@@ -640,7 +640,7 @@ export function StandardsSearchCombobox({
         facet: mapping.dimension || undefined,
       };
       console.log('[StandardsSearchCombobox] Auto-applied BigFive in handleOnetSelect:', newValue.bigFiveRef);
-      
+
       // Show toast notification
       toast.success(
         <div className="flex items-center gap-2">
@@ -650,39 +650,39 @@ export function StandardsSearchCombobox({
           </span>
         </div>,
         {
-          description: mapping.onetName 
-            ? `Derived from "${mapping.onetName}"` 
+          description: mapping.onetName
+            ? `Derived from "${mapping.onetName}"`
             : 'Auto-detected from O*NET selection',
           duration: 3000,
         }
       );
     }
-    
+
     console.log('[StandardsSearchCombobox] handleOnetSelect final value:', newValue);
     onChange(newValue);
-  }, [value, onChange]);
+  };
 
   // Handle ESCO selection
-  const handleEscoSelect = React.useCallback((skill: UnifiedSkill) => {
+  const handleEscoSelect = (skill: UnifiedSkill) => {
     const newValue: StandardCodesDto = { ...value };
     newValue.escoRef = mapToEscoRef(skill);
     onChange(newValue);
-  }, [value, onChange]);
+  };
 
   // Clear handlers
-  const handleClearOnet = React.useCallback(() => {
+  const handleClearOnet = () => {
     const newValue = { ...value };
     delete newValue.onetRef;
     // Also clear auto-detected bigFiveRef since it was derived from O*NET
     delete newValue.bigFiveRef;
     onChange(newValue);
-  }, [value, onChange]);
+  };
 
-  const handleClearEsco = React.useCallback(() => {
+  const handleClearEsco = () => {
     const newValue = { ...value };
     delete newValue.escoRef;
     onChange(newValue);
-  }, [value, onChange]);
+  };
 
   const hasOnet = !!value?.onetRef;
 

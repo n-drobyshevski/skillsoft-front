@@ -14,7 +14,7 @@
 
 'use client';
 
-import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Fuse, { type IFuseOptions, type FuseResult } from 'fuse.js';
 import type {
   UnifiedSkill,
@@ -195,10 +195,8 @@ export function useFuzzySearch(
   const fuseRef = useRef<Fuse<UnifiedSkill> | null>(null);
   
   // Filter skills based on current filters
-  const filteredSkills = useMemo(() => {
-    return applyFilters(skills, filters);
-  }, [skills, filters]);
-  
+  const filteredSkills = applyFilters(skills, filters);
+
   // Build/rebuild Fuse index when skills or filters change
   useEffect(() => {
     const fuseOptions: IFuseOptions<UnifiedSkill> = {
@@ -242,27 +240,27 @@ export function useFuzzySearch(
   }, [debouncedQuery, limit]);
   
   // Actions
-  const setQuery = useCallback((newQuery: string) => {
+  const setQuery = (newQuery: string) => {
     setQueryState(newQuery);
     if (newQuery.length > 0) {
       setIsSearching(true);
     }
-  }, []);
-  
-  const clearQuery = useCallback(() => {
+  };
+
+  const clearQuery = () => {
     setQueryState('');
     setResults([]);
     setSearchTime(0);
-  }, []);
-  
-  const setFilters = useCallback((newFilters: SkillSearchFilters) => {
+  };
+
+  const setFilters = (newFilters: SkillSearchFilters) => {
     setFiltersState(newFilters);
-  }, []);
-  
-  const clearFilters = useCallback(() => {
+  };
+
+  const clearFilters = () => {
     setFiltersState({});
-  }, []);
-  
+  };
+
   // Return state and actions
   return {
     state: {
@@ -322,10 +320,8 @@ export function useExtendedFuzzySearch(
   const debouncedQuery = useDebounce(query, debounceMs);
   const fuseRef = useRef<Fuse<UnifiedSkill> | null>(null);
   
-  const filteredSkills = useMemo(() => {
-    return applyFilters(skills, filters);
-  }, [skills, filters]);
-  
+  const filteredSkills = applyFilters(skills, filters);
+
   // Build Fuse index with extended search enabled
   useEffect(() => {
     const fuseOptions: IFuseOptions<UnifiedSkill> = {
@@ -369,27 +365,27 @@ export function useExtendedFuzzySearch(
     return () => cancelAnimationFrame(rafId);
   }, [debouncedQuery, limit]);
   
-  const setQuery = useCallback((newQuery: string) => {
+  const setQuery = (newQuery: string) => {
     setQueryState(newQuery);
     if (newQuery.length > 0) {
       setIsSearching(true);
     }
-  }, []);
-  
-  const clearQuery = useCallback(() => {
+  };
+
+  const clearQuery = () => {
     setQueryState('');
     setResults([]);
     setSearchTime(0);
-  }, []);
-  
-  const setFilters = useCallback((newFilters: SkillSearchFilters) => {
+  };
+
+  const setFilters = (newFilters: SkillSearchFilters) => {
     setFiltersState(newFilters);
-  }, []);
-  
-  const clearFilters = useCallback(() => {
+  };
+
+  const clearFilters = () => {
     setFiltersState({});
-  }, []);
-  
+  };
+
   return {
     state: {
       query,

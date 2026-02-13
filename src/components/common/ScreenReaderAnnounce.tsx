@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { createContext, useContext, useState, useCallback, useRef, useEffect } from 'react';
+import { createContext, useContext, useState, useRef, useEffect } from 'react';
 
 // ============================================================================
 // Types
@@ -91,7 +91,7 @@ export function ScreenReaderProvider({
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const idCounter = useRef(0);
 
-  const announce = useCallback((message: string, politeness: AnnouncePoliteNess = 'polite') => {
+  const announce = (message: string, politeness: AnnouncePoliteNess = 'polite') => {
     // Clear any pending timeout
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
@@ -114,11 +114,11 @@ export function ScreenReaderProvider({
         setAnnouncements((prev) => prev.filter((a) => a.id !== id));
       }, 5000);
     }, debounceDelay);
-  }, [debounceDelay]);
+  };
 
-  const clear = useCallback(() => {
+  const clear = () => {
     setAnnouncements([]);
-  }, []);
+  };
 
   // Cleanup on unmount
   useEffect(() => {
@@ -234,9 +234,9 @@ export function ScreenReaderOnly({
 export function useNavigationAnnounce() {
   const { announce } = useScreenReader();
 
-  return useCallback((message: string) => {
+  return (message: string) => {
     announce(message, 'polite');
-  }, [announce]);
+  };
 }
 
 /**
@@ -256,9 +256,9 @@ export function useNavigationAnnounce() {
 export function useErrorAnnounce() {
   const { announce } = useScreenReader();
 
-  return useCallback((message: string) => {
+  return (message: string) => {
     announce(message, 'assertive');
-  }, [announce]);
+  };
 }
 
 /**
@@ -280,9 +280,9 @@ export function useErrorAnnounce() {
 export function useLoadingAnnounce() {
   const { announce } = useScreenReader();
 
-  return useCallback((message: string) => {
+  return (message: string) => {
     announce(message, 'polite');
-  }, [announce]);
+  };
 }
 
 // ============================================================================

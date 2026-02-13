@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useCallback, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { TestSession, SessionQuestion, CurrentQuestionResponse, TestAnswer, SubmitAnswerRequest, QuestionType } from '@/types/domain';
@@ -228,9 +228,9 @@ export function ImmersivePlayer({
   /**
    * Handle time expiration
    */
-  const handleTimeExpired = useCallback(() => {
+  const handleTimeExpired = () => {
     setShowTimeoutDialog(true);
-  }, []);
+  };
 
   // Enter immersive mode on mount
   useEffect(() => {
@@ -390,7 +390,7 @@ export function ImmersivePlayer({
   /**
    * Validate current answer based on question type
    */
-  const validateAnswer = useCallback((value: string | number | string[] | undefined): { valid: boolean; error?: string } => {
+  const validateAnswer = (value: string | number | string[] | undefined): { valid: boolean; error?: string } => {
     if (!currentQuestion) {
       return { valid: false, error: 'Нет текущего вопроса' };
     }
@@ -463,12 +463,12 @@ export function ImmersivePlayer({
 
     // Default: if we have any value, it's valid
     return { valid: true };
-  }, [currentQuestion]);
+  };
 
   /**
    * Check if current answer is valid
    */
-  const isAnswerValid = React.useMemo(() => {
+  const isAnswerValid = (() => {
     const validation = validateAnswer(currentAnswer);
 
     // Debug logging in development
@@ -485,12 +485,12 @@ export function ImmersivePlayer({
     }
 
     return validation.valid;
-  }, [currentAnswer, validateAnswer, currentQuestion?.questionType]);
+  })();
 
   /**
    * Build SubmitAnswerRequest from answer value
    */
-  const buildAnswerRequest = useCallback((value: string | number | string[]): SubmitAnswerRequest => {
+  const buildAnswerRequest = (value: string | number | string[]): SubmitAnswerRequest => {
     const timeSpentSeconds = Math.floor((Date.now() - questionStartTime.current) / 1000);
     const request: SubmitAnswerRequest = {
       sessionId: session.id,
@@ -518,12 +518,12 @@ export function ImmersivePlayer({
     }
 
     return request;
-  }, [session.id, state.currentQuestion?.id, state.currentQuestion?.questionType]);
+  };
 
   /**
    * Handle answer selection
    */
-  const handleAnswer = useCallback(async (value: string | number | string[]) => {
+  const handleAnswer = async (value: string | number | string[]) => {
     if (!currentQuestion || state.isSubmitting) return;
 
     // Debug logging in development
@@ -543,13 +543,13 @@ export function ImmersivePlayer({
 
     // Optimistic update
     setCurrentAnswer(value);
-  }, [currentQuestion, state.isSubmitting]);
+  };
 
   /**
    * Fetch and display question at given index with retry logic
    * Supports both adapter pattern (new) and legacy authHeaders pattern.
    */
-  const loadQuestion = useCallback(async (direction: 'forward' | 'backward') => {
+  const loadQuestion = async (direction: 'forward' | 'backward') => {
     try {
       const response = await retryWithBackoff(
         () => adapter
@@ -649,12 +649,12 @@ export function ImmersivePlayer({
       toast.error(getUserFriendlyErrorMessage(error));
     }
     questionStartTime.current = Date.now();
-  }, [session.id, adapter, effectiveAuthHeaders, router, onError]);
+  };
 
   /**
    * Navigate to next question
    */
-  const handleNext = useCallback(async () => {
+  const handleNext = async () => {
     if (state.isSubmitting) return;
 
     // Validate current answer
@@ -737,8 +737,7 @@ export function ImmersivePlayer({
     }
 
     setState(prev => ({ ...prev, isSubmitting: false }));
-  // eslint-disable-next-line react-hooks/exhaustive-deps -- handleEnterSummary is defined after handleNext but stable
-  }, [state.isSubmitting, state.questionIndex, state.totalQuestions, currentQuestion, currentAnswer, buildAnswerRequest, session.id, loadQuestion, adapter, effectiveAuthHeaders, validateAnswer, router]);
+  };
 
   /**
    * Navigate to previous question with auto-save
@@ -747,7 +746,7 @@ export function ImmersivePlayer({
    * saves the answer before navigating backward. This prevents data loss
    * when the user clicks the back button.
    */
-  const handlePrevious = useCallback(async () => {
+  const handlePrevious = async () => {
     if (!state.allowBackNavigation || state.isSubmitting) return;
     if (state.questionIndex <= 0) return; // Already at first question
 
@@ -854,20 +853,7 @@ export function ImmersivePlayer({
     }
 
     setState(prev => ({ ...prev, isSubmitting: false }));
-  }, [
-    state.allowBackNavigation,
-    state.isSubmitting,
-    state.questionIndex,
-    currentQuestion,
-    currentAnswer,
-    validateAnswer,
-    buildAnswerRequest,
-    session.id,
-    loadQuestion,
-    adapter,
-    effectiveAuthHeaders,
-    router,
-  ]);
+  };
 
   /**
    * Navigate to a specific question by index (for dot navigation) with auto-save
@@ -876,7 +862,7 @@ export function ImmersivePlayer({
    * saves the answer before navigating. This prevents data loss when using
    * the progress dots to jump between questions.
    */
-  const handleNavigateToQuestion = useCallback(async (targetIndex: number) => {
+  const handleNavigateToQuestion = async (targetIndex: number) => {
     if (!state.allowBackNavigation || state.isSubmitting) return;
     if (targetIndex === state.questionIndex) return;
     if (targetIndex < 0 || targetIndex >= state.totalQuestions) return;
@@ -988,27 +974,12 @@ export function ImmersivePlayer({
     }
 
     setState(prev => ({ ...prev, isSubmitting: false }));
-  }, [
-    state.allowBackNavigation,
-    state.isSubmitting,
-    state.questionIndex,
-    state.totalQuestions,
-    state.questionStates,
-    currentQuestion,
-    currentAnswer,
-    validateAnswer,
-    buildAnswerRequest,
-    session.id,
-    loadQuestion,
-    adapter,
-    effectiveAuthHeaders,
-    router,
-  ]);
+  };
 
   /**
    * Skip current question without answering
    */
-  const handleSkip = useCallback(async () => {
+  const handleSkip = async () => {
     if (!state.allowSkip || state.isSubmitting) return;
 
     // Cannot skip the last question - must answer or go back
@@ -1084,14 +1055,14 @@ export function ImmersivePlayer({
     }
 
     setState(prev => ({ ...prev, isSubmitting: false }));
-  }, [state.allowSkip, state.isSubmitting, state.questionIndex, state.totalQuestions, currentQuestion, session.id, loadQuestion, adapter, effectiveAuthHeaders, router]);
+  };
 
   /**
    * Handle test completion
    * Includes session status validation and graceful error handling
    * Supports both adapter pattern (new) and legacy authHeaders pattern.
    */
-  const handleComplete = useCallback(async () => {
+  const handleComplete = async () => {
     if (state.isSubmitting) return;
 
     setState(prev => ({ ...prev, isSubmitting: true }));
@@ -1173,20 +1144,20 @@ export function ImmersivePlayer({
       toast.error('Не удалось завершить тест');
       setState(prev => ({ ...prev, isSubmitting: false }));
     }
-  }, [session.id, router, currentQuestion, currentAnswer, buildAnswerRequest, adapter, effectiveAuthHeaders, state.isSubmitting, onComplete, onError]);
+  };
 
   /**
    * Handle exit/abandon
    */
-  const handleExit = useCallback(() => {
+  const handleExit = () => {
     setShowAbandonDialog(true);
-  }, []);
+  };
 
   /**
    * Abandon the test
    * Supports both adapter pattern (new) and legacy authHeaders pattern.
    */
-  const handleAbandonTest = useCallback(async () => {
+  const handleAbandonTest = async () => {
     try {
       if (adapter) {
         await adapter.abandonSession(session.id);
@@ -1206,13 +1177,13 @@ export function ImmersivePlayer({
     } finally {
       setShowAbandonDialog(false);
     }
-  }, [session.id, adapter, effectiveAuthHeaders, router, onAbandon]);
+  };
 
   /**
    * Retry failed navigation (with auto-save)
    * Attempts the same navigation operation that failed
    */
-  const handleRetryNavigation = useCallback(async () => {
+  const handleRetryNavigation = async () => {
     if (!pendingNavigation) return;
 
     setIsRetryingNavigation(true);
@@ -1294,34 +1265,23 @@ export function ImmersivePlayer({
     } finally {
       setIsRetryingNavigation(false);
     }
-  }, [
-    pendingNavigation,
-    currentQuestion,
-    currentAnswer,
-    validateAnswer,
-    buildAnswerRequest,
-    session.id,
-    adapter,
-    effectiveAuthHeaders,
-    loadQuestion,
-    state.questionIndex,
-  ]);
+  };
 
   /**
    * Dismiss navigation error dialog
    * User stays on current question without navigating
    */
-  const handleDismissNavigationError = useCallback(() => {
+  const handleDismissNavigationError = () => {
     setShowNavigationError(false);
     setNavigationError(null);
     setPendingNavigation(null);
-  }, []);
+  };
 
   /**
    * Continue navigation without saving
    * Discards current answer changes and proceeds with navigation
    */
-  const handleContinueWithoutSaving = useCallback(async () => {
+  const handleContinueWithoutSaving = async () => {
     if (!pendingNavigation) return;
 
     const { direction, targetIndex } = pendingNavigation;
@@ -1353,22 +1313,14 @@ export function ImmersivePlayer({
       console.error('Continue without saving failed:', error);
       toast.error('Не удалось перейти к вопросу');
     }
-  }, [
-    pendingNavigation,
-    currentQuestion?.id,
-    session.id,
-    adapter,
-    effectiveAuthHeaders,
-    loadQuestion,
-    state.questionIndex,
-  ]);
+  };
 
   /**
    * Enter answer summary review screen
    * Fetches all answers and builds summary items for display
    * Supports both adapter pattern (new) and legacy authHeaders pattern.
    */
-  const handleEnterSummary = useCallback(async () => {
+  const handleEnterSummary = async () => {
     setState(prev => ({ ...prev, isSubmitting: true }));
 
     try {
@@ -1424,7 +1376,7 @@ export function ImmersivePlayer({
     }
 
     setState(prev => ({ ...prev, isSubmitting: false }));
-  }, [session.id, session.questionOrder, adapter, effectiveAuthHeaders, enterReviewPhase]);
+  };
 
   /**
    * Format answer for display in summary
@@ -1491,7 +1443,7 @@ export function ImmersivePlayer({
    * Navigates back to the specific question
    * Supports both adapter pattern (new) and legacy authHeaders pattern.
    */
-  const handleEditFromSummary = useCallback(async (questionId: string, questionIndex: number) => {
+  const handleEditFromSummary = async (questionId: string, questionIndex: number) => {
     setShowSummary(false);
 
     setState(prev => ({ ...prev, isSubmitting: true }));
@@ -1516,22 +1468,22 @@ export function ImmersivePlayer({
     }
 
     setState(prev => ({ ...prev, isSubmitting: false }));
-  }, [session.id, adapter, effectiveAuthHeaders, state.questionIndex, loadQuestion]);
+  };
 
   /**
    * Handle going back from summary to continue answering
    */
-  const handleGoBackFromSummary = useCallback(() => {
+  const handleGoBackFromSummary = () => {
     setShowSummary(false);
     resetReviewStore();
-  }, [resetReviewStore]);
+  };
 
   /**
    * Handle submission from the summary screen
    * Includes pre-flight session status check and graceful error handling
    * Supports both adapter pattern (new) and legacy authHeaders pattern.
    */
-  const handleSubmitFromSummary = useCallback(async () => {
+  const handleSubmitFromSummary = async () => {
     // Prevent double-submission
     if (isSummarySubmitting) {
       return;
@@ -1685,7 +1637,7 @@ export function ImmersivePlayer({
     } finally {
       setIsSummarySubmitting(false);
     }
-  }, [session.id, adapter, effectiveAuthHeaders, router, startSubmission, completeSubmission, failSubmission, isSummarySubmitting, onComplete, onError]);
+  };
 
   // Check if skip is available (not last question and allowSkip is enabled)
   const canSkip = state.allowSkip && state.questionIndex + 1 < state.totalQuestions;

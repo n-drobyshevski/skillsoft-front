@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
-import { testTemplatesApi } from "@/services/api";
+import { getActiveTemplatesCached } from "@/services/api.cache.templates";
 import { canCreateContent } from "@/services/roleApi";
 import TestTemplatesGridSkeleton from "./_components/TestTemplatesGridSkeleton";
 import ErrorDisplay from "./_components/ErrorDisplay";
@@ -26,7 +26,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 interface FetchResult {
-  templates: Awaited<ReturnType<typeof testTemplatesApi.getActiveTemplates>>;
+  templates: Awaited<ReturnType<typeof getActiveTemplatesCached>>;
   error: string | null;
   errorCategory?: ErrorCategory;
   isRetryable?: boolean;
@@ -34,7 +34,7 @@ interface FetchResult {
 
 async function getActiveTemplates(): Promise<FetchResult> {
   try {
-    const templates = await testTemplatesApi.getActiveTemplates();
+    const templates = await getActiveTemplatesCached();
 
     if (!Array.isArray(templates)) {
       return {

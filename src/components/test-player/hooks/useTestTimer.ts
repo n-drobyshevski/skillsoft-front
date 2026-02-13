@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 /**
  * useTestTimer Hook
@@ -130,21 +130,21 @@ export function useTestTimer({
     setIsInternalPaused(isPaused);
   }, [isPaused]);
 
-  const pause = useCallback(() => {
+  const pause = () => {
     setIsInternalPaused(true);
-  }, []);
+  };
 
-  const resume = useCallback(() => {
+  const resume = () => {
     setIsInternalPaused(false);
-  }, []);
+  };
 
-  const reset = useCallback((newSeconds: number | null) => {
+  const reset = (newSeconds: number | null) => {
     setTimeRemaining(newSeconds);
     setIsExpired(false);
     triggeredWarnings.current.clear();
-  }, []);
+  };
 
-  const sync = useCallback((serverSeconds: number) => {
+  const sync = (serverSeconds: number) => {
     // Only sync if difference is significant (> 2 seconds)
     setTimeRemaining((prev) => {
       if (prev === null) return serverSeconds;
@@ -153,7 +153,7 @@ export function useTestTimer({
       }
       return prev;
     });
-  }, []);
+  };
 
   const isWarning = timeRemaining !== null && timeRemaining <= WARNING_THRESHOLD && timeRemaining > 0;
   const isCritical = timeRemaining !== null && timeRemaining <= CRITICAL_THRESHOLD && timeRemaining > 0;

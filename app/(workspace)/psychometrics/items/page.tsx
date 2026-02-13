@@ -10,6 +10,7 @@ import {
   getPsychometricsItemsCached,
 } from '@/services/api.cache.psychometrics';
 import { getCompetenciesCached } from '@/services/api.cache';
+import { getAuthHeaders } from '@/services/roleApi';
 import type { ItemStatistics } from '@/types/psychometrics';
 import type { Competency } from '@/types/domain';
 
@@ -50,8 +51,9 @@ async function getItemsData(searchParams: Awaited<PageProps['searchParams']>) {
   const size = searchParams.size ? parseInt(searchParams.size, 10) : 20;
 
   // Fetch items and competencies in parallel using cached functions
+  const authHeaders = await getAuthHeaders();
   const [itemsResult, competencies] = await Promise.all([
-    getPsychometricsItemsCached({ status, competencyId, search, page, size }),
+    getPsychometricsItemsCached(authHeaders, { status, competencyId, search, page, size }),
     getCompetenciesCached(),
   ]);
 

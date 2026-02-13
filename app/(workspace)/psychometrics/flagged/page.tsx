@@ -6,6 +6,7 @@ import { FlaggedItemSummary, DiscriminationFlag } from '@/types/psychometrics';
 import { FlaggedItemsClient } from './_components/FlaggedItemsClient';
 import { AlertTriangle, AlertCircle, XCircle } from 'lucide-react';
 import { getPsychometricsFlaggedItemsCached } from '@/services/api.cache.psychometrics';
+import { getAuthHeaders } from '@/services/roleApi';
 
 // PPR disabled - requires cacheComponents which is incompatible with Clerk
 // export const experimental_ppr = true;
@@ -19,7 +20,8 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 async function getFlaggedItems() {
-  const items = await getPsychometricsFlaggedItemsCached();
+  const authHeaders = await getAuthHeaders();
+  const items = await getPsychometricsFlaggedItemsCached(authHeaders);
 
   return {
     items: items ?? [],

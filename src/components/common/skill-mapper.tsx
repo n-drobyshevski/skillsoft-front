@@ -18,7 +18,7 @@
 
 'use client';
 
-import { useState, useEffect, useMemo, useCallback, memo, useRef } from 'react';
+import { useState, useEffect, memo, useRef } from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { Search, X, Filter, Info, ExternalLink, Tag, Layers, Clock, Loader2 } from 'lucide-react';
 import { useWorkerSearch } from '@/hooks/use-worker-search';
@@ -522,12 +522,12 @@ export function SkillMapper({
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const isMobile = useIsMobile();
   
-  // Get unique categories (memoized)
-  const categories = useMemo(() => {
+  // Get unique categories
+  const categories = (() => {
     const cats = new Set<string>();
     skills.forEach(skill => cats.add(skill.category));
     return Array.from(cats).sort();
-  }, [skills]);
+  })();
   
   // Initialize search with Web Worker + useDeferredValue
   const { state, actions } = useWorkerSearch(skills, {
@@ -552,31 +552,31 @@ export function SkillMapper({
   // Check if input is ahead of search (for loading indicator)
   const isInputAhead = state.query !== state.deferredQuery;
   
-  // Handle skill selection (memoized to prevent child re-renders)
-  const handleSkillSelect = useCallback((skill: UnifiedSkill) => {
+  // Handle skill selection
+  const handleSkillSelect = (skill: UnifiedSkill) => {
     setSelectedSkill(skill);
     // Only open drawer on mobile - desktop shows inline panel
     if (isMobile) {
       setIsDrawerOpen(true);
     }
     onSkillSelect?.(skill);
-  }, [onSkillSelect, isMobile]);
+  };
   
-  // Handle closing details panel (memoized)
-  const handleCloseDetails = useCallback(() => {
+  // Handle closing details panel
+  const handleCloseDetails = () => {
     setSelectedSkill(null);
     setIsDrawerOpen(false);
-  }, []);
+  };
   
-  // Handle filter changes (memoized)
-  const handleFiltersChange = useCallback((newFilters: SkillSearchFilters) => {
+  // Handle filter changes
+  const handleFiltersChange = (newFilters: SkillSearchFilters) => {
     setFilters(newFilters);
-  }, []);
+  };
   
-  // Handle search input change (memoized)
-  const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+  // Handle search input change
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     actions.setQuery(e.target.value);
-  }, [actions]);
+  };
   
   // Ref for the scrollable container (required for virtualization)
   const scrollContainerRef = useRef<HTMLDivElement>(null);

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useRef } from 'react';
+import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 
 /**
@@ -132,15 +132,15 @@ export function useConfirmSaveWorkflow<TData, TResult>(
   const isMountedRef = useRef(true);
 
   // Cleanup on unmount
-  const cleanup = useCallback(() => {
+  const cleanup = () => {
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
       timeoutRef.current = null;
     }
-  }, []);
+  };
 
   // Transition: IDLE → CONFIRM_DIALOG
-  const requestSave = useCallback((data: TData) => {
+  const requestSave = (data: TData) => {
     cleanup();
     setContext({
       state: 'confirm_dialog',
@@ -149,10 +149,10 @@ export function useConfirmSaveWorkflow<TData, TResult>(
       retryCount: 0,
       createdId: null,
     });
-  }, [cleanup]);
+  };
 
   // Execute the save operation
-  const executeSave = useCallback(async () => {
+  const executeSave = async () => {
     const pendingData = context.pendingData;
     if (!pendingData) return;
 
@@ -192,21 +192,21 @@ export function useConfirmSaveWorkflow<TData, TResult>(
       }));
       onError?.(error);
     }
-  }, [context.pendingData, saveFn, getResultId, onSuccess, onError, router, redirectPath, successDelay, autoRedirect]);
+  };
 
   // Transition: CONFIRM_DIALOG → SAVING
-  const confirmSave = useCallback(async () => {
+  const confirmSave = async () => {
     await executeSave();
-  }, [executeSave]);
+  };
 
   // Transition: ERROR → SAVING (retry)
-  const retrySave = useCallback(async () => {
+  const retrySave = async () => {
     if (context.retryCount >= maxRetries) return;
     await executeSave();
-  }, [context.retryCount, maxRetries, executeSave]);
+  };
 
   // Transition: CONFIRM_DIALOG/ERROR → IDLE
-  const cancelSave = useCallback(() => {
+  const cancelSave = () => {
     cleanup();
     setContext({
       state: 'idle',
@@ -215,17 +215,17 @@ export function useConfirmSaveWorkflow<TData, TResult>(
       retryCount: 0,
       createdId: null,
     });
-  }, [cleanup]);
+  };
 
   // Transition: ERROR → IDLE (keeps pendingData for form recovery)
-  const dismissError = useCallback(() => {
+  const dismissError = () => {
     cleanup();
     setContext((prev) => ({
       ...prev,
       state: 'idle',
       error: null,
     }));
-  }, [cleanup]);
+  };
 
   // Computed values
   const isDialogOpen = context.state !== 'idle';

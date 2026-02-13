@@ -18,7 +18,7 @@ import {
   Ban,
   AlertTriangle,
 } from "lucide-react";
-import { usersApi } from "@/services/api";
+import { getUsersPageDataCached } from "@/services/api.cache.users";
 import PageHeader from "@/components/common/PageHeader";
 import TableSkeleton from "@/components/data-display/TableSkeleton";
 import { SyncUsersButton } from "./_components/SyncUsersButton";
@@ -38,7 +38,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 async function getUsersData(t: (key: string) => string) {
   try {
-    const users = await usersApi.getAllUsers();
+    const users = await getUsersPageDataCached();
     if (!Array.isArray(users)) {
       if (users === null) {
         return { users: [], error: t('errors.backendUnavailable') };

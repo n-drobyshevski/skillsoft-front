@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { getPsychometricsItemDetailCached } from '@/services/api.cache.psychometrics';
+import { getAuthHeaders } from '@/services/roleApi';
 import PageHeader from '@/components/common/PageHeader';
 import { Card, CardContent } from '@/components/ui/card';
 import { ValidityStatusBadge } from '../../_components';
@@ -28,7 +29,8 @@ interface PageProps {
 }
 
 async function getItemDetail(questionId: string) {
-  const item = await getPsychometricsItemDetailCached(questionId);
+  const authHeaders = await getAuthHeaders();
+  const item = await getPsychometricsItemDetailCached(questionId, authHeaders);
   return {
     item,
     error: item === null ? 'Не удалось загрузить данные.' : null,

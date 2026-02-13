@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useEffect, createContext, useContext } from 'react';
+import { useState, createContext, useContext } from 'react';
 
 /**
  * Onboarding Tour Hook - Phase 5.1 First-Time Experience
@@ -127,7 +127,7 @@ export function useOnboardingTour(): UseTourReturn {
   const [currentTour, setCurrentTour] = useState<TourDefinition | null>(null);
 
   // Start a tour
-  const startTour = useCallback((tour: TourDefinition) => {
+  const startTour = (tour: TourDefinition) => {
     // Check if already completed
     if (getCompletedTours().has(tour.id)) {
       return;
@@ -139,10 +139,10 @@ export function useOnboardingTour(): UseTourReturn {
       currentStepIndex: 0,
       tourId: tour.id,
     });
-  }, []);
+  };
 
   // Navigate to next step
-  const nextStep = useCallback(() => {
+  const nextStep = () => {
     if (!currentTour) return;
 
     setState((prev) => {
@@ -157,55 +157,55 @@ export function useOnboardingTour(): UseTourReturn {
 
       return { ...prev, currentStepIndex: nextIndex };
     });
-  }, [currentTour]);
+  };
 
   // Navigate to previous step
-  const prevStep = useCallback(() => {
+  const prevStep = () => {
     setState((prev) => ({
       ...prev,
       currentStepIndex: Math.max(0, prev.currentStepIndex - 1),
     }));
-  }, []);
+  };
 
   // Go to specific step
-  const goToStep = useCallback((index: number) => {
+  const goToStep = (index: number) => {
     if (!currentTour) return;
 
     setState((prev) => ({
       ...prev,
       currentStepIndex: Math.max(0, Math.min(index, currentTour.steps.length - 1)),
     }));
-  }, [currentTour]);
+  };
 
   // Skip tour
-  const skipTour = useCallback(() => {
+  const skipTour = () => {
     if (currentTour) {
       markTourCompleted(currentTour.id);
       currentTour.onSkip?.();
     }
     setState({ isActive: false, currentStepIndex: 0, tourId: null });
     setCurrentTour(null);
-  }, [currentTour]);
+  };
 
   // Complete tour
-  const completeTour = useCallback(() => {
+  const completeTour = () => {
     if (currentTour) {
       markTourCompleted(currentTour.id);
       currentTour.onComplete?.();
     }
     setState({ isActive: false, currentStepIndex: 0, tourId: null });
     setCurrentTour(null);
-  }, [currentTour]);
+  };
 
   // Check if a tour has been completed
-  const hasCompletedTour = useCallback((tourId: string): boolean => {
+  const hasCompletedTour = (tourId: string): boolean => {
     return getCompletedTours().has(tourId);
-  }, []);
+  };
 
   // Reset tour progress
-  const resetTourProgress = useCallback((tourId: string): void => {
+  const resetTourProgress = (tourId: string): void => {
     resetTourCompletion(tourId);
-  }, []);
+  };
 
   // Derived values
   const currentStep = currentTour?.steps[state.currentStepIndex] ?? null;

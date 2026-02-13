@@ -19,7 +19,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 import { AssessmentQuestion } from "@/types/domain";
-import { assessmentQuestionsApi } from "@/services/api";
+import { getQuestionsCached } from "@/services/api.cache";
 import { Button } from "@/components/ui/button";
 import FlexibleStatsCards from "@/components/data-display/FlexibleStatsCards";
 import PageHeader from "@/components/common/PageHeader";
@@ -34,7 +34,7 @@ interface EnrichedQuestion extends AssessmentQuestion {
 
 async function getQuestionsData() {
   try {
-    const questions = await assessmentQuestionsApi.getAllQuestions();
+    const questions = await getQuestionsCached();
     if (!Array.isArray(questions)) {
       return { questions: [], error: "Invalid data format from server." };
     }

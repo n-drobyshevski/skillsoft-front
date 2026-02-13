@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 
 /**
  * useSagaOperations Hook
@@ -194,179 +194,162 @@ export function useSagaOperations<TResult = unknown, TSnapshot = unknown>(
   const executeItemRef = useRef<((itemId: string) => Promise<SagaOperationResult<TResult>>) | null>(null);
 
   // Execute a single item with retry logic (implementation)
-  const executeItemImpl = useCallback(
-    async (itemId: string): Promise<SagaOperationResult<TResult>> => {
-      if (cancelledRef.current) {
-        return {
-          itemId,
-          success: false,
-          error: new Error('Operation cancelled'),
-          retryable: false,
-          timestamp: Date.now(),
-        };
+  const executeItemImpl = async (itemId: string): Promise<SagaOperationResult<TResult>> => {
+    if (cancelledRef.current) {
+      return {
+        itemId,
+        success: false,
+        error: new Error('Operation cancelled'),
+        retryable: false,
+        timestamp: Date.now(),
+      };
+    }
+
+    try {
+      const result = await onExecuteItem(itemId);
+      return {
+        itemId,
+        success: true,
+        result,
+        retryable: false,
+        timestamp: Date.now(),
+      };
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error(String(err));
+      const retryable = isRetryable(error);
+      const currentRetries = retryCountRef.current.get(itemId) ?? 0;
+
+      // Auto-retry if enabled and within limits
+      if (autoRetry && retryable && currentRetries < maxRetries) {
+        retryCountRef.current.set(itemId, currentRetries + 1);
+        // Use ref for recursive call to avoid forward reference issue
+        return executeItemRef.current!(itemId);
       }
 
-      try {
-        const result = await onExecuteItem(itemId);
-        return {
-          itemId,
-          success: true,
-          result,
-          retryable: false,
-          timestamp: Date.now(),
-        };
-      } catch (err) {
-        const error = err instanceof Error ? err : new Error(String(err));
-        const retryable = isRetryable(error);
-        const currentRetries = retryCountRef.current.get(itemId) ?? 0;
-
-        // Auto-retry if enabled and within limits
-        if (autoRetry && retryable && currentRetries < maxRetries) {
-          retryCountRef.current.set(itemId, currentRetries + 1);
-          // Use ref for recursive call to avoid forward reference issue
-          return executeItemRef.current!(itemId);
-        }
-
-        return {
-          itemId,
-          success: false,
-          error,
-          retryable: retryable && currentRetries < maxRetries,
-          timestamp: Date.now(),
-        };
-      }
-    },
-    [onExecuteItem, isRetryable, autoRetry, maxRetries]
-  );
+      return {
+        itemId,
+        success: false,
+        error,
+        retryable: retryable && currentRetries < maxRetries,
+        timestamp: Date.now(),
+      };
+    }
+  };
 
   // Keep ref updated with latest implementation
   executeItemRef.current = executeItemImpl;
 
   // Stable wrapper for external use
-  const executeItem = useCallback(
-    (itemId: string): Promise<SagaOperationResult<TResult>> => {
-      return executeItemRef.current!(itemId);
-    },
-    []
-  );
+  const executeItem = (itemId: string): Promise<SagaOperationResult<TResult>> => {
+    return executeItemRef.current!(itemId);
+  };
 
   // Execute batch with concurrency control
-  const executeBatch = useCallback(
-    async (
-      itemIds: string[],
-      existingSnapshots: SagaSnapshot<TSnapshot>[] = []
-    ): Promise<SagaState<TResult, TSnapshot>> => {
-      const operationId = crypto.randomUUID();
-      cancelledRef.current = false;
+  const executeBatch = async (
+    itemIds: string[],
+    existingSnapshots: SagaSnapshot<TSnapshot>[] = []
+  ): Promise<SagaState<TResult, TSnapshot>> => {
+    const operationId = crypto.randomUUID();
+    cancelledRef.current = false;
 
-      // Capture snapshots if not provided
-      const snapshots: SagaSnapshot<TSnapshot>[] = existingSnapshots.length > 0
-        ? existingSnapshots
-        : captureSnapshot
-        ? itemIds.map((itemId) => ({
-            itemId,
-            snapshot: captureSnapshot(itemId),
-          }))
-        : [];
+    // Capture snapshots if not provided
+    const snapshots: SagaSnapshot<TSnapshot>[] = existingSnapshots.length > 0
+      ? existingSnapshots
+      : captureSnapshot
+      ? itemIds.map((itemId) => ({
+          itemId,
+          snapshot: captureSnapshot(itemId),
+        }))
+      : [];
 
-      setState({
-        status: 'executing',
-        operationId,
-        totalItems: itemIds.length,
-        completedItems: 0,
-        successfulItems: [],
-        failedItems: [],
-        results: [],
-        snapshots,
-        startedAt: Date.now(),
-        completedAt: null,
-        error: null,
-      });
+    setState({
+      status: 'executing',
+      operationId,
+      totalItems: itemIds.length,
+      completedItems: 0,
+      successfulItems: [],
+      failedItems: [],
+      results: [],
+      snapshots,
+      startedAt: Date.now(),
+      completedAt: null,
+      error: null,
+    });
 
-      onStart?.(operationId, itemIds);
+    onStart?.(operationId, itemIds);
 
-      const results: SagaOperationResult<TResult>[] = [];
-      const successfulItems: string[] = [];
-      const failedItems: string[] = [];
+    const results: SagaOperationResult<TResult>[] = [];
+    const successfulItems: string[] = [];
+    const failedItems: string[] = [];
 
-      // Process in batches with concurrency limit
-      const chunks: string[][] = [];
-      for (let i = 0; i < itemIds.length; i += concurrency) {
-        chunks.push(itemIds.slice(i, i + concurrency));
-      }
+    // Process in batches with concurrency limit
+    const chunks: string[][] = [];
+    for (let i = 0; i < itemIds.length; i += concurrency) {
+      chunks.push(itemIds.slice(i, i + concurrency));
+    }
 
-      for (const chunk of chunks) {
-        if (cancelledRef.current) break;
+    for (const chunk of chunks) {
+      if (cancelledRef.current) break;
 
-        const chunkResults = await Promise.all(
-          chunk.map((itemId) => executeItem(itemId))
-        );
+      const chunkResults = await Promise.all(
+        chunk.map((itemId) => executeItem(itemId))
+      );
 
-        for (const result of chunkResults) {
-          results.push(result);
-          if (result.success) {
-            successfulItems.push(result.itemId);
-          } else {
-            failedItems.push(result.itemId);
-          }
-
-          onItemComplete?.(result);
-
-          setState((prev) => ({
-            ...prev,
-            completedItems: prev.completedItems + 1,
-            results: [...prev.results, result],
-            successfulItems: result.success
-              ? [...prev.successfulItems, result.itemId]
-              : prev.successfulItems,
-            failedItems: !result.success
-              ? [...prev.failedItems, result.itemId]
-              : prev.failedItems,
-          }));
+      for (const result of chunkResults) {
+        results.push(result);
+        if (result.success) {
+          successfulItems.push(result.itemId);
+        } else {
+          failedItems.push(result.itemId);
         }
+
+        onItemComplete?.(result);
+
+        setState((prev) => ({
+          ...prev,
+          completedItems: prev.completedItems + 1,
+          results: [...prev.results, result],
+          successfulItems: result.success
+            ? [...prev.successfulItems, result.itemId]
+            : prev.successfulItems,
+          failedItems: !result.success
+            ? [...prev.failedItems, result.itemId]
+            : prev.failedItems,
+        }));
       }
+    }
 
-      // Determine final status
-      const finalStatus: SagaStatus = cancelledRef.current
-        ? 'idle'
-        : failedItems.length === 0
-        ? 'completed'
-        : successfulItems.length === 0
-        ? 'failed'
-        : 'partial_failure';
+    // Determine final status
+    const finalStatus: SagaStatus = cancelledRef.current
+      ? 'idle'
+      : failedItems.length === 0
+      ? 'completed'
+      : successfulItems.length === 0
+      ? 'failed'
+      : 'partial_failure';
 
-      const finalState: SagaState<TResult, TSnapshot> = {
-        status: finalStatus,
-        operationId,
-        totalItems: itemIds.length,
-        completedItems: results.length,
-        successfulItems,
-        failedItems,
-        results,
-        snapshots,
-        startedAt: state.startedAt,
-        completedAt: Date.now(),
-        error:
-          failedItems.length > 0
-            ? new Error(`${failedItems.length} item(s) failed`)
-            : null,
-      };
+    const finalState: SagaState<TResult, TSnapshot> = {
+      status: finalStatus,
+      operationId,
+      totalItems: itemIds.length,
+      completedItems: results.length,
+      successfulItems,
+      failedItems,
+      results,
+      snapshots,
+      startedAt: state.startedAt,
+      completedAt: Date.now(),
+      error:
+        failedItems.length > 0
+          ? new Error(`${failedItems.length} item(s) failed`)
+          : null,
+    };
 
-      setState(finalState);
-      onComplete?.(finalState);
+    setState(finalState);
+    onComplete?.(finalState);
 
-      return finalState;
-    },
-    [
-      captureSnapshot,
-      concurrency,
-      executeItem,
-      onStart,
-      onItemComplete,
-      onComplete,
-      state.startedAt,
-    ]
-  );
+    return finalState;
+  };
 
   // Main execute function
   const execute = (itemIds: string[]): Promise<SagaState<TResult, TSnapshot>> => {
@@ -375,7 +358,7 @@ export function useSagaOperations<TResult = unknown, TSnapshot = unknown>(
   };
 
   // Retry failed items
-  const retryFailed = useCallback((): Promise<SagaState<TResult, TSnapshot>> => {
+  const retryFailed = (): Promise<SagaState<TResult, TSnapshot>> => {
     const { failedItems, snapshots } = state;
 
     if (failedItems.length === 0) {
@@ -388,10 +371,10 @@ export function useSagaOperations<TResult = unknown, TSnapshot = unknown>(
     );
 
     return executeBatch(failedItems, relevantSnapshots);
-  }, [state, executeBatch]);
+  };
 
   // Rollback successful operations
-  const rollback = useCallback(async (): Promise<void> => {
+  const rollback = async (): Promise<void> => {
     if (!onRollbackItem) return;
 
     const { successfulItems, snapshots } = state;
@@ -426,7 +409,7 @@ export function useSagaOperations<TResult = unknown, TSnapshot = unknown>(
     }));
 
     onRollbackComplete?.(rolledBackItems);
-  }, [state, onRollbackItem, onRollbackComplete]);
+  };
 
   // Cancel ongoing operation
   const cancel = () => {
@@ -435,11 +418,11 @@ export function useSagaOperations<TResult = unknown, TSnapshot = unknown>(
   };
 
   // Reset saga state
-  const reset = useCallback(() => {
+  const reset = () => {
     cancelledRef.current = false;
     resetRetryCounts();
     setState(initialState as SagaState<TResult, TSnapshot>);
-  }, [resetRetryCounts]);
+  };
 
   // Cleanup on unmount
   useEffect(() => {

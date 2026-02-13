@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo, useRef } from 'react';
+import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { SessionQuestion, TestAnswer, SubmitAnswerRequest, QuestionType } from '@/types/domain';
 import { testSessionsClientApi, type ApiError } from '@/services/api.client';
@@ -100,22 +100,22 @@ export function useAnswerSubmission({
   // Track answer timing
   const questionStartTime = useRef(Date.now());
 
-  const getTimeSpent = useCallback(() => {
+  const getTimeSpent = () => {
     return Math.floor((Date.now() - questionStartTime.current) / 1000);
-  }, []);
+  };
 
-  const resetQuestionTimer = useCallback(() => {
+  const resetQuestionTimer = () => {
     questionStartTime.current = Date.now();
-  }, []);
+  };
 
-  const clearValidationError = useCallback(() => {
+  const clearValidationError = () => {
     setValidationError(null);
-  }, []);
+  };
 
   /**
    * Validate current answer based on question type
    */
-  const validateAnswer = useCallback((value: string | number | string[] | undefined): ValidationResult => {
+  const validateAnswer = (value: string | number | string[] | undefined): ValidationResult => {
     if (!currentQuestion) {
       return { valid: false, error: 'Нет текущего вопроса' };
     }
@@ -188,12 +188,12 @@ export function useAnswerSubmission({
 
     // Default: if we have any value, it's valid
     return { valid: true };
-  }, [currentQuestion]);
+  };
 
   /**
    * Check if current answer is valid
    */
-  const isAnswerValid = useMemo(() => {
+  const isAnswerValid = (() => {
     const validation = validateAnswer(currentAnswer);
 
     // Debug logging in development
@@ -209,12 +209,12 @@ export function useAnswerSubmission({
     }
 
     return validation.valid;
-  }, [currentAnswer, validateAnswer, currentQuestion?.questionType]);
+  })();
 
   /**
    * Build SubmitAnswerRequest from answer value
    */
-  const buildAnswerRequest = useCallback((value: string | number | string[]): SubmitAnswerRequest => {
+  const buildAnswerRequest = (value: string | number | string[]): SubmitAnswerRequest => {
     const timeSpentSeconds = getTimeSpent();
     const request: SubmitAnswerRequest = {
       sessionId,
@@ -242,12 +242,12 @@ export function useAnswerSubmission({
     }
 
     return request;
-  }, [sessionId, currentQuestion?.id, currentQuestion?.questionType, getTimeSpent]);
+  };
 
   /**
    * Submit answer to API with retry
    */
-  const submitAnswer = useCallback(async (value: string | number | string[]): Promise<boolean> => {
+  const submitAnswer = async (value: string | number | string[]): Promise<boolean> => {
     if (!currentQuestion) return false;
 
     try {
@@ -299,12 +299,12 @@ export function useAnswerSubmission({
 
       return false;
     }
-  }, [sessionId, currentQuestion, authHeaders, buildAnswerRequest, onNavigationError, router]);
+  };
 
   /**
    * Submit skip request
    */
-  const submitSkip = useCallback(async (): Promise<boolean> => {
+  const submitSkip = async (): Promise<boolean> => {
     if (!currentQuestion) return false;
 
     try {
@@ -350,12 +350,12 @@ export function useAnswerSubmission({
       toast.error('Не удалось пропустить вопрос');
       return false;
     }
-  }, [sessionId, currentQuestion, authHeaders, getTimeSpent, router]);
+  };
 
   /**
    * Handle answer selection (optimistic update)
    */
-  const handleAnswer = useCallback((value: string | number | string[]) => {
+  const handleAnswer = (value: string | number | string[]) => {
     if (!currentQuestion) return;
 
     // Debug logging in development
@@ -374,7 +374,7 @@ export function useAnswerSubmission({
 
     // Optimistic update
     setCurrentAnswer(value);
-  }, [currentQuestion]);
+  };
 
   return {
     currentAnswer,

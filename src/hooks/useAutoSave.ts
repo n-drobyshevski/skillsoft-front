@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useCallback, useEffect, useState } from 'react';
+import { useRef, useEffect, useState } from 'react';
 
 export type SaveStatus = 'idle' | 'pending' | 'saving' | 'saved' | 'error' | 'offline' | 'retrying';
 
@@ -199,88 +199,64 @@ export function useAutoSave<T>({
     return Math.min(delay, maxDelayMs);
   };
 
-  const executeSave = useCallback(
-    async (attemptNumber = 0): Promise<boolean> => {
-      // Don't save while offline - read from ref
-      if (isOfflineRef.current) {
-        setStatus('offline');
-        return false;
-      }
+  const executeSave = async (attemptNumber = 0): Promise<boolean> => {
+    // Don't save while offline - read from ref
+    if (isOfflineRef.current) {
+      setStatus('offline');
+      return false;
+    }
 
-      // Only clear timers on first attempt
-      if (attemptNumber === 0) {
-        clearTimers();
-      }
+    // Only clear timers on first attempt
+    if (attemptNumber === 0) {
+      clearTimers();
+    }
 
-      const currentKey = compareKeyRef.current(pendingDataRef.current);
+    const currentKey = compareKeyRef.current(pendingDataRef.current);
 
-      // Skip if no changes
-      if (currentKey === lastSavedKeyRef.current) {
-        if (isMountedRef.current) {
-          setStatus('idle');
-          setHasUnsavedChanges(false);
-          setRetryAttempt(0);
-        }
-        return true;
-      }
-
+    // Skip if no changes
+    if (currentKey === lastSavedKeyRef.current) {
       if (isMountedRef.current) {
-        setStatus(attemptNumber > 0 ? 'retrying' : 'saving');
-        setRetryAttempt(attemptNumber);
+        setStatus('idle');
+        setHasUnsavedChanges(false);
+        setRetryAttempt(0);
       }
+      return true;
+    }
 
-      try {
-        const success = await onSaveRef.current(pendingDataRef.current);
+    if (isMountedRef.current) {
+      setStatus(attemptNumber > 0 ? 'retrying' : 'saving');
+      setRetryAttempt(attemptNumber);
+    }
 
-        if (!isMountedRef.current) return success;
+    try {
+      const success = await onSaveRef.current(pendingDataRef.current);
 
-        if (success) {
-          lastSavedKeyRef.current = currentKey;
-          setStatus('saved');
-          setLastSaved(new Date());
-          setHasUnsavedChanges(false);
-          setRetryAttempt(0);
-          onSuccessRef.current?.();
+      if (!isMountedRef.current) return success;
 
-          // Reset to idle after showing "saved" briefly
-          setTimeout(() => {
-            if (isMountedRef.current) {
-              setStatus('idle');
-            }
-          }, 2000);
+      if (success) {
+        lastSavedKeyRef.current = currentKey;
+        setStatus('saved');
+        setLastSaved(new Date());
+        setHasUnsavedChanges(false);
+        setRetryAttempt(0);
+        onSuccessRef.current?.();
 
-          return true;
-        } else {
-          // Save returned false - attempt retry if we have attempts left
-          if (attemptNumber < maxAttempts - 1) {
-            const delay = calculateRetryDelay(attemptNumber);
-            if (isMountedRef.current) {
-              setStatus('retrying');
-              setRetryAttempt(attemptNumber + 1);
-            }
-
-            return new Promise((resolve) => {
-              retryTimerRef.current = setTimeout(async () => {
-                const result = await executeSave(attemptNumber + 1);
-                resolve(result);
-              }, delay);
-            });
+        // Reset to idle after showing "saved" briefly
+        setTimeout(() => {
+          if (isMountedRef.current) {
+            setStatus('idle');
           }
+        }, 2000);
 
-          // Max retries exceeded
-          setStatus('error');
-          setRetryAttempt(0);
-          onErrorRef.current?.(new Error('Save failed after multiple attempts'));
-          return false;
-        }
-      } catch (error) {
-        if (!isMountedRef.current) return false;
-
-        // Network or unexpected error - attempt retry
+        return true;
+      } else {
+        // Save returned false - attempt retry if we have attempts left
         if (attemptNumber < maxAttempts - 1) {
           const delay = calculateRetryDelay(attemptNumber);
-          setStatus('retrying');
-          setRetryAttempt(attemptNumber + 1);
+          if (isMountedRef.current) {
+            setStatus('retrying');
+            setRetryAttempt(attemptNumber + 1);
+          }
 
           return new Promise((resolve) => {
             retryTimerRef.current = setTimeout(async () => {
@@ -293,18 +269,35 @@ export function useAutoSave<T>({
         // Max retries exceeded
         setStatus('error');
         setRetryAttempt(0);
-        onErrorRef.current?.(error);
+        onErrorRef.current?.(new Error('Save failed after multiple attempts'));
         return false;
       }
-    },
-    [
-      clearTimers,
-      maxAttempts,
-      calculateRetryDelay,
-    ]
-  );
+    } catch (error) {
+      if (!isMountedRef.current) return false;
 
-  const scheduleAutoSave = useCallback(() => {
+      // Network or unexpected error - attempt retry
+      if (attemptNumber < maxAttempts - 1) {
+        const delay = calculateRetryDelay(attemptNumber);
+        setStatus('retrying');
+        setRetryAttempt(attemptNumber + 1);
+
+        return new Promise((resolve) => {
+          retryTimerRef.current = setTimeout(async () => {
+            const result = await executeSave(attemptNumber + 1);
+            resolve(result);
+          }, delay);
+        });
+      }
+
+      // Max retries exceeded
+      setStatus('error');
+      setRetryAttempt(0);
+      onErrorRef.current?.(error);
+      return false;
+    }
+  };
+
+  const scheduleAutoSave = () => {
     if (!enabled) return;
 
     // If offline, just mark as having unsaved changes
@@ -333,7 +326,7 @@ export function useAutoSave<T>({
         void executeSave();
       }, maxWaitMs);
     }
-  }, [enabled, debounceMs, maxWaitMs, executeSave]);
+  };
 
   // Track data changes
   useEffect(() => {
@@ -349,10 +342,10 @@ export function useAutoSave<T>({
     return executeSave();
   };
 
-  const cancel = useCallback(() => {
+  const cancel = () => {
     clearTimers();
     setStatus('idle');
-  }, [clearTimers]);
+  };
 
   return {
     status,

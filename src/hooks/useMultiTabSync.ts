@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 /**
  * Multi-Tab Sync Hook - Phase 4.3 Conflict Resolution
@@ -189,34 +189,31 @@ export function useMultiTabSync<T>({
   }, [channelName, enabled, localState, onConflict, onRemoteUpdate]);
 
   // Broadcast state update
-  const broadcastState = useCallback(
-    (state: T) => {
-      setLocalState(state);
-      versionRef.current += 1;
-      setCurrentVersion(versionRef.current);
+  const broadcastState = (state: T) => {
+    setLocalState(state);
+    versionRef.current += 1;
+    setCurrentVersion(versionRef.current);
 
-      if (channelRef.current) {
-        channelRef.current.postMessage({
-          type: 'STATE_UPDATE',
-          tabId: tabIdRef.current,
-          version: versionRef.current,
-          timestamp: Date.now(),
-          state,
-        } satisfies SyncMessage<T>);
-      }
-    },
-    []
-  );
+    if (channelRef.current) {
+      channelRef.current.postMessage({
+        type: 'STATE_UPDATE',
+        tabId: tabIdRef.current,
+        version: versionRef.current,
+        timestamp: Date.now(),
+        state,
+      } satisfies SyncMessage<T>);
+    }
+  };
 
   // Increment version without broadcasting
-  const incrementVersion = useCallback(() => {
+  const incrementVersion = () => {
     versionRef.current += 1;
     setCurrentVersion(versionRef.current);
     return versionRef.current;
-  }, []);
+  };
 
   // Acquire editing lock
-  const acquireLock = useCallback(() => {
+  const acquireLock = () => {
     if (lockHolderRef.current && lockHolderRef.current !== tabIdRef.current) {
       return false; // Lock held by another tab
     }
@@ -234,10 +231,10 @@ export function useMultiTabSync<T>({
     }
 
     return true;
-  }, []);
+  };
 
   // Release editing lock
-  const releaseLock = useCallback(() => {
+  const releaseLock = () => {
     if (lockHolderRef.current !== tabIdRef.current) {
       return; // We don't hold the lock
     }
@@ -253,54 +250,51 @@ export function useMultiTabSync<T>({
         lockHolder: tabIdRef.current,
       } satisfies SyncMessage<T>);
     }
-  }, []);
+  };
 
   // Resolve conflict
-  const resolveConflict = useCallback(
-    (resolution: 'keep_local' | 'use_remote' | 'merge'): T | null => {
-      if (!conflictInfo) {
-        return null;
-      }
+  const resolveConflict = (resolution: 'keep_local' | 'use_remote' | 'merge'): T | null => {
+    if (!conflictInfo) {
+      return null;
+    }
 
-      let resolvedState: T;
+    let resolvedState: T;
 
-      switch (resolution) {
-        case 'keep_local':
-          resolvedState = conflictInfo.localState;
-          break;
-        case 'use_remote':
-          resolvedState = conflictInfo.remoteState;
-          break;
-        case 'merge':
-          // Basic merge strategy - combine arrays, prefer newer for conflicts
-          resolvedState = mergeStates(
-            conflictInfo.localState,
-            conflictInfo.remoteState
-          );
-          break;
-      }
+    switch (resolution) {
+      case 'keep_local':
+        resolvedState = conflictInfo.localState;
+        break;
+      case 'use_remote':
+        resolvedState = conflictInfo.remoteState;
+        break;
+      case 'merge':
+        // Basic merge strategy - combine arrays, prefer newer for conflicts
+        resolvedState = mergeStates(
+          conflictInfo.localState,
+          conflictInfo.remoteState
+        );
+        break;
+    }
 
-      // Increment version to supersede both
-      const newVersion = Math.max(
-        conflictInfo.localVersion,
-        conflictInfo.remoteVersion
-      ) + 1;
-      versionRef.current = newVersion;
-      setCurrentVersion(newVersion);
-      setConflictInfo(null);
+    // Increment version to supersede both
+    const newVersion = Math.max(
+      conflictInfo.localVersion,
+      conflictInfo.remoteVersion
+    ) + 1;
+    versionRef.current = newVersion;
+    setCurrentVersion(newVersion);
+    setConflictInfo(null);
 
-      // Broadcast resolution
-      broadcastState(resolvedState);
+    // Broadcast resolution
+    broadcastState(resolvedState);
 
-      return resolvedState;
-    },
-    [conflictInfo, broadcastState]
-  );
+    return resolvedState;
+  };
 
   // Clear conflict without resolving
-  const clearConflict = useCallback(() => {
+  const clearConflict = () => {
     setConflictInfo(null);
-  }, []);
+  };
 
   return {
     tabId: tabIdRef.current,

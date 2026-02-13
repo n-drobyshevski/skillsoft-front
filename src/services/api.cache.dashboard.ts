@@ -29,10 +29,15 @@ import { calculatePsychometricSummary } from '@/types/dashboard';
 /**
  * Fetch all dashboard data in parallel.
  * Shared implementation used by both cached and fresh variants.
+ *
+ * @param clerkUserId - Current user's Clerk ID (optional, part of cache key)
+ * @param userRole - Current user's role for conditional data fetching
+ * @param authHeaders - Pre-resolved auth headers for psychometrics API calls
  */
 async function fetchDashboardData(
   clerkUserId?: string,
-  userRole?: 'ADMIN' | 'EDITOR' | 'USER'
+  userRole?: 'ADMIN' | 'EDITOR' | 'USER',
+  authHeaders?: Record<string, string>
 ): Promise<DashboardSummary> {
   const isAdmin = userRole === 'ADMIN';
   const isEditor = userRole === 'EDITOR' || isAdmin;
@@ -53,7 +58,7 @@ async function fetchDashboardData(
     isAdmin ? usersApi.getUserStats().catch(() => null) : Promise.resolve(null),
     isAdmin ? usersApi.getAllUsers().catch(() => []) : Promise.resolve([]),
     // Editor/Admin psychometric data
-    isEditor ? fetchPsychometricHealth().catch(() => null) : Promise.resolve(null),
+    isEditor ? fetchPsychometricHealth(authHeaders ?? {}).catch(() => null) : Promise.resolve(null),
   ]);
 
   // Type-safe data extraction
@@ -107,10 +112,12 @@ async function fetchDashboardData(
 /**
  * Fetch psychometric health report.
  * Uses the cached psychometrics API for request deduplication.
+ *
+ * @param authHeaders - Pre-resolved auth headers (auth-outside-cache pattern)
  */
-async function fetchPsychometricHealth(): Promise<PsychometricHealthReport | null> {
+async function fetchPsychometricHealth(authHeaders: Record<string, string>): Promise<PsychometricHealthReport | null> {
   try {
-    return await getPsychometricsDashboardCached();
+    return await getPsychometricsDashboardCached(authHeaders);
   } catch {
     return null;
   }
@@ -153,17 +160,19 @@ function calculateAverageIndicators(competencies: Competency[]): number {
  *
  * @param clerkUserId - Current user's Clerk ID (optional, part of cache key)
  * @param userRole - Current user's role for conditional data fetching
+ * @param authHeaders - Pre-resolved auth headers for psychometrics API calls (auth-outside-cache pattern)
  * @returns DashboardSummary with all dashboard data
  */
 export async function getDashboardDataCached(
   clerkUserId?: string,
-  userRole?: 'ADMIN' | 'EDITOR' | 'USER'
+  userRole?: 'ADMIN' | 'EDITOR' | 'USER',
+  authHeaders?: Record<string, string>
 ): Promise<DashboardSummary> {
   'use cache';
   cacheLife('realtime');
   cacheTag('dashboard', 'competencies', 'templates', 'questions');
 
-  return fetchDashboardData(clerkUserId, userRole);
+  return fetchDashboardData(clerkUserId, userRole, authHeaders);
 }
 
 /**

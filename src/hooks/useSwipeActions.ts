@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useRef, useEffect, useSyncExternalStore } from 'react';
+import { useState, useRef, useEffect, useSyncExternalStore } from 'react';
 import {
   useMotionValue,
   useTransform,
@@ -192,147 +192,126 @@ export function useSwipeActions(config: SwipeActionConfig = {}): UseSwipeActions
   );
 
   // Clear long press timeout
-  const clearLongPress = useCallback(() => {
+  const clearLongPress = () => {
     if (longPressTimeoutRef.current) {
       clearTimeout(longPressTimeoutRef.current);
       longPressTimeoutRef.current = null;
     }
-  }, []);
+  };
 
   // Reset to idle state
-  const reset = useCallback(() => {
+  const reset = () => {
     controls.start({ x: 0 });
     setState('idle');
     setIsSwiping(false);
     hasTriggeredHapticRef.current = false;
-  }, [controls]);
+  };
 
   // Open left actions
-  const openLeft = useCallback(() => {
+  const openLeft = () => {
     if (disabled) return;
     controls.start({ x: -leftActionWidth });
     setState('left-open');
-  }, [controls, leftActionWidth, disabled]);
+  };
 
   // Open right actions
-  const openRight = useCallback(() => {
+  const openRight = () => {
     if (disabled) return;
     controls.start({ x: rightActionWidth });
     setState('right-open');
-  }, [controls, rightActionWidth, disabled]);
+  };
 
   // Handle drag start
-  const onDragStart = useCallback(() => {
+  const onDragStart = () => {
     if (disabled) return;
     clearLongPress();
     setIsSwiping(true);
     setState('swiping');
     hasTriggeredHapticRef.current = false;
-  }, [disabled, clearLongPress]);
+  };
 
   // Handle drag
-  const onDrag = useCallback(
-    (_event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
-      if (disabled) return;
+  const onDrag = (_event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
+    if (disabled) return;
 
-      const currentX = info.offset.x;
+    const currentX = info.offset.x;
 
-      // Trigger haptic when crossing thresholds
-      if (enableHaptics && !hasTriggeredHapticRef.current) {
-        if (currentX < -leftThreshold || currentX > rightThreshold) {
-          triggerHaptic('light');
-          hasTriggeredHapticRef.current = true;
-        }
+    // Trigger haptic when crossing thresholds
+    if (enableHaptics && !hasTriggeredHapticRef.current) {
+      if (currentX < -leftThreshold || currentX > rightThreshold) {
+        triggerHaptic('light');
+        hasTriggeredHapticRef.current = true;
       }
+    }
 
-      // Reset haptic trigger when returning to neutral
-      if (Math.abs(currentX) < Math.min(leftThreshold, rightThreshold) / 2) {
-        hasTriggeredHapticRef.current = false;
-      }
-    },
-    [disabled, enableHaptics, leftThreshold, rightThreshold]
-  );
+    // Reset haptic trigger when returning to neutral
+    if (Math.abs(currentX) < Math.min(leftThreshold, rightThreshold) / 2) {
+      hasTriggeredHapticRef.current = false;
+    }
+  };
 
   // Handle drag end
-  const onDragEnd = useCallback(
-    (_event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
-      if (disabled) return;
+  const onDragEnd = (_event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
+    if (disabled) return;
 
-      setIsSwiping(false);
-      const { offset, velocity } = info;
+    setIsSwiping(false);
+    const { offset, velocity } = info;
 
-      // Determine if swipe completed based on distance and velocity
-      const isLeftSwipe =
-        offset.x < -leftThreshold || (offset.x < 0 && velocity.x < -velocityThreshold);
-      const isRightSwipe =
-        offset.x > rightThreshold || (offset.x > 0 && velocity.x > velocityThreshold);
+    // Determine if swipe completed based on distance and velocity
+    const isLeftSwipe =
+      offset.x < -leftThreshold || (offset.x < 0 && velocity.x < -velocityThreshold);
+    const isRightSwipe =
+      offset.x > rightThreshold || (offset.x > 0 && velocity.x > velocityThreshold);
 
-      if (isLeftSwipe && onSwipeLeft) {
-        if (enableHaptics) triggerHaptic('medium');
-        controls.start({ x: -leftActionWidth });
-        setState('left-open');
-        onSwipeLeft();
-      } else if (isRightSwipe && onSwipeRight) {
-        if (enableHaptics) triggerHaptic('medium');
-        controls.start({ x: rightActionWidth });
-        setState('right-open');
-        onSwipeRight();
-      } else {
-        // Snap back to center
-        controls.start({ x: 0 });
-        setState('idle');
-        onSwipeCancel?.();
-      }
-    },
-    [
-      disabled,
-      leftThreshold,
-      rightThreshold,
-      velocityThreshold,
-      leftActionWidth,
-      rightActionWidth,
-      onSwipeLeft,
-      onSwipeRight,
-      onSwipeCancel,
-      controls,
-      enableHaptics,
-    ]
-  );
+    if (isLeftSwipe && onSwipeLeft) {
+      if (enableHaptics) triggerHaptic('medium');
+      controls.start({ x: -leftActionWidth });
+      setState('left-open');
+      onSwipeLeft();
+    } else if (isRightSwipe && onSwipeRight) {
+      if (enableHaptics) triggerHaptic('medium');
+      controls.start({ x: rightActionWidth });
+      setState('right-open');
+      onSwipeRight();
+    } else {
+      // Snap back to center
+      controls.start({ x: 0 });
+      setState('idle');
+      onSwipeCancel?.();
+    }
+  };
 
   // Handle pointer down (for long press)
-  const onPointerDown = useCallback(
-    (event: React.PointerEvent) => {
-      if (disabled) return;
+  const onPointerDown = (event: React.PointerEvent) => {
+    if (disabled) return;
 
-      startPositionRef.current = { x: event.clientX, y: event.clientY };
+    startPositionRef.current = { x: event.clientX, y: event.clientY };
 
-      // Start long press timer
-      if (onLongPress) {
-        longPressTimeoutRef.current = setTimeout(() => {
-          if (enableHaptics) triggerHaptic('heavy');
-          setState('long-pressing');
-          onLongPress();
-        }, longPressDuration);
-      }
-    },
-    [disabled, onLongPress, longPressDuration, enableHaptics]
-  );
+    // Start long press timer
+    if (onLongPress) {
+      longPressTimeoutRef.current = setTimeout(() => {
+        if (enableHaptics) triggerHaptic('heavy');
+        setState('long-pressing');
+        onLongPress();
+      }, longPressDuration);
+    }
+  };
 
   // Handle pointer up
-  const onPointerUp = useCallback(() => {
+  const onPointerUp = () => {
     clearLongPress();
     if (state === 'long-pressing') {
       setState('idle');
     }
-  }, [clearLongPress, state]);
+  };
 
   // Handle pointer cancel
-  const onPointerCancel = useCallback(() => {
+  const onPointerCancel = () => {
     clearLongPress();
     if (state === 'long-pressing') {
       setState('idle');
     }
-  }, [clearLongPress, state]);
+  };
 
   // Cleanup on unmount
   useEffect(() => {
@@ -369,17 +348,17 @@ export function useSwipeActions(config: SwipeActionConfig = {}): UseSwipeActions
  * Hook to detect if touch device using useSyncExternalStore
  */
 export function useIsTouchDevice() {
-  const subscribe = useCallback((callback: () => void) => {
+  const subscribe = (callback: () => void) => {
     // Touch capability doesn't change at runtime, but we still set up subscription
     // for React's strict mode compatibility
     return () => {};
-  }, []);
+  };
 
-  const getSnapshot = useCallback(() => {
+  const getSnapshot = () => {
     return 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-  }, []);
+  };
 
-  const getServerSnapshot = useCallback(() => false, []);
+  const getServerSnapshot = () => false;
 
   return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 }
@@ -388,17 +367,17 @@ export function useIsTouchDevice() {
  * Hook to detect preferred reduced motion using useSyncExternalStore
  */
 export function usePrefersReducedMotion() {
-  const subscribe = useCallback((callback: () => void) => {
+  const subscribe = (callback: () => void) => {
     const mql = window.matchMedia('(prefers-reduced-motion: reduce)');
     mql.addEventListener('change', callback);
     return () => mql.removeEventListener('change', callback);
-  }, []);
+  };
 
-  const getSnapshot = useCallback(() => {
+  const getSnapshot = () => {
     return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  }, []);
+  };
 
-  const getServerSnapshot = useCallback(() => false, []);
+  const getServerSnapshot = () => false;
 
   return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 }

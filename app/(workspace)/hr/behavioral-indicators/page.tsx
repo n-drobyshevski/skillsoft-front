@@ -22,10 +22,10 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 import { BehavioralIndicator } from "@/types/domain";
 import {
-  assessmentQuestionsApi,
-  behavioralIndicatorsApi,
-  competenciesApi,
-} from "@/services/api";
+  getIndicatorsCached,
+  getQuestionsCached,
+  getCompetenciesCached,
+} from "@/services/api.cache";
 import IndicatorsTable from "./_components/IndicatorsTable";
 import TableSkeleton from "@/components/data-display/TableSkeleton";
 
@@ -40,9 +40,9 @@ async function getIndicatorsData(): Promise<{
 }> {
   try {
     const [indicatorsData, questionsData, competenciesData] = await Promise.all([
-      behavioralIndicatorsApi.getAllIndicators(),
-      assessmentQuestionsApi.getAllQuestions(),
-      competenciesApi.getAllCompetencies(),
+      getIndicatorsCached(),
+      getQuestionsCached(),
+      getCompetenciesCached(),
     ]);
 
     if (!Array.isArray(indicatorsData)) {

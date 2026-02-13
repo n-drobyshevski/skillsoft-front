@@ -23,7 +23,6 @@
  */
 
 import { useFormatter, useLocale } from 'next-intl';
-import { useCallback, useMemo } from 'react';
 
 type NumberInput = number | null | undefined;
 
@@ -64,25 +63,20 @@ export function useFormattedNumbers(): FormattedNumbersReturn {
   const locale = useLocale();
 
   // Russian and many European locales use comma as decimal separator
-  const usesCommaDecimal = useMemo(() => {
-    return ['ru', 'de', 'fr', 'es', 'it', 'pt', 'pl', 'uk'].includes(locale);
-  }, [locale]);
+  const usesCommaDecimal = ['ru', 'de', 'fr', 'es', 'it', 'pt', 'pl', 'uk'].includes(locale);
 
   /**
    * Format as integer with grouping separators
    * English: "1,234"
    * Russian: "1 234"
    */
-  const formatNumber = useCallback(
-    (value: NumberInput): string => {
-      if (value == null || isNaN(value)) return '—';
+  const formatNumber = (value: NumberInput): string => {
+    if (value == null || isNaN(value)) return '—';
 
-      return format.number(value, {
-        maximumFractionDigits: 0,
-      });
-    },
-    [format]
-  );
+    return format.number(value, {
+      maximumFractionDigits: 0,
+    });
+  };
 
   /**
    * Format as percentage
@@ -92,18 +86,15 @@ export function useFormattedNumbers(): FormattedNumbersReturn {
    * @param value - Value between 0 and 1 (0.75 = 75%)
    * @param decimals - Number of decimal places (default: 0)
    */
-  const formatPercent = useCallback(
-    (value: NumberInput, decimals: number = 0): string => {
-      if (value == null || isNaN(value)) return '—';
+  const formatPercent = (value: NumberInput, decimals: number = 0): string => {
+    if (value == null || isNaN(value)) return '—';
 
-      return format.number(value, {
-        style: 'percent',
-        minimumFractionDigits: decimals,
-        maximumFractionDigits: decimals,
-      });
-    },
-    [format]
-  );
+    return format.number(value, {
+      style: 'percent',
+      minimumFractionDigits: decimals,
+      maximumFractionDigits: decimals,
+    });
+  };
 
   /**
    * Format as decimal with specified precision
@@ -113,34 +104,28 @@ export function useFormattedNumbers(): FormattedNumbersReturn {
    * @param value - Numeric value
    * @param decimals - Number of decimal places (default: 2)
    */
-  const formatDecimal = useCallback(
-    (value: NumberInput, decimals: number = 2): string => {
-      if (value == null || isNaN(value)) return '—';
+  const formatDecimal = (value: NumberInput, decimals: number = 2): string => {
+    if (value == null || isNaN(value)) return '—';
 
-      return format.number(value, {
-        minimumFractionDigits: decimals,
-        maximumFractionDigits: decimals,
-      });
-    },
-    [format]
-  );
+    return format.number(value, {
+      minimumFractionDigits: decimals,
+      maximumFractionDigits: decimals,
+    });
+  };
 
   /**
    * Format in compact notation
    * English: "1.2K", "1.5M"
    * Russian: "1,2 тыс.", "1,5 млн"
    */
-  const formatCompact = useCallback(
-    (value: NumberInput): string => {
-      if (value == null || isNaN(value)) return '—';
+  const formatCompact = (value: NumberInput): string => {
+    if (value == null || isNaN(value)) return '—';
 
-      return format.number(value, {
-        notation: 'compact',
-        maximumFractionDigits: 1,
-      });
-    },
-    [format]
-  );
+    return format.number(value, {
+      notation: 'compact',
+      maximumFractionDigits: 1,
+    });
+  };
 
   /**
    * Format as ordinal (where supported)
@@ -149,78 +134,69 @@ export function useFormattedNumbers(): FormattedNumbersReturn {
    *
    * Note: Falls back to simple number + suffix for locales without full ordinal support
    */
-  const formatOrdinal = useCallback(
-    (value: NumberInput): string => {
-      if (value == null || isNaN(value)) return '—';
+  const formatOrdinal = (value: NumberInput): string => {
+    if (value == null || isNaN(value)) return '—';
 
-      // Use Intl.PluralRules for ordinals where available
-      try {
-        const pr = new Intl.PluralRules(locale, { type: 'ordinal' });
-        const rule = pr.select(value);
+    // Use Intl.PluralRules for ordinals where available
+    try {
+      const pr = new Intl.PluralRules(locale, { type: 'ordinal' });
+      const rule = pr.select(value);
 
-        // English ordinal suffixes
-        if (locale.startsWith('en')) {
-          const suffixes: Record<string, string> = {
-            one: 'st',
-            two: 'nd',
-            few: 'rd',
-            other: 'th',
-          };
-          return `${value}${suffixes[rule] || 'th'}`;
-        }
-
-        // Russian ordinal suffix
-        if (locale.startsWith('ru')) {
-          return `${value}-й`;
-        }
-
-        // Fallback: just return the number
-        return String(value);
-      } catch {
-        return String(value);
+      // English ordinal suffixes
+      if (locale.startsWith('en')) {
+        const suffixes: Record<string, string> = {
+          one: 'st',
+          two: 'nd',
+          few: 'rd',
+          other: 'th',
+        };
+        return `${value}${suffixes[rule] || 'th'}`;
       }
-    },
-    [locale]
-  );
+
+      // Russian ordinal suffix
+      if (locale.startsWith('ru')) {
+        return `${value}-й`;
+      }
+
+      // Fallback: just return the number
+      return String(value);
+    } catch {
+      return String(value);
+    }
+  };
 
   /**
    * Format a numeric range
    * English: "0.2-0.8"
    * Russian: "0,2–0,8" (uses en-dash)
    */
-  const formatRange = useCallback(
-    (min: NumberInput, max: NumberInput, decimals: number = 1): string => {
-      if (min == null || max == null || isNaN(min) || isNaN(max)) return '—';
+  const formatRange = (min: NumberInput, max: NumberInput, decimals: number = 1): string => {
+    if (min == null || max == null || isNaN(min) || isNaN(max)) return '—';
 
-      const formattedMin = format.number(min, {
-        minimumFractionDigits: decimals,
-        maximumFractionDigits: decimals,
-      });
-      const formattedMax = format.number(max, {
-        minimumFractionDigits: decimals,
-        maximumFractionDigits: decimals,
-      });
+    const formattedMin = format.number(min, {
+      minimumFractionDigits: decimals,
+      maximumFractionDigits: decimals,
+    });
+    const formattedMax = format.number(max, {
+      minimumFractionDigits: decimals,
+      maximumFractionDigits: decimals,
+    });
 
-      // Use en-dash for ranges in Russian, hyphen for English
-      const separator = locale.startsWith('ru') ? '–' : '-';
-      return `${formattedMin}${separator}${formattedMax}`;
-    },
-    [format, locale]
-  );
+    // Use en-dash for ranges in Russian, hyphen for English
+    const separator = locale.startsWith('ru') ? '–' : '-';
+    return `${formattedMin}${separator}${formattedMax}`;
+  };
 
-  return useMemo(
-    () => ({
-      formatNumber,
-      formatPercent,
-      formatDecimal,
-      formatCompact,
-      formatOrdinal,
-      formatRange,
-      locale,
-      usesCommaDecimal,
-    }),
-    [formatNumber, formatPercent, formatDecimal, formatCompact, formatOrdinal, formatRange, locale, usesCommaDecimal]
-  );
+  return {
+    formatNumber,
+    formatPercent,
+    formatDecimal,
+    formatCompact,
+    formatOrdinal,
+    formatRange,
+    locale,
+    usesCommaDecimal,
+  };
 }
 
 /**
