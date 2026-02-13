@@ -12,6 +12,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { NextIntlClientProvider } from 'next-intl';
+import messages from '../../../../messages/en.json';
 import {
   VisibilitySelector,
   VisibilityBadge,
@@ -57,7 +59,11 @@ function createQueryClient() {
 function renderWithQuery(ui: React.ReactElement) {
   const queryClient = createQueryClient();
   return render(
-    <QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>
+    <QueryClientProvider client={queryClient}>
+      <NextIntlClientProvider locale="en" messages={messages}>
+        {ui}
+      </NextIntlClientProvider>
+    </QueryClientProvider>
   );
 }
 
@@ -130,7 +136,7 @@ describe('VisibilitySelector', () => {
       />
     );
 
-    expect(screen.getByText('5 active')).toBeInTheDocument();
+    expect(screen.getByText('5')).toBeInTheDocument();
   });
 
   it('does not show active links badge when count is 0', () => {
@@ -428,25 +434,25 @@ describe('VisibilitySelector', () => {
 
 describe('VisibilityBadge', () => {
   it('renders PRIVATE visibility badge', () => {
-    render(<VisibilityBadge visibility={TemplateVisibility.PRIVATE} />);
+    renderWithQuery(<VisibilityBadge visibility={TemplateVisibility.PRIVATE} />);
 
     expect(screen.getByText('Private')).toBeInTheDocument();
   });
 
   it('renders PUBLIC visibility badge', () => {
-    render(<VisibilityBadge visibility={TemplateVisibility.PUBLIC} />);
+    renderWithQuery(<VisibilityBadge visibility={TemplateVisibility.PUBLIC} />);
 
     expect(screen.getByText('Public')).toBeInTheDocument();
   });
 
   it('renders LINK visibility badge', () => {
-    render(<VisibilityBadge visibility={TemplateVisibility.LINK} />);
+    renderWithQuery(<VisibilityBadge visibility={TemplateVisibility.LINK} />);
 
     expect(screen.getByText('Anyone with link')).toBeInTheDocument();
   });
 
   it('applies PRIVATE color classes (slate)', () => {
-    const { container } = render(
+    const { container } = renderWithQuery(
       <VisibilityBadge visibility={TemplateVisibility.PRIVATE} />
     );
 
@@ -455,7 +461,7 @@ describe('VisibilityBadge', () => {
   });
 
   it('applies PUBLIC color classes (emerald)', () => {
-    const { container } = render(
+    const { container } = renderWithQuery(
       <VisibilityBadge visibility={TemplateVisibility.PUBLIC} />
     );
 
@@ -464,7 +470,7 @@ describe('VisibilityBadge', () => {
   });
 
   it('applies LINK color classes (blue)', () => {
-    const { container } = render(
+    const { container } = renderWithQuery(
       <VisibilityBadge visibility={TemplateVisibility.LINK} />
     );
 
@@ -473,7 +479,7 @@ describe('VisibilityBadge', () => {
   });
 
   it('applies small size class when size is sm', () => {
-    const { container } = render(
+    const { container } = renderWithQuery(
       <VisibilityBadge visibility={TemplateVisibility.PRIVATE} size="sm" />
     );
 
@@ -484,7 +490,7 @@ describe('VisibilityBadge', () => {
   });
 
   it('applies custom className', () => {
-    const { container } = render(
+    const { container } = renderWithQuery(
       <VisibilityBadge
         visibility={TemplateVisibility.PRIVATE}
         className="custom-badge"
@@ -496,7 +502,7 @@ describe('VisibilityBadge', () => {
   });
 
   it('has icon for each visibility type', () => {
-    const { container } = render(
+    const { container } = renderWithQuery(
       <VisibilityBadge visibility={TemplateVisibility.PRIVATE} />
     );
 

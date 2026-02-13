@@ -13,6 +13,7 @@ import React, { useState, useMemo, useCallback, memo } from 'react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, act, cleanup } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { renderWithProviders } from '../utils/test-providers';
 import {
   QuestionCard,
 } from '@/components/test-player/QuestionCard';
@@ -195,7 +196,7 @@ describe('Component Render Performance', () => {
 
       const startTime = performance.now();
 
-      render(
+      renderWithProviders(
         <QuestionCard
           question={question}
           selectedValue={undefined}
@@ -233,7 +234,7 @@ describe('Component Render Performance', () => {
 
         const startTime = performance.now();
 
-        const { unmount } = render(
+        const { unmount } = renderWithProviders(
           <QuestionCard
             question={question}
             selectedValue={undefined}

@@ -11,14 +11,15 @@
  * Dropdown interaction tests would require integration testing.
  */
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { screen } from '@testing-library/react';
+import { renderWithProviders } from '../../utils/test-providers';
 import { PermissionSelect, PermissionBadge } from '../../../../app/(workspace)/test-templates/[id]/_components/sharing/PermissionSelect';
 import { SharePermission } from '@/types/domain';
 
 describe('PermissionSelect', () => {
   it('renders with VIEW permission', () => {
     const onChange = vi.fn();
-    render(
+    renderWithProviders(
       <PermissionSelect
         value={SharePermission.VIEW}
         onChange={onChange}
@@ -31,7 +32,7 @@ describe('PermissionSelect', () => {
 
   it('renders with EDIT permission', () => {
     const onChange = vi.fn();
-    render(
+    renderWithProviders(
       <PermissionSelect
         value={SharePermission.EDIT}
         onChange={onChange}
@@ -43,7 +44,7 @@ describe('PermissionSelect', () => {
 
   it('renders with MANAGE permission', () => {
     const onChange = vi.fn();
-    render(
+    renderWithProviders(
       <PermissionSelect
         value={SharePermission.MANAGE}
         onChange={onChange}
@@ -54,7 +55,7 @@ describe('PermissionSelect', () => {
   });
 
   it('renders with VIEW color styling (blue)', () => {
-    const { container } = render(
+    const { container } = renderWithProviders(
       <PermissionSelect
         value={SharePermission.VIEW}
         onChange={vi.fn()}
@@ -67,7 +68,7 @@ describe('PermissionSelect', () => {
   });
 
   it('renders with EDIT color styling (amber)', () => {
-    const { container } = render(
+    const { container } = renderWithProviders(
       <PermissionSelect
         value={SharePermission.EDIT}
         onChange={vi.fn()}
@@ -80,7 +81,7 @@ describe('PermissionSelect', () => {
   });
 
   it('renders with MANAGE color styling (purple)', () => {
-    const { container } = render(
+    const { container } = renderWithProviders(
       <PermissionSelect
         value={SharePermission.MANAGE}
         onChange={vi.fn()}
@@ -94,7 +95,7 @@ describe('PermissionSelect', () => {
 
   it('disables the select when disabled prop is true', () => {
     const onChange = vi.fn();
-    render(
+    renderWithProviders(
       <PermissionSelect
         value={SharePermission.VIEW}
         onChange={onChange}
@@ -108,7 +109,7 @@ describe('PermissionSelect', () => {
 
   it('is enabled by default', () => {
     const onChange = vi.fn();
-    render(
+    renderWithProviders(
       <PermissionSelect
         value={SharePermission.VIEW}
         onChange={onChange}
@@ -121,7 +122,7 @@ describe('PermissionSelect', () => {
 
   it('applies small size class when size is sm', () => {
     const onChange = vi.fn();
-    render(
+    renderWithProviders(
       <PermissionSelect
         value={SharePermission.VIEW}
         onChange={onChange}
@@ -136,7 +137,7 @@ describe('PermissionSelect', () => {
 
   it('applies default size class when size is default', () => {
     const onChange = vi.fn();
-    render(
+    renderWithProviders(
       <PermissionSelect
         value={SharePermission.VIEW}
         onChange={onChange}
@@ -150,7 +151,7 @@ describe('PermissionSelect', () => {
 
   it('applies custom className', () => {
     const onChange = vi.fn();
-    render(
+    renderWithProviders(
       <PermissionSelect
         value={SharePermission.VIEW}
         onChange={onChange}
@@ -164,7 +165,7 @@ describe('PermissionSelect', () => {
 
   it('has correct data-state attribute when closed', () => {
     const onChange = vi.fn();
-    render(
+    renderWithProviders(
       <PermissionSelect
         value={SharePermission.VIEW}
         onChange={onChange}
@@ -178,25 +179,25 @@ describe('PermissionSelect', () => {
 
 describe('PermissionBadge', () => {
   it('renders VIEW permission badge', () => {
-    render(<PermissionBadge permission={SharePermission.VIEW} />);
+    renderWithProviders(<PermissionBadge permission={SharePermission.VIEW} />);
 
     expect(screen.getByText('Viewer')).toBeInTheDocument();
   });
 
   it('renders EDIT permission badge', () => {
-    render(<PermissionBadge permission={SharePermission.EDIT} />);
+    renderWithProviders(<PermissionBadge permission={SharePermission.EDIT} />);
 
     expect(screen.getByText('Editor')).toBeInTheDocument();
   });
 
   it('renders MANAGE permission badge', () => {
-    render(<PermissionBadge permission={SharePermission.MANAGE} />);
+    renderWithProviders(<PermissionBadge permission={SharePermission.MANAGE} />);
 
     expect(screen.getByText('Manager')).toBeInTheDocument();
   });
 
   it('applies VIEW color classes', () => {
-    const { container } = render(
+    const { container } = renderWithProviders(
       <PermissionBadge permission={SharePermission.VIEW} />
     );
 
@@ -205,7 +206,7 @@ describe('PermissionBadge', () => {
   });
 
   it('applies EDIT color classes', () => {
-    const { container } = render(
+    const { container } = renderWithProviders(
       <PermissionBadge permission={SharePermission.EDIT} />
     );
 
@@ -214,7 +215,7 @@ describe('PermissionBadge', () => {
   });
 
   it('applies MANAGE color classes', () => {
-    const { container } = render(
+    const { container } = renderWithProviders(
       <PermissionBadge permission={SharePermission.MANAGE} />
     );
 
@@ -223,7 +224,7 @@ describe('PermissionBadge', () => {
   });
 
   it('applies small size class when size is sm', () => {
-    const { container } = render(
+    const { container } = renderWithProviders(
       <PermissionBadge permission={SharePermission.VIEW} size="sm" />
     );
 
@@ -232,7 +233,7 @@ describe('PermissionBadge', () => {
   });
 
   it('applies custom className', () => {
-    const { container } = render(
+    const { container } = renderWithProviders(
       <PermissionBadge
         permission={SharePermission.VIEW}
         className="custom-badge-class"

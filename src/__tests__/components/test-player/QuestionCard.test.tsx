@@ -3,8 +3,9 @@
  * Tests different question types and user interactions
  */
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { renderWithProviders } from '../../utils/test-providers';
 import {
   QuestionCard,
   MIN_CHARS_OPEN_TEXT,
@@ -35,7 +36,7 @@ describe('QuestionCard', () => {
       const question = createMockQuestion();
       const onAnswer = vi.fn();
 
-      render(
+      renderWithProviders(
         <QuestionCard
           question={question}
           selectedValue={undefined}
@@ -54,7 +55,7 @@ describe('QuestionCard', () => {
       const question = createMockQuestion();
       const onAnswer = vi.fn();
 
-      render(
+      renderWithProviders(
         <QuestionCard
           question={question}
           selectedValue={undefined}
@@ -73,7 +74,7 @@ describe('QuestionCard', () => {
       const question = createMockQuestion();
       const onAnswer = vi.fn();
 
-      render(
+      renderWithProviders(
         <QuestionCard
           question={question}
           selectedValue={undefined}
@@ -101,7 +102,7 @@ describe('QuestionCard', () => {
       });
       const onAnswer = vi.fn();
 
-      render(
+      renderWithProviders(
         <QuestionCard
           question={question}
           selectedValue={undefined}
@@ -129,7 +130,7 @@ describe('QuestionCard', () => {
       });
       const onAnswer = vi.fn();
 
-      render(
+      renderWithProviders(
         <QuestionCard
           question={question}
           selectedValue={undefined}
@@ -157,7 +158,7 @@ describe('QuestionCard', () => {
       });
       const onAnswer = vi.fn();
 
-      render(
+      renderWithProviders(
         <QuestionCard
           question={question}
           selectedValue={undefined}
@@ -182,7 +183,7 @@ describe('QuestionCard', () => {
       });
       const onAnswer = vi.fn();
 
-      render(
+      renderWithProviders(
         <QuestionCard
           question={question}
           selectedValue={undefined}
@@ -206,7 +207,7 @@ describe('QuestionCard', () => {
       });
       const onAnswer = vi.fn();
 
-      render(
+      renderWithProviders(
         <QuestionCard
           question={question}
           selectedValue={undefined}
@@ -226,7 +227,7 @@ describe('QuestionCard', () => {
       });
       const onAnswer = vi.fn();
 
-      render(
+      renderWithProviders(
         <QuestionCard
           question={question}
           selectedValue={undefined}
@@ -250,7 +251,7 @@ describe('QuestionCard', () => {
       });
       const onAnswer = vi.fn();
 
-      render(
+      renderWithProviders(
         <QuestionCard
           question={question}
           selectedValue={undefined}
@@ -273,7 +274,7 @@ describe('QuestionCard', () => {
       });
       const onAnswer = vi.fn();
 
-      render(
+      renderWithProviders(
         <QuestionCard
           question={question}
           selectedValue={undefined}
@@ -299,7 +300,7 @@ describe('QuestionCard', () => {
       });
       const onAnswer = vi.fn();
 
-      render(
+      renderWithProviders(
         <QuestionCard
           question={question}
           selectedValue={undefined}
@@ -319,7 +320,7 @@ describe('QuestionCard', () => {
       });
       const onAnswer = vi.fn();
 
-      render(
+      renderWithProviders(
         <QuestionCard
           question={question}
           selectedValue={undefined}
@@ -340,7 +341,7 @@ describe('QuestionCard', () => {
       });
       const onAnswer = vi.fn();
 
-      render(
+      renderWithProviders(
         <QuestionCard
           question={question}
           selectedValue={undefined}
@@ -360,7 +361,7 @@ describe('QuestionCard', () => {
       });
       const onAnswer = vi.fn();
 
-      render(
+      renderWithProviders(
         <QuestionCard
           question={question}
           selectedValue={undefined}
@@ -384,7 +385,7 @@ describe('QuestionCard', () => {
       });
       const onAnswer = vi.fn();
 
-      render(
+      renderWithProviders(
         <QuestionCard
           question={question}
           selectedValue={undefined}
@@ -404,7 +405,7 @@ describe('QuestionCard', () => {
       });
       const onAnswer = vi.fn();
 
-      render(
+      renderWithProviders(
         <QuestionCard
           question={question}
           selectedValue={undefined}
@@ -427,7 +428,7 @@ describe('QuestionCard', () => {
       });
       const onAnswer = vi.fn();
 
-      render(
+      renderWithProviders(
         <QuestionCard
           question={question}
           selectedValue="Previously entered text"

@@ -197,7 +197,7 @@ describe('useAutoSave', () => {
 
       // Wait for initial save attempt
       await act(async () => {
-        vi.advanceTimersByTime(150);
+        await vi.advanceTimersByTimeAsync(150);
       });
 
       expect(result.current.status).toBe('retrying');
@@ -205,14 +205,14 @@ describe('useAutoSave', () => {
 
       // Wait for first retry (100ms base delay)
       await act(async () => {
-        vi.advanceTimersByTime(100);
+        await vi.advanceTimersByTimeAsync(100);
       });
 
       expect(result.current.retryAttempt).toBe(2);
 
       // Wait for second retry (200ms = 100 * 2^1)
       await act(async () => {
-        vi.advanceTimersByTime(200);
+        await vi.advanceTimersByTimeAsync(200);
       });
 
       expect(result.current.status).toBe('saved');
@@ -242,7 +242,7 @@ describe('useAutoSave', () => {
 
       // Wait for all retries to complete
       await act(async () => {
-        vi.advanceTimersByTime(500);
+        await vi.advanceTimersByTimeAsync(500);
       });
 
       expect(result.current.status).toBe('error');
@@ -271,7 +271,7 @@ describe('useAutoSave', () => {
 
       // Wait for initial attempt and retry
       await act(async () => {
-        vi.advanceTimersByTime(300);
+        await vi.advanceTimersByTimeAsync(300);
       });
 
       expect(result.current.status).toBe('saved');
@@ -332,7 +332,7 @@ describe('useAutoSave', () => {
       Object.defineProperty(navigator, 'onLine', { value: true });
       await act(async () => {
         window.dispatchEvent(new Event('online'));
-        vi.advanceTimersByTime(600); // Wait for stabilization delay + debounce
+        await vi.advanceTimersByTimeAsync(600); // Wait for stabilization delay + debounce
       });
 
       expect(result.current.isOffline).toBe(false);
@@ -540,7 +540,7 @@ describe('useAutoSave', () => {
       rerender({ data: { value: 'fail' } });
 
       await act(async () => {
-        vi.advanceTimersByTime(200);
+        await vi.advanceTimersByTimeAsync(200);
       });
 
       expect(onError).toHaveBeenCalled();
