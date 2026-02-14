@@ -13,7 +13,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { NextIntlClientProvider } from 'next-intl';
-import messages from '../../../../messages/en.json';
+import messages from '../../../../messages/en/index';
 import {
   VisibilitySelector,
   VisibilityBadge,
@@ -47,11 +47,6 @@ function createQueryClient() {
     defaultOptions: {
       queries: { retry: false },
       mutations: { retry: false },
-    },
-    logger: {
-      log: () => {},
-      warn: () => {},
-      error: () => {},
     },
   });
 }

@@ -69,6 +69,7 @@ const mockPassedResult: TestResult = {
   questionsSkipped: 0,
   totalQuestions: 12,
   completedAt: new Date().toISOString(),
+  status: 'COMPLETED',
 };
 
 const mockFailedResult: TestResult = {
@@ -102,6 +103,7 @@ const mockFailedResult: TestResult = {
   questionsSkipped: 2,
   totalQuestions: 10,
   completedAt: new Date(Date.now() - 86400000).toISOString(),
+  status: 'COMPLETED',
 };
 
 // ============================================
@@ -115,7 +117,7 @@ interface TestResultViewProps {
 function TestResultView({ result }: TestResultViewProps) {
   const timeInMinutes = Math.floor(result.totalTimeSeconds / 60);
   const timeInSeconds = result.totalTimeSeconds % 60;
-  const percentScore = Math.round(result.overallPercentage);
+  const percentScore = Math.round(result.overallPercentage ?? 0);
   const isPassed = result.passed;
 
   return (
@@ -151,8 +153,8 @@ function TestResultView({ result }: TestResultViewProps) {
       <div data-testid="stats-section" role="list" aria-label="Test statistics">
         <div data-testid="stat-score" role="listitem">
           <span>Score</span>
-          <span data-testid="stat-score-value">{result.overallScore.toFixed(1)}</span>
-          <span>of {result.competencyScores.reduce((sum, c) => sum + c.maxScore, 0).toFixed(1)}</span>
+          <span data-testid="stat-score-value">{(result.overallScore ?? 0).toFixed(1)}</span>
+          <span>of {(result.competencyScores ?? []).reduce((sum, c) => sum + c.maxScore, 0).toFixed(1)}</span>
         </div>
         <div data-testid="stat-time" role="listitem">
           <span>Time</span>
@@ -172,7 +174,7 @@ function TestResultView({ result }: TestResultViewProps) {
         <div data-testid="stat-competencies" role="listitem">
           <span>Competencies</span>
           <span data-testid="stat-competencies-value">
-            {result.competencyScores.length}
+            {(result.competencyScores ?? []).length}
           </span>
         </div>
       </div>
@@ -180,7 +182,7 @@ function TestResultView({ result }: TestResultViewProps) {
       {/* Competency Scores */}
       <div data-testid="competency-section">
         <h2>Competency Scores</h2>
-        {result.competencyScores.map((competency) => (
+        {(result.competencyScores ?? []).map((competency) => (
           <CompetencyCard key={competency.competencyId} competency={competency} />
         ))}
       </div>
@@ -618,9 +620,9 @@ describe('TestResultView Component', () => {
 // ============================================
 describe('CompactTestResultView', () => {
   function CompactTestResultView({ result }: TestResultViewProps) {
-    const percentScore = Math.round(result.overallPercentage);
+    const percentScore = Math.round(result.overallPercentage ?? 0);
     const isPassed = result.passed;
-    const sortedCompetencies = [...result.competencyScores].sort(
+    const sortedCompetencies = [...(result.competencyScores ?? [])].sort(
       (a, b) => b.percentage - a.percentage
     );
     const proficientCount = sortedCompetencies.filter((c) => c.percentage >= 70).length;

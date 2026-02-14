@@ -30,7 +30,7 @@ vi.mock("@/components/charts/BigFiveRadar", async (importOriginal) => {
     height,
     className,
   }: {
-    profile: { openness: number; conscientiousness: number; extraversion: number; agreeableness: number; neuroticism: number };
+    profile: { OPENNESS: number; CONSCIENTIOUSNESS: number; EXTRAVERSION: number; AGREEABLENESS: number; EMOTIONAL_STABILITY: number };
     showLabels?: boolean;
     showLegend?: boolean;
     animate?: boolean;
@@ -51,11 +51,11 @@ vi.mock("@/components/charts/BigFiveRadar", async (importOriginal) => {
         React.createElement("div", { key: "chart", "data-testid": "radar-chart" }, "Radar Chart"),
         showLabels &&
           React.createElement("div", { key: "labels", "data-testid": "chart-labels" }, [
-            React.createElement("span", { key: "o", "data-testid": "label-openness" }, `Openness: ${profile.openness}`),
-            React.createElement("span", { key: "c", "data-testid": "label-conscientiousness" }, `Conscientiousness: ${profile.conscientiousness}`),
-            React.createElement("span", { key: "e", "data-testid": "label-extraversion" }, `Extraversion: ${profile.extraversion}`),
-            React.createElement("span", { key: "a", "data-testid": "label-agreeableness" }, `Agreeableness: ${profile.agreeableness}`),
-            React.createElement("span", { key: "n", "data-testid": "label-neuroticism" }, `Neuroticism: ${profile.neuroticism}`),
+            React.createElement("span", { key: "o", "data-testid": "label-openness" }, `Openness: ${profile.OPENNESS}`),
+            React.createElement("span", { key: "c", "data-testid": "label-conscientiousness" }, `Conscientiousness: ${profile.CONSCIENTIOUSNESS}`),
+            React.createElement("span", { key: "e", "data-testid": "label-extraversion" }, `Extraversion: ${profile.EXTRAVERSION}`),
+            React.createElement("span", { key: "a", "data-testid": "label-agreeableness" }, `Agreeableness: ${profile.AGREEABLENESS}`),
+            React.createElement("span", { key: "n", "data-testid": "label-neuroticism" }, `Neuroticism: ${profile.EMOTIONAL_STABILITY}`),
           ]),
         showLegend && React.createElement("div", { key: "legend", "data-testid": "chart-legend" }, "Legend"),
         animate && React.createElement("div", { key: "anim", "data-testid": "animation-enabled" }, "Animated"),
@@ -70,7 +70,7 @@ vi.mock("@/components/charts/BigFiveRadar", async (importOriginal) => {
     size = 200,
     className,
   }: {
-    profile: { openness: number; conscientiousness: number; extraversion: number; agreeableness: number; neuroticism: number };
+    profile: { OPENNESS: number; CONSCIENTIOUSNESS: number; EXTRAVERSION: number; AGREEABLENESS: number; EMOTIONAL_STABILITY: number };
     size?: number;
     className?: string;
   }) {
@@ -83,11 +83,11 @@ vi.mock("@/components/charts/BigFiveRadar", async (importOriginal) => {
       },
       [
         React.createElement("div", { key: "chart", "data-testid": "simple-radar-chart" }, "Simple Radar"),
-        React.createElement("span", { key: "o", "data-testid": "simple-openness" }, `O: ${profile.openness}`),
-        React.createElement("span", { key: "c", "data-testid": "simple-conscientiousness" }, `C: ${profile.conscientiousness}`),
-        React.createElement("span", { key: "e", "data-testid": "simple-extraversion" }, `E: ${profile.extraversion}`),
-        React.createElement("span", { key: "a", "data-testid": "simple-agreeableness" }, `A: ${profile.agreeableness}`),
-        React.createElement("span", { key: "n", "data-testid": "simple-neuroticism" }, `N: ${profile.neuroticism}`),
+        React.createElement("span", { key: "o", "data-testid": "simple-openness" }, `O: ${profile.OPENNESS}`),
+        React.createElement("span", { key: "c", "data-testid": "simple-conscientiousness" }, `C: ${profile.CONSCIENTIOUSNESS}`),
+        React.createElement("span", { key: "e", "data-testid": "simple-extraversion" }, `E: ${profile.EXTRAVERSION}`),
+        React.createElement("span", { key: "a", "data-testid": "simple-agreeableness" }, `A: ${profile.AGREEABLENESS}`),
+        React.createElement("span", { key: "n", "data-testid": "simple-neuroticism" }, `N: ${profile.EMOTIONAL_STABILITY}`),
       ]
     );
   });
@@ -100,39 +100,48 @@ vi.mock("@/components/charts/BigFiveRadar", async (importOriginal) => {
 });
 
 // Import mocked components
-import { BigFiveRadar, BigFiveRadarSimple } from "@/components/charts/BigFiveRadar";
+import { BigFiveRadar as _BigFiveRadar, BigFiveRadarSimple as _BigFiveRadarSimple } from "@/components/charts/BigFiveRadar";
+
+// Extended prop types matching the mock implementation
+type BigFiveProfileData = { OPENNESS: number; CONSCIENTIOUSNESS: number; EXTRAVERSION: number; AGREEABLENESS: number; EMOTIONAL_STABILITY: number };
+type MockBigFiveRadarProps = { profile: BigFiveProfileData; showLabels?: boolean; showLegend?: boolean; animate?: boolean; height?: number; className?: string };
+type MockBigFiveRadarSimpleProps = { profile: BigFiveProfileData; size?: number; className?: string };
+
+// Cast to mock prop types since the mocked components accept extended props
+const BigFiveRadar = _BigFiveRadar as unknown as React.MemoExoticComponent<React.FC<MockBigFiveRadarProps>>;
+const BigFiveRadarSimple = _BigFiveRadarSimple as unknown as React.MemoExoticComponent<React.FC<MockBigFiveRadarSimpleProps>>;
 
 // Test data
 const mockProfile = {
-  openness: 75,
-  conscientiousness: 82,
-  extraversion: 68,
-  agreeableness: 71,
-  neuroticism: 45,
+  OPENNESS: 75,
+  CONSCIENTIOUSNESS: 82,
+  EXTRAVERSION: 68,
+  AGREEABLENESS: 71,
+  EMOTIONAL_STABILITY: 45,
 };
 
 const extremeHighProfile = {
-  openness: 100,
-  conscientiousness: 100,
-  extraversion: 100,
-  agreeableness: 100,
-  neuroticism: 100,
+  OPENNESS: 100,
+  CONSCIENTIOUSNESS: 100,
+  EXTRAVERSION: 100,
+  AGREEABLENESS: 100,
+  EMOTIONAL_STABILITY: 100,
 };
 
 const extremeLowProfile = {
-  openness: 0,
-  conscientiousness: 0,
-  extraversion: 0,
-  agreeableness: 0,
-  neuroticism: 0,
+  OPENNESS: 0,
+  CONSCIENTIOUSNESS: 0,
+  EXTRAVERSION: 0,
+  AGREEABLENESS: 0,
+  EMOTIONAL_STABILITY: 0,
 };
 
 const mixedProfile = {
-  openness: 10,
-  conscientiousness: 90,
-  extraversion: 50,
-  agreeableness: 30,
-  neuroticism: 70,
+  OPENNESS: 10,
+  CONSCIENTIOUSNESS: 90,
+  EXTRAVERSION: 50,
+  AGREEABLENESS: 30,
+  EMOTIONAL_STABILITY: 70,
 };
 
 describe("BigFiveRadar", () => {
@@ -282,7 +291,7 @@ describe("BigFiveRadar", () => {
     });
 
     it("handles decimal values", () => {
-      const decimalProfile = { ...mockProfile, openness: 75.5 };
+      const decimalProfile = { ...mockProfile, OPENNESS: 75.5 };
       render(React.createElement(BigFiveRadar, { profile: decimalProfile }));
       expect(screen.getByTestId("label-openness")).toHaveTextContent("Openness: 75.5");
     });

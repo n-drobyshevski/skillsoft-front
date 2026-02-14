@@ -16,7 +16,7 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { NextIntlClientProvider } from 'next-intl';
-import messages from '../../../../messages/en.json';
+import messages from '../../../../messages/en/index';
 import {
   ShareDialog,
   ShareButton,
@@ -120,11 +120,6 @@ function createQueryClient() {
     defaultOptions: {
       queries: { retry: false },
       mutations: { retry: false },
-    },
-    logger: {
-      log: () => {},
-      warn: () => {},
-      error: () => {},
     },
   });
 }

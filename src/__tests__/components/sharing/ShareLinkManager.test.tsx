@@ -16,7 +16,7 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { NextIntlClientProvider } from 'next-intl';
-import messages from '../../../../messages/en.json';
+import messages from '../../../../messages/en/index';
 import { ShareLinkManager } from '../../../../app/(workspace)/test-templates/[id]/_components/sharing/ShareLinkManager';
 import { ShareLink, SharePermission } from '@/types/domain';
 
@@ -58,45 +58,43 @@ const mockActiveLink: ShareLink = {
   id: 'link-1',
   templateId: 'template-1',
   token: 'abc123token',
-  tokenMasked: 'abc***',
+  tokenMasked: false,
   permission: SharePermission.VIEW,
-  createdBy: 'owner-1',
+  createdById: 'owner-1',
   createdAt: new Date().toISOString(),
   expiresAt: new Date(Date.now() + 86400000 * 7).toISOString(), // In 7 days
   usageCount: 5,
-  maxUses: null,
   label: 'Interview Link',
-  revokedAt: null,
+  isActive: true,
 };
 
 const mockExpiredLink: ShareLink = {
   id: 'link-2',
   templateId: 'template-1',
   token: 'expired123',
-  tokenMasked: 'exp***',
+  tokenMasked: false,
   permission: SharePermission.VIEW,
-  createdBy: 'owner-1',
+  createdById: 'owner-1',
   createdAt: new Date(Date.now() - 86400000 * 10).toISOString(), // 10 days ago
   expiresAt: new Date(Date.now() - 86400000).toISOString(), // Yesterday
   usageCount: 10,
-  maxUses: null,
   label: 'Expired Link',
-  revokedAt: null,
+  isActive: true,
 };
 
 const mockUsedUpLink: ShareLink = {
   id: 'link-3',
   templateId: 'template-1',
   token: 'usedup123',
-  tokenMasked: 'use***',
+  tokenMasked: false,
   permission: SharePermission.VIEW,
-  createdBy: 'owner-1',
+  createdById: 'owner-1',
   createdAt: new Date().toISOString(),
   expiresAt: new Date(Date.now() + 86400000 * 7).toISOString(),
   usageCount: 10,
   maxUses: 10, // Limit reached
   label: 'Used Up Link',
-  revokedAt: null,
+  isActive: true,
 };
 
 // Mock hooks
@@ -142,11 +140,6 @@ function createQueryClient() {
     defaultOptions: {
       queries: { retry: false },
       mutations: { retry: false },
-    },
-    logger: {
-      log: () => {},
-      warn: () => {},
-      error: () => {},
     },
   });
 }
@@ -388,7 +381,7 @@ describe('ShareLinkManager', () => {
     });
 
     it('shows default label when no label set', () => {
-      mockLinksData = [{ ...mockActiveLink, label: null }];
+      mockLinksData = [{ ...mockActiveLink, label: undefined }];
 
       renderWithQuery(<ShareLinkManager templateId="template-1" />);
 

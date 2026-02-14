@@ -17,7 +17,7 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { NextIntlClientProvider } from 'next-intl';
-import messages from '../../../../messages/en.json';
+import messages from '../../../../messages/en/index';
 import { UserShareList } from '../../../../app/(workspace)/test-templates/[id]/_components/sharing/UserShareList';
 import {
   TemplateShare,
@@ -55,12 +55,11 @@ const mockUserShare: TemplateShare = {
   granteeId: 'user-1',
   granteeName: 'John Doe',
   granteeEmail: 'john@example.com',
-  granteeAvatarUrl: null,
   permission: SharePermission.VIEW,
-  grantedBy: 'owner-1',
+  grantedById: 'owner-1',
   grantedByName: 'Owner',
-  createdAt: new Date().toISOString(),
-  expiresAt: null,
+  grantedAt: new Date().toISOString(),
+  isActive: true,
 };
 
 const mockTeamShare: TemplateShare = {
@@ -69,13 +68,11 @@ const mockTeamShare: TemplateShare = {
   granteeType: GranteeType.TEAM,
   granteeId: 'team-1',
   granteeName: 'Engineering Team',
-  granteeEmail: null,
-  granteeAvatarUrl: null,
   permission: SharePermission.EDIT,
-  grantedBy: 'owner-1',
+  grantedById: 'owner-1',
   grantedByName: 'Owner',
-  createdAt: new Date().toISOString(),
-  expiresAt: null,
+  grantedAt: new Date().toISOString(),
+  isActive: true,
 };
 
 const mockExpiredShare: TemplateShare = {
@@ -85,12 +82,12 @@ const mockExpiredShare: TemplateShare = {
   granteeId: 'user-2',
   granteeName: 'Expired User',
   granteeEmail: 'expired@example.com',
-  granteeAvatarUrl: null,
   permission: SharePermission.VIEW,
-  grantedBy: 'owner-1',
+  grantedById: 'owner-1',
   grantedByName: 'Owner',
-  createdAt: new Date().toISOString(),
+  grantedAt: new Date().toISOString(),
   expiresAt: new Date(Date.now() - 86400000).toISOString(), // Yesterday
+  isActive: true,
 };
 
 const mockFutureExpiryShare: TemplateShare = {
@@ -100,12 +97,12 @@ const mockFutureExpiryShare: TemplateShare = {
   granteeId: 'user-3',
   granteeName: 'Future User',
   granteeEmail: 'future@example.com',
-  granteeAvatarUrl: null,
   permission: SharePermission.VIEW,
-  grantedBy: 'owner-1',
+  grantedById: 'owner-1',
   grantedByName: 'Owner',
-  createdAt: new Date().toISOString(),
+  grantedAt: new Date().toISOString(),
   expiresAt: new Date(Date.now() + 86400000 * 7).toISOString(), // In 7 days
+  isActive: true,
 };
 
 // Mock hooks
@@ -144,11 +141,6 @@ function createQueryClient() {
     defaultOptions: {
       queries: { retry: false },
       mutations: { retry: false },
-    },
-    logger: {
-      log: () => {},
-      warn: () => {},
-      error: () => {},
     },
   });
 }

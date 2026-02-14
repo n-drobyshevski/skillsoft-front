@@ -61,7 +61,7 @@ describe('usePlayerState', () => {
       { value: 4, label: 'Often / Часто' },
       { value: 5, label: 'Always / Всегда' },
     ],
-    difficultyLevel: DifficultyLevel.MEDIUM,
+    difficultyLevel: DifficultyLevel.INTERMEDIATE,
     behavioralIndicatorId: 'bi-123',
     ...overrides,
   });
