@@ -1,0 +1,85 @@
+{
+  "title": "Активность",
+  "recentActivity": "Недавняя активность",
+  "templateActivity": "Активность по шаблону",
+  "completed": "Завершён",
+  "abandoned": "Прерван",
+  "timedOut": "Время истекло",
+  "passed": "Пройден",
+  "failed": "Не пройден",
+  "attempts": "попыток",
+  "attempt": "попытка",
+  "retry": "Повторить",
+  "noActivity": "Пока нет активности",
+  "noActivityDescription": "Здесь появятся результаты тестов",
+  "viewAll": "Смотреть все",
+  "stats": {
+    "title": "Статистика",
+    "description": "Обзор показателей",
+    "totalSessions": "Всего сессий",
+    "completedSessions": "Завершённых",
+    "abandonedSessions": "Прерванных",
+    "timedOutSessions": "Просроченных",
+    "completionRate": "Процент завершения",
+    "completionRateDescription": "Процент начатых тестов, которые были завершены",
+    "passRate": "Процент успешных",
+    "passRateDescription": "Процент завершённых тестов, которые были пройдены",
+    "averageScore": "Средний балл",
+    "averageTime": "Среднее время",
+    "lastActivity": "Последняя активность",
+    "detailsTitle": "Статистика активности",
+    "detailsDescription": "Подробная разбивка активности по данному шаблону",
+    "tapForDetails": "Нажмите для деталей",
+    "viewFullBreakdown": "Подробная статистика"
+  },
+  "filters": {
+    "title": "Фильтры",
+    "status": "Статус",
+    "allStatuses": "Все статусы",
+    "allResults": "Все результаты",
+    "passed": "Пройден",
+    "failed": "Не пройден",
+    "dateRange": "Период",
+    "allTime": "Всё время",
+    "last7Days": "Последние 7 дней",
+    "last30Days": "Последние 30 дней",
+    "last90Days": "Последние 90 дней",
+    "from": "С",
+    "to": "По",
+    "apply": "Применить фильтры",
+    "clear": "Сбросить",
+    "reset": "Сбросить"
+  },
+  "table": {
+    "title": "Журнал активности",
+    "user": "Пользователь",
+    "status": "Статус",
+    "score": "Балл",
+    "result": "Результат",
+    "timeSpent": "Затраченное время",
+    "date": "Дата",
+    "noResults": "Активность не найдена",
+    "loading": "Загрузка активности..."
+  },
+  "empty": {
+    "title": "Пока нет активности",
+    "description": "Активность появится здесь, когда кандидаты начнут проходить тесты"
+  },
+  "pagination": {
+    "of": "из",
+    "previous": "Предыдущая",
+    "next": "Следующая"
+  },
+  "errors": {
+    "loadFailed": "Не удалось загрузить активность"
+  },
+  "time": {
+    "justNow": "только что",
+    "minutesAgo": "{count} мин. назад",
+    "hoursAgo": "{count} ч. назад",
+    "daysAgo": "{count} дн. назад",
+    "seconds": "{count} сек",
+    "minutes": "{count} мин",
+    "hours": "{count} ч"
+  }
+}

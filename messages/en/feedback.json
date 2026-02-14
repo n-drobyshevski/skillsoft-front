@@ -1,0 +1,23 @@
+{
+  "undo": "Undo",
+  "undoneSuccessfully": "Undone successfully",
+  "failedToUndo": "Failed to undo",
+  "dismiss": "Dismiss",
+  "connectionRestored": "Connection restored",
+  "noConnection": "No connection - using cached data",
+  "dataOutdated": "Data may be outdated",
+  "slowConnection": "Slow connection",
+  "updating": "Updating...",
+  "update": "Update",
+  "hideNotification": "Hide notification",
+  "offline": "Offline",
+  "looksGood": "Looks good!",
+  "showGuidance": "Show guidance",
+  "nothingFound": "Nothing found",
+  "noTermsFound": "No terms found for \"{query}\"",
+  "maybeMeant": "Maybe you meant:",
+  "resetSearch": "Reset search",
+  "noCategoryTerms": "No terms in category \"{category}\" yet",
+  "loadingError": "Loading error",
+  "couldNotLoad": "Could not load the glossary. Try refreshing the page."
+}

@@ -1,0 +1,53 @@
+{
+  "title": "My Tests",
+  "description": "View your assigned tests and track progress",
+  "noAssignedTests": "No assigned tests",
+  "whenHrAssigns": "When the HR department assigns you a test, it will appear here. You can browse the test catalog in the meantime.",
+  "testCatalog": "Test Catalog",
+  "noTests": "No tests",
+  "noAssignedTestsYet": "You don't have any assigned tests yet.",
+  "allTestsStarted": "All tests started!",
+  "greatWorkAllStarted": "Great work! All assigned tests have been started or completed. Check your active tests.",
+  "activeTests": "Active Tests",
+  "noActiveTests": "No active tests",
+  "noTestsInProgress": "You have no tests in progress. Start a new test!",
+  "startTest": "Start Test",
+  "noCompletedTests": "No completed tests",
+  "noTestsCompletedYet": "You haven't completed any tests yet. Start with the pending tests!",
+  "pendingTests": "Pending Tests",
+  "tabs": {
+    "all": "All",
+    "pending": "Pending",
+    "inProgress": "In Progress",
+    "completed": "Completed"
+  },
+  "stats": {
+    "total": "Total",
+    "pending": "Pending",
+    "inProgress": "In Progress",
+    "completed": "Completed"
+  },
+  "status": {
+    "notStarted": "Pending",
+    "inProgress": "In Progress",
+    "completed": "Completed",
+    "abandoned": "Abandoned",
+    "timedOut": "Timed Out"
+  },
+  "actions": {
+    "start": "Start",
+    "startTest": "Start Test",
+    "continue": "Continue",
+    "viewResults": "Results",
+    "retry": "Retry",
+    "open": "Open"
+  },
+  "questions": "questions",
+  "questionsShort": "q.",
+  "of": "of",
+  "bestScore": "Best: {score}%",
+  "attempts": "{count, plural, one {# attempt} other {# attempts}}",
+  "previousAttempts": "{count, plural, one {# previous attempt} other {# previous attempts}}",
+  "earlier": "earlier",
+  "filterByStatus": "{label}: {count}. Click to filter."
+}

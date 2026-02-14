@@ -1,0 +1,13 @@
+{
+  "likertRequired": "Choose the option that best reflects your typical behavior or attitude. There are no right or wrong answers.",
+  "likertDefault": "Likert scales measure agreement or frequency. Select the point that best matches your response.",
+  "sjtSelection": "Rank the response options from most to least effective. Consider how you would actually behave in this situation.",
+  "sjtDefault": "Situational judgment tests assess your decision-making. Think about what action would be most appropriate.",
+  "mcqRequired": "Select the answer you believe is correct. Only one option can be chosen.",
+  "mcqDefault": "Multiple choice questions have one correct answer. Read all options before selecting.",
+  "openEndedLength": "Provide a detailed response. Include specific examples from your experience to support your answer.",
+  "openEndedRequired": "This question requires a written response. Take time to articulate your thoughts clearly.",
+  "openEndedDefault": "Open-ended questions allow you to express yourself freely. Be specific and provide examples.",
+  "rankingDefault": "Drag items to reorder them from highest to lowest priority. Each position matters.",
+  "generalDefault": "Please review your response and ensure it meets the requirements shown."
+}

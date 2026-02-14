@@ -1,0 +1,17 @@
+{
+  "byOrder": "By Order",
+  "byStatus": "By Status",
+  "byCompetency": "By Competency",
+  "byDate": "By Date",
+  "byName": "By Name",
+  "ascending": "Ascending",
+  "descending": "Descending",
+  "newest": "Newest First",
+  "oldest": "Oldest First",
+  "sortBy": "Sort by",
+  "sortByName": "Sort by Name",
+  "sortByIndicators": "Sort by Indicators",
+  "sortByModified": "Sort by Modified",
+  "sortAscending": "Sort ascending",
+  "sortDescending": "Sort descending"
+}

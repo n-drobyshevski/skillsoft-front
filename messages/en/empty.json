@@ -1,0 +1,15 @@
+{
+  "noCompetencies": "No competencies yet",
+  "noIndicators": "No indicators yet",
+  "noQuestions": "No questions yet",
+  "noTemplates": "No test templates yet",
+  "noCandidates": "No candidates yet",
+  "noResults": "No results yet",
+  "createFirst": "Create your first {item} to get started",
+  "noCompetenciesFound": "No competencies found",
+  "noMatchSearch": "No competencies match your search for \"{term}\"",
+  "noMatchCategory": "No competencies found in {category} category",
+  "tryAdjusting": "Try adjusting your search terms or filters",
+  "clearSearch": "Clear Search",
+  "showAllCategories": "Show All Categories"
+}

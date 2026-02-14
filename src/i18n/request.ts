@@ -3,6 +3,10 @@
  *
  * Detects locale from cookies with fallback to Accept-Language header.
  * This file is referenced by the next-intl plugin in next.config.ts.
+ *
+ * Messages are loaded from per-namespace split files (messages/{locale}/*.json)
+ * via the aggregator index modules. This enables per-namespace code splitting
+ * when used with NextIntlClientProvider at layout boundaries.
  */
 
 import { getRequestConfig } from 'next-intl/server';
@@ -13,12 +17,13 @@ import { type Locale, locales, defaultLocale, isValidLocale } from './config';
 type IntlMessages = Record<string, unknown>;
 
 /**
- * Static locale module map to avoid dynamic imports with template literals.
+ * Static locale module map using per-namespace aggregator index files.
+ * Each index.ts imports all namespace JSONs and re-exports them merged.
  * This satisfies the no-unsanitized/method ESLint rule by using a whitelist pattern.
  */
 const localeModules: Record<Locale, () => Promise<{ default: IntlMessages }>> = {
-  en: () => import('../../messages/en.json'),
-  ru: () => import('../../messages/ru.json'),
+  en: () => import('../../messages/en/index'),
+  ru: () => import('../../messages/ru/index'),
 };
 
 /**

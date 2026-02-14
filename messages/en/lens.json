@@ -1,0 +1,17 @@
+{
+  "mode": "Mode",
+  "currentView": "Current view: {name}",
+  "view": "{name} View",
+  "user": {
+    "name": "Personal",
+    "description": "Your profile and settings"
+  },
+  "editor": {
+    "name": "Content",
+    "description": "Manage competencies and content"
+  },
+  "admin": {
+    "name": "Admin",
+    "description": "Full system management"
+  }
+}

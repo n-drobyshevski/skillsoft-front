@@ -1,0 +1,9 @@
+{
+  "stronglyDisagree": "Strongly Disagree",
+  "disagree": "Disagree",
+  "slightlyDisagree": "Slightly Disagree",
+  "neutral": "Neutral",
+  "slightlyAgree": "Slightly Agree",
+  "agree": "Agree",
+  "stronglyAgree": "Strongly Agree"
+}

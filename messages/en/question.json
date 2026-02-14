@@ -1,0 +1,16 @@
+{
+  "title": "Assessment Questions",
+  "pageDescription": "Create and manage assessment questions for competency evaluation",
+  "create": "Create Question",
+  "edit": "Edit Question",
+  "delete": "Delete Question",
+  "text": "Question Text",
+  "type": "Question Type",
+  "difficulty": "Difficulty",
+  "options": "Answer Options",
+  "correctAnswer": "Correct Answer",
+  "explanation": "Explanation",
+  "addOption": "Add Option",
+  "removeOption": "Remove Option",
+  "backToQuestions": "Back to Questions"
+}

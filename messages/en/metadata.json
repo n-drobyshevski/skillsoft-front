@@ -1,0 +1,81 @@
+{
+  "siteName": "SkillSoft",
+  "competencies": {
+    "title": "Competencies",
+    "description": "Manage and track competency definitions and assessments for your organization.",
+    "newTitle": "Create Competency",
+    "newDescription": "Define a new competency with behavioral indicators and assessment criteria.",
+    "editTitle": "Edit Competency",
+    "editDescription": "Update competency details and configuration."
+  },
+  "indicators": {
+    "title": "Behavioral Indicators",
+    "description": "Define and manage measurable behavioral indicators for competency assessment.",
+    "newTitle": "Create Indicator",
+    "newDescription": "Define a new behavioral indicator with measurement criteria.",
+    "editTitle": "Edit Indicator",
+    "editDescription": "Update behavioral indicator details and scoring."
+  },
+  "questions": {
+    "title": "Assessment Questions",
+    "description": "Create and manage assessment questions for evaluating competencies.",
+    "newTitle": "Create Question",
+    "newDescription": "Add a new assessment question with answer options.",
+    "editTitle": "Edit Question",
+    "editDescription": "Update question content and scoring rubric."
+  },
+  "testTemplates": {
+    "title": "Test Templates",
+    "description": "Choose a test template to assess your competencies and skills.",
+    "newTitle": "Create Test Template",
+    "newDescription": "Design a new assessment template with competency selection.",
+    "editTitle": "Edit Template",
+    "editDescription": "Update test template configuration and settings.",
+    "builderTitle": "Blueprint Builder",
+    "builderDescription": "Design and configure your test template structure.",
+    "resultsTitle": "Template Results",
+    "resultsDescription": "View all assessment results for this template."
+  },
+  "myTests": {
+    "title": "My Tests",
+    "description": "View your assigned tests, track progress, and access assessment results.",
+    "historyTitle": "Test History",
+    "historyDescription": "Review your past assessment attempts and scores."
+  },
+  "testResults": {
+    "title": "Test Result",
+    "description": "View detailed assessment results and competency scores.",
+    "passedDescription": "Congratulations! You passed the assessment with a score of {score}%.",
+    "failedDescription": "Assessment completed with a score of {score}%. Review the results for improvement areas."
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "description": "Overview of your competency assessments and organization statistics."
+  },
+  "users": {
+    "title": "Users",
+    "description": "Manage user accounts and permissions. View, edit, and organize users in your organization.",
+    "newTitle": "Add New User",
+    "newDescription": "Create a new user account in the system",
+    "profileTitle": "User Profile - {name}",
+    "profileDescription": "View user details, activity, and permissions",
+    "editTitle": "Edit User - {name}",
+    "editDescription": "Update user profile and permissions"
+  },
+  "teams": {
+    "title": "Teams",
+    "description": "Manage teams and group members for team-based assessments and TEAM_FIT scenarios.",
+    "newTitle": "Create Team",
+    "newDescription": "Create a new team with members",
+    "detailTitle": "Team Details - {name}",
+    "detailDescription": "View team members, profile, and competency analytics",
+    "editTitle": "Edit Team - {name}",
+    "editDescription": "Update team information and members",
+    "profileTitle": "Team Profile - {name}",
+    "profileDescription": "View team competency saturation and skill gaps"
+  },
+  "shared": {
+    "title": "Shared with Me",
+    "description": "Templates that have been shared with you by other users."
+  }
+}

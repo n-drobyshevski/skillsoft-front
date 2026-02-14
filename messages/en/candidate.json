@@ -1,0 +1,14 @@
+{
+  "title": "Candidates",
+  "create": "Add Candidate",
+  "edit": "Edit Candidate",
+  "delete": "Remove Candidate",
+  "name": "Full Name",
+  "email": "Email",
+  "phone": "Phone",
+  "department": "Department",
+  "position": "Position",
+  "assignTest": "Assign Test",
+  "testHistory": "Test History",
+  "noTests": "No tests assigned"
+}

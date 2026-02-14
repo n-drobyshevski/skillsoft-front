@@ -1,0 +1,330 @@
+{
+  "page": {
+    "title": "Team Management",
+    "description": "Manage teams, members, and team-based assessments"
+  },
+  "actions": {
+    "createTeam": "Create Team",
+    "create": "Create"
+  },
+  "stats": {
+    "totalTeams": "Total Teams",
+    "avgTeamSize": "Avg. Size",
+    "draft": "Draft",
+    "active": "Active",
+    "archived": "Archived",
+    "totalMembers": "{count} total members",
+    "membersPerTeam": "members per team",
+    "awaitingActivation": "Awaiting activation",
+    "readyForAssessment": "Ready for assessment",
+    "noLongerActive": "No longer active"
+  },
+  "status": {
+    "draft": "Draft",
+    "active": "Active",
+    "archived": "Archived"
+  },
+  "table": {
+    "columns": {
+      "team": "Team",
+      "status": "Status",
+      "members": "Members",
+      "created": "Created",
+      "actions": "Actions"
+    },
+    "filters": {
+      "all": "All",
+      "draft": "Draft",
+      "active": "Active",
+      "archived": "Archived"
+    },
+    "search": {
+      "placeholder": "Search teams by name..."
+    },
+    "pagination": {
+      "showing": "Showing",
+      "of": "of",
+      "teams": "teams"
+    },
+    "bulk": {
+      "selected": "{count} selected",
+      "export": "Export",
+      "archive": "Archive"
+    },
+    "empty": {
+      "noTeams": "No teams found",
+      "adjustSearch": "Try adjusting your search query",
+      "createFirst": "Create your first team to get started"
+    },
+    "view": {
+      "toggleColumns": "Toggle columns"
+    },
+    "menu": {
+      "copyTeamId": "Copy Team ID",
+      "quickView": "Quick View",
+      "viewDetails": "View Details",
+      "editTeam": "Edit Team",
+      "activate": "Activate",
+      "archive": "Archive"
+    }
+  },
+  "drawer": {
+    "details": "Team Details",
+    "actions": "Actions",
+    "members": "Members",
+    "leader": "Leader",
+    "created": "Created",
+    "viewDetails": "View Details",
+    "editTeam": "Edit Team",
+    "addMembers": "Add Members",
+    "activate": "Activate Team",
+    "archive": "Archive Team"
+  },
+  "errors": {
+    "loadingTeams": "Error Loading Teams",
+    "backendUnavailable": "Backend service unavailable",
+    "invalidDataFormat": "Invalid data format from server",
+    "cannotConnect": "Cannot connect to backend",
+    "backendTip": "Tip: Start the backend with: "
+  },
+  "notFound": {
+    "title": "Team Not Found",
+    "description": "The team you're looking for doesn't exist or has been removed.",
+    "backToList": "Back to Teams",
+    "searchTeams": "Search Teams"
+  },
+  "detail": {
+    "memberCount": "{count, plural, =0 {No members} =1 {1 member} other {# members}}",
+    "created": "Created {date}",
+    "noLeader": "No leader assigned",
+    "tabs": {
+      "members": "Members",
+      "profile": "Profile",
+      "gaps": "Skill Gaps"
+    },
+    "actions": {
+      "edit": "Edit",
+      "more": "More",
+      "addMembers": "Add Members",
+      "activate": "Activate",
+      "archive": "Archive"
+    },
+    "stats": {
+      "members": "Members",
+      "leaders": "Leaders",
+      "leader": "Leader",
+      "age": "Team Age",
+      "avgSaturation": "Avg. Saturation",
+      "saturation": "Saturation",
+      "skillGaps": "Skill Gaps",
+      "gaps": "Gaps"
+    },
+    "sections": {
+      "statistics": "Statistics",
+      "teamInfo": "Team Information"
+    },
+    "info": {
+      "leader": "Team Leader",
+      "createdBy": "Created By",
+      "createdAt": "Created At",
+      "activatedAt": "Activated At"
+    },
+    "members": {
+      "role": {
+        "leader": "Leader",
+        "member": "Member"
+      },
+      "joinedAt": "Joined {date}",
+      "search": {
+        "placeholder": "Search members by name or email...",
+        "noResults": "No members found matching \"{query}\""
+      },
+      "count": "Showing {showing} of {total} members",
+      "actions": {
+        "menu": "Member actions",
+        "viewProfile": "View Profile",
+        "makeLeader": "Make Leader",
+        "remove": "Remove from Team",
+        "addMember": "Add Member"
+      },
+      "empty": {
+        "title": "No Team Members",
+        "description": "Add members to your team to start building your team profile.",
+        "action": "Add Members"
+      }
+    },
+    "profile": {
+      "empty": {
+        "title": "No Profile Data",
+        "description": "Team members need to complete assessments before a team profile can be generated."
+      },
+      "summary": {
+        "title": "Profile Summary",
+        "average": "Average",
+        "high": "High (70%+)",
+        "medium": "Medium",
+        "low": "Low (<40%)"
+      },
+      "competencies": {
+        "title": "Competency Saturation",
+        "description": "Showing {count} competencies ranked by team coverage"
+      },
+      "saturation": {
+        "high": "Strong",
+        "medium": "Moderate",
+        "low": "Weak"
+      },
+      "personality": {
+        "title": "Personality Distribution",
+        "description": "Average Big Five personality traits across team members"
+      }
+    },
+    "gaps": {
+      "empty": {
+        "title": "No Skill Gaps",
+        "description": "Great news! Your team has adequate coverage across all assessed competencies."
+      },
+      "noProfile": {
+        "title": "No Profile Available",
+        "description": "Add team members who have completed assessments to analyze skill gaps.",
+        "action": "Add Members"
+      },
+      "summary": {
+        "title": "Gap Summary"
+      },
+      "priority": {
+        "critical": "Critical",
+        "high": "High",
+        "medium": "Medium"
+      },
+      "list": {
+        "title": "Identified Gaps",
+        "description": "Found {count} competencies below the 30% saturation threshold"
+      },
+      "currentSaturation": "Current saturation: {value}%",
+      "saturation": "Saturation",
+      "threshold": "30% threshold",
+      "recommendation": "Consider hiring candidates with this competency. Estimated need: {needed} more team members.",
+      "actions": {
+        "findCandidates": "Find Candidates"
+      }
+    },
+    "actionResults": {
+      "created": "Team created successfully",
+      "updated": "Team updated successfully",
+      "activated": "Team activated successfully",
+      "archived": "Team archived successfully",
+      "memberAdded": "Member added successfully",
+      "membersAdded": "{count} members added successfully",
+      "memberRemoved": "{name} removed from team",
+      "leaderSet": "Team leader updated",
+      "leaderCleared": "Team leader removed",
+      "error": "An error occurred. Please try again."
+    },
+    "confirmations": {
+      "archive": {
+        "title": "Archive Team",
+        "description": "Are you sure you want to archive \"{name}\"? The team will be hidden from active views.",
+        "confirm": "Archive",
+        "cancel": "Cancel"
+      },
+      "removeMember": {
+        "title": "Remove Member",
+        "description": "Are you sure you want to remove {name} from this team?",
+        "confirm": "Remove",
+        "cancel": "Cancel"
+      },
+      "activate": {
+        "title": "Activate Team",
+        "description": "Activate \"{name}\"? Active teams can be used in TEAM_FIT assessments.",
+        "confirm": "Activate",
+        "cancel": "Cancel"
+      }
+    },
+    "addMembers": {
+      "title": "Add Team Members",
+      "description": "Search and select users to add to this team",
+      "search": "Search users by name or email...",
+      "selected": "{count} selected",
+      "noUsers": "No users found",
+      "alreadyMember": "Already a member",
+      "add": "Add Members",
+      "adding": "Adding...",
+      "cancel": "Cancel"
+    }
+  },
+  "form": {
+    "createTitle": "Create New Team",
+    "createDescription": "Set up a new team for team-based assessments",
+    "editTitle": "Edit Team",
+    "editDescription": "Update team information",
+    "sections": {
+      "basicInfo": "Basic Information",
+      "basicInfoDescription": "Enter the team name and description",
+      "members": "Team Members",
+      "membersDescription": "Add members to your team (optional)",
+      "leader": "Team Leader",
+      "leaderDescription": "Assign a team leader (optional)",
+      "settings": "Team Settings",
+      "settingsDescription": "Configure team options"
+    },
+    "fields": {
+      "name": "Team Name",
+      "nameDescription": "Choose a clear, identifiable name for the team",
+      "namePlaceholder": "e.g., Engineering Team, Sales Division",
+      "description": "Description",
+      "descriptionDescription": "Provide a brief description of the team's purpose",
+      "descriptionPlaceholder": "Describe the team's goals and responsibilities...",
+      "members": "Team Members",
+      "membersDescription": "Select users to add as team members",
+      "leader": "Team Leader",
+      "leaderDescription": "Select a team member to be the leader",
+      "activateImmediately": "Activate Immediately",
+      "activateImmediatelyDescription": "Make this team active right away (can be changed later)"
+    },
+    "validation": {
+      "nameRequired": "Team name is required",
+      "nameMin": "Team name must be at least 2 characters",
+      "nameMax": "Team name must not exceed 100 characters",
+      "descriptionMax": "Description must not exceed 500 characters"
+    },
+    "memberSearch": {
+      "placeholder": "Search users by name or email...",
+      "noResults": "No users found",
+      "selected": "{count} member(s) selected",
+      "alreadySelected": "Already selected",
+      "searching": "Searching...",
+      "minChars": "Type at least 2 characters to search"
+    },
+    "leaderSelect": {
+      "placeholder": "Select a leader (optional)",
+      "noLeader": "No leader",
+      "mustBeFromMembers": "Leader must be one of the team members"
+    },
+    "preview": {
+      "title": "Team Preview",
+      "noName": "Untitled Team",
+      "noDescription": "No description provided",
+      "memberCount": "{count, plural, =0 {No members} =1 {1 member} other {# members}}",
+      "willBeCreatedAs": "Will be created as",
+      "leaderAssigned": "Leader assigned"
+    },
+    "actions": {
+      "create": "Create Team",
+      "creating": "Creating...",
+      "save": "Save Changes",
+      "saving": "Saving...",
+      "cancel": "Cancel",
+      "reset": "Reset"
+    },
+    "success": {
+      "created": "Team created successfully",
+      "updated": "Team updated successfully"
+    },
+    "errors": {
+      "createFailed": "Failed to create team",
+      "updateFailed": "Failed to update team",
+      "loadFailed": "Failed to load team data"
+    }
+  }
+}

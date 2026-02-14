@@ -1,0 +1,84 @@
+{
+  "competency": {
+    "name": "A clear, concise name that describes the competency. Use action-oriented language (e.g., 'Strategic Decision Making').",
+    "description": "Detailed explanation of what this competency measures and its importance. Include observable behaviors and outcomes.",
+    "category": "Group competencies by domain to organize your competency framework. Categories help filter and search.",
+    "level": "The expected proficiency level: Novice → Proficient → Advanced → Expert. This helps set appropriate expectations.",
+    "isActive": "Active competencies are visible in assessments. Inactive ones are hidden but preserved for historical data.",
+    "approvalStatus": "Track the review lifecycle: Draft → Pending Review → Approved. Only approved competencies can be used in official assessments."
+  },
+  "indicator": {
+    "title": "A specific, observable behavior that demonstrates this competency. Be concrete and measurable.",
+    "description": "Additional context about what this indicator measures and how to identify it in practice.",
+    "weight": "Relative importance (0-1) of this indicator. All weights for a competency should sum to 1.0.",
+    "observabilityLevel": "How easily this behavior can be observed in typical work situations.",
+    "measurementType": "The method used to assess this indicator (e.g., self-assessment, peer review, manager evaluation).",
+    "examples": "Concrete examples of behaviors that demonstrate this indicator. These guide assessors.",
+    "counterExamples": "Behaviors that indicate lack of this competency. Helps avoid common misconceptions."
+  },
+  "question": {
+    "questionText": "The question presented to respondents. Be clear, specific, and avoid double-barreled questions.",
+    "questionType": "How respondents will answer: Multiple Choice (one answer), Multi-Select (many answers), Scale (rating), or Open-ended.",
+    "answerOptions": "Possible responses with their point values. For scales, define the anchors clearly.",
+    "difficultyLevel": "Foundational → Intermediate → Advanced → Specialized. Affects scoring and test composition.",
+    "scoringRubric": "Guidelines for scoring responses, especially for open-ended questions.",
+    "timeLimit": "Optional time limit in seconds. Leave empty for untimed questions.",
+    "contextTags": "Tags enable context filtering for different assessment scenarios. Add 'GENERAL' for Universal Baseline (Scenario A) assessments."
+  },
+  "scenario": {
+    "overview": {
+      "bigFive": {
+        "title": "Big Five Personality Model",
+        "description": "The OCEAN model assesses five core personality dimensions that predict workplace behavior and team dynamics.",
+        "enable": "Include personality profiling in assessment results to provide richer candidate insights.",
+        "traits": {
+          "openness": "Openness to Experience: Creativity, curiosity, intellectual interests, and willingness to embrace new ideas.",
+          "conscientiousness": "Conscientiousness: Self-discipline, organization, goal-directed behavior, and reliability.",
+          "extraversion": "Extraversion: Sociability, assertiveness, positive emotions, and tendency to seek stimulation.",
+          "agreeableness": "Agreeableness: Cooperation, empathy, trust, and orientation toward helping others.",
+          "emotionalStability": "Emotional Stability: Calmness under pressure, resilience to stress, and consistent emotional responses."
+        }
+      },
+      "difficulty": {
+        "title": "Question Difficulty Level",
+        "description": "Controls the complexity of situational judgment scenarios presented to candidates.",
+        "basic": "Entry-level questions suitable for early-career candidates or foundational skill assessment.",
+        "intermediate": "Standard complexity appropriate for most professional roles and mid-career candidates.",
+        "advanced": "Senior-level scenarios requiring strategic thinking, complex problem-solving, and leadership judgment."
+      },
+      "estimation": {
+        "questions": "Question count is estimated based on: selected competencies × average indicators × questions per indicator.",
+        "duration": "Duration is calculated at approximately 30 seconds per question, including reading and response time."
+      }
+    },
+    "jobFit": {
+      "onetRole": "O*NET (Occupational Information Network) occupation codes define standardized job competency requirements based on extensive labor market research.",
+      "benchmark": "The benchmark shows competencies and proficiency levels required for the selected job role, as defined by O*NET occupational data.",
+      "deltaTesting": "Delta testing identifies and focuses only on the gaps between a candidate's existing competency passport and job requirements, reducing assessment length.",
+      "strictness": {
+        "title": "Benchmark Matching Strictness",
+        "description": "Controls how closely a candidate must match the job benchmark to be considered a good fit.",
+        "lenient": "Broader candidate pool: Accepts partial competency matches, suitable for entry-level hiring or talent development.",
+        "moderate": "Balanced approach: Reasonable match requirements suitable for most standard hiring needs.",
+        "standard": "Industry-typical requirements: Matches common hiring standards for professional roles.",
+        "strict": "High bar: Only strong matches qualify, suitable for specialized or senior positions.",
+        "exact": "Precise alignment: Requires near-perfect benchmark match, for critical roles with no room for skill gaps."
+      }
+    },
+    "teamFit": {
+      "team": "Select the team to analyze for current skill coverage and identify competency gaps that new candidates should fill.",
+      "assessment": "Team Fit assessment focuses on undersaturated competencies, evaluating candidates on their ability to fill specific team skill gaps.",
+      "saturation": {
+        "title": "Skill Saturation Threshold",
+        "description": "The minimum team coverage level for a skill before it is flagged as a gap.",
+        "threshold": "Skills with team coverage below this percentage are considered undersaturated and will be prioritized in candidate assessment."
+      },
+      "gapStatus": {
+        "full": "Skill fully covered: 90%+ team saturation indicates strong existing capability.",
+        "adequate": "Skill adequately covered: Above threshold, no immediate hiring need for this competency.",
+        "gap": "Skill gap detected: Below threshold, candidates with this skill would strengthen the team.",
+        "critical": "Critical gap: Significantly below threshold, high priority for new hire skill requirements."
+      }
+    }
+  }
+}

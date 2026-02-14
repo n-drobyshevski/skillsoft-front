@@ -1,0 +1,374 @@
+{
+  "page": {
+    "title": "Управление пользователями",
+    "description": "Управление пользователями, ролями и правами доступа"
+  },
+  "actions": {
+    "addUser": "Добавить пользователя",
+    "add": "Добавить"
+  },
+  "stats": {
+    "totalUsers": "Всего пользователей",
+    "activeRate": "Активных",
+    "admins": "Администраторы",
+    "editors": "Редакторы",
+    "restricted": "Ограничены",
+    "canAccess": "{count} имеют доступ",
+    "activeThisMonth": "{count} активны в этом месяце",
+    "fullAccess": "Полный доступ",
+    "contentEditors": "Редакторы контента",
+    "bannedLocked": "{banned} заблокировано, {locked} заморожено"
+  },
+  "table": {
+    "columns": {
+      "user": "Пользователь",
+      "role": "Роль",
+      "status": "Статус",
+      "lastSignIn": "Последний вход",
+      "joined": "Регистрация",
+      "actions": "Действия"
+    },
+    "filters": {
+      "all": "Все",
+      "admin": "Админ",
+      "editor": "Редактор",
+      "user": "Пользователь"
+    },
+    "search": {
+      "placeholder": "Поиск по имени или email..."
+    },
+    "pagination": {
+      "showing": "Показано",
+      "of": "из",
+      "users": "пользователей"
+    },
+    "bulk": {
+      "selected": "{count} выбрано",
+      "export": "Экспорт",
+      "delete": "Удалить"
+    },
+    "empty": {
+      "noUsers": "Пользователи не найдены",
+      "adjustSearch": "Попробуйте изменить поисковый запрос",
+      "noMatch": "Нет пользователей, соответствующих фильтру"
+    },
+    "view": {
+      "toggleColumns": "Выбор колонок"
+    },
+    "menu": {
+      "copyUserId": "Копировать ID пользователя",
+      "copyEmail": "Копировать Email",
+      "quickView": "Быстрый просмотр",
+      "viewProfile": "Открыть профиль",
+      "editUser": "Редактировать",
+      "deactivate": "Деактивировать",
+      "activate": "Активировать"
+    }
+  },
+  "drawer": {
+    "tabs": {
+      "details": "Детали",
+      "activity": "Активность"
+    },
+    "sections": {
+      "account": "Аккаунт",
+      "permissions": "Права"
+    },
+    "fields": {
+      "memberSince": "Участник с",
+      "lastActive": "Последняя активность",
+      "status": "Статус",
+      "firstName": "Имя",
+      "lastName": "Фамилия",
+      "userId": "ID пользователя"
+    },
+    "actions": {
+      "viewFullProfile": "Открыть полный профиль",
+      "edit": "Редактировать",
+      "deactivate": "Деактивировать",
+      "activate": "Активировать"
+    },
+    "permissions": {
+      "manageUsers": "Управление пользователями",
+      "editContent": "Редактирование контента",
+      "viewReports": "Просмотр отчётов",
+      "systemSettings": "Системные настройки",
+      "takeAssessments": "Прохождение тестов"
+    },
+    "activity": {
+      "lastSignIn": "Последний вход",
+      "profileUpdated": "Профиль обновлён",
+      "clerkCreated": "Аккаунт Clerk создан",
+      "syncedToSkillsoft": "Синхронизирован в Skillsoft"
+    },
+    "copy": {
+      "copyUserId": "Копировать ID пользователя",
+      "copyClerkId": "Копировать Clerk ID"
+    },
+    "menu": {
+      "viewInClerk": "Открыть в Clerk"
+    }
+  },
+  "profile": {
+    "joined": "Присоединился {date}",
+    "info": {
+      "email": "Email",
+      "username": "Имя пользователя",
+      "role": "Роль",
+      "status": "Статус",
+      "memberSince": "Участник с",
+      "lastSignIn": "Последний вход",
+      "lastUpdated": "Обновлено"
+    },
+    "stats": {
+      "assessments": "Тесты",
+      "completed": "Завершено",
+      "avgScore": "Средний балл",
+      "competencies": "Компетенции",
+      "tests": "Тесты",
+      "done": "Выполнено",
+      "score": "Балл",
+      "skills": "Навыки"
+    },
+    "tabs": {
+      "overview": "Обзор",
+      "assessments": "Тесты",
+      "activity": "Активность"
+    },
+    "sections": {
+      "accountInfo": "Информация об аккаунте",
+      "activity": "Активность",
+      "statistics": "Статистика",
+      "assignedAssessments": "Назначенные тесты",
+      "contentContributions": "Созданный контент",
+      "competencyProgress": "Прогресс по компетенциям",
+      "assessmentHistory": "История тестов",
+      "createdAssessments": "Созданные тесты",
+      "recentActivity": "Последняя активность",
+      "competencyPassport": "Паспорт компетенций"
+    },
+    "passport": {
+      "empty": "Паспорт недоступен",
+      "emptyDesc": "{name} ещё не прошёл ни одного теста. Паспорт компетенций будет сформирован после прохождения тестов.",
+      "thisUser": "Этот пользователь",
+      "competenciesAssessed": "компетенций оценено",
+      "bigFiveProfile": "Профиль Большой пятёрки",
+      "topCompetencies": "Топ компетенции",
+      "top": "Топ",
+      "noBigFive": "Данные о личностном профиле недоступны",
+      "noCompetencies": "Данные о компетенциях недоступны",
+      "valid": "Действителен",
+      "expired": "Истёк",
+      "expiringSoon": "Истекает через {days} дней"
+    },
+    "assessments": {
+      "empty": "Нет тестов",
+      "emptyDesc": "{name} ещё не прошёл ни одного теста.",
+      "thisUser": "Этот пользователь",
+      "template": "Шаблон",
+      "goal": "Цель",
+      "score": "Балл",
+      "status": "Статус",
+      "duration": "Длительность",
+      "completedAt": "Завершён",
+      "pending": "Ожидание",
+      "passed": "Сдал",
+      "failed": "Не сдал",
+      "questions": "вопросов",
+      "view": "Открыть",
+      "viewDetails": "Подробнее",
+      "page": "Страница {current} из {total}"
+    },
+    "empty": {
+      "noAssessments": "Тестов пока нет",
+      "noAssessmentsDesc": "Этому пользователю ещё не назначены тесты. Тесты появятся здесь после назначения.",
+      "noContributions": "Контент пока не создан",
+      "noContributionsDesc": "Контент, созданный этим {role}, появится здесь.",
+      "noProgress": "Данных о прогрессе нет",
+      "noProgressDesc": "Оценка компетенций и отслеживание прогресса появятся здесь после прохождения тестов.",
+      "comingSoon": "Скоро появится",
+      "comingSoonDesc": "Управление тестами и история находятся в разработке. Следите за обновлениями!",
+      "noCreatedAssessments": "Созданных тестов нет",
+      "noCreatedAssessmentsDesc": "Тесты, созданные этим пользователем, появятся здесь."
+    },
+    "activity": {
+      "accountCreated": "Аккаунт создан",
+      "lastSignIn": "Вход в систему",
+      "testStarted": "Начат",
+      "testCompleted": "Завершён",
+      "testPassed": "Сдан",
+      "testFailed": "Не сдан",
+      "testAbandoned": "Прерван",
+      "testTimedOut": "Время истекло",
+      "noActivity": "Активность пока не зафиксирована",
+      "moreDetailedLogging": "Подробное логирование активности появится позже"
+    },
+    "time": {
+      "never": "Никогда"
+    },
+    "actions": {
+      "editProfile": "Редактировать профиль",
+      "createAssessment": "Создать тест"
+    },
+    "sharedTests": {
+      "title": "Доступные мне",
+      "listLabel": "Тесты, которыми с вами поделились",
+      "countLabel": "{count} тестов доступно",
+      "viewAll": "Показать все",
+      "emptyState": {
+        "title": "Нет доступных тестов",
+        "description": "Тесты, которыми с вами поделятся коллеги, появятся здесь."
+      },
+      "permissions": {
+        "view": "Просмотр",
+        "edit": "Редактирование",
+        "manage": "Управление"
+      },
+      "goals": {
+        "overview": "Обзор",
+        "jobFit": "Должность",
+        "teamFit": "Команда"
+      },
+      "stats": {
+        "competencies": "компетенций",
+        "duration": "Длительность",
+        "minutes": "мин"
+      },
+      "actions": {
+        "view": "Открыть",
+        "take": "Пройти"
+      },
+      "expires": "Истекает {time}",
+      "expired": "Доступ истёк"
+    }
+  },
+  "edit": {
+    "title": "Редактирование: {name}",
+    "backToProfile": "К профилю",
+    "sections": {
+      "profileInformation": "Информация профиля",
+      "profileInformationDesc": "Обновление данных профиля. Изменения будут синхронизированы с Clerk и бэкендом.",
+      "rolePermissions": "Роль и права",
+      "quickActions": "Быстрые действия",
+      "identifiers": "Идентификаторы"
+    },
+    "fields": {
+      "firstName": "Имя",
+      "lastName": "Фамилия",
+      "username": "Имя пользователя",
+      "email": "Email",
+      "role": "Роль пользователя"
+    },
+    "placeholders": {
+      "firstName": "Введите имя",
+      "lastName": "Введите фамилию",
+      "username": "Введите имя пользователя"
+    },
+    "help": {
+      "emailReadOnly": "Email нельзя изменить здесь. Пользователи могут обновить email в настройках Clerk.",
+      "usernameUnique": "Имя пользователя должно быть уникальным. Оставьте пустым для удаления.",
+      "roleDescription": "Роль определяет, какие действия может выполнять пользователь.",
+      "banDescription": "Блокировка отзывает все сессии. Заморозка временно запрещает вход."
+    },
+    "actions": {
+      "save": "Сохранить изменения",
+      "saving": "Сохранение...",
+      "cancel": "Отмена",
+      "syncFromClerk": "Синхронизировать из Clerk",
+      "syncing": "Синхронизация...",
+      "banUser": "Заблокировать",
+      "unbanUser": "Разблокировать",
+      "lockUser": "Заморозить",
+      "unlockUser": "Разморозить"
+    },
+    "messages": {
+      "syncSuccess": "Данные пользователя успешно синхронизированы из Clerk",
+      "syncFailed": "Не удалось синхронизировать данные",
+      "saveSuccess": "Профиль пользователя успешно обновлён",
+      "saveFailed": "Не удалось обновить профиль"
+    }
+  },
+  "new": {
+    "title": "Добавить пользователя",
+    "description": "Создание нового аккаунта в системе",
+    "backToUsers": "К списку пользователей",
+    "sections": {
+      "loginIdentifier": "Идентификатор входа",
+      "loginIdentifierDesc": "Выберите email, имя пользователя или оба",
+      "password": "Пароль",
+      "profilePermissions": "Профиль и права"
+    },
+    "fields": {
+      "email": "Email",
+      "username": "Имя пользователя",
+      "password": "Пароль",
+      "firstName": "Имя",
+      "lastName": "Фамилия",
+      "role": "Роль"
+    },
+    "placeholders": {
+      "email": "ivan@example.com",
+      "username": "ivanpetrov",
+      "password": "Минимум 8 символов с буквами и цифрами",
+      "firstName": "Иван",
+      "lastName": "Иванов"
+    },
+    "validation": {
+      "emailOrUsername": "Укажите хотя бы одно",
+      "validEmail": "Введите корректный email адрес",
+      "usernameMinLength": "Минимум 3 символа",
+      "usernameMaxLength": "Максимум 20 символов",
+      "usernamePattern": "Только буквы, цифры и подчёркивания",
+      "passwordMinLength": "Минимум 8 символов",
+      "passwordPattern": "Должен содержать буквы и цифры",
+      "valid": "Корректно"
+    },
+    "hints": {
+      "enterAtLeastOne": "Введите хотя бы одно - пользователь сможет входить с любым",
+      "or": "или"
+    },
+    "roles": {
+      "user": "Пользователь",
+      "editor": "Редактор",
+      "admin": "Администратор"
+    },
+    "actions": {
+      "create": "Создать пользователя",
+      "creating": "Создание...",
+      "cancel": "Отмена"
+    },
+    "messages": {
+      "success": "Успешно",
+      "error": "Ошибка",
+      "createSuccess": "Пользователь \"{identifier}\" успешно создан.",
+      "createFailed": "Не удалось создать пользователя. Попробуйте ещё раз."
+    }
+  },
+  "sync": {
+    "button": "Синхронизировать из Clerk",
+    "buttonShort": "Синхр.",
+    "syncing": "Синхронизация...",
+    "tooltip": "Синхронизировать всех пользователей из Clerk в базу данных",
+    "toast": {
+      "syncing": "Синхронизация пользователей из Clerk...",
+      "syncingDesc": "Получение данных и обновление базы данных",
+      "success": "Синхронизация завершена!",
+      "successDesc": "Создано: {created}, Обновлено: {updated}, Всего: {total}",
+      "failed": "Ошибка синхронизации",
+      "failedDesc": "Произошла неизвестная ошибка"
+    }
+  },
+  "errors": {
+    "loadingUsers": "Ошибка загрузки пользователей",
+    "loadingProfile": "Не удалось загрузить профиль",
+    "backendUnavailable": "Сервер недоступен. Убедитесь, что бэкенд запущен на localhost:8080.",
+    "invalidDataFormat": "Неверный формат данных от сервера.",
+    "cannotConnect": "Не удаётся подключиться к серверу. Убедитесь, что бэкенд запущен.",
+    "backendTip": "Совет: Запустите бэкенд командой: ",
+    "somethingWrong": "Что-то пошло не так!",
+    "errorLoadingPage": "При загрузке страницы пользователей произошла ошибка.",
+    "errorId": "ID ошибки",
+    "tryAgain": "Попробовать снова",
+    "backToDashboard": "На панель управления"
+  }
+}

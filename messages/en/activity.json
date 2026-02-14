@@ -1,0 +1,85 @@
+{
+  "title": "Activity",
+  "recentActivity": "Recent Activity",
+  "templateActivity": "Template Activity",
+  "completed": "Completed",
+  "abandoned": "Abandoned",
+  "timedOut": "Timed Out",
+  "passed": "Passed",
+  "failed": "Failed",
+  "attempts": "attempts",
+  "attempt": "attempt",
+  "retry": "Retry",
+  "noActivity": "No activity yet",
+  "noActivityDescription": "Test completions will appear here",
+  "viewAll": "View All",
+  "stats": {
+    "title": "Statistics",
+    "description": "Performance overview",
+    "totalSessions": "Total Sessions",
+    "completedSessions": "Completed",
+    "abandonedSessions": "Abandoned",
+    "timedOutSessions": "Timed Out",
+    "completionRate": "Completion Rate",
+    "completionRateDescription": "Percentage of started tests that were completed",
+    "passRate": "Pass Rate",
+    "passRateDescription": "Percentage of completed tests that passed",
+    "averageScore": "Average Score",
+    "averageTime": "Average Time",
+    "lastActivity": "Last Activity",
+    "detailsTitle": "Activity Statistics",
+    "detailsDescription": "Detailed breakdown of test activity for this template",
+    "tapForDetails": "Tap for details",
+    "viewFullBreakdown": "View Full Breakdown"
+  },
+  "filters": {
+    "title": "Filters",
+    "status": "Status",
+    "allStatuses": "All Statuses",
+    "allResults": "All Results",
+    "passed": "Passed",
+    "failed": "Failed",
+    "dateRange": "Date Range",
+    "allTime": "All Time",
+    "last7Days": "Last 7 Days",
+    "last30Days": "Last 30 Days",
+    "last90Days": "Last 90 Days",
+    "from": "From",
+    "to": "To",
+    "apply": "Apply Filters",
+    "clear": "Clear",
+    "reset": "Reset"
+  },
+  "table": {
+    "title": "Activity Log",
+    "user": "User",
+    "status": "Status",
+    "score": "Score",
+    "result": "Result",
+    "timeSpent": "Time Spent",
+    "date": "Date",
+    "noResults": "No matching activities found",
+    "loading": "Loading activities..."
+  },
+  "empty": {
+    "title": "No activity yet",
+    "description": "Activity will appear here once candidates start taking tests"
+  },
+  "pagination": {
+    "of": "of",
+    "previous": "Previous",
+    "next": "Next"
+  },
+  "errors": {
+    "loadFailed": "Failed to load activity"
+  },
+  "time": {
+    "justNow": "just now",
+    "minutesAgo": "{count}m ago",
+    "hoursAgo": "{count}h ago",
+    "daysAgo": "{count}d ago",
+    "seconds": "{count} seconds",
+    "minutes": "{count} minutes",
+    "hours": "{count} hours"
+  }
+}

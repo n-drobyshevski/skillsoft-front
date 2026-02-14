@@ -1,0 +1,1559 @@
+{
+  "title": "Psychometrics",
+  "description": "Analyze assessment item quality, competency reliability, and personality trait measurements",
+  "itemsNotFound": "Items not found",
+  "tryChangingFilters": "Try changing filters or search query",
+  "resetFilters": "Reset Filters",
+  "noData": "No {entityName}",
+  "dataWillAppear": "Data will appear after running the first tests",
+  "allItemsOk": "All items are OK",
+  "allQuestionsValid": "All questions meet psychometric quality standards",
+  "noFlaggedItems": "No flagged items",
+  "allQuestionsGood": "All questions have good discrimination and difficulty indicators",
+  "nothingFoundSearch": "Nothing found",
+  "noResultsFor": "No results for \"{query}\"",
+  "tryDifferentQuery": "Try changing the search query",
+  "clearSearchBtn": "Clear search",
+  "insufficientData": "Insufficient data",
+  "minResponses": "At least {required} responses are required for calculation. Current count: {current}",
+  "minResponsesGeneric": "At least {required} responses are required to calculate psychometric indicators",
+  "noItemDataAvailable": "No item data available",
+  "noDistributionData": "No distribution data available",
+  "chartError": "Chart Error",
+  "chartErrorDescription": "Unable to render the item quality scatter chart. Try refreshing.",
+  "distributionChartError": "Distribution Chart Error",
+  "distributionChartErrorDescription": "Unable to render the metric distribution charts. Try refreshing.",
+  "reliabilityGaugesError": "Reliability Gauges Error",
+  "reliabilityGaugesErrorDescription": "Unable to render reliability gauges. Try refreshing.",
+  "dataLoadingError": "Data Loading Error",
+  "failedToLoadDashboard": "Failed to load psychometrics dashboard data",
+  "lastAudit": "Last Audit",
+  "auditRecommendation": "Recommended to run audit after significant new response data",
+  "auditNotRun": "Audit not yet run",
+  "keyMetrics": "Key Metrics",
+  "avgQuestionEffectiveness": "Avg. Question Effectiveness",
+  "avgReliabilityScore": "Avg. Reliability Score",
+  "activeItems": "Active Items",
+  "reliableCompetencies": "Reliable Competencies",
+  "items": "Items",
+  "competencies": "Competencies",
+  "flagged": "Flagged",
+  "bigFive": "Big Five",
+  "itemStatus": "Item Status",
+  "active": "Active",
+  "probation": "Probation",
+  "retired": "Retired",
+  "reliability": "Reliability",
+  "reliable": "Reliable",
+  "acceptable": "Acceptable",
+  "unreliable": "Unreliable",
+  "noDataShort": "No Data",
+  "avgAlpha": "Avg Alpha",
+  "avgRpb": "Avg rpb",
+  "bigFiveAlpha": "Big5 Alpha",
+  "itemStatusSection": "Assessment item status",
+  "collectingData": "Collecting data",
+  "needsAttention": "Needs attention",
+  "excludedFromUse": "Excluded from use",
+  "competencyReliability": "Competency reliability",
+  "bigFiveReliability": "Big Five reliability",
+  "avgAlphaCompetencies": "Average competency alpha",
+  "avgDiscriminationIndex": "Average discrimination index",
+  "avgAlphaBigFive": "Average Big Five alpha",
+  "reliableTraits": "Reliable traits",
+  "acceptableTraits": "Acceptable traits",
+  "unreliableTraits": "Unreliable traits",
+  "insufficientDataTraits": "Insufficient data traits",
+  "moreDataNeeded": "More data needed",
+  "fromTotal": "{percentage}% from total",
+  "healthStatus": {
+    "excellent": "Excellent",
+    "good": "Good",
+    "needsAttention": "Needs Attention",
+    "critical": "Critical"
+  },
+  "hero": {
+    "health": "Health",
+    "psychometricHealth": "Psychometric Health",
+    "vsLast7Days": "vs last 7 days",
+    "audit": "audit",
+    "never": "Never",
+    "totalItems": "Total Items",
+    "activeRate": "Active Rate",
+    "issues": "Issues",
+    "scoreBreakdown": "Score Breakdown:",
+    "activeItems40": "Active Items (40%)",
+    "reliableCompetencies30": "Reliable Competencies (30%)",
+    "nonFlaggedItems30": "Non-Flagged Items (30%)",
+    "ariaHealthScore": "Psychometric health score: {value} out of 100",
+    "ariaHealth": "Health: {score}%",
+    "ariaPsychometricHealth": "Psychometric health",
+    "ariaScoreStatus": "Score: {score} out of 100, status: {status}",
+    "ariaStats": "Psychometric statistics",
+    "ariaLastAudit": "Last audit: {time}",
+    "ariaLastAuditNever": "Last audit: never run",
+    "ariaTotalItems": "Total items: {count}",
+    "ariaActiveItems": "Active items: {rate}%",
+    "ariaIssues": "Problem items: {count}",
+    "items": "items",
+    "active": "active"
+  },
+  "competencyDetail": {
+    "title": "Competency Reliability",
+    "description": "Detailed analysis of reliability metrics for this competency",
+    "backToList": "Back to competencies",
+    "loading": "Loading competency data...",
+    "notFound": "Competency not found",
+    "error": "Error loading competency",
+    "errorLoading": "Failed to load competency reliability data",
+    "tryAgain": "Try Again",
+    "alphaInterpretationScale": {
+      "scaleTitle": "Cronbach's Alpha Interpretation Scale",
+      "scaleAriaLabel": "Cronbach's Alpha Interpretation Scale. Current value {alpha} corresponds to level: {description}",
+      "noDataAriaLabel": "Cronbach's Alpha Interpretation Scale. No data available.",
+      "currentValue": "Current value",
+      "correspondingLevel": "corresponds to level:",
+      "noDataMessage": "Insufficient data to determine reliability level",
+      "noDataBadge": "No Data"
+    },
+    "accordion": {
+      "visualGauge": "Visual Gauge",
+      "interpretation": "Interpretation",
+      "thresholdValues": "Threshold Values",
+      "itemsAnalysis": "Items Analysis",
+      "whatItMeans": "What does this mean?",
+      "whatItMeansDesktop": "What does this metric mean?",
+      "internalConsistency": "Internal consistency coefficient",
+      "reliabilityScale": "Reliability quality scale",
+      "thresholdComparison": "Comparison with Threshold Values",
+      "thresholdComparisonDescription": "Current metrics relative to standard criteria",
+      "needAttention": "{count} need attention",
+      "metrics": {
+        "cronbachAlpha": "Cronbach's Alpha",
+        "sampleSize": "Sample Size",
+        "itemCount": "Item Count"
+      },
+      "thresholdDescriptions": {
+        "alphaGood": "Good reliability: >= 0.7",
+        "alphaGoodDetailed": "Good reliability: >= 0.7, excellent: >= 0.8",
+        "sampleMinimum": "Recommended minimum: 100",
+        "sampleMinimumDetailed": "Recommended minimum: 100 respondents",
+        "itemsOptimal": "Optimal: 5-15 items",
+        "itemsOptimalDetailed": "Optimal: 5-15 items per scale"
+      },
+      "reliabilityMessages": {
+        "insufficientData": "Insufficient data to calculate reliability.",
+        "insufficientDataDetailed": "Insufficient data to calculate reliability. More responses need to be collected.",
+        "good": "The scale shows good internal consistency.",
+        "goodDetailed": "The scale shows good internal consistency. Items measure the same construct.",
+        "acceptable": "Acceptable reliability. Consider reviewing items.",
+        "acceptableDetailed": "Acceptable reliability. Consider reviewing items with low contribution.",
+        "low": "Low reliability. Major revision required.",
+        "lowDetailed": "Low reliability. Items do not form a consistent scale. Major revision required."
+      },
+      "sections": {
+        "visualGauge": "Visual Reliability Gauge",
+        "interpretation": "Interpretation & Guidance",
+        "thresholds": "Threshold Comparison",
+        "itemAnalysis": "Item Analysis"
+      },
+      "whatThisMeans": "What This Means",
+      "insufficientDataOld": "Insufficient data to calculate reliability. More responses are needed.",
+      "goodConsistency": "Questions in this competency show good internal consistency.",
+      "acceptableReliability": "Reliability is acceptable but could be improved with question refinement.",
+      "lowReliability": "Low reliability suggests questions may not consistently measure the same construct.",
+      "cronbachsAlpha": "Cronbach's Alpha",
+      "goodReliabilityThreshold": "Good reliability threshold",
+      "sampleSize": "Sample Size",
+      "recommendedMinimum": "Recommended minimum: {count} responses",
+      "itemCount": "Item Count",
+      "optimalRange": "Optimal range: {min}-{max} items",
+      "thresholdDescription": "How current metrics compare to recommended standards",
+      "needsAttention": "Needs Attention",
+      "whatThisMetricMeans": "What this metric means"
+    },
+    "heroAlphaGauge": {
+      "ariaLabel": "Cronbach's Alpha gauge showing reliability level",
+      "noDataAriaLabel": "Cronbach's Alpha gauge with insufficient data",
+      "alphaLabel": "Cronbach's Alpha"
+    },
+    "heroMobile": {
+      "analysisDescription": "Reliability analysis for competency questions",
+      "stats": {
+        "respondents": "Respondents",
+        "items": "Items",
+        "quality": "Quality"
+      }
+    },
+    "insufficientDataGuidance": {
+      "insufficientData": "Insufficient Data",
+      "requiresAttention": "Requires Attention",
+      "cannotCalculate": "Cannot calculate reliability metrics",
+      "forImproving": "For improving reliability",
+      "criticalBadge": "Critical",
+      "attentionBadge": "Attention",
+      "readinessLabel": "Calculation Readiness",
+      "criteriaCount": "{met}/{total} criteria met",
+      "fullData": "Full data available",
+      "problemCount": "{count, plural, one {# issue} other {# issues}} detected",
+      "issues": {
+        "sampleSizeUnknown": "Sample size is unknown",
+        "sampleSizeLow": "Sample size ({count}) is below recommended minimum",
+        "sampleSizeRecommendation": "Recommended minimum of 100 respondents for reliable calculation",
+        "itemCountUnknown": "Item count is unknown",
+        "itemCountLow": "Item count ({count}) is insufficient for a scale",
+        "itemCountRecommendation": "Recommended minimum of 3 items for Alpha calculation",
+        "alphaMissing": "Cronbach's Alpha not calculated",
+        "alphaMissingRecommendation": "Collect more responses and run audit for calculation"
+      }
+    },
+    "thresholdSummaryBadge": {
+      "labels": {
+        "alpha": "Alpha",
+        "sample": "Sample",
+        "items": "Items"
+      },
+      "allOk": "All thresholds met",
+      "noData": "No data",
+      "statusMeets": "Meets threshold",
+      "statusNotMeets": "Below threshold"
+    },
+    "table": {
+      "tabs": {
+        "all": "All Competencies",
+        "reliable": "Reliable",
+        "acceptable": "Acceptable",
+        "unreliable": "Unreliable",
+        "insufficientData": "Insufficient Data",
+        "allShort": "All",
+        "reliableShort": "Reliable",
+        "acceptableShort": "OK",
+        "unreliableShort": "Low",
+        "insufficientDataShort": "No Data"
+      },
+      "resultsFound": "{count, plural, one {# competency} other {# competencies}} found",
+      "columns": {
+        "competency": "Competency",
+        "cronbachAlpha": "Cronbach's Alpha",
+        "sample": "Sample Size",
+        "questions": "Questions",
+        "status": "Status",
+        "actions": "Actions"
+      },
+      "viewQuestions": "View Questions",
+      "pagination": {
+        "page": "Page",
+        "firstPage": "First page",
+        "prevPage": "Previous page",
+        "nextPage": "Next page",
+        "lastPage": "Last page"
+      }
+    },
+    "alphaIfDeletedList": {
+      "improvesAlpha": "Removing improves alpha",
+      "importantForScale": "Important for scale",
+      "neutral": "Neutral impact",
+      "columns": {
+        "question": "Question",
+        "alphaIfDeleted": "Alpha if Deleted",
+        "change": "Change",
+        "status": "Impact"
+      },
+      "mobileAlphaWithout": "Alpha without this item",
+      "collapseList": "Collapse list",
+      "showMore": "Show {count} more",
+      "legendTitle": "Alpha Impact Legend",
+      "legendDescription": "How removing each question affects scale reliability",
+      "legendPositive": "Positive: Removing increases alpha (consider revision)",
+      "legendNegative": "Negative: Removing decreases alpha (keep)",
+      "legendNeutral": "Neutral: Minimal impact on alpha",
+      "defaultTitle": "Item Analysis",
+      "defaultDescription": "Effect of removing each question on Cronbach's Alpha",
+      "needsAttention": "Needs attention",
+      "itemAriaLabel": "Question {index}: Alpha if deleted is {alpha}, change is {change}"
+    },
+    "quality": {
+      "insufficient": {
+        "label": "Insufficient Data",
+        "description": "Not enough responses to calculate reliability"
+      },
+      "unacceptable": {
+        "label": "Unacceptable",
+        "description": "Very low reliability, major revision needed"
+      },
+      "poor": {
+        "label": "Poor",
+        "description": "Low reliability, significant improvements needed"
+      },
+      "acceptable": {
+        "label": "Acceptable",
+        "description": "Adequate for research purposes"
+      },
+      "good": {
+        "label": "Good",
+        "description": "Suitable for most assessment purposes"
+      },
+      "excellent": {
+        "label": "Excellent",
+        "description": "High reliability for high-stakes assessment"
+      },
+      "exceptional": {
+        "label": "Exceptional",
+        "description": "Very high reliability, may indicate redundancy"
+      }
+    },
+    "metadataTitle": "Competency Reliability - Psychometrics - SkillSoft",
+    "metadataDescription": "Detailed competency reliability analysis.",
+    "errorLabel": "Error",
+    "itemsLoweringAlpha": {
+      "cardTitle": "Items Lowering Reliability",
+      "cardDescription": "Removing these items would improve Alpha. Consider revising or excluding them.",
+      "alphaWithout": "Alpha without item",
+      "viewItemAriaLabel": "View item: {text}",
+      "moreItems": "+ {count} more items"
+    },
+    "reliableCompetency": {
+      "title": "Competency is Reliable",
+      "description": "Cronbach's Alpha ({alpha}) exceeds the threshold of 0.7. The scale shows good internal consistency and can be used for assessment."
+    }
+  },
+  "nav": {
+    "items": "Items",
+    "competencies": "Competencies",
+    "flagged": "Flagged",
+    "bigFive": "Big Five"
+  },
+  "itemsTable": {
+    "title": "Assessment Items",
+    "description": "Psychometric statistics for questions: difficulty and discrimination indices",
+    "searchPlaceholder": "Search questions...",
+    "clearSearch": "Clear search",
+    "searchByQuestion": "Search by question text",
+    "filterByCompetency": "Filter by competency",
+    "allCompetencies": "All competencies",
+    "foundCount": "Found: {count} items",
+    "forQuery": "for \"{query}\"",
+    "foundItems": "Found: {count} items",
+    "noItemsFound": "No items found",
+    "pageNavigation": "Page navigation",
+    "pageOfTotal": "Page {current} of {total}",
+    "selectAll": "Select all",
+    "deselectAll": "Deselect all",
+    "tabs": {
+      "all": "All",
+      "allShort": "All",
+      "active": "Active",
+      "activeShort": "Active",
+      "probation": "Probation",
+      "probationShort": "Prob.",
+      "flagged": "Under review",
+      "flaggedShort": "Review",
+      "retired": "Retired",
+      "retiredShort": "Ret."
+    },
+    "batch": {
+      "noItemsToRetire": "No items found to retire",
+      "noItemsToActivate": "No items found to activate",
+      "retiredCount": "Retired: {count} items",
+      "activatedCount": "Activated: {count} items",
+      "partialSuccess": "{success} succeeded, {failed} failed",
+      "selectAll": "Select all",
+      "selectAllPage": "Select all items on page",
+      "deselectAll": "Deselect all",
+      "retireReason": "Batch retirement via management interface",
+      "activateReason": "Batch activation via management interface",
+      "retireSelected": "Retire selected",
+      "retireAll": "Retire all",
+      "selected": "Selected: {count}"
+    },
+    "toast": {
+      "retireSuccess": "Items successfully moved to Retired status",
+      "activateSuccess": "Items successfully moved to Active status",
+      "partialError": "Some items could not be updated",
+      "retireFailed": "Failed to retire items",
+      "activateFailed": "Failed to activate items",
+      "error": "An error occurred during update",
+      "unknownError": "Unknown error",
+      "retireError": "Error retiring items",
+      "activateError": "Error activating items",
+      "itemRetired": "Item retired",
+      "itemActivated": "Item activated",
+      "batchRetireSuccess": "Items successfully retired"
+    },
+    "columns": {
+      "question": "Question",
+      "competency": "Competency",
+      "difficulty": "Difficulty (p)",
+      "discrimination": "Discrimination (rpb)",
+      "responses": "Responses",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "empty": {
+      "title": "No items found",
+      "description": "No items match the filter criteria",
+      "clearFilters": "Clear filters"
+    },
+    "actions": {
+      "viewDetails": "View details",
+      "retire": "Retire",
+      "activate": "Activate"
+    },
+    "mobileCard": {
+      "tapToView": "Tap for details",
+      "responses": "resp.",
+      "difficulty": "Diff.",
+      "discrimination": "Disc."
+    }
+  },
+  "competenciesTable": {
+    "title": "Competency Reliability",
+    "description": "Cronbach's Alpha and reliability statistics for competencies"
+  },
+  "itemDetail": {
+    "backToList": "Back to items list",
+    "loading": "Loading...",
+    "notFound": "Item not found",
+    "openActions": "Open actions menu",
+    "issuesDetected": "Issues detected",
+    "elements": "Elements",
+    "difficultyIndex": "Difficulty index",
+    "discriminationIndex": "Discrimination index",
+    "responseCount": "Response count",
+    "calculationDate": "Calculation date",
+    "recalculate": "Recalculate",
+    "recalculateSuccess": "Recalculation complete",
+    "metricsUpdated": "Psychometric metrics updated",
+    "recalculateFailed": "Failed to recalculate",
+    "error": "Error",
+    "changeStatus": "Change status",
+    "changeStatusTitle": "Change item status",
+    "changeStatusDescription": "Select new status and provide reason for the change.",
+    "selectStatusAndReason": "Select new status and provide reason.",
+    "newStatus": "New status",
+    "newStatusIs": "New status: {status}",
+    "changeReason": "Reason for change",
+    "changeReasonRequired": "Reason for change *",
+    "changeReasonPlaceholder": "Describe the reason for status change...",
+    "reasonPlaceholder": "Describe the reason for status change...",
+    "reasonRequired": "Please provide a reason for the status change",
+    "cancel": "Cancel",
+    "save": "Save",
+    "saving": "Saving...",
+    "statusUpdated": "Status updated",
+    "statusUpdateFailed": "Failed to update status",
+    "close": "Close",
+    "back": "Back",
+    "openQuestion": "Open question",
+    "manageItem": "Manage assessment item",
+    "markAsReviewed": "Mark as reviewed",
+    "approveAfterReview": "Approve after review",
+    "retire": "Retire",
+    "excludeFromTesting": "Exclude from testing",
+    "currentStatus": "Current: {status}",
+    "distractorEfficiency": "Distractor efficiency",
+    "distractorDescription": "Shows the proportion of respondents who selected each answer option",
+    "recommendations": "Recommendations",
+    "statusHistory": "Status change history",
+    "metricsComparison": "Metrics comparison",
+    "metricComparison": "Metric comparison",
+    "previousRpb": "Previous rpb",
+    "currentRpb": "Current rpb",
+    "change": "Change",
+    "metrics": {
+      "title": "Item Metrics",
+      "responses": "Responses",
+      "difficulty": "P-value (difficulty)",
+      "discrimination": "Rpb (discrimination)",
+      "lastCalculated": "Last calculated"
+    },
+    "actions": {
+      "retire": "Retire item",
+      "activate": "Activate item",
+      "retireConfirm": {
+        "title": "Retire item?",
+        "description": "This item will be excluded from future tests. This action is reversible.",
+        "confirm": "Yes, retire",
+        "cancel": "Cancel"
+      },
+      "activateConfirm": {
+        "title": "Activate item?",
+        "description": "This item will be included in tests.",
+        "confirm": "Yes, activate",
+        "cancel": "Cancel"
+      }
+    },
+    "history": {
+      "title": "Change History",
+      "empty": "No history available",
+      "statusChange": "Status changed from {from} to {to}",
+      "created": "Item created",
+      "metricsUpdated": "Metrics updated"
+    },
+    "ariaDetailPage": "Item detail page",
+    "ariaMetricsSection": "Metrics section",
+    "ariaActionsSection": "Actions section"
+  },
+  "issues": {
+    "title": "Issues detected",
+    "count": "{count} issues",
+    "countSingular": "{count} issue",
+    "requiresReview": "Requires review",
+    "moreIssues": "+{count} more",
+    "psychometricIssues": "Psychometric issues detected",
+    "itemFlagged": "Item flagged for review",
+    "itemRetired": "Item retired from use",
+    "recommendReview": "Consider revising the wording or answer options.",
+    "viewDetailedAnalysis": "View detailed analysis",
+    "viewDetails": "Details",
+    "negativeDiscrimination": "Negative discrimination index - item works in reverse direction",
+    "criticalDiscrimination": "Critically low discrimination index",
+    "weakDiscrimination": "Weak discrimination index",
+    "tooHard": "Question is too difficult",
+    "tooEasy": "Question is too easy",
+    "difficultyTooHard": "P-value too low (< 0.2) - question is too difficult",
+    "difficultyTooEasy": "P-value too high (> 0.9) - question is too easy",
+    "discriminationWarning": "Discrimination below threshold (< 0.2)",
+    "discriminationCritical": "Critically low discrimination (< 0.1)",
+    "discriminationNegative": "Negative discrimination - item works in reverse",
+    "lowResponses": "Insufficient responses for reliable statistics",
+    "noIssues": "No issues detected",
+    "recommendation": "Recommendation",
+    "recommendations": {
+      "reviewQuestion": "Review question wording",
+      "considerRetire": "Consider retiring the item",
+      "gatherMoreData": "Gather more data",
+      "reviewAnswerKey": "Review the answer key"
+    }
+  },
+  "thresholds": {
+    "title": "Comparison with threshold values",
+    "description": "Current metrics relative to recommended ranges",
+    "mobileTitle": "Threshold values",
+    "allNormal": "All within range",
+    "oneWarning": "1 warning",
+    "multipleWarnings": "{count} warnings",
+    "difficultyIndex": "Difficulty Index (p)",
+    "difficultyRange": "Optimal range: 0.2 - 0.9",
+    "discriminationIndex": "Discrimination Index (rpb)",
+    "discriminationRange": "Good value: >= 0.25, excellent: >= 0.35",
+    "responseCountLabel": "Response Count",
+    "responseCountRange": "Minimum 50 responses for reliable statistics",
+    "metric": "Metric",
+    "acceptable": "Acceptable",
+    "warning": "Warning",
+    "critical": "Critical",
+    "difficulty": {
+      "title": "P-value (difficulty)",
+      "optimal": "0.3 - 0.7 (optimal)",
+      "acceptable": "0.2 - 0.9",
+      "tooHard": "< 0.2 (too difficult)",
+      "tooEasy": "> 0.9 (too easy)"
+    },
+    "discrimination": {
+      "title": "Rpb (discrimination)",
+      "excellent": "> 0.3 (excellent)",
+      "good": "0.2 - 0.3 (good)",
+      "marginal": "0.1 - 0.2 (marginal)",
+      "poor": "< 0.1 (poor)",
+      "negative": "< 0 (negative)"
+    },
+    "responses": {
+      "title": "Response count",
+      "sufficient": "> 30 (sufficient)",
+      "minimum": "10 - 30 (minimum)",
+      "insufficient": "< 10 (insufficient)"
+    },
+    "comparison": {
+      "title": "Threshold comparison",
+      "currentValue": "Current value",
+      "status": "Status",
+      "belowThreshold": "Below threshold",
+      "withinThreshold": "Within range",
+      "aboveThreshold": "Above threshold"
+    }
+  },
+  "gauges": {
+    "difficultyTitle": "Difficulty Index (p)",
+    "difficultyDescription": "Proportion of correct answers",
+    "discriminationTitle": "Discrimination Index (rpb)",
+    "discriminationDescription": "Correlation with total score",
+    "noData": "No data",
+    "insufficientData": "Insufficient data",
+    "tooHard": "Too difficult",
+    "tooHardDesc": "Less than 20% correct answers",
+    "tooEasy": "Too easy",
+    "tooEasyDesc": "More than 90% correct answers",
+    "optimal": "Optimal",
+    "optimalDesc": "Difficulty within acceptable range",
+    "toxic": "Toxic",
+    "toxicDesc": "Item works in reverse direction",
+    "critical": "Critical",
+    "criticalDesc": "Item does not differentiate respondents",
+    "weak": "Weak",
+    "weakDesc": "Marginal differentiation",
+    "good": "Good",
+    "goodDesc": "Acceptable differentiation",
+    "excellent": "Excellent",
+    "excellentDesc": "Strong differentiation",
+    "difficulty": {
+      "title": "Difficulty",
+      "subtitle": "P-value",
+      "tooHard": "Hard",
+      "optimal": "Optimal",
+      "tooEasy": "Easy"
+    },
+    "discrimination": {
+      "title": "Discrimination",
+      "subtitle": "Rpb index",
+      "excellent": "Excellent",
+      "good": "Good",
+      "marginal": "Marginal",
+      "poor": "Poor"
+    },
+    "responses": {
+      "title": "Responses",
+      "subtitle": "Total collected",
+      "sufficient": "Sufficient",
+      "minimum": "Minimum",
+      "insufficient": "Low"
+    },
+    "calculating": "Calculating..."
+  },
+  "question": {
+    "title": "Question text",
+    "hierarchy": "Hierarchy:",
+    "text": "Question text",
+    "type": "Question type",
+    "competency": "Competency",
+    "indicator": "Indicator",
+    "options": "Answer options",
+    "correctAnswer": "Correct answer",
+    "scoringRubric": "Scoring rubric",
+    "types": {
+      "MULTIPLE_CHOICE": "Multiple choice",
+      "LIKERT": "Likert scale",
+      "SJT": "Situational judgment test"
+    },
+    "preview": {
+      "title": "Preview",
+      "asSeenByCandidate": "As seen by candidate"
+    }
+  },
+  "help": {
+    "screenReaderLabel": "Help",
+    "difficulty": {
+      "title": "Difficulty Index (p)",
+      "description": "Proportion of respondents who answered correctly.",
+      "example": "p = 0.5 means 50% answered correctly",
+      "tooHard": "p < 0.2 - too difficult",
+      "optimal": "0.2-0.8 - optimal",
+      "tooEasy": "p > 0.9 - too easy"
+    },
+    "discrimination": {
+      "title": "Discrimination Index (rpb)",
+      "description": "Shows how well the question differentiates between strong and weak respondents.",
+      "technical": "Point-biserial correlation between response and total score",
+      "toxic": "rpb < 0 - toxic (requires removal)",
+      "critical": "0-0.1 - critically low",
+      "marginal": "0.1-0.25 - marginal",
+      "good": "rpb >= 0.25 - good"
+    },
+    "cronbachAlpha": {
+      "title": "Cronbach's Alpha (α)",
+      "description": "Measure of internal consistency of the test.",
+      "technical": "Shows whether all questions measure the same characteristic",
+      "unreliable": "α < 0.6 - unreliable",
+      "acceptable": "0.6-0.7 - acceptable",
+      "reliable": "α >= 0.7 - reliable"
+    },
+    "validityStatus": {
+      "title": "Validity Status",
+      "description": "Current item status in the psychometric control system.",
+      "active": "Active - passed quality check",
+      "probation": "Probation - collecting data (< 50 responses)",
+      "flagged": "Under Review - requires manual review",
+      "retired": "Retired - excluded from use"
+    },
+    "responseCount": {
+      "title": "Response Count",
+      "description": "Total number of responses used to calculate metrics.",
+      "minimum": "Minimum 50 responses required for reliable psychometric calculations"
+    },
+    "alphaIfDeleted": {
+      "title": "Alpha If Deleted",
+      "description": "Cronbach's alpha value if this question is removed from the test.",
+      "interpretation": "If alpha increases when removing the question, it may be reducing test reliability"
+    },
+    "distractorEfficiency": {
+      "title": "Distractor Efficiency",
+      "description": "Shows how often each answer option is selected.",
+      "threshold": "Good distractors are selected by at least 5% of respondents"
+    },
+    "bigFive": {
+      "title": "Big Five",
+      "description": "Five-Factor Model of personality - scientifically validated classification of personality traits.",
+      "openness": "O - Openness to Experience",
+      "conscientiousness": "C - Conscientiousness",
+      "extraversion": "E - Extraversion",
+      "agreeableness": "A - Agreeableness",
+      "neuroticism": "N - Emotional Stability"
+    },
+    "sampleSize": {
+      "title": "Sample Size",
+      "description": "Number of unique respondents who answered questions for this competency or trait."
+    },
+    "itemCount": {
+      "title": "Item Count",
+      "description": "Number of questions used to calculate scale reliability."
+    },
+    "averageDiscrimination": {
+      "title": "Average Discrimination",
+      "description": "Average discrimination index across all active questions.",
+      "purpose": "Shows overall test ability to differentiate respondents",
+      "needsWork": "rpb < 0.15 — needs improvement",
+      "acceptable": "0.15–0.25 — acceptable",
+      "good": "rpb >= 0.25 — good"
+    },
+    "averageAlpha": {
+      "title": "Average Alpha",
+      "description": "Average Cronbach's alpha across all competencies.",
+      "purpose": "Overall reliability indicator for measurements in the system"
+    },
+    "activeItemsPercent": {
+      "title": "Active Items",
+      "description": "Percentage of questions that passed psychometric validation.",
+      "meaning": "High percentage means good quality test bank"
+    },
+    "reliableCompetenciesPercent": {
+      "title": "Reliable Competencies",
+      "description": "Percentage of competencies with Cronbach's alpha >= 0.7",
+      "meaning": "These competency measurements produce stable and reproducible results"
+    },
+    "flaggedItems": {
+      "title": "Flagged Items",
+      "description": "Questions with extreme metrics that need attention.",
+      "issue1": "Very low/high difficulty",
+      "issue2": "Low or negative discrimination",
+      "action": "Require editing or removal"
+    },
+    "itemStatusSection": {
+      "title": "Assessment Item Status",
+      "description": "Distribution of questions by psychometric validation status.",
+      "threshold": "Each question undergoes validation after collecting at least 50 responses"
+    },
+    "competencyReliabilitySection": {
+      "title": "Competency Reliability",
+      "description": "Distribution of competencies by measurement reliability level.",
+      "metric": "Evaluated by Cronbach's alpha coefficient — a measure of internal consistency"
+    },
+    "bigFiveReliabilitySection": {
+      "title": "Big Five Reliability",
+      "description": "Reliability assessment for five-factor personality model measurements.",
+      "method": "Big Five is projected from competency scores through O*NET links"
+    },
+    "activeStatus": {
+      "title": "Active Items",
+      "description": "Questions with good psychometric indicators.",
+      "rpb": "Discrimination index rpb >= 0.25",
+      "difficulty": "Difficulty index p: 0.2 - 0.9",
+      "responses": "Minimum 50 responses"
+    },
+    "probationStatus": {
+      "title": "Probation Items",
+      "description": "New questions accumulating data for validation.",
+      "requirement": "Requires minimum 50 responses for reliable calculation"
+    },
+    "flaggedForReviewStatus": {
+      "title": "Flagged for Review",
+      "description": "Questions with extreme metrics.",
+      "criticalRpb": "Critically low discrimination (rpb < 0.1)",
+      "extremeDifficulty": "Extreme difficulty"
+    },
+    "retiredStatus": {
+      "title": "Retired Items",
+      "description": "Questions excluded from use.",
+      "automatic": "Automatically retired with negative discrimination (rpb < 0)"
+    },
+    "reliableCompetencyStatus": {
+      "title": "Reliable Competencies",
+      "alpha": "Cronbach's alpha >= 0.7",
+      "meaning": "Measurements produce stable and reproducible results"
+    },
+    "acceptableCompetencyStatus": {
+      "title": "Acceptable Competencies",
+      "alpha": "Cronbach's alpha 0.6 - 0.7",
+      "meaning": "Acceptable for research but interpret with caution"
+    },
+    "unreliableCompetencyStatus": {
+      "title": "Unreliable Competencies",
+      "alpha": "Cronbach's alpha < 0.6",
+      "meaning": "Measurements are unstable, questions need revision"
+    },
+    "insufficientDataCompetency": {
+      "title": "Insufficient Data",
+      "meaning": "More completed tests required to calculate reliability"
+    },
+    "reliableTraitStatus": {
+      "title": "Reliable Traits",
+      "meaning": "Alpha >= 0.7 for personality trait projection"
+    },
+    "acceptableTraitStatus": {
+      "title": "Acceptable Traits",
+      "meaning": "Alpha 0.6 - 0.7, interpret with caution"
+    },
+    "unreliableTraitStatus": {
+      "title": "Unreliable Traits",
+      "meaning": "Alpha < 0.6, insufficient consistency"
+    },
+    "insufficientDataTrait": {
+      "title": "Insufficient Data",
+      "meaning": "More responses needed for related competencies"
+    },
+    "traitOpenness": {
+      "title": "Openness to Experience (O)",
+      "description": "Tendency toward intellectual curiosity and creativity.",
+      "high": "High: creativity, curiosity",
+      "low": "Low: practicality, traditionalism"
+    },
+    "traitConscientiousness": {
+      "title": "Conscientiousness (C)",
+      "description": "Organization, reliability, and self-discipline.",
+      "high": "High: methodicalness, responsibility",
+      "low": "Low: flexibility, spontaneity"
+    },
+    "traitExtraversion": {
+      "title": "Extraversion (E)",
+      "description": "Sociability, energy, and positive emotions.",
+      "high": "High: sociability, enthusiasm",
+      "low": "Low: introversion, reserve"
+    },
+    "traitAgreeableness": {
+      "title": "Agreeableness (A)",
+      "description": "Cooperativeness, trust, and altruism.",
+      "high": "High: empathy, diplomacy",
+      "low": "Low: competitiveness, directness"
+    },
+    "traitEmotionalStability": {
+      "title": "Emotional Stability (N-)",
+      "description": "Calmness and emotional balance.",
+      "high": "High: stress resistance, confidence",
+      "low": "Low: anxiety, emotional reactivity"
+    },
+    "averageBigFiveAlpha": {
+      "title": "Average Big Five Alpha",
+      "meaning": "Average Cronbach's alpha across all five personality traits"
+    },
+    "healthScore": {
+      "title": "Test Health Index",
+      "description": "Comprehensive assessment of test bank quality on a scale of 0-100.",
+      "excellent": "80+ — Excellent",
+      "good": "60-79 — Good",
+      "needsAttention": "40-59 — Needs Attention",
+      "critical": "< 40 — Critical"
+    },
+    "healthScoreBreakdown": {
+      "title": "Score Calculation",
+      "description": "Index is calculated from three components:",
+      "activeItems": "Active Items (40%)",
+      "reliableCompetencies": "Reliable Competencies (30%)",
+      "nonFlagged": "Non-Flagged Items (30%)"
+    },
+    "activeItemsWeight": {
+      "title": "Active Items (40%)",
+      "description": "Proportion of questions that passed psychometric validation.",
+      "meaning": "High percentage means quality test bank"
+    },
+    "reliableCompetenciesWeight": {
+      "title": "Reliable Competencies (30%)",
+      "description": "Proportion of competencies with Cronbach's alpha >= 0.6",
+      "includes": "Includes 'reliable' (α >= 0.7) and 'acceptable' (α 0.6-0.7)"
+    },
+    "nonFlaggedItemsWeight": {
+      "title": "Non-Flagged Items (30%)",
+      "description": "Proportion of questions without critical issues.",
+      "excludes": "Excludes items with extreme difficulty or negative discrimination"
+    },
+    "heroTotalItems": {
+      "title": "Total Items",
+      "meaning": "Total number of questions in the assessment system"
+    },
+    "heroActiveRate": {
+      "title": "Active Rate",
+      "description": "Percentage of items with 'Active' status.",
+      "meaning": "Active questions passed validation and are used in tests"
+    },
+    "heroIssues": {
+      "title": "Issues",
+      "description": "Number of items requiring attention.",
+      "includes": "Includes questions with extreme metrics or 'Under Review' status"
+    },
+    "itemQualityMap": {
+      "title": "Item Quality Map",
+      "description": "Visualization of all questions by two key metrics.",
+      "xAxis": "X-axis — question difficulty (p-value)",
+      "yAxis": "Y-axis — question effectiveness (rpb)",
+      "interaction": "Click a point to open question details"
+    },
+    "zoneOptimal": {
+      "title": "Optimal Zone",
+      "description": "Questions with ideal psychometric characteristics.",
+      "difficulty": "Difficulty: 0.2 - 0.8",
+      "effectiveness": "Effectiveness: >= 0.25"
+    },
+    "zoneTooEasy": {
+      "title": "Too Easy",
+      "description": "Questions answered correctly by almost everyone.",
+      "threshold": "Difficulty p > 0.9 — more than 90% correct"
+    },
+    "zoneTooHard": {
+      "title": "Too Hard",
+      "description": "Questions answered correctly by very few.",
+      "threshold": "Difficulty p < 0.2 — less than 20% correct"
+    },
+    "zoneToxic": {
+      "title": "Toxic Questions",
+      "description": "Questions with negative discrimination (rpb < 0).",
+      "meaning": "Strong respondents fail more often — requires removal or rework"
+    }
+  },
+  "charts": {
+    "itemQualityScatter": {
+      "title": "Item Quality Map",
+      "description": "Question Difficulty vs Question Effectiveness ({count} items)",
+      "noItemsWithMetrics": "No items with calculated metrics",
+      "runAuditToCalculate": "Run an audit to calculate item statistics",
+      "mobileSummaryTitle": "Item Quality Summary",
+      "zones": {
+        "optimal": "Optimal Zone",
+        "optimalRange": "Optimal (p: 0.2-0.8, rpb: 0.25+)",
+        "tooEasy": "Too Easy",
+        "tooEasyRange": "Too Easy (p > 0.9)",
+        "tooHard": "Too Hard",
+        "tooHardRange": "Too Hard (p < 0.2)",
+        "toxic": "Toxic (rpb < 0)",
+        "toxicNegativeRpb": "Toxic (Negative rpb)"
+      },
+      "tooltip": {
+        "questionDifficulty": "Question Difficulty",
+        "questionEffectiveness": "Question Effectiveness",
+        "responses": "Responses"
+      },
+      "axis": {
+        "xLabel": "Question Difficulty (p-value)",
+        "yLabel": "Question Effectiveness (rpb)"
+      },
+      "referenceLine": {
+        "goodThreshold": "Good threshold (0.25)",
+        "toxic": "Toxic"
+      }
+    },
+    "reliability": {
+      "excellent": "Excellent",
+      "good": "Good",
+      "acceptable": "Acceptable",
+      "unreliable": "Unreliable",
+      "insufficientData": "Insufficient data",
+      "noData": "No Data",
+      "responses": "responses",
+      "items": "items",
+      "resp": "resp.",
+      "ariaLabel": "{competencyName} reliability: {value}",
+      "ariaLabelNoData": "{competencyName} reliability: no data",
+      "ariaValueText": "{value} - {status}"
+    },
+    "distribution": {
+      "difficulty": {
+        "title": "Question Difficulty Distribution",
+        "description": "p-value distribution (0.2-0.8 is optimal)",
+        "tooHard": "Too Hard",
+        "optimal": "Optimal",
+        "tooEasy": "Too Easy"
+      },
+      "discrimination": {
+        "title": "Question Effectiveness Distribution",
+        "description": "rpb distribution (0.25+ is good)",
+        "negative": "Negative",
+        "critical": "Critical",
+        "warning": "Warning",
+        "good": "Good"
+      },
+      "tooltip": {
+        "items": "items"
+      },
+      "stats": {
+        "mean": "Mean",
+        "median": "Median",
+        "stdDev": "Std Dev",
+        "noData": "No data available"
+      }
+    }
+  },
+  "flaggedPage": {
+    "pageTitle": "Flagged Items",
+    "pageDescription": "Assessment items requiring attention due to low psychometric indicators",
+    "metadataTitle": "Flagged Items - Psychometrics - SkillSoft",
+    "metadataDescription": "Assessment items requiring attention and review.",
+    "stats": {
+      "negative": "Negative",
+      "critical": "Critical",
+      "warnings": "Warnings",
+      "total": "Total",
+      "unknown": "Unknown",
+      "normal": "Normal"
+    },
+    "error": {
+      "loadingError": "Data Loading Error",
+      "failedToLoad": "Failed to load flagged items data"
+    },
+    "urgent": {
+      "title": "{count, plural, one {# item needs immediate action} other {# items need immediate action}}",
+      "negativeCount": "{count} negative discrimination",
+      "criticalCount": "{count} critical",
+      "retireAllNegative": "Retire All Negative",
+      "reviewOneByOne": "Review One by One"
+    },
+    "selection": {
+      "selectionMode": "Selection Mode",
+      "exitSelectionMode": "Exit Selection Mode",
+      "selectedCount": "{selected} of {total} items selected",
+      "selectAll": "Select All",
+      "deselectAll": "Deselect All",
+      "selected": "{count} selected"
+    },
+    "sections": {
+      "negativeDiscrimination": "Negative Discrimination",
+      "negativeDescription": "Items working in reverse - high performers answer worse. Immediate action recommended.",
+      "criticalDiscrimination": "Critical Discrimination",
+      "criticalDescription": "Items barely distinguish respondents by competency level. Review and consider action.",
+      "warnings": "Warnings",
+      "warningsDescription": "Items with weak discrimination requiring observation. May improve with more data.",
+      "otherIssues": "Other Issues",
+      "otherDescription": "Items with other issues (e.g., difficulty only)",
+      "avgP": "Avg p",
+      "avgRpb": "Avg rpb"
+    },
+    "suggestions": {
+      "retire": "Retire",
+      "review": "Review",
+      "monitor": "Monitor",
+      "suggestionLabel": "Suggestion",
+      "alternativeLabel": "Alt",
+      "negativeReason": "Negative discrimination - high performers answer worse than low performers",
+      "criticalWithDifficultyReason": "Critical discrimination with extreme difficulty suggests content problems",
+      "criticalAlternative": "Consider retiring if no content improvement is possible",
+      "warningReason": "Warning-level with stable response count - may improve with more data",
+      "defaultReason": "Requires manual review to determine appropriate action"
+    },
+    "card": {
+      "responses": "Responses",
+      "quickRetire": "Quick Retire",
+      "markAsReviewed": "Mark as Reviewed",
+      "details": "Details",
+      "questionNotSpecified": "Question text not specified"
+    },
+    "batch": {
+      "processing": "Processing items...",
+      "itemsFailed": "{count, plural, one {# item failed} other {# items failed}}",
+      "retiredSuccess": "{count} negative items retired",
+      "retiredSuccessBatch": "{count} items retired successfully",
+      "activatedSuccess": "{count} items activated successfully",
+      "itemRetired": "Item retired successfully",
+      "itemReviewed": "Item marked as reviewed",
+      "retireFailed": "Failed to retire item",
+      "updateFailed": "Failed to update item status"
+    },
+    "undo": {
+      "itemsRetired": "{count, plural, one {# item retired} other {# items retired}}",
+      "itemsUpdated": "{count, plural, one {# item updated} other {# items updated}}",
+      "undoButton": "Undo",
+      "undoSuccess": "Action undone successfully",
+      "undoFailed": "Failed to undo action"
+    },
+    "detail": {
+      "metadataTitle": "Flagged Item Details - Psychometrics - SkillSoft",
+      "metadataDescription": "Detailed analysis of a flagged assessment item with improvement recommendations.",
+      "backToList": "Back to list",
+      "pageTitle": "Flagged Item",
+      "errorLoading": "Loading Error",
+      "error": "Error",
+      "failedToLoadData": "Failed to load data.",
+      "severity": {
+        "critical": "Critical Issue",
+        "high": "Serious Issue",
+        "medium": "Needs Attention",
+        "low": "Minor Issue",
+        "criticalBadge": "Critical",
+        "highBadge": "High",
+        "mediumBadge": "Medium",
+        "lowBadge": "Low"
+      },
+      "reasons": {
+        "negativeDiscrimination": "Negative discrimination index (rpb < 0) - item works in reverse",
+        "criticalDiscrimination": "Critically low discrimination index (rpb < 0.1) - item doesn't distinguish respondents",
+        "weakDiscrimination": "Weak discrimination index (0.1 <= rpb < 0.25) - marginal distinction",
+        "tooHard": "Too difficult (p < 0.2) - less than 20% correct answers",
+        "tooEasy": "Too easy (p > 0.9) - more than 90% correct answers",
+        "insufficientResponses": "Insufficient responses for reliable statistics (< 30)",
+        "manualReview": "Item flagged for manual review"
+      },
+      "questionSection": {
+        "title": "Question Text",
+        "competency": "Competency",
+        "indicator": "Indicator"
+      },
+      "gauges": {
+        "difficultyTitle": "Difficulty Index",
+        "difficultyDescription": "Proportion of correct answers (ideal: 0.2 - 0.9)",
+        "discriminationTitle": "Discrimination Index",
+        "discriminationDescription": "Correlation with total score (ideal: >= 0.25)"
+      },
+      "comparison": {
+        "title": "Threshold Comparison",
+        "difficulty": "Difficulty index (p)",
+        "difficultyDescription": "Optimal range: 0.2 - 0.9",
+        "discrimination": "Discrimination index (rpb)",
+        "discriminationDescription": "Good: >= 0.25, excellent: >= 0.35",
+        "responseCount": "Response count",
+        "responseDescription": "Minimum 50 responses for reliable statistics"
+      },
+      "stats": {
+        "responses": "Responses",
+        "sufficient": "Sufficient",
+        "insufficient": "Insufficient",
+        "lastCalculation": "Last calculation",
+        "previousRpb": "Previous rpb",
+        "rpbChange": "rpb Change"
+      },
+      "actions": {
+        "title": "Recommended Actions",
+        "considerRemoval": "Consider removing item",
+        "negativeRpbDescription": "Negative rpb means the item works against the measured construct. Recommended to disable.",
+        "checkAnswerKey": "Check answer key",
+        "answerKeyDescription": "The correct answer may be marked incorrectly or the scale inverted.",
+        "reformulateQuestion": "Reformulate question",
+        "reformulateDescription": "Current wording doesn't distinguish respondents by competency level.",
+        "reviewOptions": "Review answer options",
+        "reviewOptionsDescription": "Check that distractors are plausible and distinguishable.",
+        "monitorMetrics": "Monitor metrics",
+        "monitorDescription": "Collect more data and reassess after 50+ additional responses.",
+        "simplifyWording": "Simplify wording",
+        "simplifyDescription": "Question may be too complex or ambiguous for target audience.",
+        "addHints": "Add hints to options",
+        "addHintsDescription": "Consider adding context or clarification to answer options.",
+        "increaseComplexity": "Increase complexity",
+        "increaseDescription": "Add nuances or change distractors to be more attractive.",
+        "collectMoreData": "Collect more data",
+        "collectDescription": "Current response count ({count}) insufficient for reliable conclusions. Need at least 50."
+      },
+      "similarItems": {
+        "title": "Similar Flagged Items",
+        "description": "Items with similar issues"
+      },
+      "fullStats": "Full Item Statistics"
+    }
+  },
+  "flaggedDetail": {
+    "backToFlagged": "Flagged",
+    "backToFlaggedList": "Back to flagged items",
+    "questionText": "Question Text",
+    "viewFullStats": "Full Item Statistics",
+    "quickActions": "Quick Actions",
+    "itemFlaggedForReview": "Item flagged for review",
+    "moreReasons": "more",
+    "distractorEfficiency": "Distractor Efficiency",
+    "distractorDescription": "Shows the proportion of respondents who selected each answer option. Distractors with very low values (<5%) are ineffective.",
+    "distractorNote": "Distractors with very low values (<5%) are ineffective.",
+    "statusHistory": "Status Change History",
+    "severity": {
+      "critical": {
+        "title": "Critical Issue",
+        "label": "Critical"
+      },
+      "high": {
+        "title": "Serious Issue",
+        "label": "High"
+      },
+      "medium": {
+        "title": "Needs Attention",
+        "label": "Medium"
+      },
+      "low": {
+        "title": "Minor Issue",
+        "label": "Low"
+      }
+    },
+    "reasons": {
+      "negativeDiscrimination": "Negative discrimination index (rpb < 0) - item works in reverse direction",
+      "criticalDiscrimination": "Critically low discrimination index (rpb < 0.1) - item does not differentiate respondents",
+      "weakDiscrimination": "Weak discrimination index (0.1 <= rpb < 0.25) - marginal differentiation",
+      "tooHard": "Too high difficulty (p < 0.2) - less than 20% correct answers",
+      "tooEasy": "Too low difficulty (p > 0.9) - more than 90% correct answers",
+      "insufficientResponses": "Insufficient responses for reliable statistics (< 30)",
+      "flaggedForManualReview": "Item flagged for manual review"
+    },
+    "suggestedActions": {
+      "considerRemoval": "Consider removing item",
+      "considerRemovalDesc": "Negative rpb means the item works against the measured construct.",
+      "checkAnswerKey": "Check answer key",
+      "checkAnswerKeyDesc": "The correct answer may be marked incorrectly.",
+      "reformulateQuestion": "Reformulate the question",
+      "reformulateQuestionDesc": "Current wording does not differentiate respondents.",
+      "monitorMetrics": "Monitor metrics",
+      "monitorMetricsDesc": "Collect more data and re-evaluate.",
+      "simplifyWording": "Simplify wording",
+      "increaseComplexity": "Increase complexity",
+      "collectMoreData": "Collect more data",
+      "collectMoreDataDesc": "Current response count ({count}) is insufficient."
+    },
+    "accordion": {
+      "suggestedActions": "Suggested Actions",
+      "additionalStats": "Additional Statistics",
+      "distractorEfficiency": "Distractor Efficiency",
+      "statusHistory": "Change History",
+      "similarItems": "Similar Flagged Items"
+    },
+    "stats": {
+      "responses": "Responses",
+      "lastCalculation": "Last Calculation",
+      "previousRpb": "Previous rpb",
+      "rpbChange": "rpb Change"
+    },
+    "metrics": {
+      "difficultyIndex": "Difficulty Index",
+      "discriminationIndex": "Discrimination Index",
+      "responseCount": "Response Count",
+      "noData": "No Data",
+      "tooHard": "Too Hard",
+      "optimal": "Optimal",
+      "tooEasy": "Too Easy",
+      "negative": "Negative",
+      "critical": "Critical",
+      "warning": "Warning",
+      "good": "Good",
+      "excellent": "Excellent",
+      "insufficient": "Insufficient",
+      "minimum": "Minimum"
+    },
+    "actions": {
+      "recalculate": "Recalculate",
+      "moreActions": "More Actions",
+      "markAsReviewed": "Mark as Reviewed",
+      "approveAfterReview": "Approve after review",
+      "reviewedReason": "Reviewed and approved",
+      "retire": "Retire",
+      "retireItem": "Retire Item",
+      "retireReason": "Retired due to low psychometric indicators",
+      "excludeFromTesting": "Exclude from testing",
+      "changeStatus": "Change Status",
+      "currentStatus": "Current: {status}",
+      "viewFullStats": "Full Item Statistics",
+      "close": "Close",
+      "back": "Back",
+      "save": "Save",
+      "saving": "Saving...",
+      "cancel": "Cancel",
+      "retiring": "Retiring...",
+      "retireConfirm": "Retire"
+    },
+    "drawer": {
+      "actionsTitle": "Actions",
+      "actionsDescription": "Manage flagged item",
+      "changeStatusTitle": "Change Status",
+      "changeStatusDescription": "Select new status and provide reason"
+    },
+    "form": {
+      "newStatus": "New Status",
+      "selectStatus": "Select status",
+      "changeReason": "Reason for Change",
+      "reasonPlaceholder": "Describe the reason for status change..."
+    },
+    "dialog": {
+      "retireTitle": "Retire Item?",
+      "retireDescription": "The item will be marked as retired and will not be used in new tests. This action can be reversed by manually changing the status.",
+      "changeStatusTitle": "Change Item Status",
+      "changeStatusDescription": "Select new status and provide reason for the change."
+    },
+    "toast": {
+      "recalculateSuccess": "Recalculation Complete",
+      "metricsUpdated": "Psychometric metrics updated",
+      "recalculateFailed": "Failed to recalculate",
+      "error": "Error",
+      "statusUpdated": "Status Updated",
+      "newStatus": "New status: {status}",
+      "statusUpdateFailed": "Failed to update status",
+      "reasonRequired": "Please provide a reason for status change",
+      "itemRetired": "Item Retired",
+      "itemRetiredDescription": "Item will no longer be used in tests",
+      "retireFailed": "Failed to retire item",
+      "itemActivated": "Item Activated",
+      "itemMarkedAsReviewed": "Item marked as reviewed"
+    },
+    "validation": {
+      "reasonRequired": "Provide a reason for the change",
+      "reasonTooShort": "Reason too short",
+      "reasonTooLong": "Reason too long",
+      "minChars": "Minimum {count} characters",
+      "maxChars": "Maximum {count} characters",
+      "reasonTooShortWithRemaining": "Minimum {min} characters ({remaining} more needed)",
+      "reasonTooLongBy": "Exceeded by {excess} characters",
+      "charsUntilMin": "{remaining} more characters until minimum"
+    }
+  },
+  "bigFivePage": {
+    "pageTitle": "Big Five Reliability",
+    "pageDescription": "Cronbach's Alpha reliability analysis for personality trait measurements",
+    "metadataTitle": "Big Five Reliability - Psychometrics - SkillSoft",
+    "metadataDescription": "Cronbach Alpha reliability analysis for Big Five personality traits.",
+    "hero": {
+      "traitsReliable": "{reliable}/{total} Traits Reliable",
+      "needsAttention": "{count, plural, one {# trait needs attention} other {# traits need attention}}",
+      "couldImprove": "{count, plural, one {# trait could improve} other {# traits could improve}}",
+      "allReliable": "All traits are reliable",
+      "awaitingData": "Awaiting more data",
+      "average": "Average"
+    },
+    "summary": {
+      "title": "Summary Statistics",
+      "reliable": "Reliable",
+      "acceptable": "Acceptable",
+      "unreliable": "Unreliable",
+      "noData": "No Data",
+      "averageAlpha": "Average Alpha",
+      "highest": "Highest",
+      "lowest": "Lowest"
+    },
+    "stats": {
+      "competencies": "Competencies",
+      "items": "Items",
+      "questions": "Questions",
+      "responses": "Responses"
+    },
+    "emptyState": {
+      "title": "No Big Five Data",
+      "description": "Big Five trait reliability data has not been calculated yet. Run a psychometric audit to start the analysis."
+    },
+    "error": {
+      "loadingError": "Data Loading Error",
+      "failedToLoad": "Failed to load Big Five data"
+    },
+    "carousel": {
+      "traitDetails": "Trait Details",
+      "showing": "Showing {trait}, trait {index} of {total}",
+      "previousTrait": "Previous trait",
+      "nextTrait": "Next trait",
+      "paginationLabel": "Carousel pagination",
+      "slideLabel": "{index} of {total}",
+      "cardsLabel": "Big Five trait cards"
+    },
+    "card": {
+      "alpha": "alpha",
+      "tapForDetails": "Tap for details",
+      "details": "Details",
+      "ariaLabel": "{trait}: Alpha {alpha}, {status}. Tap for details."
+    },
+    "drawer": {
+      "cronbachAlpha": "Cronbach's Alpha",
+      "interpretation": "Interpretation",
+      "highScore": "High Score",
+      "lowScore": "Low Score",
+      "significance": "Significance",
+      "recommendation": "Recommendation",
+      "lastCalculated": "Last calculated",
+      "close": "Close"
+    },
+    "accordion": {
+      "title": "Detailed Trait Analysis",
+      "alpha": "Alpha",
+      "competencies": "Competencies",
+      "items": "Items",
+      "responses": "Responses",
+      "highScore": "High Score",
+      "lowScore": "Low Score",
+      "importance": "Significance",
+      "recommendations": "Recommendations",
+      "calculated": "Calculated",
+      "nearThreshold": "Near Threshold"
+    },
+    "chart": {
+      "comparisonTitle": "Trait Reliability Comparison",
+      "comparisonDescription": "Cronbach's Alpha across Big Five traits",
+      "average": "Avg",
+      "viewTraitNames": "View trait names",
+      "ariaLabel": "Bar chart comparing reliability across traits",
+      "noData": "No data",
+      "thresholds": {
+        "minimum": "Min",
+        "good": "Good",
+        "excellent": "Excellent"
+      },
+      "status": {
+        "excellent": "Excellent",
+        "good": "Good",
+        "acceptable": "Acceptable",
+        "unreliable": "Unreliable"
+      },
+      "abbrev": {
+        "openness": "O",
+        "conscientiousness": "C",
+        "extraversion": "E",
+        "agreeableness": "A",
+        "emotionalStability": "ES"
+      }
+    },
+    "recommendations": {
+      "excellentReliability": "Excellent Reliability",
+      "excellentDescription": "The \"{trait}\" scale demonstrates high internal consistency. Measurement results are stable and reproducible.",
+      "improvementRecommended": "Improvement Recommended",
+      "improvementDescription": "Reliability is acceptable, but adding questions or reviewing existing ones is recommended to improve measurement accuracy for \"{trait}\".",
+      "needsAttention": "Needs Attention",
+      "needsAttentionDescription": "Low reliability for \"{trait}\" scale. Review questions and remove those that lower consistency.",
+      "actionRecommendation": "Recommendation",
+      "actionDescription": "Check each question's correlation with the scale total score. Remove questions with negative or weak correlation.",
+      "insufficientData": "Insufficient Data",
+      "insufficientDataDescription": "More responses are needed to calculate reliability for \"{trait}\". Continue data collection.",
+      "nearThreshold": "Near Threshold",
+      "nearThresholdDescription": "Alpha is at the borderline of acceptable level. Small improvements could move the scale to \"Reliable\" category."
+    },
+    "traits": {
+      "openness": {
+        "label": "Openness to Experience",
+        "description": "Creativity, curiosity, intellectual interests",
+        "highScore": "Creativity, curiosity, openness to new experiences",
+        "lowScore": "Practicality, traditionalism, preference for proven methods",
+        "importance": "Important for roles requiring innovation and creative thinking"
+      },
+      "conscientiousness": {
+        "label": "Conscientiousness",
+        "description": "Organization, dependability, self-discipline",
+        "highScore": "Organization, reliability, goal-orientation",
+        "lowScore": "Flexibility, spontaneity, less structured approach",
+        "importance": "Key predictor of performance across most positions"
+      },
+      "extraversion": {
+        "label": "Extraversion",
+        "description": "Energy, sociability, assertiveness",
+        "highScore": "Energy, sociability, confidence in social situations",
+        "lowScore": "Reserved nature, preference for individual work",
+        "importance": "Critical for high social interaction positions"
+      },
+      "agreeableness": {
+        "label": "Agreeableness",
+        "description": "Cooperation, trust, empathy",
+        "highScore": "Cooperation, empathy, willingness to help",
+        "lowScore": "Independence, competitiveness, directness",
+        "importance": "Important for teamwork and customer service positions"
+      },
+      "emotionalStability": {
+        "label": "Emotional Stability",
+        "description": "Calmness, stress resilience, emotional control",
+        "highScore": "Calmness, stress resilience, emotional control",
+        "lowScore": "Emotional reactivity, sensitivity to stress",
+        "importance": "Critical for high-stress, high-responsibility positions"
+      }
+    }
+  },
+  "insights": {
+    "suggestedActions": "Suggested actions:",
+    "viewDetails": "View details",
+    "noInsights": {
+      "title": "No actionable insights at this time",
+      "description": "Your assessment items are performing well"
+    },
+    "negativeDiscrimination": {
+      "title": "Questions may be misleading",
+      "message": "{count} question(s) have negative discrimination, meaning wrong answers correlate with higher overall scores.",
+      "explanation": "This typically happens when questions are confusing, have incorrect answer keys, or measure something different than intended.",
+      "action1": "Review question wording for ambiguity",
+      "action2": "Verify the correct answer is properly marked",
+      "action3": "Consider removing or revising these questions",
+      "linkText": "Review flagged items"
+    },
+    "tooEasy": {
+      "title": "Questions may be too easy",
+      "message": "{count} question(s) have very high success rates (p > 0.9), providing little differentiation.",
+      "explanation": "When almost everyone answers correctly, the question does not help distinguish between skill levels.",
+      "action1": "Increase complexity of the question",
+      "action2": "Add more challenging answer options",
+      "action3": "Consider replacing with more discriminating items",
+      "linkText": "View easy items"
+    },
+    "tooHard": {
+      "title": "Questions may be too difficult",
+      "message": "{count} question(s) have very low success rates (p < 0.2), which may frustrate test-takers.",
+      "explanation": "When almost no one answers correctly, the question may be beyond the expected skill level or poorly worded.",
+      "action1": "Simplify the question wording",
+      "action2": "Ensure the content matches the target audience",
+      "action3": "Check if the correct answer is achievable",
+      "linkText": "View difficult items"
+    },
+    "unreliableCompetencies": {
+      "title": "Test Reliability below recommended",
+      "message": "{count} competency measurement(s) have Cronbach's Alpha below 0.6.",
+      "explanation": "Test Reliability Score (Cronbach's Alpha) measures internal consistency. Low values suggest the questions may not be measuring the same underlying competency.",
+      "action1": "Review questions for alignment with the competency",
+      "action2": "Consider adding more questions to increase reliability",
+      "action3": "Remove items that lower the overall reliability",
+      "linkText": "View unreliable competencies"
+    },
+    "probationItems": {
+      "title": "Many items awaiting validation",
+      "message": "{count} question(s) are still gathering data (< 50 responses).",
+      "explanation": "Psychometric metrics require sufficient response data to be reliable. Consider increasing test deployment.",
+      "action1": "Increase test deployment to gather more responses",
+      "action2": "Review items after 50+ responses",
+      "action3": "Consider prioritizing critical competency areas",
+      "linkText": "View probation items"
+    },
+    "allReliable": {
+      "title": "All competencies are reliable",
+      "message": "All {count} competency measurements meet reliability standards.",
+      "explanation": "Your assessment instruments are performing well. Continue monitoring for any changes.",
+      "action1": "Continue regular psychometric audits",
+      "action2": "Monitor for any degradation over time",
+      "linkText": "View all competencies"
+    },
+    "singleInsight": {
+      "negativeRpb": {
+        "title": "Negative Question Effectiveness",
+        "message": "This question has a Question Effectiveness (rpb) of {value}, indicating it may be misleading.",
+        "explanation": "Wrong answers are correlating with higher overall scores. This suggests the question is confusing or the answer key may be incorrect.",
+        "action1": "Review the question wording",
+        "action2": "Verify the correct answer is marked",
+        "action3": "Consider retiring this question"
+      },
+      "tooEasy": {
+        "title": "Very Easy Question",
+        "message": "This question has a difficulty (p) of {value}. Almost everyone answers it correctly.",
+        "explanation": "Questions with p > 0.9 provide little value in distinguishing between skill levels.",
+        "action1": "Increase question complexity",
+        "action2": "Add more challenging distractors"
+      },
+      "tooHard": {
+        "title": "Very Difficult Question",
+        "message": "This question has a difficulty (p) of {value}. Very few people answer it correctly.",
+        "explanation": "Questions with p < 0.2 may be beyond the expected skill level or poorly worded.",
+        "action1": "Simplify the question",
+        "action2": "Check if content matches target audience"
+      },
+      "lowAlpha": {
+        "title": "Low Reliability Score",
+        "message": "This competency has a Test Reliability Score of {value}, below the recommended 0.7 threshold.",
+        "explanation": "Low reliability suggests the questions may not be consistently measuring the same competency.",
+        "action1": "Review question alignment",
+        "action2": "Consider adding more questions",
+        "action3": "Remove inconsistent items"
+      }
+    }
+  },
+  "suggestedActionsCard": {
+    "title": "Suggested Actions",
+    "execute": "Execute",
+    "moreRecommendations": "+ {count} more recommendations",
+    "priority": {
+      "high": "Critical",
+      "medium": "Recommended",
+      "low": "Optional"
+    }
+  }
+}

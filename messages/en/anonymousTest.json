@@ -1,0 +1,77 @@
+{
+  "info": {
+    "questions": "Questions",
+    "timeLimit": "Time Limit",
+    "minutes": "{count} min",
+    "noTimeLimit": "No limit"
+  },
+  "feature": {
+    "skipQuestions": "You can skip questions",
+    "backNavigation": "You can go back to previous questions"
+  },
+  "privacy": {
+    "title": "Privacy Notice",
+    "description": "Your responses are anonymous. Only your name will be shared with the test administrator."
+  },
+  "action": {
+    "startTest": "Start Test",
+    "starting": "Starting...",
+    "tryAgain": "Try Again",
+    "previous": "Previous",
+    "next": "Next",
+    "skip": "Skip",
+    "finish": "Finish",
+    "closeWindow": "Close Window"
+  },
+  "error": {
+    "invalidLink": "Invalid Link",
+    "noToken": "No share link token provided.",
+    "linkNotFound": "Link Not Found",
+    "linkNotFoundDesc": "This share link does not exist or has been deleted.",
+    "linkExpired": "Link Expired",
+    "linkExpiredDesc": "This share link has expired and is no longer valid.",
+    "linkRevoked": "Link Revoked",
+    "linkRevokedDesc": "This share link has been revoked by the owner.",
+    "linkMaxUses": "Link Limit Reached",
+    "linkMaxUsesDesc": "This share link has reached its maximum number of uses.",
+    "testNotReady": "Test Not Available",
+    "testNotReadyDesc": "This test is not currently available. Please contact the administrator.",
+    "rateLimited": "Too Many Attempts",
+    "rateLimitedDesc": "You have made too many requests. Please wait a few minutes and try again.",
+    "genericTitle": "Something Went Wrong",
+    "genericDesc": "An unexpected error occurred. Please try again.",
+    "nameRequired": "First name and last name are required.",
+    "timeUp": "Time is up! Please submit your answers."
+  },
+  "progress": {
+    "question": "Question"
+  },
+  "complete": {
+    "title": "Complete Your Test",
+    "description": "Please provide your information to submit your results.",
+    "firstName": "First Name",
+    "firstNamePlaceholder": "Enter your first name",
+    "lastName": "Last Name",
+    "lastNamePlaceholder": "Enter your last name",
+    "email": "Email (optional)",
+    "emailPlaceholder": "Enter your email",
+    "notes": "Notes (optional)",
+    "notesPlaceholder": "Any additional notes",
+    "submit": "Submit Results",
+    "submitting": "Submitting..."
+  },
+  "confirm": {
+    "title": "Submit Test?",
+    "description": "Are you sure you want to submit your test? You will not be able to change your answers after submission.",
+    "cancel": "Cancel",
+    "proceed": "Submit Test"
+  },
+  "result": {
+    "passedTitle": "Congratulations!",
+    "failedTitle": "Test Completed",
+    "thankYou": "Thank you for completing the test.",
+    "correct": "correct answers",
+    "timeTaken": "total time",
+    "breakdown": "Competency Breakdown"
+  }
+}

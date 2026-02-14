@@ -1,0 +1,17 @@
+{
+  "byOrder": "По порядку",
+  "byStatus": "По статусу",
+  "byCompetency": "По компетенции",
+  "byDate": "По дате",
+  "byName": "По названию",
+  "ascending": "По возрастанию",
+  "descending": "По убыванию",
+  "newest": "Сначала новые",
+  "oldest": "Сначала старые",
+  "sortBy": "Сортировать по",
+  "sortByName": "Сортировка по названию",
+  "sortByIndicators": "Сортировка по индикаторам",
+  "sortByModified": "Сортировка по дате изменения",
+  "sortAscending": "По возрастанию",
+  "sortDescending": "По убыванию"
+}

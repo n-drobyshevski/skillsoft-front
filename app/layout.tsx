@@ -14,6 +14,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { shadcn } from '@clerk/themes';
 import { SkipLinks, MainContentAnchor } from "@/components/accessibility";
 import { HtmlLangSetter } from "@/components/providers/HtmlLangSetter";
+import { SHARED_NAMESPACES, pickMessages } from "@/i18n/namespaces";
 
 const inter = Inter({
 	subsets: ["latin", "cyrillic"],
@@ -96,16 +97,27 @@ const clerkAppearance = {
  *
  * These are inside <Suspense> so that getLocale()/getMessages() (which read
  * headers/cookies) don't block the static HTML shell from being prerendered.
+ *
+ * Bundle optimization: Only shared namespaces are passed to NextIntlClientProvider.
+ * Section-specific namespaces are loaded by layout-level providers in:
+ * - app/(workspace)/psychometrics/layout.tsx
+ * - app/(workspace)/test-templates/layout.tsx (top-level)
+ * - app/(workspace)/profile/layout.tsx
+ * Server components still have access to ALL messages via getTranslations().
  */
 async function RootProviders({ children }: { children: React.ReactNode }) {
 	const locale = await getLocale();
 	const messages = await getMessages();
+	const sharedMessages = pickMessages(
+		messages as Record<string, unknown>,
+		SHARED_NAMESPACES,
+	);
 	const publishableKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY;
 
 	if (publishableKey && publishableKey.trim() !== '') {
 		return (
 			<ClerkProvider appearance={clerkAppearance}>
-				<NextIntlClientProvider messages={messages} locale={locale}>
+				<NextIntlClientProvider messages={sharedMessages} locale={locale}>
 					<HtmlLangSetter locale={locale} />
 					<LayoutContent>{children}</LayoutContent>
 				</NextIntlClientProvider>
@@ -115,7 +127,7 @@ async function RootProviders({ children }: { children: React.ReactNode }) {
 
 	// Fallback without ClerkProvider (for development without Clerk keys)
 	return (
-		<NextIntlClientProvider messages={messages} locale={locale}>
+		<NextIntlClientProvider messages={sharedMessages} locale={locale}>
 			<HtmlLangSetter locale={locale} />
 			<LayoutProvider>
 				<QueryProvider>

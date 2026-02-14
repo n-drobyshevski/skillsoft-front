@@ -1,0 +1,14 @@
+{
+  "title": "Behavioral Indicators",
+  "pageDescription": "Define and manage measurable behavioral indicators for competency assessment",
+  "create": "Create Indicator",
+  "edit": "Edit Indicator",
+  "delete": "Delete Indicator",
+  "name": "Name",
+  "description": "Description",
+  "examples": "Examples",
+  "counterExamples": "Counter Examples",
+  "observability": "Observability Level",
+  "measurementType": "Measurement Type",
+  "backToIndicators": "Back to Indicators"
+}

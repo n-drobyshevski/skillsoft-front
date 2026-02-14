@@ -1,0 +1,178 @@
+{
+  "save": "Сохранить",
+  "saving": "Сохранение...",
+  "create": "Создать",
+  "creating": "Создание...",
+  "update": "Обновить",
+  "updating": "Обновление...",
+  "cancel": "Отмена",
+  "reset": "Сбросить",
+  "delete": "Удалить",
+  "confirm": "Подтвердить",
+  "submit": "Отправить",
+  "close": "Закрыть",
+  "basicInformation": "Основная информация",
+  "settings": "Настройки",
+  "advanced": "Дополнительно",
+  "title": "Название",
+  "name": "Имя",
+  "description": "Описание",
+  "status": "Статус",
+  "weight": "Вес",
+  "order": "Порядок",
+  "active": "Активен",
+  "inactive": "Неактивен",
+  "required": "Обязательно",
+  "optional": "Опционально",
+  "characters": "символов",
+  "minCharacters": "Минимум {min} символов",
+  "maxCharacters": "Максимум {max} символов",
+  "errorOccurred": "Произошла ошибка",
+  "pleaseFixErrors": "Исправьте ошибки перед отправкой",
+  "weightValidationError": "Исправьте ошибки валидации веса перед отправкой",
+  "duplicateTitle": "Такое название уже может существовать",
+  "saveFailed": "Не удалось сохранить",
+  "saveSuccess": "Успешно сохранено",
+  "createFailed": "Не удалось создать",
+  "createSuccess": "Успешно создано",
+  "updateFailed": "Не удалось обновить",
+  "updateSuccess": "Успешно обновлено",
+  "deleteFailed": "Не удалось удалить",
+  "deleteSuccess": "Успешно удалено",
+  "observabilityLevel": "Уровень наблюдаемости",
+  "measurementType": "Тип измерения",
+  "examples": "Примеры",
+  "counterExamples": "Контрпримеры",
+  "approvalStatus": "Статус утверждения",
+  "contextScope": "Область контекста",
+  "questionText": "Текст вопроса",
+  "questionType": "Тип вопроса",
+  "difficultyLevel": "Уровень сложности",
+  "answerOptions": "Варианты ответов",
+  "correctAnswer": "Правильный ответ",
+  "explanation": "Пояснение",
+  "tags": "Теги",
+  "addOption": "Добавить вариант",
+  "removeOption": "Удалить вариант",
+  "saveChanges": "Сохранить изменения",
+  "indicator": {
+    "sections": {
+      "coreInformation": "Основная информация",
+      "coreInformationDesc": "Название и описание поведенческого индикатора",
+      "classification": "Классификация и метрики",
+      "classificationDesc": "Наблюдаемость, тип измерения и вес",
+      "contextualExamples": "Контекстные примеры",
+      "contextualExamplesDesc": "Приведите примеры для пояснения индикатора",
+      "statusApproval": "Статус и утверждение",
+      "statusApprovalDesc": "Управление видимостью и процессом утверждения"
+    },
+    "fields": {
+      "title": "Название",
+      "description": "Описание",
+      "observabilityLevel": "Уровень наблюдаемости",
+      "measurementType": "Тип измерения",
+      "weight": "Вес",
+      "orderIndex": "Порядковый номер",
+      "contextScope": "Область применения",
+      "examples": "Положительные примеры",
+      "counterExamples": "Контрпримеры",
+      "approvalStatus": "Статус утверждения",
+      "visibility": "Видимость"
+    },
+    "placeholders": {
+      "title": "например, Проактивная коммуникация",
+      "description": "Подробное описание того, что измеряет этот индикатор...",
+      "selectLevel": "Выберите уровень",
+      "selectType": "Выберите тип",
+      "selectContextScope": "Выберите область применения",
+      "examples": "Перечислите поведение, демонстрирующее этот индикатор...",
+      "counterExamples": "Перечислите поведение, противоречащее этому индикатору...",
+      "selectStatus": "Выберите статус"
+    },
+    "buttons": {
+      "adjustWeights": "Скорректировать веса",
+      "updatePreview": "Обновить превью",
+      "createIndicator": "Создать индикатор"
+    },
+    "alerts": {
+      "weightRemaining": "Осталось только {remaining} веса для этой компетенции."
+    },
+    "help": {
+      "contextScope": "Определяет применимость этого индикатора. «Универсальные» индикаторы контекстно-нейтральны и используются в Сценарии A (Паспорт компетенций).",
+      "contextScopeNote": "«Универсальные» индикаторы включаются в Сценарий A (Общий обзор / Паспорт компетенций). Другие области — для целевых оценок."
+    }
+  },
+  "question": {
+    "sections": {
+      "questionDetails": "Детали вопроса",
+      "questionDetailsDesc": "Текст вопроса и классификация",
+      "configuration": "Конфигурация",
+      "configurationDesc": "Настройки оценивания, времени и отображения",
+      "answerOptions": "Варианты ответов",
+      "answerOptionsDesc": "Настройка вариантов множественного выбора",
+      "likertOptions": "Настройки шкалы Лайкерта",
+      "likertOptionsDesc": "Настройка точек шкалы и их меток"
+    },
+    "fields": {
+      "questionText": "Текст вопроса",
+      "questionType": "Тип вопроса",
+      "difficultyLevel": "Уровень сложности",
+      "contextTags": "Контекстные теги",
+      "scoringRubric": "Критерии оценки",
+      "orderIndex": "Порядковый номер",
+      "timeLimit": "Время (сек)",
+      "visibility": "Видимость"
+    },
+    "placeholders": {
+      "questionText": "например, Как вы справляетесь с жёсткими сроками?",
+      "selectType": "Выберите тип",
+      "selectLevel": "Выберите уровень",
+      "selectTags": "Выберите теги...",
+      "searchTags": "Поиск тегов...",
+      "scoringRubric": "например, На основе ясности и выполнимости",
+      "answerOption": "Введите вариант ответа",
+      "score": "Балл",
+      "sjtAction": "Опишите действие, которое вы бы предприняли",
+      "likertLabel": "Метка для точки {index}"
+    },
+    "buttons": {
+      "addOption": "Добавить вариант",
+      "updatePreview": "Обновить превью",
+      "createQuestion": "Создать вопрос"
+    },
+    "labels": {
+      "correct": "Правильный",
+      "noTagFound": "Тег не найден."
+    },
+    "alerts": {
+      "scenarioAIncompatibleTitle": "Несовместимость со Сценарием A",
+      "scenarioAIncompatibleDesc": "Этот вопрос не имеет тега «GENERAL» и не будет включён в универсальные оценки (Паспорт компетенций). Добавьте тег «GENERAL», если сценарий контекстно-нейтральный и применим ко всем ролям."
+    },
+    "tags": {
+      "GENERAL": "Общий",
+      "GENERAL_DESC": "Контекстно-нейтральный, без отраслевого жаргона (Сценарий A)",
+      "IT": "ИТ",
+      "IT_DESC": "Контекст информационных технологий",
+      "SALES": "Продажи",
+      "SALES_DESC": "Контекст продаж и маркетинга",
+      "FINANCE": "Финансы",
+      "FINANCE_DESC": "Контекст финансовой отрасли",
+      "MEDICAL": "Медицина",
+      "MEDICAL_DESC": "Контекст здравоохранения",
+      "ENGINEERING": "Инженерия",
+      "ENGINEERING_DESC": "Инженерный контекст",
+      "JUNIOR": "Младший",
+      "JUNIOR_DESC": "Начальный уровень сложности",
+      "MID": "Средний",
+      "MID_DESC": "Средний уровень сложности",
+      "SENIOR": "Старший",
+      "SENIOR_DESC": "Высокий уровень сложности"
+    }
+  },
+  "competency": {
+    "placeholders": {
+      "name": "например, Стратегическое лидерство",
+      "description": "Подробное описание компетенции и того, что она измеряет..."
+    }
+  }
+}

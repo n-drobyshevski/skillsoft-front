@@ -1,0 +1,369 @@
+{
+  "page": {
+    "title": "My Profile",
+    "description": "View your assessment results and competency passport",
+    "metaTitle": "Profile | SkillSoft",
+    "metaDescription": "View your test results, competency passport, and personality profile"
+  },
+  "hero": {
+    "user": "User",
+    "online": "Online",
+    "offline": "Offline",
+    "editProfile": "Edit",
+    "settings": "Settings",
+    "memberSince": "Member since",
+    "memberSinceAgo": "{time} ago",
+    "organization": "Organization",
+    "noOrganization": "No organization",
+    "lastActive": "Last active {time}",
+    "defaultUser": "User",
+    "onlineStatus": "Online status indicator",
+    "badges": {
+      "roles": {
+        "admin": "Administrator",
+        "editor": "HR Professional",
+        "user": "Candidate"
+      },
+      "verified": "Verified",
+      "new": "New"
+    },
+    "mobileActions": "Profile actions"
+  },
+  "stats": {
+    "regionLabel": "Quick statistics",
+    "testsCompleted": "Tests Completed",
+    "testsCompletedShort": "Tests",
+    "averageScore": "Average Score",
+    "averageScoreShort": "Avg Score",
+    "passRate": "Pass Rate",
+    "passRateShort": "Pass %",
+    "lastTest": "Last Test",
+    "lastTestShort": "Last",
+    "profile": "Profile",
+    "profileProgress": "Profile",
+    "profileComplete": "Profile Complete",
+    "noTests": "No tests",
+    "noDate": "—",
+    "noTestsYet": "No tests yet",
+    "neverTested": "Never",
+    "trend": "Trend",
+    "trendUp": "up",
+    "trendDown": "down",
+    "trendStable": "stable",
+    "excellent": "Excellent",
+    "good": "Good",
+    "average": "Average",
+    "low": "Low",
+    "highRate": "High",
+    "goodRate": "Good",
+    "averageRate": "Average",
+    "lowRate": "Low",
+    "scoreLabels": {
+      "excellent": "Excellent",
+      "good": "Good",
+      "average": "Average",
+      "low": "Needs Work"
+    },
+    "passRateLabels": {
+      "high": "High",
+      "good": "Good",
+      "average": "Average",
+      "low": "Low"
+    },
+    "accessibility": {
+      "avgScoreLabel": "Average assessment score",
+      "passRateLabel": "Test pass rate percentage"
+    },
+    "vsLastMonth": "vs last month",
+    "vsPreviousTests": "vs previous tests",
+    "noData": "No data",
+    "calculating": "Calculating...",
+    "tests": "{count, plural, one {# test} other {# tests}}",
+    "daysAgo": "{count, plural, one {# day ago} other {# days ago}}",
+    "hoursAgo": "{count, plural, one {# hour ago} other {# hours ago}}",
+    "minutesAgo": "{count, plural, one {# minute ago} other {# minutes ago}}",
+    "justNow": "Just now"
+  },
+  "passport": {
+    "title": "Big Five Profile",
+    "titleShort": "Big Five",
+    "subtitle": "Personality Passport",
+    "basedOn": "Based on {count, plural, one {# assessment} other {# assessments}}",
+    "dominantTrait": "Dominant trait",
+    "noData": "No profile data",
+    "noDataDescription": "Complete personality assessments to see your Big Five profile",
+    "takeAssessment": "Take Assessment",
+    "confidence": {
+      "title": "Confidence",
+      "low": "Low",
+      "medium": "Medium",
+      "high": "High"
+    },
+    "confidenceTooltip": {
+      "low": "Complete more tests to improve accuracy",
+      "medium": "Sufficient data for basic profile",
+      "high": "Reliable profile based on multiple assessments"
+    },
+    "traits": {
+      "OPENNESS": "Openness",
+      "CONSCIENTIOUSNESS": "Conscientiousness",
+      "EXTRAVERSION": "Extraversion",
+      "AGREEABLENESS": "Agreeableness",
+      "EMOTIONAL_STABILITY": "Emotional Stability"
+    },
+    "traitDescriptions": {
+      "OPENNESS": "Curiosity, creativity, and openness to new experiences",
+      "CONSCIENTIOUSNESS": "Organization, dependability, and self-discipline",
+      "EXTRAVERSION": "Sociability, assertiveness, and positive emotions",
+      "AGREEABLENESS": "Cooperation, trust, and helpfulness",
+      "EMOTIONAL_STABILITY": "Calmness, emotional resilience, and stress tolerance"
+    },
+    "traitLevels": {
+      "veryLow": "Very Low",
+      "low": "Low",
+      "average": "Average",
+      "high": "High",
+      "veryHigh": "Very High"
+    },
+    "viewDetails": "View Details",
+    "lastUpdated": "Last updated {time}"
+  },
+  "competencies": {
+    "title": "Top Competencies",
+    "titleShort": "Competencies",
+    "basedOn": "Based on {count, plural, one {# assessment} other {# assessments}}",
+    "viewAll": "View all",
+    "viewDetails": "View details",
+    "assessments": "{count, plural, one {# assessment} other {# assessments}}",
+    "score": "Score",
+    "trend": {
+      "up": "Improving",
+      "down": "Declining",
+      "stable": "Stable"
+    },
+    "level": {
+      "beginner": "Beginner",
+      "developing": "Developing",
+      "competent": "Competent",
+      "proficient": "Proficient",
+      "expert": "Expert"
+    },
+    "empty": {
+      "title": "No competencies yet",
+      "description": "Complete some tests to see your strongest competencies",
+      "action": "Start testing"
+    },
+    "showMore": "Show {count} more",
+    "showLess": "Show less"
+  },
+  "results": {
+    "title": "Recent Results",
+    "titleShort": "Results",
+    "viewAll": "All results",
+    "viewResult": "View result",
+    "filterAll": "All",
+    "filterOverview": "Overview",
+    "filterJobFit": "Job Fit",
+    "filterTeamFit": "Team Fit",
+    "noResults": "No results yet",
+    "noResultsDescription": "Complete your first test to see results here",
+    "noFilterResults": "No results for selected filter",
+    "noFilterResultsDescription": "Try selecting a different goal filter",
+    "startTesting": "Start testing",
+    "score": "Score",
+    "passed": "Passed",
+    "failed": "Failed",
+    "pending": "Pending",
+    "inProgress": "In Progress",
+    "questions": "{count, plural, one {# question} other {# questions}}",
+    "duration": "Duration",
+    "completedAt": "Completed",
+    "completedAgo": "{time} ago",
+    "goal": "Goal",
+    "template": "Template",
+    "attempt": "Attempt {number}",
+    "bestScore": "Best: {score}%",
+    "showMore": "Show more",
+    "showLess": "Show less"
+  },
+  "sharedTests": {
+    "title": "Shared with Me",
+    "titleShort": "Shared",
+    "subtitle": "Tests shared by colleagues",
+    "viewAll": "View all",
+    "take": "Take",
+    "view": "View",
+    "permissions": {
+      "view": "View",
+      "edit": "Edit",
+      "manage": "Manage"
+    },
+    "expires": "Expires {time}",
+    "expired": "Access expired",
+    "noExpiry": "No expiry",
+    "empty": {
+      "title": "No shared tests",
+      "description": "Tests shared with you by colleagues will appear here"
+    },
+    "sharedBy": "Shared by {name}",
+    "sharedOn": "Shared {time}"
+  },
+  "edit": {
+    "pageTitle": "Edit Profile",
+    "pageDescription": "Update your personal information and settings",
+    "metaTitle": "Edit Profile | SkillSoft",
+    "backToProfile": "Back to Profile",
+    "tabs": {
+      "account": "Account",
+      "results": "Results",
+      "passport": "Passport",
+      "preferences": "Preferences"
+    },
+    "account": {
+      "title": "Personal Information",
+      "description": "Update your personal details",
+      "avatarSection": "Profile Photo",
+      "avatarManaged": "Avatar is managed via Clerk.",
+      "changeInSettings": "Change it in account settings.",
+      "openClerkSettings": "Open Clerk Settings",
+      "firstName": "First Name",
+      "firstNamePlaceholder": "Enter your first name",
+      "lastName": "Last Name",
+      "lastNamePlaceholder": "Enter your last name",
+      "email": "Email",
+      "emailReadOnly": "Email cannot be changed here. Update via Clerk settings.",
+      "organization": "Organization",
+      "organizationPlaceholder": "Organization name (optional)",
+      "bio": "Bio",
+      "bioPlaceholder": "Tell us about yourself (optional)",
+      "bioHelp": "Brief description about yourself"
+    },
+    "preferences": {
+      "title": "Preferences",
+      "description": "Customize your experience",
+      "language": "Language",
+      "languageDescription": "Select your preferred language",
+      "theme": "Theme",
+      "themeDescription": "Choose light or dark mode",
+      "themeLight": "Light",
+      "themeDark": "Dark",
+      "themeSystem": "System",
+      "notifications": "Notifications",
+      "notificationsDescription": "Manage your notification preferences",
+      "emailNotifications": "Email notifications",
+      "emailNotificationsDescription": "Receive email notifications for important updates"
+    },
+    "actions": {
+      "save": "Save Changes",
+      "saving": "Saving...",
+      "cancel": "Cancel",
+      "reset": "Reset"
+    },
+    "validation": {
+      "firstNameRequired": "First name is required",
+      "firstNameMin": "First name must be at least 2 characters",
+      "firstNameMax": "First name must not exceed 50 characters",
+      "lastNameRequired": "Last name is required",
+      "lastNameMin": "Last name must be at least 2 characters",
+      "lastNameMax": "Last name must not exceed 50 characters",
+      "organizationMax": "Organization name must not exceed 100 characters",
+      "bioMax": "Bio must not exceed 500 characters"
+    },
+    "messages": {
+      "saveSuccess": "Profile updated successfully",
+      "saveError": "Failed to update profile",
+      "saveErrorDescription": "Please try again later",
+      "noChanges": "No changes to save",
+      "unsavedChanges": "You have unsaved changes",
+      "unsavedChangesDescription": "Are you sure you want to leave? Your changes will be lost.",
+      "discardChanges": "Discard changes",
+      "keepEditing": "Keep editing",
+      "draftRestored": "Draft restored",
+      "draftRestoredDescription": "Your previous changes have been restored",
+      "draftDiscarded": "Draft discarded",
+      "formHasError": "Form has 1 error. Please correct before submitting.",
+      "formHasErrors": "Form has {count} errors. Please correct before submitting."
+    },
+    "resultsTab": {
+      "title": "Assessment Results",
+      "description": "View all your completed assessments",
+      "viewResult": "View",
+      "noResults": "No results yet"
+    },
+    "passportTab": {
+      "title": "Competency Passport",
+      "description": "Your skills and personality profile",
+      "viewPassport": "View Full Passport",
+      "noPassport": "No passport data yet"
+    }
+  },
+  "errors": {
+    "loadFailed": "Failed to load profile",
+    "loadFailedDescription": "Please try refreshing the page",
+    "saveFailed": "Failed to save changes",
+    "saveFailedDescription": "Please try again later",
+    "sectionError": "Failed to load this section",
+    "sectionErrorDescription": "Please try refreshing the page",
+    "retry": "Retry",
+    "goBack": "Go Back",
+    "notFound": "Profile not found",
+    "notFoundDescription": "The profile you're looking for doesn't exist",
+    "unauthorized": "Unauthorized",
+    "unauthorizedDescription": "You don't have permission to view this profile"
+  },
+  "empty": {
+    "new-user": {
+      "title": "Welcome to SkillSoft!",
+      "description": "Complete your first assessment to start building your competency passport",
+      "cta": "Browse Tests"
+    },
+    "no-tests": {
+      "title": "No tests completed",
+      "description": "Complete your first test to see results here",
+      "cta": "Start Testing"
+    },
+    "no-results": {
+      "title": "No results found",
+      "description": "No results match your current filter",
+      "cta": "Clear Filters"
+    },
+    "no-competencies": {
+      "title": "No competencies assessed",
+      "description": "Complete competency-based tests to see your strengths",
+      "cta": "Find Tests"
+    },
+    "no-passport": {
+      "title": "No personality profile",
+      "description": "Take personality assessments to generate your Big Five profile",
+      "cta": "Take Assessment"
+    }
+  },
+  "accessibility": {
+    "profilePage": "Profile page",
+    "heroSection": "User information section",
+    "statsSection": "Statistics section",
+    "passportSection": "Personality passport section",
+    "competenciesSection": "Top competencies section",
+    "resultsSection": "Recent results section",
+    "sharedTestsSection": "Shared tests section",
+    "editButton": "Edit profile",
+    "settingsButton": "Profile settings",
+    "filterTabs": "Filter by goal",
+    "radarChart": "Big Five personality radar chart",
+    "barChart": "Big Five personality bar chart",
+    "scoreIndicator": "Score: {score} percent",
+    "trendIndicator": "Trend: {trend}",
+    "loadingProfile": "Loading profile...",
+    "loadingStats": "Loading statistics...",
+    "loadingResults": "Loading results...",
+    "chartDescription": "Your Big Five personality traits measured on 5 dimensions from multiple assessments",
+    "traitColumn": "Trait",
+    "scoreColumn": "Score (0-100)",
+    "noResultsForFilter": "No results found for {filter} filter",
+    "showingResults": "Showing {count, plural, one {# result} other {# results}}",
+    "filterChanged": "Filter changed to {filter}",
+    "competencyList": "Top competencies ranked by score",
+    "competencyItem": "{name}, rank {rank}, score {score}%",
+    "resultItem": "{name} - {status}, Score: {score}%"
+  }
+}

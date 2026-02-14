@@ -1,0 +1,53 @@
+{
+  "title": "Мои тесты",
+  "description": "Просмотр назначенных тестов и отслеживание прогресса",
+  "noAssignedTests": "Нет назначенных тестов",
+  "whenHrAssigns": "Когда HR-отдел назначит вам тестирование, оно появится здесь. Пока можете ознакомиться с каталогом тестов.",
+  "testCatalog": "Каталог тестов",
+  "noTests": "Нет тестов",
+  "noAssignedTestsYet": "У вас пока нет назначенных тестов.",
+  "allTestsStarted": "Все тесты начаты!",
+  "greatWorkAllStarted": "Отличная работа! Все назначенные тесты уже начаты или завершены. Проверьте активные тесты.",
+  "activeTests": "Активные тесты",
+  "noActiveTests": "Нет активных тестов",
+  "noTestsInProgress": "У вас нет тестов в процессе прохождения. Начните новый тест!",
+  "startTest": "Начать тест",
+  "noCompletedTests": "Нет завершенных тестов",
+  "noTestsCompletedYet": "Вы ещё не завершили ни одного теста. Начните с ожидающих тестов!",
+  "pendingTests": "Ожидающие тесты",
+  "tabs": {
+    "all": "Все",
+    "pending": "Ожидающие",
+    "inProgress": "В процессе",
+    "completed": "Завершённые"
+  },
+  "stats": {
+    "total": "Всего",
+    "pending": "Ожидающие",
+    "inProgress": "В процессе",
+    "completed": "Завершено"
+  },
+  "status": {
+    "notStarted": "Ожидает",
+    "inProgress": "В процессе",
+    "completed": "Завершён",
+    "abandoned": "Прерван",
+    "timedOut": "Время истекло"
+  },
+  "actions": {
+    "start": "Начать",
+    "startTest": "Начать тест",
+    "continue": "Продолжить",
+    "viewResults": "Результаты",
+    "retry": "Повторить",
+    "open": "Открыть"
+  },
+  "questions": "вопросов",
+  "questionsShort": "вопр.",
+  "of": "из",
+  "bestScore": "Лучший: {score}%",
+  "attempts": "{count, plural, one {# попытка} few {# попытки} many {# попыток} other {# попыток}}",
+  "previousAttempts": "{count, plural, one {# предыдущая попытка} few {# предыдущие попытки} many {# предыдущих попыток} other {# предыдущих попыток}}",
+  "earlier": "ранее",
+  "filterByStatus": "{label}: {count}. Нажмите для фильтра."
+}

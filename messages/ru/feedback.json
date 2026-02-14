@@ -1,0 +1,23 @@
+{
+  "undo": "Отменить",
+  "undoneSuccessfully": "Успешно отменено",
+  "failedToUndo": "Не удалось отменить",
+  "dismiss": "Закрыть",
+  "connectionRestored": "Подключение восстановлено",
+  "noConnection": "Нет подключения — используются кэшированные данные",
+  "dataOutdated": "Данные могут быть устаревшими",
+  "slowConnection": "Медленное подключение",
+  "updating": "Обновление...",
+  "update": "Обновить",
+  "hideNotification": "Скрыть уведомление",
+  "offline": "Оффлайн",
+  "looksGood": "Всё в порядке!",
+  "showGuidance": "Показать подсказку",
+  "nothingFound": "Ничего не найдено",
+  "noTermsFound": "По запросу «{query}» термины не найдены",
+  "maybeMeant": "Возможно, вы имели в виду:",
+  "resetSearch": "Сбросить поиск",
+  "noCategoryTerms": "В категории «{category}» пока нет терминов",
+  "loadingError": "Ошибка загрузки",
+  "couldNotLoad": "Не удалось загрузить глоссарий. Попробуйте обновить страницу."
+}

@@ -1,0 +1,369 @@
+{
+  "page": {
+    "title": "Мой профиль",
+    "description": "Просматривайте результаты тестов и паспорт компетенций",
+    "metaTitle": "Профиль | SkillSoft",
+    "metaDescription": "Просмотр результатов тестов, паспорта компетенций и личностного профиля"
+  },
+  "hero": {
+    "user": "Пользователь",
+    "online": "В сети",
+    "offline": "Не в сети",
+    "editProfile": "Изменить",
+    "settings": "Настройки",
+    "memberSince": "Участник с",
+    "memberSinceAgo": "{time} назад",
+    "organization": "Организация",
+    "noOrganization": "Организация не указана",
+    "lastActive": "Последняя активность {time}",
+    "defaultUser": "Пользователь",
+    "onlineStatus": "Индикатор статуса в сети",
+    "badges": {
+      "roles": {
+        "admin": "Администратор",
+        "editor": "HR-специалист",
+        "user": "Кандидат"
+      },
+      "verified": "Подтверждён",
+      "new": "Новый"
+    },
+    "mobileActions": "Действия профиля"
+  },
+  "stats": {
+    "regionLabel": "Краткая статистика",
+    "testsCompleted": "Пройдено тестов",
+    "testsCompletedShort": "Тесты",
+    "averageScore": "Средний балл",
+    "averageScoreShort": "Ср. балл",
+    "passRate": "Успешность",
+    "passRateShort": "Сдано",
+    "lastTest": "Последний тест",
+    "lastTestShort": "Последний",
+    "profile": "Профиль",
+    "profileProgress": "Профиль",
+    "profileComplete": "Профиль заполнен",
+    "noTests": "Нет тестов",
+    "noDate": "—",
+    "noTestsYet": "Тестов пока нет",
+    "neverTested": "Нет данных",
+    "trend": "Динамика",
+    "trendUp": "рост",
+    "trendDown": "снижение",
+    "trendStable": "стабильно",
+    "excellent": "Отлично",
+    "good": "Хорошо",
+    "average": "Средне",
+    "low": "Низко",
+    "highRate": "Высокий",
+    "goodRate": "Хороший",
+    "averageRate": "Средний",
+    "lowRate": "Низкий",
+    "scoreLabels": {
+      "excellent": "Отлично",
+      "good": "Хорошо",
+      "average": "Средне",
+      "low": "Нужна работа"
+    },
+    "passRateLabels": {
+      "high": "Высокий",
+      "good": "Хороший",
+      "average": "Средний",
+      "low": "Низкий"
+    },
+    "accessibility": {
+      "avgScoreLabel": "Средний балл за тесты",
+      "passRateLabel": "Процент успешно пройденных тестов"
+    },
+    "vsLastMonth": "по сравнению с прошлым месяцем",
+    "vsPreviousTests": "по сравнению с предыдущими тестами",
+    "noData": "Нет данных",
+    "calculating": "Расчёт...",
+    "tests": "{count, plural, one {# тест} few {# теста} many {# тестов} other {# тестов}}",
+    "daysAgo": "{count, plural, one {# день назад} few {# дня назад} many {# дней назад} other {# дней назад}}",
+    "hoursAgo": "{count, plural, one {# час назад} few {# часа назад} many {# часов назад} other {# часов назад}}",
+    "minutesAgo": "{count, plural, one {# минуту назад} few {# минуты назад} many {# минут назад} other {# минут назад}}",
+    "justNow": "Только что"
+  },
+  "passport": {
+    "title": "Профиль Большой пятёрки",
+    "titleShort": "Большая пятёрка",
+    "subtitle": "Личностный паспорт",
+    "basedOn": "На основе {count, plural, one {# оценки} few {# оценок} many {# оценок} other {# оценок}}",
+    "dominantTrait": "Доминирующая черта",
+    "noData": "Нет данных профиля",
+    "noDataDescription": "Пройдите тесты личности, чтобы увидеть свой профиль Большой пятёрки",
+    "takeAssessment": "Пройти тест",
+    "confidence": {
+      "title": "Достоверность",
+      "low": "Низкая",
+      "medium": "Средняя",
+      "high": "Высокая"
+    },
+    "confidenceTooltip": {
+      "low": "Пройдите больше тестов для повышения точности",
+      "medium": "Достаточно данных для базового профиля",
+      "high": "Надёжный профиль на основе множества оценок"
+    },
+    "traits": {
+      "OPENNESS": "Открытость",
+      "CONSCIENTIOUSNESS": "Добросовестность",
+      "EXTRAVERSION": "Экстраверсия",
+      "AGREEABLENESS": "Доброжелательность",
+      "EMOTIONAL_STABILITY": "Эмоциональная стабильность"
+    },
+    "traitDescriptions": {
+      "OPENNESS": "Любознательность, креативность и открытость новому опыту",
+      "CONSCIENTIOUSNESS": "Организованность, надёжность и самодисциплина",
+      "EXTRAVERSION": "Общительность, напористость и позитивные эмоции",
+      "AGREEABLENESS": "Сотрудничество, доверие и готовность помочь",
+      "EMOTIONAL_STABILITY": "Спокойствие, эмоциональная устойчивость и стрессоустойчивость"
+    },
+    "traitLevels": {
+      "veryLow": "Очень низкий",
+      "low": "Низкий",
+      "average": "Средний",
+      "high": "Высокий",
+      "veryHigh": "Очень высокий"
+    },
+    "viewDetails": "Подробнее",
+    "lastUpdated": "Обновлено {time}"
+  },
+  "competencies": {
+    "title": "Топ компетенции",
+    "titleShort": "Компетенции",
+    "basedOn": "На основе {count, plural, one {# оценки} few {# оценок} many {# оценок} other {# оценок}}",
+    "viewAll": "Смотреть все",
+    "viewDetails": "Подробнее",
+    "assessments": "{count, plural, one {# оценка} few {# оценки} many {# оценок} other {# оценок}}",
+    "score": "Балл",
+    "trend": {
+      "up": "Рост",
+      "down": "Снижение",
+      "stable": "Стабильно"
+    },
+    "level": {
+      "beginner": "Начинающий",
+      "developing": "Развивающийся",
+      "competent": "Компетентный",
+      "proficient": "Опытный",
+      "expert": "Эксперт"
+    },
+    "empty": {
+      "title": "Компетенций пока нет",
+      "description": "Пройдите тесты, чтобы увидеть свои сильные стороны",
+      "action": "Начать тестирование"
+    },
+    "showMore": "Показать ещё {count}",
+    "showLess": "Скрыть"
+  },
+  "results": {
+    "title": "Последние результаты",
+    "titleShort": "Результаты",
+    "viewAll": "Все результаты",
+    "viewResult": "Открыть результат",
+    "filterAll": "Все",
+    "filterOverview": "Обзор",
+    "filterJobFit": "Должность",
+    "filterTeamFit": "Команда",
+    "noResults": "Результатов пока нет",
+    "noResultsDescription": "Пройдите первый тест, чтобы увидеть результаты",
+    "noFilterResults": "Нет результатов для выбранного фильтра",
+    "noFilterResultsDescription": "Попробуйте выбрать другой фильтр по цели",
+    "startTesting": "Начать тестирование",
+    "score": "Балл",
+    "passed": "Сдан",
+    "failed": "Не сдан",
+    "pending": "Ожидание",
+    "inProgress": "В процессе",
+    "questions": "{count, plural, one {# вопрос} few {# вопроса} many {# вопросов} other {# вопросов}}",
+    "duration": "Длительность",
+    "completedAt": "Завершён",
+    "completedAgo": "{time} назад",
+    "goal": "Цель",
+    "template": "Шаблон",
+    "attempt": "Попытка {number}",
+    "bestScore": "Лучший: {score}%",
+    "showMore": "Показать ещё",
+    "showLess": "Скрыть"
+  },
+  "sharedTests": {
+    "title": "Доступные мне",
+    "titleShort": "Доступные",
+    "subtitle": "Тесты, которыми поделились коллеги",
+    "viewAll": "Смотреть все",
+    "take": "Пройти",
+    "view": "Открыть",
+    "permissions": {
+      "view": "Просмотр",
+      "edit": "Редактирование",
+      "manage": "Управление"
+    },
+    "expires": "Истекает {time}",
+    "expired": "Доступ истёк",
+    "noExpiry": "Без ограничения",
+    "empty": {
+      "title": "Нет доступных тестов",
+      "description": "Тесты, которыми с вами поделятся коллеги, появятся здесь"
+    },
+    "sharedBy": "От {name}",
+    "sharedOn": "Поделились {time}"
+  },
+  "edit": {
+    "pageTitle": "Редактирование профиля",
+    "pageDescription": "Обновите персональную информацию и настройки",
+    "metaTitle": "Редактирование профиля | SkillSoft",
+    "backToProfile": "Назад к профилю",
+    "tabs": {
+      "account": "Аккаунт",
+      "results": "Результаты",
+      "passport": "Паспорт",
+      "preferences": "Настройки"
+    },
+    "account": {
+      "title": "Персональная информация",
+      "description": "Обновите ваши личные данные",
+      "avatarSection": "Фото профиля",
+      "avatarManaged": "Аватар управляется через Clerk.",
+      "changeInSettings": "Измените его в настройках аккаунта.",
+      "openClerkSettings": "Открыть настройки Clerk",
+      "firstName": "Имя",
+      "firstNamePlaceholder": "Введите ваше имя",
+      "lastName": "Фамилия",
+      "lastNamePlaceholder": "Введите вашу фамилию",
+      "email": "Email",
+      "emailReadOnly": "Email нельзя изменить здесь. Обновите через настройки Clerk.",
+      "organization": "Организация",
+      "organizationPlaceholder": "Название организации (необязательно)",
+      "bio": "О себе",
+      "bioPlaceholder": "Расскажите о себе (необязательно)",
+      "bioHelp": "Краткое описание о себе"
+    },
+    "preferences": {
+      "title": "Настройки",
+      "description": "Настройте приложение под себя",
+      "language": "Язык",
+      "languageDescription": "Выберите предпочитаемый язык",
+      "theme": "Тема",
+      "themeDescription": "Выберите светлую или тёмную тему",
+      "themeLight": "Светлая",
+      "themeDark": "Тёмная",
+      "themeSystem": "Системная",
+      "notifications": "Уведомления",
+      "notificationsDescription": "Настройте параметры уведомлений",
+      "emailNotifications": "Email-уведомления",
+      "emailNotificationsDescription": "Получать уведомления о важных событиях по email"
+    },
+    "actions": {
+      "save": "Сохранить изменения",
+      "saving": "Сохранение...",
+      "cancel": "Отмена",
+      "reset": "Сбросить"
+    },
+    "validation": {
+      "firstNameRequired": "Имя обязательно",
+      "firstNameMin": "Имя должно содержать минимум 2 символа",
+      "firstNameMax": "Имя не должно превышать 50 символов",
+      "lastNameRequired": "Фамилия обязательна",
+      "lastNameMin": "Фамилия должна содержать минимум 2 символа",
+      "lastNameMax": "Фамилия не должна превышать 50 символов",
+      "organizationMax": "Название организации не должно превышать 100 символов",
+      "bioMax": "Описание не должно превышать 500 символов"
+    },
+    "messages": {
+      "saveSuccess": "Профиль успешно обновлён",
+      "saveError": "Не удалось обновить профиль",
+      "saveErrorDescription": "Попробуйте позже",
+      "noChanges": "Нет изменений для сохранения",
+      "unsavedChanges": "У вас есть несохранённые изменения",
+      "unsavedChangesDescription": "Вы уверены, что хотите уйти? Ваши изменения будут потеряны.",
+      "discardChanges": "Отменить изменения",
+      "keepEditing": "Продолжить редактирование",
+      "draftRestored": "Черновик восстановлен",
+      "draftRestoredDescription": "Ваши предыдущие изменения были восстановлены",
+      "draftDiscarded": "Черновик удалён",
+      "formHasError": "В форме 1 ошибка. Исправьте перед отправкой.",
+      "formHasErrors": "В форме {count} ошибок. Исправьте перед отправкой."
+    },
+    "resultsTab": {
+      "title": "Результаты тестов",
+      "description": "Просмотрите все пройденные тесты",
+      "viewResult": "Открыть",
+      "noResults": "Результатов пока нет"
+    },
+    "passportTab": {
+      "title": "Паспорт компетенций",
+      "description": "Ваши навыки и личностный профиль",
+      "viewPassport": "Открыть полный паспорт",
+      "noPassport": "Данных паспорта пока нет"
+    }
+  },
+  "errors": {
+    "loadFailed": "Не удалось загрузить профиль",
+    "loadFailedDescription": "Попробуйте обновить страницу",
+    "saveFailed": "Не удалось сохранить изменения",
+    "saveFailedDescription": "Попробуйте позже",
+    "sectionError": "Не удалось загрузить этот раздел",
+    "sectionErrorDescription": "Попробуйте обновить страницу",
+    "retry": "Повторить",
+    "goBack": "Назад",
+    "notFound": "Профиль не найден",
+    "notFoundDescription": "Запрошенный профиль не существует",
+    "unauthorized": "Нет доступа",
+    "unauthorizedDescription": "У вас нет прав для просмотра этого профиля"
+  },
+  "empty": {
+    "new-user": {
+      "title": "Добро пожаловать в SkillSoft!",
+      "description": "Пройдите первый тест, чтобы начать формирование паспорта компетенций",
+      "cta": "Выбрать тест"
+    },
+    "no-tests": {
+      "title": "Тесты не пройдены",
+      "description": "Пройдите первый тест, чтобы увидеть результаты здесь",
+      "cta": "Начать тестирование"
+    },
+    "no-results": {
+      "title": "Результаты не найдены",
+      "description": "Нет результатов по выбранному фильтру",
+      "cta": "Сбросить фильтры"
+    },
+    "no-competencies": {
+      "title": "Компетенции не оценены",
+      "description": "Пройдите тесты на компетенции, чтобы увидеть свои сильные стороны",
+      "cta": "Найти тесты"
+    },
+    "no-passport": {
+      "title": "Нет личностного профиля",
+      "description": "Пройдите тесты личности, чтобы сформировать профиль Большой пятёрки",
+      "cta": "Пройти тест"
+    }
+  },
+  "accessibility": {
+    "profilePage": "Страница профиля",
+    "heroSection": "Раздел информации о пользователе",
+    "statsSection": "Раздел статистики",
+    "passportSection": "Раздел личностного паспорта",
+    "competenciesSection": "Раздел топ компетенций",
+    "resultsSection": "Раздел последних результатов",
+    "sharedTestsSection": "Раздел доступных тестов",
+    "editButton": "Редактировать профиль",
+    "settingsButton": "Настройки профиля",
+    "filterTabs": "Фильтр по цели",
+    "radarChart": "Радарная диаграмма профиля Большой пятёрки",
+    "barChart": "Столбчатая диаграмма профиля Большой пятёрки",
+    "scoreIndicator": "Балл: {score} процентов",
+    "trendIndicator": "Тренд: {trend}",
+    "loadingProfile": "Загрузка профиля...",
+    "loadingStats": "Загрузка статистики...",
+    "loadingResults": "Загрузка результатов...",
+    "chartDescription": "Ваши личностные черты Большой пятёрки, измеренные по 5 измерениям на основе нескольких оценок",
+    "traitColumn": "Черта",
+    "scoreColumn": "Балл (0-100)",
+    "noResultsForFilter": "Нет результатов для фильтра {filter}",
+    "showingResults": "{count, plural, one {Показан # результат} few {Показано # результата} many {Показано # результатов} other {Показано # результатов}}",
+    "filterChanged": "Фильтр изменён на {filter}",
+    "competencyList": "Топ компетенции по баллам",
+    "competencyItem": "{name}, ранг {rank}, балл {score}%",
+    "resultItem": "{name} - {status}, Балл: {score}%"
+  }
+}

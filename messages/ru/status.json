@@ -1,0 +1,15 @@
+{
+  "active": "Активный",
+  "inactive": "Неактивный",
+  "draft": "Черновик",
+  "published": "Опубликован",
+  "pending": "Ожидание",
+  "approved": "Одобрено",
+  "rejected": "Отклонено",
+  "completed": "Завершен",
+  "inProgress": "В процессе",
+  "notStarted": "Не начат",
+  "abandoned": "Прерван",
+  "expired": "Истек",
+  "archived": "В архиве"
+}

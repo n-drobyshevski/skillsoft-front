@@ -1,0 +1,13 @@
+{
+  "all": "All",
+  "active": "Active",
+  "inactive": "Inactive",
+  "draft": "Draft",
+  "published": "Published",
+  "answered": "Answered",
+  "unanswered": "Unanswered",
+  "flagged": "Flagged",
+  "clearAll": "Clear All",
+  "apply": "Apply Filters",
+  "reset": "Reset Filters"
+}

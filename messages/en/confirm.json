@@ -1,0 +1,8 @@
+{
+  "delete": "Are you sure you want to delete this?",
+  "deleteTitle": "Delete {item}",
+  "deleteDescription": "This action cannot be undone. This will permanently delete the {item}.",
+  "unsavedChanges": "You have unsaved changes. Are you sure you want to leave?",
+  "proceed": "Proceed",
+  "cancel": "Cancel"
+}

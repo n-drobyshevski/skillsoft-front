@@ -8,8 +8,8 @@ import React, { type ReactNode } from 'react';
 import { render, type RenderOptions } from '@testing-library/react';
 import { NextIntlClientProvider } from 'next-intl';
 
-// Import English messages for testing
-import messages from '../../../messages/en.json';
+// Import English messages from the per-namespace split files (single source of truth)
+import messages from '../../../messages/en/index';
 
 interface ProvidersProps {
   children: ReactNode;

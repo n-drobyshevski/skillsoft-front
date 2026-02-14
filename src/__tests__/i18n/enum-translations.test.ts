@@ -6,8 +6,8 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import enMessages from '../../../messages/en.json';
-import ruMessages from '../../../messages/ru.json';
+import enMessages from '../../../messages/en/index';
+import ruMessages from '../../../messages/ru/index';
 import {
   CompetencyCategory,
   ObservabilityLevel,

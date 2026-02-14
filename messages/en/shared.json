@@ -1,0 +1,20 @@
+{
+  "title": "Shared with Me",
+  "description": "Templates that colleagues have shared with you",
+  "resultsCount": "{count, plural, one {# template shared with you} other {# templates shared with you}}",
+  "viewTemplate": "View",
+  "takeTest": "Take Test",
+  "permission": {
+    "view": "You can view and take tests with this template",
+    "edit": "You can view, take tests, and edit this template",
+    "manage": "You have full access including sharing settings"
+  },
+  "emptyState": {
+    "title": "No shared templates",
+    "description": "Templates shared with you by other users will appear here."
+  },
+  "error": {
+    "loadFailed": "Failed to load shared templates",
+    "tryAgain": "Try refreshing the page"
+  }
+}

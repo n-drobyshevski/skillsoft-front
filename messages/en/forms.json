@@ -1,0 +1,178 @@
+{
+  "save": "Save",
+  "saving": "Saving...",
+  "create": "Create",
+  "creating": "Creating...",
+  "update": "Update",
+  "updating": "Updating...",
+  "cancel": "Cancel",
+  "reset": "Reset",
+  "delete": "Delete",
+  "confirm": "Confirm",
+  "submit": "Submit",
+  "close": "Close",
+  "basicInformation": "Basic Information",
+  "settings": "Settings",
+  "advanced": "Advanced",
+  "title": "Title",
+  "name": "Name",
+  "description": "Description",
+  "status": "Status",
+  "weight": "Weight",
+  "order": "Order",
+  "active": "Active",
+  "inactive": "Inactive",
+  "required": "Required",
+  "optional": "Optional",
+  "characters": "characters",
+  "minCharacters": "Minimum {min} characters",
+  "maxCharacters": "Maximum {max} characters",
+  "errorOccurred": "An error occurred",
+  "pleaseFixErrors": "Please fix the errors before submitting",
+  "weightValidationError": "Please fix weight validation errors before submitting",
+  "duplicateTitle": "The title might already exist",
+  "saveFailed": "Failed to save",
+  "saveSuccess": "Saved successfully",
+  "createFailed": "Failed to create",
+  "createSuccess": "Created successfully",
+  "updateFailed": "Failed to update",
+  "updateSuccess": "Updated successfully",
+  "deleteFailed": "Failed to delete",
+  "deleteSuccess": "Deleted successfully",
+  "observabilityLevel": "Observability Level",
+  "measurementType": "Measurement Type",
+  "examples": "Examples",
+  "counterExamples": "Counter Examples",
+  "approvalStatus": "Approval Status",
+  "contextScope": "Context Scope",
+  "questionText": "Question Text",
+  "questionType": "Question Type",
+  "difficultyLevel": "Difficulty Level",
+  "answerOptions": "Answer Options",
+  "correctAnswer": "Correct Answer",
+  "explanation": "Explanation",
+  "tags": "Tags",
+  "addOption": "Add Option",
+  "removeOption": "Remove Option",
+  "saveChanges": "Save Changes",
+  "indicator": {
+    "sections": {
+      "coreInformation": "Core Information",
+      "coreInformationDesc": "Title and description for this behavioral indicator",
+      "classification": "Classification & Metrics",
+      "classificationDesc": "Observability, measurement type, and weight",
+      "contextualExamples": "Contextual Examples",
+      "contextualExamplesDesc": "Provide examples to clarify the indicator",
+      "statusApproval": "Status & Approval",
+      "statusApprovalDesc": "Manage visibility and workflow"
+    },
+    "fields": {
+      "title": "Title",
+      "description": "Description",
+      "observabilityLevel": "Observability Level",
+      "measurementType": "Measurement Type",
+      "weight": "Weight",
+      "orderIndex": "Order Index",
+      "contextScope": "Context Scope",
+      "examples": "Positive Examples",
+      "counterExamples": "Counter Examples",
+      "approvalStatus": "Approval Status",
+      "visibility": "Visibility"
+    },
+    "placeholders": {
+      "title": "e.g., Proactive Communication",
+      "description": "Detailed description of what this indicator measures...",
+      "selectLevel": "Select level",
+      "selectType": "Select type",
+      "selectContextScope": "Select context scope",
+      "examples": "List behaviors that demonstrate this indicator...",
+      "counterExamples": "List behaviors that contradict this indicator...",
+      "selectStatus": "Select status"
+    },
+    "buttons": {
+      "adjustWeights": "Adjust Existing Weights",
+      "updatePreview": "Update Preview",
+      "createIndicator": "Create Indicator"
+    },
+    "alerts": {
+      "weightRemaining": "Only {remaining} weight remaining for this competency."
+    },
+    "help": {
+      "contextScope": "Determines the applicability of this indicator. 'Universal' indicators are context-neutral and used in Scenario A (Competency Passport).",
+      "contextScopeNote": "\"Universal\" indicators are included in Scenario A (General Overview / Competency Passport). Other scopes are for targeted assessments."
+    }
+  },
+  "question": {
+    "sections": {
+      "questionDetails": "Question Details",
+      "questionDetailsDesc": "Question text and classification",
+      "configuration": "Configuration",
+      "configurationDesc": "Scoring, timing, and display settings",
+      "answerOptions": "Answer Options",
+      "answerOptionsDesc": "Configure multiple choice answers",
+      "likertOptions": "Likert Scale Options",
+      "likertOptionsDesc": "Configure the scale points and their labels"
+    },
+    "fields": {
+      "questionText": "Question Text",
+      "questionType": "Question Type",
+      "difficultyLevel": "Difficulty Level",
+      "contextTags": "Context Tags",
+      "scoringRubric": "Scoring Rubric",
+      "orderIndex": "Order Index",
+      "timeLimit": "Time Limit (s)",
+      "visibility": "Visibility"
+    },
+    "placeholders": {
+      "questionText": "e.g., How do you handle tight deadlines?",
+      "selectType": "Select type",
+      "selectLevel": "Select level",
+      "selectTags": "Select tags...",
+      "searchTags": "Search tags...",
+      "scoringRubric": "e.g., Based on clarity and feasibility",
+      "answerOption": "Enter answer option",
+      "score": "Score",
+      "sjtAction": "Describe the action you would take",
+      "likertLabel": "Label for point {index}"
+    },
+    "buttons": {
+      "addOption": "Add Option",
+      "updatePreview": "Update Preview",
+      "createQuestion": "Create Question"
+    },
+    "labels": {
+      "correct": "Correct",
+      "noTagFound": "No tag found."
+    },
+    "alerts": {
+      "scenarioAIncompatibleTitle": "Scenario A Incompatible",
+      "scenarioAIncompatibleDesc": "This question does not have the \"GENERAL\" tag and will not be included in Universal Baseline assessments (Competency Passport). Add the \"GENERAL\" tag if the scenario is context-neutral and applies to all roles."
+    },
+    "tags": {
+      "GENERAL": "General",
+      "GENERAL_DESC": "Context-neutral, no industry jargon (Scenario A)",
+      "IT": "IT",
+      "IT_DESC": "Information technology context",
+      "SALES": "Sales",
+      "SALES_DESC": "Sales and marketing context",
+      "FINANCE": "Finance",
+      "FINANCE_DESC": "Financial industry context",
+      "MEDICAL": "Medical",
+      "MEDICAL_DESC": "Healthcare context",
+      "ENGINEERING": "Engineering",
+      "ENGINEERING_DESC": "Engineering context",
+      "JUNIOR": "Junior",
+      "JUNIOR_DESC": "Entry-level complexity",
+      "MID": "Mid",
+      "MID_DESC": "Mid-career complexity",
+      "SENIOR": "Senior",
+      "SENIOR_DESC": "Senior-level complexity"
+    }
+  },
+  "competency": {
+    "placeholders": {
+      "name": "e.g., Strategic Leadership",
+      "description": "A detailed description of the competency and what it measures..."
+    }
+  }
+}

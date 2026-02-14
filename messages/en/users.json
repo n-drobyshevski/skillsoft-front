@@ -1,0 +1,374 @@
+{
+  "page": {
+    "title": "User Management",
+    "description": "Manage users, roles, and access permissions"
+  },
+  "actions": {
+    "addUser": "Add User",
+    "add": "Add"
+  },
+  "stats": {
+    "totalUsers": "Total Users",
+    "activeRate": "Active Rate",
+    "admins": "Admins",
+    "editors": "Editors",
+    "restricted": "Restricted",
+    "canAccess": "{count} can access",
+    "activeThisMonth": "{count} active this month",
+    "fullAccess": "Full access",
+    "contentEditors": "Content editors",
+    "bannedLocked": "{banned} banned, {locked} locked"
+  },
+  "table": {
+    "columns": {
+      "user": "User",
+      "role": "Role",
+      "status": "Status",
+      "lastSignIn": "Last Sign In",
+      "joined": "Joined",
+      "actions": "Actions"
+    },
+    "filters": {
+      "all": "All",
+      "admin": "Admin",
+      "editor": "Editor",
+      "user": "User"
+    },
+    "search": {
+      "placeholder": "Search users by name or email..."
+    },
+    "pagination": {
+      "showing": "Showing",
+      "of": "of",
+      "users": "users"
+    },
+    "bulk": {
+      "selected": "{count} selected",
+      "export": "Export",
+      "delete": "Delete"
+    },
+    "empty": {
+      "noUsers": "No users found",
+      "adjustSearch": "Try adjusting your search query",
+      "noMatch": "No users match the current filter"
+    },
+    "view": {
+      "toggleColumns": "Toggle columns"
+    },
+    "menu": {
+      "copyUserId": "Copy User ID",
+      "copyEmail": "Copy Email",
+      "quickView": "Quick View",
+      "viewProfile": "View Profile",
+      "editUser": "Edit User",
+      "deactivate": "Deactivate",
+      "activate": "Activate"
+    }
+  },
+  "drawer": {
+    "tabs": {
+      "details": "Details",
+      "activity": "Activity"
+    },
+    "sections": {
+      "account": "Account",
+      "permissions": "Permissions"
+    },
+    "fields": {
+      "memberSince": "Member since",
+      "lastActive": "Last active",
+      "status": "Status",
+      "firstName": "First name",
+      "lastName": "Last name",
+      "userId": "User ID"
+    },
+    "actions": {
+      "viewFullProfile": "View Full Profile",
+      "edit": "Edit",
+      "deactivate": "Deactivate",
+      "activate": "Activate"
+    },
+    "permissions": {
+      "manageUsers": "Manage Users",
+      "editContent": "Edit Content",
+      "viewReports": "View Reports",
+      "systemSettings": "System Settings",
+      "takeAssessments": "Take Assessments"
+    },
+    "activity": {
+      "lastSignIn": "Last sign-in",
+      "profileUpdated": "Profile updated",
+      "clerkCreated": "Clerk account created",
+      "syncedToSkillsoft": "Synced to Skillsoft"
+    },
+    "copy": {
+      "copyUserId": "Copy User ID",
+      "copyClerkId": "Copy Clerk ID"
+    },
+    "menu": {
+      "viewInClerk": "View in Clerk"
+    }
+  },
+  "profile": {
+    "joined": "Joined {date}",
+    "info": {
+      "email": "Email",
+      "username": "Username",
+      "role": "Role",
+      "status": "Status",
+      "memberSince": "Member Since",
+      "lastSignIn": "Last Sign In",
+      "lastUpdated": "Last Updated"
+    },
+    "stats": {
+      "assessments": "Assessments",
+      "completed": "Completed",
+      "avgScore": "Avg. Score",
+      "competencies": "Competencies",
+      "tests": "Tests",
+      "done": "Done",
+      "score": "Score",
+      "skills": "Skills"
+    },
+    "tabs": {
+      "overview": "Overview",
+      "assessments": "Assessments",
+      "activity": "Activity"
+    },
+    "sections": {
+      "accountInfo": "Account Info",
+      "activity": "Activity",
+      "statistics": "Statistics",
+      "assignedAssessments": "Assigned Assessments",
+      "contentContributions": "Content Contributions",
+      "competencyProgress": "Competency Progress",
+      "assessmentHistory": "Assessment History",
+      "createdAssessments": "Created Assessments",
+      "recentActivity": "Recent Activity",
+      "competencyPassport": "Competency Passport"
+    },
+    "passport": {
+      "empty": "No Passport Available",
+      "emptyDesc": "{name} hasn't completed any assessments yet. The competency passport will be generated after completing assessments.",
+      "thisUser": "This user",
+      "competenciesAssessed": "competencies assessed",
+      "bigFiveProfile": "Big Five Profile",
+      "topCompetencies": "Top Competencies",
+      "top": "Top",
+      "noBigFive": "No personality profile data available",
+      "noCompetencies": "No competency data available",
+      "valid": "Valid",
+      "expired": "Expired",
+      "expiringSoon": "Expires in {days} days"
+    },
+    "assessments": {
+      "empty": "No Assessments",
+      "emptyDesc": "{name} hasn't completed any tests yet.",
+      "thisUser": "This user",
+      "template": "Template",
+      "goal": "Goal",
+      "score": "Score",
+      "status": "Status",
+      "duration": "Duration",
+      "completedAt": "Completed",
+      "pending": "Pending",
+      "passed": "Passed",
+      "failed": "Failed",
+      "questions": "questions",
+      "view": "View",
+      "viewDetails": "View Details",
+      "page": "Page {current} of {total}"
+    },
+    "empty": {
+      "noAssessments": "No Assessments Yet",
+      "noAssessmentsDesc": "This user hasn't been assigned any assessments yet. Assessments will appear here once assigned.",
+      "noContributions": "No Contributions Yet",
+      "noContributionsDesc": "Content created by this {role} will appear here.",
+      "noProgress": "No Progress Data",
+      "noProgressDesc": "Competency assessments and progress tracking will be displayed here once the user completes assessments.",
+      "comingSoon": "Coming Soon",
+      "comingSoonDesc": "Assessment management and history tracking is currently in development. Check back soon for updates!",
+      "noCreatedAssessments": "No Created Assessments",
+      "noCreatedAssessmentsDesc": "Assessments created by this user will appear here."
+    },
+    "activity": {
+      "accountCreated": "Account Created",
+      "lastSignIn": "Signed In",
+      "testStarted": "Started",
+      "testCompleted": "Completed",
+      "testPassed": "Passed",
+      "testFailed": "Failed",
+      "testAbandoned": "Abandoned",
+      "testTimedOut": "Timed Out",
+      "noActivity": "No activity recorded yet",
+      "moreDetailedLogging": "More detailed activity logging coming soon"
+    },
+    "time": {
+      "never": "Never"
+    },
+    "actions": {
+      "editProfile": "Edit Profile",
+      "createAssessment": "Create Assessment"
+    },
+    "sharedTests": {
+      "title": "Shared with Me",
+      "listLabel": "Tests shared with you",
+      "countLabel": "{count} tests shared",
+      "viewAll": "View All Shared",
+      "emptyState": {
+        "title": "No Shared Tests",
+        "description": "Tests shared with you by colleagues will appear here."
+      },
+      "permissions": {
+        "view": "View",
+        "edit": "Edit",
+        "manage": "Manage"
+      },
+      "goals": {
+        "overview": "Overview",
+        "jobFit": "Job Fit",
+        "teamFit": "Team Fit"
+      },
+      "stats": {
+        "competencies": "competencies",
+        "duration": "Duration",
+        "minutes": "min"
+      },
+      "actions": {
+        "view": "View",
+        "take": "Take"
+      },
+      "expires": "Expires {time}",
+      "expired": "Access Expired"
+    }
+  },
+  "edit": {
+    "title": "Edit: {name}",
+    "backToProfile": "Back to Profile",
+    "sections": {
+      "profileInformation": "Profile Information",
+      "profileInformationDesc": "Update user profile details. Changes will be synced to Clerk and the backend.",
+      "rolePermissions": "Role & Permissions",
+      "quickActions": "Quick Actions",
+      "identifiers": "Identifiers"
+    },
+    "fields": {
+      "firstName": "First Name",
+      "lastName": "Last Name",
+      "username": "Username",
+      "email": "Email Address",
+      "role": "User Role"
+    },
+    "placeholders": {
+      "firstName": "Enter first name",
+      "lastName": "Enter last name",
+      "username": "Enter username"
+    },
+    "help": {
+      "emailReadOnly": "Email cannot be changed here. Users can update their email through Clerk settings.",
+      "usernameUnique": "Username must be unique across all users. Leave empty to remove.",
+      "roleDescription": "Role determines what actions the user can perform.",
+      "banDescription": "Banning revokes all sessions. Locking temporarily prevents sign-in."
+    },
+    "actions": {
+      "save": "Save Changes",
+      "saving": "Saving...",
+      "cancel": "Cancel",
+      "syncFromClerk": "Sync from Clerk",
+      "syncing": "Syncing...",
+      "banUser": "Ban User",
+      "unbanUser": "Unban User",
+      "lockUser": "Lock User",
+      "unlockUser": "Unlock User"
+    },
+    "messages": {
+      "syncSuccess": "User data synced from Clerk successfully",
+      "syncFailed": "Failed to sync user data",
+      "saveSuccess": "User profile updated successfully",
+      "saveFailed": "Failed to update user profile"
+    }
+  },
+  "new": {
+    "title": "Add New User",
+    "description": "Create a new user account in the system",
+    "backToUsers": "Back to Users",
+    "sections": {
+      "loginIdentifier": "Login Identifier",
+      "loginIdentifierDesc": "Choose email, username, or both",
+      "password": "Password",
+      "profilePermissions": "Profile & Permissions"
+    },
+    "fields": {
+      "email": "Email",
+      "username": "Username",
+      "password": "Password",
+      "firstName": "First Name",
+      "lastName": "Last Name",
+      "role": "Role"
+    },
+    "placeholders": {
+      "email": "user@example.com",
+      "username": "johndoe",
+      "password": "Min 8 characters with letters & numbers",
+      "firstName": "John",
+      "lastName": "Doe"
+    },
+    "validation": {
+      "emailOrUsername": "Provide at least one",
+      "validEmail": "Please enter a valid email address",
+      "usernameMinLength": "Username must be at least 3 characters",
+      "usernameMaxLength": "Username must be at most 20 characters",
+      "usernamePattern": "Letters, numbers, underscores only",
+      "passwordMinLength": "Password must be at least 8 characters",
+      "passwordPattern": "Must contain letters and numbers",
+      "valid": "Valid"
+    },
+    "hints": {
+      "enterAtLeastOne": "Enter at least one - user can log in with either",
+      "or": "or"
+    },
+    "roles": {
+      "user": "User",
+      "editor": "Editor",
+      "admin": "Admin"
+    },
+    "actions": {
+      "create": "Create User",
+      "creating": "Creating...",
+      "cancel": "Cancel"
+    },
+    "messages": {
+      "success": "Success",
+      "error": "Error",
+      "createSuccess": "User \"{identifier}\" created successfully.",
+      "createFailed": "Failed to create user. Please try again."
+    }
+  },
+  "sync": {
+    "button": "Sync from Clerk",
+    "buttonShort": "Sync",
+    "syncing": "Syncing...",
+    "tooltip": "Manually sync all users from Clerk to the database",
+    "toast": {
+      "syncing": "Syncing users from Clerk...",
+      "syncingDesc": "Fetching user data and updating the database",
+      "success": "Users synced successfully!",
+      "successDesc": "Created: {created}, Updated: {updated}, Total: {total}",
+      "failed": "Sync failed",
+      "failedDesc": "Unknown error occurred"
+    }
+  },
+  "errors": {
+    "loadingUsers": "Error Loading Users",
+    "loadingProfile": "Failed to load user profile",
+    "backendUnavailable": "Backend service unavailable. Please ensure the backend is running at localhost:8080.",
+    "invalidDataFormat": "Invalid data format from server.",
+    "cannotConnect": "Cannot connect to backend. Please ensure the backend server is running.",
+    "backendTip": "Tip: Start the backend with: ",
+    "somethingWrong": "Something went wrong!",
+    "errorLoadingPage": "We encountered an error while loading the users page.",
+    "errorId": "Error ID",
+    "tryAgain": "Try again",
+    "backToDashboard": "Back to Dashboard"
+  }
+}

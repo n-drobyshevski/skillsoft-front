@@ -1,0 +1,18 @@
+{
+  "title": "Настройки",
+  "description": "Управление настройками приложения",
+  "general": "Основные",
+  "appearance": "Внешний вид",
+  "appearanceDescription": "Настройте внешний вид SkillSoft на вашем устройстве",
+  "notifications": "Уведомления",
+  "security": "Безопасность",
+  "language": "Язык",
+  "languageDescription": "Выберите предпочитаемый язык",
+  "theme": "Тема",
+  "themeDescription": "Выберите предпочитаемую цветовую тему",
+  "darkMode": "Темный режим",
+  "lightMode": "Светлый режим",
+  "system": "Системная",
+  "save": "Сохранить настройки",
+  "saved": "Настройки сохранены"
+}

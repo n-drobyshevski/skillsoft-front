@@ -1,0 +1,15 @@
+{
+  "active": "Active",
+  "inactive": "Inactive",
+  "draft": "Draft",
+  "published": "Published",
+  "pending": "Pending",
+  "approved": "Approved",
+  "rejected": "Rejected",
+  "completed": "Completed",
+  "inProgress": "In Progress",
+  "notStarted": "Not Started",
+  "abandoned": "Abandoned",
+  "expired": "Expired",
+  "archived": "Archived"
+}

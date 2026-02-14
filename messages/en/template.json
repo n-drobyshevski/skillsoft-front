@@ -1,0 +1,813 @@
+{
+  "title": "Test Templates",
+  "create": "Create Template",
+  "edit": "Edit Template",
+  "delete": "Delete Template",
+  "name": "Template Name",
+  "description": "Description",
+  "duration": "Duration",
+  "passingScore": "Passing Score",
+  "questions": "Questions",
+  "sections": "Sections",
+  "randomize": "Randomize Questions",
+  "showResults": "Show Results",
+  "allowReview": "Allow Review",
+  "selectTemplate": "Select a template to assess your competencies",
+  "noTemplatesAvailable": "No templates available",
+  "noTemplatesDescription": "Test templates have not been added yet. Check back later or contact your administrator.",
+  "myResults": "My Results",
+  "results": "Results",
+  "newTemplate": "New Template",
+  "recommended": "Recommended",
+  "skills": "skills",
+  "details": "Details",
+  "settings": "Settings",
+  "actions": "Actions",
+  "testCreation": "Test Creation",
+  "createDescription": "Create a new test template to assess competencies",
+  "testName": "Test Name",
+  "testNamePlaceholder": "e.g., Leadership Skills Assessment",
+  "assessmentGoal": "Assessment Goal",
+  "descriptionPlaceholder": "Describe the purpose and content of the test...",
+  "noCompetencies": "No Competencies",
+  "searchCompetencies": "Search competencies...",
+  "selectAll": "Select All",
+  "clearSelection": "Clear",
+  "selectedCompetencies": "selected competencies",
+  "nothingFound": "Nothing found",
+  "mainParameters": "Main Parameters",
+  "questionsPerIndicator": "Questions/Indicator",
+  "timeLimit": "Time Limit",
+  "passingThreshold": "Passing Threshold",
+  "testMode": "Test Mode",
+  "shuffleQuestions": "Shuffle Questions",
+  "shuffleQuestionsDesc": "Random order",
+  "shuffleOptions": "Shuffle Options",
+  "shuffleOptionsDesc": "Random order of answer options",
+  "allowSkip": "Allow Skip",
+  "allowSkipDesc": "Can skip questions",
+  "allowBackNavigation": "Back Navigation",
+  "allowBackNavigationDesc": "Can change answers",
+  "showResultsImmediately": "Show Results",
+  "showResultsImmediatelyDesc": "Show results at the end",
+  "review": "Review",
+  "competencies": "Competencies",
+  "parameters": "Parameters",
+  "noDescription": "No description",
+  "more": "more",
+  "step": "Step",
+  "of": "of",
+  "basic": "Basic",
+  "nameAndGoal": "Name and goal",
+  "skillSelection": "Skill selection",
+  "testParameters": "Test parameters",
+  "summary": "Summary",
+  "back": "Back",
+  "next": "Next",
+  "createTest": "Create Test",
+  "testCreated": "Test created!",
+  "creationError": "Creation error",
+  "cancel": "Cancel",
+  "deleteTest": "Delete Test?",
+  "deleteConfirmation": "Are you sure you want to delete test",
+  "deleteWarning": "This action cannot be undone. All data associated with this test template will be permanently deleted.",
+  "deleting": "Deleting...",
+  "testDeleted": "Test deleted",
+  "testDeletedDescription": "Test \"{name}\" was successfully deleted.",
+  "deleteError": "Delete error",
+  "deleteErrorDescription": "Failed to delete test. Please try again later.",
+  "generalInformation": "General Information",
+  "generalInformationDesc": "Basic template details visible to administrators",
+  "templateNameLabel": "Template Name",
+  "descriptionLabel": "Description (Optional)",
+  "descriptionHelp": "Brief description of what this test measures...",
+  "assessmentGoalDesc": "Select the primary purpose of this assessment",
+  "testConfiguration": "Test Configuration",
+  "testConfigurationDesc": "Define test structure and scoring parameters",
+  "questionsPerIndicatorLabel": "Questions per Indicator",
+  "questionsPerIndicatorDesc": "Questions per behavioral indicator",
+  "timeLimitLabel": "Time Limit",
+  "timeLimitDesc": "Maximum test duration",
+  "passingScoreLabel": "Passing Score",
+  "passingScoreDesc": "Minimum percentage required",
+  "testBehavior": "Test Behavior",
+  "testBehaviorDesc": "Control how test-takers interact with the assessment",
+  "shuffleQuestionsLabel": "Shuffle Questions",
+  "shuffleQuestionsDescription": "Randomize question order for each session",
+  "shuffleOptionsLabel": "Shuffle Answer Options",
+  "shuffleOptionsDescription": "Randomize answer choices for each question",
+  "allowSkipLabel": "Allow Skip",
+  "allowSkipDescription": "Test-takers can skip questions and return later",
+  "allowBackNavigationLabel": "Allow Back Navigation",
+  "allowBackNavigationDescription": "Test-takers can go back and change answers",
+  "showResultsLabel": "Show Results Immediately",
+  "showResultsDescription": "Display results right after test completion",
+  "publicationStatus": "Publication Status",
+  "publicationStatusDesc": "Control template visibility",
+  "published": "Published",
+  "draft": "Draft",
+  "publishedDesc": "Visible and available for assessments",
+  "draftDesc": "Hidden from test-takers",
+  "templateInfo": "Template Info",
+  "created": "Created",
+  "lastModified": "Last Modified",
+  "dangerZone": "Danger Zone",
+  "dangerZoneDesc": "Irreversible actions",
+  "archiveTemplate": "Archive Template",
+  "archiveTemplateTitle": "Archive Template?",
+  "archiveTemplateDesc": "This will hide the template from active use. Existing test sessions will be preserved. You can restore it later.",
+  "archive": "Archive",
+  "templateArchived": "Template archived",
+  "archiveError": "Failed to archive",
+  "deleteForever": "Delete Forever",
+  "deleteTemplateTitle": "Delete Template Permanently?",
+  "deleteTemplateDesc": "This action cannot be undone. This will permanently delete the template and all associated test sessions and results.",
+  "unsavedChanges": "Unsaved changes",
+  "unsaved": "Unsaved",
+  "allChangesSaved": "All changes saved",
+  "saved": "Saved",
+  "discard": "Discard",
+  "changesDiscarded": "Changes discarded",
+  "saveChanges": "Save Changes",
+  "saving": "Saving...",
+  "settingsSaved": "Settings saved successfully",
+  "settingsSaveError": "Failed to save settings",
+  "question": "question",
+  "questionsPlural": "questions",
+  "minutes": "minutes",
+  "overviewSettings": "Universal Baseline Settings",
+  "jobFitSettings": "Job Fit Settings",
+  "teamFitSettings": "Team Fit Settings",
+  "goalConfig": "Scenario Configuration",
+  "goalConfigDesc": "Configure settings specific to your selected assessment goal",
+  "deselectCategory": "Deselect",
+  "selectCategory": "Select all",
+  "hub": {
+    "tabs": {
+      "overview": "Overview",
+      "builder": "Builder",
+      "activity": "Activity",
+      "access": "Access",
+      "settings": "Settings",
+      "results": "Results"
+    },
+    "status": {
+      "published": "Published",
+      "draft": "Draft",
+      "archived": "Archived"
+    },
+    "publishedWarning": {
+      "info": "Published info",
+      "message": "This blueprint is locked. Create a new version to make changes."
+    },
+    "actions": {
+      "newVersion": "New Version",
+      "newVersionShort": "New"
+    },
+    "overview": {
+      "configuration": "Configuration",
+      "recentActivity": "Recent Activity",
+      "quickStats": "Quick Stats",
+      "sharing": "Sharing",
+      "noActivity": "No recent activity",
+      "noDescription": "No description provided",
+      "performance": "Performance",
+      "hero": {
+        "goToBuilder": "Go to Builder",
+        "createdAt": "Created: {date}",
+        "updatedAt": "Updated: {date}",
+        "noDescription": "No description"
+      },
+      "configurationCard": {
+        "description": "Test settings and behavior options",
+        "viewInBuilder": "View in Builder",
+        "timeLimit": "Time Limit",
+        "passScore": "Pass Score",
+        "questions": "Questions",
+        "competencies": "Competencies",
+        "competenciesSelected": "{count, plural, one {# competency} other {# competencies}} selected",
+        "testBehavior": "Test Behavior",
+        "shuffleQuestions": "Shuffle questions",
+        "shuffleOptions": "Shuffle answer options",
+        "allowSkipping": "Allow skipping questions",
+        "allowBackNav": "Allow back navigation",
+        "showResults": "Show results immediately",
+        "unlimited": "Unlimited",
+        "notSet": "Not set"
+      },
+      "activity": {
+        "viewAll": "View All",
+        "noActivityDescription": "Activity will appear here once candidates complete the test",
+        "eventTypes": {
+          "completed": "Completed",
+          "abandoned": "Abandoned",
+          "timedOut": "Timed Out"
+        }
+      },
+      "sharingCard": {
+        "share": "Share",
+        "peopleShared": "{count, plural, one {# person} other {# people}} shared",
+        "linksActive": "{count, plural, one {# link} other {# links}} active",
+        "copyLink": "Copy Link",
+        "linkCopied": "Link copied to clipboard",
+        "copyFailed": "Failed to copy link",
+        "linkUnavailable": "Link URL not available",
+        "manageAccess": "Manage access settings",
+        "noActiveLinks": "No active share links available"
+      }
+    },
+    "stats": {
+      "sessionBreakdown": "Session Breakdown",
+      "passRate": "Pass Rate",
+      "avgScore": "Avg Score",
+      "avgDuration": "Avg Duration",
+      "lastActivity": "Last Activity",
+      "target": "Target",
+      "passed": "passed",
+      "completed": "Completed",
+      "abandoned": "Abandoned",
+      "timedOut": "Timed Out",
+      "never": "Never",
+      "noData": {
+        "title": "No performance data yet",
+        "description": "Statistics will appear here after candidates complete the test",
+        "passingScore": "Passing score"
+      }
+    },
+    "results": {
+      "title": "Test Sessions",
+      "description": "All candidates who have taken or are taking this test",
+      "stats": {
+        "total": "Total",
+        "done": "Done",
+        "active": "Active",
+        "avgScore": "Avg Score"
+      },
+      "searchPlaceholder": "Search candidates...",
+      "filters": {
+        "allStatuses": "All Statuses",
+        "completed": "Completed",
+        "inProgress": "In Progress",
+        "abandoned": "Abandoned"
+      },
+      "export": "Export",
+      "noSessions": "No test sessions yet",
+      "noSessionsDescription": "Sessions will appear here when candidates start the test"
+    },
+    "access": {
+      "title": "Access",
+      "description": "Manage who can view and use this template"
+    },
+    "settings": {
+      "title": "Settings",
+      "description": "Configure all template settings and behavior options"
+    }
+  },
+  "metadata": {
+    "testTemplate": "Test Template | SkillSoft",
+    "defaultDescription": "Manage your test template",
+    "overview": "Overview | {name}",
+    "overviewDescription": "View template overview and analytics",
+    "access": "Access & Sharing | {name}",
+    "accessDescription": "Manage who can view and use this template",
+    "activity": "Activity | {name}",
+    "activityDescription": "View candidate test activity",
+    "builder": "Blueprint Builder | {name}",
+    "builderDescription": "Build and configure assessment blueprints",
+    "results": "Results | {name}",
+    "resultsDescription": "View test results and candidate scores",
+    "settings": "Settings | {name}",
+    "settingsDescription": "Configure template settings and behavior",
+    "startAssessment": "Start Assessment | SkillSoft",
+    "startDescription": "Begin your competency assessment",
+    "invalidRoute": "Invalid Route | SkillSoft",
+    "invalidRouteDescription": "Invalid route segment"
+  },
+  "loading": {
+    "title": "Test Templates",
+    "description": "Select a template to assess your competencies"
+  },
+  "errors": {
+    "databaseError": "Database Error",
+    "databaseErrorDescription": "An error occurred while working with the database. Please try again later.",
+    "networkError": "Network Error",
+    "networkErrorDescription": "Failed to connect to the server. Check your internet connection.",
+    "templateNotFound": "Template Not Found",
+    "templateNotFoundDescription": "The requested test template was not found or has been deleted.",
+    "tryAgain": "Try Again",
+    "signIn": "Sign In",
+    "goBack": "Go Back",
+    "toTemplateList": "To Template List",
+    "toHome": "Home",
+    "contactSupport": "If the problem persists, contact support",
+    "requestId": "Request ID",
+    "errorId": "Error ID",
+    "devInfo": "Dev Info",
+    "sessionError": "Test Session Error",
+    "sessionErrorDescription": "An error occurred while loading the test. Try returning to the test list and starting again.",
+    "errorOccurred": "An Error Occurred",
+    "failedToLoad": "Failed to load the test. Please try again."
+  },
+  "builder": {
+    "dragToReorder": "Drag to reorder",
+    "questions": "{count, plural, one {# question} other {# questions}}",
+    "weight": "Weight",
+    "weightValue": "Weight: {value}x",
+    "collapse": "Collapse",
+    "expand": "Expand",
+    "removeCompetency": "Remove {name}",
+    "difficulty": "Difficulty",
+    "emptyStateTitle": "Select a Job Profile to begin",
+    "emptyStateDescription": "Your canvas is empty. Choose a job profile and drag competencies here to start building your test blueprint.",
+    "addCompetenciesFromLibrary": "Add competencies from the library",
+    "competencyStack": "Competency Stack",
+    "items": "{count, plural, one {# item} other {# items}}",
+    "minutesEstimate": "~{minutes} min",
+    "pass": "Pass: {score}%",
+    "dropHereToAdd": "Drop here to add",
+    "save": "Save",
+    "undo": "Undo",
+    "redo": "Redo"
+  },
+  "start": {
+    "title": "Start Assessment",
+    "description": "Begin your competency assessment.",
+    "checking": "Checking Readiness...",
+    "notAvailable": "Assessment Not Available",
+    "begin": "Begin Assessment",
+    "progressSaved": "Your progress will be saved automatically. You can pause and resume at any time.",
+    "failedToStart": "Failed to Start Assessment",
+    "labels": {
+      "time": "Time",
+      "questions": "Questions",
+      "competencies": "Competencies",
+      "min": "min"
+    }
+  },
+  "header": {
+    "subtitle": "Test Template Management",
+    "entity": "template",
+    "breadcrumbTemplates": "Templates",
+    "publish": "Publish"
+  },
+  "history": {
+    "title": "My Results",
+    "description": "History of completed tests and current sessions",
+    "allTemplates": "All templates",
+    "tabs": {
+      "results": "Results",
+      "sessions": "In Progress"
+    },
+    "stats": {
+      "testsTaken": "Tests Taken",
+      "passed": "Passed",
+      "averageScore": "Average Score",
+      "totalTime": "Total Time"
+    },
+    "noResults": {
+      "title": "No results",
+      "description": "You haven't completed any tests yet.",
+      "action": "Take your first test"
+    },
+    "noSessions": {
+      "title": "No active sessions",
+      "description": "You don't have any unfinished tests.",
+      "action": "Start a new test"
+    },
+    "resultCard": {
+      "passed": "Passed",
+      "failed": "Failed",
+      "questions": "questions",
+      "details": "Details",
+      "inProgress": "In Progress",
+      "started": "Started",
+      "continue": "Continue",
+      "of": "of"
+    },
+    "completionHistory": "Completion History",
+    "errorLoading": {
+      "results": "Failed to load results",
+      "sessions": "Failed to load sessions"
+    }
+  },
+  "take": {
+    "errors": {
+      "notFound": "Test not found",
+      "notFoundDescription": "The test session was not found. It may have been deleted or completed.",
+      "invalidSession": "Invalid session",
+      "invalidSessionDescription": "This test session has already been completed or cancelled.",
+      "serverError": "Server error",
+      "serverErrorDescription": "Failed to load the test due to a server error. Please try again in a few seconds.",
+      "abandoned": "Test was cancelled",
+      "abandonedDescription": "This session was cancelled. You can start a new test.",
+      "completed": "Test already completed",
+      "completedDescription": "This test has already been finished.",
+      "timedOut": "Time expired",
+      "timedOutDescription": "The allocated time for the test has ended.",
+      "templateNotSpecified": "Test template not specified",
+      "sessionNotFound": "Session not found",
+      "userNotAuthenticated": "You must sign in to take the test",
+      "userDataError": "Failed to get user data",
+      "invalidStatus": "Invalid session status: {status}",
+      "generic": "Error",
+      "genericDescription": "An error occurred while loading the test"
+    },
+    "dialogs": {
+      "existingSession": {
+        "title": "Continue previous session?",
+        "description": "You have an unfinished test. You can continue it or start over.",
+        "continue": "Continue",
+        "startNew": "Start over",
+        "loading": "Loading..."
+      },
+      "existingSessionWithName": {
+        "title": "Unfinished test",
+        "titleWithWarning": "Unfinished session",
+        "description": "You already have an unfinished session for the test \"{name}\". Would you like to continue it or start over?",
+        "descriptionTestDrive": "You already have an unfinished session for the test \"{name}\". Would you like to continue it in test-drive mode or start over?",
+        "cancel": "Cancel",
+        "startNew": "Start over",
+        "continue": "Continue",
+        "continueTestDrive": "Continue test-drive"
+      }
+    },
+    "actions": {
+      "toTestList": "Back to tests",
+      "toTemplateList": "Back to templates",
+      "tryAgain": "Try again",
+      "startNewTest": "Start new test"
+    },
+    "loading": {
+      "retrying": "Retrying {attempt} of {max}...",
+      "preparing": "Preparing test..."
+    },
+    "toasts": {
+      "testNotFound": "Test not found",
+      "invalidSession": "Invalid test session",
+      "serverError": "Server error. Please try again.",
+      "sessionAbandoned": "Session was cancelled",
+      "testStarted": "Test started!",
+      "testDriveStarted": "Test-drive started!",
+      "existingSessionError": "You already have an unfinished test. Complete it or cancel before starting a new one.",
+      "failedToStart": "Failed to start test. Please try later.",
+      "failedToStartTestDrive": "Failed to start test-drive. Please try later.",
+      "previousSessionCancelled": "Previous session cancelled",
+      "failedToStartNewSession": "Failed to start new session"
+    }
+  },
+  "filters": {
+    "all": "All",
+    "overview": "Overview",
+    "jobFit": "Job Fit",
+    "teamFit": "Team Fit",
+    "forJob": "For Job",
+    "forTeam": "For Team",
+    "searchPlaceholder": "Search templates...",
+    "clearSearch": "Clear search",
+    "showingOf": "Showing {shown} of {total}",
+    "xOfY": "{shown} of {total}"
+  },
+  "grid": {
+    "noTemplatesFound": "No templates found",
+    "noTemplatesDescription": "Try changing your search or filter parameters.",
+    "templateCount": "{count} test templates",
+    "skipToTemplates": "Skip to templates",
+    "templatesNotFoundByFilter": "No templates found matching your filters"
+  },
+  "testSession": {
+    "loginRequired": "You must sign in to take the test",
+    "testDriveLoginRequired": "You must sign in for test-drive",
+    "blueprintRequired": {
+      "title": "Blueprint Required",
+      "description": "This template needs a blueprint configuration before you can start the test. Please go to the Blueprint tab and add at least one competency.",
+      "button": "Configure Blueprint"
+    }
+  },
+  "testDrive": {
+    "button": "HR Test Drive",
+    "buttonShort": "HR",
+    "loading": "Loading..."
+  },
+  "errorDisplay": {
+    "networkHelp": "Check your internet connection and try again.",
+    "authHelp": "Please sign in again.",
+    "authorizationHelp": "You don't have permission to view test templates.",
+    "serverHelp": "The server is temporarily unavailable. Try again later.",
+    "defaultHelp": "Try refreshing the page or contact an administrator.",
+    "refreshPage": "Refresh page",
+    "signIn": "Sign in"
+  },
+  "newForm": {
+    "steps": {
+      "basic": "Basic",
+      "basicDescription": "Name and goal",
+      "competencies": "Competencies",
+      "competenciesDescription": "Skill selection",
+      "settings": "Settings",
+      "settingsDescription": "Test parameters",
+      "visibility": "Visibility",
+      "visibilityDescription": "Access settings",
+      "review": "Review",
+      "reviewDescription": "Summary"
+    },
+    "stepXOfY": "Step {current} of {total}",
+    "testName": "Test Name",
+    "testNamePlaceholder": "e.g., Leadership Skills Assessment",
+    "assessmentGoal": "Assessment Goal",
+    "descriptionLabel": "Description",
+    "descriptionPlaceholder": "Describe the purpose and content of the test...",
+    "noCompetencies": "No Competencies",
+    "searchCompetencies": "Search competencies...",
+    "selectAll": "Select All",
+    "clearAll": "Clear",
+    "selectedCompetencies": "competencies selected",
+    "nothingFound": "Nothing found",
+    "mainParameters": "Main Parameters",
+    "questionsPerIndicator": "Questions/Indicator",
+    "timeLimit": "Time Limit",
+    "passingThreshold": "Passing Score",
+    "testMode": "Test Mode",
+    "shuffleQuestions": "Shuffle Questions",
+    "shuffleQuestionsDesc": "Random order",
+    "shuffleOptions": "Shuffle Options",
+    "shuffleOptionsDesc": "Random order of answers",
+    "allowSkip": "Allow Skip",
+    "allowSkipDesc": "Can skip questions",
+    "allowBackNavigation": "Back Navigation",
+    "allowBackNavigationDesc": "Can change answers",
+    "showResultsImmediately": "Show Results",
+    "showResultsImmediatelyDesc": "Show results at the end",
+    "reviewCompetencies": "Competencies ({count})",
+    "reviewParameters": "Parameters",
+    "questionsPerIndicatorShort": "Q/ind.",
+    "timeShort": "Time",
+    "thresholdShort": "Threshold",
+    "noDescription": "No description",
+    "more": "more",
+    "validation": {
+      "minChars": "Minimum {min} characters",
+      "maxChars": "Maximum {max} characters",
+      "selectAtLeastOne": "Select at least one competency"
+    },
+    "bigFive": {
+      "openness": "Openness to Experience",
+      "opennessDesc": "Creativity, curiosity, openness to new experiences",
+      "conscientiousness": "Conscientiousness",
+      "conscientiousnessDesc": "Organization, responsibility, self-discipline",
+      "extraversion": "Extraversion",
+      "extraversionDesc": "Sociability, activity, energy",
+      "agreeableness": "Agreeableness",
+      "agreeablenessDesc": "Cooperation, empathy, trust",
+      "emotionalStability": "Emotional Stability",
+      "emotionalStabilityDesc": "Calmness, stress resistance, balance"
+    },
+    "visibility": {
+      "title": "Who can access this template?",
+      "private": "Private",
+      "privateDesc": "Only you and people you share with",
+      "public": "Public",
+      "publicDesc": "Anyone in your organization",
+      "link": "Link",
+      "linkDesc": "Anyone with the link",
+      "note": "You can share with specific people after saving.",
+      "reviewLabel": "Visibility"
+    },
+    "visibilityChangeFailed": "Template created, but visibility change failed. You can update it from the access page."
+  },
+  "saveConfirmation": {
+    "confirmTitle": "Create Template?",
+    "confirmDescription": "Review your template settings before creating.",
+    "savingTitle": "Creating Template...",
+    "savingDescription": "Please wait while we create your template.",
+    "successTitle": "Template Created!",
+    "successDescription": "Your template has been created successfully.",
+    "errorTitle": "Creation Failed",
+    "genericError": "An unexpected error occurred. Please try again.",
+    "retryAttempt": "Attempt {current} of {max}",
+    "maxRetriesReached": "Maximum retry attempts reached. Please try again later.",
+    "confirm": "Create Template",
+    "creating": "Creating...",
+    "goBack": "Go Back",
+    "retry": "Try Again",
+    "redirecting": "Redirecting to your template...",
+    "competencies": "competencies",
+    "questionsPerIndicator": "Q/indicator",
+    "minutes": "min",
+    "passingScore": "to pass",
+    "showResultsYes": "Show results",
+    "showResultsNo": "Hide results",
+    "shuffleQuestions": "Shuffle questions",
+    "shuffleOptions": "Shuffle options",
+    "allowSkip": "Allow skip",
+    "allowBack": "Allow back",
+    "visibilityChangeFailed": "Template created, but visibility change failed.",
+    "goals": {
+      "OVERVIEW": "Overview",
+      "JOB_FIT": "Job Fit",
+      "TEAM_FIT": "Team Fit"
+    },
+    "visibility": {
+      "PRIVATE": "Private",
+      "PUBLIC": "Public",
+      "LINK": "Link sharing"
+    }
+  },
+  "resultsView": {
+    "competencyProfile": "Competency Profile",
+    "noCompetencyData": "No competency data available",
+    "behavioralIndicators": "Behavioral Indicators ({count})",
+    "detailedBreakdownNotAvailable": "Detailed indicator breakdown not available",
+    "score": "Score",
+    "questions": "Questions",
+    "weight": "Weight",
+    "questionShort": "Q",
+    "stats": {
+      "average": "Average",
+      "best": "Best",
+      "growth": "Growth"
+    },
+    "tier": {
+      "excellent": "Excellent",
+      "good": "Good",
+      "average": "Average",
+      "developing": "Developing",
+      "strength": "Strength"
+    },
+    "showMore": "Show {count} more",
+    "showLess": "Show less",
+    "questionLoadError": "Failed to load question details",
+    "retry": "Retry",
+    "overview": {
+      "profileOverview": "Profile Overview",
+      "assessmentResults": "Assessment results",
+      "skills": "Skills",
+      "bigFive": "Big 5",
+      "map": "Map",
+      "minCompetenciesRequired": "At least 3 competencies required for radar chart.",
+      "requiresOnetMappings": "Requires O*NET mappings. Contact admin.",
+      "noOnetMappings": "No O*NET mappings available.",
+      "limitedCoverage": "Limited coverage.",
+      "onlyMapped": "Only {percentage}% mapped.",
+      "keyInsights": "Key Insights",
+      "profileSummary": "Profile Summary",
+      "competenciesAssessed": "{count} competencies assessed for your Competency Passport.",
+      "topTraits": "Top Traits",
+      "strengths": "Strengths",
+      "keepDevelopingSkills": "Keep developing skills.",
+      "coverage": "Coverage",
+      "mapped": "{mapped}/{total} mapped",
+      "developmentNote": "Regular reassessment helps track growth."
+    }
+  },
+  "heroCard": {
+    "jobFit": {
+      "qualified": "Qualified!",
+      "keepGrowing": "Keep Growing",
+      "matches": "Matches",
+      "doesNotMatch": "Does Not Match",
+      "onet": "O*NET"
+    },
+    "teamFit": {
+      "greatFit": "Great Compatibility!",
+      "needsAdaptation": "Needs Adaptation",
+      "fits": "Fits",
+      "adaptation": "Adaptation",
+      "team": "Team"
+    },
+    "competencyPassport": {
+      "yourProfile": "Your Competency Profile",
+      "competencies": "competencies"
+    },
+    "metrics": {
+      "time": "Time",
+      "questions": "Questions",
+      "answers": "Answers",
+      "percentile": "Percentile"
+    }
+  },
+  "access": {
+    "title": "Access",
+    "description": "Manage who can view and use this template",
+    "visibility": {
+      "title": "Visibility",
+      "description": "Control who can discover and access this template",
+      "options": {
+        "private": "Private",
+        "privateDesc": "Only you and people you share with can access",
+        "public": "Public",
+        "publicDesc": "Anyone in the organization can view and use",
+        "link": "Anyone with link",
+        "linkDesc": "Anyone with the link can access (anonymous allowed)"
+      },
+      "revokeDialog": {
+        "title": "Revoke Active Share Links?",
+        "message": "Changing visibility from Link will revoke {count, plural, =1 {# active share link} other {all # active share links}}.",
+        "warning": "Anyone with these links will no longer be able to access this template.",
+        "confirm": "Revoke & Change"
+      },
+      "changedTo": "Visibility changed to {visibility}"
+    },
+    "people": {
+      "title": "People with access",
+      "description": "Share this template with specific users or teams",
+      "form": {
+        "tabs": {
+          "email": "By Email",
+          "systemUser": "System User"
+        },
+        "emailPlaceholder": "Enter email address",
+        "userPlaceholder": "Search users...",
+        "selectedUser": "Selected: {name}",
+        "addButton": "Add",
+        "suggestions": "Suggested",
+        "searchHint": "Type at least 2 characters to search",
+        "noUsersFound": "No users found",
+        "validation": {
+          "invalidEmail": "Valid email required"
+        }
+      },
+      "list": {
+        "usersHeader": "Users ({count})",
+        "teamsHeader": "Teams ({count})",
+        "unknownUser": "Unknown User",
+        "unknownTeam": "Unknown Team",
+        "teamBadge": "Team",
+        "expiredBadge": "Expired",
+        "expires": "Expires {time}",
+        "expiresIn": "Expires {time}",
+        "failedToLoad": "Failed to load shares"
+      },
+      "emptyState": {
+        "title": "No users or teams have access",
+        "hint": "Share this template with users or teams using the form above"
+      },
+      "removeDialog": {
+        "title": "Remove Access",
+        "message": "Are you sure you want to remove access for {name}? They will no longer be able to access this template.",
+        "cancel": "Cancel",
+        "confirm": "Remove Access"
+      }
+    },
+    "links": {
+      "title": "Share Links",
+      "description": "Create shareable links that don't require adding specific users",
+      "subheader": "Share Links",
+      "usage": "{active} of {max} links used",
+      "createButton": "Create Link",
+      "form": {
+        "permissionLabel": "Permission",
+        "permissionDesc": "What can link users do?",
+        "expiresLabel": "Expires In",
+        "expiresDesc": "Expires {date}",
+        "maxUsesLabel": "Max Uses (Optional)",
+        "maxUsesPlaceholder": "Unlimited",
+        "maxUsesDesc": "0 = unlimited uses",
+        "labelLabel": "Label (Optional)",
+        "labelPlaceholder": "e.g., Interview candidates",
+        "labelDesc": "Help identify this link",
+        "cancelButton": "Cancel",
+        "submitButton": "Create Link"
+      },
+      "expiration": {
+        "day1": "1 day",
+        "day7": "7 days",
+        "day14": "14 days",
+        "day30": "30 days",
+        "day90": "90 days",
+        "year1": "1 year"
+      },
+      "listItem": {
+        "usageDisplay": "{count}{max, select, 0 {} other { / {max}}} uses",
+        "uses": "{count}{max, select, 0 {} other { / {max}}} uses",
+        "expired": "Expired",
+        "expires": "Expires {time}",
+        "expiresIn": "Expires {time}",
+        "usedUp": "Used Up",
+        "shareLink": "Share Link"
+      },
+      "emptyState": {
+        "title": "No active share links",
+        "hint": "Create a link to share this template without adding specific users"
+      },
+      "limitWarning": "Maximum link limit reached. Revoke existing links to create new ones.",
+      "revokeDialog": {
+        "title": "Revoke Share Link",
+        "message": "Are you sure you want to revoke this link? Anyone with this link will no longer be able to access the template.",
+        "confirm": "Revoke Link"
+      }
+    },
+    "toast": {
+      "sharedWith": "Shared with {email}",
+      "shareFailed": "Failed to share with user",
+      "permissionUpdated": "Permission updated",
+      "updateFailed": "Failed to update permission",
+      "accessRemoved": "Removed access for {name}",
+      "revokeFailed": "Failed to revoke access",
+      "linkCreated": "Share link created",
+      "linkCreateFailed": "Failed to create link",
+      "linkRevoked": "Link revoked",
+      "linkRevokeFailed": "Failed to revoke link",
+      "visibilityFailed": "Failed to change visibility"
+    }
+  }
+}
