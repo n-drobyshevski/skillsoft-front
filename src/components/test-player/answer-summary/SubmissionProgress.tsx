@@ -1,7 +1,6 @@
 'use client';
 
 import React from 'react';
-import { motion } from 'framer-motion';
 import { Loader2, AlertTriangle, RefreshCw, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { SubmissionError } from '@/store/review-store';
@@ -33,17 +32,11 @@ export function SubmissionProgress({
   if (!isSubmitting && !error) return null;
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="fixed inset-0 bg-neutral-950/95 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+    <div
+      className="fixed inset-0 bg-neutral-950/95 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in-0 duration-200 motion-reduce:animate-none"
     >
-      <motion.div
-        initial={{ scale: 0.9, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        transition={{ delay: 0.1 }}
-        className="max-w-sm w-full"
+      <div
+        className="max-w-sm w-full animate-in fade-in-0 zoom-in-95 duration-200 delay-100 motion-reduce:animate-none"
       >
         {isSubmitting ? (
           // Loading state
@@ -105,7 +98,7 @@ export function SubmissionProgress({
             )}
           </div>
         ) : null}
-      </motion.div>
-    </motion.div>
+      </div>
+    </div>
   );
 }

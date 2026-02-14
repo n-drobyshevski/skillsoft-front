@@ -65,7 +65,7 @@ import {
   useRevokeShareLink,
 } from '@/hooks/queries';
 import { toast } from 'sonner';
-import { addDays } from 'date-fns';
+import { addDays } from '@/lib/date-utils';
 
 interface ShareLinkManagerProps {
   templateId: string;

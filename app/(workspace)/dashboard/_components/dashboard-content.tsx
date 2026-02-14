@@ -29,7 +29,7 @@ import Link from "next/link";
 import { TestSession, TestTemplateSummary } from "@/types/domain";
 import { UserStats } from "@/types/user";
 import { ClientOnly } from "@/components/common/ClientOnly";
-import CompetencyByCategoryBarChart from "@/components/data-display/charts/CompetencyByCategoryBarChart";
+import { LazyCompetencyByCategoryBarChart as CompetencyByCategoryBarChart } from '@/lib/lazy-charts';
 import { useActiveLens } from "@/hooks/useLens";
 import { useTranslations } from 'next-intl';
 

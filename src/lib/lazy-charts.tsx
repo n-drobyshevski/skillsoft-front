@@ -106,6 +106,57 @@ export const LazyResponsiveContainer = dynamic(
   }
 );
 
+// ============================================================================
+// Composite Chart Components (lazy-loaded)
+// These are higher-level chart components that internally use recharts.
+// Lazy-loading them avoids pulling ~45KB gzipped recharts into the main bundle.
+// ============================================================================
+
+export const LazyBigFiveRadar = dynamic(
+  () => import('@/components/charts/BigFiveRadar').then((mod) => ({ default: mod.BigFiveRadar })),
+  { loading: () => <CompactChartSkeleton />, ssr: false }
+);
+
+export const LazyBigFiveRadarSimple = dynamic(
+  () => import('@/components/charts/BigFiveRadar').then((mod) => ({ default: mod.BigFiveRadarSimple })),
+  { loading: () => <CompactChartSkeleton />, ssr: false }
+);
+
+export const LazyTeamSaturationRadar = dynamic(
+  () => import('@/components/results/TeamSaturationRadar'),
+  { loading: () => <ChartSkeleton />, ssr: false }
+);
+
+export const LazyCompetencyRadarChart = dynamic(
+  () => import('@/components/data-display/charts/CompetencyRadarChart'),
+  { loading: () => <CompactChartSkeleton />, ssr: false }
+);
+
+export const LazyCompetencyByCategoryBarChart = dynamic(
+  () => import('@/components/data-display/charts/CompetencyByCategoryBarChart'),
+  { loading: () => <ChartSkeleton />, ssr: false }
+);
+
+export const LazyGapAnalysisBarChart = dynamic(
+  () => import('@/components/data-display/charts/GapAnalysisBarChart'),
+  { loading: () => <ChartSkeleton />, ssr: false }
+);
+
+export const LazyWeightDistributionPie = dynamic(
+  () => import('@/components/data-display/charts/WeightDistributionPie'),
+  { loading: () => <CompactChartSkeleton />, ssr: false }
+);
+
+export const LazyCompetencyByLevelBarChart = dynamic(
+  () => import('@/components/data-display/charts/CompetencyByLevelBarChart'),
+  { loading: () => <ChartSkeleton />, ssr: false }
+);
+
+export const LazyAverageIndicatorsGauge = dynamic(
+  () => import('@/components/data-display/charts/AverageIndicatorsGauge'),
+  { loading: () => <CompactChartSkeleton />, ssr: false }
+);
+
 /**
  * Preload chart library for routes that will need it
  * Call this in useEffect on parent pages to start loading early

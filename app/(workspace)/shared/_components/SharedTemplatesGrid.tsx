@@ -30,7 +30,7 @@ import {
   AssessmentGoal,
   getPermissionDisplayText,
 } from '@/types/domain';
-import { formatDistanceToNow } from 'date-fns';
+import { useFormattedDates } from '@/hooks/useFormattedDates';
 
 interface SharedTemplatesGridProps {
   items: SharedTemplateItem[];
@@ -112,6 +112,7 @@ interface SharedTemplateCardProps {
 
 function SharedTemplateCard({ item }: SharedTemplateCardProps) {
   const t = useTranslations('shared');
+  const { formatRelativeTime, formatFutureRelativeTime } = useFormattedDates();
   const { template, permission, sharedBy, sharedAt, expiresAt } = item;
   const permConfig = permissionConfig[permission];
   const PermIcon = permConfig.icon;
@@ -207,7 +208,7 @@ function SharedTemplateCard({ item }: SharedTemplateCardProps) {
           <div className="flex-1 min-w-0">
             <p className="text-xs font-medium truncate">{sharedBy.name}</p>
             <p className="text-xs text-muted-foreground">
-              {formatDistanceToNow(new Date(sharedAt), { addSuffix: true })}
+              {formatRelativeTime(sharedAt)}
             </p>
           </div>
         </div>
@@ -216,7 +217,7 @@ function SharedTemplateCard({ item }: SharedTemplateCardProps) {
         {expiresAt && !isExpired && (
           <div className="flex items-center gap-1.5 text-xs text-amber-600 dark:text-amber-400">
             <Calendar className="h-3 w-3" />
-            Expires {formatDistanceToNow(new Date(expiresAt), { addSuffix: true })}
+            Expires {formatFutureRelativeTime(expiresAt)}
           </div>
         )}
         {isExpired && (

@@ -2,9 +2,7 @@
 
 import * as React from 'react';
 import { Drawer as DrawerPrimitive } from 'vaul';
-import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
-import { springConfig } from '@/lib/animation-config';
 
 /**
  * Snap point types for the enhanced sheet
@@ -62,15 +60,12 @@ function DragHandle({ isDragging }: DragHandleProps) {
     >
       {/* Touch target - 48x24px for accessibility */}
       <div className="flex items-center justify-center w-12 h-6 touch-manipulation">
-        {/* Visual indicator - 48x6px */}
-        <motion.div
-          animate={{
-            width: isDragging ? 56 : 48,
-            height: isDragging ? 8 : 6,
-            opacity: isDragging ? 0.8 : 0.4,
-          }}
-          transition={springConfig.stiff}
-          className="bg-muted-foreground rounded-full"
+        {/* Visual indicator - 48x6px, expands on drag */}
+        <div
+          className={cn(
+            'bg-muted-foreground rounded-full transition-all duration-200 ease-out motion-reduce:transition-none',
+            isDragging ? 'w-14 h-2 opacity-80' : 'w-12 h-1.5 opacity-40'
+          )}
         />
       </div>
     </div>

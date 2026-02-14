@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ResultViewWrapper } from './_components/ResultViewFactory';
 
+
 interface PageProps {
   params: Promise<{
     resultId: string;

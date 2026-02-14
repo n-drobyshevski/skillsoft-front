@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useMemo } from 'react';
-import { motion } from 'framer-motion';
 import { AnswerCard } from './cards/AnswerCard';
 import { AnswerSummaryItem, CompetencyGroup } from '@/store/review-store';
 import { ChevronDown } from 'lucide-react';
@@ -44,14 +43,12 @@ export function AnswerCardList({
     return (
       <div className="space-y-2 sm:space-y-3">
         {sortedItems.map((item, index) => (
-          <motion.div
+          <div
             key={item.questionId}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{
-              duration: 0.3,
-              delay: Math.min(index * 0.02, 0.5), // Cap delay at 0.5s
-              ease: 'easeOut',
+            className="animate-in fade-in-0 slide-in-from-bottom-5 duration-300 ease-out motion-reduce:animate-none"
+            style={{
+              animationDelay: `${Math.min(index * 20, 500)}ms`,
+              animationFillMode: 'both',
             }}
           >
             <AnswerCard
@@ -61,7 +58,7 @@ export function AnswerCardList({
               onToggle={() => onToggleCard(item.questionId)}
               onEdit={() => onEditAnswer(item.questionId, item.questionIndex)}
             />
-          </motion.div>
+          </div>
         ))}
       </div>
     );
@@ -107,13 +104,11 @@ function CompetencyGroupSection({
   }, [group.items]);
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{
-        duration: 0.3,
-        delay: groupIndex * 0.1,
-        ease: 'easeOut',
+    <div
+      className="animate-in fade-in-0 slide-in-from-bottom-5 duration-300 ease-out motion-reduce:animate-none"
+      style={{
+        animationDelay: `${groupIndex * 100}ms`,
+        animationFillMode: 'both',
       }}
     >
       <Collapsible open={isGroupExpanded} onOpenChange={setIsGroupExpanded}>
@@ -154,14 +149,12 @@ function CompetencyGroupSection({
         <CollapsibleContent>
           <div className="space-y-2 sm:space-y-3 pt-2">
             {sortedItems.map((item, index) => (
-              <motion.div
+              <div
                 key={item.questionId}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{
-                  duration: 0.2,
-                  delay: index * 0.02,
-                  ease: 'easeOut',
+                className="animate-in fade-in-0 slide-in-from-bottom-2 duration-200 ease-out motion-reduce:animate-none"
+                style={{
+                  animationDelay: `${index * 20}ms`,
+                  animationFillMode: 'both',
                 }}
               >
                 <AnswerCard
@@ -171,11 +164,11 @@ function CompetencyGroupSection({
                   onToggle={() => onToggleCard(item.questionId)}
                   onEdit={() => onEditAnswer(item.questionId, item.questionIndex)}
                 />
-              </motion.div>
+              </div>
             ))}
           </div>
         </CollapsibleContent>
       </Collapsible>
-    </motion.div>
+    </div>
   );
 }

@@ -3,7 +3,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { BigFiveRadar } from '@/components/charts/BigFiveRadar';
+import { LazyBigFiveRadar as BigFiveRadar } from '@/lib/lazy-charts';
 import { useBigFiveProjection } from '@/hooks/useBigFiveProjection';
 import { TestResult, CompetencyScore } from '@/types/domain';
 import { CheckCircle2, XCircle, Clock, FileText, Target, TrendingUp, Trophy, ChevronRight } from 'lucide-react';

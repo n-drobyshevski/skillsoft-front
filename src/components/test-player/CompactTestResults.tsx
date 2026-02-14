@@ -1,7 +1,6 @@
 'use client';
 
 import React from 'react';
-import { motion } from 'framer-motion';
 import { Trophy, Clock, CheckCircle, TrendingUp, ChevronRight, RotateCcw, ArrowLeft } from 'lucide-react';
 import { TestResult } from '@/types/domain';
 import { Button } from '@/components/ui/button';
@@ -65,47 +64,19 @@ export function CompactTestResults({ result, onRetry, onBack, onViewDetails }: C
     return 'text-amber-600 dark:text-amber-400';
   };
 
-  // Animation variants with reduced motion support
-  const containerVariants = prefersReducedMotion
-    ? {
-        hidden: { opacity: 1 },
-        visible: { opacity: 1 },
-      }
-    : {
-        hidden: { opacity: 0 },
-        visible: {
-          opacity: 1,
-          transition: {
-            staggerChildren: 0.1,
-            delayChildren: 0.2,
-          },
-        },
-      };
-
-  const itemVariants = prefersReducedMotion
-    ? {
-        hidden: { opacity: 1 },
-        visible: { opacity: 1 },
-      }
-    : {
-        hidden: { opacity: 0, y: 20 },
-        visible: { opacity: 1, y: 0 },
-      };
-
-  // Progress bar animation duration
-  const progressAnimationDuration = prefersReducedMotion ? 0 : 0.8;
+  // CSS animation class helpers
+  const animateInClass = prefersReducedMotion
+    ? ''
+    : 'animate-in fade-in-0 slide-in-from-bottom-5 duration-300';
 
   return (
-    <motion.div
-      variants={containerVariants}
-      initial="hidden"
-      animate="visible"
+    <div
       className="flex flex-col h-screen max-h-screen overflow-hidden bg-background p-4 md:p-6"
     >
       {/* HEADER SECTION: 120px desktop / 100px mobile */}
-      <motion.div
-        variants={itemVariants}
-        className="flex-shrink-0 mb-4 md:mb-6"
+      <div
+        className={cn('flex-shrink-0 mb-4 md:mb-6', animateInClass)}
+        style={prefersReducedMotion ? undefined : { animationDelay: '200ms', animationFillMode: 'both' }}
       >
         {/* Desktop: Horizontal stats + title (120px) */}
         <div className="hidden md:flex items-center justify-between gap-6 h-[120px]">
@@ -206,20 +177,20 @@ export function CompactTestResults({ result, onRetry, onBack, onViewDetails }: C
             </div>
           </div>
         </div>
-      </motion.div>
+      </div>
 
       {/* COMPETENCY LIST: 600px desktop / 400px mobile (scrollable if > 8 items) */}
-      <motion.div
-        variants={itemVariants}
-        className="flex-1 min-h-0 mb-4 md:mb-6"
+      <div
+        className={cn('flex-1 min-h-0 mb-4 md:mb-6', animateInClass)}
+        style={prefersReducedMotion ? undefined : { animationDelay: '300ms', animationFillMode: 'both' }}
       >
         <div className="h-full overflow-y-auto overflow-x-hidden pr-2 -mr-2 scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent">
           <div className="space-y-3 md:space-y-4">
             {competencyScores.map((comp, index) => (
-              <motion.div
+              <div
                 key={comp.competencyId}
-                variants={itemVariants}
-                className="group"
+                className={cn('group', animateInClass)}
+                style={prefersReducedMotion ? undefined : { animationDelay: `${400 + index * 100}ms`, animationFillMode: 'both' }}
               >
                 {/* Desktop: Single row layout (75px) */}
                 <div className="hidden md:flex items-center gap-4 p-4 rounded-lg bg-card border border-border hover:border-primary/50 transition-colors">
@@ -231,18 +202,20 @@ export function CompactTestResults({ result, onRetry, onBack, onViewDetails }: C
                   {/* Progress bar (compact) */}
                   <div className="flex-1 max-w-[200px]">
                     <div className="h-2 bg-muted rounded-full overflow-hidden">
-                      <motion.div
-                        initial={{ width: prefersReducedMotion ? `${comp.percentage}%` : 0 }}
-                        animate={{ width: `${comp.percentage}%` }}
-                        transition={{ duration: progressAnimationDuration, delay: prefersReducedMotion ? 0 : index * 0.1 }}
+                      <div
                         className={cn(
                           "h-full rounded-full gpu-accelerated",
+                          !prefersReducedMotion && "transition-[width] duration-700 ease-out motion-reduce:transition-none",
                           comp.percentage >= 80
                             ? "bg-emerald-500"
                             : comp.percentage >= 60
                             ? "bg-blue-500"
                             : "bg-amber-500"
                         )}
+                        style={{
+                          width: `${comp.percentage}%`,
+                          transitionDelay: prefersReducedMotion ? '0ms' : `${index * 100}ms`,
+                        }}
                       />
                     </div>
                   </div>
@@ -273,31 +246,33 @@ export function CompactTestResults({ result, onRetry, onBack, onViewDetails }: C
 
                   {/* Progress bar */}
                   <div className="h-1.5 bg-muted rounded-full overflow-hidden">
-                    <motion.div
-                      initial={{ width: prefersReducedMotion ? `${comp.percentage}%` : 0 }}
-                      animate={{ width: `${comp.percentage}%` }}
-                      transition={{ duration: progressAnimationDuration, delay: prefersReducedMotion ? 0 : index * 0.1 }}
+                    <div
                       className={cn(
                         "h-full rounded-full gpu-accelerated",
+                        !prefersReducedMotion && "transition-[width] duration-700 ease-out motion-reduce:transition-none",
                         comp.percentage >= 80
                           ? "bg-emerald-500"
                           : comp.percentage >= 60
                           ? "bg-blue-500"
                           : "bg-amber-500"
                       )}
+                      style={{
+                        width: `${comp.percentage}%`,
+                        transitionDelay: prefersReducedMotion ? '0ms' : `${index * 100}ms`,
+                      }}
                     />
                   </div>
                 </div>
-              </motion.div>
+              </div>
             ))}
           </div>
         </div>
-      </motion.div>
+      </div>
 
       {/* FOOTER: 80px desktop / 60px mobile */}
-      <motion.div
-        variants={itemVariants}
-        className="flex-shrink-0 border-t border-border pt-4"
+      <div
+        className={cn('flex-shrink-0 border-t border-border pt-4', animateInClass)}
+        style={prefersReducedMotion ? undefined : { animationDelay: '500ms', animationFillMode: 'both' }}
       >
         {/* Desktop: Horizontal buttons (80px) */}
         <div className="hidden md:flex items-center justify-between gap-4">
@@ -373,7 +348,7 @@ export function CompactTestResults({ result, onRetry, onBack, onViewDetails }: C
             </Button>
           )}
         </div>
-      </motion.div>
-    </motion.div>
+      </div>
+    </div>
   );
 }

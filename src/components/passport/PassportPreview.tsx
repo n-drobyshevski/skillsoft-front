@@ -16,8 +16,7 @@ import {
   ExternalLink,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { formatDistanceToNow } from 'date-fns';
-import { ru } from 'date-fns/locale';
+import { useFormattedDates } from '@/hooks/useFormattedDates';
 import { PassportStatusBadge, getPassportStatus } from './PassportStatusBadge';
 import type { CompetencyPassport } from '@/types/domain';
 
@@ -147,6 +146,7 @@ export function PassportPreview({
   className,
 }: PassportPreviewProps) {
   const [isExpanded, setIsExpanded] = useState(defaultExpanded);
+  const { formatRelativeTime } = useFormattedDates();
 
   // Loading state
   if (isLoading) {
@@ -201,10 +201,7 @@ export function PassportPreview({
                       <>
                         {' '}
                         ·{' '}
-                        {formatDistanceToNow(new Date(passport.lastUpdated), {
-                          addSuffix: true,
-                          locale: ru,
-                        })}
+                        {formatRelativeTime(passport.lastUpdated)}
                       </>
                     )}
                   </p>

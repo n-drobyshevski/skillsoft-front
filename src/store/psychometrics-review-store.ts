@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { subscribeWithSelector, persist } from 'zustand/middleware';
+import { useShallow } from 'zustand/react/shallow';
 import {
   FlaggedItemSummary,
   ItemValidityStatus,
@@ -800,32 +801,34 @@ export const useSelectedCount = () =>
 
 /** Get items grouped by severity */
 export const useItemsBySeverity = () =>
-  usePsychometricsReviewStore((state) => {
-    const groups: Record<string, FlaggedItemSummary[]> = {
-      negative: [],
-      critical: [],
-      warning: [],
-      other: [],
-    };
+  usePsychometricsReviewStore(
+    useShallow((state) => {
+      const groups: Record<string, FlaggedItemSummary[]> = {
+        negative: [],
+        critical: [],
+        warning: [],
+        other: [],
+      };
 
-    state.items.forEach((item) => {
-      switch (item.discriminationFlag) {
-        case DiscriminationFlag.NEGATIVE:
-          groups.negative.push(item);
-          break;
-        case DiscriminationFlag.CRITICAL:
-          groups.critical.push(item);
-          break;
-        case DiscriminationFlag.WARNING:
-          groups.warning.push(item);
-          break;
-        default:
-          groups.other.push(item);
-      }
-    });
+      state.items.forEach((item) => {
+        switch (item.discriminationFlag) {
+          case DiscriminationFlag.NEGATIVE:
+            groups.negative.push(item);
+            break;
+          case DiscriminationFlag.CRITICAL:
+            groups.critical.push(item);
+            break;
+          case DiscriminationFlag.WARNING:
+            groups.warning.push(item);
+            break;
+          default:
+            groups.other.push(item);
+        }
+      });
 
-    return groups;
-  });
+      return groups;
+    })
+  );
 
 /** Get batch saga state */
 export const useBatchSaga = () =>
@@ -854,15 +857,17 @@ export const useLastUndoAction = () =>
 
 /** Get review progress stats */
 export const useReviewProgress = () =>
-  usePsychometricsReviewStore((state) => ({
-    total: state.items.length,
-    reviewed: state.reviewedIds.size,
-    remaining: state.items.length - state.reviewedIds.size,
-    percentage:
-      state.items.length > 0
-        ? Math.round((state.reviewedIds.size / state.items.length) * 100)
-        : 0,
-  }));
+  usePsychometricsReviewStore(
+    useShallow((state) => ({
+      total: state.items.length,
+      reviewed: state.reviewedIds.size,
+      remaining: state.items.length - state.reviewedIds.size,
+      percentage:
+        state.items.length > 0
+          ? Math.round((state.reviewedIds.size / state.items.length) * 100)
+          : 0,
+    }))
+  );
 
 /** Get item selection state */
 export const useItemSelectionState = (itemId: string) =>

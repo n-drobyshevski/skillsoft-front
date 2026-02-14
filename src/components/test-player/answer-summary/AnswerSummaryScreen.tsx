@@ -2,6 +2,7 @@
 
 import { useRef, useEffect } from 'react';
 import { AnimatePresence } from 'framer-motion';
+import { useShallow } from 'zustand/react/shallow';
 import { SummaryHero } from './SummaryHero';
 import { FilterBar } from './FilterBar';
 import { SkippedWarningBanner } from './SkippedWarningBanner';
@@ -57,20 +58,28 @@ export function AnswerSummaryScreen({
   const scrollRef = useRef<HTMLDivElement>(null);
 
   // Store state
-  const activeFilter = useReviewStore((state) => state.activeFilter);
-  const sortOrder = useReviewStore((state) => state.sortOrder);
-  const expandedCardIds = useReviewStore((state) => state.expandedCardIds);
-  const scrollPosition = useReviewStore((state) => state.scrollPosition);
-  const submissionError = useReviewStore((state) => state.lastSubmissionError);
-  const submissionAttempts = useReviewStore((state) => state.submissionAttempts);
+  const { activeFilter, sortOrder, expandedCardIds, scrollPosition, submissionError, submissionAttempts } = useReviewStore(
+    useShallow((state) => ({
+      activeFilter: state.activeFilter,
+      sortOrder: state.sortOrder,
+      expandedCardIds: state.expandedCardIds,
+      scrollPosition: state.scrollPosition,
+      submissionError: state.lastSubmissionError,
+      submissionAttempts: state.submissionAttempts,
+    }))
+  );
 
   // Store actions
-  const setActiveFilter = useReviewStore((state) => state.setActiveFilter);
-  const setSortOrder = useReviewStore((state) => state.setSortOrder);
-  const toggleCardExpanded = useReviewStore((state) => state.toggleCardExpanded);
-  const saveScrollPosition = useReviewStore((state) => state.saveScrollPosition);
-  const retrySubmission = useReviewStore((state) => state.retrySubmission);
-  const cancelSubmission = useReviewStore((state) => state.cancelSubmission);
+  const { setActiveFilter, setSortOrder, toggleCardExpanded, saveScrollPosition, retrySubmission, cancelSubmission } = useReviewStore(
+    useShallow((state) => ({
+      setActiveFilter: state.setActiveFilter,
+      setSortOrder: state.setSortOrder,
+      toggleCardExpanded: state.toggleCardExpanded,
+      saveScrollPosition: state.saveScrollPosition,
+      retrySubmission: state.retrySubmission,
+      cancelSubmission: state.cancelSubmission,
+    }))
+  );
 
   // Calculate stats
   const stats = {

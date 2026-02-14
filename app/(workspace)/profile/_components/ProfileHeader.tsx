@@ -2,8 +2,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Building2, Calendar, Mail } from 'lucide-react';
-import { formatDistanceToNow } from 'date-fns';
-import { ru } from 'date-fns/locale';
+import { formatRelativeTime } from '@/lib/date-utils';
 import type { ProfileUserInfo } from '@/types/profile';
 
 interface ProfileHeaderProps {
@@ -25,10 +24,7 @@ export function ProfileHeader({ userInfo }: ProfileHeaderProps) {
     .toUpperCase()
     .slice(0, 2);
 
-  const memberSince = formatDistanceToNow(userInfo.createdAt, {
-    addSuffix: true,
-    locale: ru,
-  });
+  const memberSince = formatRelativeTime(userInfo.createdAt, 'ru');
 
   return (
     <Card>

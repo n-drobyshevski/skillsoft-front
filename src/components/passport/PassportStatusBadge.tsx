@@ -9,8 +9,7 @@ import {
 } from '@/components/ui/tooltip';
 import { CheckCircle2, Clock, FileX } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { formatDistanceToNow } from 'date-fns';
-import { ru } from 'date-fns/locale';
+import { useFormattedDates } from '@/hooks/useFormattedDates';
 
 // ============================================================================
 // Types
@@ -96,6 +95,7 @@ export function PassportStatusBadge({
   showTooltip = true,
   className,
 }: PassportStatusBadgeProps) {
+  const { formatRelativeTime, formatFutureRelativeTime } = useFormattedDates();
   const config = STATUS_CONFIG[status];
   const sizeConfig = SIZE_CONFIG[size];
   const Icon = config.Icon;
@@ -136,19 +136,13 @@ export function PassportStatusBadge({
           {lastUpdated && (
             <p className="text-muted-foreground">
               Обновлён:{' '}
-              {formatDistanceToNow(new Date(lastUpdated), {
-                addSuffix: true,
-                locale: ru,
-              })}
+              {formatRelativeTime(lastUpdated)}
             </p>
           )}
           {expiresAt && status === 'valid' && (
             <p className="text-muted-foreground">
               Истекает:{' '}
-              {formatDistanceToNow(new Date(expiresAt), {
-                addSuffix: true,
-                locale: ru,
-              })}
+              {formatFutureRelativeTime(expiresAt)}
             </p>
           )}
           {competencyCount !== undefined && competencyCount > 0 && (

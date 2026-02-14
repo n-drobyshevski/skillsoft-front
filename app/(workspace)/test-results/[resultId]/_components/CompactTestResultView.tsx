@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { BigFiveRadar } from '@/components/charts/BigFiveRadar';
+import { LazyBigFiveRadar as BigFiveRadar } from '@/lib/lazy-charts';
 import { useBigFiveProjection } from '@/hooks/useBigFiveProjection';
 import { TestResult, CompetencyScore } from '@/types/domain';
 import {

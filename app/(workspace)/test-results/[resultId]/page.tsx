@@ -4,6 +4,7 @@ import { getTranslations } from 'next-intl/server';
 import { testResultsApi } from '@/services/api';
 import TestResultView from './_components/TestResultView';
 
+
 interface TestResultPageProps {
   params: Promise<{
     resultId: string;

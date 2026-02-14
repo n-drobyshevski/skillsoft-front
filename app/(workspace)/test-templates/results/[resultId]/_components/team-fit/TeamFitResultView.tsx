@@ -16,7 +16,7 @@ import { TeamFitHero } from './TeamFitHero';
 import { CompetencyProfile } from '../shared/CompetencyProfile';
 import { ActionButtonsBar } from '../shared/ActionButtonsBar';
 import { BaseResultViewProps } from '../shared/types';
-import { TeamSaturationRadar } from '@/components/results';
+import { LazyTeamSaturationRadar as TeamSaturationRadar } from '@/lib/lazy-charts';
 import { toTeamSaturationDataSimulated } from '@/lib/result-transformers';
 
 /**

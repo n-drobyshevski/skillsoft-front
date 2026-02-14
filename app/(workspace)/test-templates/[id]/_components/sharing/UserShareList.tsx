@@ -38,7 +38,7 @@ import {
   useRevokeShare,
 } from '@/hooks/queries';
 import { toast } from 'sonner';
-import { formatDistanceToNow } from 'date-fns';
+import { useFormattedDates } from '@/hooks/useFormattedDates';
 
 interface UserShareListProps {
   templateId: string;
@@ -206,6 +206,7 @@ function ShareListItem({
   onRevoke,
 }: ShareListItemProps) {
   const t = useTranslations('template.access.people');
+  const { formatFutureRelativeTime } = useFormattedDates();
   const isTeam = share.granteeType === GranteeType.TEAM;
   const Icon = isTeam ? Users : User;
   const isExpired = share.expiresAt && new Date(share.expiresAt) < new Date();
@@ -269,7 +270,7 @@ function ShareListItem({
           {share.expiresAt && !isExpired && (
             <span className="flex items-center gap-1 shrink-0">
               <Clock className="h-3 w-3" />
-              {t('list.expiresIn', { time: formatDistanceToNow(new Date(share.expiresAt), { addSuffix: true }) })}
+              {t('list.expiresIn', { time: formatFutureRelativeTime(share.expiresAt) })}
             </span>
           )}
         </div>

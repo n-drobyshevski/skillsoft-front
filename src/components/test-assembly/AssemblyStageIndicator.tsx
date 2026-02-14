@@ -1,7 +1,5 @@
 'use client';
 
-import React from 'react';
-import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import {
   Circle,
@@ -81,18 +79,11 @@ export function AssemblyStageIndicator({
   const config = STATUS_CONFIG[status];
   const Icon = config.Icon;
 
-  // Check for reduced motion preference
-  const prefersReducedMotion =
-    typeof window !== 'undefined' &&
-    window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
   return (
-    <motion.div
-      initial={prefersReducedMotion ? false : { opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.2 }}
+    <div
       className={cn(
         'flex items-center gap-3 rounded-lg px-3 py-2.5 transition-colors',
+        'animate-in fade-in-0 slide-in-from-bottom-2 duration-200 motion-reduce:animate-none',
         config.bgClass,
         isActive && 'ring-1 ring-primary/20',
         className
@@ -118,31 +109,25 @@ export function AssemblyStageIndicator({
 
         {/* Description - only show for active/failed states */}
         {(status === 'active' || status === 'failed') && (
-          <motion.p
-            initial={prefersReducedMotion ? false : { opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            className="text-xs text-muted-foreground mt-0.5"
+          <p
+            className="text-xs text-muted-foreground mt-0.5 animate-in fade-in-0 duration-200 motion-reduce:animate-none"
           >
             {description}
-          </motion.p>
+          </p>
         )}
 
         {/* Progress bar for stages with sub-progress */}
         {progress && status === 'active' && (
-          <motion.div
-            initial={prefersReducedMotion ? false : { opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="mt-2 h-1 w-full rounded-full bg-muted overflow-hidden"
+          <div
+            className="mt-2 h-1 w-full rounded-full bg-muted overflow-hidden animate-in fade-in-0 duration-200 motion-reduce:animate-none"
           >
-            <motion.div
-              className="h-full bg-primary rounded-full"
-              initial={{ width: 0 }}
-              animate={{
+            <div
+              className="h-full bg-primary rounded-full transition-all duration-300 ease-out motion-reduce:transition-none"
+              style={{
                 width: `${(progress.current / progress.total) * 100}%`,
               }}
-              transition={{ duration: 0.3, ease: 'easeOut' }}
             />
-          </motion.div>
+          </div>
         )}
       </div>
 
@@ -150,7 +135,7 @@ export function AssemblyStageIndicator({
       {status === 'complete' && (
         <ChevronRight className="h-4 w-4 text-emerald-500/50 shrink-0" />
       )}
-    </motion.div>
+    </div>
   );
 }
 

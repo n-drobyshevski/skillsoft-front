@@ -42,3 +42,9 @@ export { ChartErrorBoundary, SectionErrorBoundary } from './ChartErrorBoundary';
 
 // Network status
 export { OfflineIndicator, CompactNetworkStatus } from './OfflineIndicator';
+
+// Performance
+export { ChartPreloader } from './ChartPreloader';
+
+// Navigation prefetching
+export { PrefetchLink } from './PrefetchLink';

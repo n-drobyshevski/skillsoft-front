@@ -32,6 +32,7 @@ import {
 import { getAuthHeaders } from '@/services/roleApi';
 import { ErrorCategory, ErrorAction } from '@/types/errors';
 
+
 // PPR disabled - requires cacheComponents which is incompatible with Clerk
 // TODO: Re-enable when Clerk supports Next.js 16 cacheComponents
 // export const experimental_ppr = true;

@@ -109,6 +109,7 @@ export function useAutoSave<T>({
   const retryTimerRef = useRef<NodeJS.Timeout | null>(null);
   const pendingDataRef = useRef<T>(data);
   const isMountedRef = useRef(true);
+  const scheduleAutoSaveRef = useRef<() => void>(() => {});
 
   // Track online/offline status
   useEffect(() => {
@@ -328,15 +329,20 @@ export function useAutoSave<T>({
     }
   };
 
-  // Track data changes
+  // Keep scheduleAutoSave ref up to date for stable effect usage
+  scheduleAutoSaveRef.current = scheduleAutoSave;
+
+  // Track data changes — use ref to avoid re-triggering on every render
+  // when scheduleAutoSave is recreated (unstable function identity)
   useEffect(() => {
     pendingDataRef.current = data;
     const currentKey = compareKeyRef.current(data);
 
     if (currentKey !== lastSavedKeyRef.current) {
-      scheduleAutoSave();
+      scheduleAutoSaveRef.current();
     }
-  }, [data, scheduleAutoSave]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data]);
 
   const saveNow = async () => {
     return executeSave();

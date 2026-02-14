@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { subscribeWithSelector } from 'zustand/middleware';
+import { useShallow } from 'zustand/react/shallow';
 import { TestAnswer, SessionQuestion, QuestionType } from '@/types/domain';
 
 /**
@@ -462,24 +463,28 @@ export const useExpandedCardIds = () =>
 
 /** Get editing state */
 export const useEditingState = () =>
-  useReviewStore(state => ({
-    isEditing: state.phase === 'EDITING',
-    questionId: state.editingQuestionId,
-    questionIndex: state.editingQuestionIndex,
-  }));
+  useReviewStore(
+    useShallow((state) => ({
+      isEditing: state.phase === 'EDITING',
+      questionId: state.editingQuestionId,
+      questionIndex: state.editingQuestionIndex,
+    }))
+  );
 
 /** Get summary stats */
 export const useSummaryStats = () =>
-  useReviewStore(state => {
-    const answers = state.answersCache;
-    return {
-      total: answers.length,
-      answered: answers.filter(a => a.status === 'answered').length,
-      skipped: answers.filter(a => a.status === 'skipped').length,
-      flagged: answers.filter(a => a.status === 'flagged').length,
-      pending: answers.filter(a => a.status === 'pending').length,
-    };
-  });
+  useReviewStore(
+    useShallow((state) => {
+      const answers = state.answersCache;
+      return {
+        total: answers.length,
+        answered: answers.filter((a) => a.status === 'answered').length,
+        skipped: answers.filter((a) => a.status === 'skipped').length,
+        flagged: answers.filter((a) => a.status === 'flagged').length,
+        pending: answers.filter((a) => a.status === 'pending').length,
+      };
+    })
+  );
 
 /** Get filtered answers based on active filter */
 export const useFilteredAnswers = () =>

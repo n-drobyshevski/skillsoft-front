@@ -19,8 +19,7 @@ import {
   Play,
   Calendar,
 } from 'lucide-react';
-import { formatDistanceToNow } from 'date-fns';
-import { ru, enUS } from 'date-fns/locale';
+import { useFormattedDates } from '@/hooks/useFormattedDates';
 import type { SharedTemplateItem } from '@/types/domain';
 import { SharePermission, AssessmentGoal } from '@/types/domain';
 import { cn } from '@/lib/utils';
@@ -202,6 +201,7 @@ interface SharedTemplateCardProps {
 
 function SharedTemplateCard({ item }: SharedTemplateCardProps) {
   const t = useTranslations('users.profile.sharedTests');
+  const { formatRelativeTime, formatFutureRelativeTime } = useFormattedDates();
   const { template, permission, sharedBy, sharedAt, expiresAt } = item;
   const permConfig = permissionConfig[permission];
   const PermIcon = permConfig.icon;
@@ -219,9 +219,6 @@ function SharedTemplateCard({ item }: SharedTemplateCardProps) {
         .toUpperCase()
         .slice(0, 2)
     : 'U';
-
-  // Determine locale for date formatting
-  const dateLocale = typeof window !== 'undefined' && document.documentElement.lang === 'ru' ? ru : enUS;
 
   return (
     <article
@@ -292,10 +289,7 @@ function SharedTemplateCard({ item }: SharedTemplateCardProps) {
           <div className="flex-1 min-w-0">
             <p className="text-xs font-medium truncate">{sharedBy.name}</p>
             <p className="text-xs text-muted-foreground">
-              {formatDistanceToNow(new Date(sharedAt), {
-                addSuffix: true,
-                locale: dateLocale,
-              })}
+              {formatRelativeTime(sharedAt)}
             </p>
           </div>
         </div>
@@ -308,10 +302,7 @@ function SharedTemplateCard({ item }: SharedTemplateCardProps) {
           >
             <Calendar className="h-3 w-3" aria-hidden="true" />
             {t('expires', {
-              time: formatDistanceToNow(new Date(expiresAt), {
-                addSuffix: true,
-                locale: dateLocale,
-              }),
+              time: formatFutureRelativeTime(expiresAt),
             })}
           </div>
         )}

@@ -21,6 +21,7 @@ import type { ProfileUserInfo } from '@/types/profile';
 import type { Metadata } from 'next';
 import { UserRole } from '@/types/user';
 
+
 // Dynamic metadata with i18n
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('profile.page');

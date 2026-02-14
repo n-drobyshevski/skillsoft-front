@@ -4,10 +4,9 @@ import { useMemo } from 'react';
 import { PsychometricHealthReport } from '@/types/psychometrics';
 import { cn } from '@/lib/utils';
 import { TrendingUp, TrendingDown, Clock, Activity, FileText, Percent, AlertTriangle } from 'lucide-react';
-import { formatDistanceToNow } from 'date-fns';
-import { ru, enUS } from 'date-fns/locale';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { useTranslations, useLocale } from 'next-intl';
+import { useFormattedDates } from '@/hooks/useFormattedDates';
+import { useTranslations } from 'next-intl';
 import {
   HealthScoreHelp,
   HealthScoreBreakdownHelp,
@@ -270,25 +269,16 @@ function MobileStatPill({
 export function DashboardHero({ report, className }: DashboardHeroProps) {
   const isMobile = useIsMobile();
   const t = useTranslations('psychometrics');
-  const locale = useLocale();
+  const { formatRelativeTime } = useFormattedDates();
   const healthScore = useMemo(() => calculateHealthScore(report), [report]);
   const colors = getScoreColor(healthScore);
   const statusKey = getStatusKey(healthScore);
   const statusLabel = t(`healthStatus.${statusKey}`);
 
-  // Get date-fns locale based on current locale
-  const dateFnsLocale = locale === 'ru' ? ru : enUS;
-
   // Format last audit time
-  const lastAuditDisplay = useMemo(() => {
-    if (!report.lastAuditRun) return null;
-    try {
-      const date = new Date(report.lastAuditRun);
-      return formatDistanceToNow(date, { addSuffix: true, locale: dateFnsLocale });
-    } catch {
-      return null;
-    }
-  }, [report.lastAuditRun, dateFnsLocale]);
+  const lastAuditDisplay = report.lastAuditRun
+    ? formatRelativeTime(report.lastAuditRun)
+    : null;
 
   // Trend indicator (mock - in real app this would come from historical data)
   const trendValue = 2.5; // Positive means improvement

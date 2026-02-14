@@ -4,7 +4,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { motion } from 'framer-motion';
 import {
   GraduationCap,
   ChevronRight,
@@ -155,14 +154,15 @@ function TemplatePreviewCard({
 
   return (
     <Link href={`/test-templates/${template.id}`} className={cn('block w-full', className)}>
-      <motion.div
-        whileHover={{ y: -1 }}
-        whileTap={{ scale: 0.99 }}
+      <div
         className={cn(
           // Base styles - fill width, rounded corners, border
           'w-full p-3 rounded-xl border border-border/60 bg-card',
           // Hover states
-          'hover:border-border hover:shadow-sm transition-all cursor-pointer group',
+          'hover:border-border hover:shadow-sm cursor-pointer group',
+          // Hover/tap animations (replaces framer-motion whileHover/whileTap)
+          'hover:-translate-y-px active:scale-[0.99]',
+          'transition-all duration-200 motion-reduce:transition-none',
           // Touch-friendly
           'touch-manipulation',
           // Compact mode layout
@@ -217,7 +217,7 @@ function TemplatePreviewCard({
             </div>
           </>
         )}
-      </motion.div>
+      </div>
     </Link>
   );
 }

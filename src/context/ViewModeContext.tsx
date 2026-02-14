@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
+import { useShallow } from "zustand/react/shallow";
 import { useUIStore } from "@/store/ui-store";
 
 type ViewMode = "default" | "immersive";
@@ -57,7 +58,13 @@ export function shouldBeFocused(pathname: string): boolean {
  */
 export function ViewModeProvider({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const { viewMode, setViewMode, isTransitioning } = useUIStore();
+  const { viewMode, setViewMode, isTransitioning } = useUIStore(
+    useShallow((state) => ({
+      viewMode: state.viewMode,
+      setViewMode: state.setViewMode,
+      isTransitioning: state.isTransitioning,
+    }))
+  );
   
   // Track if component has mounted (for hydration safety)
   const hasMounted = useRef(false);

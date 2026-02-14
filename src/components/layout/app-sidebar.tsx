@@ -63,8 +63,10 @@ import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { SignOutButton } from "@clerk/nextjs";
 import { ClientOnly } from "@/components/common/ClientOnly";
+import { PrefetchLink } from "@/components/common/PrefetchLink";
 import { LensSwitcher } from "@/components/layout/lens-switcher";
 import { useNavigation, useNavigationBadgeCounts, isNavigationItemActive } from "@/hooks/useNavigation";
+import { useRoutePrefetch } from "@/hooks/useRoutePrefetch";
 import { cn } from "@/lib/utils";
 import { useIsImmersive } from "@/store/ui-store";
 import type { NavigationItem, NavigationGroup, BadgeConfig } from "@/config/navigation-config";
@@ -163,12 +165,14 @@ function NavItem({
   isLensChanging,
   animationDelay,
   t,
+  getPrefetchHandler,
 }: {
   item: NavigationItem;
   isActive: boolean;
   isLensChanging: boolean;
   animationDelay: number;
   t: (key: string) => string;
+  getPrefetchHandler: (path: string) => (() => void) | undefined;
 }) {
   const pathname = usePathname();
 
@@ -203,7 +207,7 @@ function NavItem({
         }
       >
         <SidebarMenuButton asChild isActive={isActive}>
-          <Link href={item.path}>
+          <PrefetchLink href={item.path} onPrefetchData={getPrefetchHandler(item.path)}>
             <IconComponent />
             <span>{t(item.labelKey)}</span>
             {item.isNew && (
@@ -212,7 +216,7 @@ function NavItem({
               </Badge>
             )}
             {item.badge && <NavigationBadge config={item.badge} />}
-          </Link>
+          </PrefetchLink>
         </SidebarMenuButton>
       </SidebarMenuItem>
     );
@@ -259,11 +263,11 @@ function NavItem({
               return (
                 <SidebarMenuSubItem key={child.id}>
                   <SidebarMenuSubButton asChild isActive={isChildActive}>
-                    <Link href={child.path}>
+                    <PrefetchLink href={child.path} onPrefetchData={getPrefetchHandler(child.path)}>
                       {ChildIconComponent && <ChildIconComponent />}
                       <span>{t(child.labelKey)}</span>
                       {child.badge && <NavigationBadge config={child.badge} />}
-                    </Link>
+                    </PrefetchLink>
                   </SidebarMenuSubButton>
                 </SidebarMenuSubItem>
               );
@@ -283,11 +287,13 @@ function NavGroup({
   isLensChanging,
   itemStartIndex,
   t,
+  getPrefetchHandler,
 }: {
   group: NavigationGroup;
   isLensChanging: boolean;
   itemStartIndex: number;
   t: (key: string) => string;
+  getPrefetchHandler: (path: string) => (() => void) | undefined;
 }) {
   const pathname = usePathname();
 
@@ -314,6 +320,7 @@ function NavGroup({
                 isLensChanging={isLensChanging}
                 animationDelay={(itemStartIndex + index) * 50}
                 t={t}
+                getPrefetchHandler={getPrefetchHandler}
               />
             );
           })}
@@ -330,6 +337,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { groups, footer, activeLens, isReady } = useNavigation();
   const { setOpenMobile } = useSidebar();
   const isImmersive = useIsImmersive();
+  const { getPrefetchHandler } = useRoutePrefetch();
   const TeamLogo = baseData.teams[0].logo;
   const t = useTranslations("navigation");
   const tAuth = useTranslations("auth");
@@ -449,6 +457,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 isLensChanging={isLensChanging}
                 itemStartIndex={startIndex}
                 t={t}
+                getPrefetchHandler={getPrefetchHandler}
               />
             );
           })
@@ -469,10 +478,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   asChild
                   isActive={pathname === "/profile"}
                 >
-                  <Link href="/profile">
+                  <PrefetchLink href="/profile" onPrefetchData={getPrefetchHandler("/profile")}>
                     <UserCircle />
                     <span>{t("myProfile")}</span>
-                  </Link>
+                  </PrefetchLink>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>
@@ -511,10 +520,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   return (
                     <SidebarMenuItem key={item.id}>
                       <SidebarMenuButton asChild isActive={isActive}>
-                        <Link href={item.path}>
+                        <PrefetchLink href={item.path} onPrefetchData={getPrefetchHandler(item.path)}>
                           <IconComponent />
                           <span>{t(item.labelKey)}</span>
-                        </Link>
+                        </PrefetchLink>
                       </SidebarMenuButton>
                     </SidebarMenuItem>
                   );

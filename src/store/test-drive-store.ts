@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { subscribeWithSelector } from 'zustand/middleware';
+import { useShallow } from 'zustand/react/shallow';
 import { SessionQuestion, Competency, BehavioralIndicator } from '@/types/domain';
 
 /**
@@ -176,9 +177,11 @@ export const useHierarchyData = () =>
  * Combined selector for panel state
  */
 export const usePanelState = () =>
-  useTestDriveStore((state) => ({
-    isOpen: state.isPanelOpen,
-    activeTab: state.activeTab,
-    togglePanel: state.togglePanel,
-    setActiveTab: state.setActiveTab,
-  }));
+  useTestDriveStore(
+    useShallow((state) => ({
+      isOpen: state.isPanelOpen,
+      activeTab: state.activeTab,
+      togglePanel: state.togglePanel,
+      setActiveTab: state.setActiveTab,
+    }))
+  );

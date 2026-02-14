@@ -25,6 +25,7 @@ import {
   UseQueryOptions,
 } from '@tanstack/react-query';
 import { psychometricsApi } from '@/services/api';
+import { ItemValidityStatus } from '@/types/psychometrics';
 import type {
   PsychometricHealthReport,
   ItemStatistics,
@@ -153,24 +154,110 @@ export function useUpdateItemStatus() {
       request: UpdateItemStatusRequest;
     }) => psychometricsApi.updateItemStatus(questionId, request),
 
+    onMutate: async ({ questionId, request }) => {
+      // Cancel outgoing refetches so they don't overwrite our optimistic update
+      await queryClient.cancelQueries({ queryKey: psychometricsKeys.items() });
+      await queryClient.cancelQueries({ queryKey: psychometricsKeys.flagged() });
+      await queryClient.cancelQueries({
+        queryKey: psychometricsKeys.itemDetail(questionId),
+      });
+
+      // Snapshot current caches for rollback
+      const previousItemDetail = queryClient.getQueryData<ItemStatisticsDetail>(
+        psychometricsKeys.itemDetail(questionId)
+      );
+      const previousItemsQueries = queryClient.getQueriesData<Page<ItemStatistics>>({
+        queryKey: psychometricsKeys.items(),
+      });
+      const previousFlagged = queryClient.getQueryData<FlaggedItemSummary[]>(
+        psychometricsKeys.flagged()
+      );
+
+      // Optimistically update item detail cache
+      if (previousItemDetail) {
+        queryClient.setQueryData<ItemStatisticsDetail>(
+          psychometricsKeys.itemDetail(questionId),
+          {
+            ...previousItemDetail,
+            validityStatus: request.newStatus,
+          }
+        );
+      }
+
+      // Optimistically update all cached items list pages
+      for (const [queryKey, data] of previousItemsQueries) {
+        if (!data) continue;
+        queryClient.setQueryData<Page<ItemStatistics>>(queryKey, {
+          ...data,
+          content: data.content.map((item) =>
+            item.questionId === questionId
+              ? { ...item, validityStatus: request.newStatus }
+              : item
+          ),
+        });
+      }
+
+      // Optimistically update flagged items cache
+      if (previousFlagged) {
+        if (request.newStatus !== ItemValidityStatus.FLAGGED_FOR_REVIEW) {
+          // Remove from flagged list if status is no longer FLAGGED_FOR_REVIEW
+          queryClient.setQueryData<FlaggedItemSummary[]>(
+            psychometricsKeys.flagged(),
+            previousFlagged.filter((item) => item.questionId !== questionId)
+          );
+        } else {
+          // Update status in flagged list if item remains flagged
+          queryClient.setQueryData<FlaggedItemSummary[]>(
+            psychometricsKeys.flagged(),
+            previousFlagged.map((item) =>
+              item.questionId === questionId
+                ? { ...item, validityStatus: request.newStatus }
+                : item
+            )
+          );
+        }
+      }
+
+      return { previousItemDetail, previousItemsQueries, previousFlagged };
+    },
+
+    onError: (_err, { questionId }, context) => {
+      // Rollback all caches to their previous state
+      if (context?.previousItemDetail) {
+        queryClient.setQueryData(
+          psychometricsKeys.itemDetail(questionId),
+          context.previousItemDetail
+        );
+      }
+      if (context?.previousItemsQueries) {
+        for (const [queryKey, data] of context.previousItemsQueries) {
+          queryClient.setQueryData(queryKey, data);
+        }
+      }
+      if (context?.previousFlagged) {
+        queryClient.setQueryData(
+          psychometricsKeys.flagged(),
+          context.previousFlagged
+        );
+      }
+    },
+
     onSuccess: (updatedItem, { questionId }) => {
-      // Update the item detail cache
+      // Replace optimistic data with real server response
       queryClient.setQueryData(
         psychometricsKeys.itemDetail(questionId),
         updatedItem
       );
+    },
 
-      // Invalidate lists to refresh with new status
+    onSettled: () => {
+      // Always refetch to ensure server state consistency
       queryClient.invalidateQueries({
         queryKey: psychometricsKeys.items(),
       });
-
-      // Invalidate flagged items if status changed
       queryClient.invalidateQueries({
         queryKey: psychometricsKeys.flagged(),
       });
-
-      // Invalidate dashboard to update counts
       queryClient.invalidateQueries({
         queryKey: psychometricsKeys.dashboard(),
       });
@@ -360,6 +447,7 @@ export function prefetchPsychometricsCompetencyDetail(
 
 /**
  * Mutation hook for batch status updates
+ * Includes optimistic update and cache invalidation
  */
 export function useBatchUpdateItemStatus() {
   const queryClient = useQueryClient();
@@ -373,8 +461,75 @@ export function useBatchUpdateItemStatus() {
       request: UpdateItemStatusRequest;
     }) => psychometricsApi.batchUpdateItemStatus(questionIds, request.newStatus, request.reason),
 
-    onSuccess: () => {
-      // Invalidate all related caches
+    onMutate: async ({ questionIds, request }) => {
+      const questionIdSet = new Set(questionIds);
+
+      // Cancel outgoing refetches so they don't overwrite our optimistic update
+      await queryClient.cancelQueries({ queryKey: psychometricsKeys.items() });
+      await queryClient.cancelQueries({ queryKey: psychometricsKeys.flagged() });
+
+      // Snapshot current caches for rollback
+      const previousItemsQueries = queryClient.getQueriesData<Page<ItemStatistics>>({
+        queryKey: psychometricsKeys.items(),
+      });
+      const previousFlagged = queryClient.getQueryData<FlaggedItemSummary[]>(
+        psychometricsKeys.flagged()
+      );
+
+      // Optimistically update all cached items list pages
+      for (const [queryKey, data] of previousItemsQueries) {
+        if (!data) continue;
+        queryClient.setQueryData<Page<ItemStatistics>>(queryKey, {
+          ...data,
+          content: data.content.map((item) =>
+            questionIdSet.has(item.questionId)
+              ? { ...item, validityStatus: request.newStatus }
+              : item
+          ),
+        });
+      }
+
+      // Optimistically update flagged items cache
+      if (previousFlagged) {
+        if (request.newStatus !== ItemValidityStatus.FLAGGED_FOR_REVIEW) {
+          // Remove batch items from flagged list
+          queryClient.setQueryData<FlaggedItemSummary[]>(
+            psychometricsKeys.flagged(),
+            previousFlagged.filter((item) => !questionIdSet.has(item.questionId))
+          );
+        } else {
+          // Update status for batch items that are already in flagged list
+          queryClient.setQueryData<FlaggedItemSummary[]>(
+            psychometricsKeys.flagged(),
+            previousFlagged.map((item) =>
+              questionIdSet.has(item.questionId)
+                ? { ...item, validityStatus: request.newStatus }
+                : item
+            )
+          );
+        }
+      }
+
+      return { previousItemsQueries, previousFlagged };
+    },
+
+    onError: (_err, _variables, context) => {
+      // Rollback all caches to their previous state
+      if (context?.previousItemsQueries) {
+        for (const [queryKey, data] of context.previousItemsQueries) {
+          queryClient.setQueryData(queryKey, data);
+        }
+      }
+      if (context?.previousFlagged) {
+        queryClient.setQueryData(
+          psychometricsKeys.flagged(),
+          context.previousFlagged
+        );
+      }
+    },
+
+    onSettled: () => {
+      // Always refetch to ensure server state consistency
       queryClient.invalidateQueries({
         queryKey: psychometricsKeys.items(),
       });

@@ -13,8 +13,8 @@ import {
   CheckCircle,
   XCircle,
 } from 'lucide-react';
-import { format, formatDistanceToNow } from 'date-fns';
-import { ru } from 'date-fns/locale';
+import { useFormattedDates } from '@/hooks/useFormattedDates';
+import { formatShortMonthDay } from '@/lib/date-utils';
 import type { AssessmentSummary, RecentTestResult } from '@/types/profile';
 import { AssessmentGoal } from '@/types/domain';
 import { cn } from '@/lib/utils';
@@ -29,6 +29,8 @@ interface AssessmentSummarySectionProps {
  * Displays test history, quick stats, and recent results.
  */
 export function AssessmentSummarySection({ summary }: AssessmentSummarySectionProps) {
+  const { formatRelativeTime, locale } = useFormattedDates();
+
   // Empty state for new users
   if (summary.totalCompleted === 0) {
     return (
@@ -93,7 +95,7 @@ export function AssessmentSummarySection({ summary }: AssessmentSummarySectionPr
             label="Последний тест"
             value={
               summary.lastAssessmentDate
-                ? format(new Date(summary.lastAssessmentDate), 'd MMM', { locale: ru })
+                ? formatShortMonthDay(summary.lastAssessmentDate, locale)
                 : '-'
             }
           />
@@ -149,6 +151,7 @@ function StatCard({
 }
 
 function RecentResultCard({ result }: { result: RecentTestResult }) {
+  const { formatRelativeTime } = useFormattedDates();
   const goalLabels: Record<AssessmentGoal, string> = {
     [AssessmentGoal.OVERVIEW]: 'Обзор',
     [AssessmentGoal.JOB_FIT]: 'Должность',
@@ -177,10 +180,7 @@ function RecentResultCard({ result }: { result: RecentTestResult }) {
         <div className="min-w-0">
           <div className="font-medium truncate">{result.templateName}</div>
           <div className="text-xs text-muted-foreground">
-            {formatDistanceToNow(new Date(result.completedAt), {
-              addSuffix: true,
-              locale: ru,
-            })}
+            {formatRelativeTime(result.completedAt)}
           </div>
         </div>
       </div>

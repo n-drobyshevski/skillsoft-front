@@ -6,7 +6,7 @@ import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import CompetencyRadarChart from "@/components/data-display/charts/CompetencyRadarChart";
+import { LazyCompetencyRadarChart as CompetencyRadarChart } from '@/lib/lazy-charts';
 import {
   Trophy,
   Target,

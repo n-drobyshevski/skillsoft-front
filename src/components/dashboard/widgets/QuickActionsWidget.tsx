@@ -2,7 +2,6 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { motion } from 'framer-motion';
 import {
   Plus,
   Brain,
@@ -182,10 +181,8 @@ function ActionRow({
   const Icon = action.icon;
   return (
     <Link href={action.href}>
-      <motion.div
-        whileHover={{ x: 2 }}
-        whileTap={{ scale: 0.99 }}
-        className="flex items-center gap-3 p-3 -mx-3 rounded-lg hover:bg-muted/50 transition-colors group cursor-pointer min-h-[48px] touch-manipulation"
+      <div
+        className="flex items-center gap-3 p-3 -mx-3 rounded-lg hover:bg-muted/50 group cursor-pointer min-h-[48px] touch-manipulation hover:translate-x-0.5 active:scale-[0.99] transition-all duration-200 motion-reduce:transition-none"
       >
         <div className="w-9 h-9 rounded-lg bg-muted flex items-center justify-center shrink-0">
           <Icon className="w-4 h-4 text-muted-foreground" />
@@ -197,7 +194,7 @@ function ActionRow({
           )}
         </div>
         <ChevronRight className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
-      </motion.div>
+      </div>
     </Link>
   );
 }

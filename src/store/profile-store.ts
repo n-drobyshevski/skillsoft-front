@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { devtools, subscribeWithSelector } from 'zustand/middleware';
+import { useShallow } from 'zustand/react/shallow';
 import {
   AssessmentSummary,
   CompetencyPassport,
@@ -324,12 +325,14 @@ export const useProfileErrors = () => useProfileStore((s) => s.errors);
  * Select store actions
  */
 export const useProfileActions = () =>
-  useProfileStore((s) => ({
-    fetchAll: s.fetchAll,
-    fetchSummary: s.fetchSummary,
-    fetchPassport: s.fetchPassport,
-    retry: s.retry,
-    hydrate: s.hydrate,
-    reset: s.reset,
-    isStale: s.isStale,
-  }));
+  useProfileStore(
+    useShallow((s) => ({
+      fetchAll: s.fetchAll,
+      fetchSummary: s.fetchSummary,
+      fetchPassport: s.fetchPassport,
+      retry: s.retry,
+      hydrate: s.hydrate,
+      reset: s.reset,
+      isStale: s.isStale,
+    }))
+  );
