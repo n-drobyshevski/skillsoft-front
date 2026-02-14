@@ -79,12 +79,12 @@ function parseDate(date: DateInput): Date | null {
  * Hook for locale-aware date/time formatting
  *
  * Uses next-intl's useFormatter for proper localization and
- * the users.time.* translation keys for relative time labels.
+ * the time.* translation keys for relative time labels.
  */
 export function useFormattedDates(): FormattedDatesReturn {
   const format = useFormatter();
   const locale = useLocale();
-  const t = useTranslations('users.time');
+  const t = useTranslations('time');
 
   /**
    * Format as localized medium date
@@ -371,7 +371,7 @@ export function useFormattedDates(): FormattedDatesReturn {
  * import { getFormatter, getTranslations } from 'next-intl/server';
  *
  * const format = await getFormatter();
- * const t = await getTranslations('users.time');
+ * const t = await getTranslations('time');
  * const result = serverFormatDate(date, format, t('never'));
  */
 export function serverFormatDate(

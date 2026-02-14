@@ -295,7 +295,7 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
   const { userId } = await params;
   const user = await getUserData(userId);
   const t = await getTranslations('users.profile');
-  const tTime = await getTranslations('users.time');
+  const tTime = await getTranslations('time');
   const tRole = await getTranslations('enums.userRole');
   const tStatus = await getTranslations('enums.userStatus');
   const { locale } = await import('next-intl/server').then(m => m.getLocale()).then(locale => ({ locale }));

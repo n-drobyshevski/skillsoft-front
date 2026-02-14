@@ -77,7 +77,7 @@ export default function UserDrawer({
 }: UserDrawerProps) {
   const router = useRouter();
   const t = useTranslations('users');
-  const tTime = useTranslations('users.time');
+  const tTime = useTranslations('time');
   const locale = useLocale();
   const { getLabel: getRoleLabel } = useUserRoleTranslation();
   const { getLabel: getStatusLabel } = useUserStatusTranslation();

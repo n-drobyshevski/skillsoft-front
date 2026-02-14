@@ -1,7 +1,9 @@
 import { Suspense } from 'react';
 import { Metadata } from 'next';
-import { getTranslations } from 'next-intl/server';
+import { getTranslations, getMessages } from 'next-intl/server';
+import { NextIntlClientProvider } from 'next-intl';
 import { AuthHandlerClient } from '@/components/auth/auth-handler-client';
+import { LANDING_NAMESPACES, pickMessages } from '@/i18n/namespaces';
 import {
   LandingHeader,
   HeroSection,
@@ -23,7 +25,7 @@ export async function generateMetadata(): Promise<Metadata> {
     metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://skillsoft.app'),
     title: t('title'),
     description: t('description'),
-    keywords: t.raw('keywords') as string[],
+    keywords: Object.values(t.raw('keywords')) as string[],
     authors: [{ name: 'SkillSoft' }],
     creator: 'SkillSoft',
     publisher: 'SkillSoft',
@@ -80,7 +82,8 @@ export async function generateMetadata(): Promise<Metadata> {
 // JSON-LD Structured Data with i18n
 async function StructuredData() {
   const t = await getTranslations('landing.metadata.jsonLd');
-  const faq = t.raw('faq') as Array<{ question: string; answer: string }>;
+  const faqRaw = t.raw('faq');
+  const faq = Array.isArray(faqRaw) ? faqRaw : Object.values(faqRaw) as Array<{ question: string; answer: string }>;
 
   const jsonLd = {
     '@context': 'https://schema.org',
@@ -109,7 +112,7 @@ async function StructuredData() {
           priceCurrency: 'USD',
           description: t('offerDescription'),
         },
-        featureList: t.raw('features') as string[],
+        featureList: Object.values(t.raw('features')) as string[],
       },
       {
         '@type': 'WebPage',
@@ -142,49 +145,57 @@ async function StructuredData() {
   );
 }
 
-export default function HomePage() {
+export default async function HomePage() {
+  const messages = await getMessages();
+  const scopedMessages = pickMessages(
+    messages as Record<string, unknown>,
+    LANDING_NAMESPACES,
+  );
+
   return (
-    <div className="min-h-screen w-full bg-background overflow-x-hidden">
-      {/* Structured Data for SEO */}
-      <StructuredData />
+    <NextIntlClientProvider messages={scopedMessages}>
+      <div className="min-h-screen w-full bg-background overflow-x-hidden">
+        {/* Structured Data for SEO */}
+        <StructuredData />
 
-      {/* Client-side authentication handler */}
-      <Suspense fallback={null}>
-        <AuthHandlerClient />
-      </Suspense>
+        {/* Client-side authentication handler */}
+        <Suspense fallback={null}>
+          <AuthHandlerClient />
+        </Suspense>
 
-      {/* Client Component - Interactive Header */}
-      <LandingHeader />
+        {/* Client Component - Interactive Header */}
+        <LandingHeader />
 
-      {/* Server-rendered landing page sections */}
-      <main>
-        {/* Hero with interactive demo - above the fold, critical path */}
-        <HeroSection />
+        {/* Server-rendered landing page sections */}
+        <main>
+          {/* Hero with interactive demo - above the fold, critical path */}
+          <HeroSection />
 
-        {/* Psychometrics showcase with reliability gauges */}
-        <PsychometricsShowcase />
+          {/* Psychometrics showcase with reliability gauges */}
+          <PsychometricsShowcase />
 
-        {/* Assessment types (Likert, SJT, MCQ) */}
-        <AssessmentTypesSection />
+          {/* Assessment types (Likert, SJT, MCQ) */}
+          <AssessmentTypesSection />
 
-        {/* International standards (ESCO, O*NET, Big Five) */}
-        <StandardsSection />
+          {/* International standards (ESCO, O*NET, Big Five) */}
+          <StandardsSection />
 
-        {/* How it works - 3 step process */}
-        <HowItWorksSection />
+          {/* How it works - 3 step process */}
+          <HowItWorksSection />
 
-        {/* Stats section with animated counters */}
-        <StatsSection />
+          {/* Stats section with animated counters */}
+          <StatsSection />
 
-        {/* Final CTA */}
-        <CTASection />
-      </main>
+          {/* Final CTA */}
+          <CTASection />
+        </main>
 
-      {/* Footer */}
-      <FooterSection />
+        {/* Footer */}
+        <FooterSection />
 
-      {/* Mobile sticky CTA */}
-      <MobileStickyCTA />
-    </div>
+        {/* Mobile sticky CTA */}
+        <MobileStickyCTA />
+      </div>
+    </NextIntlClientProvider>
   );
 }
