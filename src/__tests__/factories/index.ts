@@ -37,7 +37,6 @@ import {
   DifficultyLevel,
   SessionStatus,
   AssessmentGoal,
-  TemplateStatus,
 } from '@/types/domain';
 
 import type { User, UserRole } from '@/types/user';
@@ -313,7 +312,7 @@ export function createMockTestTemplate(
     name: `Test Template / Тестовый шаблон ${id}`,
     description: `Template description / Описание шаблона ${id}`,
     goal,
-    status: TemplateStatus.DRAFT,
+    status: 'DRAFT',
     version: 1,
     questionsPerIndicator: 3,
     timeLimitMinutes: 60,

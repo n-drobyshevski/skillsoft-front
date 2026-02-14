@@ -31,6 +31,26 @@ interface ApiError extends Error {
 
 type ResultStatus = 'PENDING' | 'COMPLETED' | 'FAILED';
 
+interface CompetencyScore {
+  competencyId: string;
+  competencyName: string;
+  competencyCategory?: string;
+  score: number;
+  maxScore: number;
+  percentage: number;
+  questionsAnswered?: number;
+  weight?: number;
+  onetCode?: string;
+  indicatorScores?: {
+    indicatorId: string;
+    indicatorTitle: string;
+    score: number;
+    maxScore: number;
+    percentage: number;
+    questionsAnswered: number;
+  }[];
+}
+
 interface TestResult {
   id: string;
   sessionId: string;
@@ -40,7 +60,7 @@ interface TestResult {
   overallScore: number | null;
   overallPercentage: number | null;
   passed: boolean | null;
-  competencyScores: unknown[] | null;
+  competencyScores: CompetencyScore[] | null;
   totalTimeSeconds: number;
   questionsAnswered: number;
   questionsSkipped: number;

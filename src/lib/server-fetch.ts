@@ -139,7 +139,7 @@ function toServerFetchError(error: unknown): ServerFetchError {
     };
   }
 
-  // Handle errors with status property (axios-like)
+  // Handle errors with status property
   if (error && typeof error === 'object' && 'status' in error) {
     const status = (error as { status: number }).status;
     const category = getErrorCategory(status);

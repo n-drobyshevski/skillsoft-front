@@ -28,11 +28,6 @@ export function createTestQueryClient() {
         retry: false,
       },
     },
-    logger: {
-      log: console.log,
-      warn: console.warn,
-      error: () => {}, // Suppress error logs in tests
-    },
   });
 }
 
@@ -136,7 +131,11 @@ export function renderQueryHook<TResult, TProps>(
  * Useful after mutations that invalidate queries
  */
 export async function waitForQueries(queryClient: QueryClient) {
-  await queryClient.getQueryCache().onStable();
+  // In React Query v5, QueryCache.onStable() was removed.
+  // Use isFetching() polling to wait for all queries to complete.
+  while (queryClient.isFetching()) {
+    await new Promise((resolve) => setTimeout(resolve, 10));
+  }
 }
 
 /**

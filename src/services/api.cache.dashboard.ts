@@ -43,6 +43,9 @@ async function fetchDashboardData(
   const isEditor = userRole === 'EDITOR' || isAdmin;
 
   // Parallel fetch all required data
+  // Auth headers are passed through to API calls that need them (auth-outside-cache pattern).
+  // This avoids calling getAuthHeaders() (which uses headers()) inside a 'use cache' scope.
+  const resolvedAuth = authHeaders ?? {};
   const [
     competenciesResult,
     templatesResult,
@@ -52,13 +55,13 @@ async function fetchDashboardData(
     psychometricsResult,
   ] = await Promise.all([
     competenciesApi.getAllCompetencies().catch(() => []),
-    testTemplatesApi.getActiveTemplates().catch(() => []),
+    testTemplatesApi.getActiveTemplates(resolvedAuth).catch(() => []),
     assessmentQuestionsApi.getAllQuestions().catch(() => []),
     // Admin-only data
-    isAdmin ? usersApi.getUserStats().catch(() => null) : Promise.resolve(null),
-    isAdmin ? usersApi.getAllUsers().catch(() => []) : Promise.resolve([]),
+    isAdmin ? usersApi.getUserStats(resolvedAuth).catch(() => null) : Promise.resolve(null),
+    isAdmin ? usersApi.getAllUsers(resolvedAuth).catch(() => []) : Promise.resolve([]),
     // Editor/Admin psychometric data
-    isEditor ? fetchPsychometricHealth(authHeaders ?? {}).catch(() => null) : Promise.resolve(null),
+    isEditor ? fetchPsychometricHealth(resolvedAuth).catch(() => null) : Promise.resolve(null),
   ]);
 
   // Type-safe data extraction
@@ -189,8 +192,13 @@ export async function getDashboardDataFresh(
 /**
  * Fetch only stats (lightweight version).
  * Useful for polling or quick refresh.
+ *
+ * @param authHeaders - Pre-resolved auth headers (auth-outside-cache pattern).
+ *   Required because getAuthHeaders() uses headers() which cannot be called inside 'use cache'.
  */
-export async function getDashboardStatsCached(): Promise<DashboardStats | null> {
+export async function getDashboardStatsCached(
+  authHeaders: Record<string, string>,
+): Promise<DashboardStats | null> {
   'use cache';
   cacheLife('realtime');
   cacheTag('dashboard-stats');
@@ -198,7 +206,7 @@ export async function getDashboardStatsCached(): Promise<DashboardStats | null> 
   try {
     const [competencies, templates, questions] = await Promise.all([
       competenciesApi.getAllCompetencies().catch(() => []),
-      testTemplatesApi.getActiveTemplates().catch(() => []),
+      testTemplatesApi.getActiveTemplates(authHeaders).catch(() => []),
       assessmentQuestionsApi.getAllQuestions().catch(() => []),
     ]);
 
@@ -219,5 +227,132 @@ export async function getDashboardStatsCached(): Promise<DashboardStats | null> 
     };
   } catch {
     return null;
+  }
+}
+
+// ============================================================================
+// Section-level fetchers for Suspense streaming
+// ============================================================================
+
+/**
+ * Data shape returned by the main column fetcher.
+ * Contains stats, templates, and psychometrics for the primary content area.
+ */
+export interface MainColumnData {
+  stats: DashboardStats;
+  templates: TestTemplateSummary[];
+  psychometrics?: PsychometricSummary;
+}
+
+/**
+ * Data shape returned by the side column fetcher.
+ * Contains admin-only user stats and activity data.
+ */
+export interface SideColumnData {
+  userStats: UserStats | null;
+}
+
+/**
+ * Cached fetcher for the main content column (stats + templates + psychometrics).
+ *
+ * Used by the DashboardMainSection Suspense boundary to independently stream
+ * the primary content area (chart, psychometric health, progress, templates).
+ *
+ * @param userRole - Current user's role for conditional psychometrics fetching
+ * @param authHeaders - Pre-resolved auth headers for psychometrics API calls
+ */
+export async function getMainColumnDataCached(
+  userRole?: 'ADMIN' | 'EDITOR' | 'USER',
+  authHeaders?: Record<string, string>,
+): Promise<MainColumnData | null> {
+  'use cache';
+  cacheLife('realtime');
+  cacheTag('dashboard-main', 'competencies', 'templates', 'questions');
+
+  const isAdmin = userRole === 'ADMIN';
+  const isEditor = userRole === 'EDITOR' || isAdmin;
+
+  try {
+    const resolvedAuth = authHeaders ?? {};
+    const [competencies, templates, questions, psychometricsResult] = await Promise.all([
+      competenciesApi.getAllCompetencies().catch(() => []),
+      testTemplatesApi.getActiveTemplates(resolvedAuth).catch(() => []),
+      assessmentQuestionsApi.getAllQuestions().catch(() => []),
+      isEditor ? fetchPsychometricHealth(resolvedAuth).catch(() => null) : Promise.resolve(null),
+    ]);
+
+    const competencyList: Competency[] = Array.isArray(competencies) ? competencies : [];
+    const templateList: TestTemplateSummary[] = Array.isArray(templates) ? templates : [];
+    const questionList = Array.isArray(questions) ? questions : [];
+
+    const stats: DashboardStats = {
+      totalCompetencies: competencyList.length,
+      totalIndicators: competencyList.reduce(
+        (sum, comp) => sum + (comp.behavioralIndicators?.length || 0),
+        0,
+      ),
+      totalQuestions: questionList.length,
+      activeTemplates: templateList.filter(t => t.isActive).length,
+      competenciesByCategory: calculateCategoryDistribution(competencyList),
+      averageIndicatorsPerCompetency: calculateAverageIndicators(competencyList),
+    };
+
+    const psychometrics: PsychometricSummary | undefined = psychometricsResult
+      ? calculatePsychometricSummary(psychometricsResult)
+      : undefined;
+
+    return {
+      stats,
+      templates: templateList.filter(t => t.isActive),
+      psychometrics,
+    };
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Cached fetcher for the side column (admin user stats).
+ *
+ * Used by the DashboardSideSection Suspense boundary to independently stream
+ * the sidebar content (quick actions, activity, admin user stats).
+ *
+ * Only fetches admin-specific data when userRole is ADMIN;
+ * returns null userStats for other roles.
+ *
+ * @param userRole - Current user's role for conditional data fetching
+ * @param authHeaders - Pre-resolved auth headers (auth-outside-cache pattern)
+ */
+export async function getSideColumnDataCached(
+  userRole?: 'ADMIN' | 'EDITOR' | 'USER',
+  authHeaders?: Record<string, string>,
+): Promise<SideColumnData> {
+  'use cache';
+  cacheLife('realtime');
+  cacheTag('dashboard-side', 'users');
+
+  const isAdmin = userRole === 'ADMIN';
+
+  try {
+    const userStatsResult = isAdmin
+      ? await usersApi.getUserStats(authHeaders).catch(() => null)
+      : null;
+
+    const userStats: UserStats | null = userStatsResult
+      ? {
+          totalUsers: userStatsResult.totalUsers,
+          activeUsers: userStatsResult.activeUsers,
+          byRole: {
+            admin: userStatsResult.byRole?.ADMIN || 0,
+            editor: userStatsResult.byRole?.EDITOR || 0,
+            user: userStatsResult.byRole?.USER || 0,
+          },
+          recentlyActive: userStatsResult.activeUsers,
+        }
+      : null;
+
+    return { userStats };
+  } catch {
+    return { userStats: null };
   }
 }

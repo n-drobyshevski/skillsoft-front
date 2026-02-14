@@ -68,7 +68,7 @@ export function createMockShare(
   permission?: SharePermission
 ): TemplateShare {
   // Handle 3-argument signature: (id, granteeType, permission)
-  if (typeof typeOrOverrides === 'string' || (typeOrOverrides && 'USER' in GranteeType && Object.values(GranteeType).includes(typeOrOverrides as GranteeType))) {
+  if (typeof typeOrOverrides === 'string') {
     const id = idOrTemplateId;
     const granteeType = typeOrOverrides as GranteeType;
     return {
@@ -132,7 +132,6 @@ export function createMockShareLink(
       createdByName: 'Test Owner',
       createdAt: new Date().toISOString(),
       isActive: true,
-      revokedAt: null,
     };
   }
 
@@ -154,7 +153,6 @@ export function createMockShareLink(
     createdByName: 'Test Owner',
     createdAt: new Date().toISOString(),
     isActive: true,
-    revokedAt: null,
     ...overrides,
   };
 }

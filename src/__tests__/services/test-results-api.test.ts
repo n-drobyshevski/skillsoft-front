@@ -80,6 +80,7 @@ const mockTestResult: TestResult = {
   questionsSkipped: 1,
   totalQuestions: 10,
   completedAt: new Date().toISOString(),
+  status: 'COMPLETED',
 };
 
 const mockFailedResult: TestResult = {
@@ -106,6 +107,7 @@ const mockFailedResult: TestResult = {
   questionsSkipped: 2,
   totalQuestions: 10,
   completedAt: new Date(Date.now() - 86400000).toISOString(), // 1 day ago
+  status: 'FAILED',
 };
 
 const mockUserStatistics: UserStatistics = {
@@ -320,9 +322,9 @@ describe('Test Results API', () => {
         const result = await fetchResultById('result-1');
 
         expect(result.competencyScores).toBeInstanceOf(Array);
-        expect(result.competencyScores.length).toBeGreaterThan(0);
+        expect(result.competencyScores!.length).toBeGreaterThan(0);
 
-        const firstCompetency = result.competencyScores[0];
+        const firstCompetency = result.competencyScores![0];
         expect(firstCompetency).toHaveProperty('competencyId');
         expect(firstCompetency).toHaveProperty('competencyName');
         expect(firstCompetency).toHaveProperty('score');
@@ -332,7 +334,7 @@ describe('Test Results API', () => {
 
       it('should include indicator scores when available', async () => {
         const result = await fetchResultById('result-1');
-        const competencyWithIndicators = result.competencyScores.find(
+        const competencyWithIndicators = result.competencyScores!.find(
           (c) => c.indicatorScores && c.indicatorScores.length > 0
         );
 
@@ -510,7 +512,7 @@ describe('Test Results API', () => {
     it('should have percentage matching score/maxScore ratio', async () => {
       const result = await fetchResultById('result-1');
 
-      result.competencyScores.forEach((cs) => {
+      result.competencyScores!.forEach((cs) => {
         const calculatedPercentage = (cs.score / cs.maxScore) * 100;
         expect(cs.percentage).toBeCloseTo(calculatedPercentage, 0);
       });
@@ -601,7 +603,7 @@ describe('Test Results API', () => {
 
     it('should have O*NET codes for mapped competencies', async () => {
       const result = await fetchResultById('result-1');
-      const competencyWithOnet = result.competencyScores.find((c) => c.onetCode);
+      const competencyWithOnet = result.competencyScores!.find((c) => c.onetCode);
 
       expect(competencyWithOnet).toBeDefined();
       expect(competencyWithOnet?.onetCode).toMatch(/^\d+\.[A-Z]\.\d+\.[a-z]$/);
@@ -611,7 +613,7 @@ describe('Test Results API', () => {
       const result = await fetchResultById('result-1');
 
       expect(result.overallScore).toBeGreaterThanOrEqual(0);
-      result.competencyScores.forEach((cs) => {
+      result.competencyScores!.forEach((cs) => {
         expect(cs.score).toBeGreaterThanOrEqual(0);
         expect(cs.maxScore).toBeGreaterThan(0);
       });
@@ -622,7 +624,7 @@ describe('Test Results API', () => {
 
       expect(result.overallPercentage).toBeGreaterThanOrEqual(0);
       expect(result.overallPercentage).toBeLessThanOrEqual(100);
-      result.competencyScores.forEach((cs) => {
+      result.competencyScores!.forEach((cs) => {
         expect(cs.percentage).toBeGreaterThanOrEqual(0);
         expect(cs.percentage).toBeLessThanOrEqual(100);
       });
