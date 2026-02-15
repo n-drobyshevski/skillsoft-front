@@ -413,10 +413,11 @@ export default function DashboardContent({
               </motion.div>
             )}
 
-            {/* Recent Activity */}
+            {/* Recent Activity - only auto-fetch for ADMIN/EDITOR who have API access */}
             <motion.div variants={fadeInUp}>
               <RecentActivityWidget
                 completions={recentCompletions}
+                disableFetch={!currentUser?.role || currentUser.role === 'USER'}
               />
             </motion.div>
 

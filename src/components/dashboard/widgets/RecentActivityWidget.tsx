@@ -95,7 +95,10 @@ export function RecentActivityWidget({
       setActivities(data);
       setError(null);
     } catch (err) {
-      log.error('Failed to fetch recent activity', { error: err });
+      const errorInfo = err instanceof Error
+        ? { message: err.message, name: err.name, ...(('status' in err) ? { status: (err as { status?: number }).status } : {}) }
+        : { raw: String(err) };
+      log.error('Failed to fetch recent activity', errorInfo);
       setError('Failed to load activity');
     } finally {
       setIsLoading(false);
