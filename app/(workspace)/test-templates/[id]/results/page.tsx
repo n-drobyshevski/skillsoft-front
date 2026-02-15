@@ -2,7 +2,9 @@ import React, { Suspense } from 'react';
 import { notFound } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 import { testTemplatesApi } from '@/services/api';
-import { TestSession } from '@/types/domain';
+import { activityApi } from '@/services/api/activity';
+import { TestSession, SessionStatus } from '@/types/domain';
+import type { TestActivity } from '@/types/activity';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -63,6 +65,42 @@ export async function generateMetadata({ params }: ResultsPageProps) {
   };
 }
 
+/**
+ * Maps an ActivityEventType to a SessionStatus for display purposes.
+ */
+function mapEventTypeToStatus(eventType: string): SessionStatus {
+  switch (eventType) {
+    case 'COMPLETED': return SessionStatus.COMPLETED;
+    case 'ABANDONED': return SessionStatus.ABANDONED;
+    case 'TIMED_OUT': return SessionStatus.TIMED_OUT;
+    default: return SessionStatus.COMPLETED;
+  }
+}
+
+/**
+ * Maps a TestActivity (from activity tracking API) to an ExtendedSession
+ * for display in the SessionsTable component.
+ */
+function mapActivityToSession(activity: TestActivity): ExtendedSession {
+  return {
+    id: activity.sessionId,
+    templateId: activity.templateId,
+    templateName: activity.templateName,
+    clerkUserId: activity.clerkUserId,
+    status: mapEventTypeToStatus(activity.eventType),
+    createdAt: activity.occurredAt,
+    currentQuestionIndex: 0,
+    questionOrder: [],
+    totalQuestions: 0,
+    answeredQuestions: 0,
+    candidateName: activity.userName || undefined,
+    score: activity.score ?? undefined,
+    durationMinutes: activity.timeSpentSeconds
+      ? Math.round(activity.timeSpentSeconds / 60)
+      : undefined,
+  } as ExtendedSession;
+}
+
 async function getResultsData(id: string, filters: { status?: string; search?: string }) {
   // Reject reserved route segments to prevent routing conflicts
   if (isReservedTestTemplateSegment(id)) {
@@ -76,19 +114,25 @@ async function getResultsData(id: string, filters: { status?: string; search?: s
       return { template: null, sessions: [] as ExtendedSession[], stats: null, error: 'Template not found' };
     }
 
-    // TODO: Replace with actual API call when getSessionsByTemplate is available
-    const sessions: ExtendedSession[] = [];
+    // Fetch real session data from activity API
+    const [activityPage, activityStats] = await Promise.all([
+      activityApi.getTemplateActivity(id, {
+        status: (filters.status && filters.status !== 'all')
+          ? filters.status as 'COMPLETED' | 'ABANDONED' | 'TIMED_OUT'
+          : undefined,
+        page: 0,
+        size: 100,
+      }).catch(() => null),
+      activityApi.getTemplateActivityStats(id).catch(() => null),
+    ]);
 
-    // Filter sessions
-    let filteredSessions = sessions;
-    
-    if (filters.status && filters.status !== 'all') {
-      filteredSessions = filteredSessions.filter((s: ExtendedSession) => s.status === filters.status);
-    }
-    
+    // Map activity data to ExtendedSession format
+    let sessions: ExtendedSession[] = (activityPage?.content ?? []).map(mapActivityToSession);
+
+    // Client-side text search filter (activity API doesn't support text search)
     if (filters.search) {
       const searchLower = filters.search.toLowerCase();
-      filteredSessions = filteredSessions.filter(
+      sessions = sessions.filter(
         (s: ExtendedSession) =>
           s.candidateName?.toLowerCase().includes(searchLower) ||
           s.candidateEmail?.toLowerCase().includes(searchLower)
@@ -96,24 +140,40 @@ async function getResultsData(id: string, filters: { status?: string; search?: s
     }
 
     // Sort by date (newest first)
-    filteredSessions.sort(
-      (a: ExtendedSession, b: ExtendedSession) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime()
+    sessions.sort(
+      (a: ExtendedSession, b: ExtendedSession) =>
+        new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime()
     );
 
-    // Calculate stats
-    const completedSessions = sessions.filter((s: ExtendedSession) => s.status === 'COMPLETED');
-    const stats = {
-      total: sessions.length,
-      completed: completedSessions.length,
-      inProgress: sessions.filter((s: ExtendedSession) => s.status === 'IN_PROGRESS').length,
-      avgScore: completedSessions.length > 0
-        ? Math.round(
-            completedSessions.reduce((sum: number, s: ExtendedSession) => sum + (s.score || 0), 0) / completedSessions.length
-          )
-        : 0,
-    };
+    // Use real stats from activity API, with fallback to client-side calculation
+    const stats = activityStats
+      ? {
+          total: activityStats.totalSessions,
+          completed: activityStats.completedCount,
+          inProgress: Math.max(
+            0,
+            activityStats.totalSessions
+              - activityStats.completedCount
+              - activityStats.abandonedCount
+              - activityStats.timedOutCount
+          ),
+          avgScore: Math.round(activityStats.averageScore),
+        }
+      : {
+          total: sessions.length,
+          completed: sessions.filter(s => s.status === SessionStatus.COMPLETED).length,
+          inProgress: 0,
+          avgScore: sessions.length > 0
+            ? Math.round(
+                sessions
+                  .filter(s => s.score !== undefined)
+                  .reduce((sum, s) => sum + (s.score || 0), 0)
+                / Math.max(1, sessions.filter(s => s.score !== undefined).length)
+              )
+            : 0,
+        };
 
-    return { template, sessions: filteredSessions, stats, error: null };
+    return { template, sessions, stats, error: null };
   } catch (error) {
     console.error('Failed to fetch results data:', error);
     return { template: null, sessions: [] as ExtendedSession[], stats: null, error: 'Failed to load data' };

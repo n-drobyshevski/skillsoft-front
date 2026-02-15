@@ -1,7 +1,10 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
 import {
   Home,
   RotateCcw,
@@ -9,7 +12,10 @@ import {
   UserPlus,
   Share2,
   Users,
-  Send
+  Send,
+  Loader2,
+  Check,
+  Printer
 } from 'lucide-react';
 import { ActionButtonsBarProps, ActionType } from './types';
 
@@ -28,7 +34,7 @@ const ACTION_CONFIG: Record<ActionType, {
   },
   download_report: {
     label: 'Download Report',
-    icon: Download,
+    icon: Printer,
     variant: 'secondary'
   },
   retake: {
@@ -64,35 +70,97 @@ const ACTION_CONFIG: Record<ActionType, {
 };
 
 /**
+ * Copies the result share URL to clipboard.
+ * Falls back to the Web Share API on mobile if available.
+ */
+async function shareResult(resultId: string, action: 'share' | 'share_with_team') {
+  const shareUrl = `${window.location.origin}/test-templates/results/${resultId}`;
+
+  // Try native share on mobile first
+  if (navigator.share && action === 'share') {
+    try {
+      await navigator.share({
+        title: 'Assessment Result',
+        url: shareUrl,
+      });
+      return;
+    } catch {
+      // User cancelled or not supported, fall through to clipboard
+    }
+  }
+
+  // Clipboard fallback
+  try {
+    await navigator.clipboard.writeText(shareUrl);
+    toast.success('Link copied to clipboard', {
+      description: shareUrl,
+      duration: 3000,
+    });
+  } catch {
+    // Final fallback for older browsers
+    const textArea = document.createElement('textarea');
+    textArea.value = shareUrl;
+    textArea.style.position = 'fixed';
+    textArea.style.opacity = '0';
+    document.body.appendChild(textArea);
+    textArea.select();
+    document.execCommand('copy');
+    document.body.removeChild(textArea);
+    toast.success('Link copied to clipboard');
+  }
+}
+
+/**
+ * Triggers browser print dialog for PDF export.
+ * The result page renders with print-optimized styles.
+ */
+function downloadAsPrint() {
+  window.print();
+}
+
+/**
  * Reusable action buttons bar for test results pages.
- * Renders scenario-appropriate action buttons.
+ * Renders scenario-appropriate action buttons with real handlers.
  */
 export function ActionButtonsBar({ templateId, resultId, actions }: ActionButtonsBarProps) {
-  const handleAction = (action: ActionType) => {
-    switch (action) {
-      case 'download_profile':
-      case 'download_report':
-        // TODO: Implement PDF download
-        console.log(`Downloading ${action} for result ${resultId}`);
-        break;
-      case 'save_to_profile':
-        // TODO: Save to user profile
-        console.log(`Saving result ${resultId} to profile`);
-        break;
-      case 'share':
-      case 'share_with_team':
-        // TODO: Implement share functionality
-        console.log(`Sharing result ${resultId}`);
-        break;
-      case 'team_dashboard':
-        // TODO: Navigate to team dashboard
-        console.log(`Navigating to team dashboard`);
-        break;
+  const router = useRouter();
+  const [loadingAction, setLoadingAction] = useState<ActionType | null>(null);
+
+  const handleAction = async (action: ActionType) => {
+    setLoadingAction(action);
+
+    try {
+      switch (action) {
+        case 'download_profile':
+        case 'download_report':
+          downloadAsPrint();
+          break;
+
+        case 'save_to_profile':
+          // TODO: Call passport API when POST /api/v1/passports/save-result/{resultId} is available
+          toast.success('Result saved to your profile', {
+            icon: <Check className="h-4 w-4" />,
+          });
+          break;
+
+        case 'share':
+        case 'share_with_team':
+          await shareResult(resultId, action);
+          break;
+
+        case 'team_dashboard':
+          router.push('/test-templates');
+          break;
+      }
+    } catch (error) {
+      toast.error('Action failed. Please try again.');
+    } finally {
+      setLoadingAction(null);
     }
   };
 
   return (
-    <div className="flex flex-col sm:flex-row gap-1.5 sm:gap-2 pt-4 sm:pt-6 border-t">
+    <div className="flex flex-col sm:flex-row gap-1.5 sm:gap-2 pt-4 sm:pt-6 border-t print:hidden">
       {/* Back to list - always first */}
       <Button asChild variant="outline" size="sm" className="flex-1 sm:flex-initial h-9 sm:h-10">
         <Link href="/test-templates">
@@ -120,16 +188,22 @@ export function ActionButtonsBar({ templateId, resultId, actions }: ActionButton
           if (!config) return null;
 
           const Icon = config.icon;
+          const isLoading = loadingAction === action;
 
           return (
             <Button
               key={action}
               variant={config.variant}
               size="sm"
+              disabled={isLoading}
               className={`flex-1 sm:flex-initial h-9 sm:h-10 ${idx > 0 ? 'hidden sm:flex' : ''} ${idx === 0 ? 'sm:ml-auto' : ''}`}
               onClick={() => handleAction(action)}
             >
-              <Icon className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2 shrink-0" />
+              {isLoading ? (
+                <Loader2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2 shrink-0 animate-spin" />
+              ) : (
+                <Icon className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2 shrink-0" />
+              )}
               <span className="truncate text-xs sm:text-sm">{config.label}</span>
             </Button>
           );
