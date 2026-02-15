@@ -73,7 +73,7 @@ interface MoreMenuSection {
 // All possible primary navigation items
 const ALL_NAV_ITEMS: NavItem[] = [
   { href: '/dashboard', icon: Home, labelKey: 'home' },
-  { href: '/my-tests', icon: ClipboardList, labelKey: 'myTests' },
+  { href: '/my-tests', icon: ClipboardList, labelKey: 'myActivity' },
   { href: '/test-templates', icon: FileText, labelKey: 'tests' },
   { href: '/psychometrics', icon: BarChart3, labelKey: 'analysis' },
   { href: '/profile', icon: User, labelKey: 'profile' },

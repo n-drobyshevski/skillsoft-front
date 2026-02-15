@@ -6,15 +6,14 @@ import Link from "next/link";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { TestTemplateSummary, AssessmentGoal, AssessmentGoalInfo } from "@/types/domain";
+import { TestTemplateSummary, AssessmentGoal } from "@/types/domain";
+import { GoalBadge, getGoalConfig } from "@/components/catalog/GoalBadge";
+import { TemplateStats } from "@/components/catalog/TemplateStats";
 import {
   Clock,
   Target,
   BookOpen,
   Pencil,
-  Crosshair,
-  Users,
-  Briefcase,
   Eye,
   Sparkles,
   MoreVertical,
@@ -54,36 +53,6 @@ interface TestTemplateCardProps {
   isRecommended?: boolean;
 }
 
-/**
- * Goal configuration for styling - unified for both mobile and desktop
- */
-const GOAL_CONFIG = {
-  [AssessmentGoal.JOB_FIT]: {
-    icon: Briefcase,
-    badgeClass: 'bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300',
-    borderClass: 'border-l-blue-500',
-    iconBgClass: 'bg-blue-500/10',
-    iconTextClass: 'text-blue-600 dark:text-blue-400',
-  },
-  [AssessmentGoal.TEAM_FIT]: {
-    icon: Users,
-    badgeClass: 'bg-violet-100 text-violet-700 dark:bg-violet-950 dark:text-violet-300',
-    borderClass: 'border-l-violet-500',
-    iconBgClass: 'bg-violet-500/10',
-    iconTextClass: 'text-violet-600 dark:text-violet-400',
-  },
-  [AssessmentGoal.OVERVIEW]: {
-    icon: Crosshair,
-    badgeClass: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300',
-    borderClass: 'border-l-emerald-500',
-    iconBgClass: 'bg-emerald-500/10',
-    iconTextClass: 'text-emerald-600 dark:text-emerald-400',
-  },
-};
-
-function getGoalConfig(goal: AssessmentGoal | undefined) {
-  return GOAL_CONFIG[goal || AssessmentGoal.OVERVIEW];
-}
 
 /**
  * Format duration - compact for mobile, full for desktop
@@ -222,8 +191,6 @@ function DesktopTemplateCard({
   const router = useRouter();
   const t = useTranslations('template');
   const tCommon = useTranslations('common');
-  const GoalIcon = goalConfig.icon;
-  const goalInfo = template.goal ? AssessmentGoalInfo[template.goal] : AssessmentGoalInfo[AssessmentGoal.OVERVIEW];
 
   // Delete dialog state
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -265,10 +232,7 @@ function DesktopTemplateCard({
         <div className="flex items-start justify-between gap-2 mb-2">
           <div className="flex items-center gap-2 flex-wrap">
             {/* Goal Badge */}
-            <Badge variant="secondary" className={cn("text-xs font-medium px-2 py-0.5", goalConfig.badgeClass)}>
-              <GoalIcon className="h-3 w-3 mr-1" />
-              {goalInfo.displayName}
-            </Badge>
+            <GoalBadge goal={template.goal || AssessmentGoal.OVERVIEW} />
 
             {/* Recommended Badge */}
             {isRecommended && (
@@ -364,20 +328,7 @@ function DesktopTemplateCard({
 
       <CardContent className="p-4 pt-0 flex-1">
         {/* Stats Row */}
-        <div className="flex flex-wrap gap-1.5" aria-label={t('testConfiguration')}>
-          <span className="inline-flex items-center gap-1 text-xs text-muted-foreground bg-muted/50 rounded px-1.5 py-0.5">
-            <Clock className="h-3 w-3" />
-            {formatDuration(template.timeLimitMinutes, false, t)}
-          </span>
-          <span className="inline-flex items-center gap-1 text-xs text-muted-foreground bg-muted/50 rounded px-1.5 py-0.5">
-            <Target className="h-3 w-3" />
-            {template.passingScore}%
-          </span>
-          <span className="inline-flex items-center gap-1 text-xs text-muted-foreground bg-muted/50 rounded px-1.5 py-0.5">
-            <BookOpen className="h-3 w-3" />
-            {template.competencyCount} {t('skills')}
-          </span>
-        </div>
+        <TemplateStats template={template} variant="pills" />
       </CardContent>
 
       <CardFooter className="p-4 pt-2 mt-auto">

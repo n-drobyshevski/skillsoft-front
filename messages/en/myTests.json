@@ -1,6 +1,6 @@
 {
-  "title": "My Tests",
-  "description": "View your assigned tests and track progress",
+  "title": "My Activity",
+  "description": "Track your assessment progress and results",
   "noAssignedTests": "No assigned tests",
   "whenHrAssigns": "When the HR department assigns you a test, it will appear here. You can browse the test catalog in the meantime.",
   "testCatalog": "Test Catalog",

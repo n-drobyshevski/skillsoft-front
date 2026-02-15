@@ -17,13 +17,9 @@ export default function MyTestsLoading() {
             <div className="p-2 rounded-lg bg-primary/10">
               <ClipboardList className="size-6 text-primary" />
             </div>
-            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
-              Мои тесты
-            </h1>
+            <Skeleton className="h-8 w-40" />
           </div>
-          <p className="text-muted-foreground text-sm sm:text-base">
-            Просматривайте назначенные тесты и отслеживайте прогресс
-          </p>
+          <Skeleton className="h-4 w-64" />
         </header>
 
         {/* Summary Stats Skeleton */}

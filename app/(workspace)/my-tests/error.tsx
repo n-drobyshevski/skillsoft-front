@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -19,13 +20,17 @@ interface ErrorProps {
 }
 
 /**
- * Error boundary for My Tests page
+ * Error boundary for My Activity page
  * Handles network errors, auth errors, and general failures with retry capability
  */
 export default function MyTestsError({ error, reset }: ErrorProps) {
+  const t = useTranslations('myTests');
+  const tAuth = useTranslations('auth');
+  const tErrors = useTranslations('errors');
+  const tNav = useTranslations('navigation');
+
   useEffect(() => {
-    // Log error for monitoring (could integrate with error tracking service)
-    console.error('My Tests page error:', error);
+    console.error('My Activity page error:', error);
   }, [error]);
 
   const isNetworkError =
@@ -43,8 +48,8 @@ export default function MyTestsError({ error, reset }: ErrorProps) {
         icon: AlertCircle,
         iconClassName: 'text-amber-500',
         bgClassName: 'bg-amber-500/10',
-        title: 'Доступ ограничен',
-        description: 'Войдите в систему, чтобы просмотреть свои тесты.',
+        title: tErrors('loginRequired'),
+        description: tErrors('unauthorized'),
         showRetry: false,
         showSignIn: true,
       };
@@ -55,9 +60,8 @@ export default function MyTestsError({ error, reset }: ErrorProps) {
         icon: WifiOff,
         iconClassName: 'text-blue-500',
         bgClassName: 'bg-blue-500/10',
-        title: 'Ошибка соединения',
-        description:
-          'Не удалось загрузить данные. Проверьте подключение к интернету.',
+        title: tErrors('networkError'),
+        description: tErrors('network'),
         showRetry: true,
         showSignIn: false,
       };
@@ -67,9 +71,8 @@ export default function MyTestsError({ error, reset }: ErrorProps) {
       icon: AlertCircle,
       iconClassName: 'text-destructive',
       bgClassName: 'bg-destructive/10',
-      title: 'Не удалось загрузить тесты',
-      description:
-        'Произошла ошибка при загрузке ваших тестов. Попробуйте обновить страницу.',
+      title: tErrors('loadingFailed'),
+      description: tErrors('errorLoadingPage'),
       showRetry: true,
       showSignIn: false,
     };
@@ -81,18 +84,18 @@ export default function MyTestsError({ error, reset }: ErrorProps) {
   return (
     <div className="min-h-screen bg-background">
       <div className="container max-w-5xl mx-auto px-4 py-6 sm:py-8">
-        {/* Page Header - Same as main page for consistency */}
+        {/* Page Header */}
         <header className="mb-6 sm:mb-8">
           <div className="flex items-center gap-3 mb-2">
             <div className="p-2 rounded-lg bg-primary/10">
               <ClipboardList className="size-6 text-primary" />
             </div>
             <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
-              Мои тесты
+              {t('title')}
             </h1>
           </div>
           <p className="text-muted-foreground text-sm sm:text-base">
-            Просматривайте назначенные тесты и отслеживайте прогресс
+            {t('description')}
           </p>
         </header>
 
@@ -114,7 +117,7 @@ export default function MyTestsError({ error, reset }: ErrorProps) {
             {error.digest && (
               <CardContent>
                 <div className="text-xs text-muted-foreground bg-muted p-2 rounded font-mono text-center">
-                  Код ошибки: {error.digest}
+                  {tErrors('errorId')}: {error.digest}
                 </div>
               </CardContent>
             )}
@@ -123,27 +126,27 @@ export default function MyTestsError({ error, reset }: ErrorProps) {
               {content.showRetry && (
                 <Button onClick={reset} className="w-full">
                   <RefreshCw className="w-4 h-4 mr-2" />
-                  Попробовать снова
+                  {tErrors('tryAgain')}
                 </Button>
               )}
 
               {content.showSignIn && (
                 <Button asChild className="w-full">
-                  <Link href="/sign-in">Войти в систему</Link>
+                  <Link href="/sign-in">{tAuth('signIn')}</Link>
                 </Button>
               )}
 
               <Button variant="outline" asChild className="w-full">
                 <Link href="/test-templates">
                   <ClipboardList className="w-4 h-4 mr-2" />
-                  Каталог тестов
+                  {tNav('items.testCatalog')}
                 </Link>
               </Button>
 
               <Button variant="ghost" asChild className="w-full">
                 <Link href="/">
                   <Home className="w-4 h-4 mr-2" />
-                  На главную
+                  {tNav('home')}
                 </Link>
               </Button>
             </CardFooter>

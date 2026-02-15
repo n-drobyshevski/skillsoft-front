@@ -455,6 +455,13 @@
       "failedToStartNewSession": "Failed to start new session"
     }
   },
+  "catalog": {
+    "tabs": {
+      "available": "All Available",
+      "shared": "Shared with Me",
+      "sharedCount": "{count} shared"
+    }
+  },
   "filters": {
     "all": "All",
     "overview": "Overview",

@@ -54,8 +54,11 @@
     "analytics": "Аналитика",
     "system": "Система"
   },
+  "myActivity": "Мой прогресс",
   "items": {
     "overview": "Обзор",
+    "myActivity": "Мой прогресс",
+    "testCatalog": "Каталог тестов",
     "availableTests": "Доступные тесты",
     "sharedWithMe": "Доступные мне",
     "hiringOverview": "Обзор найма",

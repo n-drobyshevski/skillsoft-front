@@ -31,7 +31,7 @@ export const NAVIGATION_CONFIG: NavigationConfig = {
         {
           id: "my-tests",
           path: "/my-tests",
-          labelKey: "myTests",
+          labelKey: "items.myActivity",
           icon: "ClipboardCheck",
           badge: {
             content: { type: "count", key: "inProgressTests" },
@@ -40,16 +40,10 @@ export const NAVIGATION_CONFIG: NavigationConfig = {
           },
         },
         {
-          id: "available-tests",
+          id: "test-catalog",
           path: "/test-templates",
-          labelKey: "items.availableTests",
+          labelKey: "items.testCatalog",
           icon: "FileStack",
-        },
-        {
-          id: "shared-with-me",
-          path: "/shared",
-          labelKey: "items.sharedWithMe",
-          icon: "Share2",
           badge: {
             content: { type: "count", key: "sharedTemplates" },
             variant: "secondary",

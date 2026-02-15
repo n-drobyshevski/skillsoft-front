@@ -761,6 +761,15 @@ export interface TestTemplateSummary {
   createdAt: string;
 }
 
+/**
+ * Minimal template data needed for catalog cards.
+ * Shared between Available Tests and Shared with Me views.
+ */
+export type TemplateCardData = Pick<TestTemplateSummary,
+  'id' | 'name' | 'description' | 'goal' | 'competencyCount' |
+  'timeLimitMinutes' | 'passingScore' | 'isActive'
+>;
+
 export interface CreateTestTemplateRequest {
   name: string;
   description?: string;

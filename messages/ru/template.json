@@ -455,6 +455,13 @@
       "failedToStartNewSession": "Не удалось начать новую сессию"
     }
   },
+  "catalog": {
+    "tabs": {
+      "available": "Все доступные",
+      "shared": "Доступные мне",
+      "sharedCount": "{count} доступно"
+    }
+  },
   "filters": {
     "all": "Все",
     "overview": "Обзор",

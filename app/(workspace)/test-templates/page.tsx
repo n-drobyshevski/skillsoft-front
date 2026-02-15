@@ -5,11 +5,14 @@ import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { getActiveTemplatesCached } from "@/services/api.cache.templates";
 import { canCreateContent } from "@/services/roleApi";
+import { templateSharingApi } from "@/services/api";
 import TestTemplatesGridSkeleton from "./_components/TestTemplatesGridSkeleton";
 import ErrorDisplay from "./_components/ErrorDisplay";
 import { TemplatesPageHeader } from "./_components/TemplatesPageHeader";
 import { TemplatesGridWrapper } from "./_components/TemplatesPageContent";
+import { CatalogTabs } from "./_components/CatalogTabs";
 import { isApiError, getUserFriendlyMessage, ErrorCategory } from "@/types/errors";
+import type { SharedTemplatesResponse } from "@/types/domain";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("metadata.testTemplates");
@@ -71,8 +74,19 @@ async function getActiveTemplates(): Promise<FetchResult> {
   }
 }
 
-// Async component for templates grid - streams after static shell
-async function TemplatesContent({ canCreate }: { canCreate: boolean }) {
+/**
+ * Safely fetch shared templates, returning empty result on failure.
+ */
+async function getSharedTemplatesSafe(): Promise<SharedTemplatesResponse> {
+  try {
+    return await templateSharingApi.getSharedWithMe();
+  } catch {
+    return { items: [], total: 0 };
+  }
+}
+
+// Editor/Admin: existing studio view (unchanged)
+async function StudioContent() {
   const { templates, error, errorCategory, isRetryable } = await getActiveTemplates();
 
   if (error) {
@@ -85,14 +99,40 @@ async function TemplatesContent({ canCreate }: { canCreate: boolean }) {
     );
   }
 
-  return <TemplatesGridWrapper templates={templates} canEdit={canCreate} />;
+  return <TemplatesGridWrapper templates={templates} canEdit />;
+}
+
+// Personal lens: catalog with tabs (Available + Shared)
+async function CatalogContent() {
+  const [templatesResult, sharedResult] = await Promise.all([
+    getActiveTemplates(),
+    getSharedTemplatesSafe(),
+  ]);
+
+  if (templatesResult.error) {
+    return (
+      <ErrorDisplay
+        message={templatesResult.error}
+        category={templatesResult.errorCategory}
+        isRetryable={templatesResult.isRetryable}
+      />
+    );
+  }
+
+  return (
+    <CatalogTabs
+      templates={templatesResult.templates}
+      sharedItems={sharedResult.items}
+      sharedTotal={sharedResult.total}
+    />
+  );
 }
 
 // Main component - Auth check then static shell with streaming content
 export default async function TestsPage() {
   // Check authentication first (required before rendering)
   const { userId } = await auth();
-  
+
   if (!userId) {
     redirect("/sign-in");
   }
@@ -106,7 +146,7 @@ export default async function TestsPage() {
 
       {/* Dynamic content - streams after static shell */}
       <Suspense fallback={<TestTemplatesGridSkeleton />}>
-        <TemplatesContent canCreate={canCreate} />
+        {canCreate ? <StudioContent /> : <CatalogContent />}
       </Suspense>
     </div>
   );

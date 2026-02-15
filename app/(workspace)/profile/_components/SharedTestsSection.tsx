@@ -157,7 +157,7 @@ export function SharedTestsSection({ items, total }: SharedTestsSectionProps) {
             asChild
             className="hidden sm:inline-flex shrink-0 text-xs h-7 px-2"
           >
-            <Link href="/shared">
+            <Link href="/test-templates?source=shared">
               {tCommon('viewAll')}
               <ChevronRight className="ml-0.5 h-3.5 w-3.5" aria-hidden="true" />
             </Link>
@@ -180,7 +180,7 @@ export function SharedTestsSection({ items, total }: SharedTestsSectionProps) {
         {/* Mobile "View All" button */}
         <div className="mt-3 sm:hidden">
           <Button variant="outline" size="sm" asChild className="w-full text-xs">
-            <Link href="/shared">
+            <Link href="/test-templates?source=shared">
               {t('viewAll')}
               <ChevronRight className="ml-1 h-3.5 w-3.5" aria-hidden="true" />
             </Link>

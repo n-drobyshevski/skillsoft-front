@@ -54,8 +54,11 @@
     "analytics": "Analytics",
     "system": "System"
   },
+  "myActivity": "My Activity",
   "items": {
     "overview": "Overview",
+    "myActivity": "My Activity",
+    "testCatalog": "Test Catalog",
     "availableTests": "Available Tests",
     "sharedWithMe": "Shared with Me",
     "hiringOverview": "Hiring Overview",
