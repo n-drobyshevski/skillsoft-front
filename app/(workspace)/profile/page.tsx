@@ -110,9 +110,9 @@ export default async function ProfilePage() {
         </header>
 
         {/* Main Content - 3-Column Grid Layout (matching test-template/[id]/overview) */}
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-6">
           {/* Hero Card - Full Width */}
-          <div className="animate-in fade-in-0 slide-in-from-bottom-2 duration-300">
+          <div className="animate-in fade-in-0 duration-300">
             <ProfileHeroCard
               userInfo={userInfo}
               role={userRole}
@@ -121,7 +121,7 @@ export default async function ProfilePage() {
           </div>
 
           {/* Quick Stats Grid - Full Width (2x2 mobile, 4x1 desktop) */}
-          <div className="animate-in fade-in-0 slide-in-from-bottom-2 duration-300 delay-75 fill-mode-both">
+          <div className="animate-in fade-in-0 duration-300">
             <Suspense fallback={<QuickStatsGridSkeleton />}>
               <QuickStatsGridLoader userId={user.id} />
             </Suspense>
@@ -130,9 +130,9 @@ export default async function ProfilePage() {
           {/* 3-Column Grid: Main (2 cols) + Sidebar (1 col) */}
           {/* Mobile order: Sidebar first (competencies, passport) via order-1, then main via order-2 */}
           {/* items-start ensures columns don't stretch unnecessarily, preventing content overflow */}
-          <div className="grid gap-6 grid-cols-1 lg:grid-cols-3 lg:items-start animate-in fade-in-0 slide-in-from-bottom-2 duration-300 delay-100 fill-mode-both">
+          <div className="grid gap-4 sm:gap-6 grid-cols-1 lg:grid-cols-3 lg:items-start animate-in fade-in-0 duration-300">
             {/* Main Column - Recent Results + Shared Tests (2 cols on desktop) */}
-            <div className="lg:col-span-2 order-2 lg:order-1 space-y-6">
+            <div className="lg:col-span-2 order-2 lg:order-1 space-y-4 sm:space-y-6">
               <Suspense fallback={<RecentResultsSectionSkeleton />}>
                 <RecentResultsLoader userId={user.id} />
               </Suspense>
@@ -145,7 +145,7 @@ export default async function ProfilePage() {
 
             {/* Sidebar - Competencies + Personality (1 col on desktop) */}
             {/* Shows first on mobile via order-1 for actionable insights */}
-            <div className="order-1 lg:order-2 space-y-6">
+            <div className="order-1 lg:order-2 space-y-4 sm:space-y-6">
               <Suspense fallback={<TopCompetenciesCardSkeleton />}>
                 <TopCompetenciesLoader userId={user.id} />
               </Suspense>

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useMemo, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import {
   ResponsiveContainer,
   RadarChart,
@@ -98,35 +99,12 @@ export function analyzeTeamFit(
 // Contribution Type Badges
 // ============================================================================
 
-const CONTRIBUTION_CONFIG: Record<
-  TeamContributionType,
-  { label: string; description: string; color: string }
-> = {
-  leader: {
-    label: 'Leader',
-    description: 'High scores across leadership competencies',
-    color: 'bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20',
-  },
-  specialist: {
-    label: 'Specialist',
-    description: 'Deep expertise in specific areas',
-    color: 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20',
-  },
-  generalist: {
-    label: 'Generalist',
-    description: 'Balanced skills across areas',
-    color: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20',
-  },
-  collaborator: {
-    label: 'Collaborator',
-    description: 'Strong in interpersonal skills',
-    color: 'bg-orange-500/10 text-orange-600 dark:text-orange-400 border-orange-500/20',
-  },
-  innovator: {
-    label: 'Innovator',
-    description: 'High in creativity and openness',
-    color: 'bg-pink-500/10 text-pink-600 dark:text-pink-400 border-pink-500/20',
-  },
+const CONTRIBUTION_COLORS: Record<TeamContributionType, string> = {
+  leader: 'bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20',
+  specialist: 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20',
+  generalist: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20',
+  collaborator: 'bg-orange-500/10 text-orange-600 dark:text-orange-400 border-orange-500/20',
+  innovator: 'bg-pink-500/10 text-pink-600 dark:text-pink-400 border-pink-500/20',
 };
 
 // ============================================================================
@@ -172,10 +150,11 @@ function CustomTooltip({ active, payload, label }: CustomTooltipProps) {
 
 interface GapFillListProps {
   gapsFilledCompetencies: TeamSaturationDataPoint[];
+  title: string;
   className?: string;
 }
 
-function GapFillList({ gapsFilledCompetencies, className }: GapFillListProps) {
+function GapFillList({ gapsFilledCompetencies, title, className }: GapFillListProps) {
   if (gapsFilledCompetencies.length === 0) return null;
 
   return (
@@ -187,7 +166,7 @@ function GapFillList({ gapsFilledCompetencies, className }: GapFillListProps) {
     >
       <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
         <Sparkles className="w-3.5 h-3.5 text-emerald-500" />
-        Gaps You Fill
+        {title}
       </div>
       <div className="flex flex-wrap gap-1.5">
         {gapsFilledCompetencies.map((comp) => (
@@ -229,11 +208,21 @@ export function TeamSaturationRadar({
   onPointClick,
   className,
 }: TeamSaturationRadarProps) {
+  const t = useTranslations('results.teamFit.radar');
   const isMobile = useIsMobile();
   const [hoveredPoint, setHoveredPoint] = useState<string | null>(null);
 
   // Calculate team fit analysis
   const analysis = useMemo(() => analyzeTeamFit(data), [data]);
+
+  // Translated contribution type labels
+  const contributionLabels: Record<TeamContributionType, { label: string; description: string }> = {
+    leader: { label: t('leader'), description: t('leaderDescription') },
+    specialist: { label: t('specialist'), description: t('specialistDescription') },
+    generalist: { label: t('generalist'), description: t('generalistDescription') },
+    collaborator: { label: t('collaborator'), description: t('collaboratorDescription') },
+    innovator: { label: t('innovator'), description: t('innovatorDescription') },
+  };
 
   // Transform data for Recharts
   const chartData = useMemo(() => {
@@ -255,7 +244,8 @@ export function TeamSaturationRadar({
   const chartHeight = isMobile ? 260 : 340;
 
   // Contribution badge config
-  const contribConfig = CONTRIBUTION_CONFIG[analysis.contributionType];
+  const contribColor = CONTRIBUTION_COLORS[analysis.contributionType];
+  const contribLabel = contributionLabels[analysis.contributionType];
 
   return (
     <div className={cn('space-y-4', className)}>
@@ -263,10 +253,10 @@ export function TeamSaturationRadar({
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           <Users className="w-4 h-4 text-muted-foreground" />
-          <span className="text-sm font-medium">Team Fit Analysis</span>
+          <span className="text-sm font-medium">{t('title')}</span>
         </div>
-        <Badge variant="outline" className={cn('text-xs', contribConfig.color)}>
-          {contribConfig.label}
+        <Badge variant="outline" className={cn('text-xs', contribColor)}>
+          {contribLabel.label}
         </Badge>
       </div>
 
@@ -359,7 +349,7 @@ export function TeamSaturationRadar({
       </motion.div>
 
       {/* Gaps filled section */}
-      <GapFillList gapsFilledCompetencies={analysis.gapsFilledCompetencies} />
+      <GapFillList gapsFilledCompetencies={analysis.gapsFilledCompetencies} title={t('gapsYouFill')} />
 
       {/* Quick stats */}
       <div className={cn(
@@ -368,7 +358,7 @@ export function TeamSaturationRadar({
       )}>
         <div className="text-center p-2.5 bg-primary/5 rounded-lg">
           <div className="text-[10px] uppercase tracking-wide text-muted-foreground mb-0.5">
-            Compatibility
+            {t('compatibility')}
           </div>
           <div className="text-base font-bold tabular-nums text-primary">
             {analysis.compatibilityScore}%
@@ -376,7 +366,7 @@ export function TeamSaturationRadar({
         </div>
         <div className="text-center p-2.5 bg-emerald-500/10 rounded-lg">
           <div className="text-[10px] uppercase tracking-wide text-muted-foreground mb-0.5">
-            Gaps Filled
+            {t('gapsFilled')}
           </div>
           <div className="text-base font-bold tabular-nums text-emerald-600 dark:text-emerald-400">
             {analysis.gapsFilledCompetencies.length}
@@ -385,7 +375,7 @@ export function TeamSaturationRadar({
         {!isMobile && (
           <div className="text-center p-2.5 bg-muted/50 rounded-lg">
             <div className="text-[10px] uppercase tracking-wide text-muted-foreground mb-0.5">
-              Strengths
+              {t('strengths')}
             </div>
             <div className="text-base font-bold tabular-nums text-foreground">
               {analysis.relativeStrengths.length}
@@ -404,7 +394,7 @@ export function TeamSaturationRadar({
         >
           <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">
             <Target className="w-3.5 h-3.5" />
-            Growth Areas for Team Fit
+            {t('growthAreas')}
           </div>
           <div className="flex flex-wrap gap-1.5">
             {analysis.developmentAreas.slice(0, 3).map((area) => (

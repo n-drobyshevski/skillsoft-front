@@ -47,6 +47,19 @@ export const testTemplatesApi = {
   },
 
   /**
+   * Get active templates owned by the current user.
+   * Used for personal mode catalog.
+   */
+  getMyTemplates: async (): Promise<TestTemplateSummary[]> => {
+    const authHeaders = await getAuthHeaders();
+    return fetchApi(`${TEST_TEMPLATES_BASE}/mine`, {
+      tags: ['my-templates'],
+      revalidate: 60,
+      authHeaders,
+    });
+  },
+
+  /**
    * Get a single test template by ID
    */
   getTemplateById: async (id: string): Promise<TestTemplate | null> => {

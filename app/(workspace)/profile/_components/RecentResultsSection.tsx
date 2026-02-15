@@ -86,7 +86,7 @@ export function RecentResultsSection({ results }: RecentResultsSectionProps) {
   }
 
   return (
-    <Card className="transition-all duration-300 shadow-card hover:shadow-card-hover hover:border-primary/10">
+    <Card>
       <CardHeader className="pb-3 sm:pb-4 px-4 sm:px-6">
         <div className="flex flex-col gap-2 sm:gap-3 sm:flex-row sm:items-center sm:justify-between">
           <CardTitle className="text-base sm:text-lg flex items-center gap-2 shrink-0">
@@ -180,22 +180,19 @@ function ResultRow({
       href={`/test-templates/results/${result.resultId}`}
       aria-label={ariaLabel}
       className={cn(
-        'flex items-center gap-2 sm:gap-3 w-full p-2 sm:p-3 rounded-xl border transition-colors group touch-manipulation overflow-hidden',
+        'flex items-center gap-2 sm:gap-3 w-full p-2 sm:p-3 rounded-xl border border-border transition-colors group touch-manipulation overflow-hidden',
         'min-h-[44px]',
         'hover:bg-muted/50',
-        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
-        result.passed
-          ? 'border-emerald-500/20 bg-emerald-500/5 hover:bg-emerald-500/10'
-          : 'border-amber-500/20 bg-amber-500/5 hover:bg-amber-500/10'
+        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2'
       )}
     >
       {/* Score Circle - Compact on mobile */}
       <div
         className={cn(
-          'h-10 w-10 sm:h-12 sm:w-12 rounded-full flex items-center justify-center text-sm sm:text-base font-bold shrink-0 shadow-sm',
+          'h-10 w-10 sm:h-12 sm:w-12 rounded-full flex items-center justify-center text-sm sm:text-base font-bold shrink-0',
           result.passed
-            ? 'bg-linear-to-br from-emerald-100 to-emerald-200 text-emerald-700 dark:from-emerald-900/50 dark:to-emerald-800/50 dark:text-emerald-300'
-            : 'bg-linear-to-br from-amber-100 to-amber-200 text-amber-700 dark:from-amber-900/50 dark:to-amber-800/50 dark:text-amber-300'
+            ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-300'
+            : 'bg-amber-50 text-amber-700 dark:bg-amber-950/30 dark:text-amber-300'
         )}
       >
         {result.overallPercentage.toFixed(0)}%

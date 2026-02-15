@@ -47,15 +47,12 @@ export function ProfileHeroCard({
   const memberSince = format.relativeTime(userInfo.createdAt);
 
   return (
-    <Card className="relative overflow-hidden transition-all duration-300 shadow-card hover:shadow-card-hover hover:border-primary/10">
-      {/* Gradient accent bar */}
-      <div className="absolute top-0 inset-x-0 h-0.5 sm:h-1 bg-linear-to-r from-primary via-primary/70 to-primary/30" />
-
-      <CardContent className="p-4 sm:p-5 pt-4 sm:pt-6">
+    <Card className="relative overflow-hidden">
+      <CardContent className="p-3 sm:p-4">
         <div className="flex items-center gap-3 sm:gap-4">
           {/* Avatar with status */}
           <div className="relative shrink-0 group">
-            <Avatar className="size-12 sm:size-16 ring-2 ring-primary/10 ring-offset-2 ring-offset-background transition-all duration-300 group-hover:ring-primary/30 group-hover:scale-105">
+            <Avatar className="size-12 sm:size-16 ring-1 ring-border">
               {userInfo.avatarUrl ? (
                 <Image
                   src={userInfo.avatarUrl}

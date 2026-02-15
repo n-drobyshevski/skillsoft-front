@@ -7,6 +7,7 @@ import type {
   UserStatistics,
   TemplateStatistics,
   QuestionScore,
+  CandidateComparison,
 } from '@/types/domain';
 
 // Test endpoints - paths are relative to the v1 base URL
@@ -118,6 +119,24 @@ export const testResultsApi = {
   ): Promise<QuestionScore[]> => {
     const authHeaders = await getAuthHeaders();
     return fetchApi(`${TEST_RESULTS_BASE}/${resultId}/indicators/${indicatorId}/questions`, {
+      cache: 'no-store',
+      authHeaders,
+    });
+  },
+
+  /**
+   * Compare multiple Team Fit results side-by-side.
+   * Requires ADMIN or EDITOR role.
+   */
+  compareCandidates: async (
+    templateId: string,
+    resultIds: string[]
+  ): Promise<CandidateComparison> => {
+    const authHeaders = await getAuthHeaders();
+    const params = new URLSearchParams();
+    params.set('templateId', templateId);
+    resultIds.forEach(id => params.append('resultIds', id));
+    return fetchApi(`${TEST_RESULTS_BASE}/compare?${params.toString()}`, {
       cache: 'no-store',
       authHeaders,
     });

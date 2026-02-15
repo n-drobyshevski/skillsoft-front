@@ -2,9 +2,10 @@
 
 import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
-import { Users, ArrowLeft } from 'lucide-react';
+import { Users, ArrowLeft, Info } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import type { CandidateComparison } from '@/types/domain';
 
 import { RankingCards } from './RankingCards';
@@ -42,6 +43,7 @@ export function ComparisonView({ data }: ComparisonViewProps) {
     templateName,
     targetRole,
     teamSize,
+    teamAvailable,
     candidates,
     competencyComparison,
     gapCoverageMatrix,
@@ -105,10 +107,22 @@ export function ComparisonView({ data }: ComparisonViewProps) {
                 {t('targetRole', { role: targetRole })}
               </Badge>
             )}
-            <Badge variant="outline" className="text-xs">
-              {t('teamSize', { count: teamSize })}
-            </Badge>
+            {teamAvailable && (
+              <Badge variant="outline" className="text-xs">
+                {t('teamSize', { count: teamSize })}
+              </Badge>
+            )}
           </div>
+
+          {/* Team unavailable banner */}
+          {!teamAvailable && (
+            <Alert variant="default" className="mt-3 border-amber-200 bg-amber-50/50 dark:border-amber-800 dark:bg-amber-950/20">
+              <Info className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+              <AlertDescription className="text-xs text-amber-700 dark:text-amber-300">
+                {t('teamUnavailable')}
+              </AlertDescription>
+            </Alert>
+          )}
         </div>
 
         {/* Ranking Cards */}

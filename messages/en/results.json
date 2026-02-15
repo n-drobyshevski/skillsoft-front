@@ -151,6 +151,7 @@
     "clearSelection": "Clear",
     "maxSelections": "Maximum 5 candidates for comparison",
     "selectToCompare": "Select 2-5 completed candidates to compare",
-    "resolving": "Loading comparison..."
+    "resolving": "Loading comparison...",
+    "teamUnavailable": "Team profile data is unavailable. Comparison shows candidate scores without team gap analysis."
   }
 }

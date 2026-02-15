@@ -457,7 +457,7 @@
   },
   "catalog": {
     "tabs": {
-      "available": "Все доступные",
+      "available": "Мои шаблоны",
       "shared": "Доступные мне",
       "sharedCount": "{count} доступно"
     }

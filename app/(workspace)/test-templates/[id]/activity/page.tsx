@@ -59,6 +59,7 @@ export default async function TemplateActivityPage({ params }: TemplateActivityP
         <Suspense fallback={<ActivityListSkeleton />}>
           <TemplateActivityTable
             templateId={templateId}
+            templateGoal={template.goal}
             className="lg:col-span-2"
           />
         </Suspense>

@@ -934,6 +934,10 @@ export interface TeamFitExtendedMetrics {
   saturationCount: number;
   /** Count of competency gaps candidate can fill */
   gapCount: number;
+  /** Per-competency team saturation scores (competencyId -> saturation %). Populated by backend v2+. */
+  competencySaturation?: Record<string, number>;
+  /** Personality compatibility between candidate and team Big Five profiles (0-1). Null if no personality data. */
+  personalityCompatibility?: number | null;
 }
 
 /**
@@ -1071,6 +1075,73 @@ export interface TemplateStatistics {
   averageScore: number;
   passRate: number;
   averageTimeSeconds: number;
+}
+
+// ============================================
+// CANDIDATE COMPARISON TYPES
+// ============================================
+
+/** Top-level comparison response for side-by-side Team Fit analysis. */
+export interface CandidateComparison {
+  templateId: string;
+  templateName: string;
+  teamId: string;
+  targetRole: string | null;
+  teamSize: number;
+  teamAvailable: boolean;
+  candidates: CandidateSummary[];
+  competencyComparison: CompetencyComparisonEntry[];
+  gapCoverageMatrix: GapCoverageEntry[];
+  complementarityPairs: CandidatePairComplementarity[];
+  teamCompetencySaturation: Record<string, number>;
+}
+
+/** Per-candidate summary with rankings and scores. */
+export interface CandidateSummary {
+  resultId: string;
+  displayName: string;
+  overallPercentage: number;
+  passed: boolean;
+  overallRank: number;
+  diversityRank: number;
+  personalityRank: number;
+  diversityRatio: number;
+  saturationRatio: number;
+  teamFitMultiplier: number;
+  personalityCompatibility: number | null;
+  bigFiveProfile: Record<string, number> | null;
+  competencySaturation: Record<string, number>;
+  completedAt: string;
+}
+
+/** Per-competency comparison across all candidates. */
+export interface CompetencyComparisonEntry {
+  competencyId: string;
+  competencyName: string;
+  teamSaturation: number | null;
+  candidateScores: Record<string, number>;
+  bestCandidateId: string;
+  isTeamGap: boolean;
+}
+
+/** Gap coverage entry showing which candidates fill a team gap. */
+export interface GapCoverageEntry {
+  competencyId: string;
+  competencyName: string;
+  teamSaturation: number;
+  candidateCoverage: Record<string, number>;
+  bestCandidateId: string;
+}
+
+/** Pairwise candidate complementarity for combined hiring decisions. */
+export interface CandidatePairComplementarity {
+  candidateA: string;
+  candidateB: string;
+  candidateAName: string;
+  candidateBName: string;
+  complementarityScore: number;
+  combinedGapsCovered: number;
+  totalTeamGaps: number;
 }
 
 // ============================================

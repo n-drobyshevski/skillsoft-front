@@ -12,11 +12,18 @@ import {
 } from '@/components/ui/table';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
+import { Checkbox } from '@/components/ui/checkbox';
 import type { UserResultSummary } from '@/types/activity';
 
 export interface ActivityTableProps {
   /** User-grouped result data */
   data: UserResultSummary[];
+  /** Whether this is a TEAM_FIT template (enables selection) */
+  isTeamFit?: boolean;
+  /** Currently selected session IDs for comparison */
+  selectedIds?: Set<string>;
+  /** Callback when a checkbox is toggled */
+  onCheckboxChange?: (sessionId: string, checked: boolean) => void;
   /** Optional className */
   className?: string;
 }
@@ -30,7 +37,13 @@ export interface ActivityTableProps {
  * - Score with color coding (emerald for pass)
  * - Pass/Fail badge, Time, Date columns
  */
-export function ActivityTable({ data, className }: ActivityTableProps) {
+export function ActivityTable({
+  data,
+  isTeamFit,
+  selectedIds,
+  onCheckboxChange,
+  className,
+}: ActivityTableProps) {
   const t = useTranslations('activity');
   const tTable = useTranslations('activity.table');
 
@@ -39,6 +52,11 @@ export function ActivityTable({ data, className }: ActivityTableProps) {
       <Table>
         <TableHeader>
           <TableRow>
+            {isTeamFit && (
+              <TableHead className="w-[40px] pl-4">
+                <span className="sr-only">Select</span>
+              </TableHead>
+            )}
             <TableHead className="w-[200px]">{tTable('user')}</TableHead>
             <TableHead className="w-[80px] text-right">{tTable('score')}</TableHead>
             <TableHead className="w-[80px]">{tTable('result')}</TableHead>
@@ -48,7 +66,14 @@ export function ActivityTable({ data, className }: ActivityTableProps) {
         </TableHeader>
         <TableBody>
           {data.map((result) => (
-            <UserResultRow key={result.clerkUserId} result={result} t={t} />
+            <UserResultRow
+              key={result.clerkUserId}
+              result={result}
+              t={t}
+              isTeamFit={isTeamFit}
+              isSelected={selectedIds?.has(result.latestSession.sessionId)}
+              onCheckboxChange={onCheckboxChange}
+            />
           ))}
         </TableBody>
       </Table>
@@ -62,14 +87,32 @@ export function ActivityTable({ data, className }: ActivityTableProps) {
 interface UserResultRowProps {
   result: UserResultSummary;
   t: ReturnType<typeof useTranslations<'activity'>>;
+  isTeamFit?: boolean;
+  isSelected?: boolean;
+  onCheckboxChange?: (sessionId: string, checked: boolean) => void;
 }
 
-function UserResultRow({ result, t }: UserResultRowProps) {
+function UserResultRow({ result, t, isTeamFit, isSelected, onCheckboxChange }: UserResultRowProps) {
   const initials = getInitials(result.userName);
   const { latestSession } = result;
+  const isCompleted = latestSession.eventType === 'COMPLETED';
 
   return (
-    <TableRow>
+    <TableRow className={cn(isTeamFit && isSelected && 'bg-primary/5')}>
+      {/* Checkbox for TEAM_FIT comparison */}
+      {isTeamFit && (
+        <TableCell className="pl-4 py-2">
+          {isCompleted && (
+            <Checkbox
+              checked={!!isSelected}
+              onCheckedChange={(checked) =>
+                onCheckboxChange?.(latestSession.sessionId, !!checked)
+              }
+              aria-label={`Select ${result.userName}`}
+            />
+          )}
+        </TableCell>
+      )}
       {/* User */}
       <TableCell>
         <div className="flex items-center gap-2">

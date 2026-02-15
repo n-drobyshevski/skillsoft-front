@@ -127,6 +127,11 @@ export const LazyTeamSaturationRadar = dynamic(
   { loading: () => <ChartSkeleton />, ssr: false }
 );
 
+export const LazyIndicatorHeatmap = dynamic(
+  () => import('@/components/results/IndicatorHeatmap').then((mod) => ({ default: mod.IndicatorHeatmap })),
+  { loading: () => <ChartSkeleton height={200} />, ssr: false }
+);
+
 export const LazyCompetencyRadarChart = dynamic(
   () => import('@/components/data-display/charts/CompetencyRadarChart'),
   { loading: () => <CompactChartSkeleton />, ssr: false }

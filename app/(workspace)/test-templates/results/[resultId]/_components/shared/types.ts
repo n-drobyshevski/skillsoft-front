@@ -95,6 +95,7 @@ export interface TeamFitHeroProps {
   overallPercentage: number;
   passed: boolean;
   teamId?: string;
+  teamName?: string;
   questionsAnswered: number;
   totalQuestions: number;
   timeSpent: number;

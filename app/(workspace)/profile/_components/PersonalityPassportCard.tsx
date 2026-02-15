@@ -96,7 +96,7 @@ export function PersonalityPassportCard({
   const dominantInfo = BIG_FIVE_INFO[dominantTrait];
 
   return (
-    <Card className="h-full flex flex-col transition-all duration-300 shadow-card hover:shadow-card-hover hover:border-primary/10 isolate">
+    <Card className="h-full flex flex-col isolate">
       <CardHeader className="pb-3 sm:pb-4 px-4 sm:px-6">
         <div className="flex items-start justify-between gap-2">
           <div>
@@ -117,19 +117,14 @@ export function PersonalityPassportCard({
       <CardContent className="flex-1 space-y-3 sm:space-y-4 px-4 sm:px-6 pb-4 sm:pb-6">
         {/* Dominant trait callout - Enhanced with gradient */}
         <div
-          className={cn(
-            'p-2.5 sm:p-3 rounded-xl flex items-center gap-2.5 sm:gap-3',
-            'bg-linear-to-r from-primary/10 to-transparent border border-primary/15',
-            // eslint-disable-next-line security/detect-object-injection
-            TRAIT_COLORS[dominantTrait].bg
-          )}
+          className="p-2.5 sm:p-3 rounded-xl flex items-center gap-2.5 sm:gap-3 bg-muted/50 border border-border"
         >
           <div
             className={cn(
               'h-9 w-9 px-2 sm:h-10 sm:w-10 rounded-full flex items-center justify-center font-bold text-base sm:text-lg',
               // eslint-disable-next-line security/detect-object-injection
               TRAIT_COLORS[dominantTrait].text,
-              'bg-white/50 dark:bg-black/20'
+              'bg-muted'
             )}
           >
             {/* eslint-disable-next-line security/detect-object-injection */}

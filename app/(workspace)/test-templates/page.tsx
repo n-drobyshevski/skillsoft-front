@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { getActiveTemplatesCached } from "@/services/api.cache.templates";
 import { canCreateContent } from "@/services/roleApi";
-import { templateSharingApi } from "@/services/api";
+import { templateSharingApi, testTemplatesApi } from "@/services/api";
 import TestTemplatesGridSkeleton from "./_components/TestTemplatesGridSkeleton";
 import ErrorDisplay from "./_components/ErrorDisplay";
 import { TemplatesPageHeader } from "./_components/TemplatesPageHeader";
@@ -75,6 +75,46 @@ async function getActiveTemplates(): Promise<FetchResult> {
 }
 
 /**
+ * Fetch templates owned by the current user (personal mode catalog).
+ */
+async function getMyTemplates(): Promise<FetchResult> {
+  try {
+    const templates = await testTemplatesApi.getMyTemplates();
+
+    if (!Array.isArray(templates)) {
+      return {
+        templates: [],
+        error: "Получены некорректные данные от сервера.",
+        errorCategory: ErrorCategory.SERVER,
+        isRetryable: true,
+      };
+    }
+
+    return { templates, error: null };
+  } catch (err) {
+    if (isApiError(err)) {
+      return {
+        templates: [],
+        error: err.message || getUserFriendlyMessage(err.category),
+        errorCategory: err.category,
+        isRetryable: err.isRetryable,
+      };
+    }
+
+    const errorMessage = err instanceof Error
+      ? err.message
+      : "Произошла непредвиденная ошибка при загрузке шаблонов.";
+
+    return {
+      templates: [],
+      error: errorMessage,
+      errorCategory: ErrorCategory.UNKNOWN,
+      isRetryable: true,
+    };
+  }
+}
+
+/**
  * Safely fetch shared templates, returning empty result on failure.
  */
 async function getSharedTemplatesSafe(): Promise<SharedTemplatesResponse> {
@@ -102,10 +142,10 @@ async function StudioContent() {
   return <TemplatesGridWrapper templates={templates} canEdit />;
 }
 
-// Personal lens: catalog with tabs (Available + Shared)
+// Personal lens: catalog with tabs (My Templates + Shared with Me)
 async function CatalogContent() {
   const [templatesResult, sharedResult] = await Promise.all([
-    getActiveTemplates(),
+    getMyTemplates(),
     getSharedTemplatesSafe(),
   ]);
 

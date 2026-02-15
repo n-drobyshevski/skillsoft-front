@@ -2,12 +2,8 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useTranslations } from "next-intl";
-import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import {
   Table,
   TableBody,
@@ -31,13 +27,10 @@ import {
   XCircle,
   AlertCircle,
   Hourglass,
-  GitCompareArrows,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { CandidateResultDetails } from "./CandidateResultDetails";
 import { AssessmentGoal, SessionStatus, TestSession } from "@/types/domain";
-
-const MAX_COMPARE_SELECTIONS = 5;
 
 // Extended session type with additional fields
 type ExtendedSession = TestSession & {
@@ -110,44 +103,16 @@ export function SessionsTable({
   templateGoal,
   passingScore = 70,
 }: SessionsTableProps) {
-  const router = useRouter();
-  const t = useTranslations("results.comparison");
   const [selectedSessionId, setSelectedSessionId] = useState<string | null>(
     null
   );
   const [sheetOpen, setSheetOpen] = useState(false);
-  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
-
-  const isTeamFit = templateGoal === AssessmentGoal.TEAM_FIT;
 
   const handleRowClick = (session: ExtendedSession) => {
     if (session.status === SessionStatus.COMPLETED) {
       setSelectedSessionId(session.id);
       setSheetOpen(true);
     }
-  };
-
-  const handleCheckboxChange = (sessionId: string, checked: boolean) => {
-    setSelectedIds((prev) => {
-      const next = new Set(prev);
-      if (checked) {
-        if (next.size >= MAX_COMPARE_SELECTIONS) {
-          toast.warning(t("maxSelections"));
-          return prev;
-        }
-        next.add(sessionId);
-      } else {
-        next.delete(sessionId);
-      }
-      return next;
-    });
-  };
-
-  const handleCompare = () => {
-    const ids = Array.from(selectedIds).join(",");
-    router.push(
-      `/test-templates/compare?templateId=${templateId}&sessionIds=${ids}`
-    );
   };
 
   const selectedSession = sessions.find((s) => s.id === selectedSessionId);
@@ -170,11 +135,6 @@ export function SessionsTable({
         <Table>
           <TableHeader>
             <TableRow className="bg-muted/5 hover:bg-muted/5">
-              {isTeamFit && (
-                <TableHead className="w-[40px] pl-4">
-                  <span className="sr-only">Select</span>
-                </TableHead>
-              )}
               <TableHead className="w-[40%] min-w-[140px] pl-4">
                 Candidate
               </TableHead>
@@ -194,7 +154,6 @@ export function SessionsTable({
           <TableBody>
             {sessions.map((session) => {
               const isCompleted = session.status === SessionStatus.COMPLETED;
-              const isSelected = selectedIds.has(session.id);
 
               return (
                 <TableRow
@@ -202,27 +161,10 @@ export function SessionsTable({
                   className={cn(
                     "group",
                     isCompleted &&
-                      "cursor-pointer hover:bg-muted/50 transition-colors",
-                    isTeamFit && isSelected && "bg-primary/5"
+                      "cursor-pointer hover:bg-muted/50 transition-colors"
                   )}
                   onClick={() => handleRowClick(session)}
                 >
-                  {isTeamFit && (
-                    <TableCell
-                      className="pl-4 py-3"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      {isCompleted && (
-                        <Checkbox
-                          checked={isSelected}
-                          onCheckedChange={(checked) =>
-                            handleCheckboxChange(session.id, !!checked)
-                          }
-                          aria-label={`Select ${session.candidateName || "candidate"}`}
-                        />
-                      )}
-                    </TableCell>
-                  )}
                   <TableCell className="pl-4 py-3 align-top sm:align-middle">
                     <div className="flex flex-col gap-0.5">
                       <p className="font-medium text-sm truncate max-w-[140px] sm:max-w-xs">
@@ -296,29 +238,6 @@ export function SessionsTable({
           </TableBody>
         </Table>
       </div>
-
-      {/* Compare Bar — visible when 2+ TEAM_FIT candidates selected */}
-      {isTeamFit && selectedIds.size >= 2 && (
-        <div className="sticky bottom-0 z-10 border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 px-4 py-3 flex items-center justify-between gap-3">
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <GitCompareArrows className="h-4 w-4" />
-            <span>{t("selectedCount", { count: selectedIds.size })}</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setSelectedIds(new Set())}
-            >
-              {t("clearSelection")}
-            </Button>
-            <Button size="sm" onClick={handleCompare}>
-              <GitCompareArrows className="h-4 w-4 mr-1.5" />
-              {t("compareSelected")}
-            </Button>
-          </div>
-        </div>
-      )}
 
       {/* Talent Sheet Side Drawer */}
       <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>

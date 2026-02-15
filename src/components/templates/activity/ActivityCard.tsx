@@ -3,6 +3,7 @@
 import { cn } from '@/lib/utils';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
+import { Checkbox } from '@/components/ui/checkbox';
 import { useTranslations } from 'next-intl';
 import { Timer } from 'lucide-react';
 import type { UserResultSummary } from '@/types/activity';
@@ -10,6 +11,12 @@ import type { UserResultSummary } from '@/types/activity';
 export interface ActivityCardProps {
   /** User result summary */
   result: UserResultSummary;
+  /** Whether this is a TEAM_FIT template (enables selection) */
+  isTeamFit?: boolean;
+  /** Whether this card is selected for comparison */
+  isSelected?: boolean;
+  /** Callback when checkbox is toggled */
+  onCheckboxChange?: (sessionId: string, checked: boolean) => void;
   /** Optional className */
   className?: string;
 }
@@ -24,9 +31,10 @@ export interface ActivityCardProps {
  * - 44px minimum touch targets
  * - Dark mode support
  */
-export function ActivityCard({ result, className }: ActivityCardProps) {
+export function ActivityCard({ result, isTeamFit, isSelected, onCheckboxChange, className }: ActivityCardProps) {
   const t = useTranslations('activity');
   const { latestSession } = result;
+  const isCompleted = latestSession.eventType === 'COMPLETED';
 
   // Determine border color based on pass/fail
   const borderColor = latestSession.passed === undefined
@@ -43,6 +51,8 @@ export function ActivityCard({ result, className }: ActivityCardProps) {
         // Status border on left
         'border-l-4',
         borderColor,
+        // Selection highlight
+        isTeamFit && isSelected && 'ring-2 ring-primary/30',
         // Overflow handling
         'overflow-hidden',
         className
@@ -50,6 +60,17 @@ export function ActivityCard({ result, className }: ActivityCardProps) {
     >
       {/* Row 1: Avatar + Name + Badge */}
       <div className="flex items-center gap-2 p-3 pb-2">
+        {/* Checkbox for TEAM_FIT comparison */}
+        {isTeamFit && isCompleted && (
+          <Checkbox
+            checked={!!isSelected}
+            onCheckedChange={(checked) =>
+              onCheckboxChange?.(latestSession.sessionId, !!checked)
+            }
+            aria-label={`Select ${result.userName}`}
+            className="shrink-0"
+          />
+        )}
         <Avatar className="h-9 w-9 shrink-0">
           {result.userImageUrl && (
             <AvatarImage src={result.userImageUrl} alt={result.userName} />

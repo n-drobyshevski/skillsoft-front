@@ -398,6 +398,7 @@ export function TeamFitHero({
   overallPercentage,
   passed,
   teamId,
+  teamName,
   questionsAnswered,
   totalQuestions,
   timeSpent,
@@ -427,7 +428,7 @@ export function TeamFitHero({
               {teamId && (
                 <div className="flex items-center gap-1 mt-1">
                   <Users className="h-3 w-3 text-muted-foreground" />
-                  <span className="text-xs text-muted-foreground">{t('teamFit.team')}: {teamId}</span>
+                  <span className="text-xs text-muted-foreground">{t('teamFit.team')}: {teamName || teamId}</span>
                 </div>
               )}
             </div>
@@ -480,7 +481,7 @@ export function TeamFitHero({
                 {teamId && (
                   <span className="flex items-center gap-1">
                     <Users className="h-3 w-3" />
-                    {t('teamFit.team')}: {teamId}
+                    {t('teamFit.team')}: {teamName || teamId}
                   </span>
                 )}
                 <span className="flex items-center gap-1">

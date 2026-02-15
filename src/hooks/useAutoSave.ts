@@ -341,7 +341,7 @@ export function useAutoSave<T>({
     if (currentKey !== lastSavedKeyRef.current) {
       scheduleAutoSaveRef.current();
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+   
   }, [data]);
 
   const saveNow = async () => {

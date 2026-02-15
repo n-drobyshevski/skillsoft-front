@@ -1,6 +1,7 @@
 'use client';
 
-
+import { useState, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import {
@@ -13,11 +14,14 @@ import {
 } from 'lucide-react';
 import { useBigFiveProjection, bigFiveToArray } from '@/hooks/useBigFiveProjection';
 import { TeamFitHero } from './TeamFitHero';
+import { TeamFitMultiplierBanner } from './TeamFitMultiplierBanner';
+import { TeamFitMetricsPanel } from './TeamFitMetricsPanel';
 import { CompetencyProfile } from '../shared/CompetencyProfile';
 import { ActionButtonsBar } from '../shared/ActionButtonsBar';
 import { BaseResultViewProps } from '../shared/types';
-import { LazyTeamSaturationRadar as TeamSaturationRadar } from '@/lib/lazy-charts';
-import { toTeamSaturationDataSimulated } from '@/lib/result-transformers';
+import { LazyTeamSaturationRadar as TeamSaturationRadar, LazyIndicatorHeatmap as IndicatorHeatmap } from '@/lib/lazy-charts';
+import { toTeamSaturationData, toTeamSaturationDataSimulated } from '@/lib/result-transformers';
+import { teamsApi } from '@/services/api/teams';
 
 /**
  * Team Fit Result View for Scenario C (Team Compatibility Analysis).
@@ -30,17 +34,46 @@ import { toTeamSaturationDataSimulated } from '@/lib/result-transformers';
  * - Focus on collaboration rather than individual achievement
  */
 export function TeamFitResultView({ result, template }: BaseResultViewProps) {
+  const t = useTranslations('results.teamFit');
   const teamId = template.blueprint?.team_id;
   const isGoodFit = result.passed ?? false;
   const passingScore = template.passingScore || 70;
   const competencyScores = result.competencyScores ?? [];
 
+  // Resolve team name for display (falls back to UUID)
+  const [teamName, setTeamName] = useState<string | undefined>();
+
+  useEffect(() => {
+    if (!teamId) return;
+    teamsApi.getTeamProfile(teamId)
+      .then(profile => setTeamName(profile.teamName))
+      .catch(() => {}); // Silently fall back to UUID display
+  }, [teamId]);
+
   // Project competencies to Big Five for personality fit visualization
-  const bigFiveProfile = useBigFiveProjection(competencyScores);
+  const projectedProfile = useBigFiveProjection(competencyScores);
+
+  // Prefer backend-computed Big Five (direct competency mapping) over frontend projection (O*NET approximation)
+  const hasBackendBigFive = result.bigFiveProfile && Object.keys(result.bigFiveProfile).length > 0;
+
+  const bigFiveProfile = hasBackendBigFive
+    ? {
+        OPENNESS: result.bigFiveProfile!['OPENNESS'] ?? result.bigFiveProfile!['Openness'] ?? 50,
+        CONSCIENTIOUSNESS: result.bigFiveProfile!['CONSCIENTIOUSNESS'] ?? result.bigFiveProfile!['Conscientiousness'] ?? 50,
+        EXTRAVERSION: result.bigFiveProfile!['EXTRAVERSION'] ?? result.bigFiveProfile!['Extraversion'] ?? 50,
+        AGREEABLENESS: result.bigFiveProfile!['AGREEABLENESS'] ?? result.bigFiveProfile!['Agreeableness'] ?? 50,
+        EMOTIONAL_STABILITY: result.bigFiveProfile!['EMOTIONAL_STABILITY'] ?? result.bigFiveProfile!['Emotional_Stability'] ?? result.bigFiveProfile!['NEUROTICISM'] ?? 50,
+      }
+    : projectedProfile;
+
   const bigFiveData = bigFiveToArray(bigFiveProfile);
 
   // Transform competency scores to team saturation data for radar visualization
-  const teamSaturationData = toTeamSaturationDataSimulated(competencyScores, 55, 20);
+  // Prefer real per-competency saturation from backend when available; fall back to simulated for legacy results
+  const competencySaturation = result.extendedMetrics?.competencySaturation;
+  const teamSaturationData = competencySaturation
+    ? toTeamSaturationData(competencyScores, { teamSaturation: competencySaturation })
+    : toTeamSaturationDataSimulated(competencyScores, 55, 20);
 
   // Calculate team contribution insights
   const strengths = competencyScores.filter(c => c.percentage >= 70);
@@ -52,8 +85,7 @@ export function TeamFitResultView({ result, template }: BaseResultViewProps) {
   const gapAreas = developing.slice(0, 3);
   const insights = { strengths, developing, avgScore, complementary, gapAreas };
 
-  // Check if we have Big Five data
-  const hasBigFiveData = Object.values(bigFiveProfile).some(v => v !== 50);
+  const hasBigFiveData = hasBackendBigFive || Object.values(projectedProfile).some(v => v !== 50);
 
   return (
     <div className="min-h-screen bg-muted/30 py-3 sm:py-4 md:py-8">
@@ -65,10 +97,25 @@ export function TeamFitResultView({ result, template }: BaseResultViewProps) {
           overallPercentage={result.overallPercentage ?? 0}
           passed={isGoodFit}
           teamId={teamId}
+          teamName={teamName}
           questionsAnswered={result.questionsAnswered}
           totalQuestions={result.totalQuestions}
           timeSpent={result.totalTimeSeconds}
         />
+
+        {/* Multiplier banner (score boost/penalty explanation) */}
+        {result.extendedMetrics && result.extendedMetrics.teamFitMultiplier !== 1.0 && (
+          <TeamFitMultiplierBanner
+            teamFitMultiplier={result.extendedMetrics.teamFitMultiplier}
+            diversityRatio={result.extendedMetrics.diversityRatio}
+            saturationRatio={result.extendedMetrics.saturationRatio}
+          />
+        )}
+
+        {/* Extended metrics overview panel */}
+        {result.extendedMetrics && (
+          <TeamFitMetricsPanel extendedMetrics={result.extendedMetrics} />
+        )}
 
         {/* Main content grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 animate-fadeInUp-2">
@@ -77,10 +124,10 @@ export function TeamFitResultView({ result, template }: BaseResultViewProps) {
             <CardHeader className="pb-2 sm:pb-3 px-3 sm:px-6">
               <CardTitle className="text-sm sm:text-lg font-semibold flex items-center gap-2">
                 <Users className="h-4 w-4 sm:h-5 sm:w-5 shrink-0" />
-                Team Fit Profile
+                {t('title')}
               </CardTitle>
               <CardDescription className="text-[10px] sm:text-sm">
-                Your skills vs team saturation
+                {t('subtitle')}
               </CardDescription>
             </CardHeader>
             <CardContent className="px-3 sm:px-6">
@@ -95,7 +142,7 @@ export function TeamFitResultView({ result, template }: BaseResultViewProps) {
                 <div className="flex flex-col items-center justify-center min-h-[200px] sm:min-h-[280px] text-center p-4 sm:p-6">
                   <Lightbulb className="h-8 w-8 sm:h-12 sm:w-12 text-muted-foreground/50 mb-2 sm:mb-3" />
                   <p className="text-xs sm:text-sm text-muted-foreground">
-                    Need 3+ competencies for radar.
+                    {t('needMoreCompetencies')}
                   </p>
                 </div>
               )}
@@ -109,7 +156,7 @@ export function TeamFitResultView({ result, template }: BaseResultViewProps) {
                 <div className="p-1.5 sm:p-2 rounded-lg bg-blue-500/10">
                   <Users className="h-4 w-4 sm:h-5 sm:w-5 text-blue-500" />
                 </div>
-                Team Insights
+                {t('insights')}
               </CardTitle>
             </CardHeader>
             <CardContent className="flex-1 space-y-4 sm:space-y-5 px-4 sm:px-6">
@@ -121,7 +168,7 @@ export function TeamFitResultView({ result, template }: BaseResultViewProps) {
                       <Users className="h-4 w-4 sm:h-5 sm:w-5 text-blue-500" />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <span className="text-sm sm:text-base font-medium text-foreground">Team Analysis</span>
+                      <span className="text-sm sm:text-base font-medium text-foreground">{t('teamAnalysis')}</span>
                       <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
                         Team: <code className="text-blue-600 dark:text-blue-400 font-mono">{teamId}</code>
                       </p>
@@ -139,10 +186,10 @@ export function TeamFitResultView({ result, template }: BaseResultViewProps) {
                     </div>
                     <div className="min-w-0 flex-1">
                       <h4 className="font-semibold text-sm sm:text-base text-blue-800 dark:text-blue-300 mb-1">
-                        Strong Team Fit
+                        {t('strongFit')}
                       </h4>
                       <p className="text-xs sm:text-sm text-blue-700 dark:text-blue-400 leading-relaxed">
-                        Your skills complement the team well.
+                        {t('strongFitDescription')}
                       </p>
                     </div>
                   </div>
@@ -155,10 +202,10 @@ export function TeamFitResultView({ result, template }: BaseResultViewProps) {
                     </div>
                     <div className="min-w-0 flex-1">
                       <h4 className="font-semibold text-sm sm:text-base text-slate-800 dark:text-slate-300 mb-1">
-                        Alignment Needed
+                        {t('alignmentNeeded')}
                       </h4>
                       <p className="text-xs sm:text-sm text-slate-700 dark:text-slate-400 leading-relaxed">
-                        Some skills need development for team fit.
+                        {t('alignmentNeededDescription')}
                       </p>
                     </div>
                   </div>
@@ -170,7 +217,7 @@ export function TeamFitResultView({ result, template }: BaseResultViewProps) {
                 <div className="space-y-3">
                   <h5 className="text-xs sm:text-sm font-semibold text-foreground uppercase tracking-wider flex items-center gap-2">
                     <span className="w-1 h-4 bg-blue-500/60 rounded-full" />
-                    You Bring
+                    {t('youBring')}
                   </h5>
                   <div className="space-y-2 sm:space-y-2.5">
                     {insights.complementary.map(c => (
@@ -195,7 +242,7 @@ export function TeamFitResultView({ result, template }: BaseResultViewProps) {
                 <div className="space-y-3">
                   <h5 className="text-xs sm:text-sm font-semibold text-foreground uppercase tracking-wider flex items-center gap-2">
                     <span className="w-1 h-4 bg-slate-400/60 rounded-full" />
-                    Growth Areas
+                    {t('growthAreas')}
                   </h5>
                   <div className="space-y-2 sm:space-y-2.5">
                     {insights.gapAreas.map(c => (
@@ -218,7 +265,7 @@ export function TeamFitResultView({ result, template }: BaseResultViewProps) {
               {/* Collaboration note - Footer */}
               <div className="pt-3 sm:pt-4 border-t border-border/50 mt-auto">
                 <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed text-center">
-                  Team fit shows how your skills complement the group.
+                  {t('collaborationNote')}
                 </p>
               </div>
             </CardContent>
@@ -231,10 +278,10 @@ export function TeamFitResultView({ result, template }: BaseResultViewProps) {
             <CardHeader className="pb-2 sm:pb-3 px-3 sm:px-6">
               <CardTitle className="text-sm sm:text-lg font-semibold flex items-center gap-2">
                 <Target className="h-4 w-4 sm:h-5 sm:w-5 shrink-0" />
-                <span className="truncate">Personality Profile</span>
+                <span className="truncate">{t('personality')}</span>
               </CardTitle>
               <CardDescription className="text-[10px] sm:text-sm">
-                Big Five for team dynamics
+                {t('personalityDescription')}
               </CardDescription>
             </CardHeader>
             <CardContent className="px-2 sm:px-6">
@@ -278,11 +325,29 @@ export function TeamFitResultView({ result, template }: BaseResultViewProps) {
                       </div>
                     </div>
                     <div className="text-[8px] sm:text-xs text-muted-foreground hidden sm:block">
-                      {value >= 70 ? 'High' : value >= 40 ? 'Moderate' : 'Low'}
+                      {value >= 70 ? t('high') : value >= 40 ? t('moderate') : t('low')}
                     </div>
                   </div>
                 ))}
               </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Indicator Heatmap - per-indicator score breakdown */}
+        {competencyScores.some(c => c.indicatorScores && c.indicatorScores.length > 0) && (
+          <Card className="animate-fadeInUp-3">
+            <CardHeader className="pb-2 sm:pb-3 px-3 sm:px-6">
+              <CardTitle className="text-sm sm:text-lg font-semibold flex items-center gap-2">
+                <BarChart3 className="h-4 w-4 sm:h-5 sm:w-5 shrink-0" />
+                {t('heatmap.title')}
+              </CardTitle>
+              <CardDescription className="text-[10px] sm:text-sm">
+                {t('heatmap.description')}
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="px-2 sm:px-6">
+              <IndicatorHeatmap competencies={competencyScores} />
             </CardContent>
           </Card>
         )}

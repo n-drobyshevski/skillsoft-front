@@ -1,13 +1,15 @@
 'use client';
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 import { useTranslations } from 'next-intl';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { Users, RefreshCw } from 'lucide-react';
+import { toast } from 'sonner';
+import { Users, RefreshCw, GitCompareArrows } from 'lucide-react';
 import { activityApi } from '@/services/api';
 import {
   ActivityTable,
@@ -18,6 +20,7 @@ import {
   getDateRangeBounds,
 } from './activity';
 import type { ActivityPage, ActivityFilterParams, TestActivity, UserResultSummary } from '@/types/activity';
+import type { AssessmentGoal } from '@/types/domain';
 import { createLogger } from '@/lib/logger';
 
 /**
@@ -63,8 +66,11 @@ function groupByLatestUserAttempt(activities: TestActivity[]): UserResultSummary
 
 const log = createLogger('TemplateActivityTable');
 
+const MAX_COMPARE_SELECTIONS = 5;
+
 export interface TemplateActivityTableProps {
   templateId: string;
+  templateGoal?: AssessmentGoal;
   className?: string;
 }
 
@@ -80,11 +86,16 @@ export interface TemplateActivityTableProps {
  */
 export function TemplateActivityTable({
   templateId,
+  templateGoal,
   className,
 }: TemplateActivityTableProps) {
   const t = useTranslations('activity');
   const tTable = useTranslations('activity.table');
+  const tCompare = useTranslations('results.comparison');
   const isMobile = useIsMobile();
+  const router = useRouter();
+
+  const isTeamFit = templateGoal === 'TEAM_FIT';
 
   // Filter state from URL
   const {
@@ -101,6 +112,30 @@ export function TemplateActivityTable({
   const [data, setData] = useState<ActivityPage | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Compare selection state (TEAM_FIT only)
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+
+  const handleCheckboxChange = useCallback((sessionId: string, checked: boolean) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (checked) {
+        if (next.size >= MAX_COMPARE_SELECTIONS) {
+          toast.warning(tCompare('maxSelections'));
+          return prev;
+        }
+        next.add(sessionId);
+      } else {
+        next.delete(sessionId);
+      }
+      return next;
+    });
+  }, [tCompare]);
+
+  const handleCompare = useCallback(() => {
+    const ids = Array.from(selectedIds).join(',');
+    router.push(`/test-templates/compare?templateId=${templateId}&sessionIds=${ids}`);
+  }, [selectedIds, templateId, router]);
 
   const pageSize = 10;
 
@@ -185,9 +220,35 @@ export function TemplateActivityTable({
             filters={filters}
             pageSize={pageSize}
             setPage={setPage}
+            isTeamFit={isTeamFit}
+            selectedIds={selectedIds}
+            onCheckboxChange={handleCheckboxChange}
           />
         )}
       </CardContent>
+
+      {/* Compare Bar — visible when 2+ TEAM_FIT candidates selected */}
+      {isTeamFit && selectedIds.size >= 2 && (
+        <div className="sticky bottom-0 z-10 border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 px-4 py-3 flex items-center justify-between gap-3 rounded-b-lg">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <GitCompareArrows className="h-4 w-4" />
+            <span>{tCompare('selectedCount', { count: selectedIds.size })}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setSelectedIds(new Set())}
+            >
+              {tCompare('clearSelection')}
+            </Button>
+            <Button size="sm" onClick={handleCompare}>
+              <GitCompareArrows className="h-4 w-4 mr-1.5" />
+              {tCompare('compareSelected')}
+            </Button>
+          </div>
+        </div>
+      )}
     </Card>
   );
 }
@@ -200,11 +261,17 @@ function GroupedActivityView({
   filters,
   pageSize,
   setPage,
+  isTeamFit,
+  selectedIds,
+  onCheckboxChange,
 }: {
   data: ActivityPage;
   filters: { page: number };
   pageSize: number;
   setPage: (page: number) => void;
+  isTeamFit: boolean;
+  selectedIds: Set<string>;
+  onCheckboxChange: (sessionId: string, checked: boolean) => void;
 }) {
   // Group activities by user, keeping only latest attempt per user
   const groupedData = useMemo(
@@ -216,12 +283,22 @@ function GroupedActivityView({
     <>
       {/* Desktop: Table View */}
       <div className="hidden md:block">
-        <ActivityTable data={groupedData} />
+        <ActivityTable
+          data={groupedData}
+          isTeamFit={isTeamFit}
+          selectedIds={selectedIds}
+          onCheckboxChange={onCheckboxChange}
+        />
       </div>
 
       {/* Mobile: Card List View */}
       <div className="md:hidden">
-        <ActivityCardList data={groupedData} />
+        <ActivityCardList
+          data={groupedData}
+          isTeamFit={isTeamFit}
+          selectedIds={selectedIds}
+          onCheckboxChange={onCheckboxChange}
+        />
       </div>
 
       {/* Pagination */}

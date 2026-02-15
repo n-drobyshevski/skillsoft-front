@@ -9,6 +9,12 @@ import type { UserResultSummary } from '@/types/activity';
 export interface ActivityCardListProps {
   /** User-grouped result data */
   data: UserResultSummary[];
+  /** Whether this is a TEAM_FIT template (enables selection) */
+  isTeamFit?: boolean;
+  /** Currently selected session IDs for comparison */
+  selectedIds?: Set<string>;
+  /** Callback when a checkbox is toggled */
+  onCheckboxChange?: (sessionId: string, checked: boolean) => void;
   /** Optional className */
   className?: string;
 }
@@ -22,7 +28,13 @@ export interface ActivityCardListProps {
  * - Empty state handling
  * - Touch-optimized layout
  */
-export function ActivityCardList({ data, className }: ActivityCardListProps) {
+export function ActivityCardList({
+  data,
+  isTeamFit,
+  selectedIds,
+  onCheckboxChange,
+  className,
+}: ActivityCardListProps) {
   if (data.length === 0) {
     return <ActivityEmptyState />;
   }
@@ -30,7 +42,13 @@ export function ActivityCardList({ data, className }: ActivityCardListProps) {
   return (
     <div className={cn('space-y-2', className)}>
       {data.map((result) => (
-        <ActivityCard key={result.clerkUserId} result={result} />
+        <ActivityCard
+          key={result.clerkUserId}
+          result={result}
+          isTeamFit={isTeamFit}
+          isSelected={selectedIds?.has(result.latestSession.sessionId)}
+          onCheckboxChange={onCheckboxChange}
+        />
       ))}
     </div>
   );

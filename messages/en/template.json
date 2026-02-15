@@ -457,7 +457,7 @@
   },
   "catalog": {
     "tabs": {
-      "available": "All Available",
+      "available": "My Templates",
       "shared": "Shared with Me",
       "sharedCount": "{count} shared"
     }

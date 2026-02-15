@@ -12,9 +12,6 @@ import {
   TrendingDown,
   Minus,
   ChevronRight,
-  Trophy,
-  Medal,
-  Award,
 } from 'lucide-react';
 import type { TopCompetency } from '@/types/profile';
 import { cn } from '@/lib/utils';
@@ -63,7 +60,7 @@ export function TopCompetenciesCard({
   }
 
   return (
-    <Card className="h-full flex flex-col transition-all duration-300 shadow-card hover:shadow-card-hover hover:border-primary/10">
+    <Card className="h-full flex flex-col">
       <CardHeader className="pb-2 sm:pb-3 px-3 sm:px-6">
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0 flex-1">
@@ -116,10 +113,9 @@ function CompetencyRow({ competency, rank }: { competency: TopCompetency; rank: 
       aria-label={`${t('rank')} ${rank}: ${competency.competencyName}, ${competency.averageScore}%`}
       className={cn(
         'flex items-center gap-2 sm:gap-3 p-2 sm:p-3 rounded-xl bg-muted/30 group',
-        'transition-all duration-200 cursor-default',
-        'hover:bg-muted/50 hover:shadow-sm hover:-translate-x-0.5',
-        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
-        'active:scale-[0.99]'
+        'transition-colors duration-200 cursor-default',
+        'hover:bg-muted/50',
+        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2'
       )}
     >
       {/* Rank Badge */}
@@ -178,32 +174,17 @@ function CompetencyRow({ competency, rank }: { competency: TopCompetency; rank: 
 // ============================================
 
 function RankBadge({ rank }: { rank: number }) {
-  // Medal icons for top 3
-  const MedalIcon = rank === 1 ? Trophy : rank === 2 ? Medal : rank === 3 ? Award : null;
-
-  const rankStyles: Record<number, string> = {
-    1: 'bg-linear-to-br from-amber-100 to-amber-200 text-amber-700 dark:from-amber-900/50 dark:to-amber-800/50 dark:text-amber-300 ring-2 ring-amber-300/50',
-    2: 'bg-linear-to-br from-slate-100 to-slate-200 text-slate-700 dark:from-slate-800 dark:to-slate-700 dark:text-slate-200 ring-2 ring-slate-300/50',
-    3: 'bg-linear-to-br from-orange-100 to-orange-200 text-orange-700 dark:from-orange-900/50 dark:to-orange-800/50 dark:text-orange-300 ring-2 ring-orange-300/50',
-  };
-
-  // eslint-disable-next-line security/detect-object-injection
-  const style = rankStyles[rank] || 'bg-muted text-muted-foreground';
-
   return (
     <div
       className={cn(
         'h-8 w-8 sm:h-10 sm:w-10 rounded-full flex items-center justify-center shrink-0',
-        'text-xs sm:text-sm font-bold shadow-sm',
-        'transition-all duration-200 group-hover:scale-110 group-hover:shadow-md',
-        style
+        'text-xs sm:text-sm font-bold',
+        rank <= 3
+          ? 'bg-primary/10 text-primary'
+          : 'bg-muted text-muted-foreground'
       )}
     >
-      {MedalIcon ? (
-        <MedalIcon className="h-4 w-4 sm:h-5 sm:w-5 transition-transform duration-200" />
-      ) : (
-        rank
-      )}
+      {rank}
     </div>
   );
 }
@@ -239,7 +220,7 @@ function TrendIndicator({ trend }: { trend: 'up' | 'down' | 'stable' }) {
   return (
     <>
       <span className="sr-only">{t(labelKey)}</span>
-      <Icon className={cn('h-3 w-3 sm:h-4 sm:w-4 shrink-0 transition-all duration-200 group-hover:scale-110', className)} aria-hidden="true" />
+      <Icon className={cn('h-3 w-3 sm:h-4 sm:w-4 shrink-0', className)} aria-hidden="true" />
     </>
   );
 }
