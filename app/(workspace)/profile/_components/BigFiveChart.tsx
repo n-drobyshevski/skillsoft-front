@@ -298,3 +298,5 @@ export function BigFiveChart({ profile }: BigFiveChartProps) {
 
 // Export for potential reuse
 export { BIG_FIVE_COLORS };
+
+export default BigFiveChart;

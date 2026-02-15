@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
@@ -18,6 +19,7 @@ import {
   UserStatusKey,
 } from "@/types/user";
 import UserEditForm from "./_components/UserEditForm";
+import Loading from "./loading";
 
 interface UserEditPageProps {
   params: Promise<{ userId: string }>;
@@ -74,8 +76,11 @@ function StatusBadge({ statusKey, label }: { statusKey: UserStatusKey; label: st
   );
 }
 
-export default async function UserEditPage({ params }: UserEditPageProps) {
-  const { userId } = await params;
+/**
+ * Async data-fetching component for user edit page.
+ * Wrapped in Suspense to enable PPR static shell.
+ */
+async function UserEditData({ userId }: { userId: string }) {
   const user = await getUserData(userId);
   const t = await getTranslations('users.edit');
   const tRole = await getTranslations('enums.userRole');
@@ -92,7 +97,7 @@ export default async function UserEditPage({ params }: UserEditPageProps) {
   const statusLabel = tStatus(statusKey);
 
   return (
-    <div className="flex flex-1 flex-col gap-4 p-4 pt-6 md:gap-6 md:p-6">
+    <>
       {/* Back Navigation */}
       <div className="flex items-center gap-2">
         <Button variant="ghost" size="sm" asChild className="gap-2">
@@ -156,6 +161,18 @@ export default async function UserEditPage({ params }: UserEditPageProps) {
 
       {/* Edit Form */}
       <UserEditForm user={user} userId={userId} />
+    </>
+  );
+}
+
+export default async function UserEditPage({ params }: UserEditPageProps) {
+  const { userId } = await params;
+
+  return (
+    <div className="flex flex-1 flex-col gap-4 p-4 pt-6 md:gap-6 md:p-6">
+      <Suspense fallback={<Loading />}>
+        <UserEditData userId={userId} />
+      </Suspense>
     </div>
   );
 }

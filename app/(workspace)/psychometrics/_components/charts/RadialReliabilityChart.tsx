@@ -280,3 +280,5 @@ export function RadialReliabilityMini({ value, className }: RadialReliabilityMin
 export function getReliabilityStatusConfig(value: number | null | undefined) {
   return getStatusConfig(value);
 }
+
+export default RadialReliabilityChart;

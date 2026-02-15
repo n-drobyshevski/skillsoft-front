@@ -404,3 +404,5 @@ export function MetricDistributionCharts({ items, className }: MetricDistributio
     </div>
   );
 }
+
+export default MetricDistributionCharts;

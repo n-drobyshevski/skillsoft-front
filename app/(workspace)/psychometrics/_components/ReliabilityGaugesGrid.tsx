@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { RadialReliabilityChart } from './charts/RadialReliabilityChart';
+import { LazyRadialReliabilityChart as RadialReliabilityChart } from '@/lib/lazy-charts';
 import { CompactReliabilityList } from './CompactReliabilityList';
 import { Shield, ArrowRight } from 'lucide-react';
 import { useRouter } from 'next/navigation';

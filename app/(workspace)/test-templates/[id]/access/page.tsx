@@ -1,8 +1,10 @@
+import { Suspense } from 'react';
 import { notFound } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 import { testTemplatesApi } from '@/services/api';
 import { isReservedTestTemplateSegment } from '@/lib/routing-constants';
 import { AccessPageContent } from './_components/AccessPageContent';
+import Loading from './loading';
 
 interface AccessPageProps {
   params: Promise<{ id: string }>;
@@ -52,17 +54,11 @@ async function getTemplateData(id: string) {
 }
 
 /**
- * Access Page
- *
- * Full-page access management for test templates:
- * - Visibility settings (Private/Public/Link)
- * - User and team sharing with permission levels
- * - Share link generation and management
+ * Async data-fetching component for access page content.
+ * Wrapped in Suspense to enable PPR static shell.
  */
-export default async function AccessPage({ params }: AccessPageProps) {
-  const { id } = await params;
+async function AccessData({ id }: { id: string }) {
   const { template, error } = await getTemplateData(id);
-  const t = await getTranslations('template.access');
 
   if (!template || error) {
     notFound();
@@ -74,6 +70,28 @@ export default async function AccessPage({ params }: AccessPageProps) {
   const canManage = true;
 
   return (
+    <AccessPageContent
+      templateId={template.id}
+      templateName={template.name}
+      isOwner={isOwner}
+      canManage={canManage}
+    />
+  );
+}
+
+/**
+ * Access Page
+ *
+ * Full-page access management for test templates:
+ * - Visibility settings (Private/Public/Link)
+ * - User and team sharing with permission levels
+ * - Share link generation and management
+ */
+export default async function AccessPage({ params }: AccessPageProps) {
+  const { id } = await params;
+  const t = await getTranslations('template.access');
+
+  return (
     <div className="mx-auto w-full max-w-5xl px-4 py-6 lg:px-8">
       <div className="mb-6">
         <h1 className="text-2xl font-bold">{t('title')}</h1>
@@ -82,12 +100,9 @@ export default async function AccessPage({ params }: AccessPageProps) {
         </p>
       </div>
 
-      <AccessPageContent
-        templateId={template.id}
-        templateName={template.name}
-        isOwner={isOwner}
-        canManage={canManage}
-      />
+      <Suspense fallback={<Loading />}>
+        <AccessData id={id} />
+      </Suspense>
     </div>
   );
 }

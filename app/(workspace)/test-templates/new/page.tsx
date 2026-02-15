@@ -1,12 +1,17 @@
-import React from "react";
+import React, { Suspense } from "react";
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { canCreateContent } from "@/services/roleApi";
 import { competenciesApi } from "@/services/api";
 import NewTestForm from "./_components/NewTestForm";
 import { NewTestPageHeader } from "./_components/NewTestPageHeader";
+import Loading from "./loading";
 
-export default async function NewTestPage() {
+/**
+ * Async data-fetching component for the new test form.
+ * Handles auth checks and competency loading.
+ */
+async function NewTestFormData() {
   // Check authentication and authorization
   const { userId } = await auth();
 
@@ -45,11 +50,17 @@ export default async function NewTestPage() {
     console.error("Failed to fetch competencies:", error);
   }
 
+  return <NewTestForm competencies={competencies} />;
+}
+
+export default async function NewTestPage() {
   return (
     <div className="flex flex-1 flex-col gap-4 p-4 pt-6 md:gap-6 md:p-6">
       <NewTestPageHeader />
 
-      <NewTestForm competencies={competencies} />
+      <Suspense fallback={<Loading />}>
+        <NewTestFormData />
+      </Suspense>
     </div>
   );
 }

@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils';
 import { BigFiveReliability } from '@/types/psychometrics';
 import { MobileTraitCardSimple } from './MobileTraitCardSimple';
 import { TraitDetailDrawer } from './TraitDetailDrawer';
-import { useBigFivePageStore } from '@/stores/useBigFivePageStore';
+import { useCarouselIndex, useSetCarouselIndex, useDrawerState } from '@/store/big-five-page-store';
 import { useCarouselUrlSync } from '../_hooks';
 import { useTranslations } from 'next-intl';
 import { getTraitKey } from './BigFiveTraitCard';
@@ -36,15 +36,15 @@ export function MobileTraitCarouselEnhanced({
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
 
-  // Use Zustand store for state
+  // Use Zustand selector hooks for granular subscriptions
+  const carouselIndex = useCarouselIndex();
+  const setCarouselIndex = useSetCarouselIndex();
   const {
-    carouselIndex,
-    setCarouselIndex,
     selectedTrait: selectedTraitFromStore,
-    isDrawerOpen,
-    openDrawer,
-    closeDrawer,
-  } = useBigFivePageStore();
+    isOpen: isDrawerOpen,
+    open: openDrawer,
+    close: closeDrawer,
+  } = useDrawerState();
 
   // Local active index state (synced with store)
   const [activeIndex, setActiveIndex] = useState(carouselIndex);

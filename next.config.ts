@@ -77,7 +77,7 @@ const nextConfig: NextConfig = {
 			"recharts",
 			"@radix-ui/react-icons",
 			"@tanstack/react-table",
-			"framer-motion",
+			"motion",
 			// Added for better bundle optimization
 			"date-fns",
 			"sonner",

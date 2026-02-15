@@ -1,7 +1,7 @@
 'use client';
 
 import { useRef, useEffect } from 'react';
-import { AnimatePresence } from 'framer-motion';
+import { AnimatePresence } from 'motion/react';
 import { useShallow } from 'zustand/react/shallow';
 import { SummaryHero } from './SummaryHero';
 import { FilterBar } from './FilterBar';

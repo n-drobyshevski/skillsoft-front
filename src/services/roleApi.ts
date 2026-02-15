@@ -13,6 +13,7 @@
  */
 'use server';
 
+import { connection } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { UserRole } from '@/types/user';
 
@@ -50,6 +51,9 @@ interface ErrorResponse {
  */
 export async function getAuthHeaders(): Promise<Record<string, string>> {
   try {
+    // Signal to Next.js PPR that this code requires a real request
+    // Without this, prerendering will fail because auth() needs headers()
+    await connection();
     const authResult = await auth();
     const { userId, sessionClaims, orgRole } = authResult;
 
@@ -80,6 +84,11 @@ export async function getAuthHeaders(): Promise<Record<string, string>> {
       'X-User-Role': userRole,
     };
   } catch (error) {
+    // Re-throw Next.js internal errors (PPR bailout, prerender signals, redirects)
+    // These must propagate so Next.js can properly handle dynamic rendering boundaries
+    if (typeof error === 'object' && error !== null && 'digest' in error) {
+      throw error;
+    }
     // Log the error in development
     if (process.env.NODE_ENV === 'development') {
       console.error('[Auth] Failed to get auth headers:', error);
@@ -97,6 +106,7 @@ export async function getAuthHeaders(): Promise<Record<string, string>> {
  */
 export async function getCurrentUserRole(): Promise<UserRole> {
   try {
+    await connection();
     const authResult = await auth();
     const { userId, sessionClaims, orgRole } = authResult;
     
@@ -108,7 +118,11 @@ export async function getCurrentUserRole(): Promise<UserRole> {
     const mappedRole = mapOrgRole(orgRole as string | undefined);
     
     return mappedRole ?? metadataRole ?? UserRole.USER;
-  } catch {
+  } catch (error) {
+    // Re-throw Next.js internal errors (PPR bailout, prerender signals, redirects)
+    if (typeof error === 'object' && error !== null && 'digest' in error) {
+      throw error;
+    }
     return UserRole.USER;
   }
 }

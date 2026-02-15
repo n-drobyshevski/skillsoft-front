@@ -4,7 +4,7 @@ import { useRef, useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { motion, useMotionValue, useTransform, useAnimation, PanInfo } from 'framer-motion';
+import { motion, useMotionValue, useTransform, useAnimation, PanInfo } from 'motion/react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface SwipeNavigatorProps {

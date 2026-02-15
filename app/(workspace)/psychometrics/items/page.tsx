@@ -87,14 +87,14 @@ function TableSkeleton() {
   );
 }
 
-export default async function ItemsPage({ searchParams }: PageProps) {
-  const resolvedParams = await searchParams;
+// Async data component — keeps getAuthHeaders() inside Suspense for PPR
+async function ItemsData({ searchParams }: { searchParams: Awaited<PageProps['searchParams']> }) {
   const t = await getTranslations('psychometrics');
   const tTable = await getTranslations('psychometrics.itemsTable');
-  const { items, competencies, error } = await getItemsData(resolvedParams);
+  const { items, competencies, error } = await getItemsData(searchParams);
 
   return (
-    <div className="flex flex-1 flex-col gap-6 p-4 pt-6 md:gap-8 md:p-6">
+    <>
       <PageHeader
         title={tTable('title')}
         description={tTable('description')}
@@ -111,14 +111,23 @@ export default async function ItemsPage({ searchParams }: PageProps) {
       )}
 
       {/* Items Table with Filters */}
+      <ItemsTableClient
+        initialItems={items}
+        competencies={competencies}
+        currentStatus={searchParams.status as ItemValidityStatus | undefined}
+        currentCompetencyId={searchParams.competencyId}
+        currentSearch={searchParams.search}
+      />
+    </>
+  );
+}
+
+export default async function ItemsPage({ searchParams }: PageProps) {
+  const resolvedParams = await searchParams;
+  return (
+    <div className="flex flex-1 flex-col gap-6 p-4 pt-6 md:gap-8 md:p-6">
       <Suspense fallback={<TableSkeleton />}>
-        <ItemsTableClient
-          initialItems={items}
-          competencies={competencies}
-          currentStatus={resolvedParams.status as ItemValidityStatus | undefined}
-          currentCompetencyId={resolvedParams.competencyId}
-          currentSearch={resolvedParams.search}
-        />
+        <ItemsData searchParams={resolvedParams} />
       </Suspense>
     </div>
   );

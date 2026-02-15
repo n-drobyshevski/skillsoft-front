@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { Suspense } from 'react';
 import { notFound } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 import { getOverviewDataCached } from '@/lib/cached-data';
 import { isReservedTestTemplateSegment } from '@/lib/routing-constants';
 import { OverviewContent } from './_components/OverviewContent';
+import Loading from './loading';
 
 interface OverviewPageProps {
   params: Promise<{ id: string }>;
@@ -36,6 +37,34 @@ export async function generateMetadata({ params }: OverviewPageProps) {
 }
 
 /**
+ * Async data-fetching component for overview content.
+ * Wrapped in Suspense to enable PPR static shell.
+ */
+async function OverviewData({ id }: { id: string }) {
+  const { template, competencies, activities, stats, error } = await getOverviewDataCached(id);
+
+  if (!template || error) {
+    notFound();
+  }
+
+  // TODO: Get actual ownership/permission data from auth context
+  // For now, assume owner for demo purposes
+  const isOwner = true;
+  const canEdit = true;
+
+  return (
+    <OverviewContent
+      template={template}
+      competencies={competencies}
+      activities={activities}
+      stats={stats}
+      isOwner={isOwner}
+      canEdit={canEdit}
+    />
+  );
+}
+
+/**
  * Overview Page - Template Management Dashboard
  *
  * Redesigned Overview tab featuring:
@@ -58,25 +87,9 @@ export default async function OverviewPage({ params }: OverviewPageProps) {
     notFound();
   }
 
-  const { template, competencies, activities, stats, error } = await getOverviewDataCached(id);
-
-  if (!template || error) {
-    notFound();
-  }
-
-  // TODO: Get actual ownership/permission data from auth context
-  // For now, assume owner for demo purposes
-  const isOwner = true;
-  const canEdit = true;
-
   return (
-    <OverviewContent
-      template={template}
-      competencies={competencies}
-      activities={activities}
-      stats={stats}
-      isOwner={isOwner}
-      canEdit={canEdit}
-    />
+    <Suspense fallback={<Loading />}>
+      <OverviewData id={id} />
+    </Suspense>
   );
 }

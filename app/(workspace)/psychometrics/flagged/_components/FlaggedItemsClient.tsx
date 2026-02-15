@@ -54,6 +54,7 @@ import {
   Undo2,
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { useShallow } from 'zustand/react/shallow';
 import {
   usePsychometricsReviewStore,
   useReviewPhase,
@@ -674,7 +675,7 @@ function UndoBanner({ t }: { t: TranslationFunction }) {
   const canUndo = useCanUndo();
   const countdown = useUndoCountdown();
   const lastAction = useLastUndoAction();
-  const { undo } = usePsychometricsReviewStore();
+  const undo = usePsychometricsReviewStore((state) => state.undo);
   const [isUndoing, setIsUndoing] = React.useState(false);
 
   if (!canUndo || !lastAction) return null;
@@ -776,7 +777,24 @@ export function FlaggedItemsClient({ initialItems }: FlaggedItemsClientProps) {
     removeItems,
     executeBatchStatusChange,
     generateSuggestions,
-  } = usePsychometricsReviewStore();
+  } = usePsychometricsReviewStore(
+    useShallow((state) => ({
+      items: state.items,
+      setItems: state.setItems,
+      selectedIds: state.selectedIds,
+      toggleSelection: state.toggleSelection,
+      selectMany: state.selectMany,
+      deselectMany: state.deselectMany,
+      clearSelection: state.clearSelection,
+      enterSelectMode: state.enterSelectMode,
+      exitSelectMode: state.exitSelectMode,
+      setLoadingItem: state.setLoadingItem,
+      loadingItemId: state.loadingItemId,
+      removeItems: state.removeItems,
+      executeBatchStatusChange: state.executeBatchStatusChange,
+      generateSuggestions: state.generateSuggestions,
+    }))
+  );
 
   const phase = useReviewPhase();
   const isExecuting = useIsExecuting();

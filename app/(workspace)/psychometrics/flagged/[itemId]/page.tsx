@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import type { Metadata } from 'next';
 import { getTranslations, getLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
@@ -41,6 +42,7 @@ import {
   DifficultyFlag,
   FlaggedItemSummary,
 } from '@/types/psychometrics';
+import Loading from './loading';
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('psychometrics.flaggedPage.detail');
@@ -280,8 +282,11 @@ function generateSuggestedActions(
   return actions;
 }
 
-export default async function FlaggedItemDetailPage({ params }: PageProps) {
-  const { itemId } = await params;
+/**
+ * Async data-fetching component for flagged item detail.
+ * Wrapped in Suspense to enable PPR static shell.
+ */
+async function FlaggedItemDetailData({ itemId }: { itemId: string }) {
   const t = await getTranslations('psychometrics.flaggedPage.detail');
   const locale = await getLocale();
 
@@ -586,5 +591,15 @@ export default async function FlaggedItemDetailPage({ params }: PageProps) {
       </div>
       </div>
     </MobileFlaggedItemLayoutWrapper>
+  );
+}
+
+export default async function FlaggedItemDetailPage({ params }: PageProps) {
+  const { itemId } = await params;
+
+  return (
+    <Suspense fallback={<Loading />}>
+      <FlaggedItemDetailData itemId={itemId} />
+    </Suspense>
   );
 }

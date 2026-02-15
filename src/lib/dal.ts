@@ -24,6 +24,7 @@
 'use server';
 
 import { cache } from 'react';
+import { connection } from 'next/server';
 import { auth, currentUser } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
 import { UserRole } from '@/types/user';
@@ -78,6 +79,9 @@ function mapOrgRoleToUserRole(orgRole: string | undefined): UserRole | null {
  */
 export const verifySession = cache(async (): Promise<VerifiedSession | null> => {
   try {
+    // Signal to Next.js PPR that this code requires a real request
+    // Without this, prerendering will fail because auth() needs headers()
+    await connection();
     const authResult = await auth();
     const { userId, sessionClaims, orgRole } = authResult;
     
@@ -104,7 +108,11 @@ export const verifySession = cache(async (): Promise<VerifiedSession | null> => 
       isEditor: role === 'EDITOR',
       hasContentAccess: role === 'ADMIN' || role === 'EDITOR',
     };
-  } catch {
+  } catch (error) {
+    // Re-throw Next.js internal errors (PPR bailout, prerender signals, redirects)
+    if (typeof error === 'object' && error !== null && 'digest' in error) {
+      throw error;
+    }
     return null;
   }
 });

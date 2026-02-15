@@ -25,7 +25,7 @@ import {
   CheckCircle2,
   Info,
 } from 'lucide-react';
-import { useAccordionState } from '@/stores/useBigFivePageStore';
+import { useAccordionState } from '@/store/big-five-page-store';
 import { useLocale, useTranslations } from 'next-intl';
 
 /**

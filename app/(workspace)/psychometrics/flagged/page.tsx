@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 import { Card, CardContent } from '@/components/ui/card';
@@ -7,6 +8,7 @@ import { FlaggedItemsClient } from './_components/FlaggedItemsClient';
 import { AlertTriangle, AlertCircle, XCircle } from 'lucide-react';
 import { getPsychometricsFlaggedItemsCached } from '@/services/api.cache.psychometrics';
 import { getAuthHeaders } from '@/services/roleApi';
+import Loading from './loading';
 
 // PPR disabled - requires cacheComponents which is incompatible with Clerk
 // export const experimental_ppr = true;
@@ -57,18 +59,17 @@ function getGroupCounts(items: FlaggedItemSummary[]) {
   return counts;
 }
 
-export default async function FlaggedItemsPage() {
+/**
+ * Async data-fetching component for flagged items content.
+ * Wrapped in Suspense to enable PPR static shell.
+ */
+async function FlaggedItemsData() {
   const t = await getTranslations('psychometrics.flaggedPage');
   const { items, error } = await getFlaggedItems();
   const counts = getGroupCounts(items);
 
   return (
-    <div className="flex flex-1 flex-col gap-6 p-4 pt-6 md:gap-8 md:p-6">
-      <PageHeader
-        title={t('pageTitle')}
-        description={t('pageDescription')}
-      />
-
+    <>
       {/* Summary Stats */}
       <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
         <Card className="bg-red-50 dark:bg-red-950/20 border-red-200 dark:border-red-800">
@@ -129,6 +130,23 @@ export default async function FlaggedItemsPage() {
 
       {/* Client component with batch selection */}
       {!error && <FlaggedItemsClient initialItems={items} />}
+    </>
+  );
+}
+
+export default async function FlaggedItemsPage() {
+  const t = await getTranslations('psychometrics.flaggedPage');
+
+  return (
+    <div className="flex flex-1 flex-col gap-6 p-4 pt-6 md:gap-8 md:p-6">
+      <PageHeader
+        title={t('pageTitle')}
+        description={t('pageDescription')}
+      />
+
+      <Suspense fallback={<Loading />}>
+        <FlaggedItemsData />
+      </Suspense>
     </div>
   );
 }

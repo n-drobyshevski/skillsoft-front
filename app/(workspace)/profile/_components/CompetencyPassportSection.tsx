@@ -1,23 +1,13 @@
 'use client';
 
-import dynamic from 'next/dynamic';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Skeleton } from '@/components/ui/skeleton';
 import { Brain, Target, Info, TrendingUp, TrendingDown, Minus } from 'lucide-react';
 import { BIG_FIVE_INFO, type BigFiveProfile } from '@/hooks/useBigFiveProjection';
 import type { CompetencyPassport, TopCompetency } from '@/types/profile';
 import { cn } from '@/lib/utils';
-
-// Dynamic import for chart to reduce initial bundle
-const BigFiveRadarChart = dynamic(
-  () => import('./BigFiveChart').then((mod) => mod.BigFiveChart),
-  {
-    loading: () => <Skeleton className="h-[280px] w-full" />,
-    ssr: false,
-  }
-);
+import { LazyBigFiveChart as BigFiveRadarChart } from '@/lib/lazy-charts';
 
 interface CompetencyPassportSectionProps {
   passport: CompetencyPassport;

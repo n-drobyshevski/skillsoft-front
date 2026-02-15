@@ -9,7 +9,7 @@
 
 import { useTranslations } from 'next-intl';
 import { useUserPreferences } from '@/hooks/useUserPreferences';
-import { useLanguageHydration } from '@/stores/language-store';
+import { useLanguageHydration } from '@/store/language-store';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';

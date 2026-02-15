@@ -1,9 +1,10 @@
 /**
  * Fuzzy Search Hook
- * 
+ *
  * Client-side fuzzy search engine using fuse.js for skill mapping.
  * Provides zero-latency search with no network calls.
- * 
+ * Fuse.js is dynamically imported to reduce initial bundle size.
+ *
  * Features:
  * - Weighted search across name, altNames, description
  * - Debounced query processing
@@ -15,12 +16,24 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import Fuse, { type IFuseOptions, type FuseResult } from 'fuse.js';
+import type Fuse from 'fuse.js';
+import type { IFuseOptions, FuseResult } from 'fuse.js';
 import type {
   UnifiedSkill,
   SkillSearchResult,
   SkillSearchFilters,
 } from '@/types/skills';
+
+// Lazy-loaded Fuse constructor to avoid pulling fuse.js into the initial bundle
+let FuseConstructor: typeof Fuse | null = null;
+
+async function loadFuse(): Promise<typeof Fuse> {
+  if (!FuseConstructor) {
+    const mod = await import('fuse.js');
+    FuseConstructor = mod.default;
+  }
+  return FuseConstructor;
+}
 
 // =============================================================================
 // Types
@@ -197,14 +210,20 @@ export function useFuzzySearch(
   // Filter skills based on current filters
   const filteredSkills = applyFilters(skills, filters);
 
-  // Build/rebuild Fuse index when skills or filters change
+  // Build/rebuild Fuse index when skills or filters change (async to support lazy loading)
   useEffect(() => {
-    const fuseOptions: IFuseOptions<UnifiedSkill> = {
-      ...DEFAULT_FUSE_OPTIONS,
-      threshold,
-    };
-    
-    fuseRef.current = new Fuse(filteredSkills, fuseOptions);
+    let cancelled = false;
+
+    loadFuse().then((FuseCtor) => {
+      if (cancelled) return;
+      const fuseOptions: IFuseOptions<UnifiedSkill> = {
+        ...DEFAULT_FUSE_OPTIONS,
+        threshold,
+      };
+      fuseRef.current = new FuseCtor(filteredSkills, fuseOptions);
+    });
+
+    return () => { cancelled = true; };
   }, [filteredSkills, threshold]);
   
   // Execute search when debounced query changes
@@ -322,15 +341,21 @@ export function useExtendedFuzzySearch(
   
   const filteredSkills = applyFilters(skills, filters);
 
-  // Build Fuse index with extended search enabled
+  // Build Fuse index with extended search enabled (async to support lazy loading)
   useEffect(() => {
-    const fuseOptions: IFuseOptions<UnifiedSkill> = {
-      ...DEFAULT_FUSE_OPTIONS,
-      threshold,
-      useExtendedSearch: true,
-    };
-    
-    fuseRef.current = new Fuse(filteredSkills, fuseOptions);
+    let cancelled = false;
+
+    loadFuse().then((FuseCtor) => {
+      if (cancelled) return;
+      const fuseOptions: IFuseOptions<UnifiedSkill> = {
+        ...DEFAULT_FUSE_OPTIONS,
+        threshold,
+        useExtendedSearch: true,
+      };
+      fuseRef.current = new FuseCtor(filteredSkills, fuseOptions);
+    });
+
+    return () => { cancelled = true; };
   }, [filteredSkills, threshold]);
   
   // Execute search

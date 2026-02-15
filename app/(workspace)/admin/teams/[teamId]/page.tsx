@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
@@ -6,6 +7,7 @@ import type { ManagedTeam, ManagedTeamProfile } from "@/types/team";
 import TeamHeroSection from "./_components/TeamHeroSection";
 import TeamStatsGrid from "./_components/TeamStatsGrid";
 import TeamDetailClient from "./_components/TeamDetailClient";
+import Loading from "./loading";
 
 interface TeamDetailPageProps {
   params: Promise<{ teamId: string }>;
@@ -51,8 +53,11 @@ async function getTeamDetailData(teamId: string): Promise<TeamDetailData | null>
   };
 }
 
-export default async function TeamDetailPage({ params }: TeamDetailPageProps) {
-  const { teamId } = await params;
+/**
+ * Async data-fetching component for team detail.
+ * Wrapped in Suspense to enable PPR static shell.
+ */
+async function TeamDetailData({ teamId }: { teamId: string }) {
   const t = await getTranslations('teams.detail');
   const tStatus = await getTranslations('teams.status');
 
@@ -80,7 +85,7 @@ export default async function TeamDetailPage({ params }: TeamDetailPageProps) {
   };
 
   return (
-    <div className="flex flex-1 flex-col min-h-0">
+    <>
       {/* Hero Section with Team Info */}
       <TeamHeroSection
         team={team}
@@ -101,6 +106,18 @@ export default async function TeamDetailPage({ params }: TeamDetailPageProps) {
           />
         </div>
       </div>
+    </>
+  );
+}
+
+export default async function TeamDetailPage({ params }: TeamDetailPageProps) {
+  const { teamId } = await params;
+
+  return (
+    <div className="flex flex-1 flex-col min-h-0">
+      <Suspense fallback={<Loading />}>
+        <TeamDetailData teamId={teamId} />
+      </Suspense>
     </div>
   );
 }

@@ -7,7 +7,7 @@ import {
   useAnimation,
   PanInfo,
   type MotionValue,
-} from 'framer-motion';
+} from 'motion/react';
 
 /**
  * useSwipeActions Hook

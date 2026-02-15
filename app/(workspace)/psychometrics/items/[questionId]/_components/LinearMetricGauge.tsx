@@ -2,7 +2,7 @@
 
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { type GaugeZone } from '../../../_components/SemiCircularGauge';
 
 /** Format type for displaying values */

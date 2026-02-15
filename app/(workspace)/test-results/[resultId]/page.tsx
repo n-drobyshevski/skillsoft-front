@@ -1,14 +1,30 @@
+import { Suspense } from 'react';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 import { testResultsApi } from '@/services/api';
 import TestResultView from './_components/TestResultView';
+import Loading from './loading';
 
 
 interface TestResultPageProps {
   params: Promise<{
     resultId: string;
   }>;
+}
+
+/**
+ * Async data-fetching component for test result.
+ * Wrapped in Suspense to enable PPR static shell.
+ */
+async function TestResultData({ resultId }: { resultId: string }) {
+  const result = await testResultsApi.getResultById(resultId);
+
+  if (!result) {
+    notFound();
+  }
+
+  return <TestResultView result={result} />;
 }
 
 /**
@@ -24,14 +40,11 @@ interface TestResultPageProps {
 export default async function TestResultPage({ params }: TestResultPageProps) {
   const { resultId } = await params;
 
-  // Fetch test result from backend
-  const result = await testResultsApi.getResultById(resultId);
-
-  if (!result) {
-    notFound();
-  }
-
-  return <TestResultView result={result} />;
+  return (
+    <Suspense fallback={<Loading />}>
+      <TestResultData resultId={resultId} />
+    </Suspense>
+  );
 }
 
 /**

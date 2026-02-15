@@ -19,7 +19,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Globe, Check, Loader2 } from 'lucide-react';
 import { type Locale, locales, localeNames } from '@/i18n/config';
-import { useLanguageStore } from '@/stores/language-store';
+import { useLanguageStore } from '@/store/language-store';
 import { cn } from '@/lib/utils';
 
 interface LanguageSwitcherProps {

@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -17,6 +18,7 @@ import {
 } from './_components';
 import { getPsychometricsBigFiveCached } from '@/services/api.cache.psychometrics';
 import { getAuthHeaders } from '@/services/roleApi';
+import Loading from './loading';
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('psychometrics.bigFivePage');
@@ -333,7 +335,11 @@ function EmptyState({ translations }: { translations: EmptyStateTranslations }) 
   );
 }
 
-export default async function BigFivePage() {
+/**
+ * Async data-fetching component for Big Five content.
+ * Wrapped in Suspense to enable PPR static shell.
+ */
+async function BigFiveData() {
   const t = await getTranslations('psychometrics.bigFivePage');
   const { reliabilityData, error } = await getBigFiveData();
 
@@ -370,14 +376,7 @@ export default async function BigFivePage() {
   };
 
   return (
-    <div className="flex flex-1 flex-col gap-6 p-4 pt-6 md:gap-8 md:p-6">
-      <PageHeader
-        title={t('pageTitle')}
-        description={t('pageDescription')}
-      >
-        <TriggerAuditButton />
-      </PageHeader>
-
+    <>
       {/* Error Display */}
       {error && (
         <Card className="border-destructive/50 bg-destructive/10">
@@ -436,6 +435,25 @@ export default async function BigFivePage() {
           </BigFiveClientWrapper>
         </>
       )}
+    </>
+  );
+}
+
+export default async function BigFivePage() {
+  const t = await getTranslations('psychometrics.bigFivePage');
+
+  return (
+    <div className="flex flex-1 flex-col gap-6 p-4 pt-6 md:gap-8 md:p-6">
+      <PageHeader
+        title={t('pageTitle')}
+        description={t('pageDescription')}
+      >
+        <TriggerAuditButton />
+      </PageHeader>
+
+      <Suspense fallback={<Loading />}>
+        <BigFiveData />
+      </Suspense>
     </div>
   );
 }

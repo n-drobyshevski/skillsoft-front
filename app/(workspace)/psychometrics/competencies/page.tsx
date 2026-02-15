@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 import PageHeader from '@/components/common/PageHeader';
@@ -7,6 +8,7 @@ import { ErrorCategory, ErrorAction } from '@/types/errors';
 import { CompetenciesTableClient } from './_components/CompetenciesTableClient';
 import { getPsychometricsCompetenciesCached } from '@/services/api.cache.psychometrics';
 import { getAuthHeaders } from '@/services/roleApi';
+import Loading from './loading';
 
 export const metadata: Metadata = {
   title: 'Competency Reliability - Psychometrics - SkillSoft',
@@ -46,18 +48,15 @@ async function getCompetenciesData(searchParams: Awaited<PageProps['searchParams
   };
 }
 
-export default async function CompetenciesPage({ searchParams }: PageProps) {
-  const resolvedParams = await searchParams;
-  const { competencies, error } = await getCompetenciesData(resolvedParams);
-  const t = await getTranslations('psychometrics');
+/**
+ * Async data-fetching component for competencies content.
+ * Wrapped in Suspense to enable PPR static shell.
+ */
+async function CompetenciesData({ searchParams }: { searchParams: Awaited<PageProps['searchParams']> }) {
+  const { competencies, error } = await getCompetenciesData(searchParams);
 
   return (
-    <div className="flex flex-1 flex-col gap-6 p-4 pt-6 md:gap-8 md:p-6">
-      <PageHeader
-        title={t('competenciesTable.title')}
-        description={t('competenciesTable.description')}
-      />
-
+    <>
       {/* Error Display with rich metadata and retry capability */}
       {error && (
         <InlineError
@@ -76,9 +75,27 @@ export default async function CompetenciesPage({ searchParams }: PageProps) {
       {/* Competencies Table with Filters */}
       <CompetenciesTableClient
         initialData={competencies}
-        currentStatus={resolvedParams.status as ReliabilityStatus | undefined}
-        currentPage={resolvedParams.page ? parseInt(resolvedParams.page, 10) : 0}
+        currentStatus={searchParams.status as ReliabilityStatus | undefined}
+        currentPage={searchParams.page ? parseInt(searchParams.page, 10) : 0}
       />
+    </>
+  );
+}
+
+export default async function CompetenciesPage({ searchParams }: PageProps) {
+  const resolvedParams = await searchParams;
+  const t = await getTranslations('psychometrics');
+
+  return (
+    <div className="flex flex-1 flex-col gap-6 p-4 pt-6 md:gap-8 md:p-6">
+      <PageHeader
+        title={t('competenciesTable.title')}
+        description={t('competenciesTable.description')}
+      />
+
+      <Suspense fallback={<Loading />}>
+        <CompetenciesData searchParams={resolvedParams} />
+      </Suspense>
     </div>
   );
 }

@@ -1,6 +1,5 @@
 'use client';
 
-import dynamic from 'next/dynamic';
 import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -18,15 +17,7 @@ import { cn } from '@/lib/utils';
 import { MobileBigFiveBars } from './MobileBigFiveBars';
 import { ProfileEmptyState } from './ProfileEmptyState';
 import { AccessibleChart } from '@/components/accessibility/AccessibleChart';
-
-// Dynamic import for chart to reduce initial bundle
-const BigFiveRadarChart = dynamic(
-  () => import('./BigFiveChart').then((mod) => mod.BigFiveChart),
-  {
-    loading: () => <Skeleton className="h-[200px] sm:h-[260px] w-full rounded-lg" />,
-    ssr: false,
-  }
-);
+import { LazyBigFiveChart as BigFiveRadarChart } from '@/lib/lazy-charts';
 
 /**
  * Trait colors matching the radar chart

@@ -434,3 +434,5 @@ export function ItemQualityScatter({ items, className, height = 400 }: ItemQuali
     </Card>
   );
 }
+
+export default ItemQualityScatter;

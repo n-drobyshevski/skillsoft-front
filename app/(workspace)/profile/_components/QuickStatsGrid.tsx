@@ -1,6 +1,5 @@
 'use client';
 
-import dynamic from 'next/dynamic';
 import { useTranslations, useFormatter } from 'next-intl';
 import { Card, CardContent } from '@/components/ui/card';
 import { AnimatedProgress } from '@/components/ui/animated-progress';
@@ -16,12 +15,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { AssessmentSummary } from '@/types/profile';
-
-// Lazy load sparkline to avoid loading recharts on initial bundle
-const ScoreSparkline = dynamic(
-  () => import('./ScoreSparkline').then(mod => ({ default: mod.ScoreSparkline })),
-  { ssr: false }
-);
+import { LazyScoreSparkline as ScoreSparkline } from '@/lib/lazy-charts';
 
 interface QuickStatsGridProps {
   summary: AssessmentSummary;

@@ -18,7 +18,7 @@ import { useBreadcrumbContext } from "@/context/BreadcrumbContext";
 import { SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
 import { CompactAuthModals, FullAuthModals } from "@/components/auth/auth-modals";
 import { ClientOnly } from "@/components/common/ClientOnly";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import { cn } from "@/lib/utils";
 import { useScrollDirection } from "@/hooks/use-scroll-direction";
 import { timing } from "@/lib/animation-config";

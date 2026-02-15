@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
@@ -45,6 +46,7 @@ import UserProfileClient from "./_components/UserProfileClient";
 import { AdminPassportSection } from "./_components/AdminPassportSection";
 import { UserAssessmentsTab } from "./_components/UserAssessmentsTab";
 import { UserActivityTab } from "./_components/UserActivityTab";
+import Loading from "./loading";
 
 interface UserProfilePageProps {
   params: Promise<{ userId: string }>;
@@ -291,8 +293,11 @@ function StatCard({
   );
 }
 
-export default async function UserProfilePage({ params }: UserProfilePageProps) {
-  const { userId } = await params;
+/**
+ * Async data-fetching component for user profile.
+ * Wrapped in Suspense to enable PPR static shell.
+ */
+async function UserProfileData({ userId }: { userId: string }) {
   const user = await getUserData(userId);
   const t = await getTranslations('users.profile');
   const tTime = await getTranslations('time');
@@ -329,7 +334,7 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
   };
 
   return (
-    <div className="flex flex-1 flex-col min-h-0">
+    <>
       {/* Hero Header with Gradient */}
       <div className="relative">
         {/* Gradient Background */}
@@ -603,6 +608,18 @@ export default async function UserProfilePage({ params }: UserProfilePageProps) 
           </div>
         </div>
       </div>
+    </>
+  );
+}
+
+export default async function UserProfilePage({ params }: UserProfilePageProps) {
+  const { userId } = await params;
+
+  return (
+    <div className="flex flex-1 flex-col min-h-0">
+      <Suspense fallback={<Loading />}>
+        <UserProfileData userId={userId} />
+      </Suspense>
     </div>
   );
 }

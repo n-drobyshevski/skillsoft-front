@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
@@ -16,6 +17,7 @@ import {
   ExternalLink,
 } from 'lucide-react';
 import type { ItemLoweringAlpha } from '@/types/psychometrics';
+import Loading from './loading';
 
 // Import extracted components and utilities
 import {
@@ -46,9 +48,12 @@ async function getCompetencyDetail(competencyId: string, errorMessage: string) {
   };
 }
 
-export default async function CompetencyDetailPage({ params }: PageProps) {
+/**
+ * Async data-fetching component for competency detail.
+ * Wrapped in Suspense to enable PPR static shell.
+ */
+async function CompetencyDetailData({ competencyId }: { competencyId: string }) {
   const t = await getTranslations('psychometrics.competencyDetail');
-  const { competencyId } = await params;
   const { detail, error } = await getCompetencyDetail(competencyId, t('errorLoading'));
 
   // Use state machine for type-safe rendering
@@ -85,7 +90,7 @@ export default async function CompetencyDetailPage({ params }: PageProps) {
   const data = pageState.data;
 
   return (
-    <div className="flex flex-1 flex-col min-h-screen">
+    <>
       {/* Hero Section - Mobile First */}
       <CompetencyHeroMobile data={data} />
 
@@ -139,6 +144,18 @@ export default async function CompetencyDetailPage({ params }: PageProps) {
           </Card>
         )}
       </main>
+    </>
+  );
+}
+
+export default async function CompetencyDetailPage({ params }: PageProps) {
+  const { competencyId } = await params;
+
+  return (
+    <div className="flex flex-1 flex-col min-h-screen">
+      <Suspense fallback={<Loading />}>
+        <CompetencyDetailData competencyId={competencyId} />
+      </Suspense>
     </div>
   );
 }

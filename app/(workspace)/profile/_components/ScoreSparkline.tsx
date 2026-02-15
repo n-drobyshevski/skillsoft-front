@@ -85,6 +85,8 @@ export function ScoreSparkline({
   );
 }
 
+export default ScoreSparkline;
+
 /**
  * Extract recent scores from test results for sparkline display
  */

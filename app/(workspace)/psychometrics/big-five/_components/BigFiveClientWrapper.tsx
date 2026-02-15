@@ -1,7 +1,7 @@
 'use client';
 
 import { ReactNode } from 'react';
-import { useBigFiveStoreHydration } from '@/stores/useBigFivePageStore';
+import { useBigFiveStoreHydration } from '@/store/big-five-page-store';
 
 interface BigFiveClientWrapperProps {
   children: ReactNode;

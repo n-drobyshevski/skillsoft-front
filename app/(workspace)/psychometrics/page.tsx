@@ -33,9 +33,6 @@ import { getAuthHeaders } from '@/services/roleApi';
 import { ErrorCategory, ErrorAction } from '@/types/errors';
 
 
-// PPR disabled - requires cacheComponents which is incompatible with Clerk
-// TODO: Re-enable when Clerk supports Next.js 16 cacheComponents
-// export const experimental_ppr = true;
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('psychometrics');
@@ -181,15 +178,15 @@ async function AnalyticsZoneWrapper({
   );
 }
 
-export default async function PsychometricsPage() {
-  // Fetch dashboard report first (fast data for immediate render)
+// Async data component — all dynamic APIs (headers, auth) are inside Suspense
+async function PsychometricsData() {
   const authHeaders = await getAuthHeaders();
   const report = await getPsychometricsDashboardCached(authHeaders);
   const t = await getTranslations('psychometrics');
   const locale = await getLocale();
 
   return (
-    <div className="flex flex-1 flex-col gap-3 p-2.5 pt-3 sm:gap-4 sm:p-3 sm:pt-4 md:gap-6 md:p-6 min-w-0 overflow-x-hidden">
+    <>
       <PageHeader
         title={t('title')}
         description={t('description')}
@@ -400,6 +397,28 @@ export default async function PsychometricsPage() {
           </div>
         </>
       )}
+    </>
+  );
+}
+
+export default async function PsychometricsPage() {
+  return (
+    <div className="flex flex-1 flex-col gap-3 p-2.5 pt-3 sm:gap-4 sm:p-3 sm:pt-4 md:gap-6 md:p-6 min-w-0 overflow-x-hidden">
+      <Suspense fallback={
+        <div className="space-y-4">
+          <Skeleton className="h-10 w-64" />
+          <Skeleton className="h-4 w-96" />
+          <div className="grid gap-2 sm:gap-4 grid-cols-2 lg:grid-cols-4">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <Skeleton key={i} className="h-[100px] rounded-lg" />
+            ))}
+          </div>
+          <StatsCardsSkeleton />
+          <ChartSkeleton />
+        </div>
+      }>
+        <PsychometricsData />
+      </Suspense>
     </div>
   );
 }

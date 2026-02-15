@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Suspense } from 'react';
 import { notFound } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 import { testTemplatesApi } from '@/services/api';
@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 import { SessionsTable } from './_components';
 import { isReservedTestTemplateSegment } from '@/lib/routing-constants';
+import Loading from './loading';
 
 // Extended session type with additional fields that may come from API
 type ExtendedSession = TestSession & {
@@ -121,15 +122,10 @@ async function getResultsData(id: string, filters: { status?: string; search?: s
 
 
 /**
- * Results Page - Candidates & Test Sessions
- * * Shows all test sessions for this template with:
- * - Search and filter functionality
- * - Session status and scores
- * - Export capabilities
+ * Async data-fetching component for results content.
+ * Wrapped in Suspense to enable PPR static shell.
  */
-export default async function ResultsPage({ params, searchParams }: ResultsPageProps) {
-  const { id } = await params;
-  const filters = await searchParams;
+async function ResultsData({ id, filters }: { id: string; filters: { status?: string; search?: string } }) {
   const { template, sessions, stats, error } = await getResultsData(id, filters);
 
   if (!template || error) {
@@ -137,7 +133,7 @@ export default async function ResultsPage({ params, searchParams }: ResultsPageP
   }
 
   return (
-    <div className="p-4 lg:p-6 space-y-6 max-w-[100vw] overflow-hidden">
+    <>
       {/* Stats Header - Mobile: 2 cols, Desktop: 4 cols */}
       <div className="grid grid-cols-2 gap-3 sm:gap-4 sm:grid-cols-4">
         <Card className="shadow-sm">
@@ -231,6 +227,26 @@ export default async function ResultsPage({ params, searchParams }: ResultsPageP
           />
         </CardContent>
       </Card>
+    </>
+  );
+}
+
+/**
+ * Results Page - Candidates & Test Sessions
+ * Shows all test sessions for this template with:
+ * - Search and filter functionality
+ * - Session status and scores
+ * - Export capabilities
+ */
+export default async function ResultsPage({ params, searchParams }: ResultsPageProps) {
+  const { id } = await params;
+  const filters = await searchParams;
+
+  return (
+    <div className="p-4 lg:p-6 space-y-6 max-w-[100vw] overflow-hidden">
+      <Suspense fallback={<Loading />}>
+        <ResultsData id={id} filters={filters} />
+      </Suspense>
     </div>
   );
 }

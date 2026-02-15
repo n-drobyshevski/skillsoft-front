@@ -9,7 +9,7 @@
 
 import { useState, useEffect } from 'react';
 import { useTheme } from 'next-themes';
-import { useLanguageStore } from '@/stores/language-store';
+import { useLanguageStore } from '@/store/language-store';
 import type { Locale } from '@/i18n/config';
 
 export type ThemePreference = 'light' | 'dark' | 'system';

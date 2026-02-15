@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { getPsychometricsItemDetailCached } from '@/services/api.cache.psychometrics';
@@ -18,6 +19,7 @@ import {
 } from './_components';
 import { Users, Clock } from 'lucide-react';
 import { ItemValidityStatus } from '@/types/psychometrics';
+import Loading from './loading';
 
 export const metadata: Metadata = {
   title: 'Детали элемента - Психометрика - SkillSoft',
@@ -53,8 +55,11 @@ function getStatusGradient(status: ItemValidityStatus): string {
   }
 }
 
-export default async function ItemDetailPage({ params }: PageProps) {
-  const { questionId } = await params;
+/**
+ * Async data-fetching component for item detail.
+ * Wrapped in Suspense to enable PPR static shell.
+ */
+async function ItemDetailDataComponent({ questionId }: { questionId: string }) {
   const { item, error } = await getItemDetail(questionId);
 
   if (!item && !error) {
@@ -138,5 +143,15 @@ export default async function ItemDetailPage({ params }: PageProps) {
       {/* Client-side interactive components */}
       <ItemDetailClient item={item!} />
     </ItemDetailLayout>
+  );
+}
+
+export default async function ItemDetailPage({ params }: PageProps) {
+  const { questionId } = await params;
+
+  return (
+    <Suspense fallback={<Loading />}>
+      <ItemDetailDataComponent questionId={questionId} />
+    </Suspense>
   );
 }

@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { assessmentQuestionsApi, behavioralIndicatorsApi, competenciesApi } from "@/services/api";
 import {
@@ -24,6 +25,8 @@ import QuestionDetailClient from "./_components/QuestionDetailClient";
 import { CompetencyHoverCard } from "../../behavioral-indicators/[indicatorId]/_components/CompetencyHoverCard";
 import { IndicatorHoverCard } from "@/components/feedback/IndicatorHoverCard";
 import type { BehavioralIndicator, Competency } from "@/types/domain";
+import Loading from "./loading";
+
 interface QuestionDetailPageProps {
 	params: { questionId: string };
 }
@@ -56,8 +59,11 @@ async function getQuestionData(questionId: string) {
 }
 
 
-export default async function Page({ params }: QuestionDetailPageProps) {
-	const { questionId } = await params;
+/**
+ * Async data-fetching component for question detail.
+ * Wrapped in Suspense to enable PPR static shell.
+ */
+async function QuestionDetailData({ questionId }: { questionId: string }) {
 	const { question, indicator, competency } = await getQuestionData(questionId);
 
 	if (!question) {
@@ -353,5 +359,15 @@ export default async function Page({ params }: QuestionDetailPageProps) {
 			</div>
 			</QuestionDetailClient>
 		</EntityDetailLayout>
+	);
+}
+
+export default async function Page({ params }: QuestionDetailPageProps) {
+	const { questionId } = await params;
+
+	return (
+		<Suspense fallback={<Loading />}>
+			<QuestionDetailData questionId={questionId} />
+		</Suspense>
 	);
 }

@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { Suspense } from 'react';
 import { notFound } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 import { testTemplatesApi } from '@/services/api';
 import { SettingsForm } from './_components/SettingsForm';
 import { isReservedTestTemplateSegment } from '@/lib/routing-constants';
+import Loading from './loading';
 
 interface SettingsPageProps {
   params: Promise<{ id: string }>;
@@ -53,6 +54,20 @@ async function getTemplateData(id: string) {
 }
 
 /**
+ * Async data-fetching component for settings content.
+ * Wrapped in Suspense to enable PPR static shell.
+ */
+async function SettingsData({ id }: { id: string }) {
+  const { template, error } = await getTemplateData(id);
+
+  if (!template || error) {
+    notFound();
+  }
+
+  return <SettingsForm template={template} />;
+}
+
+/**
  * Settings Page
  *
  * Full template configuration management:
@@ -65,11 +80,6 @@ async function getTemplateData(id: string) {
  */
 export default async function SettingsPage({ params }: SettingsPageProps) {
   const { id } = await params;
-  const { template, error } = await getTemplateData(id);
-
-  if (!template || error) {
-    notFound();
-  }
 
   return (
     <div className="mx-auto w-full max-w-7xl px-4 py-6 lg:px-8">
@@ -80,7 +90,9 @@ export default async function SettingsPage({ params }: SettingsPageProps) {
         </p>
       </div>
 
-      <SettingsForm template={template} />
+      <Suspense fallback={<Loading />}>
+        <SettingsData id={id} />
+      </Suspense>
     </div>
   );
 }

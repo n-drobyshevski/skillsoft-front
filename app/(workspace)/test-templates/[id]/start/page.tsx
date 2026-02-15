@@ -1,9 +1,11 @@
+import { Suspense } from "react";
 import { Metadata } from "next";
 import { testTemplatesApi, testSessionsApi } from "@/services/api";
 import { notFound, redirect } from "next/navigation";
 import { auth } from "@clerk/nextjs/server";
 import { StartAssessmentClient } from "./StartAssessmentClient";
 import { isReservedTestTemplateSegment } from "@/lib/routing-constants";
+import Loading from "./loading";
 
 interface StartPageProps {
   params: Promise<{
@@ -54,11 +56,11 @@ export async function generateMetadata({ params }: StartPageProps): Promise<Meta
   }
 }
 
-export default async function StartPage({ params, searchParams }: StartPageProps) {
-  const { id } = await params;
-  const resolvedSearchParams = await searchParams;
-  const errorMessage = resolvedSearchParams.error;
-
+/**
+ * Async data-fetching component for start assessment.
+ * Wrapped in Suspense to enable PPR static shell.
+ */
+async function StartAssessmentData({ id, errorMessage }: { id: string; errorMessage?: string }) {
   // Reject reserved route segments to prevent routing conflicts
   if (isReservedTestTemplateSegment(id)) {
     notFound();
@@ -149,5 +151,17 @@ export default async function StartPage({ params, searchParams }: StartPageProps
       startAssessment={startAssessment}
       abandonAndStartNew={abandonAndStartNew}
     />
+  );
+}
+
+export default async function StartPage({ params, searchParams }: StartPageProps) {
+  const { id } = await params;
+  const resolvedSearchParams = await searchParams;
+  const errorMessage = resolvedSearchParams.error;
+
+  return (
+    <Suspense fallback={<Loading />}>
+      <StartAssessmentData id={id} errorMessage={errorMessage} />
+    </Suspense>
   );
 }

@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { behavioralIndicatorsApi, assessmentQuestionsApi } from "@/services/api";
 import type {
@@ -27,8 +28,11 @@ async function getIndicatorData(indicatorId: string) {
 	return { indicator, assessmentQuestions: assessmentQuestions || [] };
 }
 
-export default async function Page({ params }: IndicatorDetailPageProps) {
-	const { indicatorId } = await params;
+/**
+ * Async data-fetching component for indicator detail.
+ * Wrapped in Suspense to enable PPR static shell.
+ */
+async function IndicatorDetailData({ indicatorId }: { indicatorId: string }) {
 	const { indicator, assessmentQuestions } = await getIndicatorData(indicatorId);
 
 	if (!indicator) {
@@ -41,5 +45,15 @@ export default async function Page({ params }: IndicatorDetailPageProps) {
 				<IndicatorDetailContent indicator={indicator} assessmentQuestions={assessmentQuestions} />
 			</IndicatorDetailClient>
 		</EntityDetailLayout>
+	);
+}
+
+export default async function Page({ params }: IndicatorDetailPageProps) {
+	const { indicatorId } = await params;
+
+	return (
+		<Suspense fallback={<Loading />}>
+			<IndicatorDetailData indicatorId={indicatorId} />
+		</Suspense>
 	);
 }

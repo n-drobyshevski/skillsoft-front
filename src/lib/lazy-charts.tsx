@@ -157,6 +157,36 @@ export const LazyAverageIndicatorsGauge = dynamic(
   { loading: () => <CompactChartSkeleton />, ssr: false }
 );
 
+// ============================================================================
+// Page-level Chart Components (lazy-loaded from app/ directory)
+// These are full-featured chart components used in workspace pages.
+// ============================================================================
+
+export const LazyBigFiveChart = dynamic(
+  () => import('../../app/(workspace)/profile/_components/BigFiveChart'),
+  { loading: () => <CompactChartSkeleton />, ssr: false }
+);
+
+export const LazyScoreSparkline = dynamic(
+  () => import('../../app/(workspace)/profile/_components/ScoreSparkline'),
+  { ssr: false }
+);
+
+export const LazyRadialReliabilityChart = dynamic(
+  () => import('../../app/(workspace)/psychometrics/_components/charts/RadialReliabilityChart'),
+  { loading: () => <CompactChartSkeleton />, ssr: false }
+);
+
+export const LazyMetricDistributionCharts = dynamic(
+  () => import('../../app/(workspace)/psychometrics/_components/charts/MetricDistributionChart'),
+  { loading: () => <ChartSkeleton height={320} />, ssr: false }
+);
+
+export const LazyItemQualityScatter = dynamic(
+  () => import('../../app/(workspace)/psychometrics/_components/charts/ItemQualityScatter'),
+  { loading: () => <ChartSkeleton height={450} />, ssr: false }
+);
+
 /**
  * Preload chart library for routes that will need it
  * Call this in useEffect on parent pages to start loading early

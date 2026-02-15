@@ -1,4 +1,4 @@
-import React from "react";
+import React, { Suspense } from "react";
 import Link from "next/link";
 import { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
@@ -21,6 +21,7 @@ import {
 import { getTeamsPageDataCached } from "@/services/api.cache.teams";
 import PageHeader from "@/components/common/PageHeader";
 import TeamsTableWrapper from "./_components/TeamsTableWrapper";
+import Loading from "./loading";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('metadata.teams');
@@ -82,8 +83,11 @@ function StatCard({
   );
 }
 
-// Main component
-export default async function TeamsPage() {
+/**
+ * Async data-fetching component for teams content.
+ * Wrapped in Suspense to enable PPR static shell.
+ */
+async function TeamsData() {
   const t = await getTranslations('teams');
   const { teams, stats, error } = await getTeamsData(t);
 
@@ -102,22 +106,7 @@ export default async function TeamsPage() {
     : "0";
 
   return (
-    <div className="flex flex-1 flex-col gap-4 p-4 pt-6 md:gap-6 md:p-6">
-      <PageHeader
-        title={t('page.title')}
-        description={t('page.description')}
-      >
-        <div className="flex gap-2">
-          <Link href="/admin/teams/new">
-            <Button className="gap-2 shadow-sm">
-              <UserPlus className="h-4 w-4" />
-              <span className="hidden sm:inline">{t('actions.createTeam')}</span>
-              <span className="sm:hidden">{t('actions.create')}</span>
-            </Button>
-          </Link>
-        </div>
-      </PageHeader>
-
+    <>
       {/* Compact Stats Row */}
       <div className="grid gap-4 grid-cols-2 lg:grid-cols-5">
         <StatCard
@@ -172,6 +161,34 @@ export default async function TeamsPage() {
 
       {/* Teams Table */}
       <TeamsTableWrapper teams={teams} />
+    </>
+  );
+}
+
+// Main component
+export default async function TeamsPage() {
+  const t = await getTranslations('teams');
+
+  return (
+    <div className="flex flex-1 flex-col gap-4 p-4 pt-6 md:gap-6 md:p-6">
+      <PageHeader
+        title={t('page.title')}
+        description={t('page.description')}
+      >
+        <div className="flex gap-2">
+          <Link href="/admin/teams/new">
+            <Button className="gap-2 shadow-sm">
+              <UserPlus className="h-4 w-4" />
+              <span className="hidden sm:inline">{t('actions.createTeam')}</span>
+              <span className="sm:hidden">{t('actions.create')}</span>
+            </Button>
+          </Link>
+        </div>
+      </PageHeader>
+
+      <Suspense fallback={<Loading />}>
+        <TeamsData />
+      </Suspense>
     </div>
   );
 }

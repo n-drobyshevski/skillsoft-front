@@ -103,6 +103,7 @@ export function useTemplateVisibility(
 
 /**
  * Mutation hook to change template visibility
+ * Includes optimistic update and cache invalidation
  */
 export function useChangeVisibility() {
   const queryClient = useQueryClient();
@@ -116,14 +117,52 @@ export function useChangeVisibility() {
       request: ChangeVisibilityRequest;
     }) => templateSharingApi.changeVisibility(templateId, request),
 
+    onMutate: async ({ templateId, request }) => {
+      // Cancel outgoing refetches so they don't overwrite our optimistic update
+      await queryClient.cancelQueries({
+        queryKey: templateSharingKeys.visibility(templateId),
+      });
+
+      // Snapshot current visibility data for rollback
+      const previousVisibility = queryClient.getQueryData<VisibilityInfo>(
+        templateSharingKeys.visibility(templateId)
+      );
+
+      // Optimistically update visibility
+      if (previousVisibility) {
+        queryClient.setQueryData<VisibilityInfo>(
+          templateSharingKeys.visibility(templateId),
+          {
+            ...previousVisibility,
+            visibility: request.visibility,
+            visibilityChangedAt: new Date().toISOString(),
+          }
+        );
+      }
+
+      return { previousVisibility };
+    },
+
+    onError: (_err, { templateId }, context) => {
+      // Rollback to snapshot on error
+      if (context?.previousVisibility) {
+        queryClient.setQueryData(
+          templateSharingKeys.visibility(templateId),
+          context.previousVisibility
+        );
+      }
+    },
+
     onSuccess: (updatedInfo, { templateId }) => {
-      // Update visibility cache
+      // Replace optimistic data with real server response
       queryClient.setQueryData(
         templateSharingKeys.visibility(templateId),
         updatedInfo
       );
+    },
 
-      // If visibility changed away from LINK, invalidate links
+    onSettled: (_, _err, { templateId }) => {
+      // If visibility changed, invalidate links to sync with server
       queryClient.invalidateQueries({
         queryKey: templateSharingKeys.links(templateId),
       });
@@ -213,6 +252,7 @@ export function useShareWithTeam() {
 
 /**
  * Mutation hook to update a share's permission
+ * Includes optimistic update and cache invalidation
  */
 export function useUpdateShare() {
   const queryClient = useQueryClient();
@@ -228,8 +268,44 @@ export function useUpdateShare() {
       request: UpdateShareRequest;
     }) => templateSharingApi.updateShare(templateId, shareId, request),
 
+    onMutate: async ({ templateId, shareId, request }) => {
+      // Cancel outgoing refetches so they don't overwrite our optimistic update
+      await queryClient.cancelQueries({
+        queryKey: templateSharingKeys.sharesList(templateId),
+      });
+
+      // Snapshot current shares list for rollback
+      const previousShares = queryClient.getQueryData<TemplateShare[]>(
+        templateSharingKeys.sharesList(templateId)
+      );
+
+      // Optimistically update the share's permission
+      if (previousShares) {
+        queryClient.setQueryData<TemplateShare[]>(
+          templateSharingKeys.sharesList(templateId),
+          previousShares.map((share) =>
+            share.id === shareId
+              ? { ...share, permission: request.permission, expiresAt: request.expiresAt ?? share.expiresAt }
+              : share
+          )
+        );
+      }
+
+      return { previousShares };
+    },
+
+    onError: (_err, { templateId }, context) => {
+      // Rollback to snapshot on error
+      if (context?.previousShares) {
+        queryClient.setQueryData(
+          templateSharingKeys.sharesList(templateId),
+          context.previousShares
+        );
+      }
+    },
+
     onSuccess: (updatedShare, { templateId }) => {
-      // Update share in list
+      // Replace optimistic data with real server response
       queryClient.setQueryData<TemplateShare[]>(
         templateSharingKeys.sharesList(templateId),
         (old) =>
@@ -243,6 +319,7 @@ export function useUpdateShare() {
 
 /**
  * Mutation hook to revoke a share
+ * Includes optimistic update and cache invalidation
  */
 export function useRevokeShare() {
   const queryClient = useQueryClient();
@@ -256,13 +333,43 @@ export function useRevokeShare() {
       shareId: string;
     }) => templateSharingApi.revokeShare(templateId, shareId),
 
-    onSuccess: (_, { templateId, shareId }) => {
-      // Remove from shares list
-      queryClient.setQueryData<TemplateShare[]>(
-        templateSharingKeys.sharesList(templateId),
-        (old) => old?.filter((share) => share.id !== shareId)
+    onMutate: async ({ templateId, shareId }) => {
+      // Cancel outgoing refetches so they don't overwrite our optimistic update
+      await queryClient.cancelQueries({
+        queryKey: templateSharingKeys.sharesList(templateId),
+      });
+
+      // Snapshot current shares list for rollback
+      const previousShares = queryClient.getQueryData<TemplateShare[]>(
+        templateSharingKeys.sharesList(templateId)
       );
 
+      // Optimistically remove the revoked share
+      if (previousShares) {
+        queryClient.setQueryData<TemplateShare[]>(
+          templateSharingKeys.sharesList(templateId),
+          previousShares.filter((share) => share.id !== shareId)
+        );
+      }
+
+      return { previousShares };
+    },
+
+    onError: (_err, { templateId }, context) => {
+      // Rollback to snapshot on error
+      if (context?.previousShares) {
+        queryClient.setQueryData(
+          templateSharingKeys.sharesList(templateId),
+          context.previousShares
+        );
+      }
+    },
+
+    onSettled: (_, _err, { templateId }) => {
+      // Always invalidate to sync with server
+      queryClient.invalidateQueries({
+        queryKey: templateSharingKeys.sharesList(templateId),
+      });
       // Update visibility counts
       queryClient.invalidateQueries({
         queryKey: templateSharingKeys.visibility(templateId),
@@ -425,6 +532,7 @@ export function useCreateShareLink() {
 
 /**
  * Mutation hook to revoke a share link
+ * Includes optimistic update and cache invalidation
  */
 export function useRevokeShareLink() {
   const queryClient = useQueryClient();
@@ -438,34 +546,77 @@ export function useRevokeShareLink() {
       linkId: string;
     }) => templateSharingApi.revokeLink(templateId, linkId),
 
-    onSuccess: (_, { templateId, linkId }) => {
-      // Update link in list to show as revoked
+    onMutate: async ({ templateId, linkId }) => {
+      // Cancel outgoing refetches so they don't overwrite our optimistic update
+      await queryClient.cancelQueries({
+        queryKey: templateSharingKeys.linksList(templateId),
+      });
+      await queryClient.cancelQueries({
+        queryKey: templateSharingKeys.activeLinks(templateId),
+      });
+
+      // Snapshot current caches for rollback
+      const previousLinks = queryClient.getQueryData<ShareLink[]>(
+        templateSharingKeys.linksList(templateId)
+      );
+      const previousActiveLinks = queryClient.getQueryData<ShareLink[]>(
+        templateSharingKeys.activeLinks(templateId)
+      );
+
+      // Optimistically mark link as revoked in the links list
       const now = new Date().toISOString();
-      queryClient.setQueryData<ShareLink[]>(
-        templateSharingKeys.linksList(templateId),
-        (old) =>
-          old?.map((link) =>
-            link.id === linkId ? { ...link, revokedAt: now } : link
+      if (previousLinks) {
+        queryClient.setQueryData<ShareLink[]>(
+          templateSharingKeys.linksList(templateId),
+          previousLinks.map((link) =>
+            link.id === linkId
+              ? { ...link, revokedAt: now, isActive: false }
+              : link
           )
-      );
+        );
+      }
 
-      // Remove from active links
-      queryClient.setQueryData<ShareLink[]>(
-        templateSharingKeys.activeLinks(templateId),
-        (old) => old?.filter((link) => link.id !== linkId)
-      );
+      // Optimistically remove from active links
+      if (previousActiveLinks) {
+        queryClient.setQueryData<ShareLink[]>(
+          templateSharingKeys.activeLinks(templateId),
+          previousActiveLinks.filter((link) => link.id !== linkId)
+        );
+      }
 
-      // Update link count
+      return { previousLinks, previousActiveLinks };
+    },
+
+    onError: (_err, { templateId }, context) => {
+      // Rollback all caches to their previous state
+      if (context?.previousLinks) {
+        queryClient.setQueryData(
+          templateSharingKeys.linksList(templateId),
+          context.previousLinks
+        );
+      }
+      if (context?.previousActiveLinks) {
+        queryClient.setQueryData(
+          templateSharingKeys.activeLinks(templateId),
+          context.previousActiveLinks
+        );
+      }
+    },
+
+    onSettled: (_, _err, { templateId }) => {
+      // Always invalidate to sync with server
+      queryClient.invalidateQueries({
+        queryKey: templateSharingKeys.linksList(templateId),
+      });
+      queryClient.invalidateQueries({
+        queryKey: templateSharingKeys.activeLinks(templateId),
+      });
       queryClient.invalidateQueries({
         queryKey: templateSharingKeys.linkCount(templateId),
       });
-
-      // Update can create status
       queryClient.invalidateQueries({
         queryKey: templateSharingKeys.canCreateLink(templateId),
       });
-
-      // Update visibility counts
       queryClient.invalidateQueries({
         queryKey: templateSharingKeys.visibility(templateId),
       });
