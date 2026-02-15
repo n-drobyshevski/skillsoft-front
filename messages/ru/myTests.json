@@ -49,5 +49,16 @@
   "attempts": "{count, plural, one {# попытка} few {# попытки} many {# попыток} other {# попыток}}",
   "previousAttempts": "{count, plural, one {# предыдущая попытка} few {# предыдущие попытки} many {# предыдущих попыток} other {# предыдущих попыток}}",
   "earlier": "ранее",
-  "filterByStatus": "{label}: {count}. Нажмите для фильтра."
+  "filterByStatus": "{label}: {count}. Нажмите для фильтра.",
+  "performanceStats": {
+    "testsTaken": "Тестов пройдено",
+    "passed": "Сдано",
+    "averageScore": "Средний балл",
+    "totalTime": "Всего времени"
+  },
+  "scoreGauge": {
+    "passed": "Пройден",
+    "failed": "Не пройден",
+    "result": "Результат"
+  }
 }

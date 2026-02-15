@@ -8,9 +8,10 @@ import { Badge } from '@/components/ui/badge';
 import { TemplateGroup, groupSessionsByTemplate, TemplateGroupData } from './TemplateGroup';
 import { EmptyState } from './EmptyState';
 import { SummaryStats } from './SummaryStats';
+import { PerformanceStatGrid } from '@/components/activity';
 import { TestSessionSummary, TestResult, SessionStatus } from '@/types/domain';
 import { cn } from '@/lib/utils';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 
 // Extended session type with result
 export interface EnrichedTestSession extends TestSessionSummary {
@@ -42,6 +43,7 @@ const TAB_CONFIG: { value: TabValue; labelKey: 'tabs.all' | 'tabs.pending' | 'ta
  */
 export function MyTestsContent({ sessions, initialTab = 'all' }: MyTestsContentProps) {
   const t = useTranslations('myTests');
+  const locale = useLocale();
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -149,6 +151,32 @@ export function MyTestsContent({ sessions, initialTab = 'all' }: MyTestsContentP
     completed: sessionsByStatus.completed.length,
   };
 
+  // Compute performance stats from completed sessions with results (zero API calls)
+  const performanceStats = useMemo(() => {
+    const completedWithResults = sessions.filter(
+      (s) => s.status === SessionStatus.COMPLETED && s.result
+    );
+    if (completedWithResults.length === 0) return null;
+
+    const testsTaken = completedWithResults.length;
+    const passed = completedWithResults.filter((s) => s.result!.passed).length;
+    const totalScore = completedWithResults.reduce(
+      (acc, s) => acc + (s.result!.overallPercentage ?? 0),
+      0
+    );
+    const totalTime = completedWithResults.reduce(
+      (acc, s) => acc + (s.result!.totalTimeSeconds || 0),
+      0
+    );
+
+    return {
+      testsTaken,
+      passed,
+      averageScore: totalScore / testsTaken,
+      totalTimeSeconds: totalTime,
+    };
+  }, [sessions]);
+
   if (sessions.length === 0) {
     return <EmptyState type="no_tests" />;
   }
@@ -204,11 +232,29 @@ export function MyTestsContent({ sessions, initialTab = 'all' }: MyTestsContentP
               {tabSessions.length === 0 ? (
                 <EmptyState type={`no_${tab.value}` as EmptyStateType} />
               ) : (
-                <div className={cn('grid gap-3 sm:gap-4', isPending && 'opacity-70 transition-opacity')}>
-                  {/* Only compute grouping when tab is active (lazy evaluation) */}
-                  {isActive && getGroupedForTab(tab.value).map(group => (
-                    <TemplateGroup key={group.templateId} group={group} defaultExpanded={false} />
-                  ))}
+                <div className={cn('space-y-4 sm:space-y-6', isPending && 'opacity-70 transition-opacity')}>
+                  {/* Performance stats for completed tab */}
+                  {isActive && tab.value === 'completed' && performanceStats && (
+                    <PerformanceStatGrid
+                      testsTaken={performanceStats.testsTaken}
+                      passed={performanceStats.passed}
+                      averageScore={performanceStats.averageScore}
+                      totalTimeSeconds={performanceStats.totalTimeSeconds}
+                      labels={{
+                        testsTaken: t('performanceStats.testsTaken'),
+                        passed: t('performanceStats.passed'),
+                        averageScore: t('performanceStats.averageScore'),
+                        totalTime: t('performanceStats.totalTime'),
+                      }}
+                      locale={locale}
+                    />
+                  )}
+                  <div className="grid gap-3 sm:gap-4">
+                    {/* Only compute grouping when tab is active (lazy evaluation) */}
+                    {isActive && getGroupedForTab(tab.value).map(group => (
+                      <TemplateGroup key={group.templateId} group={group} defaultExpanded={false} />
+                    ))}
+                  </div>
                 </div>
               )}
             </TabsContent>

@@ -5,6 +5,7 @@ import { Trophy, History, TrendingUp } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { EnrichedTestSession } from './MyTestsContent';
 import { SessionStatus } from '@/types/domain';
+import { useTranslations } from 'next-intl';
 
 export interface TemplateStats {
   templateId: string;
@@ -26,6 +27,7 @@ interface TemplateHeaderProps {
  * Displays template name with aggregate statistics
  */
 export function TemplateHeader({ stats }: TemplateHeaderProps) {
+  const t = useTranslations('myTests');
   const showBestScore = stats.bestScore !== null && stats.completedAttempts > 0;
 
   return (
@@ -45,7 +47,7 @@ export function TemplateHeader({ stats }: TemplateHeaderProps) {
           className="gap-1 font-normal"
         >
           <History className="size-3" />
-          {stats.totalAttempts} {getAttemptsLabel(stats.totalAttempts)}
+          {t('attempts', { count: stats.totalAttempts })}
         </Badge>
 
         {/* Best Score Badge (if completed any) */}
@@ -71,7 +73,7 @@ export function TemplateHeader({ stats }: TemplateHeaderProps) {
             className="gap-1 font-normal border-blue-500/30 bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-400"
           >
             <TrendingUp className="size-3" />
-            В работе
+            {t('status.inProgress')}
           </Badge>
         )}
 
@@ -80,7 +82,7 @@ export function TemplateHeader({ stats }: TemplateHeaderProps) {
             variant="outline"
             className="gap-1 font-normal border-slate-500/30 bg-slate-50 dark:bg-slate-950/30 text-slate-700 dark:text-slate-400"
           >
-            Ожидает
+            {t('status.notStarted')}
           </Badge>
         )}
       </div>
@@ -125,15 +127,3 @@ export function calculateTemplateStats(sessions: EnrichedTestSession[]): Templat
   };
 }
 
-/**
- * Get Russian plural form for attempts
- */
-function getAttemptsLabel(count: number): string {
-  const lastTwo = count % 100;
-  const lastOne = count % 10;
-
-  if (lastTwo >= 11 && lastTwo <= 14) return 'попыток';
-  if (lastOne === 1) return 'попытка';
-  if (lastOne >= 2 && lastOne <= 4) return 'попытки';
-  return 'попыток';
-}

@@ -188,16 +188,3 @@ export function groupSessionsByTemplate(
 
   return groups;
 }
-
-/**
- * Get Russian plural form for previous attempts label
- */
-function getPreviousAttemptsLabel(count: number): string {
-  const lastTwo = count % 100;
-  const lastOne = count % 10;
-
-  if (lastTwo >= 11 && lastTwo <= 14) return `${count} предыдущих попыток`;
-  if (lastOne === 1) return `${count} предыдущая попытка`;
-  if (lastOne >= 2 && lastOne <= 4) return `${count} предыдущие попытки`;
-  return `${count} предыдущих попыток`;
-}

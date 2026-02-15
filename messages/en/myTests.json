@@ -49,5 +49,16 @@
   "attempts": "{count, plural, one {# attempt} other {# attempts}}",
   "previousAttempts": "{count, plural, one {# previous attempt} other {# previous attempts}}",
   "earlier": "earlier",
-  "filterByStatus": "{label}: {count}. Click to filter."
+  "filterByStatus": "{label}: {count}. Click to filter.",
+  "performanceStats": {
+    "testsTaken": "Tests Taken",
+    "passed": "Passed",
+    "averageScore": "Average Score",
+    "totalTime": "Total Time"
+  },
+  "scoreGauge": {
+    "passed": "Passed",
+    "failed": "Failed",
+    "result": "Result"
+  }
 }

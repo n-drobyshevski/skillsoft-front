@@ -1,4 +1,7 @@
+'use client';
+
 import { cn } from '@/lib/utils';
+import { useTranslations } from 'next-intl';
 
 interface CircularProgressProps {
   /** Progress value from 0 to 100 */
@@ -107,6 +110,8 @@ interface ScoreGaugeProps {
 }
 
 export function ScoreGauge({ score, passed, size = 52, showLabel = true, className }: ScoreGaugeProps) {
+  const t = useTranslations('myTests');
+
   return (
     <div className={cn('flex items-center gap-2 sm:gap-3', className)}>
       <CircularProgress
@@ -135,9 +140,9 @@ export function ScoreGauge({ score, passed, size = 52, showLabel = true, classNa
               passed ? 'text-emerald-700 dark:text-emerald-400' : 'text-red-700 dark:text-red-400'
             )}
           >
-            {passed ? 'Пройден' : 'Не пройден'}
+            {passed ? t('scoreGauge.passed') : t('scoreGauge.failed')}
           </span>
-          <span className="text-xs text-muted-foreground hidden sm:block">Результат</span>
+          <span className="text-xs text-muted-foreground hidden sm:block">{t('scoreGauge.result')}</span>
         </div>
       )}
     </div>
