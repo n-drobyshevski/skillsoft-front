@@ -87,6 +87,10 @@ export interface CompetencyRadarDataPoint {
   subject: string;
   A: number;
   fullMark: number;
+  /** 95% CI lower bound (optional - renders confidence band when present) */
+  ciLower?: number;
+  /** 95% CI upper bound (optional - renders confidence band when present) */
+  ciUpper?: number;
 }
 
 interface CompetencyRadarChartProps {
@@ -282,6 +286,35 @@ function CompetencyRadarChartComponent({
             axisLine={false}
           />
 
+          {/* Confidence interval band (rendered behind main radar) */}
+          {data.some(d => d.ciLower != null && d.ciUpper != null) && (
+            <>
+              <Radar
+                name="CI Upper"
+                dataKey="ciUpper"
+                stroke={colors.primary}
+                strokeWidth={0}
+                fill={colors.primary}
+                fillOpacity={0.08}
+                isAnimationActive={animated}
+                animationDuration={600}
+                dot={false}
+              />
+              <Radar
+                name="CI Lower"
+                dataKey="ciLower"
+                stroke={colors.primary}
+                strokeWidth={0.5}
+                strokeDasharray="4 4"
+                strokeOpacity={0.3}
+                fill="none"
+                isAnimationActive={animated}
+                animationDuration={600}
+                dot={false}
+              />
+            </>
+          )}
+
           {/* Data area with subtle glow */}
           <Radar
             name="Оценка"
@@ -327,6 +360,14 @@ function CompetencyRadarChartComponent({
                       {score}%
                     </span>
                   </div>
+                  {item.ciLower != null && item.ciUpper != null && (
+                    <div className="flex items-center justify-between gap-3 mt-1">
+                      <span className="text-[10px] sm:text-xs text-muted-foreground">95% ДИ:</span>
+                      <span className="text-[10px] sm:text-xs font-medium tabular-nums text-foreground">
+                        {Math.round(item.ciLower)}&ndash;{Math.round(item.ciUpper)}%
+                      </span>
+                    </div>
+                  )}
                   {!isPassing && passingScore > 0 && (
                     <p className="text-[10px] sm:text-xs text-muted-foreground mt-1.5 pt-1.5 border-t border-border/50">
                       До цели: +{passingScore - score}%

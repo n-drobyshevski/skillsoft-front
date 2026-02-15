@@ -216,6 +216,30 @@ export function GapBar({
                 className={cn('absolute top-0 bottom-0 rounded', config.bg)}
               />
 
+              {/* Confidence interval error bars (whisker marks) */}
+              {dataPoint.ciLower != null && dataPoint.ciUpper != null && (
+                <>
+                  {/* CI horizontal line */}
+                  <div
+                    className="absolute top-1/2 -translate-y-1/2 h-0.5 bg-foreground/30 z-15"
+                    style={{
+                      left: `${(dataPoint.ciLower / maxValue) * 100}%`,
+                      width: `${((dataPoint.ciUpper - dataPoint.ciLower) / maxValue) * 100}%`,
+                    }}
+                  />
+                  {/* Left whisker cap */}
+                  <div
+                    className="absolute top-1 bottom-1 w-0.5 bg-foreground/30 z-15"
+                    style={{ left: `${(dataPoint.ciLower / maxValue) * 100}%` }}
+                  />
+                  {/* Right whisker cap */}
+                  <div
+                    className="absolute top-1 bottom-1 w-0.5 bg-foreground/30 z-15"
+                    style={{ left: `${(dataPoint.ciUpper / maxValue) * 100}%` }}
+                  />
+                </>
+              )}
+
               {/* Score label inside bar */}
               <div
                 className={cn(
@@ -250,6 +274,11 @@ export function GapBar({
               <p className={config.color}>
                 Gap: {dataPoint.gap > 0 ? '+' : ''}{Math.round(dataPoint.gap)}%
               </p>
+              {dataPoint.ciLower != null && dataPoint.ciUpper != null && (
+                <p className="text-muted-foreground">
+                  95% CI: {Math.round(dataPoint.ciLower)}&ndash;{Math.round(dataPoint.ciUpper)}%
+                </p>
+              )}
             </div>
           </div>
         </TooltipContent>

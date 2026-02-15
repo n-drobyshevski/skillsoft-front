@@ -986,6 +986,13 @@ export interface CompetencyScore {
   weight?: number;
   onetCode?: string; // O*NET code for Big Five projection
   indicatorScores?: IndicatorScore[];
+  // Confidence interval fields (populated by backend ConfidenceIntervalCalculator)
+  sem?: number;           // Standard Error of Measurement
+  ciLower?: number;       // 95% CI lower bound
+  ciUpper?: number;       // 95% CI upper bound
+  cronbachAlpha?: number; // Cronbach's alpha used for CI calculation
+  // Per-competency percentile rank
+  percentile?: number;    // Percentile rank within this competency across all takers
 }
 
 export interface IndicatorScore {
@@ -1007,6 +1014,36 @@ export interface QuestionScore {
   userAnswer?: string;
   correctAnswer?: string;
   timeSpentSeconds: number;
+}
+
+// ============================================
+// TREND TRACKING TYPES
+// ============================================
+
+/**
+ * Lightweight competency score for trend tracking.
+ * Matches backend CompetencyTrendPointDto.
+ */
+export interface CompetencyTrendPoint {
+  competencyId: string;
+  competencyName: string;
+  percentage: number | null;
+  ciLower?: number | null;
+  ciUpper?: number | null;
+}
+
+/**
+ * Single data point for historical trend visualization.
+ * Matches backend TrendDataPointDto.
+ */
+export interface TrendDataPoint {
+  resultId: string;
+  templateId: string;
+  templateName: string;
+  overallPercentage: number | null;
+  passed: boolean | null;
+  completedAt: string;
+  competencyScores: CompetencyTrendPoint[];
 }
 
 export interface UserStatistics {

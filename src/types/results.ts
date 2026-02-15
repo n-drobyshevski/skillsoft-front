@@ -90,6 +90,12 @@ export interface GapDataPoint {
   category?: string;
   /** Weight/importance (0-1) */
   weight?: number;
+  /** Confidence interval lower bound */
+  ciLower?: number;
+  /** Confidence interval upper bound */
+  ciUpper?: number;
+  /** Standard Error of Measurement */
+  sem?: number;
   /** Additional metadata */
   metadata?: {
     onetCode?: string;

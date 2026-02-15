@@ -29,3 +29,10 @@ export {
   DevelopmentRecommendations,
   RecommendationCard,
 } from './DevelopmentRecommendations';
+
+export {
+  TrendLineChart,
+  CompetencySparkline,
+  ImprovementBadge,
+  TrendOverview,
+} from './trends';

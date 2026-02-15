@@ -3,6 +3,7 @@ import { fetchApi } from './core';
 
 import type {
   TestResult,
+  TrendDataPoint,
   UserStatistics,
   TemplateStatistics,
   QuestionScore,
@@ -85,6 +86,23 @@ export const testResultsApi = {
     return fetchApi(`${TEST_RESULTS_BASE}/template/${templateId}/statistics`, {
       tags: [`template-statistics-${templateId}`],
       revalidate: 60,
+      authHeaders,
+    });
+  },
+
+  /**
+   * Get historical trend data for a user.
+   * Returns lightweight time-series data with competency-level scores.
+   */
+  getUserHistory: async (
+    clerkUserId: string,
+    templateId?: string
+  ): Promise<TrendDataPoint[]> => {
+    const authHeaders = await getAuthHeaders();
+    const params = templateId ? `?templateId=${templateId}` : '';
+    return fetchApi(`${TEST_RESULTS_BASE}/user/${clerkUserId}/history${params}`, {
+      tags: [`user-history-${clerkUserId}`],
+      cache: 'no-store',
       authHeaders,
     });
   },

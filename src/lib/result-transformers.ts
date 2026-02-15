@@ -51,6 +51,9 @@ export function toGapData(
         gap,
         category: score.competencyCategory,
         weight: includeWeights ? score.weight : undefined,
+        ciLower: score.ciLower,
+        ciUpper: score.ciUpper,
+        sem: score.sem,
         metadata: {
           onetCode: score.onetCode,
           questionsAnswered: score.questionsAnswered,
@@ -92,6 +95,9 @@ export function toGapDataWithBenchmarks(
         gap,
         category: score.competencyCategory,
         weight: includeWeights ? score.weight : undefined,
+        ciLower: score.ciLower,
+        ciUpper: score.ciUpper,
+        sem: score.sem,
         metadata: {
           onetCode: score.onetCode,
           questionsAnswered: score.questionsAnswered,
