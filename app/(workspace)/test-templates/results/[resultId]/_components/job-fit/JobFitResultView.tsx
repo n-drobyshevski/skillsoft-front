@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useRef, useState, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import {
   BarChart3,
@@ -23,6 +23,7 @@ import {
   toGapData,
   generateRecommendationsFromGaps,
 } from '@/lib/result-transformers';
+import type { GapDataPoint } from '@/types/results';
 
 /**
  * Job Fit Result View for Scenario B (O*NET Benchmark Comparison).
@@ -41,6 +42,10 @@ export function JobFitResultView({ result, template }: BaseResultViewProps) {
 
   const competencyScores = result.competencyScores ?? [];
 
+  // V2: State and ref for gap bar click -> competency profile scroll/expand
+  const [focusedCompetencyId, setFocusedCompetencyId] = useState<string | null>(null);
+  const competencyProfileRef = useRef<HTMLDivElement>(null);
+
   // Transform data for enhanced gap analysis chart
   const gapData = useMemo(() => {
     return toGapData(competencyScores, { defaultTarget: passingScore });
@@ -54,12 +59,14 @@ export function JobFitResultView({ result, template }: BaseResultViewProps) {
     });
   }, [gapData]);
 
-  // Prepare data for radar chart
+  // Prepare data for radar chart (V1: includes CI bands)
   const radarData = useMemo(() => {
     return competencyScores.map(cs => ({
       subject: cs.competencyName,
       A: Math.round(cs.percentage),
-      fullMark: 100
+      fullMark: 100,
+      ciLower: cs.ciLower != null ? Math.round(cs.ciLower) : undefined,
+      ciUpper: cs.ciUpper != null ? Math.round(cs.ciUpper) : undefined,
     }));
   }, [competencyScores]);
 
@@ -73,6 +80,17 @@ export function JobFitResultView({ result, template }: BaseResultViewProps) {
 
     return { strengths, gaps, avgScore };
   }, [competencyScores, passingScore]);
+
+  // V2: Handler for gap bar click -> scroll to competency profile and expand
+  const handleGapBarClick = useCallback((dataPoint: GapDataPoint) => {
+    const match = competencyScores.find(
+      cs => cs.competencyName === dataPoint.name
+    );
+    if (match) {
+      setFocusedCompetencyId(match.competencyId);
+      competencyProfileRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, [competencyScores]);
 
   return (
     <div className="min-h-screen bg-muted/30 py-3 sm:py-4 md:py-8">
@@ -110,6 +128,7 @@ export function JobFitResultView({ result, template }: BaseResultViewProps) {
                 animate={true}
                 sortBy="gap"
                 sortDirection="desc"
+                onBarClick={handleGapBarClick}
               />
             </CardContent>
           </Card>
@@ -259,12 +278,15 @@ export function JobFitResultView({ result, template }: BaseResultViewProps) {
         )}
 
         {/* Detailed competency breakdown - Mobile-First */}
-        <CompetencyProfile
-          competencies={competencyScores}
-          resultId={result.id}
-          showPassFail={true}
-          passingScore={passingScore}
-        />
+        <div ref={competencyProfileRef}>
+          <CompetencyProfile
+            competencies={competencyScores}
+            resultId={result.id}
+            showPassFail={true}
+            passingScore={passingScore}
+            expandedCompetencyId={focusedCompetencyId}
+          />
+        </div>
 
         {/* Development Recommendations */}
         {recommendations.length > 0 && (

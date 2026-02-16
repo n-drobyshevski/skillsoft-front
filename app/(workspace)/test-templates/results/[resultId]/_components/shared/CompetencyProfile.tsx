@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState, useCallback } from 'react';
+import { useMemo, useState, useCallback, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -38,6 +38,7 @@ interface CompetencyProfileProps {
   showPassFail?: boolean;
   passingScore?: number;
   className?: string;
+  expandedCompetencyId?: string | null;
 }
 
 type PerformanceTier = 'excellent' | 'good' | 'average' | 'developing';
@@ -627,10 +628,20 @@ export function CompetencyProfile({
   showPassFail = false,
   passingScore = 70,
   className,
+  expandedCompetencyId,
 }: CompetencyProfileProps) {
   const t = useTranslations('template.resultsView');
   const [expandedMobile, setExpandedMobile] = useState<string | null>(null);
   const [showAll, setShowAll] = useState(false);
+  const [accordionValue, setAccordionValue] = useState<string | undefined>(undefined);
+
+  // Sync expandedCompetencyId to desktop accordion and mobile expanded state
+  useEffect(() => {
+    if (expandedCompetencyId) {
+      setAccordionValue(expandedCompetencyId);
+      setExpandedMobile(expandedCompetencyId);
+    }
+  }, [expandedCompetencyId]);
 
   // Sort by percentage descending
   const sortedCompetencies = useMemo(
@@ -701,7 +712,7 @@ export function CompetencyProfile({
 
         {/* Desktop View */}
         <div className="hidden sm:block">
-          <Accordion type="single" collapsible className="space-y-1">
+          <Accordion type="single" collapsible value={accordionValue} onValueChange={setAccordionValue} className="space-y-1">
             {sortedCompetencies.map((comp, index) => (
               <DesktopCompetencyRow
                 key={comp.competencyId}
