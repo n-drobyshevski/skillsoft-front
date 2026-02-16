@@ -2537,3 +2537,93 @@ textarea:focus-visible,
 		transform: none;
 	}
 }
+
+/* ===== PRINT STYLES ===== */
+
+/* Utility class to hide elements in print */
+.print-hidden {
+	/* Visible by default */
+}
+
+@media print {
+
+	/* Hide navigation, sidebar, action buttons, and interactive-only elements */
+	nav,
+	[data-sidebar],
+	.print-hidden,
+	.action-buttons-bar,
+	button:not(.print-visible),
+	[role="navigation"] {
+		display: none !important;
+	}
+
+	/* Reset backgrounds for ink saving, preserve exact colors for charts */
+	body {
+		background: white !important;
+		color: black !important;
+		-webkit-print-color-adjust: exact;
+		print-color-adjust: exact;
+		font-size: 10pt !important;
+	}
+
+	/* Ensure charts and SVGs print with colors */
+	.recharts-wrapper,
+	svg {
+		print-color-adjust: exact !important;
+		-webkit-print-color-adjust: exact !important;
+	}
+
+	/* Page break rules - keep cards together */
+	.card,
+	[data-card],
+	[data-slot="card"] {
+		break-inside: avoid;
+		page-break-inside: avoid;
+	}
+
+	/* Disable all animations and transitions */
+	* {
+		animation: none !important;
+		transition: none !important;
+	}
+
+	/* Full width layout */
+	.container {
+		max-width: 100% !important;
+		padding: 0 !important;
+	}
+
+	/* Adjust font sizes for print readability */
+	h1,
+	h2,
+	h3 {
+		font-size: 14pt !important;
+	}
+
+	h4,
+	h5,
+	h6 {
+		font-size: 12pt !important;
+	}
+
+	/* Ensure links show their URL in print */
+	a[href^="http"]::after {
+		content: " (" attr(href) ")";
+		font-size: 8pt;
+		font-weight: normal;
+		color: #666;
+	}
+
+	/* Prevent color badges from losing contrast */
+	[data-slot="badge"] {
+		print-color-adjust: exact !important;
+		-webkit-print-color-adjust: exact !important;
+		border: 1px solid #999 !important;
+	}
+
+	/* Ensure muted backgrounds are visible */
+	.bg-muted\/30,
+	.bg-muted\/40 {
+		background: #f5f5f5 !important;
+	}
+}

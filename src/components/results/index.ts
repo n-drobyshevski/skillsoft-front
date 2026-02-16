@@ -36,3 +36,7 @@ export {
   ImprovementBadge,
   TrendOverview,
 } from './trends';
+
+export {
+  HiringScorecard,
+} from './HiringScorecard';

@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useRef, useState, useCallback } from 'react';
+import { useMemo, useRef, useState, useCallback, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import {
   BarChart3,
@@ -9,7 +9,8 @@ import {
   CheckCircle2,
   Target,
   Briefcase,
-  Grid3x3
+  Grid3x3,
+  TrendingUp,
 } from 'lucide-react';
 import CompetencyRadarChart from '@/components/data-display/charts/CompetencyRadarChart';
 import { JobFitHero } from './JobFitHero';
@@ -19,6 +20,8 @@ import { BaseResultViewProps } from '../shared/types';
 import {
   GapAnalysisChart,
   DevelopmentRecommendations,
+  HiringScorecard,
+  TrendOverview,
 } from '@/components/results';
 import { IndicatorHeatmap } from '@/components/results/IndicatorHeatmap';
 import {
@@ -26,6 +29,8 @@ import {
   generateRecommendationsFromGaps,
 } from '@/lib/result-transformers';
 import type { GapDataPoint } from '@/types/results';
+import type { TrendDataPoint } from '@/types/domain';
+import { testResultsApi } from '@/services/api/results';
 
 /**
  * Job Fit Result View for Scenario B (O*NET Benchmark Comparison).
@@ -47,6 +52,47 @@ export function JobFitResultView({ result, template }: BaseResultViewProps) {
   // V2: State and ref for gap bar click -> competency profile scroll/expand
   const [focusedCompetencyId, setFocusedCompetencyId] = useState<string | null>(null);
   const competencyProfileRef = useRef<HTMLDivElement>(null);
+
+  // V7: Trend data for historical progress visualization
+  const [trendData, setTrendData] = useState<TrendDataPoint[] | null>(null);
+
+  // Extract confidence metrics from extendedMetrics (loosely typed for cross-scenario support)
+  const extendedMetrics = result.extendedMetrics as
+    | (Record<string, unknown> & { confidenceLevel?: string; confidenceMessage?: string })
+    | null
+    | undefined;
+  const confidenceLevel = extendedMetrics?.confidenceLevel;
+  const confidenceMessage = extendedMetrics?.confidenceMessage;
+
+  // V7: Fetch historical trend data for this template
+  useEffect(() => {
+    let cancelled = false;
+
+    async function fetchTrend() {
+      try {
+        const history = await testResultsApi.getUserHistory(
+          result.clerkUserId,
+          result.templateId
+        );
+        if (!cancelled && history) {
+          setTrendData(history);
+        }
+      } catch {
+        // Silently fail - trend is optional enhancement
+        if (!cancelled) {
+          setTrendData(null);
+        }
+      }
+    }
+
+    if (result.clerkUserId && result.templateId) {
+      fetchTrend();
+    }
+
+    return () => {
+      cancelled = true;
+    };
+  }, [result.clerkUserId, result.templateId]);
 
   // Transform data for enhanced gap analysis chart
   const gapData = useMemo(() => {
@@ -109,6 +155,17 @@ export function JobFitResultView({ result, template }: BaseResultViewProps) {
           totalQuestions={result.totalQuestions}
           timeSpent={result.totalTimeSeconds}
           percentile={result.percentile ?? undefined}
+        />
+
+        {/* V5: Hiring Scorecard - Executive Summary */}
+        <HiringScorecard
+          overallPercentage={result.overallPercentage ?? 0}
+          passed={isPassed}
+          competencyScores={competencyScores}
+          passingScore={passingScore}
+          onetSocCode={onetSocCode}
+          confidenceLevel={confidenceLevel}
+          confidenceMessage={confidenceMessage}
         />
 
         {/* Charts + Insights Section */}
@@ -309,6 +366,24 @@ export function JobFitResultView({ result, template }: BaseResultViewProps) {
           />
         </div>
 
+        {/* V7: Progress Over Time */}
+        {trendData && trendData.length > 1 && (
+          <Card className="animate-fadeInUp-4">
+            <CardHeader>
+              <CardTitle className="text-sm sm:text-lg font-semibold flex items-center gap-2">
+                <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 shrink-0" />
+                Progress Over Time
+              </CardTitle>
+              <CardDescription className="text-[10px] sm:text-sm">
+                Your improvement across attempts
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <TrendOverview data={trendData} passingThreshold={passingScore} />
+            </CardContent>
+          </Card>
+        )}
+
         {/* Development Recommendations */}
         {recommendations.length > 0 && (
           <Card className="animate-fadeInUp-4">
@@ -325,11 +400,13 @@ export function JobFitResultView({ result, template }: BaseResultViewProps) {
         )}
 
         {/* Action buttons */}
-        <ActionButtonsBar
-          templateId={result.templateId}
-          resultId={result.id}
-          actions={['download_report', 'retake', 'share']}
-        />
+        <div className="print-hidden">
+          <ActionButtonsBar
+            templateId={result.templateId}
+            resultId={result.id}
+            actions={['download_report', 'retake', 'share']}
+          />
+        </div>
       </div>
     </div>
   );
