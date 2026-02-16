@@ -1006,6 +1006,7 @@ export interface CompetencyScore {
   cronbachAlpha?: number; // Cronbach's alpha used for CI calculation
   // Per-competency percentile rank
   percentile?: number;    // Percentile rank within this competency across all takers
+  benchmarkScore?: number; // O*NET benchmark score for this competency (S1)
 }
 
 export interface IndicatorScore {

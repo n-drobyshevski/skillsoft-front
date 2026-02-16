@@ -8,7 +8,8 @@ import {
   AlertTriangle,
   CheckCircle2,
   Target,
-  Briefcase
+  Briefcase,
+  Grid3x3
 } from 'lucide-react';
 import CompetencyRadarChart from '@/components/data-display/charts/CompetencyRadarChart';
 import { JobFitHero } from './JobFitHero';
@@ -19,6 +20,7 @@ import {
   GapAnalysisChart,
   DevelopmentRecommendations,
 } from '@/components/results';
+import { IndicatorHeatmap } from '@/components/results/IndicatorHeatmap';
 import {
   toGapData,
   generateRecommendationsFromGaps,
@@ -59,7 +61,7 @@ export function JobFitResultView({ result, template }: BaseResultViewProps) {
     });
   }, [gapData]);
 
-  // Prepare data for radar chart (V1: includes CI bands)
+  // Prepare data for radar chart (V1: includes CI bands, V3: includes benchmark overlay)
   const radarData = useMemo(() => {
     return competencyScores.map(cs => ({
       subject: cs.competencyName,
@@ -67,6 +69,7 @@ export function JobFitResultView({ result, template }: BaseResultViewProps) {
       fullMark: 100,
       ciLower: cs.ciLower != null ? Math.round(cs.ciLower) : undefined,
       ciUpper: cs.ciUpper != null ? Math.round(cs.ciUpper) : undefined,
+      benchmark: cs.benchmarkScore != null ? Math.round(cs.benchmarkScore) : undefined,
     }));
   }, [competencyScores]);
 
@@ -273,6 +276,24 @@ export function JobFitResultView({ result, template }: BaseResultViewProps) {
                   passingScore={passingScore}
                 />
               </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Indicator-Level Heatmap */}
+        {competencyScores.some(cs => cs.indicatorScores && cs.indicatorScores.length > 0) && (
+          <Card className="animate-fadeInUp-3">
+            <CardHeader className="pb-2 sm:pb-3 px-3 sm:px-6">
+              <CardTitle className="text-sm sm:text-lg font-semibold flex items-center gap-2">
+                <Grid3x3 className="h-4 w-4 sm:h-5 sm:w-5 shrink-0" />
+                Indicator Breakdown
+              </CardTitle>
+              <CardDescription className="text-[10px] sm:text-sm">
+                Per-indicator score heatmap
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="px-2 sm:px-6">
+              <IndicatorHeatmap competencies={competencyScores} />
             </CardContent>
           </Card>
         )}

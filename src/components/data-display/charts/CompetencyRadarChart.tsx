@@ -91,6 +91,8 @@ export interface CompetencyRadarDataPoint {
   ciLower?: number;
   /** 95% CI upper bound (optional - renders confidence band when present) */
   ciUpper?: number;
+  /** O*NET benchmark target score (optional - renders benchmark line when present) */
+  benchmark?: number;
 }
 
 interface CompetencyRadarChartProps {
@@ -315,6 +317,21 @@ function CompetencyRadarChartComponent({
             </>
           )}
 
+          {/* O*NET Benchmark overlay (dashed reference line) */}
+          {data.some(d => d.benchmark != null) && (
+            <Radar
+              name="Benchmark"
+              dataKey="benchmark"
+              stroke={colors.mutedForeground}
+              strokeWidth={1.5}
+              strokeDasharray="6 4"
+              fill="none"
+              isAnimationActive={animated}
+              animationDuration={600}
+              dot={false}
+            />
+          )}
+
           {/* Data area with subtle glow */}
           <Radar
             name="Оценка"
@@ -365,6 +382,14 @@ function CompetencyRadarChartComponent({
                       <span className="text-[10px] sm:text-xs text-muted-foreground">95% ДИ:</span>
                       <span className="text-[10px] sm:text-xs font-medium tabular-nums text-foreground">
                         {Math.round(item.ciLower)}&ndash;{Math.round(item.ciUpper)}%
+                      </span>
+                    </div>
+                  )}
+                  {item.benchmark != null && (
+                    <div className="flex items-center justify-between gap-3 mt-1">
+                      <span className="text-[10px] sm:text-xs text-muted-foreground">Эталон:</span>
+                      <span className="text-[10px] sm:text-xs font-medium tabular-nums text-foreground">
+                        {Math.round(item.benchmark)}%
                       </span>
                     </div>
                   )}

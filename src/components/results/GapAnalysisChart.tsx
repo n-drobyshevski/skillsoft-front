@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useMemo, useState } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion, AnimatePresence, useReducedMotion } from 'motion/react';
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
 import {
@@ -162,6 +162,9 @@ export function GapBar({
   onClick,
   isMobile = false,
 }: GapBarProps) {
+  const shouldReduceMotion = useReducedMotion();
+  const effectiveAnimate = animate && !shouldReduceMotion;
+
   const status = getGapStatus(dataPoint.actualScore, dataPoint.targetScore, tolerance);
   const config = STATUS_CONFIG[status];
   const actualPercent = (dataPoint.actualScore / maxValue) * 100;
@@ -177,7 +180,7 @@ export function GapBar({
       <Tooltip>
         <TooltipTrigger asChild>
           <motion.div
-            initial={animate ? { opacity: 0, x: -20 } : false}
+            initial={effectiveAnimate ? { opacity: 0, x: -20 } : false}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: index * 0.05, duration: 0.3 }}
             className={cn(
@@ -210,7 +213,7 @@ export function GapBar({
 
               {/* Actual bar */}
               <motion.div
-                initial={animate ? { width: 0 } : false}
+                initial={effectiveAnimate ? { width: 0 } : false}
                 animate={{ width: `${actualPercent}%` }}
                 transition={{ delay: index * 0.05 + 0.2, duration: 0.5, ease: 'easeOut' }}
                 className={cn('absolute top-0 bottom-0 rounded', config.bg)}
@@ -467,6 +470,28 @@ export function GapAnalysisChart({
           <div className="text-sm font-bold tabular-nums text-red-600 dark:text-red-400">
             {summary.criticalCount}
           </div>
+        </div>
+      </div>
+
+      {/* Screen reader: accessible data table */}
+      <div className="sr-only" role="table" aria-label="Gap analysis data">
+        <div role="rowgroup">
+          <div role="row">
+            <span role="columnheader">Competency</span>
+            <span role="columnheader">Your Score</span>
+            <span role="columnheader">Target</span>
+            <span role="columnheader">Gap</span>
+          </div>
+        </div>
+        <div role="rowgroup">
+          {data.map((d) => (
+            <div key={d.id} role="row">
+              <span role="cell">{d.name}</span>
+              <span role="cell">{Math.round(d.actualScore)}%</span>
+              <span role="cell">{Math.round(d.targetScore)}%</span>
+              <span role="cell">{d.gap > 0 ? '+' : ''}{Math.round(d.gap)}%</span>
+            </div>
+          ))}
         </div>
       </div>
     </div>
