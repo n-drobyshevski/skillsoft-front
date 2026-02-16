@@ -918,10 +918,25 @@ export interface SubmitAnswerRequest {
 export type ResultStatus = 'PENDING' | 'COMPLETED' | 'FAILED';
 
 /**
+ * Response consistency analysis fields.
+ * Populated by backend consistency analysis across all assessment goals.
+ */
+export interface ConsistencyMetrics {
+  /** Overall response consistency score (0-1). Higher = more consistent. */
+  consistencyScore?: number;
+  /** Human-readable consistency warning flags */
+  consistencyFlags?: string[];
+  /** Rate of speed anomalies detected (0-1). Higher = more anomalies. */
+  speedAnomalyRate?: number;
+  /** Rate of straight-lining detected (0-1). Higher = more straight-lining. */
+  straightLiningRate?: number;
+}
+
+/**
  * Extended metrics for TEAM_FIT assessment results.
  * Populated by TeamFitScoringStrategy on backend.
  */
-export interface TeamFitExtendedMetrics {
+export interface TeamFitExtendedMetrics extends ConsistencyMetrics {
   /** Ratio of unique skills candidate brings to team (0-1) */
   diversityRatio: number;
   /** Ratio of overlapping skills with team (0-1) */
@@ -938,6 +953,36 @@ export interface TeamFitExtendedMetrics {
   competencySaturation?: Record<string, number>;
   /** Personality compatibility between candidate and team Big Five profiles (0-1). Null if no personality data. */
   personalityCompatibility?: number | null;
+}
+
+/**
+ * Generic extended metrics for any assessment goal.
+ * Contains optional consistency analysis and goal-specific fields.
+ */
+export interface GenericExtendedMetrics extends ConsistencyMetrics {
+  /** Confidence level computed by backend */
+  confidenceLevel?: string;
+  /** Human-readable confidence message */
+  confidenceMessage?: string;
+  /** Allow additional dynamic fields from backend */
+  [key: string]: unknown;
+}
+
+/**
+ * Type guard to check if extended metrics contain TEAM_FIT specific fields.
+ */
+export function isTeamFitMetrics(
+  metrics: TeamFitExtendedMetrics | GenericExtendedMetrics | null | undefined,
+): metrics is TeamFitExtendedMetrics {
+  if (!metrics) return false;
+  return (
+    'diversityRatio' in metrics &&
+    'saturationRatio' in metrics &&
+    'teamFitMultiplier' in metrics &&
+    typeof metrics.diversityRatio === 'number' &&
+    typeof metrics.saturationRatio === 'number' &&
+    typeof metrics.teamFitMultiplier === 'number'
+  );
 }
 
 /**
@@ -982,10 +1027,10 @@ export interface TestResult {
    */
   bigFiveProfile?: Record<string, number> | null;
   /**
-   * Extended metrics for TEAM_FIT scoring strategy.
-   * Contains diversity/saturation analysis for team composition.
+   * Extended metrics for scoring strategy.
+   * Contains diversity/saturation analysis for TEAM_FIT, consistency data for all goals.
    */
-  extendedMetrics?: TeamFitExtendedMetrics | null;
+  extendedMetrics?: TeamFitExtendedMetrics | GenericExtendedMetrics | null;
 }
 
 export interface CompetencyScore {
@@ -1082,7 +1127,7 @@ export interface TemplateStatistics {
 // CANDIDATE COMPARISON TYPES
 // ============================================
 
-/** Top-level comparison response for side-by-side Team Fit analysis. */
+/** Top-level comparison response for side-by-side candidate analysis. */
 export interface CandidateComparison {
   templateId: string;
   templateName: string;
@@ -1095,6 +1140,8 @@ export interface CandidateComparison {
   gapCoverageMatrix: GapCoverageEntry[];
   complementarityPairs: CandidatePairComplementarity[];
   teamCompetencySaturation: Record<string, number>;
+  /** Assessment goal context. Inferred from backend response structure when not explicitly provided. */
+  goal?: 'JOB_FIT' | 'TEAM_FIT' | 'OVERVIEW';
 }
 
 /** Per-candidate summary with rankings and scores. */

@@ -12,6 +12,8 @@ interface CompetencyTableProps {
   candidates: CandidateSummary[];
   competencyComparison: CompetencyComparisonEntry[];
   colorMap: Map<string, number>;
+  /** When true, adapts labels and columns for JOB_FIT benchmark comparison. */
+  isJobFit?: boolean;
 }
 
 /** Returns Tailwind classes for a percentage cell background. */
@@ -25,21 +27,41 @@ function getScoreCellClasses(percentage: number): string {
   return 'bg-red-50 text-red-700 dark:bg-red-900/20 dark:text-red-300';
 }
 
+/** Returns Tailwind classes for a candidate score cell when below benchmark in JOB_FIT mode. */
+function getBelowBenchmarkClasses(score: number, benchmark: number | null): string {
+  if (benchmark !== null && score < benchmark) {
+    return 'bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-300';
+  }
+  return '';
+}
+
 /**
  * Competency comparison table with color-coded score cells.
- * Rows are competencies, columns are team saturation + one per candidate.
+ * Rows are competencies, columns are team saturation / benchmark + one per candidate.
  * Mobile: horizontal scroll with sticky first column.
+ *
+ * In JOB_FIT mode:
+ * - "Team Saturation" column is labeled "Benchmark"
+ * - "Gap" badge becomes "Below Benchmark"
+ * - Candidate cells below benchmark are highlighted amber
  */
 export function CompetencyTable({
   candidates,
   competencyComparison,
   colorMap,
+  isJobFit = false,
 }: CompetencyTableProps) {
   const t = useTranslations('results.comparison');
 
   if (competencyComparison.length === 0) {
     return null;
   }
+
+  const saturationLabel = isJobFit ? t('jobFit.teamSaturation') : t('teamSaturation');
+  const gapLabel = isJobFit ? t('jobFit.teamGap') : t('teamGap');
+  const descriptionText = isJobFit
+    ? t('jobFit.competencyBreakdownDescription')
+    : t('competencyBreakdownDescription');
 
   return (
     <Card>
@@ -49,7 +71,7 @@ export function CompetencyTable({
           {t('competencyBreakdown')}
         </CardTitle>
         <CardDescription className="text-[10px] sm:text-sm">
-          {t('competencyBreakdownDescription')}
+          {descriptionText}
         </CardDescription>
       </CardHeader>
       <CardContent className="px-0 sm:px-6 pb-4">
@@ -61,7 +83,7 @@ export function CompetencyTable({
                   {t('competency')}
                 </th>
                 <th className="px-3 py-2 text-center text-xs font-semibold text-muted-foreground uppercase tracking-wider min-w-[70px]">
-                  {t('teamSaturation')}
+                  {saturationLabel}
                 </th>
                 {candidates.map((candidate) => {
                   const colorIdx = colorMap.get(candidate.resultId) ?? 0;
@@ -99,16 +121,23 @@ export function CompetencyTable({
                           variant="outline"
                           className="text-[9px] shrink-0 bg-amber-50 text-amber-600 border-amber-300 dark:bg-amber-900/30 dark:text-amber-300"
                         >
-                          {t('teamGap')}
+                          {gapLabel}
                         </Badge>
                       )}
                     </div>
                   </td>
 
-                  {/* Team saturation */}
+                  {/* Team saturation / Benchmark */}
                   <td className="px-3 py-2.5 text-center">
                     {entry.teamSaturation !== null ? (
-                      <span className="text-xs font-medium tabular-nums text-muted-foreground">
+                      <span
+                        className={cn(
+                          'text-xs font-medium tabular-nums',
+                          isJobFit
+                            ? 'text-blue-600 dark:text-blue-400 font-semibold'
+                            : 'text-muted-foreground',
+                        )}
+                      >
                         {Math.round(entry.teamSaturation)}%
                       </span>
                     ) : (
@@ -130,13 +159,16 @@ export function CompetencyTable({
                     }
 
                     const rounded = Math.round(score);
+                    const belowBenchmark = isJobFit
+                      ? getBelowBenchmarkClasses(rounded, entry.teamSaturation)
+                      : '';
 
                     return (
                       <td key={candidate.resultId} className="px-3 py-2.5 text-center">
                         <span
                           className={cn(
                             'inline-block px-2 py-0.5 rounded-md text-xs tabular-nums',
-                            getScoreCellClasses(rounded),
+                            belowBenchmark || getScoreCellClasses(rounded),
                             isBest && 'font-bold ring-1 ring-current/20',
                           )}
                         >

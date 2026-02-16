@@ -56,13 +56,24 @@ export function JobFitResultView({ result, template }: BaseResultViewProps) {
   // V7: Trend data for historical progress visualization
   const [trendData, setTrendData] = useState<TrendDataPoint[] | null>(null);
 
-  // Extract confidence metrics from extendedMetrics (loosely typed for cross-scenario support)
+  // Extract confidence and consistency metrics from extendedMetrics (loosely typed for cross-scenario support)
   const extendedMetrics = result.extendedMetrics as
-    | (Record<string, unknown> & { confidenceLevel?: string; confidenceMessage?: string })
+    | (Record<string, unknown> & {
+        confidenceLevel?: string;
+        confidenceMessage?: string;
+        consistencyScore?: number;
+        consistencyFlags?: string[];
+      })
     | null
     | undefined;
   const confidenceLevel = extendedMetrics?.confidenceLevel;
   const confidenceMessage = extendedMetrics?.confidenceMessage;
+  const consistencyScore = typeof extendedMetrics?.consistencyScore === 'number'
+    ? extendedMetrics.consistencyScore
+    : undefined;
+  const consistencyFlags = Array.isArray(extendedMetrics?.consistencyFlags)
+    ? extendedMetrics.consistencyFlags
+    : undefined;
 
   // V7: Fetch historical trend data for this template
   useEffect(() => {
@@ -166,6 +177,8 @@ export function JobFitResultView({ result, template }: BaseResultViewProps) {
           onetSocCode={onetSocCode}
           confidenceLevel={confidenceLevel}
           confidenceMessage={confidenceMessage}
+          consistencyScore={consistencyScore}
+          consistencyFlags={consistencyFlags}
         />
 
         {/* Charts + Insights Section */}

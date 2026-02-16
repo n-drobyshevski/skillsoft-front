@@ -1,8 +1,9 @@
 'use client';
 
+import { useMemo } from 'react';
 import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
-import { Users, ArrowLeft, Info } from 'lucide-react';
+import { Users, ArrowLeft, Info, Briefcase } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -26,14 +27,35 @@ export const CANDIDATE_COLORS = [
   { bg: 'bg-rose-500', text: 'text-rose-600', border: 'border-rose-500', fill: '#f43f5e' },
 ] as const;
 
+/** Comparison goal context inferred from response data. */
+export type ComparisonGoalContext = 'TEAM_FIT' | 'JOB_FIT';
+
+/**
+ * Infer the comparison goal context from the response data.
+ * JOB_FIT: teamAvailable is false and teamId is absent/empty.
+ * Otherwise defaults to TEAM_FIT.
+ */
+export function inferGoalContext(data: CandidateComparison): ComparisonGoalContext {
+  if (data.goal === 'JOB_FIT') return 'JOB_FIT';
+  if (data.goal === 'TEAM_FIT') return 'TEAM_FIT';
+  // Infer from structure when goal is not explicitly set
+  if (!data.teamAvailable && (!data.teamId || data.teamId.trim() === '')) {
+    return 'JOB_FIT';
+  }
+  return 'TEAM_FIT';
+}
+
 interface ComparisonViewProps {
   data: CandidateComparison;
 }
 
 /**
  * Main orchestrator for the candidate comparison page.
- * Renders all sections in order: Header, RankingCards, ComparisonRadar,
- * CompetencyTable, GapCoverageMatrix, and ComplementarityPairs.
+ * Detects assessment goal context (TEAM_FIT vs JOB_FIT) and adjusts
+ * section titles, visibility, and labels accordingly.
+ *
+ * Renders: Header, RankingCards, ComparisonRadar,
+ * CompetencyTable, GapCoverageMatrix, and ComplementarityPairs (TEAM_FIT only).
  */
 export function ComparisonView({ data }: ComparisonViewProps) {
   const t = useTranslations('results.comparison');
@@ -49,6 +71,9 @@ export function ComparisonView({ data }: ComparisonViewProps) {
     gapCoverageMatrix,
     complementarityPairs,
   } = data;
+
+  const goalContext = useMemo(() => inferGoalContext(data), [data]);
+  const isJobFit = goalContext === 'JOB_FIT';
 
   // Build a map from resultId to color index for consistent coloring
   const colorMap = new Map<string, number>();
@@ -77,13 +102,19 @@ export function ComparisonView({ data }: ComparisonViewProps) {
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div className="space-y-1">
               <div className="flex items-center gap-2">
-                <Users className="h-5 w-5 sm:h-6 sm:w-6 text-primary shrink-0" />
+                {isJobFit ? (
+                  <Briefcase className="h-5 w-5 sm:h-6 sm:w-6 text-primary shrink-0" />
+                ) : (
+                  <Users className="h-5 w-5 sm:h-6 sm:w-6 text-primary shrink-0" />
+                )}
                 <h1 className="text-lg sm:text-2xl font-bold tracking-tight">
                   {t('title')}
                 </h1>
               </div>
               <p className="text-xs sm:text-sm text-muted-foreground">
-                {t('subtitle', { count: candidates.length })}
+                {isJobFit
+                  ? t('jobFit.subtitle', { count: candidates.length })
+                  : t('subtitle', { count: candidates.length })}
               </p>
             </div>
             <Button
@@ -97,7 +128,7 @@ export function ComparisonView({ data }: ComparisonViewProps) {
             </Button>
           </div>
 
-          {/* Team context badges */}
+          {/* Context badges */}
           <div className="flex flex-wrap items-center gap-2 mt-3">
             <Badge variant="secondary" className="text-xs">
               {templateName}
@@ -107,15 +138,20 @@ export function ComparisonView({ data }: ComparisonViewProps) {
                 {t('targetRole', { role: targetRole })}
               </Badge>
             )}
-            {teamAvailable && (
+            {!isJobFit && teamAvailable && (
               <Badge variant="outline" className="text-xs">
                 {t('teamSize', { count: teamSize })}
               </Badge>
             )}
+            {isJobFit && (
+              <Badge variant="outline" className="text-xs border-blue-300 bg-blue-50/50 dark:border-blue-800 dark:bg-blue-950/20">
+                Job Fit
+              </Badge>
+            )}
           </div>
 
-          {/* Team unavailable banner */}
-          {!teamAvailable && (
+          {/* Team unavailable banner (only for TEAM_FIT context) */}
+          {!isJobFit && !teamAvailable && (
             <Alert variant="default" className="mt-3 border-amber-200 bg-amber-50/50 dark:border-amber-800 dark:bg-amber-950/20">
               <Info className="h-4 w-4 text-amber-600 dark:text-amber-400" />
               <AlertDescription className="text-xs text-amber-700 dark:text-amber-300">
@@ -130,6 +166,7 @@ export function ComparisonView({ data }: ComparisonViewProps) {
           <RankingCards
             candidates={sortedCandidates}
             colorMap={colorMap}
+            isJobFit={isJobFit}
           />
         </div>
 
@@ -148,22 +185,24 @@ export function ComparisonView({ data }: ComparisonViewProps) {
             candidates={sortedCandidates}
             competencyComparison={competencyComparison}
             colorMap={colorMap}
+            isJobFit={isJobFit}
           />
         </div>
 
-        {/* Gap Coverage Matrix */}
+        {/* Gap Coverage Matrix / Benchmark Gap Analysis */}
         {gapCoverageMatrix.length > 0 && (
           <div className="animate-fadeInUp-4">
             <GapCoverageMatrix
               candidates={sortedCandidates}
               gapCoverageMatrix={gapCoverageMatrix}
               colorMap={colorMap}
+              isJobFit={isJobFit}
             />
           </div>
         )}
 
-        {/* Complementarity Pairs */}
-        {complementarityPairs.length > 0 && (
+        {/* Complementarity Pairs (TEAM_FIT only - not applicable for JOB_FIT) */}
+        {!isJobFit && complementarityPairs.length > 0 && (
           <div className="animate-fadeInUp-5">
             <ComplementarityPairs
               complementarityPairs={complementarityPairs}

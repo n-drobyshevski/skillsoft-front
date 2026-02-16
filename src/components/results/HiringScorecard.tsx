@@ -9,6 +9,8 @@ import {
   TrendingUp,
   TrendingDown,
   ShieldCheck,
+  ShieldAlert,
+  ShieldX,
   BarChart3,
   AlertTriangle,
 } from 'lucide-react';
@@ -23,6 +25,10 @@ interface HiringScorecardProps {
   onetSocCode?: string;
   confidenceLevel?: string;
   confidenceMessage?: string;
+  /** Response consistency score (0-1) from extendedMetrics. */
+  consistencyScore?: number;
+  /** Human-readable consistency warning flags from extendedMetrics. */
+  consistencyFlags?: string[];
   className?: string;
 }
 
@@ -46,6 +52,8 @@ export function HiringScorecard({
   onetSocCode,
   confidenceLevel,
   confidenceMessage,
+  consistencyScore,
+  consistencyFlags,
   className,
 }: HiringScorecardProps) {
   const { strengths, gaps, evidenceQuality, computedConfidenceMessage } = useMemo(() => {
@@ -237,7 +245,26 @@ export function HiringScorecard({
                   {competencyScores.length}
                 </span>
               </li>
+              {consistencyScore != null && (
+                <li className="flex items-center justify-between text-xs sm:text-sm">
+                  <span className="text-muted-foreground">Response Quality</span>
+                  <ConsistencyBadge score={consistencyScore} />
+                </li>
+              )}
             </ul>
+            {consistencyFlags && consistencyFlags.length > 0 && (
+              <div className="space-y-1 pt-1">
+                {consistencyFlags.map((flag, idx) => (
+                  <div
+                    key={idx}
+                    className="flex items-start gap-1.5 text-[10px] sm:text-xs leading-tight"
+                  >
+                    <AlertTriangle className="h-3 w-3 shrink-0 text-amber-500 dark:text-amber-400 mt-0.5" />
+                    <span className="text-amber-700 dark:text-amber-300">{flag}</span>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 
@@ -250,6 +277,37 @@ export function HiringScorecard({
         </div>
       </CardContent>
     </Card>
+  );
+}
+
+/**
+ * Small badge indicating response quality level based on consistency score.
+ * High (>= 0.8): green with ShieldCheck icon
+ * Medium (>= 0.5): amber with ShieldAlert icon
+ * Low (< 0.5): red with ShieldX icon
+ */
+function ConsistencyBadge({ score }: { score: number }) {
+  if (score >= 0.8) {
+    return (
+      <span className="inline-flex items-center gap-1 text-[10px] sm:text-xs font-semibold text-green-700 dark:text-green-400">
+        <ShieldCheck className="h-3 w-3 shrink-0" />
+        High
+      </span>
+    );
+  }
+  if (score >= 0.5) {
+    return (
+      <span className="inline-flex items-center gap-1 text-[10px] sm:text-xs font-semibold text-amber-700 dark:text-amber-400">
+        <ShieldAlert className="h-3 w-3 shrink-0" />
+        Medium
+      </span>
+    );
+  }
+  return (
+    <span className="inline-flex items-center gap-1 text-[10px] sm:text-xs font-semibold text-red-700 dark:text-red-400">
+      <ShieldX className="h-3 w-3 shrink-0" />
+      Low
+    </span>
   );
 }
 

@@ -14,18 +14,23 @@ interface GapCoverageMatrixProps {
   candidates: CandidateSummary[];
   gapCoverageMatrix: GapCoverageEntry[];
   colorMap: Map<string, number>;
+  /** When true, adapts labels for JOB_FIT benchmark context. */
+  isJobFit?: boolean;
 }
 
 /**
- * Gap coverage matrix showing which candidates can fill team skill gaps.
- * Gaps are sorted by team saturation ascending (most critical first).
- * Each gap row shows: competency name, team %, coverage per candidate,
- * and a progress bar indicating how many candidates can fill the gap.
+ * Gap coverage matrix showing which candidates can fill team skill gaps
+ * (TEAM_FIT) or meet benchmark requirements (JOB_FIT).
+ *
+ * Gaps are sorted by team saturation / benchmark ascending (most critical first).
+ * Each gap row shows: competency name, team % / benchmark %, coverage per candidate,
+ * and a progress bar indicating how many candidates can fill the gap / meet benchmark.
  */
 export function GapCoverageMatrix({
   candidates,
   gapCoverageMatrix,
   colorMap,
+  isJobFit = false,
 }: GapCoverageMatrixProps) {
   const t = useTranslations('results.comparison');
 
@@ -39,15 +44,19 @@ export function GapCoverageMatrix({
     return null;
   }
 
+  const titleText = isJobFit ? t('jobFit.gapCoverage') : t('gapCoverage');
+  const descriptionText = isJobFit ? t('jobFit.gapCoverageDescription') : t('gapCoverageDescription');
+  const saturationLabel = isJobFit ? t('jobFit.teamSaturation') : t('teamSaturation');
+
   return (
     <Card>
       <CardHeader className="pb-2 sm:pb-3 px-3 sm:px-6">
         <CardTitle className="text-sm sm:text-lg font-semibold flex items-center gap-2">
           <Target className="h-4 w-4 sm:h-5 sm:w-5 shrink-0" />
-          {t('gapCoverage')}
+          {titleText}
         </CardTitle>
         <CardDescription className="text-[10px] sm:text-sm">
-          {t('gapCoverageDescription')}
+          {descriptionText}
         </CardDescription>
       </CardHeader>
       <CardContent className="px-0 sm:px-6 pb-4">
@@ -59,7 +68,7 @@ export function GapCoverageMatrix({
                   {t('competency')}
                 </th>
                 <th className="px-3 py-2 text-center text-xs font-semibold text-muted-foreground uppercase tracking-wider min-w-[70px]">
-                  {t('teamSaturation')}
+                  {saturationLabel}
                 </th>
                 {candidates.map((candidate) => {
                   const colorIdx = colorMap.get(candidate.resultId) ?? 0;

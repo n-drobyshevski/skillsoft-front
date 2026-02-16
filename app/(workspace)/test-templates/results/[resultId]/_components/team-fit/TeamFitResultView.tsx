@@ -21,6 +21,7 @@ import { ActionButtonsBar } from '../shared/ActionButtonsBar';
 import { BaseResultViewProps } from '../shared/types';
 import { LazyTeamSaturationRadar as TeamSaturationRadar, LazyIndicatorHeatmap as IndicatorHeatmap } from '@/lib/lazy-charts';
 import { toTeamSaturationData, toTeamSaturationDataSimulated } from '@/lib/result-transformers';
+import { isTeamFitMetrics } from '@/types/domain';
 import { teamsApi } from '@/services/api/teams';
 
 /**
@@ -68,9 +69,12 @@ export function TeamFitResultView({ result, template }: BaseResultViewProps) {
 
   const bigFiveData = bigFiveToArray(bigFiveProfile);
 
+  // Type-guard for team-fit specific metrics access
+  const teamFitMetrics = isTeamFitMetrics(result.extendedMetrics) ? result.extendedMetrics : null;
+
   // Transform competency scores to team saturation data for radar visualization
   // Prefer real per-competency saturation from backend when available; fall back to simulated for legacy results
-  const competencySaturation = result.extendedMetrics?.competencySaturation;
+  const competencySaturation = teamFitMetrics?.competencySaturation;
   const teamSaturationData = competencySaturation
     ? toTeamSaturationData(competencyScores, { teamSaturation: competencySaturation })
     : toTeamSaturationDataSimulated(competencyScores, 55, 20);
@@ -104,17 +108,17 @@ export function TeamFitResultView({ result, template }: BaseResultViewProps) {
         />
 
         {/* Multiplier banner (score boost/penalty explanation) */}
-        {result.extendedMetrics && result.extendedMetrics.teamFitMultiplier !== 1.0 && (
+        {teamFitMetrics && teamFitMetrics.teamFitMultiplier !== 1.0 && (
           <TeamFitMultiplierBanner
-            teamFitMultiplier={result.extendedMetrics.teamFitMultiplier}
-            diversityRatio={result.extendedMetrics.diversityRatio}
-            saturationRatio={result.extendedMetrics.saturationRatio}
+            teamFitMultiplier={teamFitMetrics.teamFitMultiplier}
+            diversityRatio={teamFitMetrics.diversityRatio}
+            saturationRatio={teamFitMetrics.saturationRatio}
           />
         )}
 
         {/* Extended metrics overview panel */}
-        {result.extendedMetrics && (
-          <TeamFitMetricsPanel extendedMetrics={result.extendedMetrics} />
+        {teamFitMetrics && (
+          <TeamFitMetricsPanel extendedMetrics={teamFitMetrics} />
         )}
 
         {/* Main content grid */}

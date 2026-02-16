@@ -152,6 +152,19 @@
     "maxSelections": "Maximum 5 candidates for comparison",
     "selectToCompare": "Select 2-5 completed candidates to compare",
     "resolving": "Loading comparison...",
-    "teamUnavailable": "Team profile data is unavailable. Comparison shows candidate scores without team gap analysis."
+    "teamUnavailable": "Team profile data is unavailable. Comparison shows candidate scores without team gap analysis.",
+    "jobFit": {
+      "subtitle": "Side-by-side Job Fit comparison for {count} candidates",
+      "teamSaturation": "Benchmark",
+      "teamGap": "Below Benchmark",
+      "gapCoverage": "Benchmark Gap Analysis",
+      "gapCoverageDescription": "Which candidates meet the benchmark for each competency",
+      "competencyBreakdownDescription": "Score comparison against O*NET occupation benchmarks",
+      "overallFit": "Overall Score"
+    },
+    "responseQuality": "Response Quality",
+    "responseQualityHigh": "High",
+    "responseQualityMedium": "Medium",
+    "responseQualityLow": "Low"
   }
 }

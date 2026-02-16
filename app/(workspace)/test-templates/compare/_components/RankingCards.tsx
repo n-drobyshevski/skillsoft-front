@@ -11,6 +11,8 @@ import { CANDIDATE_COLORS } from './ComparisonView';
 interface RankingCardsProps {
   candidates: CandidateSummary[];
   colorMap: Map<string, number>;
+  /** When true, adapts labels for JOB_FIT context. */
+  isJobFit?: boolean;
 }
 
 /** Medal colors for ranks 1-3. */
@@ -24,8 +26,9 @@ const RANK_STYLES: Record<number, string> = {
  * Horizontal scrollable ranking cards on mobile, grid on desktop.
  * Each card shows rank, name, overall percentage, pass/fail, and key metrics.
  */
-export function RankingCards({ candidates, colorMap }: RankingCardsProps) {
+export function RankingCards({ candidates, colorMap, isJobFit = false }: RankingCardsProps) {
   const t = useTranslations('results.comparison');
+  const overallLabel = isJobFit ? t('jobFit.overallFit') : t('overallFit');
 
   return (
     <div className="flex gap-3 overflow-x-auto pb-2 snap-x snap-mandatory lg:grid lg:grid-cols-2 xl:grid-cols-3 lg:overflow-visible lg:pb-0">
@@ -85,7 +88,7 @@ export function RankingCards({ candidates, colorMap }: RankingCardsProps) {
                   {Math.round(candidate.overallPercentage)}%
                 </div>
                 <p className="text-[10px] text-muted-foreground uppercase tracking-wider mt-0.5">
-                  {t('overallFit')}
+                  {overallLabel}
                 </p>
               </div>
 
