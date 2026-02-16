@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo, useRef, useState, useCallback, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import {
   BarChart3,
@@ -13,6 +14,7 @@ import {
   TrendingUp,
 } from 'lucide-react';
 import CompetencyRadarChart from '@/components/data-display/charts/CompetencyRadarChart';
+import { ChartErrorBoundary } from '@/components/charts/ChartErrorBoundary';
 import { JobFitHero } from './JobFitHero';
 import { CompetencyProfile } from '../shared/CompetencyProfile';
 import { ActionButtonsBar } from '../shared/ActionButtonsBar';
@@ -43,6 +45,7 @@ import { testResultsApi } from '@/services/api/results';
  * - Green/Amber color palette for pass/fail states
  */
 export function JobFitResultView({ result, template }: BaseResultViewProps) {
+  const t = useTranslations('results.jobFit');
   const onetSocCode = template.blueprint?.onet_soc_code;
   const isPassed = result.passed ?? false;
   const passingScore = template.passingScore || 70;
@@ -188,21 +191,23 @@ export function JobFitResultView({ result, template }: BaseResultViewProps) {
             <CardHeader className="pb-2 sm:pb-3 px-3 sm:px-6">
               <CardTitle className="text-base sm:text-lg font-semibold flex items-center gap-2">
                 <BarChart3 className="h-4 w-4 sm:h-5 sm:w-5 shrink-0" />
-                Gap Analysis
+                {t('gapAnalysis')}
               </CardTitle>
               <CardDescription className="text-xs sm:text-sm">
-                Your scores vs. job requirements ({passingScore}%)
+                {t('gapAnalysisDescription', { passingScore })}
               </CardDescription>
             </CardHeader>
             <CardContent className="px-3 sm:px-6">
-              <GapAnalysisChart
-                data={gapData}
-                passingThreshold={passingScore}
-                animate={true}
-                sortBy="gap"
-                sortDirection="desc"
-                onBarClick={handleGapBarClick}
-              />
+              <ChartErrorBoundary>
+                <GapAnalysisChart
+                  data={gapData}
+                  passingThreshold={passingScore}
+                  animate={true}
+                  sortBy="gap"
+                  sortDirection="desc"
+                  onBarClick={handleGapBarClick}
+                />
+              </ChartErrorBoundary>
             </CardContent>
           </Card>
 
@@ -213,7 +218,7 @@ export function JobFitResultView({ result, template }: BaseResultViewProps) {
                 <div className="p-1.5 sm:p-2 rounded-lg bg-primary/10">
                   <Award className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
                 </div>
-                Key Insights
+                {t('keyInsights')}
               </CardTitle>
             </CardHeader>
             <CardContent className="flex-1 space-y-4 sm:space-y-5 px-4 sm:px-6">
@@ -225,7 +230,7 @@ export function JobFitResultView({ result, template }: BaseResultViewProps) {
                       <Briefcase className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground" />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <span className="text-sm sm:text-base font-medium text-foreground">Job Requirements</span>
+                      <span className="text-sm sm:text-base font-medium text-foreground">{t('jobRequirements')}</span>
                       <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
                         O*NET: <code className="text-primary font-mono">{onetSocCode}</code>
                       </p>
@@ -243,12 +248,12 @@ export function JobFitResultView({ result, template }: BaseResultViewProps) {
                     </div>
                     <div className="min-w-0 flex-1">
                       <h4 className="font-semibold text-sm sm:text-base text-green-800 dark:text-green-300 mb-1">
-                        Qualified
+                        {t('qualified')}
                       </h4>
                       <p className="text-xs sm:text-sm text-green-700 dark:text-green-400 leading-relaxed">
-                        You meet the benchmark requirements.
+                        {t('qualifiedMessage')}
                         {insights.strengths.length > 0 && (
-                          <span className="hidden sm:inline"> Excel in: {insights.strengths.slice(0, 2).map(s => s.competencyName).join(', ')}.</span>
+                          <span className="hidden sm:inline"> {t('excelIn', { areas: insights.strengths.slice(0, 2).map(s => s.competencyName).join(', ') })}</span>
                         )}
                       </p>
                     </div>
@@ -262,12 +267,12 @@ export function JobFitResultView({ result, template }: BaseResultViewProps) {
                     </div>
                     <div className="min-w-0 flex-1">
                       <h4 className="font-semibold text-sm sm:text-base text-amber-800 dark:text-amber-300 mb-1">
-                        Below Requirements
+                        {t('belowRequirements')}
                       </h4>
                       <p className="text-xs sm:text-sm text-amber-700 dark:text-amber-400 leading-relaxed">
-                        Some competencies need development.
+                        {t('belowRequirementsMessage')}
                         {insights.gaps.length > 0 && (
-                          <span className="hidden sm:inline"> Focus on: {insights.gaps.slice(0, 2).map(g => g.competencyName).join(', ')}.</span>
+                          <span className="hidden sm:inline"> {t('focusOn', { areas: insights.gaps.slice(0, 2).map(g => g.competencyName).join(', ') })}</span>
                         )}
                       </p>
                     </div>
@@ -280,7 +285,7 @@ export function JobFitResultView({ result, template }: BaseResultViewProps) {
                 <div className="space-y-3">
                   <h5 className="text-xs sm:text-sm font-semibold text-foreground uppercase tracking-wider flex items-center gap-2">
                     <span className="w-1 h-4 bg-green-500/60 rounded-full" />
-                    Strengths ({insights.strengths.length})
+                    {t('strengths', { count: insights.strengths.length })}
                   </h5>
                   <div className="flex flex-wrap gap-1.5 sm:gap-2">
                     {insights.strengths.slice(0, 3).map(s => (
@@ -300,7 +305,7 @@ export function JobFitResultView({ result, template }: BaseResultViewProps) {
                 <div className="space-y-3">
                   <h5 className="text-xs sm:text-sm font-semibold text-foreground uppercase tracking-wider flex items-center gap-2">
                     <span className="w-1 h-4 bg-amber-500/60 rounded-full" />
-                    Gaps ({insights.gaps.length})
+                    {t('gaps', { count: insights.gaps.length })}
                   </h5>
                   <div className="flex flex-wrap gap-1.5 sm:gap-2">
                     {insights.gaps.slice(0, 3).map(g => (
@@ -319,7 +324,10 @@ export function JobFitResultView({ result, template }: BaseResultViewProps) {
               {result.percentile !== undefined && result.percentile !== null && (
                 <div className="p-3 sm:p-4 bg-muted/30 rounded-xl border border-border/40 mt-auto">
                   <p className="text-xs sm:text-sm text-muted-foreground text-center">
-                    Better than <span className="font-bold text-foreground text-sm sm:text-base">{result.percentile}%</span> of candidates
+                    {t.rich('betterThan', {
+                      percentage: result.percentile,
+                      bold: (chunks) => <span className="font-bold text-foreground text-sm sm:text-base">{chunks}</span>,
+                    })}
                   </p>
                 </div>
               )}
@@ -333,19 +341,21 @@ export function JobFitResultView({ result, template }: BaseResultViewProps) {
             <CardHeader className="pb-2 sm:pb-3 px-3 sm:px-6">
               <CardTitle className="text-sm sm:text-lg font-semibold flex items-center gap-2">
                 <BarChart3 className="h-4 w-4 sm:h-5 sm:w-5 shrink-0" />
-                Competency Map
+                {t('competencyMap')}
               </CardTitle>
               <CardDescription className="text-[10px] sm:text-sm">
-                Visual profile
+                {t('visualProfile')}
               </CardDescription>
             </CardHeader>
             <CardContent className="px-2 sm:px-6">
-              <div className="flex justify-center items-center min-h-[220px] sm:min-h-[280px] md:min-h-[340px]">
-                <CompetencyRadarChart
-                  data={radarData}
-                  passingScore={passingScore}
-                />
-              </div>
+              <ChartErrorBoundary>
+                <div className="flex justify-center items-center min-h-[220px] sm:min-h-[280px] md:min-h-[340px]">
+                  <CompetencyRadarChart
+                    data={radarData}
+                    passingScore={passingScore}
+                  />
+                </div>
+              </ChartErrorBoundary>
             </CardContent>
           </Card>
         )}
@@ -356,14 +366,16 @@ export function JobFitResultView({ result, template }: BaseResultViewProps) {
             <CardHeader className="pb-2 sm:pb-3 px-3 sm:px-6">
               <CardTitle className="text-sm sm:text-lg font-semibold flex items-center gap-2">
                 <Grid3x3 className="h-4 w-4 sm:h-5 sm:w-5 shrink-0" />
-                Indicator Breakdown
+                {t('indicatorBreakdown')}
               </CardTitle>
               <CardDescription className="text-[10px] sm:text-sm">
-                Per-indicator score heatmap
+                {t('indicatorHeatmapDescription')}
               </CardDescription>
             </CardHeader>
             <CardContent className="px-2 sm:px-6">
-              <IndicatorHeatmap competencies={competencyScores} />
+              <ChartErrorBoundary>
+                <IndicatorHeatmap competencies={competencyScores} />
+              </ChartErrorBoundary>
             </CardContent>
           </Card>
         )}
@@ -385,14 +397,16 @@ export function JobFitResultView({ result, template }: BaseResultViewProps) {
             <CardHeader>
               <CardTitle className="text-sm sm:text-lg font-semibold flex items-center gap-2">
                 <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 shrink-0" />
-                Progress Over Time
+                {t('progressOverTime')}
               </CardTitle>
               <CardDescription className="text-[10px] sm:text-sm">
-                Your improvement across attempts
+                {t('improvementAcrossAttempts')}
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <TrendOverview data={trendData} passingThreshold={passingScore} />
+              <ChartErrorBoundary>
+                <TrendOverview data={trendData} passingThreshold={passingScore} />
+              </ChartErrorBoundary>
             </CardContent>
           </Card>
         )}

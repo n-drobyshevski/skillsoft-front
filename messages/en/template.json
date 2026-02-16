@@ -663,7 +663,34 @@
       "keepDevelopingSkills": "Keep developing skills.",
       "coverage": "Coverage",
       "mapped": "{mapped}/{total} mapped",
-      "developmentNote": "Regular reassessment helps track growth."
+      "developmentNote": "Regular reassessment helps track growth.",
+      "traits": {
+        "openness": {
+          "high": "You show strong creativity, curiosity, and openness to new experiences and ideas.",
+          "medium": "You have a balanced approach to new experiences, combining creativity with practicality.",
+          "low": "You prefer established routines and practical, concrete approaches to problems."
+        },
+        "conscientiousness": {
+          "high": "You demonstrate excellent organization, dependability, and goal-oriented behavior.",
+          "medium": "You balance structure with flexibility, achieving goals while adapting to changes.",
+          "low": "You prefer spontaneity and flexibility over rigid planning and structure."
+        },
+        "extraversion": {
+          "high": "You thrive in social settings, drawing energy from interactions with others.",
+          "medium": "You comfortably navigate both social situations and solo activities.",
+          "low": "You prefer thoughtful, one-on-one interactions and value your independent time."
+        },
+        "agreeableness": {
+          "high": "You prioritize harmony, cooperation, and concern for others in your interactions.",
+          "medium": "You balance empathy with assertiveness, adapting your approach as needed.",
+          "low": "You value directness and objectivity, prioritizing results over social harmony."
+        },
+        "emotionalStability": {
+          "high": "You demonstrate excellent resilience, calmness, and stress management.",
+          "medium": "You handle most situations calmly while acknowledging emotional responses.",
+          "low": "You experience emotions deeply and may be more sensitive to stress."
+        }
+      }
     }
   },
   "heroCard": {

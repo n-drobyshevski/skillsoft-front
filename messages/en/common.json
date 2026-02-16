@@ -45,6 +45,7 @@
   "startTest": "Start",
   "testDrive": "Test Drive",
   "questionsShort": "q.",
+  "chartRenderError": "Chart could not be rendered",
   "pagination": {
     "navigation": "Page navigation",
     "pageOf": "Page {current} of {total}",

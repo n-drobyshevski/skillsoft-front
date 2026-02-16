@@ -45,6 +45,7 @@
   "startTest": "Начать",
   "testDrive": "Тест-драйв",
   "questionsShort": "вопр.",
+  "chartRenderError": "Не удалось отобразить график",
   "pagination": {
     "navigation": "Навигация по страницам",
     "pageOf": "Страница {current} из {total}",

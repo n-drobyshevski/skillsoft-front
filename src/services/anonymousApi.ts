@@ -204,10 +204,12 @@ async function fetchWithSessionToken(
     headers['X-Session-Token'] = token;
   }
 
-  return await fetch(`${getApiBaseUrl()}/anonymous${endpoint}`, {
+  const response = await fetch(`${getApiBaseUrl()}/anonymous${endpoint}`, {
     ...options,
     headers,
   });
+
+  return response;
 }
 
 /**

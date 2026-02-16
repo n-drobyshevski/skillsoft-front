@@ -13,6 +13,7 @@ import {
   Target
 } from 'lucide-react';
 import { useBigFiveProjection, bigFiveToArray } from '@/hooks/useBigFiveProjection';
+import { ChartErrorBoundary } from '@/components/charts/ChartErrorBoundary';
 import { TeamFitHero } from './TeamFitHero';
 import { TeamFitMultiplierBanner } from './TeamFitMultiplierBanner';
 import { TeamFitMetricsPanel } from './TeamFitMetricsPanel';
@@ -136,12 +137,14 @@ export function TeamFitResultView({ result, template }: BaseResultViewProps) {
             </CardHeader>
             <CardContent className="px-3 sm:px-6">
               {teamSaturationData.length >= 3 ? (
-                <TeamSaturationRadar
-                  data={teamSaturationData}
-                  showCandidate={true}
-                  showTeam={true}
-                  animate={true}
-                />
+                <ChartErrorBoundary>
+                  <TeamSaturationRadar
+                    data={teamSaturationData}
+                    showCandidate={true}
+                    showTeam={true}
+                    animate={true}
+                  />
+                </ChartErrorBoundary>
               ) : (
                 <div className="flex flex-col items-center justify-center min-h-[200px] sm:min-h-[280px] text-center p-4 sm:p-6">
                   <Lightbulb className="h-8 w-8 sm:h-12 sm:w-12 text-muted-foreground/50 mb-2 sm:mb-3" />
@@ -289,51 +292,53 @@ export function TeamFitResultView({ result, template }: BaseResultViewProps) {
               </CardDescription>
             </CardHeader>
             <CardContent className="px-2 sm:px-6">
-              <div className="grid grid-cols-5 gap-1 sm:gap-4">
-                {bigFiveData.map(({ trait, value }) => (
-                  <div
-                    key={trait}
-                    className="text-center p-1.5 sm:p-4 bg-muted/30 rounded-lg border min-w-0"
-                  >
-                    <div className="text-[8px] sm:text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1 sm:mb-2 truncate">
-                      {trait.slice(0, 4)}
-                    </div>
-                    <div className="relative w-10 h-10 sm:w-16 sm:h-16 mx-auto mb-1 sm:mb-2">
-                      <svg className="w-10 h-10 sm:w-16 sm:h-16 transform -rotate-90" viewBox="0 0 64 64">
-                        <circle
-                          cx="32"
-                          cy="32"
-                          r="28"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="4"
-                          className="text-muted/30"
-                        />
-                        <circle
-                          cx="32"
-                          cy="32"
-                          r="28"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="4"
-                          strokeDasharray={`${2 * Math.PI * 28}`}
-                          strokeDashoffset={`${2 * Math.PI * 28 * (1 - value / 100)}`}
-                          className="text-blue-500 transition-all duration-1000"
-                          strokeLinecap="round"
-                        />
-                      </svg>
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <span className="text-xs sm:text-lg font-bold text-blue-600 dark:text-blue-400 tabular-nums">
-                          {value}
-                        </span>
+              <ChartErrorBoundary>
+                <div className="grid grid-cols-5 gap-1 sm:gap-4">
+                  {bigFiveData.map(({ trait, value }) => (
+                    <div
+                      key={trait}
+                      className="text-center p-1.5 sm:p-4 bg-muted/30 rounded-lg border min-w-0"
+                    >
+                      <div className="text-[8px] sm:text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1 sm:mb-2 truncate">
+                        {trait.slice(0, 4)}
+                      </div>
+                      <div className="relative w-10 h-10 sm:w-16 sm:h-16 mx-auto mb-1 sm:mb-2">
+                        <svg className="w-10 h-10 sm:w-16 sm:h-16 transform -rotate-90" viewBox="0 0 64 64">
+                          <circle
+                            cx="32"
+                            cy="32"
+                            r="28"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="4"
+                            className="text-muted/30"
+                          />
+                          <circle
+                            cx="32"
+                            cy="32"
+                            r="28"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="4"
+                            strokeDasharray={`${2 * Math.PI * 28}`}
+                            strokeDashoffset={`${2 * Math.PI * 28 * (1 - value / 100)}`}
+                            className="text-blue-500 transition-all duration-1000"
+                            strokeLinecap="round"
+                          />
+                        </svg>
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <span className="text-xs sm:text-lg font-bold text-blue-600 dark:text-blue-400 tabular-nums">
+                            {value}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="text-[8px] sm:text-xs text-muted-foreground hidden sm:block">
+                        {value >= 70 ? t('high') : value >= 40 ? t('moderate') : t('low')}
                       </div>
                     </div>
-                    <div className="text-[8px] sm:text-xs text-muted-foreground hidden sm:block">
-                      {value >= 70 ? t('high') : value >= 40 ? t('moderate') : t('low')}
-                    </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              </ChartErrorBoundary>
             </CardContent>
           </Card>
         )}
@@ -351,7 +356,9 @@ export function TeamFitResultView({ result, template }: BaseResultViewProps) {
               </CardDescription>
             </CardHeader>
             <CardContent className="px-2 sm:px-6">
-              <IndicatorHeatmap competencies={competencyScores} />
+              <ChartErrorBoundary>
+                <IndicatorHeatmap competencies={competencyScores} />
+              </ChartErrorBoundary>
             </CardContent>
           </Card>
         )}

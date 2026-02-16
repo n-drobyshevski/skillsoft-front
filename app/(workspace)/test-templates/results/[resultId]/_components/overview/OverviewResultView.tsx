@@ -8,6 +8,7 @@ import { Award, Lightbulb, Brain, Target, GitCompareArrows, AlertTriangle } from
 import { LazyBigFiveRadarSimple as BigFiveRadarSimple, LazyCompetencyRadarChart as CompetencyRadarChart } from '@/lib/lazy-charts';
 import type { CompetencyRadarDataPoint } from '@/components/data-display/charts/CompetencyRadarChart';
 import { BigFiveMappingInsights } from '@/components/charts/BigFiveMappingInsights';
+import { ChartErrorBoundary } from '@/components/charts/ChartErrorBoundary';
 import { useBigFiveProjectionDetailed, getBigFiveLabels } from '@/hooks/useBigFiveProjection';
 import { CompetencyPassportHero } from './CompetencyPassportHero';
 import { CompetencyProfile } from '../shared/CompetencyProfile';
@@ -15,43 +16,31 @@ import { ActionButtonsBar } from '../shared/ActionButtonsBar';
 import { BaseResultViewProps } from '../shared/types';
 
 /**
- * Get personality trait description based on score
+ * Trait key mapping for i18n lookup.
+ * Maps display labels to translation key prefixes.
  */
-function getTraitDescription(trait: string, score: number): string {
-  const descriptions: Record<string, { high: string; medium: string; low: string }> = {
-    Openness: {
-      high: 'You show strong creativity, curiosity, and openness to new experiences and ideas.',
-      medium: 'You have a balanced approach to new experiences, combining creativity with practicality.',
-      low: 'You prefer established routines and practical, concrete approaches to problems.'
-    },
-    Conscientiousness: {
-      high: 'You demonstrate excellent organization, dependability, and goal-oriented behavior.',
-      medium: 'You balance structure with flexibility, achieving goals while adapting to changes.',
-      low: 'You prefer spontaneity and flexibility over rigid planning and structure.'
-    },
-    Extraversion: {
-      high: 'You thrive in social settings, drawing energy from interactions with others.',
-      medium: 'You comfortably navigate both social situations and solo activities.',
-      low: 'You prefer thoughtful, one-on-one interactions and value your independent time.'
-    },
-    Agreeableness: {
-      high: 'You prioritize harmony, cooperation, and concern for others in your interactions.',
-      medium: 'You balance empathy with assertiveness, adapting your approach as needed.',
-      low: 'You value directness and objectivity, prioritizing results over social harmony.'
-    },
-    'Emotional Stability': {
-      high: 'You demonstrate excellent resilience, calmness, and stress management.',
-      medium: 'You handle most situations calmly while acknowledging emotional responses.',
-      low: 'You experience emotions deeply and may be more sensitive to stress.'
-    }
-  };
+const TRAIT_KEYS: Record<string, string> = {
+  Openness: 'openness',
+  Conscientiousness: 'conscientiousness',
+  Extraversion: 'extraversion',
+  Agreeableness: 'agreeableness',
+  'Emotional Stability': 'emotionalStability',
+};
 
-  const traitDesc = descriptions[trait];
-  if (!traitDesc) return '';
+/**
+ * Get personality trait description based on score, using translations.
+ */
+function getTraitDescription(
+  t: ReturnType<typeof useTranslations>,
+  trait: string,
+  score: number
+): string {
+  const key = TRAIT_KEYS[trait];
+  if (!key) return '';
 
-  if (score >= 70) return traitDesc.high;
-  if (score >= 40) return traitDesc.medium;
-  return traitDesc.low;
+  if (score >= 70) return t(`traits.${key}.high`);
+  if (score >= 40) return t(`traits.${key}.medium`);
+  return t(`traits.${key}.low`);
 }
 
 /**
@@ -171,12 +160,14 @@ export function OverviewResultView({ result, template }: BaseResultViewProps) {
                 {/* Competency Radar Tab */}
                 <TabsContent value="competency" className="mt-0">
                   {hasCompetencyData ? (
-                    <CompetencyRadarChart
-                      data={competencyRadarData}
-                      passingScore={0}
-                      animated={true}
-                      className="min-h-[240px] sm:min-h-[300px]"
-                    />
+                    <ChartErrorBoundary>
+                      <CompetencyRadarChart
+                        data={competencyRadarData}
+                        passingScore={0}
+                        animated={true}
+                        className="min-h-[240px] sm:min-h-[300px]"
+                      />
+                    </ChartErrorBoundary>
                   ) : (
                     <div className="flex flex-col items-center justify-center min-h-[200px] sm:min-h-[280px] text-center p-4 sm:p-6">
                       <div className="w-12 h-12 sm:w-16 sm:h-16 mb-3 sm:mb-4 rounded-full bg-muted/50 flex items-center justify-center">
@@ -192,12 +183,14 @@ export function OverviewResultView({ result, template }: BaseResultViewProps) {
                 {/* Personality (Big Five) Tab */}
                 <TabsContent value="personality" className="mt-0">
                   {hasBigFiveData ? (
-                    <div className="min-h-[240px] sm:min-h-[300px]">
-                      <BigFiveRadarSimple
-                        profile={bigFiveProfile}
-                        height={280}
-                      />
-                    </div>
+                    <ChartErrorBoundary>
+                      <div className="min-h-[240px] sm:min-h-[300px]">
+                        <BigFiveRadarSimple
+                          profile={bigFiveProfile}
+                          height={280}
+                        />
+                      </div>
+                    </ChartErrorBoundary>
                   ) : (
                     <div className="flex flex-col items-center justify-center min-h-[200px] sm:min-h-[280px] text-center p-4 sm:p-6">
                       <div className="w-12 h-12 sm:w-16 sm:h-16 mb-3 sm:mb-4 rounded-full bg-muted/50 flex items-center justify-center">
@@ -213,21 +206,23 @@ export function OverviewResultView({ result, template }: BaseResultViewProps) {
                 {/* Mapping Insights Tab */}
                 <TabsContent value="mapping" className="mt-0 overflow-hidden">
                   {hasMappingData ? (
-                    <div className="min-h-[240px] sm:min-h-[300px] max-h-[350px] sm:max-h-[400px] overflow-y-auto overflow-x-hidden">
-                      {metadata.mappingConfidence === 'low' && (
-                        <div className="flex items-start gap-2 p-2 sm:p-3 mb-2 sm:mb-3 bg-muted/50 rounded-lg border border-muted-foreground/20">
-                          <AlertTriangle className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-muted-foreground shrink-0 mt-0.5" />
-                          <div className="text-[10px] sm:text-xs text-muted-foreground">
-                            <span className="font-medium">{t('limitedCoverage')}</span>{' '}
-                            {t('onlyMapped', { percentage: metadata.coveragePercentage })}
+                    <ChartErrorBoundary>
+                      <div className="min-h-[240px] sm:min-h-[300px] max-h-[350px] sm:max-h-[400px] overflow-y-auto overflow-x-hidden">
+                        {metadata.mappingConfidence === 'low' && (
+                          <div className="flex items-start gap-2 p-2 sm:p-3 mb-2 sm:mb-3 bg-muted/50 rounded-lg border border-muted-foreground/20">
+                            <AlertTriangle className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-muted-foreground shrink-0 mt-0.5" />
+                            <div className="text-[10px] sm:text-xs text-muted-foreground">
+                              <span className="font-medium">{t('limitedCoverage')}</span>{' '}
+                              {t('onlyMapped', { percentage: metadata.coveragePercentage })}
+                            </div>
                           </div>
-                        </div>
-                      )}
-                      <BigFiveMappingInsights
-                        profile={bigFiveProfile}
-                        contributions={contributions}
-                      />
-                    </div>
+                        )}
+                        <BigFiveMappingInsights
+                          profile={bigFiveProfile}
+                          contributions={contributions}
+                        />
+                      </div>
+                    </ChartErrorBoundary>
                   ) : (
                     <div className="flex flex-col items-center justify-center min-h-[200px] sm:min-h-[280px] text-center p-4 sm:p-6">
                       <div className="w-12 h-12 sm:w-16 sm:h-16 mb-3 sm:mb-4 rounded-full bg-muted/50 flex items-center justify-center">
@@ -293,7 +288,7 @@ export function OverviewResultView({ result, template }: BaseResultViewProps) {
                           </span>
                         </div>
                         <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-                          {getTraitDescription(trait.label, trait.value)}
+                          {getTraitDescription(t, trait.label, trait.value)}
                         </p>
                       </div>
                     ))}
