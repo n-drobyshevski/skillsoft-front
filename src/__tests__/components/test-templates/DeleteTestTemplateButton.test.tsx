@@ -393,14 +393,15 @@ describe('DeleteTestTemplateButton', () => {
 
     it('should show loading spinner during deletion', async () => {
       const user = userEvent.setup();
-      mockDeleteTestTemplate.mockImplementation(() => new Promise<void>(resolve => setTimeout(() => resolve(), 100)));
+      // Use a never-resolving promise to keep loading state visible
+      mockDeleteTestTemplate.mockImplementation(() => new Promise<void>(() => {}));
 
       render(<DeleteTestTemplateButton {...defaultProps} />);
 
       await user.click(screen.getByRole('button', { name: /удалить/i }));
       await user.click(screen.getByRole('button', { name: /удалить тест/i }));
 
-      // Should show Loader2 spinner
+      // Should show loading text in the dialog confirm button
       await waitFor(() => {
         const loadingIndicator = screen.queryByText(/удаление/i);
         expect(loadingIndicator).toBeInTheDocument();

@@ -552,20 +552,45 @@ function MobileLayout() {
 }
 
 export function BlueprintWorkspace({ templateId: _templateId }: BlueprintWorkspaceProps) {
-  return (
-    <div
-      className="flex flex-col h-full overflow-hidden bg-muted/30"
-      data-template-id={_templateId}
-    >
-      {/* Desktop Layout - Hidden on mobile */}
-      <div className="hidden lg:flex flex-1 min-h-0 overflow-hidden p-2 lg:p-3">
-        <DesktopLayout />
-      </div>
+  // Conditionally mount only the active layout to avoid 2x memory cost on mobile.
+  // During SSR, render skeletons with CSS hiding to prevent layout shift.
+  const [isClient, setIsClient] = useState(false);
+  const [isLargeScreen, setIsLargeScreen] = useState(true);
 
-      {/* Mobile Layout - Hidden on desktop */}
-      <div className="flex lg:hidden flex-1 min-h-0 overflow-hidden">
-        <MobileLayout />
+  useEffect(() => {
+    const mql = window.matchMedia('(min-width: 1024px)');
+    setIsLargeScreen(mql.matches);
+    setIsClient(true);
+    const handler = (e: MediaQueryListEvent) => setIsLargeScreen(e.matches);
+    mql.addEventListener('change', handler);
+    return () => mql.removeEventListener('change', handler);
+  }, []);
+
+  if (!isClient) {
+    // SSR: skeletons with CSS hiding for zero layout shift
+    return (
+      <div className="flex flex-col h-full overflow-hidden bg-muted/30" data-template-id={_templateId}>
+        <div className="hidden lg:flex flex-1 min-h-0 overflow-hidden p-2 lg:p-3">
+          <DesktopSkeleton />
+        </div>
+        <div className="flex lg:hidden flex-1 min-h-0 overflow-hidden">
+          <CanvasSkeleton />
+        </div>
       </div>
+    );
+  }
+
+  return (
+    <div className="flex flex-col h-full overflow-hidden bg-muted/30" data-template-id={_templateId}>
+      {isLargeScreen ? (
+        <div className="flex flex-1 min-h-0 overflow-hidden p-2 lg:p-3">
+          <DesktopLayout />
+        </div>
+      ) : (
+        <div className="flex flex-1 min-h-0 overflow-hidden">
+          <MobileLayout />
+        </div>
+      )}
     </div>
   );
 }

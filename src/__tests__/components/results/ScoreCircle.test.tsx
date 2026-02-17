@@ -67,8 +67,8 @@ const createMockMotionValue = (initialValue: number) => {
   };
 };
 
-vi.mock('framer-motion', async () => {
-  const actual = await vi.importActual<typeof import('framer-motion')>('framer-motion');
+vi.mock('motion/react', async () => {
+  const actual = await vi.importActual<typeof import('motion/react')>('motion/react');
 
   return {
     ...actual,

@@ -15,6 +15,7 @@ import { CompetencySmartCard } from "./CompetencySmartCard";
 import { SaveStatusIndicator } from "./SaveStatusIndicator";
 import { InsertionIndicator } from "./InsertionIndicator";
 import { useBlueprintHistory, type HistoryActionType } from "@/hooks/useBlueprintHistory";
+import { STRATEGY_HELP_CONTENT, type Strategy } from "./simulator/strategy-context";
 
 export function WeightedCanvas() {
   const {
@@ -94,6 +95,7 @@ export function WeightedCanvas() {
     if (previousState) {
       isRestoringRef.current = true;
       setCompetencies(previousState);
+      setAriaAnnouncement(`Undone. ${previousState.length} competencies now.`);
     }
   }, [historyUndo, setCompetencies]);
 
@@ -102,6 +104,7 @@ export function WeightedCanvas() {
     if (nextState) {
       isRestoringRef.current = true;
       setCompetencies(nextState);
+      setAriaAnnouncement(`Redone. ${nextState.length} competencies now.`);
     }
   }, [historyRedo, setCompetencies]);
 
@@ -288,6 +291,19 @@ export function WeightedCanvas() {
                     <p className="text-xs mt-1 opacity-70">
                       {showEmptyDropState ? "" : "Or click + to add from library"}
                     </p>
+                    {!showEmptyDropState && STRATEGY_HELP_CONTENT[state.strategy as Strategy] && (
+                      <div className="mt-4 text-left w-full max-w-xs space-y-1.5">
+                        <p className="text-xs font-medium text-muted-foreground/80">
+                          {STRATEGY_HELP_CONTENT[state.strategy as Strategy].title}
+                        </p>
+                        {STRATEGY_HELP_CONTENT[state.strategy as Strategy].points.slice(0, 2).map((point, i) => (
+                          <p key={i} className="text-[11px] text-muted-foreground/60 flex items-start gap-1.5">
+                            <span className="mt-0.5 shrink-0">&#8226;</span>
+                            <span>{point}</span>
+                          </p>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 ) : (
                   state.competencies.map((comp, index) => (
@@ -305,6 +321,7 @@ export function WeightedCanvas() {
                         onRemove={() => {
                           const updated = state.competencies.filter((c) => c.id !== comp.id);
                           setCompetencies(updated);
+                          setAriaAnnouncement(`${comp.name} removed. ${updated.length} competencies remaining.`);
                         }}
                         onWeightChange={(val) => setCompetencies(state.competencies.map((c) => c.id === comp.id ? { ...c, weight: val } : c))}
                       />
@@ -327,6 +344,19 @@ export function WeightedCanvas() {
                   <Sparkles className="h-10 w-10 mb-3 text-muted-foreground/40" />
                   <p className="text-sm font-medium">Drag competencies here</p>
                   <p className="text-xs mt-1 opacity-70">Or click + to add from library</p>
+                  {STRATEGY_HELP_CONTENT[state.strategy as Strategy] && (
+                    <div className="mt-4 text-left w-full max-w-xs space-y-1.5">
+                      <p className="text-xs font-medium text-muted-foreground/80">
+                        {STRATEGY_HELP_CONTENT[state.strategy as Strategy].title}
+                      </p>
+                      {STRATEGY_HELP_CONTENT[state.strategy as Strategy].points.slice(0, 2).map((point, i) => (
+                        <p key={i} className="text-[11px] text-muted-foreground/60 flex items-start gap-1.5">
+                          <span className="mt-0.5 shrink-0">&#8226;</span>
+                          <span>{point}</span>
+                        </p>
+                      ))}
+                    </div>
+                  )}
                 </div>
               ) : (
                 state.competencies.map((comp) => (

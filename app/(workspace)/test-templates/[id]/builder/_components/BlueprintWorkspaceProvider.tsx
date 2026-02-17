@@ -6,6 +6,7 @@ import React, {
   useState,
   useCallback,
   useEffect,
+  useRef,
   type ReactNode,
 } from 'react';
 import { toast } from 'sonner';
@@ -109,6 +110,8 @@ export function BlueprintWorkspaceProvider({
 
   // Server-confirmed state for rollback on error
   const [serverState, setServerState] = useState(initialState);
+  const serverStateRef = useRef(serverState);
+  serverStateRef.current = serverState;
 
   // Library with health status (updated from inventory)
   const [libraryCompetencies, setLibraryCompetencies] = useState(initialLibrary);
@@ -134,9 +137,10 @@ export function BlueprintWorkspaceProvider({
       return false;
     },
     onError: (error) => {
-      // Show error toast only after all retries exhausted
+      // Rollback to last server-confirmed state after all retries exhausted
+      setLocalState(serverStateRef.current);
       const message = error instanceof Error ? error.message : 'Failed to save';
-      toast.error(message);
+      toast.error(`${message} — changes reverted`);
     },
     debounceMs: 2000,  // Wait 2s after last change
     maxWaitMs: 10000,  // Force save every 10s max

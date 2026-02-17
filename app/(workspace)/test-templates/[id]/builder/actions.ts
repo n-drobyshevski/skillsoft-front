@@ -253,11 +253,8 @@ export async function getSampleQuestion(
   } catch (error) {
     console.error('getSampleQuestion error:', error);
     return {
-      success: true,
-      data: {
-        text: 'Scenario: You are leading a cross-functional project with conflicting stakeholder goals. How do you align the team and keep delivery on track?',
-        difficulty: 'INTERMEDIATE',
-      },
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to fetch sample question',
     };
   }
 }
@@ -456,14 +453,6 @@ export async function simulateTest(
     return { success: true, data: result };
   } catch (error) {
     console.error('simulateTest error:', error);
-    // Return mock data only in development
-    if (process.env.NODE_ENV === 'development') {
-      console.warn('[DEV] Using mock simulation data');
-      return {
-        success: true,
-        data: generateMockSimulation(state, profile),
-      };
-    }
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Simulation failed',
@@ -503,15 +492,9 @@ export async function fetchInventoryHealth(): Promise<
     return { success: true, data: result };
   } catch (error) {
     console.error('fetchInventoryHealth error:', error);
-    // Return empty mock data
     return {
-      success: true,
-      data: {
-        competencyHealth: {},
-        totalCompetencies: 0,
-        healthyCounts: 0,
-        criticalCounts: 0,
-      },
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to fetch inventory health',
     };
   }
 }

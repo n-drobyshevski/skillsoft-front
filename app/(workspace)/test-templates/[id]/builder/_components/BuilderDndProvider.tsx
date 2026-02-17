@@ -157,6 +157,9 @@ export function BuilderDndProvider({ children }: BuilderDndProviderProps) {
     const { active } = event;
     const data = active.data.current as ActiveDragData | undefined;
 
+    // Haptic feedback on drag start (mobile)
+    navigator.vibrate?.(50);
+
     setActiveId(active.id);
     setActiveDragData(data || null);
   }, []);
@@ -234,6 +237,9 @@ export function BuilderDndProvider({ children }: BuilderDndProviderProps) {
       setInsertionTarget(null);
 
       if (!over) return;
+
+      // Haptic feedback on successful drop (mobile)
+      navigator.vibrate?.(30);
 
       if (activeData?.type === "library-item" && activeData.competency) {
         // EXTERNAL DROP: Add library item at specific position

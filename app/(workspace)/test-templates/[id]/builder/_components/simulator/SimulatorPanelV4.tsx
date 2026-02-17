@@ -119,10 +119,10 @@ function MobileResultsView({
         fineTuneSettings={fineTuneSettings}
       />
 
-      {/* Floating Action Bar for Re-run */}
+      {/* Floating Action Bar for Re-run — offset for mobile bottom nav (h-16 = 64px + safe area) */}
       <div
         className={cn(
-          'fixed bottom-0 left-0 right-0 z-30',
+          'sticky bottom-0 left-0 right-0 z-30',
           'p-3 bg-background/95 backdrop-blur-sm border-t',
           'flex items-center gap-2'
         )}

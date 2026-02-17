@@ -19,6 +19,7 @@
 import React from 'react';
 import { describe, it, expect, vi, beforeEach, beforeAll, afterEach } from 'vitest';
 import { render, screen, within } from '@testing-library/react';
+import { renderWithIntl } from '../../utils/test-providers';
 import CompetencyRadarChart from '@/components/data-display/charts/CompetencyRadarChart';
 import type { CompetencyRadarDataPoint } from '@/components/data-display/charts/CompetencyRadarChart';
 
@@ -213,14 +214,14 @@ describe('CompetencyRadarChart', () => {
 
   describe('Basic Rendering', () => {
     it('should render the component with data', () => {
-      render(<CompetencyRadarChart data={mockRadarData} />);
+      renderWithIntl(<CompetencyRadarChart data={mockRadarData} />);
 
       expect(screen.getByTestId('responsive-container')).toBeInTheDocument();
       expect(screen.getByTestId('radar-chart')).toBeInTheDocument();
     });
 
     it('should render ResponsiveContainer with radar chart', () => {
-      render(<CompetencyRadarChart data={mockRadarData} />);
+      renderWithIntl(<CompetencyRadarChart data={mockRadarData} />);
 
       const container = screen.getByTestId('responsive-container');
       const chart = within(container).getByTestId('radar-chart');
@@ -228,44 +229,44 @@ describe('CompetencyRadarChart', () => {
     });
 
     it('should render polar grid', () => {
-      render(<CompetencyRadarChart data={mockRadarData} />);
+      renderWithIntl(<CompetencyRadarChart data={mockRadarData} />);
 
       expect(screen.getByTestId('polar-grid')).toBeInTheDocument();
     });
 
     it('should render polar grid with polygon type', () => {
-      render(<CompetencyRadarChart data={mockRadarData} />);
+      renderWithIntl(<CompetencyRadarChart data={mockRadarData} />);
 
       const grid = screen.getByTestId('polar-grid');
       expect(grid).toHaveAttribute('data-grid-type', 'polygon');
     });
 
     it('should render polar angle axis', () => {
-      render(<CompetencyRadarChart data={mockRadarData} />);
+      renderWithIntl(<CompetencyRadarChart data={mockRadarData} />);
 
       expect(screen.getByTestId('polar-angle-axis')).toBeInTheDocument();
     });
 
     it('should render polar radius axis', () => {
-      render(<CompetencyRadarChart data={mockRadarData} />);
+      renderWithIntl(<CompetencyRadarChart data={mockRadarData} />);
 
       expect(screen.getByTestId('polar-radius-axis')).toBeInTheDocument();
     });
 
     it('should render radar element', () => {
-      render(<CompetencyRadarChart data={mockRadarData} />);
+      renderWithIntl(<CompetencyRadarChart data={mockRadarData} />);
 
       expect(screen.getByTestId('radar')).toBeInTheDocument();
     });
 
     it('should render tooltip', () => {
-      render(<CompetencyRadarChart data={mockRadarData} />);
+      renderWithIntl(<CompetencyRadarChart data={mockRadarData} />);
 
       expect(screen.getByTestId('tooltip')).toBeInTheDocument();
     });
 
     it('should pass correct number of data points to chart', () => {
-      render(<CompetencyRadarChart data={mockRadarData} />);
+      renderWithIntl(<CompetencyRadarChart data={mockRadarData} />);
 
       const chart = screen.getByTestId('radar-chart');
       expect(chart).toHaveAttribute('data-points', '5');
@@ -278,13 +279,13 @@ describe('CompetencyRadarChart', () => {
 
   describe('Empty Data Handling', () => {
     it('should display empty state when data is empty array', () => {
-      render(<CompetencyRadarChart data={[]} />);
+      renderWithIntl(<CompetencyRadarChart data={[]} />);
 
-      expect(screen.getByText('Нет данных для отображения')).toBeInTheDocument();
+      expect(screen.getByText('No data to display')).toBeInTheDocument();
     });
 
     it('should display empty state when data is undefined/null-ish', () => {
-      render(<CompetencyRadarChart data={[]} />);
+      renderWithIntl(<CompetencyRadarChart data={[]} />);
 
       expect(screen.queryByTestId('radar-chart')).not.toBeInTheDocument();
     });
@@ -295,24 +296,24 @@ describe('CompetencyRadarChart', () => {
         { subject: 'B', A: 60, fullMark: 100 },
       ];
 
-      render(<CompetencyRadarChart data={twoPoints} />);
+      renderWithIntl(<CompetencyRadarChart data={twoPoints} />);
 
-      expect(screen.getByText(/Недостаточно данных для диаграммы/)).toBeInTheDocument();
-      expect(screen.getByText(/минимум 3 компетенции/)).toBeInTheDocument();
+      expect(screen.getByText(/Insufficient data for chart/)).toBeInTheDocument();
+      expect(screen.getByText(/minimum 3 competencies/)).toBeInTheDocument();
     });
 
     it('should render chart with exactly 3 data points', () => {
-      render(<CompetencyRadarChart data={mockMinimalData} />);
+      renderWithIntl(<CompetencyRadarChart data={mockMinimalData} />);
 
       expect(screen.getByTestId('radar-chart')).toBeInTheDocument();
       expect(screen.getByTestId('radar-chart')).toHaveAttribute('data-points', '3');
     });
 
     it('should display empty state icon', () => {
-      render(<CompetencyRadarChart data={[]} />);
+      renderWithIntl(<CompetencyRadarChart data={[]} />);
 
       // Empty state has an SVG icon
-      const emptyState = screen.getByText('Нет данных для отображения').closest('div');
+      const emptyState = screen.getByText('No data to display').closest('div');
       expect(emptyState?.querySelector('svg')).toBeInTheDocument();
     });
   });
@@ -323,7 +324,7 @@ describe('CompetencyRadarChart', () => {
 
   describe('Label Truncation', () => {
     it('should use custom tick component on polar angle axis', () => {
-      render(<CompetencyRadarChart data={mockRadarData} />);
+      renderWithIntl(<CompetencyRadarChart data={mockRadarData} />);
 
       const angleAxis = screen.getByTestId('polar-angle-axis');
       expect(angleAxis).toHaveAttribute('data-has-custom-tick', 'true');
@@ -331,7 +332,7 @@ describe('CompetencyRadarChart', () => {
 
     it('should configure mobile max label length to 8 chars', () => {
       mockUseIsMobile.mockReturnValue(true);
-      render(<CompetencyRadarChart data={mockRadarData} />);
+      renderWithIntl(<CompetencyRadarChart data={mockRadarData} />);
 
       // Verified by checking the component renders (truncation logic is internal)
       expect(screen.getByTestId('radar-chart')).toBeInTheDocument();
@@ -339,7 +340,7 @@ describe('CompetencyRadarChart', () => {
 
     it('should configure desktop max label length to 18 chars', () => {
       mockUseIsMobile.mockReturnValue(false);
-      render(<CompetencyRadarChart data={mockRadarData} />);
+      renderWithIntl(<CompetencyRadarChart data={mockRadarData} />);
 
       expect(screen.getByTestId('radar-chart')).toBeInTheDocument();
     });
@@ -351,7 +352,7 @@ describe('CompetencyRadarChart', () => {
         { subject: 'Yet another competency with a ridiculously long name', A: 75, fullMark: 100 },
       ];
 
-      render(<CompetencyRadarChart data={longNameData} />);
+      renderWithIntl(<CompetencyRadarChart data={longNameData} />);
 
       expect(screen.getByTestId('radar-chart')).toBeInTheDocument();
     });
@@ -363,7 +364,7 @@ describe('CompetencyRadarChart', () => {
         { subject: 'C', A: 75, fullMark: 100 },
       ];
 
-      render(<CompetencyRadarChart data={shortNameData} />);
+      renderWithIntl(<CompetencyRadarChart data={shortNameData} />);
 
       expect(screen.getByTestId('radar-chart')).toBeInTheDocument();
     });
@@ -375,32 +376,32 @@ describe('CompetencyRadarChart', () => {
 
   describe('passingScore Prop', () => {
     it('should use default passing score of 70', () => {
-      render(<CompetencyRadarChart data={mockRadarData} />);
+      renderWithIntl(<CompetencyRadarChart data={mockRadarData} />);
 
       // Chart renders with default - verified via screen reader text
       expect(screen.getByRole('img')).toBeInTheDocument();
     });
 
     it('should accept custom passing score', () => {
-      render(<CompetencyRadarChart data={mockRadarData} passingScore={80} />);
+      renderWithIntl(<CompetencyRadarChart data={mockRadarData} passingScore={80} />);
 
       expect(screen.getByTestId('radar-chart')).toBeInTheDocument();
     });
 
     it('should accept passing score of 0', () => {
-      render(<CompetencyRadarChart data={mockRadarData} passingScore={0} />);
+      renderWithIntl(<CompetencyRadarChart data={mockRadarData} passingScore={0} />);
 
       expect(screen.getByTestId('radar-chart')).toBeInTheDocument();
     });
 
     it('should accept passing score of 100', () => {
-      render(<CompetencyRadarChart data={mockRadarData} passingScore={100} />);
+      renderWithIntl(<CompetencyRadarChart data={mockRadarData} passingScore={100} />);
 
       expect(screen.getByTestId('radar-chart')).toBeInTheDocument();
     });
 
     it('should affect tooltip rendering based on passing score', () => {
-      render(<CompetencyRadarChart data={mockRadarData} passingScore={90} />);
+      renderWithIntl(<CompetencyRadarChart data={mockRadarData} passingScore={90} />);
 
       const tooltip = screen.getByTestId('tooltip');
       expect(tooltip).toHaveAttribute('data-has-custom-content', 'true');
@@ -413,35 +414,35 @@ describe('CompetencyRadarChart', () => {
 
   describe('animated Prop', () => {
     it('should enable animation by default', () => {
-      render(<CompetencyRadarChart data={mockRadarData} />);
+      renderWithIntl(<CompetencyRadarChart data={mockRadarData} />);
 
       const radar = screen.getByTestId('radar');
       expect(radar).toHaveAttribute('data-animation-active', 'true');
     });
 
     it('should enable animation when animated is true', () => {
-      render(<CompetencyRadarChart data={mockRadarData} animated={true} />);
+      renderWithIntl(<CompetencyRadarChart data={mockRadarData} animated={true} />);
 
       const radar = screen.getByTestId('radar');
       expect(radar).toHaveAttribute('data-animation-active', 'true');
     });
 
     it('should disable animation when animated is false', () => {
-      render(<CompetencyRadarChart data={mockRadarData} animated={false} />);
+      renderWithIntl(<CompetencyRadarChart data={mockRadarData} animated={false} />);
 
       const radar = screen.getByTestId('radar');
       expect(radar).toHaveAttribute('data-animation-active', 'false');
     });
 
     it('should use 600ms animation duration', () => {
-      render(<CompetencyRadarChart data={mockRadarData} animated={true} />);
+      renderWithIntl(<CompetencyRadarChart data={mockRadarData} animated={true} />);
 
       const radar = screen.getByTestId('radar');
       expect(radar).toHaveAttribute('data-animation-duration', '600');
     });
 
     it('should use ease-out animation easing', () => {
-      render(<CompetencyRadarChart data={mockRadarData} animated={true} />);
+      renderWithIntl(<CompetencyRadarChart data={mockRadarData} animated={true} />);
 
       const radar = screen.getByTestId('radar');
       expect(radar).toHaveAttribute('data-animation-easing', 'ease-out');
@@ -454,7 +455,7 @@ describe('CompetencyRadarChart', () => {
 
   describe('Custom className', () => {
     it('should apply custom className to container', () => {
-      const { container } = render(
+      const { container } = renderWithIntl(
         <CompetencyRadarChart data={mockRadarData} className="custom-radar-class" />
       );
 
@@ -462,7 +463,7 @@ describe('CompetencyRadarChart', () => {
     });
 
     it('should merge custom className with default classes', () => {
-      const { container } = render(
+      const { container } = renderWithIntl(
         <CompetencyRadarChart data={mockRadarData} className="my-custom-class" />
       );
 
@@ -471,7 +472,7 @@ describe('CompetencyRadarChart', () => {
     });
 
     it('should work without className prop', () => {
-      const { container } = render(<CompetencyRadarChart data={mockRadarData} />);
+      const { container } = renderWithIntl(<CompetencyRadarChart data={mockRadarData} />);
 
       expect(container.firstChild).toHaveClass('w-full');
     });
@@ -483,44 +484,44 @@ describe('CompetencyRadarChart', () => {
 
   describe('Screen Reader Accessibility', () => {
     it('should have role="img" on container', () => {
-      render(<CompetencyRadarChart data={mockRadarData} />);
+      renderWithIntl(<CompetencyRadarChart data={mockRadarData} />);
 
       expect(screen.getByRole('img')).toBeInTheDocument();
     });
 
     it('should have aria-label with competency count', () => {
-      render(<CompetencyRadarChart data={mockRadarData} />);
+      renderWithIntl(<CompetencyRadarChart data={mockRadarData} />);
 
       const container = screen.getByRole('img');
       expect(container).toHaveAttribute('aria-label');
-      expect(container.getAttribute('aria-label')).toContain('5 компетенциями');
+      expect(container.getAttribute('aria-label')).toContain('5 competencies');
     });
 
     it('should include score range in aria-label', () => {
-      render(<CompetencyRadarChart data={mockRadarData} />);
+      renderWithIntl(<CompetencyRadarChart data={mockRadarData} />);
 
       const container = screen.getByRole('img');
       const ariaLabel = container.getAttribute('aria-label') || '';
-      expect(ariaLabel).toContain('от 65%');
-      expect(ariaLabel).toContain('до 85%');
+      expect(ariaLabel).toContain('65% to');
+      expect(ariaLabel).toContain('to 85%');
     });
 
     it('should include average score in aria-label', () => {
-      render(<CompetencyRadarChart data={mockRadarData} />);
+      renderWithIntl(<CompetencyRadarChart data={mockRadarData} />);
 
       const container = screen.getByRole('img');
       const ariaLabel = container.getAttribute('aria-label') || '';
-      expect(ariaLabel).toContain('Средний балл');
+      expect(ariaLabel).toContain('Average score');
     });
 
     it('should render sr-only section with detailed results', () => {
-      render(<CompetencyRadarChart data={mockRadarData} />);
+      renderWithIntl(<CompetencyRadarChart data={mockRadarData} />);
 
-      expect(screen.getByText('Детальные результаты по компетенциям:')).toBeInTheDocument();
+      expect(screen.getByText('Detailed results by competency:')).toBeInTheDocument();
     });
 
     it('should list all competencies in sr-only section', () => {
-      render(<CompetencyRadarChart data={mockRadarData} />);
+      renderWithIntl(<CompetencyRadarChart data={mockRadarData} />);
 
       expect(screen.getByText(/Communication: 85%/)).toBeInTheDocument();
       expect(screen.getByText(/Leadership: 70%/)).toBeInTheDocument();
@@ -528,19 +529,19 @@ describe('CompetencyRadarChart', () => {
     });
 
     it('should indicate passing status in sr-only section', () => {
-      render(<CompetencyRadarChart data={mockRadarData} passingScore={70} />);
+      renderWithIntl(<CompetencyRadarChart data={mockRadarData} passingScore={70} />);
 
       // 85% should pass
-      expect(screen.getByText(/Communication: 85%.*пройдено/)).toBeInTheDocument();
+      expect(screen.getByText(/Communication: 85%.*passed/)).toBeInTheDocument();
       // 65% should not pass
-      expect(screen.getByText(/Problem Solving: 65%.*не пройдено/)).toBeInTheDocument();
+      expect(screen.getByText(/Problem Solving: 65%.*not passed/)).toBeInTheDocument();
     });
 
     it('should update sr-only content based on passingScore', () => {
-      render(<CompetencyRadarChart data={mockRadarData} passingScore={90} />);
+      renderWithIntl(<CompetencyRadarChart data={mockRadarData} passingScore={90} />);
 
       // With 90% threshold, 85% should not pass
-      expect(screen.getByText(/Communication: 85%.*не пройдено/)).toBeInTheDocument();
+      expect(screen.getByText(/Communication: 85%.*not passed/)).toBeInTheDocument();
     });
   });
 
@@ -550,7 +551,7 @@ describe('CompetencyRadarChart', () => {
 
   describe('Theme-Aware Color Computation', () => {
     it('should use computed colors for polar grid stroke', () => {
-      render(<CompetencyRadarChart data={mockRadarData} />);
+      renderWithIntl(<CompetencyRadarChart data={mockRadarData} />);
 
       const grid = screen.getByTestId('polar-grid');
       // The stroke should be a computed color value
@@ -558,21 +559,21 @@ describe('CompetencyRadarChart', () => {
     });
 
     it('should set stroke opacity on polar grid', () => {
-      render(<CompetencyRadarChart data={mockRadarData} />);
+      renderWithIntl(<CompetencyRadarChart data={mockRadarData} />);
 
       const grid = screen.getByTestId('polar-grid');
       expect(grid).toHaveAttribute('data-stroke-opacity', '0.4');
     });
 
     it('should use computed colors for radar stroke', () => {
-      render(<CompetencyRadarChart data={mockRadarData} />);
+      renderWithIntl(<CompetencyRadarChart data={mockRadarData} />);
 
       const radar = screen.getByTestId('radar');
       expect(radar).toHaveAttribute('data-stroke');
     });
 
     it('should use gradient fill for radar', () => {
-      render(<CompetencyRadarChart data={mockRadarData} />);
+      renderWithIntl(<CompetencyRadarChart data={mockRadarData} />);
 
       const radar = screen.getByTestId('radar');
       expect(radar).toHaveAttribute('data-fill', 'url(#competencyRadarGradient)');
@@ -586,7 +587,7 @@ describe('CompetencyRadarChart', () => {
   describe('Responsive Tick Count', () => {
     it('should use 3 ticks on mobile', () => {
       mockUseIsMobile.mockReturnValue(true);
-      render(<CompetencyRadarChart data={mockRadarData} />);
+      renderWithIntl(<CompetencyRadarChart data={mockRadarData} />);
 
       const radiusAxis = screen.getByTestId('polar-radius-axis');
       expect(radiusAxis).toHaveAttribute('data-tick-count', '3');
@@ -594,28 +595,28 @@ describe('CompetencyRadarChart', () => {
 
     it('should use 5 ticks on desktop', () => {
       mockUseIsMobile.mockReturnValue(false);
-      render(<CompetencyRadarChart data={mockRadarData} />);
+      renderWithIntl(<CompetencyRadarChart data={mockRadarData} />);
 
       const radiusAxis = screen.getByTestId('polar-radius-axis');
       expect(radiusAxis).toHaveAttribute('data-tick-count', '5');
     });
 
     it('should configure radius axis with 0-100 domain', () => {
-      render(<CompetencyRadarChart data={mockRadarData} />);
+      renderWithIntl(<CompetencyRadarChart data={mockRadarData} />);
 
       const radiusAxis = screen.getByTestId('polar-radius-axis');
       expect(radiusAxis).toHaveAttribute('data-domain', '0,100');
     });
 
     it('should configure radius axis with 90 degree angle', () => {
-      render(<CompetencyRadarChart data={mockRadarData} />);
+      renderWithIntl(<CompetencyRadarChart data={mockRadarData} />);
 
       const radiusAxis = screen.getByTestId('polar-radius-axis');
       expect(radiusAxis).toHaveAttribute('data-angle', '90');
     });
 
     it('should hide axis line on radius axis', () => {
-      render(<CompetencyRadarChart data={mockRadarData} />);
+      renderWithIntl(<CompetencyRadarChart data={mockRadarData} />);
 
       const radiusAxis = screen.getByTestId('polar-radius-axis');
       expect(radiusAxis).toHaveAttribute('data-axis-line', 'false');
@@ -629,7 +630,7 @@ describe('CompetencyRadarChart', () => {
   describe('Responsive Height', () => {
     it('should use 260px height on mobile', () => {
       mockUseIsMobile.mockReturnValue(true);
-      const { container } = render(<CompetencyRadarChart data={mockRadarData} />);
+      const { container } = renderWithIntl(<CompetencyRadarChart data={mockRadarData} />);
 
       const chartContainer = container.firstChild as HTMLElement;
       expect(chartContainer.style.height).toBe('260px');
@@ -637,7 +638,7 @@ describe('CompetencyRadarChart', () => {
 
     it('should use 340px height on desktop', () => {
       mockUseIsMobile.mockReturnValue(false);
-      const { container } = render(<CompetencyRadarChart data={mockRadarData} />);
+      const { container } = renderWithIntl(<CompetencyRadarChart data={mockRadarData} />);
 
       const chartContainer = container.firstChild as HTMLElement;
       expect(chartContainer.style.height).toBe('340px');
@@ -651,7 +652,7 @@ describe('CompetencyRadarChart', () => {
   describe('Responsive Margins', () => {
     it('should use smaller margins on mobile', () => {
       mockUseIsMobile.mockReturnValue(true);
-      render(<CompetencyRadarChart data={mockRadarData} />);
+      renderWithIntl(<CompetencyRadarChart data={mockRadarData} />);
 
       const chart = screen.getByTestId('radar-chart');
       const margin = JSON.parse(chart.getAttribute('data-margin') || '{}');
@@ -663,7 +664,7 @@ describe('CompetencyRadarChart', () => {
 
     it('should use larger margins on desktop', () => {
       mockUseIsMobile.mockReturnValue(false);
-      render(<CompetencyRadarChart data={mockRadarData} />);
+      renderWithIntl(<CompetencyRadarChart data={mockRadarData} />);
 
       const chart = screen.getByTestId('radar-chart');
       const margin = JSON.parse(chart.getAttribute('data-margin') || '{}');
@@ -681,7 +682,7 @@ describe('CompetencyRadarChart', () => {
   describe('Responsive Glow Filter', () => {
     it('should not apply glow filter on mobile', () => {
       mockUseIsMobile.mockReturnValue(true);
-      render(<CompetencyRadarChart data={mockRadarData} />);
+      renderWithIntl(<CompetencyRadarChart data={mockRadarData} />);
 
       const radar = screen.getByTestId('radar');
       expect(radar.getAttribute('data-filter')).toBeNull();
@@ -689,7 +690,7 @@ describe('CompetencyRadarChart', () => {
 
     it('should apply glow filter on desktop', () => {
       mockUseIsMobile.mockReturnValue(false);
-      render(<CompetencyRadarChart data={mockRadarData} />);
+      renderWithIntl(<CompetencyRadarChart data={mockRadarData} />);
 
       const radar = screen.getByTestId('radar');
       expect(radar).toHaveAttribute('data-filter', 'url(#glow)');
@@ -702,14 +703,14 @@ describe('CompetencyRadarChart', () => {
 
   describe('Bilingual Competency Names', () => {
     it('should render Cyrillic competency names', () => {
-      render(<CompetencyRadarChart data={mockBilingualData} />);
+      renderWithIntl(<CompetencyRadarChart data={mockBilingualData} />);
 
       expect(screen.getByTestId('radar-chart')).toBeInTheDocument();
       expect(screen.getByTestId('radar-chart')).toHaveAttribute('data-points', '5');
     });
 
     it('should include Cyrillic names in sr-only section', () => {
-      render(<CompetencyRadarChart data={mockBilingualData} />);
+      renderWithIntl(<CompetencyRadarChart data={mockBilingualData} />);
 
       expect(screen.getByText(/Коммуникация: 80%/)).toBeInTheDocument();
       expect(screen.getByText(/Лидерство: 65%/)).toBeInTheDocument();
@@ -722,7 +723,7 @@ describe('CompetencyRadarChart', () => {
         { subject: 'Problem Solving', A: 80, fullMark: 100 },
       ];
 
-      render(<CompetencyRadarChart data={mixedData} />);
+      renderWithIntl(<CompetencyRadarChart data={mixedData} />);
 
       expect(screen.getByTestId('radar-chart')).toBeInTheDocument();
       expect(screen.getByText(/Communication: 70%/)).toBeInTheDocument();
@@ -736,7 +737,7 @@ describe('CompetencyRadarChart', () => {
         { subject: 'Стратегическое планирование', A: 80, fullMark: 100 },
       ];
 
-      render(<CompetencyRadarChart data={longCyrillicData} />);
+      renderWithIntl(<CompetencyRadarChart data={longCyrillicData} />);
 
       expect(screen.getByTestId('radar-chart')).toBeInTheDocument();
     });
@@ -752,13 +753,13 @@ describe('CompetencyRadarChart', () => {
         { subject: 'Only One', A: 75, fullMark: 100 },
       ];
 
-      render(<CompetencyRadarChart data={singlePoint} />);
+      renderWithIntl(<CompetencyRadarChart data={singlePoint} />);
 
-      expect(screen.getByText(/Недостаточно данных/)).toBeInTheDocument();
+      expect(screen.getByText(/Insufficient data/)).toBeInTheDocument();
     });
 
     it('should handle exactly 3 data points (minimum)', () => {
-      render(<CompetencyRadarChart data={mockMinimalData} />);
+      renderWithIntl(<CompetencyRadarChart data={mockMinimalData} />);
 
       expect(screen.getByTestId('radar-chart')).toBeInTheDocument();
       expect(screen.getByTestId('radar-chart')).toHaveAttribute('data-points', '3');
@@ -771,7 +772,7 @@ describe('CompetencyRadarChart', () => {
         fullMark: 100,
       }));
 
-      render(<CompetencyRadarChart data={manyPoints} />);
+      renderWithIntl(<CompetencyRadarChart data={manyPoints} />);
 
       expect(screen.getByTestId('radar-chart')).toBeInTheDocument();
       expect(screen.getByTestId('radar-chart')).toHaveAttribute('data-points', '12');
@@ -784,7 +785,7 @@ describe('CompetencyRadarChart', () => {
         fullMark: 100,
       }));
 
-      render(<CompetencyRadarChart data={manyPoints} />);
+      renderWithIntl(<CompetencyRadarChart data={manyPoints} />);
 
       expect(screen.getByTestId('radar-chart')).toBeInTheDocument();
     });
@@ -802,7 +803,7 @@ describe('CompetencyRadarChart', () => {
         { subject: 'High', A: 80, fullMark: 100 },
       ];
 
-      render(<CompetencyRadarChart data={zeroScoreData} />);
+      renderWithIntl(<CompetencyRadarChart data={zeroScoreData} />);
 
       expect(screen.getByTestId('radar-chart')).toBeInTheDocument();
       expect(screen.getByText(/Zero: 0%/)).toBeInTheDocument();
@@ -815,7 +816,7 @@ describe('CompetencyRadarChart', () => {
         { subject: 'Still Mid', A: 50, fullMark: 100 },
       ];
 
-      render(<CompetencyRadarChart data={midScoreData} />);
+      renderWithIntl(<CompetencyRadarChart data={midScoreData} />);
 
       expect(screen.getByTestId('radar-chart')).toBeInTheDocument();
     });
@@ -827,7 +828,7 @@ describe('CompetencyRadarChart', () => {
         { subject: 'TopResult', A: 100, fullMark: 100 },
       ];
 
-      render(<CompetencyRadarChart data={perfectScoreData} />);
+      renderWithIntl(<CompetencyRadarChart data={perfectScoreData} />);
 
       expect(screen.getByTestId('radar-chart')).toBeInTheDocument();
       expect(screen.getByText(/MaxScore: 100%/)).toBeInTheDocument();
@@ -840,12 +841,12 @@ describe('CompetencyRadarChart', () => {
         { subject: 'C', A: 0, fullMark: 100 },
       ];
 
-      render(<CompetencyRadarChart data={allZeroData} />);
+      renderWithIntl(<CompetencyRadarChart data={allZeroData} />);
 
       expect(screen.getByTestId('radar-chart')).toBeInTheDocument();
       const container = screen.getByRole('img');
-      expect(container.getAttribute('aria-label')).toContain('от 0%');
-      expect(container.getAttribute('aria-label')).toContain('до 0%');
+      expect(container.getAttribute('aria-label')).toContain('0% to');
+      expect(container.getAttribute('aria-label')).toContain('to 0%');
     });
 
     it('should handle all scores at 100', () => {
@@ -855,11 +856,11 @@ describe('CompetencyRadarChart', () => {
         { subject: 'C', A: 100, fullMark: 100 },
       ];
 
-      render(<CompetencyRadarChart data={allPerfectData} />);
+      renderWithIntl(<CompetencyRadarChart data={allPerfectData} />);
 
       const container = screen.getByRole('img');
-      expect(container.getAttribute('aria-label')).toContain('от 100%');
-      expect(container.getAttribute('aria-label')).toContain('до 100%');
+      expect(container.getAttribute('aria-label')).toContain('100% to');
+      expect(container.getAttribute('aria-label')).toContain('to 100%');
     });
 
     it('should handle mixed boundary scores', () => {
@@ -869,12 +870,12 @@ describe('CompetencyRadarChart', () => {
         { subject: 'Max', A: 100, fullMark: 100 },
       ];
 
-      render(<CompetencyRadarChart data={mixedBoundaryData} />);
+      renderWithIntl(<CompetencyRadarChart data={mixedBoundaryData} />);
 
       expect(screen.getByTestId('radar-chart')).toBeInTheDocument();
       const container = screen.getByRole('img');
-      expect(container.getAttribute('aria-label')).toContain('от 0%');
-      expect(container.getAttribute('aria-label')).toContain('до 100%');
+      expect(container.getAttribute('aria-label')).toContain('0% to');
+      expect(container.getAttribute('aria-label')).toContain('to 100%');
     });
   });
 
@@ -890,7 +891,7 @@ describe('CompetencyRadarChart', () => {
         { subject: 'C', A: 85, fullMark: 100 },
       ];
 
-      render(<CompetencyRadarChart data={data} />);
+      renderWithIntl(<CompetencyRadarChart data={data} />);
 
       expect(screen.getByTestId('radar-chart')).toBeInTheDocument();
     });
@@ -902,7 +903,7 @@ describe('CompetencyRadarChart', () => {
         { subject: 'C', A: 85, fullMark: 100 },
       ];
 
-      render(<CompetencyRadarChart data={data} />);
+      renderWithIntl(<CompetencyRadarChart data={data} />);
 
       expect(screen.getByTestId('radar-chart')).toBeInTheDocument();
     });
@@ -914,7 +915,7 @@ describe('CompetencyRadarChart', () => {
         { subject: 'C', A: 0, fullMark: 0 },
       ];
 
-      render(<CompetencyRadarChart data={data} />);
+      renderWithIntl(<CompetencyRadarChart data={data} />);
 
       expect(screen.getByTestId('radar-chart')).toBeInTheDocument();
     });
@@ -926,7 +927,7 @@ describe('CompetencyRadarChart', () => {
         { subject: 'C', A: 900, fullMark: 1000 },
       ];
 
-      render(<CompetencyRadarChart data={data} />);
+      renderWithIntl(<CompetencyRadarChart data={data} />);
 
       expect(screen.getByTestId('radar-chart')).toBeInTheDocument();
     });
@@ -938,21 +939,21 @@ describe('CompetencyRadarChart', () => {
 
   describe('Radar Configuration', () => {
     it('should configure radar with correct dataKey', () => {
-      render(<CompetencyRadarChart data={mockRadarData} />);
+      renderWithIntl(<CompetencyRadarChart data={mockRadarData} />);
 
       const radar = screen.getByTestId('radar');
       expect(radar).toHaveAttribute('data-key', 'A');
     });
 
     it('should configure radar with correct name', () => {
-      render(<CompetencyRadarChart data={mockRadarData} />);
+      renderWithIntl(<CompetencyRadarChart data={mockRadarData} />);
 
       const radar = screen.getByTestId('radar');
-      expect(radar).toHaveAttribute('data-name', 'Оценка');
+      expect(radar).toHaveAttribute('data-name', 'Score');
     });
 
     it('should configure radar fill opacity to 1', () => {
-      render(<CompetencyRadarChart data={mockRadarData} />);
+      renderWithIntl(<CompetencyRadarChart data={mockRadarData} />);
 
       const radar = screen.getByTestId('radar');
       expect(radar).toHaveAttribute('data-fill-opacity', '1');
@@ -960,7 +961,7 @@ describe('CompetencyRadarChart', () => {
 
     it('should use thinner stroke on mobile', () => {
       mockUseIsMobile.mockReturnValue(true);
-      render(<CompetencyRadarChart data={mockRadarData} />);
+      renderWithIntl(<CompetencyRadarChart data={mockRadarData} />);
 
       const radar = screen.getByTestId('radar');
       expect(radar).toHaveAttribute('data-stroke-width', '1.5');
@@ -968,7 +969,7 @@ describe('CompetencyRadarChart', () => {
 
     it('should use thicker stroke on desktop', () => {
       mockUseIsMobile.mockReturnValue(false);
-      render(<CompetencyRadarChart data={mockRadarData} />);
+      renderWithIntl(<CompetencyRadarChart data={mockRadarData} />);
 
       const radar = screen.getByTestId('radar');
       expect(radar).toHaveAttribute('data-stroke-width', '2');
@@ -982,7 +983,7 @@ describe('CompetencyRadarChart', () => {
   describe('Polar Grid Configuration', () => {
     it('should use thinner grid stroke on mobile', () => {
       mockUseIsMobile.mockReturnValue(true);
-      render(<CompetencyRadarChart data={mockRadarData} />);
+      renderWithIntl(<CompetencyRadarChart data={mockRadarData} />);
 
       const grid = screen.getByTestId('polar-grid');
       expect(grid).toHaveAttribute('data-stroke-width', '0.5');
@@ -990,7 +991,7 @@ describe('CompetencyRadarChart', () => {
 
     it('should use standard grid stroke on desktop', () => {
       mockUseIsMobile.mockReturnValue(false);
-      render(<CompetencyRadarChart data={mockRadarData} />);
+      renderWithIntl(<CompetencyRadarChart data={mockRadarData} />);
 
       const grid = screen.getByTestId('polar-grid');
       expect(grid).toHaveAttribute('data-stroke-width', '1');
@@ -1003,14 +1004,14 @@ describe('CompetencyRadarChart', () => {
 
   describe('Polar Angle Axis Configuration', () => {
     it('should use subject as dataKey', () => {
-      render(<CompetencyRadarChart data={mockRadarData} />);
+      renderWithIntl(<CompetencyRadarChart data={mockRadarData} />);
 
       const angleAxis = screen.getByTestId('polar-angle-axis');
       expect(angleAxis).toHaveAttribute('data-key', 'subject');
     });
 
     it('should hide tick line', () => {
-      render(<CompetencyRadarChart data={mockRadarData} />);
+      renderWithIntl(<CompetencyRadarChart data={mockRadarData} />);
 
       const angleAxis = screen.getByTestId('polar-angle-axis');
       expect(angleAxis).toHaveAttribute('data-tick-line', 'false');
@@ -1023,7 +1024,7 @@ describe('CompetencyRadarChart', () => {
 
   describe('Tooltip Configuration', () => {
     it('should render tooltip with custom content', () => {
-      render(<CompetencyRadarChart data={mockRadarData} />);
+      renderWithIntl(<CompetencyRadarChart data={mockRadarData} />);
 
       const tooltip = screen.getByTestId('tooltip');
       expect(tooltip).toHaveAttribute('data-has-custom-content', 'true');
@@ -1036,13 +1037,13 @@ describe('CompetencyRadarChart', () => {
 
   describe('Memoization', () => {
     it('should render correctly on initial mount', () => {
-      render(<CompetencyRadarChart data={mockRadarData} />);
+      renderWithIntl(<CompetencyRadarChart data={mockRadarData} />);
 
       expect(screen.getByTestId('radar-chart')).toBeInTheDocument();
     });
 
     it('should update when data changes', () => {
-      const { rerender } = render(<CompetencyRadarChart data={mockRadarData} />);
+      const { rerender } = renderWithIntl(<CompetencyRadarChart data={mockRadarData} />);
 
       expect(screen.getByTestId('radar-chart')).toHaveAttribute('data-points', '5');
 
@@ -1052,7 +1053,7 @@ describe('CompetencyRadarChart', () => {
     });
 
     it('should update when props change', () => {
-      const { rerender } = render(<CompetencyRadarChart data={mockRadarData} animated={true} />);
+      const { rerender } = renderWithIntl(<CompetencyRadarChart data={mockRadarData} animated={true} />);
 
       expect(screen.getByTestId('radar')).toHaveAttribute('data-animation-active', 'true');
 
@@ -1068,32 +1069,32 @@ describe('CompetencyRadarChart', () => {
 
   describe('Stats Calculation', () => {
     it('should calculate correct min score', () => {
-      render(<CompetencyRadarChart data={mockRadarData} />);
+      renderWithIntl(<CompetencyRadarChart data={mockRadarData} />);
 
       const container = screen.getByRole('img');
-      expect(container.getAttribute('aria-label')).toContain('от 65%');
+      expect(container.getAttribute('aria-label')).toContain('65% to');
     });
 
     it('should calculate correct max score', () => {
-      render(<CompetencyRadarChart data={mockRadarData} />);
+      renderWithIntl(<CompetencyRadarChart data={mockRadarData} />);
 
       const container = screen.getByRole('img');
-      expect(container.getAttribute('aria-label')).toContain('до 85%');
+      expect(container.getAttribute('aria-label')).toContain('to 85%');
     });
 
     it('should calculate correct average score', () => {
       // mockRadarData: 85 + 70 + 65 + 80 + 72 = 372 / 5 = 74.4 -> 74
-      render(<CompetencyRadarChart data={mockRadarData} />);
+      renderWithIntl(<CompetencyRadarChart data={mockRadarData} />);
 
       const container = screen.getByRole('img');
-      expect(container.getAttribute('aria-label')).toContain('Средний балл: 74%');
+      expect(container.getAttribute('aria-label')).toContain('Average score: 74%');
     });
 
     it('should handle empty data for stats calculation', () => {
-      render(<CompetencyRadarChart data={[]} />);
+      renderWithIntl(<CompetencyRadarChart data={[]} />);
 
       // Should show empty state, not crash
-      expect(screen.getByText('Нет данных для отображения')).toBeInTheDocument();
+      expect(screen.getByText('No data to display')).toBeInTheDocument();
     });
   });
 });

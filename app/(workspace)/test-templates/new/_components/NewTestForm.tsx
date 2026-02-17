@@ -968,7 +968,8 @@ function ReviewStep({ form, competencies }: NewTestFormProps & { form: any }) {
   const t = useTranslations('template.newForm');
   const tVisibility = useTranslations('template.newForm.visibility');
   const tTemplate = useTranslations('template');
-  const values = form.getValues();
+  // useWatch subscribes to form changes — getValues() only captures a snapshot
+  const values = useWatch({ control: form.control }) as ReturnType<typeof form.getValues>;
   const selectedCompetencies = competencies.filter(c => values.competencyIds.includes(c.id));
   const config = [
     { labelKey: 'questionsPerIndicatorShort', value: values.questionsPerIndicator, icon: HelpCircle },

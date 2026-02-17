@@ -298,7 +298,7 @@ describe('GapBar', () => {
 
   it('should render GapAnalysisChart with single data point', () => {
     render(<GapAnalysisChart data={[mockGapData[0]]} showLegend={false} />);
-    expect(screen.getByText('Communication')).toBeInTheDocument();
+    expect(screen.getAllByText('Communication')[0]).toBeInTheDocument();
   });
 
   it('should render competency name and score', () => {
@@ -364,10 +364,10 @@ describe('GapAnalysisChart', () => {
     it('should render chart with competency data', () => {
       render(<GapAnalysisChart data={mockGapData} />);
 
-      expect(screen.getByText('Communication')).toBeInTheDocument();
-      expect(screen.getByText('Problem Solving')).toBeInTheDocument();
-      expect(screen.getByText('Leadership')).toBeInTheDocument();
-      expect(screen.getByText('Strategic Thinking')).toBeInTheDocument();
+      expect(screen.getAllByText('Communication')[0]).toBeInTheDocument();
+      expect(screen.getAllByText('Problem Solving')[0]).toBeInTheDocument();
+      expect(screen.getAllByText('Leadership')[0]).toBeInTheDocument();
+      expect(screen.getAllByText('Strategic Thinking')[0]).toBeInTheDocument();
     });
 
     it('should render empty state when no data', () => {
@@ -595,7 +595,7 @@ describe('GapAnalysisChart', () => {
 
       render(<GapAnalysisChart data={mockGapData} onBarClick={onBarClick} />);
 
-      const bar = screen.getByText('Communication').closest('div[class*="group"]');
+      const bar = screen.getAllByText('Communication')[0].closest('div[class*="group"]');
       if (bar) {
         await user.click(bar);
       }
@@ -658,12 +658,12 @@ describe('GapAnalysisChart', () => {
     it('should handle Cyrillic competency names', () => {
       render(<GapAnalysisChart data={mockBilingualData} />);
 
-      expect(screen.getByText('Коммуникация')).toBeInTheDocument();
-      expect(screen.getByText('Лидерство')).toBeInTheDocument();
+      expect(screen.getAllByText('Коммуникация')[0]).toBeInTheDocument();
+      expect(screen.getAllByText('Лидерство')[0]).toBeInTheDocument();
     });
 
     it('should sort Cyrillic names correctly', () => {
-      render(
+      const { container } = render(
         <GapAnalysisChart
           data={mockBilingualData}
           sortBy="name"
@@ -672,12 +672,14 @@ describe('GapAnalysisChart', () => {
         />
       );
 
-      const bars = screen.getAllByText(/Коммуникация|Лидерство/);
+      // Scope to bar labels only (div.font-medium) to avoid duplicates from the summary table
+      const barLabels = container.querySelectorAll('div.font-medium');
+      const barNames = Array.from(barLabels).map(el => el.textContent).filter(Boolean);
       // In Cyrillic alphabetical order: К (Коммуникация) comes before Л (Лидерство)
       // However, localeCompare may vary - just verify both are present
-      expect(bars.length).toBe(2);
-      expect(bars.some(bar => bar.textContent?.includes('Коммуникация'))).toBe(true);
-      expect(bars.some(bar => bar.textContent?.includes('Лидерство'))).toBe(true);
+      expect(barNames.length).toBe(2);
+      expect(barNames.some(name => name?.includes('Коммуникация'))).toBe(true);
+      expect(barNames.some(name => name?.includes('Лидерство'))).toBe(true);
     });
   });
 
@@ -724,7 +726,7 @@ describe('GapAnalysisChart', () => {
       render(<GapAnalysisChart data={noWeightData} sortBy="weight" showLegend={false} />);
 
       // Should render without error
-      expect(screen.getByText('Communication')).toBeInTheDocument();
+      expect(screen.getAllByText('Communication')[0]).toBeInTheDocument();
     });
 
     it('should handle items without category', () => {
@@ -734,7 +736,7 @@ describe('GapAnalysisChart', () => {
 
       render(<GapAnalysisChart data={noCategoryData} />);
 
-      expect(screen.getByText('Communication')).toBeInTheDocument();
+      expect(screen.getAllByText('Communication')[0]).toBeInTheDocument();
     });
   });
 
@@ -743,7 +745,7 @@ describe('GapAnalysisChart', () => {
       render(<GapAnalysisChart data={mockGapData} />);
 
       // Component should render with default threshold
-      expect(screen.getByText('Communication')).toBeInTheDocument();
+      expect(screen.getAllByText('Communication')[0]).toBeInTheDocument();
     });
 
     it('should use default meetsTolerance of 5', () => {
@@ -763,13 +765,13 @@ describe('GapAnalysisChart', () => {
       // This test just ensures the prop is accepted
       render(<GapAnalysisChart data={mockGapData} animate={true} />);
 
-      expect(screen.getByText('Communication')).toBeInTheDocument();
+      expect(screen.getAllByText('Communication')[0]).toBeInTheDocument();
     });
 
     it('should allow disabling animation', () => {
       render(<GapAnalysisChart data={mockGapData} animate={false} />);
 
-      expect(screen.getByText('Communication')).toBeInTheDocument();
+      expect(screen.getAllByText('Communication')[0]).toBeInTheDocument();
     });
   });
 
@@ -778,8 +780,8 @@ describe('GapAnalysisChart', () => {
       render(<GapAnalysisChart data={mockGapData} />);
 
       // Chart should be accessible - all competencies are visible
-      expect(screen.getByText('Communication')).toBeInTheDocument();
-      expect(screen.getByText('Problem Solving')).toBeInTheDocument();
+      expect(screen.getAllByText('Communication')[0]).toBeInTheDocument();
+      expect(screen.getAllByText('Problem Solving')[0]).toBeInTheDocument();
     });
 
     it('should provide status information visually', () => {
@@ -826,13 +828,13 @@ describe('GapAnalysisChart', () => {
     it('should accept custom height as number', () => {
       render(<GapAnalysisChart data={mockGapData} height={400} />);
 
-      expect(screen.getByText('Communication')).toBeInTheDocument();
+      expect(screen.getAllByText('Communication')[0]).toBeInTheDocument();
     });
 
     it('should accept custom height as string', () => {
       render(<GapAnalysisChart data={mockGapData} height="50vh" />);
 
-      expect(screen.getByText('Communication')).toBeInTheDocument();
+      expect(screen.getAllByText('Communication')[0]).toBeInTheDocument();
     });
   });
 });
