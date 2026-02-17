@@ -15,6 +15,10 @@ interface IndicatorHeatmapProps {
   competencies: CompetencyScore[];
   className?: string;
   onIndicatorClick?: (competencyId: string, indicatorId: string) => void;
+  /** Translation namespace for heatmap keys (score, questions, noData).
+   *  Defaults to 'results.teamFit' for backwards compatibility.
+   *  Pass 'results.shared' to use the shared namespace for Overview mode. */
+  translationNamespace?: string;
 }
 
 /**
@@ -48,8 +52,10 @@ export function IndicatorHeatmap({
   competencies,
   className,
   onIndicatorClick,
+  translationNamespace = 'results.teamFit',
 }: IndicatorHeatmapProps) {
-  const t = useTranslations('results.teamFit');
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const t = useTranslations(translationNamespace as any);
   const isMobile = useIsMobile();
 
   // Filter to competencies that have indicator scores

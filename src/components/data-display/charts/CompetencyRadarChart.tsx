@@ -10,6 +10,7 @@ import {
   ResponsiveContainer,
   Tooltip,
 } from "recharts";
+import { useTranslations } from "next-intl";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 
@@ -164,6 +165,7 @@ function CompetencyRadarChartComponent({
 }: CompetencyRadarChartProps) {
   const isMobile = useIsMobile();
   const colors = useComputedColors();
+  const t = useTranslations('results.charts');
 
   // Responsive configuration - optimized for mobile readability
   const config = useMemo(() => ({
@@ -193,19 +195,19 @@ function CompetencyRadarChartComponent({
 
   // Validate data - early returns after all hooks
   if (!data || data.length === 0) {
-    return <EmptyState message="Нет данных для отображения" />;
+    return <EmptyState message={t('noData')} />;
   }
 
   if (data.length < MIN_DATA_POINTS) {
     return (
       <EmptyState
-        message={`Недостаточно данных для диаграммы (минимум ${MIN_DATA_POINTS} компетенции)`}
+        message={t('insufficientData', { min: MIN_DATA_POINTS })}
       />
     );
   }
 
   // Generate accessible description
-  const ariaLabel = `Радарная диаграмма с ${stats.count} компетенциями. Диапазон оценок: от ${stats.min}% до ${stats.max}%. Средний балл: ${stats.avg}%.`;
+  const ariaLabel = t('radarAriaLabel', { count: stats.count, min: stats.min, max: stats.max, avg: stats.avg });
 
   return (
     <div
@@ -334,7 +336,7 @@ function CompetencyRadarChartComponent({
 
           {/* Data area with subtle glow */}
           <Radar
-            name="Оценка"
+            name={t('scoreName')}
             dataKey="A"
             stroke={colors.primary}
             strokeWidth={config.radarStrokeWidth}
@@ -367,7 +369,7 @@ function CompetencyRadarChartComponent({
                     {item.subject}
                   </p>
                   <div className="flex items-center justify-between gap-3">
-                    <span className="text-[10px] sm:text-xs text-muted-foreground">Результат:</span>
+                    <span className="text-[10px] sm:text-xs text-muted-foreground">{t('tooltipScore')}</span>
                     <span className={cn(
                       "text-base sm:text-lg font-bold tabular-nums",
                       isPassing
@@ -379,7 +381,7 @@ function CompetencyRadarChartComponent({
                   </div>
                   {item.ciLower != null && item.ciUpper != null && (
                     <div className="flex items-center justify-between gap-3 mt-1">
-                      <span className="text-[10px] sm:text-xs text-muted-foreground">95% ДИ:</span>
+                      <span className="text-[10px] sm:text-xs text-muted-foreground">{t('tooltipCI')}</span>
                       <span className="text-[10px] sm:text-xs font-medium tabular-nums text-foreground">
                         {Math.round(item.ciLower)}&ndash;{Math.round(item.ciUpper)}%
                       </span>
@@ -387,7 +389,7 @@ function CompetencyRadarChartComponent({
                   )}
                   {item.benchmark != null && (
                     <div className="flex items-center justify-between gap-3 mt-1">
-                      <span className="text-[10px] sm:text-xs text-muted-foreground">Эталон:</span>
+                      <span className="text-[10px] sm:text-xs text-muted-foreground">{t('tooltipBenchmark')}</span>
                       <span className="text-[10px] sm:text-xs font-medium tabular-nums text-foreground">
                         {Math.round(item.benchmark)}%
                       </span>
@@ -395,7 +397,7 @@ function CompetencyRadarChartComponent({
                   )}
                   {!isPassing && passingScore > 0 && (
                     <p className="text-[10px] sm:text-xs text-muted-foreground mt-1.5 pt-1.5 border-t border-border/50">
-                      До цели: +{passingScore - score}%
+                      {t('tooltipGap', { gap: passingScore - score })}
                     </p>
                   )}
                 </div>
@@ -407,12 +409,12 @@ function CompetencyRadarChartComponent({
 
       {/* Screen reader only: detailed data */}
       <div className="sr-only">
-        <h3>Детальные результаты по компетенциям:</h3>
+        <h3>{t('srDetailedResults')}</h3>
         <ul>
           {data.map((item, idx) => (
             <li key={idx}>
               {item.subject}: {item.A}%
-              {item.A >= passingScore ? " (пройдено)" : " (не пройдено)"}
+              {item.A >= passingScore ? ` ${t('srPassed')}` : ` ${t('srNotPassed')}`}
             </li>
           ))}
         </ul>

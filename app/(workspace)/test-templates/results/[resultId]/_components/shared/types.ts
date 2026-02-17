@@ -102,14 +102,6 @@ export interface TeamFitHeroProps {
 }
 
 /**
- * Props for profile competencies card (neutral presentation)
- */
-export interface ProfileCompetenciesCardProps {
-  competencies: CompetencyScore[];
-  showAsProfile?: boolean; // true = neutral colors, false = pass/fail colors
-}
-
-/**
  * Props for competency detail accordion (reusable across scenarios)
  */
 export interface CompetencyDetailAccordionProps {

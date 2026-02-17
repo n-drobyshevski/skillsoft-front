@@ -12,6 +12,7 @@ import {
   Area,
   ReferenceLine,
 } from 'recharts';
+import { useTranslations, useLocale } from 'next-intl';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
 import type { TrendDataPoint } from '@/types/domain';
@@ -112,12 +113,13 @@ const COMPETENCY_COLORS = [
   '#ec4899', // pink
 ];
 
-function formatDate(dateStr: string, isMobile: boolean): string {
+function formatDate(dateStr: string, isMobile: boolean, locale: string): string {
   const date = new Date(dateStr);
+  const dateLocale = locale === 'ru' ? 'ru-RU' : 'en-US';
   if (isMobile) {
-    return date.toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit' });
+    return date.toLocaleDateString(dateLocale, { day: '2-digit', month: '2-digit' });
   }
-  return date.toLocaleDateString('ru-RU', { day: '2-digit', month: 'short', year: '2-digit' });
+  return date.toLocaleDateString(dateLocale, { day: '2-digit', month: 'short', year: '2-digit' });
 }
 
 function TrendLineChartComponent({
@@ -130,6 +132,8 @@ function TrendLineChartComponent({
 }: TrendLineChartProps) {
   const isMobile = useIsMobile();
   const colors = useComputedColors();
+  const t = useTranslations('results.trends');
+  const locale = useLocale();
 
   const config = useMemo(() => ({
     height: isMobile ? 220 : 300,
@@ -157,7 +161,7 @@ function TrendLineChartComponent({
     return data.map((dp) => {
       const point: ChartDataPoint = {
         date: dp.completedAt,
-        dateLabel: formatDate(dp.completedAt, isMobile),
+        dateLabel: formatDate(dp.completedAt, isMobile, locale),
         overall: dp.overallPercentage,
       };
 
@@ -173,12 +177,12 @@ function TrendLineChartComponent({
 
       return point;
     });
-  }, [data, selectedCompetencies, showConfidenceBands, isMobile]);
+  }, [data, selectedCompetencies, showConfidenceBands, isMobile, locale]);
 
   if (data.length === 0) {
     return (
       <div className={cn('flex items-center justify-center h-[200px] text-sm text-muted-foreground', className)}>
-        No historical data available
+        {t('noHistoricalData')}
       </div>
     );
   }
@@ -186,7 +190,7 @@ function TrendLineChartComponent({
   if (data.length === 1) {
     return (
       <div className={cn('flex items-center justify-center h-[200px] text-sm text-muted-foreground', className)}>
-        At least 2 attempts needed for trend visualization
+        {t('needMoreAttempts')}
       </div>
     );
   }
@@ -196,11 +200,9 @@ function TrendLineChartComponent({
   // Accessible description
   const firstScore = data[0].overallPercentage;
   const lastScore = data[data.length - 1].overallPercentage;
-  const ariaLabel = `Score trend chart with ${data.length} data points. ${
-    firstScore != null && lastScore != null
-      ? `Score changed from ${Math.round(firstScore)}% to ${Math.round(lastScore)}%.`
-      : ''
-  }`;
+  const ariaLabel = firstScore != null && lastScore != null
+    ? t('trendAriaLabel', { count: data.length, from: Math.round(firstScore), to: Math.round(lastScore) })
+    : '';
 
   return (
     <div
@@ -341,12 +343,12 @@ function TrendLineChartComponent({
 
       {/* Screen reader data */}
       <div className="sr-only">
-        <h3>Historical score data:</h3>
+        <h3>{t('srHistoricalData')}</h3>
         <ul>
           {data.map((dp, i) => (
             <li key={i}>
-              {new Date(dp.completedAt).toLocaleDateString()}: {dp.overallPercentage != null ? `${Math.round(dp.overallPercentage)}%` : 'N/A'}
-              {dp.passed ? ' (passed)' : ' (not passed)'}
+              {new Date(dp.completedAt).toLocaleDateString(locale === 'ru' ? 'ru-RU' : 'en-US')}: {dp.overallPercentage != null ? `${Math.round(dp.overallPercentage)}%` : 'N/A'}
+              {dp.passed ? ` ${t('srPassed')}` : ` ${t('srNotPassed')}`}
             </li>
           ))}
         </ul>

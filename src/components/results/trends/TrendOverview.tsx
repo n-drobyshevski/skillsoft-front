@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { TrendLineChart } from './TrendLineChart';
@@ -37,6 +38,7 @@ export function TrendOverview({
   className,
 }: TrendOverviewProps) {
   const isMobile = useIsMobile();
+  const t = useTranslations('results.trends');
   const [selectedCompetencies, setSelectedCompetencies] = useState<string[]>([]);
 
   // Extract unique competency trends
@@ -93,7 +95,7 @@ export function TrendOverview({
   if (data.length === 0) {
     return (
       <div className={cn('text-center py-8 text-sm text-muted-foreground', className)}>
-        No historical data available yet.
+        {t('noHistoricalDataYet')}
       </div>
     );
   }
@@ -104,16 +106,16 @@ export function TrendOverview({
       <div className="flex items-center justify-between">
         <div>
           <h3 className="text-sm font-semibold text-foreground">
-            Progress Over Time
+            {t('progressOverTime')}
           </h3>
           <p className="text-xs text-muted-foreground">
-            {data.length} attempt{data.length !== 1 ? 's' : ''}
+            {t('attempts', { count: data.length })}
           </p>
         </div>
         {overallChange != null && (
           <div className="text-right">
             <div className="text-[10px] uppercase tracking-wide text-muted-foreground mb-0.5">
-              Overall Change
+              {t('overallChange')}
             </div>
             <ImprovementBadge change={overallChange} />
           </div>
@@ -141,7 +143,7 @@ export function TrendOverview({
       {competencyTrends.length > 0 && (
         <div className="space-y-1.5">
           <p className="text-xs font-medium text-muted-foreground">
-            Select competencies to compare
+            {t('selectCompetencies')}
           </p>
           <div className="space-y-0.5">
             {competencyTrends.map((trend) => {

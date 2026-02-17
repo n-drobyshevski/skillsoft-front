@@ -969,6 +969,34 @@ export interface GenericExtendedMetrics extends ConsistencyMetrics {
 }
 
 /**
+ * Extended metrics for OVERVIEW assessment results.
+ * Populated by OverviewScoringStrategy on backend.
+ * Contains profile pattern categorization of competencies.
+ */
+export interface OverviewExtendedMetrics extends GenericExtendedMetrics {
+  /**
+   * Profile pattern categorization of competencies.
+   * Keys: SIGNATURE_STRENGTH, STRENGTH, AVERAGE, DEVELOPING, CRITICAL_GAP
+   * Values: Array of competency names belonging to each category.
+   */
+  profilePattern?: Record<string, string[]>;
+}
+
+/**
+ * Type guard to check if extended metrics contain OVERVIEW specific fields.
+ */
+export function isOverviewMetrics(
+  metrics: OverviewExtendedMetrics | TeamFitExtendedMetrics | GenericExtendedMetrics | null | undefined,
+): metrics is OverviewExtendedMetrics {
+  if (!metrics) return false;
+  return (
+    'profilePattern' in metrics &&
+    metrics.profilePattern != null &&
+    typeof metrics.profilePattern === 'object'
+  );
+}
+
+/**
  * Type guard to check if extended metrics contain TEAM_FIT specific fields.
  */
 export function isTeamFitMetrics(

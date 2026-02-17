@@ -650,6 +650,7 @@
     "confidenceInterval": "95% CI: {lower}% \u2013 {upper}%",
     "insufficientEvidence": "Insufficient evidence",
     "insufficientEvidenceTooltip": "This competency has limited evidence. Results should be interpreted with caution.",
+    "lowConfidenceCount": "{count} {count, plural, =1 {competency has} other {competencies have}} limited evidence",
     "showMore": "Show {count} more",
     "showLess": "Show less",
     "questionLoadError": "Failed to load question details",
@@ -679,6 +680,9 @@
       "consistencyWarning": "Possible response inconsistencies",
       "consistencyScore": "Response consistency: {score}%",
       "consistencyFlags": "Flags: {flags}",
+      "indicatorBreakdown": "Indicator Breakdown",
+      "indicatorBreakdownDescription": "Per-indicator score heatmap across competencies",
+      "target": "Target",
       "traits": {
         "openness": {
           "high": "You show strong creativity, curiosity, and openness to new experiences and ideas.",
@@ -705,6 +709,22 @@
           "medium": "You handle most situations calmly while acknowledging emotional responses.",
           "low": "You experience emotions deeply and may be more sensitive to stress."
         }
+      },
+      "profilePattern": {
+        "title": "Competency Profile Pattern",
+        "description": "Your competencies categorized by proficiency level, based on assessment performance.",
+        "categories": {
+          "SIGNATURE_STRENGTH": "Signature Strength",
+          "STRENGTH": "Strength",
+          "AVERAGE": "Average",
+          "DEVELOPING": "Developing",
+          "CRITICAL_GAP": "Critical Gap"
+        }
+      },
+      "growthTrajectory": {
+        "title": "Progress Over Time",
+        "description": "Your improvement across assessment attempts",
+        "emptyState": "Take this assessment again to track your progress over time."
       }
     }
   },

@@ -1,18 +1,23 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Award, Lightbulb, Brain, Target, GitCompareArrows, AlertTriangle, CheckCircle2, ShieldAlert } from 'lucide-react';
-import { LazyBigFiveRadarSimple as BigFiveRadarSimple, LazyCompetencyRadarChart as CompetencyRadarChart } from '@/lib/lazy-charts';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Award, Lightbulb, Brain, Target, GitCompareArrows, AlertTriangle, CheckCircle2, ShieldAlert, TrendingUp, ChevronDown, History, Grid3X3 } from 'lucide-react';
+import { LazyBigFiveRadarSimple as BigFiveRadarSimple, LazyCompetencyRadarChart as CompetencyRadarChart, LazyIndicatorHeatmap as IndicatorHeatmap } from '@/lib/lazy-charts';
 import type { CompetencyRadarDataPoint } from '@/components/data-display/charts/CompetencyRadarChart';
 import { BigFiveMappingInsights } from '@/components/charts/BigFiveMappingInsights';
 import { ChartErrorBoundary } from '@/components/charts/ChartErrorBoundary';
+import { TrendOverview } from '@/components/results';
 import { useBigFiveProjectionDetailed, getBigFiveLabels } from '@/hooks/useBigFiveProjection';
 import { getScoreInterpretation, getProficiencyLabel } from '@/lib/scoreInterpretation';
+import { testResultsApi } from '@/services/api/results';
+import type { TrendDataPoint } from '@/types/domain';
 import { CompetencyPassportHero } from './CompetencyPassportHero';
+import { ProfilePatternSummary } from './ProfilePatternSummary';
 import { CompetencyProfile } from '../shared/CompetencyProfile';
 import { ActionButtonsBar } from '../shared/ActionButtonsBar';
 import { BaseResultViewProps } from '../shared/types';
@@ -80,6 +85,40 @@ export function OverviewResultView({ result, template }: BaseResultViewProps) {
     ? extendedMetrics.consistencyFlags
     : undefined;
 
+  // Growth trajectory: fetch historical trend data for this template
+  const [trendData, setTrendData] = useState<TrendDataPoint[] | null>(null);
+  const [trendOpen, setTrendOpen] = useState(true);
+  const [heatmapOpen, setHeatmapOpen] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function fetchTrend() {
+      try {
+        const history = await testResultsApi.getUserHistory(
+          result.clerkUserId,
+          result.templateId
+        );
+        if (!cancelled && history) {
+          setTrendData(history);
+        }
+      } catch {
+        // Silently fail - trend is optional enhancement
+        if (!cancelled) {
+          setTrendData(null);
+        }
+      }
+    }
+
+    if (result.clerkUserId && result.templateId) {
+      fetchTrend();
+    }
+
+    return () => {
+      cancelled = true;
+    };
+  }, [result.clerkUserId, result.templateId]);
+
   // Project competencies to Big Five personality profile with detailed contributions
   const { profile: bigFiveProfile, contributions, metadata } = useBigFiveProjectionDetailed(competencyScores);
   const bigFiveLabels = getBigFiveLabels();
@@ -108,11 +147,13 @@ export function OverviewResultView({ result, template }: BaseResultViewProps) {
   const hasMappingData = metadata.mappedCompetencies > 0;
 
   // Transform competency scores to radar chart format
+  // For OVERVIEW mode (no O*NET benchmark), add a static 70% "Target" reference line
   const competencyRadarData: CompetencyRadarDataPoint[] = useMemo(() => {
     return competencyScores.map(score => ({
       subject: score.competencyName,
       A: Math.round(score.percentage),
-      fullMark: 100
+      fullMark: 100,
+      benchmark: 70,
     }));
   }, [competencyScores]);
 
@@ -140,6 +181,11 @@ export function OverviewResultView({ result, template }: BaseResultViewProps) {
       .filter(c => c.interpretation.level === 'developing' || c.interpretation.level === 'foundational')
       .slice(0, 3);
   }, [categorizedCompetencies]);
+
+  // Check if any competencies have indicator-level data for the heatmap
+  const hasIndicatorData = useMemo(() => {
+    return competencyScores.some(c => c.indicatorScores && c.indicatorScores.length > 0);
+  }, [competencyScores]);
 
   return (
     <div className="min-h-screen bg-muted/30 py-3 sm:py-4 md:py-8">
@@ -475,12 +521,109 @@ export function OverviewResultView({ result, template }: BaseResultViewProps) {
           </Card>
         </div>
 
+        {/* Profile Pattern Summary - Backend-computed competency categorization */}
+        <ProfilePatternSummary extendedMetrics={extendedMetrics} />
+
         {/* Competency Profile - Mobile-First Unified Component */}
         <CompetencyProfile
           competencies={competencyScores}
           resultId={result.id}
           showPassFail={false}
         />
+
+        {/* Indicator Heatmap - Per-indicator score breakdown */}
+        {hasIndicatorData && (
+          <Collapsible open={heatmapOpen} onOpenChange={setHeatmapOpen}>
+            <Card>
+              <CollapsibleTrigger asChild>
+                <CardHeader className="cursor-pointer select-none hover:bg-muted/30 transition-colors rounded-t-lg">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-base sm:text-lg font-semibold flex items-center gap-2.5">
+                      <div className="p-1.5 sm:p-2 rounded-lg bg-primary/10">
+                        <Grid3X3 className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+                      </div>
+                      {t('indicatorBreakdown')}
+                    </CardTitle>
+                    <ChevronDown
+                      className={`h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground transition-transform duration-200 ${
+                        heatmapOpen ? 'rotate-180' : ''
+                      }`}
+                    />
+                  </div>
+                  <CardDescription className="text-xs sm:text-sm">
+                    {t('indicatorBreakdownDescription')}
+                  </CardDescription>
+                </CardHeader>
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+                <CardContent className="px-2 sm:px-6">
+                  <ChartErrorBoundary>
+                    <IndicatorHeatmap
+                      competencies={competencyScores}
+                      translationNamespace="results.shared"
+                    />
+                  </ChartErrorBoundary>
+                </CardContent>
+              </CollapsibleContent>
+            </Card>
+          </Collapsible>
+        )}
+
+        {/* Growth Trajectory - Progress Over Time */}
+        {trendData && trendData.length >= 2 ? (
+          <Collapsible open={trendOpen} onOpenChange={setTrendOpen}>
+            <Card>
+              <CollapsibleTrigger asChild>
+                <CardHeader className="cursor-pointer select-none hover:bg-muted/30 transition-colors rounded-t-lg">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-base sm:text-lg font-semibold flex items-center gap-2.5">
+                      <div className="p-1.5 sm:p-2 rounded-lg bg-primary/10">
+                        <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+                      </div>
+                      {t('growthTrajectory.title')}
+                    </CardTitle>
+                    <ChevronDown
+                      className={`h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground transition-transform duration-200 ${
+                        trendOpen ? 'rotate-180' : ''
+                      }`}
+                    />
+                  </div>
+                  <CardDescription className="text-xs sm:text-sm">
+                    {t('growthTrajectory.description')}
+                  </CardDescription>
+                </CardHeader>
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+                <CardContent>
+                  <ChartErrorBoundary>
+                    <TrendOverview data={trendData} passingThreshold={0} />
+                  </ChartErrorBoundary>
+                </CardContent>
+              </CollapsibleContent>
+            </Card>
+          </Collapsible>
+        ) : trendData && trendData.length < 2 ? (
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base sm:text-lg font-semibold flex items-center gap-2.5">
+                <div className="p-1.5 sm:p-2 rounded-lg bg-muted/50">
+                  <History className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground" />
+                </div>
+                {t('growthTrajectory.title')}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-col items-center justify-center py-6 sm:py-8 text-center">
+                <div className="w-12 h-12 sm:w-14 sm:h-14 mb-3 rounded-full bg-muted/50 flex items-center justify-center">
+                  <TrendingUp className="w-6 h-6 sm:w-7 sm:h-7 text-muted-foreground" />
+                </div>
+                <p className="text-xs sm:text-sm text-muted-foreground max-w-sm">
+                  {t('growthTrajectory.emptyState')}
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        ) : null}
 
         {/* Action buttons */}
         <ActionButtonsBar

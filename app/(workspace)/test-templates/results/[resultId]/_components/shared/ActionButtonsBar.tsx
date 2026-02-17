@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import {
@@ -15,100 +16,60 @@ import {
   Send,
   Loader2,
   Check,
-  Printer
+  Printer,
+  Link2,
 } from 'lucide-react';
 import { ActionButtonsBarProps, ActionType } from './types';
 
 /**
- * Action button configuration
+ * Action button icon/variant configuration (labels come from i18n).
  */
-const ACTION_CONFIG: Record<ActionType, {
-  label: string;
+const ACTION_STYLE: Record<ActionType, {
+  labelKey: string;
   icon: React.ComponentType<{ className?: string }>;
   variant: 'default' | 'outline' | 'secondary' | 'ghost';
 }> = {
   download_profile: {
-    label: 'Download Profile',
+    labelKey: 'downloadProfile',
     icon: Download,
     variant: 'secondary'
   },
   download_report: {
-    label: 'Download Report',
+    labelKey: 'downloadReport',
     icon: Printer,
     variant: 'secondary'
   },
   retake: {
-    label: 'Retake Test',
+    labelKey: 'retakeTest',
     icon: RotateCcw,
     variant: 'default'
   },
   save_to_profile: {
-    label: 'Save to Profile',
+    labelKey: 'saveToProfile',
     icon: UserPlus,
     variant: 'secondary'
   },
   share: {
-    label: 'Share',
+    labelKey: 'share',
     icon: Share2,
     variant: 'outline'
   },
   back_to_list: {
-    label: 'Back to Tests',
+    labelKey: 'backToTests',
     icon: Home,
     variant: 'outline'
   },
   team_dashboard: {
-    label: 'Team Dashboard',
+    labelKey: 'teamDashboard',
     icon: Users,
     variant: 'secondary'
   },
   share_with_team: {
-    label: 'Share with Team',
+    labelKey: 'shareWithTeam',
     icon: Send,
     variant: 'outline'
   }
 };
-
-/**
- * Copies the result share URL to clipboard.
- * Falls back to the Web Share API on mobile if available.
- */
-async function shareResult(resultId: string, action: 'share' | 'share_with_team') {
-  const shareUrl = `${window.location.origin}/test-templates/results/${resultId}`;
-
-  // Try native share on mobile first
-  if (navigator.share && action === 'share') {
-    try {
-      await navigator.share({
-        title: 'Assessment Result',
-        url: shareUrl,
-      });
-      return;
-    } catch {
-      // User cancelled or not supported, fall through to clipboard
-    }
-  }
-
-  // Clipboard fallback
-  try {
-    await navigator.clipboard.writeText(shareUrl);
-    toast.success('Link copied to clipboard', {
-      description: shareUrl,
-      duration: 3000,
-    });
-  } catch {
-    // Final fallback for older browsers
-    const textArea = document.createElement('textarea');
-    textArea.value = shareUrl;
-    textArea.style.position = 'fixed';
-    textArea.style.opacity = '0';
-    document.body.appendChild(textArea);
-    textArea.select();
-    document.execCommand('copy');
-    document.body.removeChild(textArea);
-    toast.success('Link copied to clipboard');
-  }
-}
 
 /**
  * Triggers browser print dialog for PDF export.
@@ -121,10 +82,76 @@ function downloadAsPrint() {
 /**
  * Reusable action buttons bar for test results pages.
  * Renders scenario-appropriate action buttons with real handlers.
+ * Includes Export PDF and Copy Link actions with i18n support.
  */
 export function ActionButtonsBar({ templateId, resultId, actions }: ActionButtonsBarProps) {
   const router = useRouter();
+  const t = useTranslations('results.actions');
   const [loadingAction, setLoadingAction] = useState<ActionType | null>(null);
+  const [linkCopied, setLinkCopied] = useState(false);
+
+  /**
+   * Copies the result share URL to clipboard.
+   * Falls back to the Web Share API on mobile if available.
+   */
+  async function shareResult(action: 'share' | 'share_with_team') {
+    const shareUrl = `${window.location.origin}/test-templates/results/${resultId}`;
+
+    // Try native share on mobile first
+    if (navigator.share && action === 'share') {
+      try {
+        await navigator.share({
+          title: 'Assessment Result',
+          url: shareUrl,
+        });
+        return;
+      } catch {
+        // User cancelled or not supported, fall through to clipboard
+      }
+    }
+
+    // Clipboard fallback
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      toast.success(t('linkCopied'), {
+        description: shareUrl,
+        duration: 3000,
+      });
+    } catch {
+      // Final fallback for older browsers
+      const textArea = document.createElement('textarea');
+      textArea.value = shareUrl;
+      textArea.style.position = 'fixed';
+      textArea.style.opacity = '0';
+      document.body.appendChild(textArea);
+      textArea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textArea);
+      toast.success(t('linkCopied'));
+    }
+  }
+
+  /**
+   * Copies the current page URL to clipboard and shows confirmation.
+   */
+  async function copyLink() {
+    const url = window.location.href;
+    try {
+      await navigator.clipboard.writeText(url);
+    } catch {
+      const textArea = document.createElement('textarea');
+      textArea.value = url;
+      textArea.style.position = 'fixed';
+      textArea.style.opacity = '0';
+      document.body.appendChild(textArea);
+      textArea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textArea);
+    }
+    setLinkCopied(true);
+    toast.success(t('linkCopied'));
+    setTimeout(() => setLinkCopied(false), 2000);
+  }
 
   const handleAction = async (action: ActionType) => {
     setLoadingAction(action);
@@ -138,22 +165,22 @@ export function ActionButtonsBar({ templateId, resultId, actions }: ActionButton
 
         case 'save_to_profile':
           // TODO: Call passport API when POST /api/v1/passports/save-result/{resultId} is available
-          toast.success('Result saved to your profile', {
+          toast.success(t('resultSaved'), {
             icon: <Check className="h-4 w-4" />,
           });
           break;
 
         case 'share':
         case 'share_with_team':
-          await shareResult(resultId, action);
+          await shareResult(action);
           break;
 
         case 'team_dashboard':
           router.push('/test-templates');
           break;
       }
-    } catch (error) {
-      toast.error('Action failed. Please try again.');
+    } catch {
+      toast.error(t('actionFailed'));
     } finally {
       setLoadingAction(null);
     }
@@ -165,7 +192,7 @@ export function ActionButtonsBar({ templateId, resultId, actions }: ActionButton
       <Button asChild variant="outline" size="sm" className="flex-1 sm:flex-initial h-9 sm:h-10">
         <Link href="/test-templates">
           <Home className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2 shrink-0" />
-          <span className="truncate">Back</span>
+          <span className="truncate">{t('back')}</span>
         </Link>
       </Button>
 
@@ -174,26 +201,54 @@ export function ActionButtonsBar({ templateId, resultId, actions }: ActionButton
         <Button asChild size="sm" className="flex-1 sm:flex-initial h-9 sm:h-10">
           <Link href={`/test-templates/${templateId}/start`}>
             <RotateCcw className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2 shrink-0" />
-            <span className="truncate">Retake</span>
+            <span className="truncate">{t('retake')}</span>
           </Link>
         </Button>
       )}
 
-      {/* Other actions - only show first action on mobile */}
+      {/* Export PDF button */}
+      <Button
+        variant="outline"
+        size="sm"
+        className="flex-1 sm:flex-initial h-9 sm:h-10 hidden sm:flex"
+        onClick={downloadAsPrint}
+      >
+        <Printer className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2 shrink-0" />
+        <span className="truncate text-xs sm:text-sm">{t('exportPdf')}</span>
+      </Button>
+
+      {/* Copy Link button */}
+      <Button
+        variant="outline"
+        size="sm"
+        className="flex-1 sm:flex-initial h-9 sm:h-10 hidden sm:flex"
+        onClick={copyLink}
+      >
+        {linkCopied ? (
+          <Check className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2 shrink-0 text-emerald-600" />
+        ) : (
+          <Link2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2 shrink-0" />
+        )}
+        <span className="truncate text-xs sm:text-sm">
+          {linkCopied ? t('linkCopied') : t('copyLink')}
+        </span>
+      </Button>
+
+      {/* Other actions - only show first 2 on desktop */}
       {actions
         .filter(action => action !== 'retake' && action !== 'back_to_list')
         .slice(0, 2)
         .map((action, idx) => {
-          const config = ACTION_CONFIG[action];
-          if (!config) return null;
+          const style = ACTION_STYLE[action];
+          if (!style) return null;
 
-          const Icon = config.icon;
+          const Icon = style.icon;
           const isLoading = loadingAction === action;
 
           return (
             <Button
               key={action}
-              variant={config.variant}
+              variant={style.variant}
               size="sm"
               disabled={isLoading}
               className={`flex-1 sm:flex-initial h-9 sm:h-10 ${idx > 0 ? 'hidden sm:flex' : ''} ${idx === 0 ? 'sm:ml-auto' : ''}`}
@@ -204,7 +259,9 @@ export function ActionButtonsBar({ templateId, resultId, actions }: ActionButton
               ) : (
                 <Icon className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2 shrink-0" />
               )}
-              <span className="truncate text-xs sm:text-sm">{config.label}</span>
+              <span className="truncate text-xs sm:text-sm">
+                {t(style.labelKey)}
+              </span>
             </Button>
           );
         })}

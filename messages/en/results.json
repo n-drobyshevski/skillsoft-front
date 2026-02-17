@@ -132,6 +132,15 @@
       "innovatorDescription": "High in creativity and openness"
     }
   },
+  "shared": {
+    "heatmap": {
+      "title": "Indicator Breakdown",
+      "description": "Performance across behavioral indicators within each competency",
+      "score": "Score",
+      "questions": "{count} questions",
+      "noData": "No indicator data available"
+    }
+  },
   "comparison": {
     "title": "Candidate Comparison",
     "subtitle": "Side-by-side Team Fit analysis for {count} candidates",
@@ -187,5 +196,48 @@
     "responseQualityHigh": "High",
     "responseQualityMedium": "Medium",
     "responseQualityLow": "Low"
+  },
+  "charts": {
+    "noData": "No data to display",
+    "insufficientData": "Insufficient data for chart (minimum {min} competencies)",
+    "radarAriaLabel": "Radar chart with {count} competencies. Score range: {min}% to {max}%. Average score: {avg}%.",
+    "scoreName": "Score",
+    "tooltipScore": "Score:",
+    "tooltipCI": "95% CI:",
+    "tooltipBenchmark": "Benchmark:",
+    "tooltipGap": "To target: +{gap}%",
+    "srDetailedResults": "Detailed results by competency:",
+    "srPassed": "(passed)",
+    "srNotPassed": "(not passed)"
+  },
+  "trends": {
+    "noHistoricalData": "No historical data available",
+    "needMoreAttempts": "At least 2 attempts needed for trend visualization",
+    "progressOverTime": "Progress Over Time",
+    "attempts": "{count, plural, one {# attempt} other {# attempts}}",
+    "overallChange": "Overall Change",
+    "selectCompetencies": "Select competencies to compare",
+    "noHistoricalDataYet": "No historical data available yet.",
+    "srHistoricalData": "Historical score data:",
+    "srPassed": "(passed)",
+    "srNotPassed": "(not passed)",
+    "trendAriaLabel": "Score trend chart with {count} data points. Score changed from {from}% to {to}%."
+  },
+  "actions": {
+    "exportPdf": "Export PDF",
+    "copyLink": "Copy Link",
+    "linkCopied": "Link copied to clipboard",
+    "back": "Back",
+    "retake": "Retake",
+    "downloadProfile": "Download Profile",
+    "downloadReport": "Download Report",
+    "retakeTest": "Retake Test",
+    "saveToProfile": "Save to Profile",
+    "share": "Share",
+    "backToTests": "Back to Tests",
+    "teamDashboard": "Team Dashboard",
+    "shareWithTeam": "Share with Team",
+    "resultSaved": "Result saved to your profile",
+    "actionFailed": "Action failed. Please try again."
   }
 }

@@ -539,7 +539,7 @@ function MobileCompetencyCard({ competency, resultId, rank, showPassFail, passin
         'rounded-xl border transition-all',
         isExpanded ? config.border : 'border-border/50',
         isExpanded && config.bg,
-        isInsufficientEvidence && 'opacity-80'
+        isInsufficientEvidence && 'opacity-60'
       )}
     >
       {/* Main Row - Clickable Header */}
@@ -602,7 +602,12 @@ function MobileCompetencyCard({ competency, resultId, rank, showPassFail, passin
           <div className="h-1.5 bg-muted/50 rounded-full overflow-hidden">
             <div
               className={cn('h-full rounded-full transition-all duration-500', config.progress)}
-              style={{ width: `${percentage}%` }}
+              style={{
+                width: `${percentage}%`,
+                ...(isInsufficientEvidence && {
+                  backgroundImage: 'repeating-linear-gradient(135deg, transparent, transparent 3px, rgba(255,255,255,0.3) 3px, rgba(255,255,255,0.3) 5px)',
+                }),
+              }}
             />
           </div>
         </div>
@@ -654,7 +659,7 @@ function DesktopCompetencyRow({ competency, resultId, rank, showPassFail, passin
       value={competency.competencyId}
       className={cn(
         'border rounded-lg px-4 data-[state=open]:bg-muted/20',
-        isInsufficientEvidence && 'opacity-80'
+        isInsufficientEvidence && 'opacity-60'
       )}
     >
       <AccordionTrigger className="hover:no-underline py-3 [&>svg]:shrink-0 [&>svg]:ml-2">
@@ -691,7 +696,12 @@ function DesktopCompetencyRow({ competency, resultId, rank, showPassFail, passin
           <div className="w-32 lg:w-48 h-2 bg-muted/30 rounded-full overflow-hidden shrink-0">
             <div
               className={cn('h-full rounded-full transition-all', config.progress)}
-              style={{ width: `${percentage}%` }}
+              style={{
+                width: `${percentage}%`,
+                ...(isInsufficientEvidence && {
+                  backgroundImage: 'repeating-linear-gradient(135deg, transparent, transparent 3px, rgba(255,255,255,0.3) 3px, rgba(255,255,255,0.3) 5px)',
+                }),
+              }}
             />
           </div>
 
@@ -756,6 +766,12 @@ export function CompetencyProfile({
     [competencies]
   );
 
+  // Count competencies with insufficient evidence for summary badge
+  const insufficientEvidenceCount = useMemo(
+    () => competencies.filter(c => c.insufficientEvidence === true).length,
+    [competencies]
+  );
+
   // Show only top 5 on mobile initially
   const MOBILE_INITIAL_COUNT = 5;
   const displayedCompetencies = showAll
@@ -777,10 +793,21 @@ export function CompetencyProfile({
   return (
     <Card className={cn('overflow-hidden', className)}>
       <CardHeader className="pb-3 px-4 sm:px-6">
-        <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
-          <BarChart3 className="h-4 w-4 sm:h-5 sm:w-5" />
-          {t('competencyProfile')}
-        </CardTitle>
+        <div className="flex items-center justify-between gap-2 flex-wrap">
+          <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+            <BarChart3 className="h-4 w-4 sm:h-5 sm:w-5" />
+            {t('competencyProfile')}
+          </CardTitle>
+          {insufficientEvidenceCount > 0 && (
+            <Badge
+              variant="outline"
+              className="bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/30 text-xs gap-1 shrink-0"
+            >
+              <AlertTriangle className="h-3 w-3" />
+              {t('lowConfidenceCount', { count: insufficientEvidenceCount })}
+            </Badge>
+          )}
+        </div>
       </CardHeader>
 
       <CardContent className="px-4 sm:px-6 space-y-4">

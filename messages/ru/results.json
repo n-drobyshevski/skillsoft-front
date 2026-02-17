@@ -132,6 +132,15 @@
       "innovatorDescription": "Высокий уровень креативности и открытости"
     }
   },
+  "shared": {
+    "heatmap": {
+      "title": "Разбивка по индикаторам",
+      "description": "Результативность по поведенческим индикаторам внутри каждой компетенции",
+      "score": "Балл",
+      "questions": "{count} вопросов",
+      "noData": "Данные по индикаторам недоступны"
+    }
+  },
   "comparison": {
     "title": "Сравнение кандидатов",
     "subtitle": "Параллельный анализ командной совместимости для {count} кандидатов",
@@ -187,5 +196,48 @@
     "responseQualityHigh": "Высокое",
     "responseQualityMedium": "Среднее",
     "responseQualityLow": "Низкое"
+  },
+  "charts": {
+    "noData": "Нет данных для отображения",
+    "insufficientData": "Недостаточно данных для диаграммы (минимум {min} компетенции)",
+    "radarAriaLabel": "Радарная диаграмма с {count} компетенциями. Диапазон оценок: от {min}% до {max}%. Средний балл: {avg}%.",
+    "scoreName": "Оценка",
+    "tooltipScore": "Результат:",
+    "tooltipCI": "95% ДИ:",
+    "tooltipBenchmark": "Эталон:",
+    "tooltipGap": "До цели: +{gap}%",
+    "srDetailedResults": "Детальные результаты по компетенциям:",
+    "srPassed": "(пройдено)",
+    "srNotPassed": "(не пройдено)"
+  },
+  "trends": {
+    "noHistoricalData": "Нет исторических данных",
+    "needMoreAttempts": "Для визуализации тренда необходимо минимум 2 попытки",
+    "progressOverTime": "Прогресс по времени",
+    "attempts": "{count, plural, one {# попытка} few {# попытки} many {# попыток} other {# попыток}}",
+    "overallChange": "Общее изменение",
+    "selectCompetencies": "Выберите компетенции для сравнения",
+    "noHistoricalDataYet": "Исторических данных пока нет.",
+    "srHistoricalData": "Исторические данные по баллам:",
+    "srPassed": "(пройдено)",
+    "srNotPassed": "(не пройдено)",
+    "trendAriaLabel": "График тренда баллов с {count} точками данных. Балл изменился с {from}% до {to}%."
+  },
+  "actions": {
+    "exportPdf": "Экспорт PDF",
+    "copyLink": "Копировать ссылку",
+    "linkCopied": "Ссылка скопирована в буфер обмена",
+    "back": "Назад",
+    "retake": "Пересдать",
+    "downloadProfile": "Скачать профиль",
+    "downloadReport": "Скачать отчёт",
+    "retakeTest": "Пересдать тест",
+    "saveToProfile": "Сохранить в профиль",
+    "share": "Поделиться",
+    "backToTests": "К списку тестов",
+    "teamDashboard": "Панель команды",
+    "shareWithTeam": "Поделиться с командой",
+    "resultSaved": "Результат сохранён в профиль",
+    "actionFailed": "Действие не удалось. Попробуйте ещё раз."
   }
 }
