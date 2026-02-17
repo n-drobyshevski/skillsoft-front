@@ -3,13 +3,15 @@
 import { useMemo } from 'react';
 import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Award, Lightbulb, Brain, Target, GitCompareArrows, AlertTriangle } from 'lucide-react';
+import { Award, Lightbulb, Brain, Target, GitCompareArrows, AlertTriangle, CheckCircle2, ShieldAlert } from 'lucide-react';
 import { LazyBigFiveRadarSimple as BigFiveRadarSimple, LazyCompetencyRadarChart as CompetencyRadarChart } from '@/lib/lazy-charts';
 import type { CompetencyRadarDataPoint } from '@/components/data-display/charts/CompetencyRadarChart';
 import { BigFiveMappingInsights } from '@/components/charts/BigFiveMappingInsights';
 import { ChartErrorBoundary } from '@/components/charts/ChartErrorBoundary';
 import { useBigFiveProjectionDetailed, getBigFiveLabels } from '@/hooks/useBigFiveProjection';
+import { getScoreInterpretation, getProficiencyLabel } from '@/lib/scoreInterpretation';
 import { CompetencyPassportHero } from './CompetencyPassportHero';
 import { CompetencyProfile } from '../shared/CompetencyProfile';
 import { ActionButtonsBar } from '../shared/ActionButtonsBar';
@@ -52,10 +54,31 @@ function getTraitDescription(
  * - Big Five personality radar as primary visualization
  * - Neutral color palette (no red/green pass/fail)
  * - "Your Competency Profile" messaging
+ * - 5-level proficiency labels (Expert -> Foundational)
+ * - Consistency score and flags display
+ * - Percentile ranking when available
  */
 export function OverviewResultView({ result, template }: BaseResultViewProps) {
   const t = useTranslations('template.resultsView.overview');
+  const tResults = useTranslations('template.resultsView');
   const competencyScores = result.competencyScores ?? [];
+
+  // Extract consistency metrics from extendedMetrics (same pattern as JobFitResultView)
+  const extendedMetrics = result.extendedMetrics as
+    | (Record<string, unknown> & {
+        confidenceLevel?: string;
+        confidenceMessage?: string;
+        consistencyScore?: number;
+        consistencyFlags?: string[];
+      })
+    | null
+    | undefined;
+  const consistencyScore = typeof extendedMetrics?.consistencyScore === 'number'
+    ? extendedMetrics.consistencyScore
+    : undefined;
+  const consistencyFlags = Array.isArray(extendedMetrics?.consistencyFlags)
+    ? extendedMetrics.consistencyFlags
+    : undefined;
 
   // Project competencies to Big Five personality profile with detailed contributions
   const { profile: bigFiveProfile, contributions, metadata } = useBigFiveProjectionDetailed(competencyScores);
@@ -95,6 +118,28 @@ export function OverviewResultView({ result, template }: BaseResultViewProps) {
 
   // Check if we have competency data for the radar
   const hasCompetencyData = competencyRadarData.length >= 3;
+
+  // Categorize competencies using the 5-level interpretation system (Task 5)
+  const categorizedCompetencies = useMemo(() => {
+    return competencyScores.map(c => ({
+      ...c,
+      interpretation: getScoreInterpretation(c.percentage),
+    }));
+  }, [competencyScores]);
+
+  // Get top competencies (expert + advanced) for display
+  const topCompetencies = useMemo(() => {
+    return categorizedCompetencies
+      .filter(c => c.interpretation.level === 'expert' || c.interpretation.level === 'advanced')
+      .slice(0, 4);
+  }, [categorizedCompetencies]);
+
+  // Get developing competencies (developing + foundational)
+  const developingCompetencies = useMemo(() => {
+    return categorizedCompetencies
+      .filter(c => c.interpretation.level === 'developing' || c.interpretation.level === 'foundational')
+      .slice(0, 3);
+  }, [categorizedCompetencies]);
 
   return (
     <div className="min-h-screen bg-muted/30 py-3 sm:py-4 md:py-8">
@@ -266,6 +311,40 @@ export function OverviewResultView({ result, template }: BaseResultViewProps) {
                 </div>
               </div>
 
+              {/* Task 3: Consistency Score Badge */}
+              {consistencyScore !== undefined && (
+                <div className={`flex items-center gap-2 p-2.5 sm:p-3 rounded-xl border ${
+                  consistencyScore >= 0.7
+                    ? 'bg-emerald-500/5 border-emerald-500/20'
+                    : 'bg-amber-500/5 border-amber-500/20'
+                }`}>
+                  {consistencyScore >= 0.7 ? (
+                    <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                  ) : (
+                    <ShieldAlert className="h-4 w-4 text-amber-600 dark:text-amber-400 shrink-0" />
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <span className={`text-xs sm:text-sm font-medium ${
+                      consistencyScore >= 0.7
+                        ? 'text-emerald-700 dark:text-emerald-400'
+                        : 'text-amber-700 dark:text-amber-400'
+                    }`}>
+                      {consistencyScore >= 0.7
+                        ? t('consistencyGood')
+                        : t('consistencyWarning')}
+                    </span>
+                    <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5">
+                      {t('consistencyScore', { score: Math.round(consistencyScore * 100) })}
+                    </p>
+                    {consistencyFlags && consistencyFlags.length > 0 && consistencyScore < 0.7 && (
+                      <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5">
+                        {t('consistencyFlags', { flags: consistencyFlags.join(', ') })}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              )}
+
               {/* Top Traits - Secondary importance */}
               {hasBigFiveData && topTraits.length > 0 && (
                 <div className="space-y-3">
@@ -296,31 +375,74 @@ export function OverviewResultView({ result, template }: BaseResultViewProps) {
                 </div>
               )}
 
-              {/* Strengths - Tertiary importance */}
-              {competencyScores.length > 0 && (
+              {/* Task 5: 5-level proficiency chips instead of binary Strength/Developing */}
+              {topCompetencies.length > 0 && (
                 <div className="space-y-3">
                   <h5 className="text-xs sm:text-sm font-semibold text-foreground uppercase tracking-wider flex items-center gap-2">
                     <span className="w-1 h-4 bg-emerald-500/60 rounded-full" />
                     {t('strengths')}
                   </h5>
                   <div className="flex flex-wrap gap-1.5 sm:gap-2">
-                    {competencyScores
-                      .filter(c => c.percentage >= 70)
-                      .slice(0, 3)
-                      .map(c => (
-                        <span
-                          key={c.competencyId}
-                          className="text-xs sm:text-sm px-2.5 sm:px-3 py-1 sm:py-1.5 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 rounded-full font-medium border border-emerald-500/20"
-                        >
-                          {c.competencyName}
-                        </span>
-                      ))}
-                    {competencyScores.filter(c => c.percentage >= 70).length === 0 && (
-                      <p className="text-xs sm:text-sm text-muted-foreground italic">
-                        {t('keepDevelopingSkills')}
-                      </p>
-                    )}
+                    {topCompetencies.map(c => (
+                      <span
+                        key={c.competencyId}
+                        className={`text-xs sm:text-sm px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full font-medium border ${c.interpretation.bgColor} ${c.interpretation.color} ${c.interpretation.borderColor}`}
+                      >
+                        {c.competencyName}
+                        <Badge variant="secondary" className={`ml-1.5 text-[10px] px-1.5 py-0 ${c.interpretation.bgColor} ${c.interpretation.color}`}>
+                          {getProficiencyLabel(c.interpretation.level, (key: string) => tResults(key), c.proficiencyLabel)}
+                        </Badge>
+                      </span>
+                    ))}
                   </div>
+                </div>
+              )}
+
+              {/* Developing competencies with 5-level labels */}
+              {developingCompetencies.length > 0 && (
+                <div className="space-y-3">
+                  <h5 className="text-xs sm:text-sm font-semibold text-foreground uppercase tracking-wider flex items-center gap-2">
+                    <span className="w-1 h-4 bg-amber-500/60 rounded-full" />
+                    {t('keepDevelopingSkills')}
+                  </h5>
+                  <div className="flex flex-wrap gap-1.5 sm:gap-2">
+                    {developingCompetencies.map(c => (
+                      <span
+                        key={c.competencyId}
+                        className={`text-xs sm:text-sm px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full font-medium border ${c.interpretation.bgColor} ${c.interpretation.color} ${c.interpretation.borderColor}`}
+                      >
+                        {c.competencyName}
+                        <Badge variant="secondary" className={`ml-1.5 text-[10px] px-1.5 py-0 ${c.interpretation.bgColor} ${c.interpretation.color}`}>
+                          {getProficiencyLabel(c.interpretation.level, (key: string) => tResults(key), c.proficiencyLabel)}
+                        </Badge>
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* No strengths fallback */}
+              {topCompetencies.length === 0 && developingCompetencies.length === 0 && competencyScores.length > 0 && (
+                <div className="space-y-3">
+                  <h5 className="text-xs sm:text-sm font-semibold text-foreground uppercase tracking-wider flex items-center gap-2">
+                    <span className="w-1 h-4 bg-emerald-500/60 rounded-full" />
+                    {t('strengths')}
+                  </h5>
+                  <p className="text-xs sm:text-sm text-muted-foreground italic">
+                    {t('keepDevelopingSkills')}
+                  </p>
+                </div>
+              )}
+
+              {/* Task 4: Percentile display */}
+              {result.percentile !== undefined && result.percentile !== null && (
+                <div className="p-3 sm:p-4 bg-muted/30 rounded-xl border border-border/40">
+                  <p className="text-xs sm:text-sm text-muted-foreground text-center">
+                    {t.rich('betterThan', {
+                      percentage: result.percentile,
+                      bold: (chunks) => <span className="font-bold text-foreground text-sm sm:text-base">{chunks}</span>,
+                    })}
+                  </p>
                 </div>
               )}
 

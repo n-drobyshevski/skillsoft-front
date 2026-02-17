@@ -640,6 +640,16 @@
       "developing": "Развивается",
       "strength": "Сильная"
     },
+    "proficiencyLevel": {
+      "expert": "Эксперт",
+      "advanced": "Продвинутый",
+      "proficient": "Уверенный",
+      "developing": "Развивающийся",
+      "foundational": "Базовый"
+    },
+    "confidenceInterval": "95% ДИ: {lower}% \u2013 {upper}%",
+    "insufficientEvidence": "Недостаточно данных",
+    "insufficientEvidenceTooltip": "По этой компетенции мало данных. Результаты следует интерпретировать с осторожностью.",
     "showMore": "Показать ещё {count}",
     "showLess": "Скрыть",
     "questionLoadError": "Не удалось загрузить детали вопроса",
@@ -664,6 +674,11 @@
       "coverage": "Покрытие",
       "mapped": "{mapped}/{total} сопоставлено",
       "developmentNote": "Регулярная переоценка помогает отслеживать рост.",
+      "betterThan": "Лучше, чем <bold>{percentage}%</bold> участников",
+      "consistencyGood": "Согласованные ответы",
+      "consistencyWarning": "Возможные несоответствия в ответах",
+      "consistencyScore": "Согласованность ответов: {score}%",
+      "consistencyFlags": "Замечания: {flags}",
       "traits": {
         "openness": {
           "high": "Вы проявляете сильную креативность, любознательность и открытость к новому опыту и идеям.",

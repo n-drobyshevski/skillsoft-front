@@ -640,6 +640,16 @@
       "developing": "Developing",
       "strength": "Strength"
     },
+    "proficiencyLevel": {
+      "expert": "Expert",
+      "advanced": "Advanced",
+      "proficient": "Proficient",
+      "developing": "Developing",
+      "foundational": "Foundational"
+    },
+    "confidenceInterval": "95% CI: {lower}% \u2013 {upper}%",
+    "insufficientEvidence": "Insufficient evidence",
+    "insufficientEvidenceTooltip": "This competency has limited evidence. Results should be interpreted with caution.",
     "showMore": "Show {count} more",
     "showLess": "Show less",
     "questionLoadError": "Failed to load question details",
@@ -664,6 +674,11 @@
       "coverage": "Coverage",
       "mapped": "{mapped}/{total} mapped",
       "developmentNote": "Regular reassessment helps track growth.",
+      "betterThan": "Better than <bold>{percentage}%</bold> of participants",
+      "consistencyGood": "Consistent responses",
+      "consistencyWarning": "Possible response inconsistencies",
+      "consistencyScore": "Response consistency: {score}%",
+      "consistencyFlags": "Flags: {flags}",
       "traits": {
         "openness": {
           "high": "You show strong creativity, curiosity, and openness to new experiences and ideas.",

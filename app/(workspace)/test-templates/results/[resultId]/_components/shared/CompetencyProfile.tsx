@@ -10,6 +10,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
+import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 import {
   Target,
   ChevronDown,
@@ -23,8 +24,11 @@ import {
   Layers,
   Loader2,
   AlertCircle,
+  Info,
+  AlertTriangle,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { getScoreInterpretation, getProficiencyLabel } from '@/lib/scoreInterpretation';
 import type { CompetencyScore, IndicatorScore, QuestionScore } from '@/types/domain';
 import { testResultsApi } from '@/services/api';
 
@@ -88,26 +92,75 @@ const TIER_CONFIG = {
   },
 } as const;
 
-const NEUTRAL_CONFIG = {
-  strength: {
-    labelKey: 'tier.strength' as const,
-    color: 'text-primary',
-    bg: 'bg-primary/10',
-    border: 'border-primary/30',
-    progress: 'bg-primary',
-  },
-  developing: {
-    labelKey: 'tier.developing' as const,
-    color: 'text-muted-foreground',
-    bg: 'bg-muted/50',
-    border: 'border-muted',
-    progress: 'bg-muted-foreground/60',
-  },
-};
-
 // Rank badge styling
 const RANK_BADGE_PASSED = 'bg-primary/10 text-primary';
 const RANK_BADGE_DEFAULT = 'bg-muted text-muted-foreground';
+
+/**
+ * Get the tier config for neutral (non-pass/fail) mode using the 5-level system.
+ * Returns an object matching the shape of TIER_CONFIG entries.
+ */
+function getNeutralConfig(percentage: number, t: ReturnType<typeof useTranslations<'template.resultsView'>>, proficiencyLabel?: string) {
+  const interpretation = getScoreInterpretation(percentage);
+  const label = getProficiencyLabel(interpretation.level, (key: string) => t(key), proficiencyLabel);
+  return {
+    labelKey: `proficiencyLevel.${interpretation.level}` as const,
+    label,
+    color: interpretation.color,
+    bg: interpretation.bgColor,
+    border: interpretation.borderColor,
+    progress: interpretation.progressColor,
+  };
+}
+
+// ============================================================================
+// CI Tooltip Component (Task 6)
+// ============================================================================
+
+interface CiTooltipProps {
+  ciLower: number;
+  ciUpper: number;
+  t: ReturnType<typeof useTranslations<'template.resultsView'>>;
+}
+
+function CiTooltip({ ciLower, ciUpper, t }: CiTooltipProps) {
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <button type="button" className="inline-flex items-center shrink-0" aria-label="Confidence interval">
+          <Info className="h-3.5 w-3.5 text-muted-foreground/70 hover:text-muted-foreground transition-colors" />
+        </button>
+      </TooltipTrigger>
+      <TooltipContent side="top" className="max-w-[200px]">
+        <span>{t('confidenceInterval', { lower: Math.round(ciLower), upper: Math.round(ciUpper) })}</span>
+      </TooltipContent>
+    </Tooltip>
+  );
+}
+
+// ============================================================================
+// Evidence Sufficiency Warning (Task 7)
+// ============================================================================
+
+interface EvidenceWarningProps {
+  evidenceNote?: string;
+  t: ReturnType<typeof useTranslations<'template.resultsView'>>;
+}
+
+function EvidenceWarning({ evidenceNote, t }: EvidenceWarningProps) {
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <button type="button" className="inline-flex items-center shrink-0" aria-label={t('insufficientEvidence')}>
+          <AlertTriangle className="h-3.5 w-3.5 text-amber-500 hover:text-amber-600 transition-colors" />
+        </button>
+      </TooltipTrigger>
+      <TooltipContent side="top" className="max-w-[250px]">
+        <span>{evidenceNote ?? t('insufficientEvidenceTooltip')}</span>
+      </TooltipContent>
+    </Tooltip>
+  );
+}
 
 // ============================================================================
 // Competency Details Component (Expanded Accordion Content)
@@ -149,7 +202,25 @@ function CompetencyDetails({ competency, resultId, showPassFail, passingScore, t
           <div className="flex items-center gap-1.5 px-2.5 py-1 bg-muted/50 rounded-lg text-xs">
             <Layers className="h-3.5 w-3.5 text-muted-foreground" />
             <span className="text-muted-foreground">{t('weight')}:</span>
-            <span className="font-semibold">×{competency.weight}</span>
+            <span className="font-semibold">&times;{competency.weight}</span>
+          </div>
+        )}
+        {/* Task 6: Confidence interval tooltip in stats row */}
+        {competency.ciLower != null && competency.ciUpper != null && (
+          <div className="flex items-center gap-1.5 px-2.5 py-1 bg-muted/50 rounded-lg text-xs">
+            <CiTooltip ciLower={competency.ciLower} ciUpper={competency.ciUpper} t={t} />
+            <span className="text-muted-foreground tabular-nums">
+              {Math.round(competency.ciLower)}% &ndash; {Math.round(competency.ciUpper)}%
+            </span>
+          </div>
+        )}
+        {/* Task 7: Insufficient evidence warning in stats row */}
+        {competency.insufficientEvidence && (
+          <div className="flex items-center gap-1.5 px-2.5 py-1 bg-amber-500/10 rounded-lg text-xs">
+            <EvidenceWarning evidenceNote={competency.evidenceNote} t={t} />
+            <span className="text-amber-600 dark:text-amber-400 font-medium">
+              {t('insufficientEvidence')}
+            </span>
           </div>
         )}
       </div>
@@ -204,7 +275,7 @@ function IndicatorRow({ indicator, resultId, showPassFail, passingScore, isExpan
   const percentage = Math.round(indicator.percentage);
   const config = showPassFail
     ? TIER_CONFIG[getTier(percentage, showPassFail, passingScore)]
-    : (percentage >= passingScore ? NEUTRAL_CONFIG.strength : NEUTRAL_CONFIG.developing);
+    : getNeutralConfig(percentage, t, indicator.proficiencyLabel);
 
   // State for lazy-loaded question scores
   const [questionScores, setQuestionScores] = useState<QuestionScore[] | null>(
@@ -367,7 +438,7 @@ function IndicatorRow({ indicator, resultId, showPassFail, passingScore, isExpan
                   {question.timeSpentSeconds > 0 && (
                     <div className="flex items-center gap-0.5 text-muted-foreground">
                       <Clock className="h-3 w-3" />
-                      <span>{Math.round(question.timeSpentSeconds)}с</span>
+                      <span>{Math.round(question.timeSpentSeconds)}s</span>
                     </div>
                   )}
                   <Badge
@@ -456,14 +527,19 @@ interface MobileCompetencyCardProps {
 function MobileCompetencyCard({ competency, resultId, rank, showPassFail, passingScore, isExpanded, onToggle, t }: MobileCompetencyCardProps) {
   const percentage = Math.round(competency.percentage);
   const tier = getTier(percentage, showPassFail, passingScore);
-  const config = showPassFail ? TIER_CONFIG[tier] : (percentage >= passingScore ? NEUTRAL_CONFIG.strength : NEUTRAL_CONFIG.developing);
+  // Task 5: Use 5-level system for neutral mode
+  const config = showPassFail
+    ? TIER_CONFIG[tier]
+    : getNeutralConfig(percentage, t, competency.proficiencyLabel);
+  const isInsufficientEvidence = competency.insufficientEvidence === true;
 
   return (
     <div
       className={cn(
         'rounded-xl border transition-all',
         isExpanded ? config.border : 'border-border/50',
-        isExpanded && config.bg
+        isExpanded && config.bg,
+        isInsufficientEvidence && 'opacity-80'
       )}
     >
       {/* Main Row - Clickable Header */}
@@ -476,14 +552,24 @@ function MobileCompetencyCard({ competency, resultId, rank, showPassFail, passin
           {/* Rank Badge */}
           <span className={cn(
             'w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold shrink-0',
-            percentage >= passingScore ? RANK_BADGE_PASSED : RANK_BADGE_DEFAULT
+            percentage >= 50 ? RANK_BADGE_PASSED : RANK_BADGE_DEFAULT
           )}>
             {rank}
           </span>
 
           {/* Name & Category */}
           <div className="flex-1 min-w-0">
-            <div className="font-medium text-sm truncate">{competency.competencyName}</div>
+            <div className="font-medium text-sm truncate flex items-center gap-1.5">
+              {competency.competencyName}
+              {/* Task 7: Evidence warning icon */}
+              {isInsufficientEvidence && (
+                <EvidenceWarning evidenceNote={competency.evidenceNote} t={t} />
+              )}
+              {/* Task 6: CI tooltip icon */}
+              {competency.ciLower != null && competency.ciUpper != null && !isInsufficientEvidence && (
+                <CiTooltip ciLower={competency.ciLower} ciUpper={competency.ciUpper} t={t} />
+              )}
+            </div>
             {competency.competencyCategory && (
               <div className="text-xs text-muted-foreground truncate">{competency.competencyCategory}</div>
             )}
@@ -556,23 +642,44 @@ interface DesktopCompetencyRowProps {
 function DesktopCompetencyRow({ competency, resultId, rank, showPassFail, passingScore, t }: DesktopCompetencyRowProps) {
   const percentage = Math.round(competency.percentage);
   const tier = getTier(percentage, showPassFail, passingScore);
-  const config = showPassFail ? TIER_CONFIG[tier] : (percentage >= passingScore ? NEUTRAL_CONFIG.strength : NEUTRAL_CONFIG.developing);
+  // Task 5: Use 5-level system for neutral mode
+  const config = showPassFail
+    ? TIER_CONFIG[tier]
+    : getNeutralConfig(percentage, t, competency.proficiencyLabel);
+  const tierLabel = showPassFail ? t(TIER_CONFIG[tier].labelKey) : ('label' in config ? config.label : '');
+  const isInsufficientEvidence = competency.insufficientEvidence === true;
 
   return (
-    <AccordionItem value={competency.competencyId} className="border rounded-lg px-4 data-[state=open]:bg-muted/20">
+    <AccordionItem
+      value={competency.competencyId}
+      className={cn(
+        'border rounded-lg px-4 data-[state=open]:bg-muted/20',
+        isInsufficientEvidence && 'opacity-80'
+      )}
+    >
       <AccordionTrigger className="hover:no-underline py-3 [&>svg]:shrink-0 [&>svg]:ml-2">
         <div className="flex items-center gap-4 flex-1 min-w-0">
           {/* Rank */}
           <span className={cn(
             'w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold shrink-0',
-            percentage >= passingScore ? RANK_BADGE_PASSED : RANK_BADGE_DEFAULT
+            percentage >= 50 ? RANK_BADGE_PASSED : RANK_BADGE_DEFAULT
           )}>
             {rank}
           </span>
 
           {/* Name & Category */}
           <div className="flex-1 min-w-0 text-left">
-            <div className="font-medium truncate">{competency.competencyName}</div>
+            <div className="font-medium truncate flex items-center gap-1.5">
+              {competency.competencyName}
+              {/* Task 7: Evidence warning icon */}
+              {isInsufficientEvidence && (
+                <EvidenceWarning evidenceNote={competency.evidenceNote} t={t} />
+              )}
+              {/* Task 6: CI tooltip */}
+              {competency.ciLower != null && competency.ciUpper != null && !isInsufficientEvidence && (
+                <CiTooltip ciLower={competency.ciLower} ciUpper={competency.ciUpper} t={t} />
+              )}
+            </div>
             {competency.competencyCategory && (
               <Badge variant="outline" className="mt-1 text-xs">
                 {competency.competencyCategory}
@@ -596,9 +703,9 @@ function DesktopCompetencyRow({ competency, resultId, rank, showPassFail, passin
             {percentage}%
           </div>
 
-          {/* Tier Label */}
+          {/* Tier Label - 5-level for neutral, 4-level for pass/fail */}
           <Badge variant="secondary" className={cn('shrink-0', config.bg, config.color)}>
-            {t(config.labelKey)}
+            {tierLabel}
           </Badge>
         </div>
       </AccordionTrigger>

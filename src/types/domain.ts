@@ -1049,9 +1049,15 @@ export interface CompetencyScore {
   ciLower?: number;       // 95% CI lower bound
   ciUpper?: number;       // 95% CI upper bound
   cronbachAlpha?: number; // Cronbach's alpha used for CI calculation
+  computedSd?: number;    // Computed standard deviation for this competency
   // Per-competency percentile rank
   percentile?: number;    // Percentile rank within this competency across all takers
   benchmarkScore?: number; // O*NET benchmark score for this competency (S1)
+  // 5-level proficiency label (backend-computed, e.g. "Expert", "Developing")
+  proficiencyLabel?: string;
+  // Evidence sufficiency indicator
+  insufficientEvidence?: boolean;
+  evidenceNote?: string;
 }
 
 export interface IndicatorScore {
@@ -1062,6 +1068,10 @@ export interface IndicatorScore {
   percentage: number;
   questionsAnswered: number;
   questionScores?: QuestionScore[];
+  /** Weight of this indicator within the competency */
+  weight?: number;
+  /** 5-level proficiency label (backend-computed) */
+  proficiencyLabel?: string;
 }
 
 export interface QuestionScore {
