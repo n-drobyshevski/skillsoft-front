@@ -7,7 +7,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Info, Loader2, Play, Redo2, Save, Sparkles, Undo2 } from "lucide-react";
+import { Info, Loader2, Play, Redo2, Save, Scale, Sparkles, Undo2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useBlueprintWorkspace } from "./BlueprintWorkspaceProvider";
 import { useBuilderDnd } from "./BuilderDndProvider";
@@ -24,6 +24,7 @@ export function WeightedCanvas() {
     isSaving,
     saveBlueprint,
     setCompetencies,
+    removeCompetency,
     templateId,
     // Auto-save state
     saveStatus,
@@ -50,6 +51,9 @@ export function WeightedCanvas() {
 
   // ARIA live region for accessibility announcements
   const [ariaAnnouncement, setAriaAnnouncement] = useState("");
+
+  // U3: Track focused card index for keyboard navigation
+  const [focusedCardIndex, setFocusedCardIndex] = useState<number | null>(null);
 
   // DnD-Kit hydration fix: defer rendering until client-side to avoid ID mismatch
   // DnD-Kit uses incrementing IDs that differ between SSR and client
@@ -116,6 +120,32 @@ export function WeightedCanvas() {
     window.open(`/test-templates/${templateId}/start?mode=test-drive`, '_blank');
   }, [templateId]);
 
+  // U4: Balance weights - normalize all weights so average is 1.0x
+  const handleBalanceWeights = useCallback(() => {
+    if (state.competencies.length === 0) return;
+    const totalWeight = state.competencies.reduce((sum, c) => sum + (c.weight ?? 1), 0);
+    const targetTotal = state.competencies.length; // average of 1.0x
+    const factor = targetTotal / totalWeight;
+    const balanced = state.competencies.map((c) => ({
+      ...c,
+      weight: Math.round((c.weight ?? 1) * factor * 10) / 10,
+    }));
+    setCompetencies(balanced);
+    setAriaAnnouncement(`Weights balanced. Average is now 1.0x.`);
+  }, [state.competencies, setCompetencies]);
+
+  // U3: Move card up/down via keyboard (Alt+Arrow)
+  const handleMoveCard = useCallback((index: number, direction: 'up' | 'down') => {
+    const newIndex = direction === 'up' ? index - 1 : index + 1;
+    if (newIndex < 0 || newIndex >= state.competencies.length) return;
+    const reordered = [...state.competencies];
+    const [moved] = reordered.splice(index, 1);
+    reordered.splice(newIndex, 0, moved);
+    setCompetencies(reordered);
+    setFocusedCardIndex(newIndex);
+    setAriaAnnouncement(`${moved.name} moved ${direction} to position ${newIndex + 1}.`);
+  }, [state.competencies, setCompetencies]);
+
   // Keyboard shortcuts: Ctrl+Z (undo), Ctrl+Shift+Z (redo), Ctrl+S (save)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -152,11 +182,23 @@ export function WeightedCanvas() {
         e.preventDefault();
         handleSave();
       }
+
+      // U3: Alt+ArrowUp / Alt+ArrowDown = Move focused card
+      if (e.altKey && !isMod && focusedCardIndex !== null) {
+        if (e.key === 'ArrowUp') {
+          e.preventDefault();
+          handleMoveCard(focusedCardIndex, 'up');
+        }
+        if (e.key === 'ArrowDown') {
+          e.preventDefault();
+          handleMoveCard(focusedCardIndex, 'down');
+        }
+      }
     };
 
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [handleUndo, handleRedo, handleSave]);
+  }, [handleUndo, handleRedo, handleSave, focusedCardIndex, handleMoveCard]);
 
   return (
     <div className="flex flex-col h-full min-h-0 overflow-hidden">
@@ -231,6 +273,26 @@ export function WeightedCanvas() {
               Redo <kbd className="ml-1.5 px-1.5 py-0.5 bg-muted rounded text-[10px] font-mono">Ctrl+Shift+Z</kbd>
             </TooltipContent>
           </Tooltip>
+          {/* U4: Balance Weights button */}
+          {state.competencies.length >= 2 && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 sm:h-10 sm:w-10 md:h-8 md:w-8 active:scale-95"
+                  onClick={handleBalanceWeights}
+                  disabled={isPending}
+                  aria-label="Balance weights to average 1.0x"
+                >
+                  <Scale className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" className="text-xs">
+                Balance weights to avg 1.0x
+              </TooltipContent>
+            </Tooltip>
+          )}
           <Button
             variant="secondary"
             size="sm"
@@ -314,14 +376,23 @@ export function WeightedCanvas() {
                           <InsertionIndicator />
                         )}
 
+                      {/* U3: Wrapper div for keyboard focus tracking */}
+                      <div
+                        onFocus={() => setFocusedCardIndex(index)}
+                        onBlur={(e) => {
+                          // Only clear if focus leaves this card entirely
+                          if (!e.currentTarget.contains(e.relatedTarget)) {
+                            setFocusedCardIndex(null);
+                          }
+                        }}
+                      >
                       <CompetencySmartCard
                         competency={comp}
                         laneId="DEFAULT"
                         isPending={isPending}
                         onRemove={() => {
-                          const updated = state.competencies.filter((c) => c.id !== comp.id);
-                          setCompetencies(updated);
-                          setAriaAnnouncement(`${comp.name} removed. ${updated.length} competencies remaining.`);
+                          removeCompetency(comp.id);
+                          setAriaAnnouncement(`${comp.name} removed. ${state.competencies.length - 1} competencies remaining.`);
                         }}
                         onWeightChange={(val) => setCompetencies(state.competencies.map((c) => c.id === comp.id ? { ...c, weight: val } : c))}
                       />
@@ -331,6 +402,7 @@ export function WeightedCanvas() {
                         insertionTarget?.position === "after" && (
                           <InsertionIndicator />
                         )}
+                      </div>
                     </React.Fragment>
                   ))
                 )}

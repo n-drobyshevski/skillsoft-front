@@ -20,8 +20,8 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { cn } from "@/lib/utils";
-import { GripVertical, ChevronDown, ChevronUp, Trash2 } from "lucide-react";
-import { BlueprintCompetency } from "../actions";
+import { GripVertical, ChevronDown, ChevronUp, Trash2, Minus, Plus } from "lucide-react";
+import { BlueprintCompetency, type Difficulty } from "../actions";
 import { getSampleQuestion } from "../actions";
 import { useBlueprintWorkspace } from "./BlueprintWorkspaceProvider";
 
@@ -52,6 +52,13 @@ const difficultyPalette = {
   medium: "bg-amber-400",
   hard: "bg-orange-500",
 };
+
+const DIFFICULTY_OPTIONS: { value: Difficulty; label: string; short: string; color: string }[] = [
+  { value: "FOUNDATIONAL", label: "Foundational", short: "F", color: "bg-emerald-500 text-white" },
+  { value: "INTERMEDIATE", label: "Intermediate", short: "I", color: "bg-amber-500 text-white" },
+  { value: "ADVANCED", label: "Advanced", short: "A", color: "bg-orange-500 text-white" },
+  { value: "EXPERT", label: "Expert", short: "E", color: "bg-red-500 text-white" },
+];
 
 export function CompetencySmartCard({
   competency,
@@ -175,6 +182,28 @@ export function CompetencySmartCard({
           </div>
         </div>
 
+        {/* U6: Inline difficulty selector - desktop */}
+        <div className="hidden md:flex items-center mr-2">
+          <div className="flex rounded-md border border-border/40 overflow-hidden">
+            {DIFFICULTY_OPTIONS.map((opt) => (
+              <button
+                key={opt.value}
+                onClick={() => updateCompetency(competency.id, { difficulty: opt.value })}
+                disabled={isPending}
+                className={cn(
+                  "px-2 py-1 text-[10px] font-medium transition-colors",
+                  (competency.difficulty ?? "INTERMEDIATE") === opt.value
+                    ? opt.color
+                    : "bg-muted/30 text-muted-foreground hover:bg-muted/60"
+                )}
+                title={opt.label}
+              >
+                {opt.short}
+              </button>
+            ))}
+          </div>
+        </div>
+
         {/* Compact weight control - always visible on desktop */}
         <div className="hidden md:flex items-center gap-2 mr-2">
           <Tooltip>
@@ -220,24 +249,57 @@ export function CompetencySmartCard({
         </Button>
       </div>
 
-      {/* Mobile weight control - visible below header on mobile only */}
-      <div className="md:hidden px-2 sm:px-4 pb-2 sm:pb-3">
+      {/* Mobile controls - weight stepper + difficulty selector */}
+      <div className="md:hidden px-2 sm:px-4 pb-2 sm:pb-3 space-y-2">
+        {/* M1: Touch-optimized weight stepper */}
         <div className="flex items-center gap-2 sm:gap-3 p-2 sm:p-2.5 rounded-lg bg-muted/20 border border-border/30">
           <span className="text-[11px] sm:text-xs text-muted-foreground font-medium shrink-0">Weight</span>
-          <div className="flex-1 min-w-0">
-            <Slider
-              value={[competency.weight ?? 1]}
-              min={0.5}
-              max={2.0}
-              step={0.1}
-              onValueChange={([val]) => onWeightChange(val)}
-              disabled={isPending}
-              className="[&_[data-slot=slider-thumb]]:h-5 [&_[data-slot=slider-thumb]]:w-5 sm:[&_[data-slot=slider-thumb]]:h-6 sm:[&_[data-slot=slider-thumb]]:w-6 [&_[data-slot=slider-thumb]]:shadow-md [&_[data-slot=slider-track]]:h-2"
-            />
+          <div className="flex-1 flex items-center justify-center gap-2">
+            <Button
+              variant="outline"
+              size="icon"
+              className="h-9 w-9 shrink-0 rounded-full active:scale-95"
+              onClick={() => onWeightChange(Math.max(0.5, Math.round(((competency.weight ?? 1) - 0.1) * 10) / 10))}
+              disabled={isPending || (competency.weight ?? 1) <= 0.5}
+              aria-label="Decrease weight"
+            >
+              <Minus className="h-4 w-4" />
+            </Button>
+            <span className="font-mono text-base font-semibold text-foreground w-12 text-center">
+              {(competency.weight ?? 1).toFixed(1)}x
+            </span>
+            <Button
+              variant="outline"
+              size="icon"
+              className="h-9 w-9 shrink-0 rounded-full active:scale-95"
+              onClick={() => onWeightChange(Math.min(2.0, Math.round(((competency.weight ?? 1) + 0.1) * 10) / 10))}
+              disabled={isPending || (competency.weight ?? 1) >= 2.0}
+              aria-label="Increase weight"
+            >
+              <Plus className="h-4 w-4" />
+            </Button>
           </div>
-          <span className="font-mono text-xs sm:text-sm text-foreground/80 w-7 sm:w-8 text-right shrink-0">
-            {(competency.weight ?? 1).toFixed(1)}x
-          </span>
+        </div>
+        {/* U6: Mobile difficulty selector */}
+        <div className="flex items-center gap-2 p-2 rounded-lg bg-muted/20 border border-border/30">
+          <span className="text-[11px] sm:text-xs text-muted-foreground font-medium shrink-0">Difficulty</span>
+          <div className="flex-1 flex rounded-md border border-border/40 overflow-hidden">
+            {DIFFICULTY_OPTIONS.map((opt) => (
+              <button
+                key={opt.value}
+                onClick={() => updateCompetency(competency.id, { difficulty: opt.value })}
+                disabled={isPending}
+                className={cn(
+                  "flex-1 py-1.5 text-[11px] font-medium transition-colors",
+                  (competency.difficulty ?? "INTERMEDIATE") === opt.value
+                    ? opt.color
+                    : "bg-muted/30 text-muted-foreground"
+                )}
+              >
+                {opt.short}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 

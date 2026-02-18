@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo, useRef } from 'react';
 import { useDraggable } from '@dnd-kit/core';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import { useVirtualizer } from '@tanstack/react-virtual';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import {
@@ -339,9 +339,21 @@ function CategoryGroup({
 // MAIN COMPONENT
 // ============================================
 
+// ============================================
+// VIRTUALIZED ROW TYPES
+// ============================================
+
+type VirtualRow =
+  | { type: 'header'; category: string; count: number }
+  | { type: 'item'; competency: LibraryCompetency };
+
+const ROW_HEIGHT_HEADER = 36;
+const ROW_HEIGHT_ITEM = 56;
+
 export function LibraryPanel({ onAdd }: LibraryPanelProps) {
   const { libraryCompetencies, state, addCompetency } = useBlueprintWorkspace();
   const [searchQuery, setSearchQuery] = useState('');
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   // When onAdd is provided (mobile sheet), disable drag
   // When not provided (desktop panel), enable drag
@@ -356,21 +368,39 @@ export function LibraryPanel({ onAdd }: LibraryPanelProps) {
       c.category.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  // Group by category
-  const groupedCompetencies = filteredCompetencies.reduce(
-    (acc, comp) => {
-      const category = comp.category;
-      if (!acc[category]) {
-        acc[category] = [];
-      }
-      acc[category].push(comp);
-      return acc;
-    },
-    {} as Record<string, LibraryCompetency[]>
-  );
+  // U2: Flatten grouped categories into virtual rows
+  const virtualRows = useMemo(() => {
+    const grouped = filteredCompetencies.reduce(
+      (acc, comp) => {
+        const category = comp.category;
+        if (!acc[category]) acc[category] = [];
+        acc[category].push(comp);
+        return acc;
+      },
+      {} as Record<string, LibraryCompetency[]>
+    );
 
-  // Sort categories alphabetically
-  const sortedCategories = Object.keys(groupedCompetencies).sort();
+    const sortedCategories = Object.keys(grouped).sort();
+    const rows: VirtualRow[] = [];
+
+    for (const category of sortedCategories) {
+      rows.push({ type: 'header', category, count: grouped[category].length });
+      for (const comp of grouped[category]) {
+        rows.push({ type: 'item', competency: comp });
+      }
+    }
+
+    return rows;
+  }, [filteredCompetencies]);
+
+  // Virtualizer for efficient rendering
+  const virtualizer = useVirtualizer({
+    count: virtualRows.length,
+    getScrollElement: () => scrollContainerRef.current,
+    estimateSize: (index) =>
+      virtualRows[index].type === 'header' ? ROW_HEIGHT_HEADER : ROW_HEIGHT_ITEM,
+    overscan: 8,
+  });
 
   // Handle add (click or mobile) - drag is now handled by useDraggable
   const handleAdd = useCallback(
@@ -409,31 +439,66 @@ export function LibraryPanel({ onAdd }: LibraryPanelProps) {
         </div>
       </div>
 
-      {/* Competency List */}
-      <ScrollArea className="flex-1 min-h-0">
-        <div className="p-3 space-y-4">
-          {sortedCategories.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-12 text-center">
-              <Brain className="h-10 w-10 text-muted-foreground/30 mb-3" />
-              <p className="text-sm text-muted-foreground">No competencies found</p>
-              <p className="text-xs text-muted-foreground/70 mt-1">
-                Try adjusting your search
-              </p>
-            </div>
-          ) : (
-            sortedCategories.map((category) => (
-              <CategoryGroup
-                key={category}
-                category={category}
-                competencies={groupedCompetencies[category]}
-                selectedIds={selectedIds}
-                onAdd={handleAdd}
-                enableDrag={enableDrag}
-              />
-            ))
-          )}
-        </div>
-      </ScrollArea>
+      {/* U2: Virtualized Competency List */}
+      <div ref={scrollContainerRef} className="flex-1 min-h-0 overflow-auto">
+        {virtualRows.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-12 text-center px-3">
+            <Brain className="h-10 w-10 text-muted-foreground/30 mb-3" />
+            <p className="text-sm text-muted-foreground">No competencies found</p>
+            <p className="text-xs text-muted-foreground/70 mt-1">
+              Try adjusting your search
+            </p>
+          </div>
+        ) : (
+          <div
+            className="relative w-full px-3"
+            style={{ height: `${virtualizer.getTotalSize()}px` }}
+          >
+            {virtualizer.getVirtualItems().map((virtualItem) => {
+              const row = virtualRows[virtualItem.index];
+
+              if (row.type === 'header') {
+                return (
+                  <div
+                    key={`header-${row.category}`}
+                    className="absolute left-3 right-3 flex items-center gap-2 px-1 pt-3"
+                    style={{
+                      top: `${virtualItem.start}px`,
+                      height: `${virtualItem.size}px`,
+                    }}
+                  >
+                    <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+                      {row.category.replace(/_/g, ' ')}
+                    </span>
+                    <span className="text-[10px] text-muted-foreground/60">
+                      ({row.count})
+                    </span>
+                  </div>
+                );
+              }
+
+              return (
+                <div
+                  key={`item-${row.competency.id}`}
+                  className="absolute left-3 right-3"
+                  style={{
+                    top: `${virtualItem.start}px`,
+                    height: `${virtualItem.size}px`,
+                    paddingTop: 3,
+                  }}
+                >
+                  <CompetencyItem
+                    competency={row.competency}
+                    isSelected={selectedIds.includes(row.competency.id)}
+                    onAdd={() => handleAdd(row.competency)}
+                    enableDrag={enableDrag}
+                  />
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
