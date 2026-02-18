@@ -341,7 +341,7 @@ function MobileLayout() {
       <div className="flex-1 overflow-hidden relative w-full">
         {/* Note: Library View removed - now accessed via bottom sheet only */}
 
-        {/* Canvas View - Always rendered with content-visibility optimization */}
+        {/* Canvas View - Always rendered with content-visibility + CSS containment */}
         <div
           ref={canvasScrollRef}
           key={`canvas-${slideKeyRef.current}`}
@@ -352,9 +352,10 @@ function MobileLayout() {
             activeTab === "canvas" && slideDirection === "left" && "animate-slide-in-left"
           )}
           style={{
-            // Phase 3.3: content-visibility optimization for off-screen performance
             contentVisibility: activeTab === "canvas" ? "visible" : "auto",
             containIntrinsicSize: "0 500px",
+            // MOB-3: CSS containment on inactive panels to isolate layout/paint
+            contain: activeTab === "canvas" ? undefined : "layout style paint",
           }}
         >
           <WeightedCanvas />
@@ -372,6 +373,10 @@ function MobileLayout() {
               activeTab === "simulate" && slideDirection === "right" && "animate-slide-in-right",
               activeTab === "simulate" && slideDirection === "left" && "animate-slide-in-left"
             )}
+            style={{
+              // MOB-3: CSS containment on inactive panels to isolate layout/paint
+              contain: activeTab === "simulate" ? undefined : "layout style paint",
+            }}
           >
             <Suspense fallback={<SimulatorSkeleton />}>
               <LazySimulatorPanel variant="mobile" />

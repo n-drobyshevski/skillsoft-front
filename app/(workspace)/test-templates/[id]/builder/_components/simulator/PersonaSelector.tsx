@@ -3,39 +3,12 @@
 import React from 'react';
 import { Sparkles, Shuffle, TrendingDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { SimulationProfile } from './types';
+import { SimulationProfile, personaConfig } from './types';
 
-const personaConfig: Record<
-  SimulationProfile,
-  {
-    icon: React.ElementType;
-    label: string;
-    description: string;
-    color: string;
-    bgColor: string;
-  }
-> = {
-  PERFECT_CANDIDATE: {
-    icon: Sparkles,
-    label: 'Perfect',
-    description: 'Ideal candidate',
-    color: 'text-emerald-600 dark:text-emerald-400',
-    bgColor: 'bg-emerald-50 dark:bg-emerald-950/50 border-emerald-200 dark:border-emerald-800',
-  },
-  RANDOM_GUESSER: {
-    icon: Shuffle,
-    label: 'Random',
-    description: 'Random answers',
-    color: 'text-amber-600 dark:text-amber-400',
-    bgColor: 'bg-amber-50 dark:bg-amber-950/50 border-amber-200 dark:border-amber-800',
-  },
-  FAILING_CANDIDATE: {
-    icon: TrendingDown,
-    label: 'Failing',
-    description: 'Poor performer',
-    color: 'text-red-600 dark:text-red-400',
-    bgColor: 'bg-red-50 dark:bg-red-950/50 border-red-200 dark:border-red-800',
-  },
+const PERSONA_ICON_MAP: Record<string, React.ElementType> = {
+  Sparkles,
+  Shuffle,
+  TrendingDown,
 };
 
 interface PersonaSelectorProps {
@@ -49,7 +22,7 @@ export function PersonaSelector({ selected, onSelect, disabled }: PersonaSelecto
     <div className="grid grid-cols-3 gap-2">
       {(Object.keys(personaConfig) as SimulationProfile[]).map((profile) => {
         const config = personaConfig[profile];
-        const Icon = config.icon;
+        const Icon = PERSONA_ICON_MAP[config.icon] ?? Sparkles;
         const isSelected = selected === profile;
 
         return (
@@ -58,7 +31,6 @@ export function PersonaSelector({ selected, onSelect, disabled }: PersonaSelecto
             onClick={() => onSelect(profile)}
             disabled={disabled}
             className={cn(
-              // Mobile: larger touch targets
               'flex flex-col items-center gap-1.5 p-3 rounded-xl border transition-all',
               'min-h-[72px]',
               'hover:shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-ring',

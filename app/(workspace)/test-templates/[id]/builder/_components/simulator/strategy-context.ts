@@ -251,32 +251,10 @@ export function computeBlueprintHash(state: {
 }
 
 // ============================================
-// PERSONA CONFIGURATION (Re-export with strategy awareness)
+// PERSONA CONFIGURATION (single source in types.ts)
 // ============================================
 
-export const personaConfig = {
-  PERFECT_CANDIDATE: {
-    icon: 'Sparkles',
-    label: 'Perfect',
-    description: 'Ideal candidate',
-    color: 'text-emerald-600 dark:text-emerald-400',
-    bgColor: 'bg-emerald-50 dark:bg-emerald-950/50 border-emerald-200 dark:border-emerald-800',
-  },
-  RANDOM_GUESSER: {
-    icon: 'Shuffle',
-    label: 'Random',
-    description: 'Random answers',
-    color: 'text-amber-600 dark:text-amber-400',
-    bgColor: 'bg-amber-50 dark:bg-amber-950/50 border-amber-200 dark:border-amber-800',
-  },
-  FAILING_CANDIDATE: {
-    icon: 'TrendingDown',
-    label: 'Failing',
-    description: 'Poor performer',
-    color: 'text-red-600 dark:text-red-400',
-    bgColor: 'bg-red-50 dark:bg-red-950/50 border-red-200 dark:border-red-800',
-  },
-} as const;
+export { personaConfig } from './types';
 
 // ============================================
 // STRATEGY HELP CONTENT

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useMemo, useState, useEffect, useRef, useCallback } from 'react';
 import {
   Radar,
   RadarChart,
@@ -11,14 +11,12 @@ import {
   Tooltip,
   Legend,
 } from 'recharts';
-import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
 import {
   CompetencyDistribution,
   transformSimulationToRadar,
   estimateBigFiveFromCompetencies,
   truncateLabel,
-  COMPETENCY_COLORS,
   BIG_FIVE_TRAIT_COLORS,
 } from '../utils/transformSimulationToRadar';
 import { BigFiveProfile } from '@/hooks/useBigFiveProjection';
@@ -118,43 +116,108 @@ function useComputedColors() {
 }
 
 // ============================================
+// CONTAINER SIZE HOOK
+// ============================================
+
+/**
+ * Hook to measure actual container width via ResizeObserver.
+ * Enables continuous responsive sizing instead of binary mobile/desktop.
+ */
+function useContainerSize(ref: React.RefObject<HTMLDivElement | null>) {
+  const [width, setWidth] = useState(0);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+
+    const observer = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        const w = entry.contentBoxSize?.[0]?.inlineSize ?? entry.contentRect.width;
+        setWidth(w);
+      }
+    });
+
+    observer.observe(el);
+    // Initial measurement
+    setWidth(el.clientWidth);
+
+    return () => observer.disconnect();
+  }, [ref]);
+
+  return width;
+}
+
+// ============================================
 // CONFIG
 // ============================================
 
-const CONFIG = {
-  default: {
-    desktop: {
-      height: 340,
-      outerRadius: '75%',
-      fontSize: 11,
-      radiusFontSize: 9,
-      maxLabelLength: 14,
-    },
-    mobile: {
-      height: 280,
-      outerRadius: '65%',
-      fontSize: 9,
-      radiusFontSize: 8,
-      maxLabelLength: 10,
-    },
-  },
-  compact: {
-    desktop: {
-      height: 260,
-      outerRadius: '70%',
-      fontSize: 10,
-      radiusFontSize: 8,
-      maxLabelLength: 12,
-    },
-    mobile: {
-      height: 220,
-      outerRadius: '60%',
-      fontSize: 8,
-      radiusFontSize: 7,
-      maxLabelLength: 8,
-    },
-  },
-};
+interface ChartConfig {
+  height: number;
+  outerRadius: string;
+  fontSize: number;
+  radiusFontSize: number;
+  maxLabelLength: number;
+  showLegend: boolean;
+  showDetailedTooltip: boolean;
+  tickCount: number;
+}
+
+/**
+ * Derive chart config from actual container width for smooth responsive sizing.
+ * Falls back to static configs when container width is not yet measured.
+ */
+function getResponsiveConfig(containerWidth: number, variant: 'default' | 'compact'): ChartConfig {
+  const isCompact = variant === 'compact';
+
+  // Breakpoints: <280 (tiny), 280-400 (small/mobile), 400-550 (medium), 550+ (large/desktop)
+  if (containerWidth > 0 && containerWidth < 280) {
+    return {
+      height: isCompact ? 200 : 240,
+      outerRadius: '55%',
+      fontSize: 7,
+      radiusFontSize: 6,
+      maxLabelLength: 7,
+      showLegend: false,
+      showDetailedTooltip: false,
+      tickCount: 3,
+    };
+  }
+  if (containerWidth > 0 && containerWidth < 400) {
+    return {
+      height: isCompact ? 220 : 280,
+      outerRadius: isCompact ? '60%' : '65%',
+      fontSize: isCompact ? 8 : 9,
+      radiusFontSize: isCompact ? 7 : 8,
+      maxLabelLength: isCompact ? 8 : 10,
+      showLegend: false,
+      showDetailedTooltip: true,
+      tickCount: 3,
+    };
+  }
+  if (containerWidth > 0 && containerWidth < 550) {
+    return {
+      height: isCompact ? 240 : 300,
+      outerRadius: isCompact ? '65%' : '70%',
+      fontSize: isCompact ? 9 : 10,
+      radiusFontSize: isCompact ? 7 : 8,
+      maxLabelLength: isCompact ? 10 : 12,
+      showLegend: true,
+      showDetailedTooltip: true,
+      tickCount: 4,
+    };
+  }
+  // 550+ or not yet measured (0)
+  return {
+    height: isCompact ? 260 : 340,
+    outerRadius: isCompact ? '70%' : '75%',
+    fontSize: isCompact ? 10 : 11,
+    radiusFontSize: isCompact ? 8 : 9,
+    maxLabelLength: isCompact ? 12 : 14,
+    showLegend: true,
+    showDetailedTooltip: true,
+    tickCount: 5,
+  };
+}
 
 // ============================================
 // COMPONENT
@@ -170,11 +233,15 @@ export const SimulationCombinedRadar = React.memo<SimulationCombinedRadarProps>(
     variant = 'default',
     className,
   }) => {
-    const isMobile = useIsMobile();
+    const containerRef = useRef<HTMLDivElement>(null);
+    const containerWidth = useContainerSize(containerRef);
     const colors = useComputedColors();
 
-    // Get config based on variant and device
-    const config = CONFIG[variant][isMobile ? 'mobile' : 'desktop'];
+    // Responsive config derived from actual container width
+    const config = useMemo(
+      () => getResponsiveConfig(containerWidth, variant),
+      [containerWidth, variant]
+    );
     const chartHeight = height || config.height;
 
     // Generate or use Big Five profile
@@ -229,8 +296,14 @@ export const SimulationCombinedRadar = React.memo<SimulationCombinedRadarProps>(
           bigFive: null as number | null,
         }));
 
+    const isNarrow = containerWidth > 0 && containerWidth < 400;
+    const margin = isNarrow
+      ? { top: 5, right: 5, bottom: 5, left: 5 }
+      : { top: 10, right: 10, bottom: 10, left: 10 };
+
     return (
       <div
+        ref={containerRef}
         className={cn('w-full', className)}
         style={{ height: chartHeight }}
         role="img"
@@ -244,7 +317,7 @@ export const SimulationCombinedRadar = React.memo<SimulationCombinedRadarProps>(
             cy="50%"
             outerRadius={config.outerRadius}
             data={chartData}
-            margin={isMobile ? { top: 5, right: 5, bottom: 5, left: 5 } : { top: 10, right: 10, bottom: 10, left: 10 }}
+            margin={margin}
           >
             {/* Gradient definitions */}
             <defs>
@@ -264,7 +337,7 @@ export const SimulationCombinedRadar = React.memo<SimulationCombinedRadarProps>(
             <PolarGrid
               stroke={colors.border}
               strokeOpacity={0.5}
-              strokeWidth={isMobile ? 0.5 : 1}
+              strokeWidth={isNarrow ? 0.5 : 1}
               gridType="polygon"
             />
 
@@ -301,10 +374,10 @@ export const SimulationCombinedRadar = React.memo<SimulationCombinedRadarProps>(
                 fill: colors.mutedForeground,
                 fontSize: config.radiusFontSize,
               }}
-              tickCount={isMobile ? 3 : 5}
+              tickCount={config.tickCount}
               tickFormatter={(value) => {
                 const numValue = Number(value);
-                if (isMobile && numValue !== 0 && numValue !== 50 && numValue !== 100) {
+                if (isNarrow && numValue !== 0 && numValue !== 50 && numValue !== 100) {
                   return '';
                 }
                 return `${numValue}`;
@@ -317,7 +390,7 @@ export const SimulationCombinedRadar = React.memo<SimulationCombinedRadarProps>(
               name="Competency Weight"
               dataKey="competency"
               stroke="#3b82f6"
-              strokeWidth={isMobile ? 1.5 : 2}
+              strokeWidth={isNarrow ? 1.5 : 2}
               fill="url(#simulationCompetencyGradient)"
               fillOpacity={1}
               isAnimationActive={true}
@@ -332,7 +405,7 @@ export const SimulationCombinedRadar = React.memo<SimulationCombinedRadarProps>(
                 name="Big Five"
                 dataKey="bigFive"
                 stroke="#8b5cf6"
-                strokeWidth={isMobile ? 1.5 : 2}
+                strokeWidth={isNarrow ? 1.5 : 2}
                 strokeDasharray="5 3"
                 fill="url(#simulationBigFiveGradient)"
                 fillOpacity={1}
@@ -354,6 +427,29 @@ export const SimulationCombinedRadar = React.memo<SimulationCombinedRadarProps>(
                 const color = isCompetency
                   ? '#3b82f6'
                   : BIG_FIVE_TRAIT_COLORS[item.id as keyof BigFiveProfile] || '#8b5cf6';
+
+                // Compact tooltip for very narrow containers
+                if (!config.showDetailedTooltip) {
+                  return (
+                    <div
+                      className="bg-popover/95 backdrop-blur-sm border border-border rounded-lg shadow-lg px-2.5 py-1.5"
+                      style={{ backgroundColor: colors.card }}
+                    >
+                      <div className="flex items-center gap-1.5">
+                        <div
+                          className="w-2 h-2 rounded-full shrink-0"
+                          style={{ backgroundColor: color }}
+                        />
+                        <span className="text-xs font-medium" style={{ color: colors.foreground }}>
+                          {truncateLabel(item.subject, 12)}
+                        </span>
+                        <span className="text-xs font-bold tabular-nums" style={{ color }}>
+                          {value}%
+                        </span>
+                      </div>
+                    </div>
+                  );
+                }
 
                 return (
                   <div
@@ -407,8 +503,8 @@ export const SimulationCombinedRadar = React.memo<SimulationCombinedRadarProps>(
               }}
             />
 
-            {/* Legend (desktop only) */}
-            {!isMobile && showBigFive && radarData.bigFive.length > 0 && (
+            {/* Legend - hidden on narrow containers */}
+            {config.showLegend && showBigFive && radarData.bigFive.length > 0 && (
               <Legend
                 wrapperStyle={{
                   color: colors.foreground,

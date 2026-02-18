@@ -251,27 +251,36 @@ export function CompetencySmartCard({
 
       {/* Mobile controls - weight stepper + difficulty selector */}
       <div className="md:hidden px-2 sm:px-4 pb-2 sm:pb-3 space-y-2">
-        {/* M1: Touch-optimized weight stepper */}
+        {/* M1: Touch-optimized weight stepper with visual feedback */}
         <div className="flex items-center gap-2 sm:gap-3 p-2 sm:p-2.5 rounded-lg bg-muted/20 border border-border/30">
           <span className="text-[11px] sm:text-xs text-muted-foreground font-medium shrink-0">Weight</span>
-          <div className="flex-1 flex items-center justify-center gap-2">
+          <div className="flex-1 flex items-center justify-center gap-3">
             <Button
               variant="outline"
               size="icon"
-              className="h-9 w-9 shrink-0 rounded-full active:scale-95"
+              className="h-10 w-10 shrink-0 rounded-full active:scale-90 active:bg-destructive/10 touch-manipulation transition-all"
               onClick={() => onWeightChange(Math.max(0.5, Math.round(((competency.weight ?? 1) - 0.1) * 10) / 10))}
               disabled={isPending || (competency.weight ?? 1) <= 0.5}
               aria-label="Decrease weight"
             >
               <Minus className="h-4 w-4" />
             </Button>
-            <span className="font-mono text-base font-semibold text-foreground w-12 text-center">
-              {(competency.weight ?? 1).toFixed(1)}x
-            </span>
+            <div className="flex flex-col items-center">
+              <span className="font-mono text-lg font-semibold text-foreground w-14 text-center tabular-nums transition-all">
+                {(competency.weight ?? 1).toFixed(1)}x
+              </span>
+              {/* Visual weight bar indicator */}
+              <div className="w-12 h-1 mt-1 rounded-full bg-muted overflow-hidden">
+                <div
+                  className="h-full rounded-full bg-primary transition-all duration-200"
+                  style={{ width: `${(((competency.weight ?? 1) - 0.5) / 1.5) * 100}%` }}
+                />
+              </div>
+            </div>
             <Button
               variant="outline"
               size="icon"
-              className="h-9 w-9 shrink-0 rounded-full active:scale-95"
+              className="h-10 w-10 shrink-0 rounded-full active:scale-90 active:bg-primary/10 touch-manipulation transition-all"
               onClick={() => onWeightChange(Math.min(2.0, Math.round(((competency.weight ?? 1) + 0.1) * 10) / 10))}
               disabled={isPending || (competency.weight ?? 1) >= 2.0}
               aria-label="Increase weight"

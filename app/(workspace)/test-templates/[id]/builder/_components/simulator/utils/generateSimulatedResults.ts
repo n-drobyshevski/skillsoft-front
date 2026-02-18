@@ -79,6 +79,32 @@ function getConfidenceLevel(questionCount: number): 'high' | 'medium' | 'low' {
 /**
  * Generate simulated competency scores based on persona
  */
+/**
+ * Derive competency scores from real backend competencyScores data.
+ * Uses actual simulation results instead of client-side estimation.
+ */
+function deriveCompetencyScoresFromBackend(
+  result: SimulationResult,
+  passingScore: number
+): SimulatedCompetencyScore[] {
+  if (!result.competencyScores) return [];
+
+  // Build a name lookup from distributionByCompetency
+  const nameMap = new Map<string, string>();
+  result.distributionByCompetency?.forEach((c) => {
+    nameMap.set(c.competencyId, c.competencyName);
+  });
+
+  return Object.entries(result.competencyScores).map(([compId, score]) => ({
+    competencyId: compId,
+    competencyName: nameMap.get(compId) || `Competency`,
+    simulatedPercentage: Math.round(score.scorePercentage),
+    questionCount: score.totalQuestions,
+    passed: score.scorePercentage >= passingScore,
+    confidence: getConfidenceLevel(score.totalQuestions),
+  }));
+}
+
 export function generateSimulatedScores(
   distribution: SimulationResult['distributionByCompetency'],
   persona: SimulationProfile,
@@ -213,12 +239,14 @@ export function generateSimulatedResults(
   onetSocCode?: string,
   teamId?: string
 ): SimulatedResultsData {
-  // Generate competency scores
-  const competencyScores = generateSimulatedScores(
-    result.distributionByCompetency || [],
-    persona,
-    passingScore
-  );
+  // Use real backend competencyScores when available, otherwise fall back to client-side generation
+  const competencyScores = result.competencyScores
+    ? deriveCompetencyScoresFromBackend(result, passingScore)
+    : generateSimulatedScores(
+        result.distributionByCompetency || [],
+        persona,
+        passingScore
+      );
 
   // Calculate overall score
   const overallScore = result.simulatedScore ?? (

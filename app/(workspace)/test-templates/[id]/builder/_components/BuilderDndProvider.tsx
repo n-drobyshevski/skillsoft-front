@@ -311,7 +311,8 @@ export function BuilderDndProvider({ children }: BuilderDndProviderProps) {
         {children}
 
         {/* Unified Drag Overlay for both item types */}
-        <DragOverlay dropAnimation={null}>
+        {/* MOB-3: will-change for GPU-promoted compositing during drag */}
+        <DragOverlay dropAnimation={null} style={{ willChange: 'transform' }}>
           {activeDragData ? (
             <DragPreview data={activeDragData} activeCompetency={activeCanvasCompetency} />
           ) : null}

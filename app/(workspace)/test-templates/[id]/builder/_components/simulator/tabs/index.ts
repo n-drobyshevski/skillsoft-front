@@ -5,20 +5,20 @@
  * Includes both standard and optimized versions.
  */
 
-// Standard tabs (default exports)
-export { default as TimelineTab } from './TimelineTab';
-export { default as AnalyticsTab } from './AnalyticsTab';
+// Tab components
 export { default as FineTuneTab } from './FineTuneTab';
 export { default as StrategyInsightsTab } from './StrategyInsightsTab';
 
-// Optimized tabs (performance-enhanced)
+// Optimized tabs (consolidated from legacy AnalyticsTab/TimelineTab)
 export {
   TimelineTabOptimized,
+  TimelineTabOptimized as TimelineTab,
   default as TimelineTabOptimizedDefault,
 } from './TimelineTabOptimized';
 
 export {
   AnalyticsTabOptimized,
+  AnalyticsTabOptimized as AnalyticsTab,
   default as AnalyticsTabOptimizedDefault,
 } from './AnalyticsTabOptimized';
 

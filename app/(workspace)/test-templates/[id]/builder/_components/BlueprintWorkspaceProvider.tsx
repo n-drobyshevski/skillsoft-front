@@ -2,26 +2,33 @@
 
 import React, {
   createContext,
+  use,
   useContext,
-  useState,
   useCallback,
   useEffect,
   useRef,
+  Suspense,
   type ReactNode,
 } from 'react';
 import { toast } from 'sonner';
 import { useAutoSave, type SaveStatus } from '@/hooks/useAutoSave';
+import { useMultiTabSync } from '@/hooks/useMultiTabSync';
 import {
   BlueprintState,
   BlueprintCompetency,
   LibraryCompetency,
   SimulationResult,
-  HealthStatus,
   updateBlueprint,
   simulateTest,
   fetchInventoryHealth,
   SimulationProfile,
 } from '../actions';
+import { ConflictResolutionDialog } from './ConflictResolutionDialog';
+
+// Zustand stores (STATE-1)
+import { useBlueprintStore } from '@/store/blueprint-store';
+import { useSimulationStore } from '@/store/simulation-store';
+import { useSaveStatusStore } from '@/store/save-status-store';
 
 // ============================================
 // TYPES
@@ -66,11 +73,21 @@ interface BlueprintWorkspaceContextValue {
 }
 
 // ============================================
-// CONTEXT
+// CONTEXT (kept for backward compatibility)
 // ============================================
 
 const BlueprintWorkspaceContext = createContext<BlueprintWorkspaceContextValue | null>(null);
 
+/**
+ * Legacy compatibility hook - reads from context which delegates to Zustand stores.
+ *
+ * For new code, prefer using the individual store hooks directly:
+ * - useBlueprintStore() for blueprint state and mutations
+ * - useSimulationStore() for simulation state
+ * - useSaveStatusStore() for save status
+ *
+ * These provide better re-render optimization via selective subscriptions.
+ */
 export function useBlueprintWorkspace() {
   const ctx = useContext(BlueprintWorkspaceContext);
   if (!ctx) {
@@ -89,34 +106,94 @@ interface BlueprintWorkspaceProviderProps {
   children: ReactNode;
   initialState: BlueprintState;
   libraryCompetencies: LibraryCompetency[];
+  /** R19-1: Streamed competencies promise from server component */
+  competenciesPromise?: Promise<import('@/types/domain').Competency[]>;
   templateId: string;
   templateName: string;
   isReadOnly?: boolean;
 }
 
+/**
+ * BlueprintWorkspaceProvider
+ *
+ * Initializes the Zustand stores (BlueprintStore, SimulationStore, SaveStatusStore)
+ * from server props and wires up the auto-save hook. Provides a context wrapper
+ * for backward compatibility with existing consumer components.
+ *
+ * STATE-1 Migration:
+ * - Stores own the canonical state; context delegates to stores.
+ * - Auto-save hook reads from BlueprintStore and syncs status to SaveStatusStore.
+ * - Consumers can gradually migrate from useBlueprintWorkspace() to individual store hooks.
+ */
 export function BlueprintWorkspaceProvider({
   children,
   initialState,
   libraryCompetencies: initialLibrary,
+  competenciesPromise,
   templateId,
   templateName,
   isReadOnly = false,
 }: BlueprintWorkspaceProviderProps) {
-  const [isSimulating, setIsSimulating] = useState(false);
-  const [simulationResult, setSimulationResult] = useState<SimulationResult | null>(null);
+  // ============================================
+  // STORE INITIALIZATION
+  // ============================================
 
-  // Local state - updates trigger auto-save
-  const [localState, setLocalState] = useState(initialState);
+  const blueprintInitialize = useBlueprintStore((s) => s.initialize);
+  const initRef = useRef(false);
 
-  // Server-confirmed state for rollback on error
-  const [serverState, setServerState] = useState(initialState);
+  // Initialize blueprint store on mount (once per provider instance)
+  useEffect(() => {
+    if (!initRef.current) {
+      blueprintInitialize({
+        initialState,
+        libraryCompetencies: initialLibrary,
+        templateId,
+        templateName,
+        isReadOnly,
+      });
+      initRef.current = true;
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // ============================================
+  // READ FROM STORES
+  // ============================================
+
+  // Blueprint store state
+  const localState = useBlueprintStore((s) => s.state);
+  const serverState = useBlueprintStore((s) => s.serverState);
+  const libraryCompetencies = useBlueprintStore((s) => s.libraryCompetencies);
+
+  // Blueprint store actions (stable references from Zustand)
+  const storeAddCompetency = useBlueprintStore((s) => s.addCompetency);
+  const storeInsertCompetencyAtIndex = useBlueprintStore((s) => s.insertCompetencyAtIndex);
+  const storeRemoveCompetency = useBlueprintStore((s) => s.removeCompetency);
+  const storeReorderCompetencies = useBlueprintStore((s) => s.reorderCompetencies);
+  const storeUpdateCompetency = useBlueprintStore((s) => s.updateCompetency);
+  const storeSetCompetencies = useBlueprintStore((s) => s.setCompetencies);
+  const storeUpdateSettings = useBlueprintStore((s) => s.updateSettings);
+  const storeSetServerState = useBlueprintStore((s) => s.setServerState);
+  const storeRollback = useBlueprintStore((s) => s.rollbackToServerState);
+  const storeUpdateLibraryHealth = useBlueprintStore((s) => s.updateLibraryHealth);
+
+  // Simulation store state and actions
+  const isSimulating = useSimulationStore((s) => s.isSimulating);
+  const simulationResult = useSimulationStore((s) => s.simulationResult);
+  const storeSetSimulating = useSimulationStore((s) => s.setSimulating);
+  const storeSetSimulationResult = useSimulationStore((s) => s.setSimulationResult);
+
+  // Save status store sync
+  const syncSaveStatus = useSaveStatusStore((s) => s.syncFromAutoSave);
+
+  // ============================================
+  // AUTO-SAVE INTEGRATION
+  // ============================================
+
+  // Keep a ref to serverState for the onError rollback closure
   const serverStateRef = useRef(serverState);
   serverStateRef.current = serverState;
 
-  // Library with health status (updated from inventory)
-  const [libraryCompetencies, setLibraryCompetencies] = useState(initialLibrary);
-
-  // Auto-save with debounce and retry
   const {
     status: saveStatus,
     lastSaved,
@@ -130,20 +207,19 @@ export function BlueprintWorkspaceProvider({
     onSave: async (state) => {
       const result = await updateBlueprint(state);
       if (result.success) {
-        setServerState(result.data);
+        storeSetServerState(result.data);
         return true;
       }
-      // Don't toast on each retry - only final failure
       return false;
     },
     onError: (error) => {
       // Rollback to last server-confirmed state after all retries exhausted
-      setLocalState(serverStateRef.current);
+      storeRollback();
       const message = error instanceof Error ? error.message : 'Failed to save';
       toast.error(`${message} — changes reverted`);
     },
-    debounceMs: 2000,  // Wait 2s after last change
-    maxWaitMs: 10000,  // Force save every 10s max
+    debounceMs: 2000,
+    maxWaitMs: 10000,
     enabled: !isReadOnly,
     compareKey: (s) => JSON.stringify({ competencies: s.competencies, settings: s }),
     retry: {
@@ -155,190 +231,105 @@ export function BlueprintWorkspaceProvider({
     warnOnLeave: true,
   });
 
-  // Fetch inventory health on mount
+  // Sync auto-save hook state into SaveStatusStore on every change
+  useEffect(() => {
+    syncSaveStatus({
+      status: saveStatus,
+      lastSaved,
+      hasUnsavedChanges,
+      isSaving,
+      retryAttempt,
+      isOffline,
+    });
+  }, [saveStatus, lastSaved, hasUnsavedChanges, isSaving, retryAttempt, isOffline, syncSaveStatus]);
+
+  // ============================================
+  // ARCH-2: MULTI-TAB SYNC + CONFLICT RESOLUTION
+  // ============================================
+
+  const {
+    hasConflict,
+    conflictInfo,
+    broadcastState: syncBroadcast,
+    resolveConflict: syncResolve,
+    clearConflict: syncClear,
+  } = useMultiTabSync<BlueprintCompetency[]>({
+    channelName: templateId,
+    enabled: !isReadOnly,
+    onRemoteUpdate: (remoteCompetencies) => {
+      // When another tab updates without conflict, silently apply
+      storeSetCompetencies(remoteCompetencies);
+    },
+  });
+
+  // Broadcast competencies to other tabs after every successful save
+  const prevSaveStatusRef = useRef(saveStatus);
+  useEffect(() => {
+    if (prevSaveStatusRef.current === 'saving' && saveStatus === 'saved') {
+      syncBroadcast(localState.competencies);
+    }
+    prevSaveStatusRef.current = saveStatus;
+  }, [saveStatus, localState.competencies, syncBroadcast]);
+
+  // Handle conflict resolution from the dialog
+  const handleConflictResolve = useCallback(
+    (resolution: 'keep_local' | 'use_remote' | 'merge') => {
+      const resolved = syncResolve(resolution);
+      if (resolved) {
+        storeSetCompetencies(resolved);
+        toast.success(
+          resolution === 'merge'
+            ? 'Changes merged from both tabs'
+            : resolution === 'keep_local'
+              ? 'Kept your changes'
+              : 'Applied changes from other tab'
+        );
+      }
+    },
+    [syncResolve, storeSetCompetencies]
+  );
+
+  // ============================================
+  // FETCH INVENTORY HEALTH ON MOUNT
+  // ============================================
+
   useEffect(() => {
     async function loadHealth() {
       const result = await fetchInventoryHealth();
       if (result.success) {
-        setLibraryCompetencies((prev) =>
-          prev.map((c) => ({
-            ...c,
-            health: (result.data.competencyHealth[c.id] || 'HEALTHY') as HealthStatus,
-          }))
-        );
+        storeUpdateLibraryHealth(result.data.competencyHealth);
       }
     }
     loadHealth();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Add competency from library to canvas (appends to end)
-  const addCompetency = useCallback(
-    (competency: LibraryCompetency) => {
-      // Check if already added
-      if (localState.competencies.some((c) => c.id === competency.id)) {
-        toast.warning('Competency already added');
-        return;
-      }
+  // ============================================
+  // WRAPPED ACTIONS (bridge store actions to context API)
+  // ============================================
 
-      // Check if critical health (no questions)
-      if (competency.health === 'CRITICAL') {
-        toast.error(`${competency.name} has no questions available`);
-        return;
-      }
-
-      const blueprintCompetency: BlueprintCompetency = {
-        id: competency.id,
-        name: competency.name,
-        category: competency.category,
-        questionCount: Math.min(competency.questionCount, 5),
-        weight: 1.0,
-        difficulty: 'INTERMEDIATE',
-      };
-
-      // Update local state (triggers auto-save)
-      setLocalState((prev) => ({
-        ...prev,
-        competencies: [...prev.competencies, blueprintCompetency],
-      }));
-
-      toast.success(`Added ${competency.name}`);
-    },
-    [localState.competencies]
-  );
-
-  // Insert competency at specific index (used by drag-and-drop)
-  const insertCompetencyAtIndex = useCallback(
-    (competency: LibraryCompetency, index: number) => {
-      // Check if already added
-      if (localState.competencies.some((c) => c.id === competency.id)) {
-        toast.warning('Competency already added');
-        return;
-      }
-
-      // Check if critical health (no questions)
-      if (competency.health === 'CRITICAL') {
-        toast.error(`${competency.name} has no questions available`);
-        return;
-      }
-
-      const blueprintCompetency: BlueprintCompetency = {
-        id: competency.id,
-        name: competency.name,
-        category: competency.category,
-        questionCount: Math.min(competency.questionCount, 5),
-        weight: 1.0,
-        difficulty: 'INTERMEDIATE',
-      };
-
-      // Update local state with insertion at specific index
-      setLocalState((prev) => {
-        const newCompetencies = [...prev.competencies];
-        // Clamp index to valid range
-        const safeIndex = Math.max(0, Math.min(index, newCompetencies.length));
-        newCompetencies.splice(safeIndex, 0, blueprintCompetency);
-        return { ...prev, competencies: newCompetencies };
-      });
-
-      toast.success(`Added ${competency.name}`);
-    },
-    [localState.competencies]
-  );
-
-  // Remove competency from canvas (auto-saved) with undo capability
-  const removeCompetency = useCallback(
-    (competencyId: string) => {
-      const competencyIndex = localState.competencies.findIndex(
-        (c) => c.id === competencyId
-      );
-      const competency = localState.competencies[competencyIndex];
-
-      if (!competency) return;
-
-      // Store the competency and its position for potential undo
-      const removedCompetency = { ...competency };
-      const originalPosition = competencyIndex;
-
-      // Update local state (triggers auto-save)
-      setLocalState((prev) => ({
-        ...prev,
-        competencies: prev.competencies.filter((c) => c.id !== competencyId),
-      }));
-
-      // Show toast with undo action
-      toast.success(`Removed ${competency.name}`, {
-        action: {
-          label: 'Undo',
-          onClick: () => {
-            // Restore the competency at its original position
-            setLocalState((prev) => {
-              const newCompetencies = [...prev.competencies];
-              // Insert at original position, or at end if position is now invalid
-              const insertIndex = Math.min(originalPosition, newCompetencies.length);
-              newCompetencies.splice(insertIndex, 0, removedCompetency);
-              return { ...prev, competencies: newCompetencies };
-            });
-            toast.success(`Restored ${removedCompetency.name}`);
-          },
-        },
-        duration: 5000, // Give user 5 seconds to undo
-      });
-    },
-    [localState.competencies]
-  );
-
-  // Reorder competencies via drag-drop (auto-saved)
-  const reorderCompetencies = (fromIndex: number, toIndex: number) => {
-    if (fromIndex === toIndex) return;
-
-    setLocalState((prev) => {
-      const newCompetencies = [...prev.competencies];
-      const [moved] = newCompetencies.splice(fromIndex, 1);
-      newCompetencies.splice(toIndex, 0, moved);
-      return { ...prev, competencies: newCompetencies };
-    });
-  };
-
-  // Update single competency properties (auto-saved)
-  const updateCompetency = (competencyId: string, updates: Partial<BlueprintCompetency>) => {
-    setLocalState((prev) => ({
-      ...prev,
-      competencies: prev.competencies.map((c) =>
-        c.id === competencyId ? { ...c, ...updates } : c
-      ),
-    }));
-  };
-
-  // Replace full competency list - used for undo/redo (auto-saved)
-  const setCompetencies = (competencies: BlueprintCompetency[]) => {
-    setLocalState((prev) => ({ ...prev, competencies }));
-  };
-
-  // Update blueprint settings - strategy, time limit, etc. (auto-saved)
-  const updateSettings = (settings: Partial<BlueprintState>) => {
-    setLocalState((prev) => ({ ...prev, ...settings }));
-  };
-
-  // Run simulation with persona
+  // runSimulation: orchestrates simulateTest server action + store updates
   const runSimulation = useCallback(
     async (profile: SimulationProfile) => {
-      setIsSimulating(true);
+      storeSetSimulating(true);
       try {
-        const result = await simulateTest(localState, profile);
+        const currentState = useBlueprintStore.getState().state;
+        const result = await simulateTest(currentState, profile);
         if (result.success) {
-          setSimulationResult(result.data);
+          storeSetSimulationResult(result.data);
         } else {
           toast.error(result.error);
+          storeSetSimulating(false);
         }
       } catch {
         toast.error('Simulation failed');
-      } finally {
-        setIsSimulating(false);
+        storeSetSimulating(false);
       }
     },
-    [localState]
+    [storeSetSimulating, storeSetSimulationResult]
   );
 
-  // Manual save (for explicit save button - uses the auto-save hook)
+  // Manual save (explicit save button)
   const saveBlueprint = useCallback(async () => {
     const success = await saveNow();
     if (success) {
@@ -347,11 +338,15 @@ export function BlueprintWorkspaceProvider({
     return success;
   }, [saveNow]);
 
-  // Derive isPending from save status (for UI disabled states)
+  // Derive isPending from save status
   const isPending = saveStatus === 'saving';
 
+  // ============================================
+  // CONTEXT VALUE (delegates to stores)
+  // ============================================
+
   const value: BlueprintWorkspaceContextValue = {
-    // State
+    // State (from BlueprintStore)
     state: localState,
     serverState,
     libraryCompetencies,
@@ -369,21 +364,75 @@ export function BlueprintWorkspaceProvider({
     hasUnsavedChanges,
     retryAttempt,
     isOffline,
-    // Actions
-    addCompetency,
-    insertCompetencyAtIndex,
-    removeCompetency,
-    reorderCompetencies,
-    updateCompetency,
-    setCompetencies,
-    updateSettings,
+    // Actions (delegated to stores)
+    addCompetency: storeAddCompetency,
+    insertCompetencyAtIndex: storeInsertCompetencyAtIndex,
+    removeCompetency: storeRemoveCompetency,
+    reorderCompetencies: storeReorderCompetencies,
+    updateCompetency: storeUpdateCompetency,
+    setCompetencies: storeSetCompetencies,
+    updateSettings: storeUpdateSettings,
     runSimulation,
     saveBlueprint,
   };
 
   return (
     <BlueprintWorkspaceContext.Provider value={value}>
+      {/* R19-1: Stream competencies via Suspense + use() */}
+      {competenciesPromise && (
+        <Suspense fallback={null}>
+          <CompetencyResolver competenciesPromise={competenciesPromise} />
+        </Suspense>
+      )}
       {children}
+      {/* ARCH-2: Multi-tab conflict resolution dialog */}
+      <ConflictResolutionDialog
+        open={hasConflict}
+        conflict={conflictInfo}
+        onResolve={handleConflictResolve}
+        onDismiss={syncClear}
+      />
     </BlueprintWorkspaceContext.Provider>
   );
+}
+
+// ============================================
+// R19-1: STREAMING COMPETENCY RESOLVER
+// ============================================
+
+/**
+ * Invisible component that resolves the competencies promise via React 19 use().
+ * Suspends until competencies are available, then hydrates the Zustand store
+ * with library data and enriches canvas competency names.
+ */
+function CompetencyResolver({
+  competenciesPromise,
+}: {
+  competenciesPromise: Promise<import('@/types/domain').Competency[]>;
+}) {
+  const competencies = use(competenciesPromise);
+  const setLibrary = useBlueprintStore((s) => s.setLibraryCompetencies);
+  const hasHydrated = useRef(false);
+
+  useEffect(() => {
+    if (hasHydrated.current) return;
+    hasHydrated.current = true;
+
+    const library: LibraryCompetency[] = competencies.map((c) => ({
+      id: c.id,
+      name: c.name,
+      category: c.category,
+      description: c.description || '',
+      questionCount:
+        c.behavioralIndicators?.reduce(
+          (sum, bi) => sum + (bi.isActive ? 1 : 0),
+          0
+        ) || 0,
+      health: 'HEALTHY' as const,
+    }));
+
+    setLibrary(library);
+  }, [competencies, setLibrary]);
+
+  return null;
 }
