@@ -1,18 +1,14 @@
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
+/**
+ * Hook for fetching and managing a user's Competency Passport.
+ *
+ * Migrated from React Query to simple useState + useEffect pattern.
+ */
+
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { passportApi } from '@/services/api';
 import type { CompetencyPassport } from '@/types/domain';
-
-// ============================================================================
-// Query Keys
-// ============================================================================
-
-export const passportKeys = {
-  all: ['passport'] as const,
-  byUser: (clerkUserId: string) => [...passportKeys.all, 'user', clerkUserId] as const,
-  validity: (clerkUserId: string) => [...passportKeys.all, 'validity', clerkUserId] as const,
-};
 
 // ============================================================================
 // Types
@@ -21,8 +17,6 @@ export const passportKeys = {
 export interface UsePassportOptions {
   /** Whether to enable the query */
   enabled?: boolean;
-  /** Stale time in milliseconds (default: 5 minutes) */
-  staleTime?: number;
 }
 
 export interface UsePassportReturn {
@@ -61,7 +55,6 @@ export interface DeltaAnalysis {
 // Constants
 // ============================================================================
 
-const DEFAULT_STALE_TIME = 5 * 60 * 1000; // 5 minutes
 const AVG_QUESTIONS_PER_COMPETENCY = 5;
 const AVG_TIME_PER_QUESTION = 1.5; // minutes
 
@@ -80,24 +73,62 @@ export function usePassport(
   clerkUserId: string | undefined | null,
   options: UsePassportOptions = {}
 ): UsePassportReturn {
-  const { enabled = true, staleTime = DEFAULT_STALE_TIME } = options;
+  const { enabled = true } = options;
+  const shouldFetch = enabled && !!clerkUserId;
 
-  const query = useQuery({
-    queryKey: passportKeys.byUser(clerkUserId ?? ''),
-    queryFn: () => passportApi.getPassport(clerkUserId!),
-    enabled: enabled && !!clerkUserId,
-    staleTime,
-  });
+  const [passport, setPassport] = useState<CompetencyPassport | null>(null);
+  const [isLoading, setIsLoading] = useState(shouldFetch);
+  const [isError, setIsError] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
 
-  const passport = query.data ?? null;
+  const clerkUserIdRef = useRef(clerkUserId);
+  clerkUserIdRef.current = clerkUserId;
+  const mountedRef = useRef(true);
+
+  const doFetch = useCallback(() => {
+    const id = clerkUserIdRef.current;
+    if (!id || !mountedRef.current) return;
+
+    setIsLoading(true);
+    setIsError(false);
+    setError(null);
+
+    passportApi
+      .getPassport(id)
+      .then((data) => {
+        if (!mountedRef.current) return;
+        setPassport(data);
+        setIsLoading(false);
+      })
+      .catch((err: unknown) => {
+        if (!mountedRef.current) return;
+        setIsError(true);
+        setError(err instanceof Error ? err : new Error(String(err)));
+        setIsLoading(false);
+      });
+  }, []);
+
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => { mountedRef.current = false; };
+  }, []);
+
+  useEffect(() => {
+    if (shouldFetch) {
+      doFetch();
+    } else {
+      setIsLoading(false);
+    }
+  }, [shouldFetch, doFetch]);
+
   const competencyCount = passport?.scores ? Object.keys(passport.scores).length : 0;
 
   return {
     passport,
-    isLoading: query.isLoading,
-    isError: query.isError,
-    error: query.error,
-    refetch: query.refetch,
+    isLoading,
+    isError,
+    error,
+    refetch: doFetch,
     isValid: passport?.isValid ?? false,
     competencyCount,
   };
@@ -115,19 +146,40 @@ export function usePassportValidity(
   clerkUserId: string | undefined | null,
   options: UsePassportOptions = {}
 ): { isValid: boolean; isLoading: boolean } {
-  const { enabled = true, staleTime = DEFAULT_STALE_TIME } = options;
+  const { enabled = true } = options;
+  const shouldFetch = enabled && !!clerkUserId;
 
-  const query = useQuery({
-    queryKey: passportKeys.validity(clerkUserId ?? ''),
-    queryFn: () => passportApi.hasValidPassport(clerkUserId!),
-    enabled: enabled && !!clerkUserId,
-    staleTime,
-  });
+  const [isValid, setIsValid] = useState(false);
+  const [isLoading, setIsLoading] = useState(shouldFetch);
 
-  return {
-    isValid: query.data ?? false,
-    isLoading: query.isLoading,
-  };
+  useEffect(() => {
+    if (!shouldFetch || !clerkUserId) {
+      setIsLoading(false);
+      return;
+    }
+
+    let cancelled = false;
+    setIsLoading(true);
+
+    passportApi
+      .hasValidPassport(clerkUserId)
+      .then((valid) => {
+        if (!cancelled) {
+          setIsValid(valid);
+          setIsLoading(false);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setIsValid(false);
+          setIsLoading(false);
+        }
+      });
+
+    return () => { cancelled = true; };
+  }, [shouldFetch, clerkUserId]);
+
+  return { isValid, isLoading };
 }
 
 // ============================================================================

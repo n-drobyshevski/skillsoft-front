@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { useFormContext } from 'react-hook-form';
 import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -73,17 +73,13 @@ export function OverviewConfigPanel({
   const t = useTranslations('help.scenario.overview');
 
   // Calculate estimated questions and time
-  const estimatedQuestions = useMemo(() => {
-    const questionsPerIndicator = form.watch('questionsPerIndicator') || 2;
-    // Assume ~3 indicators per competency on average
-    const avgIndicators = 3;
-    return selectedCompetencyCount * avgIndicators * questionsPerIndicator;
-  }, [selectedCompetencyCount, form]);
+  const questionsPerIndicator = form.watch('questionsPerIndicator') || 2;
+  // Assume ~3 indicators per competency on average
+  const avgIndicators = 3;
+  const estimatedQuestions = selectedCompetencyCount * avgIndicators * questionsPerIndicator;
 
-  const estimatedTime = useMemo(() => {
-    // ~30 seconds per question on average
-    return Math.ceil(estimatedQuestions * 0.5);
-  }, [estimatedQuestions]);
+  // ~30 seconds per question on average
+  const estimatedTime = Math.ceil(estimatedQuestions * 0.5);
 
   const includeBigFive = form.watch('includeBigFive');
 

@@ -7,7 +7,6 @@
  * Part of UX Navigation Redesign - See docs/UX_STRATEGY.md
  */
 
-import { useMemo } from "react";
 import { useLensStore, LensType } from "@/store/lens-store";
 import {
   NavigationGroup,
@@ -90,14 +89,11 @@ export function useNavigation(): UseNavigationReturn {
 
   const isReady = isHydrated && isInitialized;
 
-  const filteredGroups = useMemo(() => {
-    if (!isReady) return [];
-    return filterGroupsByLens(NAVIGATION_CONFIG.groups, activeLens);
-  }, [activeLens, isReady]);
+  const filteredGroups = isReady
+    ? filterGroupsByLens(NAVIGATION_CONFIG.groups, activeLens)
+    : [];
 
-  const footer = useMemo(() => {
-    return NAVIGATION_CONFIG.footer ?? [];
-  }, []);
+  const footer = NAVIGATION_CONFIG.footer ?? [];
 
   return {
     groups: filteredGroups,

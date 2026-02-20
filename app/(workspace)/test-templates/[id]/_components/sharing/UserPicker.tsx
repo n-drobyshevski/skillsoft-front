@@ -1,7 +1,6 @@
 'use client';
 
 import * as React from 'react';
-import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@clerk/nextjs';
 import { Check, ChevronsUpDown, Search, User as UserIcon, Loader2 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
@@ -130,38 +129,58 @@ export function UserPicker({
     hasUsers: hasSuggested,
   } = useSuggestedUsers(excludeEmails, 3);
 
-  // Search users query - using client-side auth
-  const {
-    data: users = [],
-    isLoading,
-    isFetching,
-  } = useQuery({
-    queryKey: ['users', 'search', debouncedQuery],
-    queryFn: async () => {
-      if (!authHeaders) return [];
+  // Search users - using client-side auth with useState + useEffect
+  const [users, setUsers] = React.useState<User[]>([]);
+  const [isLoading, setIsLoading] = React.useState(false);
+  const [isFetching, setIsFetching] = React.useState(false);
 
-      const response = await fetch(
-        `${getApiBaseUrl()}/users/search?query=${encodeURIComponent(debouncedQuery)}`,
-        {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            ...authHeaders,
-          },
-          mode: 'cors',
-          credentials: 'include',
+  React.useEffect(() => {
+    if (!isSignedIn || !authHeaders || debouncedQuery.length < 2) {
+      setUsers([]);
+      return;
+    }
+
+    let cancelled = false;
+    setIsFetching(true);
+    setIsLoading(users.length === 0);
+
+    (async () => {
+      try {
+        const response = await fetch(
+          `${getApiBaseUrl()}/users/search?query=${encodeURIComponent(debouncedQuery)}`,
+          {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              ...authHeaders,
+            },
+            mode: 'cors',
+            credentials: 'include',
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error(`Failed to search users: ${response.status}`);
         }
-      );
 
-      if (!response.ok) {
-        throw new Error(`Failed to search users: ${response.status}`);
+        const result = (await response.json()) as User[];
+        if (!cancelled) {
+          setUsers(result);
+        }
+      } catch {
+        if (!cancelled) {
+          setUsers([]);
+        }
+      } finally {
+        if (!cancelled) {
+          setIsLoading(false);
+          setIsFetching(false);
+        }
       }
+    })();
 
-      return response.json() as Promise<User[]>;
-    },
-    enabled: isSignedIn && !!authHeaders && debouncedQuery.length >= 2,
-    staleTime: 30000, // 30 seconds
-  });
+    return () => { cancelled = true; };
+  }, [isSignedIn, authHeaders, debouncedQuery]);
 
   // Filter out excluded users (by email or username) and current user
   const filteredUsers = React.useMemo(() => {
@@ -407,15 +426,32 @@ export function UserSearchInput({
   const debouncedQuery = useDebounce(searchQuery, 300);
   const containerRef = React.useRef<HTMLDivElement>(null);
 
-  const {
-    data: users = [],
-    isLoading,
-  } = useQuery({
-    queryKey: ['users', 'search', debouncedQuery],
-    queryFn: () => usersApi.searchUsers(debouncedQuery),
-    enabled: debouncedQuery.length >= 2,
-    staleTime: 30000,
-  });
+  const [users, setSearchUsers] = React.useState<User[]>([]);
+  const [isLoading, setSearchLoading] = React.useState(false);
+
+  React.useEffect(() => {
+    if (debouncedQuery.length < 2) {
+      setSearchUsers([]);
+      return;
+    }
+
+    let cancelled = false;
+    setSearchLoading(true);
+
+    usersApi
+      .searchUsers(debouncedQuery)
+      .then((result) => {
+        if (!cancelled) setSearchUsers(result);
+      })
+      .catch(() => {
+        if (!cancelled) setSearchUsers([]);
+      })
+      .finally(() => {
+        if (!cancelled) setSearchLoading(false);
+      });
+
+    return () => { cancelled = true; };
+  }, [debouncedQuery]);
 
   // Filter out excluded emails
   const filteredUsers = React.useMemo(() => {

@@ -14,7 +14,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { NextIntlClientProvider } from 'next-intl';
 import messages from '../../../../messages/en/index';
 import {
@@ -115,23 +114,11 @@ vi.mock('sonner', () => ({
   },
 }));
 
-function createQueryClient() {
-  return new QueryClient({
-    defaultOptions: {
-      queries: { retry: false },
-      mutations: { retry: false },
-    },
-  });
-}
-
-function renderWithQuery(ui: React.ReactElement) {
-  const queryClient = createQueryClient();
+function renderWithProviders(ui: React.ReactElement) {
   return render(
-    <QueryClientProvider client={queryClient}>
-      <NextIntlClientProvider locale="en" messages={messages}>
-        {ui}
-      </NextIntlClientProvider>
-    </QueryClientProvider>
+    <NextIntlClientProvider locale="en" messages={messages}>
+      {ui}
+    </NextIntlClientProvider>
   );
 }
 
@@ -142,7 +129,7 @@ describe('ShareDialog', () => {
   });
 
   it('renders default trigger button', () => {
-    renderWithQuery(
+    renderWithProviders(
       <ShareDialog
         templateId="template-1"
         templateName="Test Template"
@@ -154,7 +141,7 @@ describe('ShareDialog', () => {
   });
 
   it('renders custom trigger when provided', () => {
-    renderWithQuery(
+    renderWithProviders(
       <ShareDialog
         templateId="template-1"
         templateName="Test Template"
@@ -168,7 +155,7 @@ describe('ShareDialog', () => {
   });
 
   it('opens dialog when trigger is clicked', async () => {
-    renderWithQuery(
+    renderWithProviders(
       <ShareDialog
         templateId="template-1"
         templateName="Test Template"
@@ -185,7 +172,7 @@ describe('ShareDialog', () => {
   });
 
   it('shows template name in dialog title', async () => {
-    renderWithQuery(
+    renderWithProviders(
       <ShareDialog
         templateId="template-1"
         templateName="My Test Template"
@@ -201,7 +188,7 @@ describe('ShareDialog', () => {
   });
 
   it('shows dialog description', async () => {
-    renderWithQuery(
+    renderWithProviders(
       <ShareDialog
         templateId="template-1"
         templateName="Test Template"
@@ -219,7 +206,7 @@ describe('ShareDialog', () => {
   });
 
   it('shows visibility section header', async () => {
-    renderWithQuery(
+    renderWithProviders(
       <ShareDialog
         templateId="template-1"
         templateName="Test Template"
@@ -235,7 +222,7 @@ describe('ShareDialog', () => {
   });
 
   it('renders VisibilitySelector component', async () => {
-    renderWithQuery(
+    renderWithProviders(
       <ShareDialog
         templateId="template-1"
         templateName="Test Template"
@@ -251,7 +238,7 @@ describe('ShareDialog', () => {
   });
 
   it('shows People and Links tabs', async () => {
-    renderWithQuery(
+    renderWithProviders(
       <ShareDialog
         templateId="template-1"
         templateName="Test Template"
@@ -268,7 +255,7 @@ describe('ShareDialog', () => {
   });
 
   it('People tab is active by default', async () => {
-    renderWithQuery(
+    renderWithProviders(
       <ShareDialog
         templateId="template-1"
         templateName="Test Template"
@@ -285,7 +272,7 @@ describe('ShareDialog', () => {
   });
 
   it('shows UserShareList in People tab', async () => {
-    renderWithQuery(
+    renderWithProviders(
       <ShareDialog
         templateId="template-1"
         templateName="Test Template"
@@ -303,7 +290,7 @@ describe('ShareDialog', () => {
   it('switches to Links tab when clicked', async () => {
     const user = userEvent.setup();
 
-    renderWithQuery(
+    renderWithProviders(
       <ShareDialog
         templateId="template-1"
         templateName="Test Template"
@@ -328,7 +315,7 @@ describe('ShareDialog', () => {
   it('shows ShareLinkManager in Links tab', async () => {
     const user = userEvent.setup();
 
-    renderWithQuery(
+    renderWithProviders(
       <ShareDialog
         templateId="template-1"
         templateName="Test Template"
@@ -350,7 +337,7 @@ describe('ShareDialog', () => {
   });
 
   it('shows add user form when isOwner is true', async () => {
-    renderWithQuery(
+    renderWithProviders(
       <ShareDialog
         templateId="template-1"
         templateName="Test Template"
@@ -369,7 +356,7 @@ describe('ShareDialog', () => {
   });
 
   it('shows add user form when canManage is true', async () => {
-    renderWithQuery(
+    renderWithProviders(
       <ShareDialog
         templateId="template-1"
         templateName="Test Template"
@@ -388,7 +375,7 @@ describe('ShareDialog', () => {
   });
 
   it('hides add user form when user cannot edit', async () => {
-    renderWithQuery(
+    renderWithProviders(
       <ShareDialog
         templateId="template-1"
         templateName="Test Template"
@@ -409,7 +396,7 @@ describe('ShareDialog', () => {
   });
 
   it('shows Add button in the form when user can edit', async () => {
-    renderWithQuery(
+    renderWithProviders(
       <ShareDialog
         templateId="template-1"
         templateName="Test Template"
@@ -425,7 +412,7 @@ describe('ShareDialog', () => {
   });
 
   it('shows permission select in add user form', async () => {
-    renderWithQuery(
+    renderWithProviders(
       <ShareDialog
         templateId="template-1"
         templateName="Test Template"
@@ -443,7 +430,7 @@ describe('ShareDialog', () => {
   it('does not submit form with invalid email', async () => {
     const user = userEvent.setup();
 
-    renderWithQuery(
+    renderWithProviders(
       <ShareDialog
         templateId="template-1"
         templateName="Test Template"
@@ -478,7 +465,7 @@ describe('ShareDialog', () => {
   it('submits form with valid email', async () => {
     const user = userEvent.setup();
 
-    renderWithQuery(
+    renderWithProviders(
       <ShareDialog
         templateId="template-1"
         templateName="Test Template"
@@ -513,7 +500,7 @@ describe('ShareDialog', () => {
   });
 
   it('passes canManage prop to child components', async () => {
-    renderWithQuery(
+    renderWithProviders(
       <ShareDialog
         templateId="template-1"
         templateName="Test Template"
@@ -534,7 +521,7 @@ describe('ShareDialog', () => {
 
 describe('ShareButton', () => {
   it('renders share button with icon', () => {
-    renderWithQuery(
+    renderWithProviders(
       <ShareButton
         templateId="template-1"
         templateName="Test Template"
@@ -551,7 +538,7 @@ describe('ShareButton', () => {
   });
 
   it('applies outline variant by default', () => {
-    renderWithQuery(
+    renderWithProviders(
       <ShareButton
         templateId="template-1"
         templateName="Test Template"
@@ -565,7 +552,7 @@ describe('ShareButton', () => {
   });
 
   it('applies custom variant', () => {
-    renderWithQuery(
+    renderWithProviders(
       <ShareButton
         templateId="template-1"
         templateName="Test Template"
@@ -580,7 +567,7 @@ describe('ShareButton', () => {
   });
 
   it('applies small size by default', () => {
-    renderWithQuery(
+    renderWithProviders(
       <ShareButton
         templateId="template-1"
         templateName="Test Template"
@@ -594,7 +581,7 @@ describe('ShareButton', () => {
   });
 
   it('applies custom size', () => {
-    renderWithQuery(
+    renderWithProviders(
       <ShareButton
         templateId="template-1"
         templateName="Test Template"
@@ -609,7 +596,7 @@ describe('ShareButton', () => {
   });
 
   it('applies custom className', () => {
-    renderWithQuery(
+    renderWithProviders(
       <ShareButton
         templateId="template-1"
         templateName="Test Template"
@@ -623,7 +610,7 @@ describe('ShareButton', () => {
   });
 
   it('opens ShareDialog when clicked', async () => {
-    renderWithQuery(
+    renderWithProviders(
       <ShareButton
         templateId="template-1"
         templateName="Test Template"
@@ -639,7 +626,7 @@ describe('ShareButton', () => {
   });
 
   it('shows template name in opened dialog', async () => {
-    renderWithQuery(
+    renderWithProviders(
       <ShareButton
         templateId="template-1"
         templateName="Button Template"

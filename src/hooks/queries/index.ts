@@ -1,13 +1,14 @@
 /**
- * React Query Hooks
+ * Client-side Data Fetching Hooks
  *
- * Centralized exports for all query hooks used in client-side data fetching.
- * These hooks provide caching, refetching, and optimistic updates.
+ * Centralized exports for all data fetching hooks.
+ * These hooks use simple useState + useEffect patterns for client-side data loading.
+ * Server-side caching is handled by 'use cache' functions in api.cache.*.ts files.
  */
 
-// Psychometrics queries
+// Psychometrics hooks
 export {
-  // Query keys for external cache manipulation
+  // Key structure (for test compatibility)
   psychometricsKeys,
   // Dashboard
   usePsychometricsDashboard,
@@ -26,22 +27,21 @@ export {
   usePsychometricsBigFive,
   // Audit
   useTriggerAudit,
-  // Prefetching
+  // Prefetching (no-ops after React Query removal)
   prefetchPsychometricsDashboard,
   prefetchPsychometricsItems,
   prefetchPsychometricsItemDetail,
   prefetchPsychometricsCompetencyDetail,
 } from './usePsychometricsQuery';
 
-// Suggested Users queries
+// Suggested Users hook
 export {
-  suggestedUsersKeys,
   useSuggestedUsers,
 } from './useSuggestedUsers';
 
-// Template Sharing queries
+// Template Sharing hooks
 export {
-  // Query keys for external cache manipulation
+  // Key structure (for test compatibility)
   templateSharingKeys,
   // Visibility
   useTemplateVisibility,

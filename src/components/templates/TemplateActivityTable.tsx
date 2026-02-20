@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -116,7 +116,7 @@ export function TemplateActivityTable({
   // Compare selection state (TEAM_FIT only)
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
-  const handleCheckboxChange = useCallback((sessionId: string, checked: boolean) => {
+  const handleCheckboxChange = (sessionId: string, checked: boolean) => {
     setSelectedIds((prev) => {
       const next = new Set(prev);
       if (checked) {
@@ -130,17 +130,17 @@ export function TemplateActivityTable({
       }
       return next;
     });
-  }, [tCompare]);
+  };
 
-  const handleCompare = useCallback(() => {
+  const handleCompare = () => {
     const ids = Array.from(selectedIds).join(',');
     router.push(`/test-templates/compare?templateId=${templateId}&sessionIds=${ids}`);
-  }, [selectedIds, templateId, router]);
+  };
 
   const pageSize = 10;
 
   // Fetch data based on filters
-  const fetchData = useCallback(async () => {
+  const fetchData = async () => {
     setLoading(true);
     setError(null);
 
@@ -173,12 +173,13 @@ export function TemplateActivityTable({
     } finally {
       setLoading(false);
     }
-  }, [templateId, filters, t]);
+  };
 
   // Fetch on mount and filter changes
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     fetchData();
-  }, [fetchData]);
+  }, [templateId, filters]);
 
   return (
     <Card className={className}>
@@ -274,10 +275,7 @@ function GroupedActivityView({
   onCheckboxChange: (sessionId: string, checked: boolean) => void;
 }) {
   // Group activities by user, keeping only latest attempt per user
-  const groupedData = useMemo(
-    () => groupByLatestUserAttempt(data.content),
-    [data.content]
-  );
+  const groupedData = groupByLatestUserAttempt(data.content);
 
   return (
     <>

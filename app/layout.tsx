@@ -9,7 +9,6 @@ import { Analytics } from '@vercel/analytics/next';
 import { NextIntlClientProvider } from 'next-intl';
 import { getLocale, getMessages } from 'next-intl/server';
 import { LayoutProvider } from "@/components/layout/layout-provider";
-import { QueryProvider } from "@/components/providers/QueryProvider";
 import { Toaster } from "@/components/ui/sonner";
 import { shadcn } from '@clerk/themes';
 import { SkipLinks, MainContentAnchor } from "@/components/accessibility";
@@ -72,14 +71,12 @@ function AuthLoadingFallback() {
 async function LayoutContent({ children }: { children: React.ReactNode }) {
 	return (
 		<LayoutProvider>
-			<QueryProvider>
-				{/* Skip links for keyboard navigation (WCAG 2.4.1) */}
-				<SkipLinks />
-				{/* Main content anchor for skip link target */}
-				<MainContentAnchor />
-				{children}
-				<Toaster richColors />
-			</QueryProvider>
+			{/* Skip links for keyboard navigation (WCAG 2.4.1) */}
+			<SkipLinks />
+			{/* Main content anchor for skip link target */}
+			<MainContentAnchor />
+			{children}
+			<Toaster richColors />
 		</LayoutProvider>
 	);
 }
@@ -130,12 +127,10 @@ async function RootProviders({ children }: { children: React.ReactNode }) {
 		<NextIntlClientProvider messages={sharedMessages} locale={locale}>
 			<HtmlLangSetter locale={locale} />
 			<LayoutProvider>
-				<QueryProvider>
-					<SkipLinks />
-					<MainContentAnchor />
-					{children}
-					<Toaster richColors />
-				</QueryProvider>
+				<SkipLinks />
+				<MainContentAnchor />
+				{children}
+				<Toaster richColors />
 			</LayoutProvider>
 		</NextIntlClientProvider>
 	);

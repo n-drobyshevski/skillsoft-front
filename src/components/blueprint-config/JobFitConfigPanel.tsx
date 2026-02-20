@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useCallback } from 'react';
+import React, { useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -89,31 +89,25 @@ export function JobFitConfigPanel({
   const requiredCompetencyIds = onetProfile?.benchmarks.map((b) => b.competencyCode) || [];
 
   // Handle delta config change
-  const handleDeltaConfigChange = useCallback(
-    (config: DeltaConfig) => {
-      // Update form field with shouldDirty to enable save button
-      form.setValue('enableDeltaTesting', config.enabled, { shouldDirty: true });
-      form.setValue('candidateClerkUserId', candidateClerkUserId || '', { shouldDirty: true });
-      // Notify parent
-      onDeltaConfigChange?.(config);
-    },
-    [form, candidateClerkUserId, onDeltaConfigChange]
-  );
+  const handleDeltaConfigChange = (config: DeltaConfig) => {
+    // Update form field with shouldDirty to enable save button
+    form.setValue('enableDeltaTesting', config.enabled, { shouldDirty: true });
+    form.setValue('candidateClerkUserId', candidateClerkUserId || '', { shouldDirty: true });
+    // Notify parent
+    onDeltaConfigChange?.(config);
+  };
 
   // Handle O*NET selection
-  const handleONetChange = useCallback(
-    (socCode: string | undefined, profile?: ONetProfile) => {
-      form.setValue('onetSocCode', socCode || '', { shouldDirty: true });
-      if (profile) {
-        setOnetProfile(profile);
-        // Auto-expand benchmark preview when profile loads
-        setBenchmarkOpen(true);
-      } else {
-        setOnetProfile(null);
-      }
-    },
-    [form]
-  );
+  const handleONetChange = (socCode: string | undefined, profile?: ONetProfile) => {
+    form.setValue('onetSocCode', socCode || '', { shouldDirty: true });
+    if (profile) {
+      setOnetProfile(profile);
+      // Auto-expand benchmark preview when profile loads
+      setBenchmarkOpen(true);
+    } else {
+      setOnetProfile(null);
+    }
+  };
 
   const strictnessInfo = getStrictnessLabel(strictnessLevel);
 

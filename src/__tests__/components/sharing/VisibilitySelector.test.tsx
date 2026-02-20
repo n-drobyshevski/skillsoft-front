@@ -11,7 +11,6 @@
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { NextIntlClientProvider } from 'next-intl';
 import messages from '../../../../messages/en/index';
 import {
@@ -42,23 +41,11 @@ vi.mock('sonner', () => ({
   },
 }));
 
-function createQueryClient() {
-  return new QueryClient({
-    defaultOptions: {
-      queries: { retry: false },
-      mutations: { retry: false },
-    },
-  });
-}
-
-function renderWithQuery(ui: React.ReactElement) {
-  const queryClient = createQueryClient();
+function renderWithProviders(ui: React.ReactElement) {
   return render(
-    <QueryClientProvider client={queryClient}>
-      <NextIntlClientProvider locale="en" messages={messages}>
-        {ui}
-      </NextIntlClientProvider>
-    </QueryClientProvider>
+    <NextIntlClientProvider locale="en" messages={messages}>
+      {ui}
+    </NextIntlClientProvider>
   );
 }
 
@@ -69,7 +56,7 @@ describe('VisibilitySelector', () => {
   });
 
   it('renders all visibility options', () => {
-    renderWithQuery(
+    renderWithProviders(
       <VisibilitySelector
         templateId="template-1"
         currentVisibility={TemplateVisibility.PRIVATE}
@@ -83,7 +70,7 @@ describe('VisibilitySelector', () => {
   });
 
   it('shows description for each visibility option', () => {
-    renderWithQuery(
+    renderWithProviders(
       <VisibilitySelector
         templateId="template-1"
         currentVisibility={TemplateVisibility.PRIVATE}
@@ -103,7 +90,7 @@ describe('VisibilitySelector', () => {
   });
 
   it('shows checkmark on current visibility', () => {
-    const { container } = renderWithQuery(
+    const { container } = renderWithProviders(
       <VisibilitySelector
         templateId="template-1"
         currentVisibility={TemplateVisibility.PUBLIC}
@@ -122,7 +109,7 @@ describe('VisibilitySelector', () => {
   });
 
   it('shows active links count badge when LINK visibility has active links', () => {
-    renderWithQuery(
+    renderWithProviders(
       <VisibilitySelector
         templateId="template-1"
         currentVisibility={TemplateVisibility.LINK}
@@ -135,7 +122,7 @@ describe('VisibilitySelector', () => {
   });
 
   it('does not show active links badge when count is 0', () => {
-    renderWithQuery(
+    renderWithProviders(
       <VisibilitySelector
         templateId="template-1"
         currentVisibility={TemplateVisibility.LINK}
@@ -148,7 +135,7 @@ describe('VisibilitySelector', () => {
   });
 
   it('applies disabled styling when user cannot edit', () => {
-    const { container } = renderWithQuery(
+    const { container } = renderWithProviders(
       <VisibilitySelector
         templateId="template-1"
         currentVisibility={TemplateVisibility.PRIVATE}
@@ -166,7 +153,7 @@ describe('VisibilitySelector', () => {
   });
 
   it('allows editing when isOwner is true', () => {
-    const { container } = renderWithQuery(
+    const { container } = renderWithProviders(
       <VisibilitySelector
         templateId="template-1"
         currentVisibility={TemplateVisibility.PRIVATE}
@@ -183,7 +170,7 @@ describe('VisibilitySelector', () => {
   });
 
   it('allows editing when canManage is true', () => {
-    const { container } = renderWithQuery(
+    const { container } = renderWithProviders(
       <VisibilitySelector
         templateId="template-1"
         currentVisibility={TemplateVisibility.PRIVATE}
@@ -202,7 +189,7 @@ describe('VisibilitySelector', () => {
   it('changes visibility when clicking a different option', async () => {
     const onVisibilityChange = vi.fn();
 
-    renderWithQuery(
+    renderWithProviders(
       <VisibilitySelector
         templateId="template-1"
         currentVisibility={TemplateVisibility.PRIVATE}
@@ -226,7 +213,7 @@ describe('VisibilitySelector', () => {
   });
 
   it('does not trigger change when clicking the same visibility', async () => {
-    renderWithQuery(
+    renderWithProviders(
       <VisibilitySelector
         templateId="template-1"
         currentVisibility={TemplateVisibility.PRIVATE}
@@ -245,7 +232,7 @@ describe('VisibilitySelector', () => {
   });
 
   it('shows confirmation dialog when changing from LINK with active links', async () => {
-    renderWithQuery(
+    renderWithProviders(
       <VisibilitySelector
         templateId="template-1"
         currentVisibility={TemplateVisibility.LINK}
@@ -273,7 +260,7 @@ describe('VisibilitySelector', () => {
   });
 
   it('cancels visibility change when clicking Cancel in dialog', async () => {
-    renderWithQuery(
+    renderWithProviders(
       <VisibilitySelector
         templateId="template-1"
         currentVisibility={TemplateVisibility.LINK}
@@ -307,7 +294,7 @@ describe('VisibilitySelector', () => {
   it('confirms visibility change when clicking Revoke & Change in dialog', async () => {
     const onVisibilityChange = vi.fn();
 
-    renderWithQuery(
+    renderWithProviders(
       <VisibilitySelector
         templateId="template-1"
         currentVisibility={TemplateVisibility.LINK}
@@ -342,7 +329,7 @@ describe('VisibilitySelector', () => {
   });
 
   it('does not show confirmation when changing from LINK with no active links', async () => {
-    renderWithQuery(
+    renderWithProviders(
       <VisibilitySelector
         templateId="template-1"
         currentVisibility={TemplateVisibility.LINK}
@@ -367,7 +354,7 @@ describe('VisibilitySelector', () => {
   });
 
   it('shows correct icons for each visibility option', () => {
-    const { container } = renderWithQuery(
+    const { container } = renderWithProviders(
       <VisibilitySelector
         templateId="template-1"
         currentVisibility={TemplateVisibility.PRIVATE}
@@ -382,7 +369,7 @@ describe('VisibilitySelector', () => {
   });
 
   it('applies correct color classes for PRIVATE visibility', () => {
-    const { container } = renderWithQuery(
+    const { container } = renderWithProviders(
       <VisibilitySelector
         templateId="template-1"
         currentVisibility={TemplateVisibility.PRIVATE}
@@ -397,7 +384,7 @@ describe('VisibilitySelector', () => {
   });
 
   it('applies correct color classes for PUBLIC visibility', () => {
-    const { container } = renderWithQuery(
+    const { container } = renderWithProviders(
       <VisibilitySelector
         templateId="template-1"
         currentVisibility={TemplateVisibility.PUBLIC}
@@ -412,7 +399,7 @@ describe('VisibilitySelector', () => {
   });
 
   it('applies correct color classes for LINK visibility', () => {
-    const { container } = renderWithQuery(
+    const { container } = renderWithProviders(
       <VisibilitySelector
         templateId="template-1"
         currentVisibility={TemplateVisibility.LINK}
@@ -429,25 +416,25 @@ describe('VisibilitySelector', () => {
 
 describe('VisibilityBadge', () => {
   it('renders PRIVATE visibility badge', () => {
-    renderWithQuery(<VisibilityBadge visibility={TemplateVisibility.PRIVATE} />);
+    renderWithProviders(<VisibilityBadge visibility={TemplateVisibility.PRIVATE} />);
 
     expect(screen.getByText('Private')).toBeInTheDocument();
   });
 
   it('renders PUBLIC visibility badge', () => {
-    renderWithQuery(<VisibilityBadge visibility={TemplateVisibility.PUBLIC} />);
+    renderWithProviders(<VisibilityBadge visibility={TemplateVisibility.PUBLIC} />);
 
     expect(screen.getByText('Public')).toBeInTheDocument();
   });
 
   it('renders LINK visibility badge', () => {
-    renderWithQuery(<VisibilityBadge visibility={TemplateVisibility.LINK} />);
+    renderWithProviders(<VisibilityBadge visibility={TemplateVisibility.LINK} />);
 
     expect(screen.getByText('Anyone with link')).toBeInTheDocument();
   });
 
   it('applies PRIVATE color classes (slate)', () => {
-    const { container } = renderWithQuery(
+    const { container } = renderWithProviders(
       <VisibilityBadge visibility={TemplateVisibility.PRIVATE} />
     );
 
@@ -456,7 +443,7 @@ describe('VisibilityBadge', () => {
   });
 
   it('applies PUBLIC color classes (emerald)', () => {
-    const { container } = renderWithQuery(
+    const { container } = renderWithProviders(
       <VisibilityBadge visibility={TemplateVisibility.PUBLIC} />
     );
 
@@ -465,7 +452,7 @@ describe('VisibilityBadge', () => {
   });
 
   it('applies LINK color classes (blue)', () => {
-    const { container } = renderWithQuery(
+    const { container } = renderWithProviders(
       <VisibilityBadge visibility={TemplateVisibility.LINK} />
     );
 
@@ -474,7 +461,7 @@ describe('VisibilityBadge', () => {
   });
 
   it('applies small size class when size is sm', () => {
-    const { container } = renderWithQuery(
+    const { container } = renderWithProviders(
       <VisibilityBadge visibility={TemplateVisibility.PRIVATE} size="sm" />
     );
 
@@ -485,7 +472,7 @@ describe('VisibilityBadge', () => {
   });
 
   it('applies custom className', () => {
-    const { container } = renderWithQuery(
+    const { container } = renderWithProviders(
       <VisibilityBadge
         visibility={TemplateVisibility.PRIVATE}
         className="custom-badge"
@@ -497,7 +484,7 @@ describe('VisibilityBadge', () => {
   });
 
   it('has icon for each visibility type', () => {
-    const { container } = renderWithQuery(
+    const { container } = renderWithProviders(
       <VisibilityBadge visibility={TemplateVisibility.PRIVATE} />
     );
 

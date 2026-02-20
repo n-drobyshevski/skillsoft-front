@@ -14,7 +14,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { NextIntlClientProvider } from 'next-intl';
 import messages from '../../../../messages/en/index';
 import { ShareLinkManager } from '../../../../app/(workspace)/test-templates/[id]/_components/sharing/ShareLinkManager';
@@ -135,23 +134,11 @@ vi.mock('sonner', () => ({
   },
 }));
 
-function createQueryClient() {
-  return new QueryClient({
-    defaultOptions: {
-      queries: { retry: false },
-      mutations: { retry: false },
-    },
-  });
-}
-
-function renderWithQuery(ui: React.ReactElement) {
-  const queryClient = createQueryClient();
+function renderWithProviders(ui: React.ReactElement) {
   return render(
-    <QueryClientProvider client={queryClient}>
-      <NextIntlClientProvider locale="en" messages={messages}>
-        {ui}
-      </NextIntlClientProvider>
-    </QueryClientProvider>
+    <NextIntlClientProvider locale="en" messages={messages}>
+      {ui}
+    </NextIntlClientProvider>
   );
 }
 
@@ -170,7 +157,7 @@ describe('ShareLinkManager', () => {
     it('shows Share Links title', () => {
       mockLinksData = [];
 
-      renderWithQuery(<ShareLinkManager templateId="template-1" />);
+      renderWithProviders(<ShareLinkManager templateId="template-1" />);
 
       expect(screen.getByText('Share Links')).toBeInTheDocument();
     });
@@ -179,7 +166,7 @@ describe('ShareLinkManager', () => {
       mockLinksData = [];
       mockLinkCount = { activeCount: 3, maxLinks: 10 };
 
-      renderWithQuery(<ShareLinkManager templateId="template-1" />);
+      renderWithProviders(<ShareLinkManager templateId="template-1" />);
 
       expect(screen.getByText('3 of 10 links used')).toBeInTheDocument();
     });
@@ -189,7 +176,7 @@ describe('ShareLinkManager', () => {
     it('shows skeleton when loading', () => {
       mockLinksLoading = true;
 
-      renderWithQuery(<ShareLinkManager templateId="template-1" />);
+      renderWithProviders(<ShareLinkManager templateId="template-1" />);
 
       const skeletons = document.querySelectorAll('[data-slot="skeleton"]');
       expect(skeletons.length).toBeGreaterThan(0);
@@ -200,7 +187,7 @@ describe('ShareLinkManager', () => {
     it('shows empty message when no links', () => {
       mockLinksData = [];
 
-      renderWithQuery(<ShareLinkManager templateId="template-1" />);
+      renderWithProviders(<ShareLinkManager templateId="template-1" />);
 
       expect(screen.getByText('No active share links')).toBeInTheDocument();
     });
@@ -208,7 +195,7 @@ describe('ShareLinkManager', () => {
     it('shows hint text in empty state', () => {
       mockLinksData = [];
 
-      renderWithQuery(<ShareLinkManager templateId="template-1" />);
+      renderWithProviders(<ShareLinkManager templateId="template-1" />);
 
       expect(
         screen.getByText(
@@ -222,7 +209,7 @@ describe('ShareLinkManager', () => {
     it('shows create button when canManage is true', () => {
       mockLinksData = [];
 
-      renderWithQuery(
+      renderWithProviders(
         <ShareLinkManager templateId="template-1" canManage={true} />
       );
 
@@ -234,7 +221,7 @@ describe('ShareLinkManager', () => {
     it('hides create button when canManage is false', () => {
       mockLinksData = [];
 
-      renderWithQuery(
+      renderWithProviders(
         <ShareLinkManager templateId="template-1" canManage={false} />
       );
 
@@ -247,7 +234,7 @@ describe('ShareLinkManager', () => {
       mockLinksData = [];
       mockCanCreate = false;
 
-      renderWithQuery(
+      renderWithProviders(
         <ShareLinkManager templateId="template-1" canManage={true} />
       );
 
@@ -259,7 +246,7 @@ describe('ShareLinkManager', () => {
       mockLinksData = [];
       mockCanCreate = false;
 
-      renderWithQuery(
+      renderWithProviders(
         <ShareLinkManager templateId="template-1" canManage={true} />
       );
 
@@ -274,7 +261,7 @@ describe('ShareLinkManager', () => {
       const user = userEvent.setup();
       mockLinksData = [];
 
-      renderWithQuery(
+      renderWithProviders(
         <ShareLinkManager templateId="template-1" canManage={true} />
       );
 
@@ -290,7 +277,7 @@ describe('ShareLinkManager', () => {
       const user = userEvent.setup();
       mockLinksData = [];
 
-      renderWithQuery(
+      renderWithProviders(
         <ShareLinkManager templateId="template-1" canManage={true} />
       );
 
@@ -307,7 +294,7 @@ describe('ShareLinkManager', () => {
       const user = userEvent.setup();
       mockLinksData = [];
 
-      renderWithQuery(
+      renderWithProviders(
         <ShareLinkManager templateId="template-1" canManage={true} />
       );
 
@@ -328,7 +315,7 @@ describe('ShareLinkManager', () => {
       const user = userEvent.setup();
       mockLinksData = [];
 
-      renderWithQuery(
+      renderWithProviders(
         <ShareLinkManager templateId="template-1" canManage={true} />
       );
 
@@ -344,7 +331,7 @@ describe('ShareLinkManager', () => {
       const user = userEvent.setup();
       mockLinksData = [];
 
-      renderWithQuery(
+      renderWithProviders(
         <ShareLinkManager templateId="template-1" canManage={true} />
       );
 
@@ -375,7 +362,7 @@ describe('ShareLinkManager', () => {
     it('shows link label', () => {
       mockLinksData = [mockActiveLink];
 
-      renderWithQuery(<ShareLinkManager templateId="template-1" />);
+      renderWithProviders(<ShareLinkManager templateId="template-1" />);
 
       expect(screen.getByText('Interview Link')).toBeInTheDocument();
     });
@@ -383,7 +370,7 @@ describe('ShareLinkManager', () => {
     it('shows default label when no label set', () => {
       mockLinksData = [{ ...mockActiveLink, label: undefined }];
 
-      renderWithQuery(<ShareLinkManager templateId="template-1" />);
+      renderWithProviders(<ShareLinkManager templateId="template-1" />);
 
       expect(screen.getByText('Share Link')).toBeInTheDocument();
     });
@@ -391,7 +378,7 @@ describe('ShareLinkManager', () => {
     it('shows permission badge', () => {
       mockLinksData = [mockActiveLink];
 
-      renderWithQuery(<ShareLinkManager templateId="template-1" />);
+      renderWithProviders(<ShareLinkManager templateId="template-1" />);
 
       expect(screen.getByTestId('permission-badge')).toBeInTheDocument();
     });
@@ -399,7 +386,7 @@ describe('ShareLinkManager', () => {
     it('shows usage count', () => {
       mockLinksData = [mockActiveLink];
 
-      renderWithQuery(<ShareLinkManager templateId="template-1" />);
+      renderWithProviders(<ShareLinkManager templateId="template-1" />);
 
       expect(screen.getByText(/5.*uses/)).toBeInTheDocument();
     });
@@ -407,7 +394,7 @@ describe('ShareLinkManager', () => {
     it('shows expiry time', () => {
       mockLinksData = [mockActiveLink];
 
-      renderWithQuery(<ShareLinkManager templateId="template-1" />);
+      renderWithProviders(<ShareLinkManager templateId="template-1" />);
 
       expect(screen.getByText(/Expires/)).toBeInTheDocument();
     });
@@ -415,7 +402,7 @@ describe('ShareLinkManager', () => {
     it('shows Expired badge for expired links', () => {
       mockLinksData = [mockExpiredLink];
 
-      const { container } = renderWithQuery(
+      const { container } = renderWithProviders(
         <ShareLinkManager templateId="template-1" />
       );
 
@@ -427,7 +414,7 @@ describe('ShareLinkManager', () => {
     it('shows Used Up badge for exhausted links', () => {
       mockLinksData = [mockUsedUpLink];
 
-      renderWithQuery(<ShareLinkManager templateId="template-1" />);
+      renderWithProviders(<ShareLinkManager templateId="template-1" />);
 
       expect(screen.getByText('Used Up')).toBeInTheDocument();
     });
@@ -435,7 +422,7 @@ describe('ShareLinkManager', () => {
     it('shows share URL display for active links', () => {
       mockLinksData = [mockActiveLink];
 
-      renderWithQuery(<ShareLinkManager templateId="template-1" />);
+      renderWithProviders(<ShareLinkManager templateId="template-1" />);
 
       expect(screen.getByTestId('share-url')).toBeInTheDocument();
     });
@@ -443,7 +430,7 @@ describe('ShareLinkManager', () => {
     it('hides share URL display for expired links', () => {
       mockLinksData = [mockExpiredLink];
 
-      renderWithQuery(<ShareLinkManager templateId="template-1" />);
+      renderWithProviders(<ShareLinkManager templateId="template-1" />);
 
       expect(screen.queryByTestId('share-url')).not.toBeInTheDocument();
     });
@@ -453,7 +440,7 @@ describe('ShareLinkManager', () => {
     it('shows revoke button when canManage is true', () => {
       mockLinksData = [mockActiveLink];
 
-      renderWithQuery(
+      renderWithProviders(
         <ShareLinkManager templateId="template-1" canManage={true} />
       );
 
@@ -468,7 +455,7 @@ describe('ShareLinkManager', () => {
     it('hides revoke button when canManage is false', () => {
       mockLinksData = [mockActiveLink];
 
-      renderWithQuery(
+      renderWithProviders(
         <ShareLinkManager templateId="template-1" canManage={false} />
       );
 
@@ -480,7 +467,7 @@ describe('ShareLinkManager', () => {
       const user = userEvent.setup();
       mockLinksData = [mockActiveLink];
 
-      renderWithQuery(
+      renderWithProviders(
         <ShareLinkManager templateId="template-1" canManage={true} />
       );
 
@@ -503,7 +490,7 @@ describe('ShareLinkManager', () => {
       const user = userEvent.setup();
       mockLinksData = [mockActiveLink];
 
-      renderWithQuery(
+      renderWithProviders(
         <ShareLinkManager templateId="template-1" canManage={true} />
       );
 
@@ -539,7 +526,7 @@ describe('ShareLinkManager', () => {
       const user = userEvent.setup();
       mockLinksData = [mockActiveLink];
 
-      renderWithQuery(
+      renderWithProviders(
         <ShareLinkManager templateId="template-1" canManage={true} />
       );
 

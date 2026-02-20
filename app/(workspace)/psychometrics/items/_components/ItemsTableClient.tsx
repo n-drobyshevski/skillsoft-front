@@ -6,8 +6,6 @@ import Link from 'next/link';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { psychometricsApi } from '@/services/api';
-import { useQueryClient } from '@tanstack/react-query';
-import { prefetchPsychometricsItemDetail } from '@/hooks/queries';
 import {
   Table,
   TableBody,
@@ -119,7 +117,6 @@ export function ItemsTableClient({
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const isMobile = useIsMobile();
-  const queryClient = useQueryClient();
   const t = useTranslations('psychometrics');
   const tCommon = useTranslations('common');
   const { translate: translateStatus } = useEnumTranslation<ItemValidityStatus>('itemValidityStatus');
@@ -264,9 +261,8 @@ export function ItemsTableClient({
 
   const { content: items, totalElements, totalPages, number: pageNumber, first, last } = initialItems;
 
-  // Prefetch item detail on row hover for faster navigation
+  // Prefetch item detail page on row hover for faster navigation
   const handleRowPrefetch = (questionId: string) => {
-    prefetchPsychometricsItemDetail(queryClient, questionId);
     router.prefetch(`/psychometrics/items/${questionId}`);
   };
 

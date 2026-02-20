@@ -1,6 +1,6 @@
 import { useLensStore } from "@/store/lens-store";
 import { selectHasFeature, selectActiveLens } from "@/store/lens-selectors";
-import { useMemo, useRef } from "react";
+import { useRef } from "react";
 import { getLensConfig } from "@/config/lens-configs";
 
 /**
@@ -19,9 +19,8 @@ import { getLensConfig } from "@/config/lens-configs";
  * @returns Boolean indicating if feature is enabled
  */
 export function useHasFeature(feature: string): boolean {
-  // Create a memoized selector for this specific feature
-  // This prevents creating a new function on every render
-  const selector = useMemo(() => selectHasFeature(feature), [feature]);
+  // Create a selector for this specific feature
+  const selector = selectHasFeature(feature);
 
   return useLensStore(selector);
 }
@@ -106,8 +105,6 @@ export function useAllFeatures(): string[] {
 
   // Return the features array from the lens config
   // This is a stable reference from LENS_CONFIGS
-  return useMemo(() => {
-    const config = getLensConfig(activeLens);
-    return config.features;
-  }, [activeLens]);
+  const config = getLensConfig(activeLens);
+  return config.features;
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useDebounce } from './use-debounce';
 
 /**
@@ -96,7 +96,7 @@ export function useSimulationWorkflow<TState, TProfile, TResult>({
   const debouncedAutoState = useDebounce(autoSimulateState, autoSimulateDebounceMs);
 
   // Process queue
-  const processQueue = useCallback(async () => {
+  const processQueue = async () => {
     if (isSimulating || queueRef.current.length === 0) {
       return;
     }
@@ -133,11 +133,10 @@ export function useSimulationWorkflow<TState, TProfile, TResult>({
     } finally {
       setIsSimulating(false);
     }
-  }, [isSimulating, onSimulate, comparison.baseline]);
+  };
 
   // Run simulation with queue management
-  const runSimulation = useCallback(
-    async (state: TState, profile: TProfile): Promise<TResult | null> => {
+  const runSimulation = async (state: TState, profile: TProfile): Promise<TResult | null> => {
       const request: SimulationRequest<TState, TProfile, TResult> = {
         id: crypto.randomUUID(),
         state,
@@ -159,9 +158,7 @@ export function useSimulationWorkflow<TState, TProfile, TResult>({
       } catch {
         return null;
       }
-    },
-    [isSimulating, processQueue]
-  );
+  };
 
   // Auto-simulation effect
   useEffect(() => {

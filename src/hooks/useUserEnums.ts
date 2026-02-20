@@ -1,7 +1,6 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { useMemo } from 'react';
 import { UserRole } from '@/types/user';
 
 /**
@@ -59,70 +58,68 @@ function createHasKeyChecker(t: TranslationFn): (key: string) => boolean {
 export function useUserRoleTranslation() {
   const t = useTranslations('enums.userRole') as TranslationFn;
 
-  return useMemo(() => {
-    // Helper to safely translate a key
-    const safeTranslate = (key: string): string => {
-      try {
-        return (t as unknown as (key: string) => string)(key);
-      } catch {
-        // Fallback: format enum value to title case
-        return key.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, c => c.toUpperCase());
-      }
-    };
+  // Helper to safely translate a key
+  const safeTranslate = (key: string): string => {
+    try {
+      return (t as unknown as (key: string) => string)(key);
+    } catch {
+      // Fallback: format enum value to title case
+      return key.replace(/_/g, ' ').toLowerCase().replace(/\b\w/g, c => c.toUpperCase());
+    }
+  };
 
-    // Check if a key exists using the shared helper
-    const hasKey = createHasKeyChecker(t);
+  // Check if a key exists using the shared helper
+  const hasKey = createHasKeyChecker(t);
 
-    return {
-      /**
-       * Get the translated label for a user role.
-       */
-      getLabel: (role: UserRole): string => safeTranslate(role),
+  return {
+    /**
+     * Get the translated label for a user role.
+     */
+    getLabel: (role: UserRole): string => safeTranslate(role),
 
-      /**
-       * Get the translated description for a user role.
-       */
-      getDescription: (role: UserRole): string | undefined => {
-        const descKey = `${role}_DESC`;
-        return hasKey(descKey) ? safeTranslate(descKey) : undefined;
-      },
+    /**
+     * Get the translated description for a user role.
+     */
+    getDescription: (role: UserRole): string | undefined => {
+      const descKey = `${role}_DESC`;
+      return hasKey(descKey) ? safeTranslate(descKey) : undefined;
+    },
 
-      /**
-       * Get label and description together for rich UI components.
-       */
-      getLabelWithDescription: (role: UserRole): { label: string; description?: string } => {
+    /**
+     * Get label and description together for rich UI components.
+     */
+    getLabelWithDescription: (role: UserRole): { label: string; description?: string } => {
+      const label = safeTranslate(role);
+      const descKey = `${role}_DESC`;
+      const description = hasKey(descKey) ? safeTranslate(descKey) : undefined;
+      return { label, description };
+    },
+
+    /**
+     * Get all role options for Select components.
+     * Returns options in order: USER, EDITOR, ADMIN (ascending privilege).
+     */
+    getRoleOptions: (): UserEnumOption<UserRole>[] => {
+      const roleOrder: UserRole[] = [UserRole.USER, UserRole.EDITOR, UserRole.ADMIN];
+      return roleOrder.map((role) => {
         const label = safeTranslate(role);
         const descKey = `${role}_DESC`;
         const description = hasKey(descKey) ? safeTranslate(descKey) : undefined;
-        return { label, description };
-      },
+        return { value: role, label, description };
+      });
+    },
 
-      /**
-       * Get all role options for Select components.
-       * Returns options in order: USER, EDITOR, ADMIN (ascending privilege).
-       */
-      getRoleOptions: (): UserEnumOption<UserRole>[] => {
-        const roleOrder: UserRole[] = [UserRole.USER, UserRole.EDITOR, UserRole.ADMIN];
-        return roleOrder.map((role) => {
-          const label = safeTranslate(role);
-          const descKey = `${role}_DESC`;
-          const description = hasKey(descKey) ? safeTranslate(descKey) : undefined;
-          return { value: role, label, description };
-        });
-      },
-
-      /**
-       * Get role options from a custom list of roles.
-       */
-      getOptionsForRoles: (roles: readonly UserRole[]): UserEnumOption<UserRole>[] =>
-        roles.map((role) => {
-          const label = safeTranslate(role);
-          const descKey = `${role}_DESC`;
-          const description = hasKey(descKey) ? safeTranslate(descKey) : undefined;
-          return { value: role, label, description };
-        }),
-    };
-  }, [t]);
+    /**
+     * Get role options from a custom list of roles.
+     */
+    getOptionsForRoles: (roles: readonly UserRole[]): UserEnumOption<UserRole>[] =>
+      roles.map((role) => {
+        const label = safeTranslate(role);
+        const descKey = `${role}_DESC`;
+        const description = hasKey(descKey) ? safeTranslate(descKey) : undefined;
+        return { value: role, label, description };
+      }),
+  };
 }
 
 /**
@@ -148,70 +145,68 @@ export function useUserRoleTranslation() {
 export function useUserStatusTranslation() {
   const t = useTranslations('enums.userStatus') as TranslationFn;
 
-  return useMemo(() => {
-    // Helper to safely translate a key
-    const safeTranslate = (key: string): string => {
-      try {
-        return (t as unknown as (key: string) => string)(key);
-      } catch {
-        // Fallback: capitalize
-        return key.charAt(0).toUpperCase() + key.slice(1);
-      }
-    };
+  // Helper to safely translate a key
+  const safeTranslate = (key: string): string => {
+    try {
+      return (t as unknown as (key: string) => string)(key);
+    } catch {
+      // Fallback: capitalize
+      return key.charAt(0).toUpperCase() + key.slice(1);
+    }
+  };
 
-    // Check if a key exists using the shared helper
-    const hasKey = createHasKeyChecker(t);
+  // Check if a key exists using the shared helper
+  const hasKey = createHasKeyChecker(t);
 
-    // All available statuses in display order
-    const allStatuses: UserStatusKey[] = ['active', 'inactive', 'locked', 'banned'];
+  // All available statuses in display order
+  const allStatuses: UserStatusKey[] = ['active', 'inactive', 'locked', 'banned'];
 
-    return {
-      /**
-       * Get the translated label for a user status.
-       */
-      getLabel: (status: UserStatusKey): string => safeTranslate(status),
+  return {
+    /**
+     * Get the translated label for a user status.
+     */
+    getLabel: (status: UserStatusKey): string => safeTranslate(status),
 
-      /**
-       * Get the translated description for a user status.
-       */
-      getDescription: (status: UserStatusKey): string | undefined => {
-        const descKey = `${status}_DESC`;
-        return hasKey(descKey) ? safeTranslate(descKey) : undefined;
-      },
+    /**
+     * Get the translated description for a user status.
+     */
+    getDescription: (status: UserStatusKey): string | undefined => {
+      const descKey = `${status}_DESC`;
+      return hasKey(descKey) ? safeTranslate(descKey) : undefined;
+    },
 
-      /**
-       * Get label and description together for rich UI components.
-       */
-      getLabelWithDescription: (status: UserStatusKey): { label: string; description?: string } => {
+    /**
+     * Get label and description together for rich UI components.
+     */
+    getLabelWithDescription: (status: UserStatusKey): { label: string; description?: string } => {
+      const label = safeTranslate(status);
+      const descKey = `${status}_DESC`;
+      const description = hasKey(descKey) ? safeTranslate(descKey) : undefined;
+      return { label, description };
+    },
+
+    /**
+     * Get all status options for Select/filter components.
+     */
+    getStatusOptions: (): UserEnumOption<UserStatusKey>[] =>
+      allStatuses.map((status) => {
         const label = safeTranslate(status);
         const descKey = `${status}_DESC`;
         const description = hasKey(descKey) ? safeTranslate(descKey) : undefined;
-        return { label, description };
-      },
+        return { value: status, label, description };
+      }),
 
-      /**
-       * Get all status options for Select/filter components.
-       */
-      getStatusOptions: (): UserEnumOption<UserStatusKey>[] =>
-        allStatuses.map((status) => {
-          const label = safeTranslate(status);
-          const descKey = `${status}_DESC`;
-          const description = hasKey(descKey) ? safeTranslate(descKey) : undefined;
-          return { value: status, label, description };
-        }),
-
-      /**
-       * Get status options from a custom list.
-       */
-      getOptionsForStatuses: (statuses: readonly UserStatusKey[]): UserEnumOption<UserStatusKey>[] =>
-        statuses.map((status) => {
-          const label = safeTranslate(status);
-          const descKey = `${status}_DESC`;
-          const description = hasKey(descKey) ? safeTranslate(descKey) : undefined;
-          return { value: status, label, description };
-        }),
-    };
-  }, [t]);
+    /**
+     * Get status options from a custom list.
+     */
+    getOptionsForStatuses: (statuses: readonly UserStatusKey[]): UserEnumOption<UserStatusKey>[] =>
+      statuses.map((status) => {
+        const label = safeTranslate(status);
+        const descKey = `${status}_DESC`;
+        const description = hasKey(descKey) ? safeTranslate(descKey) : undefined;
+        return { value: status, label, description };
+      }),
+  };
 }
 
 /**

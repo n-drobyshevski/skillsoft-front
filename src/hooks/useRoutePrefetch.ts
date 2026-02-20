@@ -3,49 +3,28 @@
 /**
  * useRoutePrefetch - Route-aware data prefetching for sidebar navigation
  *
- * Maps route paths to their React Query prefetch functions so that hovering
- * over a sidebar link pre-populates the cache for that page's data.
+ * After React Query removal, this hook only handles route-level JS prefetching
+ * via Next.js router.prefetch(). Server-side data caching is handled by
+ * 'use cache' functions at the route level.
  *
  * Features:
  * - Network-aware: skips data prefetch on slow connections (2G / save-data)
- * - Lazy imports: avoids circular dependencies by dynamically importing query modules
- * - One-shot: each handler only fires once per mount to prevent redundant fetches
+ * - One-shot: each handler only fires once per mount to prevent redundant work
  *
  * The Next.js route JS prefetch still happens via PrefetchLink regardless
  * of network conditions -- this hook only controls the _data_ prefetch layer.
  */
 
 import { useCallback, useRef } from 'react';
-import { useQueryClient, QueryClient } from '@tanstack/react-query';
 import { useNetworkStatus } from '@/hooks/useNetworkStatus';
-
-// ---------------------------------------------------------------------------
-// Route-to-prefetch mapping
-// Each entry lazily imports the query module to avoid eager bundle inclusion
-// and circular dependency issues. Functions receive the QueryClient directly.
-// ---------------------------------------------------------------------------
-
-type PrefetchFn = (queryClient: QueryClient) => void;
-
-const PREFETCH_MAP: Record<string, PrefetchFn> = {
-  '/psychometrics': (qc) => {
-    import('@/hooks/queries/usePsychometricsQuery').then((mod) => {
-      mod.prefetchPsychometricsDashboard(qc);
-    });
-  },
-  '/psychometrics/items': (qc) => {
-    import('@/hooks/queries/usePsychometricsQuery').then((mod) => {
-      mod.prefetchPsychometricsItems(qc);
-    });
-  },
-};
 
 /**
  * Returns a `getPrefetchHandler` function that, given a route path, produces
  * a one-shot callback suitable for PrefetchLink's `onPrefetchData` prop.
  *
- * If no prefetch mapping exists for the path, `undefined` is returned so
- * PrefetchLink gracefully degrades to route-only prefetching.
+ * After React Query removal, the data prefetch functions are no-ops since
+ * server-side 'use cache' functions handle caching. Route-level JS prefetching
+ * is handled by Next.js automatically. This hook preserves the API surface.
  *
  * @example
  * ```tsx
@@ -56,31 +35,27 @@ const PREFETCH_MAP: Record<string, PrefetchFn> = {
  * ```
  */
 export function useRoutePrefetch() {
-  const queryClient = useQueryClient();
   const { shouldPrefetch } = useNetworkStatus();
 
   // Track which paths have already been prefetched to enforce one-shot behaviour.
-  // Using a ref (Set) instead of per-handler closure so the set persists across
-  // re-renders without causing identity changes to the returned callback.
   const prefetchedPaths = useRef<Set<string>>(new Set());
 
   const getPrefetchHandler = useCallback(
     (path: string): (() => void) | undefined => {
-      const prefetchFn = PREFETCH_MAP[path];
-      if (!prefetchFn) return undefined;
+      // Return a no-op handler for known prefetch paths.
+      // Route JS prefetch is handled by PrefetchLink / router.prefetch().
+      // Data prefetch is handled by server-side 'use cache' functions.
+      const KNOWN_PATHS = ['/psychometrics', '/psychometrics/items'];
+      if (!KNOWN_PATHS.includes(path)) return undefined;
 
       return () => {
-        // Skip data prefetch on slow connections -- route JS prefetch still happens
         if (!shouldPrefetch) return;
-
-        // Only prefetch once per path per component lifetime
         if (prefetchedPaths.current.has(path)) return;
         prefetchedPaths.current.add(path);
-
-        prefetchFn(queryClient);
+        // No-op: data caching is server-side via 'use cache'
       };
     },
-    [queryClient, shouldPrefetch]
+    [shouldPrefetch]
   );
 
   return { getPrefetchHandler };

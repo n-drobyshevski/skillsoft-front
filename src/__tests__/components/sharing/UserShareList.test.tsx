@@ -15,7 +15,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { NextIntlClientProvider } from 'next-intl';
 import messages from '../../../../messages/en/index';
 import { UserShareList } from '../../../../app/(workspace)/test-templates/[id]/_components/sharing/UserShareList';
@@ -136,23 +135,11 @@ vi.mock('sonner', () => ({
   },
 }));
 
-function createQueryClient() {
-  return new QueryClient({
-    defaultOptions: {
-      queries: { retry: false },
-      mutations: { retry: false },
-    },
-  });
-}
-
-function renderWithQuery(ui: React.ReactElement) {
-  const queryClient = createQueryClient();
+function renderWithProviders(ui: React.ReactElement) {
   return render(
-    <QueryClientProvider client={queryClient}>
-      <NextIntlClientProvider locale="en" messages={messages}>
-        {ui}
-      </NextIntlClientProvider>
-    </QueryClientProvider>
+    <NextIntlClientProvider locale="en" messages={messages}>
+      {ui}
+    </NextIntlClientProvider>
   );
 }
 
@@ -170,7 +157,7 @@ describe('UserShareList', () => {
     it('shows skeleton when loading', () => {
       mockIsLoading = true;
 
-      renderWithQuery(<UserShareList templateId="template-1" />);
+      renderWithProviders(<UserShareList templateId="template-1" />);
 
       // Should show skeleton elements
       const skeletons = document.querySelectorAll('[data-slot="skeleton"]');
@@ -182,7 +169,7 @@ describe('UserShareList', () => {
     it('shows error message when fetch fails', () => {
       mockError = new Error('Failed to fetch');
 
-      renderWithQuery(<UserShareList templateId="template-1" />);
+      renderWithProviders(<UserShareList templateId="template-1" />);
 
       expect(screen.getByText('Failed to load shares')).toBeInTheDocument();
     });
@@ -192,7 +179,7 @@ describe('UserShareList', () => {
     it('shows empty message when no shares', () => {
       mockSharesData = [];
 
-      renderWithQuery(<UserShareList templateId="template-1" />);
+      renderWithProviders(<UserShareList templateId="template-1" />);
 
       expect(
         screen.getByText('No users or teams have access')
@@ -202,7 +189,7 @@ describe('UserShareList', () => {
     it('shows hint text in empty state', () => {
       mockSharesData = [];
 
-      renderWithQuery(<UserShareList templateId="template-1" />);
+      renderWithProviders(<UserShareList templateId="template-1" />);
 
       expect(
         screen.getByText(
@@ -216,7 +203,7 @@ describe('UserShareList', () => {
     it('shows user shares in Users section', () => {
       mockSharesData = [mockUserShare];
 
-      renderWithQuery(<UserShareList templateId="template-1" />);
+      renderWithProviders(<UserShareList templateId="template-1" />);
 
       expect(screen.getByText('Users (1)')).toBeInTheDocument();
       expect(screen.getByText('John Doe')).toBeInTheDocument();
@@ -225,7 +212,7 @@ describe('UserShareList', () => {
     it('shows user email', () => {
       mockSharesData = [mockUserShare];
 
-      renderWithQuery(<UserShareList templateId="template-1" />);
+      renderWithProviders(<UserShareList templateId="template-1" />);
 
       expect(screen.getByText('john@example.com')).toBeInTheDocument();
     });
@@ -233,7 +220,7 @@ describe('UserShareList', () => {
     it('shows user initials in avatar', () => {
       mockSharesData = [mockUserShare];
 
-      renderWithQuery(<UserShareList templateId="template-1" />);
+      renderWithProviders(<UserShareList templateId="template-1" />);
 
       expect(screen.getByText('JD')).toBeInTheDocument();
     });
@@ -243,7 +230,7 @@ describe('UserShareList', () => {
     it('shows team shares in Teams section', () => {
       mockSharesData = [mockTeamShare];
 
-      renderWithQuery(<UserShareList templateId="template-1" />);
+      renderWithProviders(<UserShareList templateId="template-1" />);
 
       expect(screen.getByText('Teams (1)')).toBeInTheDocument();
       expect(screen.getByText('Engineering Team')).toBeInTheDocument();
@@ -252,7 +239,7 @@ describe('UserShareList', () => {
     it('shows Team badge for team shares', () => {
       mockSharesData = [mockTeamShare];
 
-      renderWithQuery(<UserShareList templateId="template-1" />);
+      renderWithProviders(<UserShareList templateId="template-1" />);
 
       expect(screen.getByText('Team')).toBeInTheDocument();
     });
@@ -260,7 +247,7 @@ describe('UserShareList', () => {
     it('shows team initials in avatar', () => {
       mockSharesData = [mockTeamShare];
 
-      renderWithQuery(<UserShareList templateId="template-1" />);
+      renderWithProviders(<UserShareList templateId="template-1" />);
 
       expect(screen.getByText('ET')).toBeInTheDocument();
     });
@@ -270,7 +257,7 @@ describe('UserShareList', () => {
     it('shows both users and teams sections', () => {
       mockSharesData = [mockUserShare, mockTeamShare];
 
-      renderWithQuery(<UserShareList templateId="template-1" />);
+      renderWithProviders(<UserShareList templateId="template-1" />);
 
       expect(screen.getByText('Users (1)')).toBeInTheDocument();
       expect(screen.getByText('Teams (1)')).toBeInTheDocument();
@@ -281,7 +268,7 @@ describe('UserShareList', () => {
     it('shows permission badge when canManage is false', () => {
       mockSharesData = [mockUserShare];
 
-      renderWithQuery(
+      renderWithProviders(
         <UserShareList templateId="template-1" canManage={false} />
       );
 
@@ -292,7 +279,7 @@ describe('UserShareList', () => {
     it('shows permission select when canManage is true', () => {
       mockSharesData = [mockUserShare];
 
-      renderWithQuery(
+      renderWithProviders(
         <UserShareList templateId="template-1" canManage={true} />
       );
 
@@ -305,7 +292,7 @@ describe('UserShareList', () => {
     it('shows revoke button when canManage is true', () => {
       mockSharesData = [mockUserShare];
 
-      renderWithQuery(
+      renderWithProviders(
         <UserShareList templateId="template-1" canManage={true} />
       );
 
@@ -317,7 +304,7 @@ describe('UserShareList', () => {
     it('hides revoke button when canManage is false', () => {
       mockSharesData = [mockUserShare];
 
-      renderWithQuery(
+      renderWithProviders(
         <UserShareList templateId="template-1" canManage={false} />
       );
 
@@ -329,7 +316,7 @@ describe('UserShareList', () => {
       const user = userEvent.setup();
       mockSharesData = [mockUserShare];
 
-      renderWithQuery(
+      renderWithProviders(
         <UserShareList templateId="template-1" canManage={true} />
       );
 
@@ -348,7 +335,7 @@ describe('UserShareList', () => {
       const user = userEvent.setup();
       mockSharesData = [mockUserShare];
 
-      renderWithQuery(
+      renderWithProviders(
         <UserShareList templateId="template-1" canManage={true} />
       );
 
@@ -365,7 +352,7 @@ describe('UserShareList', () => {
       const user = userEvent.setup();
       mockSharesData = [mockUserShare];
 
-      renderWithQuery(
+      renderWithProviders(
         <UserShareList templateId="template-1" canManage={true} />
       );
 
@@ -394,7 +381,7 @@ describe('UserShareList', () => {
       const user = userEvent.setup();
       mockSharesData = [mockUserShare];
 
-      renderWithQuery(
+      renderWithProviders(
         <UserShareList templateId="template-1" canManage={true} />
       );
 
@@ -418,7 +405,7 @@ describe('UserShareList', () => {
     it('shows Expired badge for expired shares', () => {
       mockSharesData = [mockExpiredShare];
 
-      renderWithQuery(<UserShareList templateId="template-1" />);
+      renderWithProviders(<UserShareList templateId="template-1" />);
 
       expect(screen.getByText('Expired')).toBeInTheDocument();
     });
@@ -426,7 +413,7 @@ describe('UserShareList', () => {
     it('shows expiry time for future expiry shares', () => {
       mockSharesData = [mockFutureExpiryShare];
 
-      renderWithQuery(<UserShareList templateId="template-1" />);
+      renderWithProviders(<UserShareList templateId="template-1" />);
 
       // Should show "Expires in X days" text
       expect(screen.getByText(/Expires/)).toBeInTheDocument();
@@ -435,7 +422,7 @@ describe('UserShareList', () => {
     it('disables permission select for expired shares', () => {
       mockSharesData = [mockExpiredShare];
 
-      renderWithQuery(
+      renderWithProviders(
         <UserShareList templateId="template-1" canManage={true} />
       );
 
@@ -449,7 +436,7 @@ describe('UserShareList', () => {
       const user = userEvent.setup();
       mockSharesData = [mockUserShare];
 
-      renderWithQuery(
+      renderWithProviders(
         <UserShareList templateId="template-1" canManage={true} />
       );
 

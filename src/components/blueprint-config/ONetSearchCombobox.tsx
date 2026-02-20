@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Check, X, Loader2, Search, Briefcase, ChevronDown, Star, Clock } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -116,37 +116,34 @@ export function ONetSearchCombobox({
   }, [value, searchResults, popularJobTitles, recentSelections]);
 
   // Handle selection
-  const handleSelect = useCallback(
-    async (jobTitle: ONetJobTitle) => {
-      setSelectedJobTitle(jobTitle);
-      setOpen(false);
-      setSearchQuery('');
+  const handleSelect = async (jobTitle: ONetJobTitle) => {
+    setSelectedJobTitle(jobTitle);
+    setOpen(false);
+    setSearchQuery('');
 
-      // Add to recent selections
-      setRecentSelections((prev) => {
-        const filtered = prev.filter((o) => o.socCode !== jobTitle.socCode);
-        return [jobTitle, ...filtered].slice(0, 5);
-      });
+    // Add to recent selections
+    setRecentSelections((prev) => {
+      const filtered = prev.filter((o) => o.socCode !== jobTitle.socCode);
+      return [jobTitle, ...filtered].slice(0, 5);
+    });
 
-      // Load profile
-      setIsLoadingProfile(true);
-      try {
-        const profile = await onetApi.getProfile(jobTitle.socCode);
-        onChange(jobTitle.socCode, profile);
-      } catch {
-        onChange(jobTitle.socCode, undefined);
-      } finally {
-        setIsLoadingProfile(false);
-      }
-    },
-    [onChange]
-  );
+    // Load profile
+    setIsLoadingProfile(true);
+    try {
+      const profile = await onetApi.getProfile(jobTitle.socCode);
+      onChange(jobTitle.socCode, profile);
+    } catch {
+      onChange(jobTitle.socCode, undefined);
+    } finally {
+      setIsLoadingProfile(false);
+    }
+  };
 
   // Handle clear
-  const handleClear = useCallback(() => {
+  const handleClear = () => {
     setSelectedJobTitle(null);
     onChange(undefined, undefined);
-  }, [onChange]);
+  };
 
   // Determine what to show
   const hasSearchQuery = searchQuery.trim().length > 0;

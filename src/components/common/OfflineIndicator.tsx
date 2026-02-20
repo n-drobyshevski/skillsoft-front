@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 import { useNetworkStatus } from '@/hooks/useNetworkStatus';
@@ -67,7 +67,7 @@ export function OfflineIndicator({
   }, [isOnline, wasOffline, autoHideDelay]);
 
   // Handle refresh action
-  const handleRefresh = useCallback(async () => {
+  const handleRefresh = async () => {
     if (!onRefresh || isRefreshing) return;
 
     setIsRefreshing(true);
@@ -76,12 +76,12 @@ export function OfflineIndicator({
     } finally {
       setIsRefreshing(false);
     }
-  }, [onRefresh, isRefreshing]);
+  };
 
   // Handle dismiss
-  const handleDismiss = useCallback(() => {
+  const handleDismiss = () => {
     setIsDismissed(true);
-  }, []);
+  };
 
   // Don't show if dismissed, online with fresh data, and not showing online notice
   if (isDismissed && isOnline && !isStale && !showOnlineNotice) {

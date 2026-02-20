@@ -1,29 +1,21 @@
 'use client';
 
 /**
- * React Query hooks for Psychometrics data fetching
+ * Client-side hooks for Psychometrics data fetching
  *
- * Provides client-side caching with stale-while-revalidate pattern for:
+ * Provides fetch-based data loading for:
  * - Dashboard overview data
  * - Item statistics with filtering
  * - Competency reliability data
  * - Big Five trait analysis
  * - Flagged items
  *
- * Features:
- * - Automatic background refetching when data becomes stale
- * - Optimistic updates for status changes
- * - Query invalidation for mutations
- * - Prefetching utilities for navigation
+ * Migrated from React Query to simple useState + useEffect patterns.
+ * Mutations are plain async functions.
+ * Prefetching utilities use router.prefetch() for route-level prefetching.
  */
 
-import {
-  useQuery,
-  useMutation,
-  useQueryClient,
-  QueryClient,
-  UseQueryOptions,
-} from '@tanstack/react-query';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { psychometricsApi } from '@/services/api';
 import { ItemValidityStatus } from '@/types/psychometrics';
 import type {
@@ -37,52 +29,162 @@ import type {
   FlaggedItemSummary,
   BigFiveReliability,
   UpdateItemStatusRequest,
-  AuditResult,
   Page,
 } from '@/types/psychometrics';
 
 // ============================================================================
-// Query Keys - Centralized key management for cache operations
+// Generic fetch hook (shared with useTemplateSharingQuery)
+// ============================================================================
+
+interface FetchState<T> {
+  data: T | undefined;
+  isLoading: boolean;
+  isSuccess: boolean;
+  isError: boolean;
+  error: Error | null;
+  fetchStatus: 'idle' | 'fetching';
+  refetch: () => void;
+}
+
+function useFetch<T>(
+  fetchFn: () => Promise<T>,
+  enabled: boolean = true,
+): FetchState<T> {
+  const [data, setData] = useState<T | undefined>(undefined);
+  const [isLoading, setIsLoading] = useState(enabled);
+  const [isSuccess, setIsSuccess] = useState(false);
+  const [isError, setIsError] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
+  const [fetchStatus, setFetchStatus] = useState<'idle' | 'fetching'>(
+    enabled ? 'fetching' : 'idle'
+  );
+  const fetchFnRef = useRef(fetchFn);
+  fetchFnRef.current = fetchFn;
+  const mountedRef = useRef(true);
+
+  const doFetch = useCallback(() => {
+    if (!mountedRef.current) return;
+    setIsLoading(true);
+    setFetchStatus('fetching');
+    setIsError(false);
+    setError(null);
+
+    fetchFnRef.current()
+      .then((result) => {
+        if (!mountedRef.current) return;
+        setData(result);
+        setIsSuccess(true);
+        setIsLoading(false);
+        setFetchStatus('idle');
+      })
+      .catch((err: unknown) => {
+        if (!mountedRef.current) return;
+        setIsError(true);
+        setError(err instanceof Error ? err : new Error(String(err)));
+        setIsLoading(false);
+        setFetchStatus('idle');
+      });
+  }, []);
+
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => { mountedRef.current = false; };
+  }, []);
+
+  useEffect(() => {
+    if (enabled) {
+      doFetch();
+    } else {
+      setIsLoading(false);
+      setFetchStatus('idle');
+    }
+  }, [enabled, doFetch]);
+
+  return {
+    data,
+    isLoading: enabled ? isLoading : false,
+    isSuccess,
+    isError,
+    error,
+    fetchStatus: enabled ? fetchStatus : 'idle',
+    refetch: doFetch,
+  };
+}
+
+// ============================================================================
+// Generic mutation hook
+// ============================================================================
+
+interface MutationState<TData, TVariables> {
+  mutateAsync: (variables: TVariables) => Promise<TData>;
+  isPending: boolean;
+  isSuccess: boolean;
+  isError: boolean;
+  error: Error | null;
+  data: TData | undefined;
+}
+
+function useMutationFn<TData, TVariables>(
+  mutationFn: (variables: TVariables) => Promise<TData>,
+  options?: {
+    onSuccess?: (data: TData, variables: TVariables) => void;
+    onError?: (error: Error, variables: TVariables) => void;
+  },
+): MutationState<TData, TVariables> {
+  const [isPending, setIsPending] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
+  const [isError, setIsError] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
+  const [data, setData] = useState<TData | undefined>(undefined);
+
+  const mutateAsync = useCallback(
+    async (variables: TVariables): Promise<TData> => {
+      setIsPending(true);
+      setIsSuccess(false);
+      setIsError(false);
+      setError(null);
+
+      try {
+        const result = await mutationFn(variables);
+        setData(result);
+        setIsSuccess(true);
+        options?.onSuccess?.(result, variables);
+        return result;
+      } catch (err) {
+        const typedErr = err instanceof Error ? err : new Error(String(err));
+        setError(typedErr);
+        setIsError(true);
+        options?.onError?.(typedErr, variables);
+        throw typedErr;
+      } finally {
+        setIsPending(false);
+      }
+    },
+    [mutationFn, options],
+  );
+
+  return { mutateAsync, isPending, isSuccess, isError, error, data };
+}
+
+// ============================================================================
+// Query Keys - Kept for structural compatibility
 // ============================================================================
 
 export const psychometricsKeys = {
   all: ['psychometrics'] as const,
-
-  // Dashboard
   dashboard: () => [...psychometricsKeys.all, 'dashboard'] as const,
-
-  // Items
   items: () => [...psychometricsKeys.all, 'items'] as const,
   itemsList: (params: ItemStatisticsFilterParams) =>
     [...psychometricsKeys.items(), 'list', params] as const,
   itemDetail: (questionId: string) =>
     [...psychometricsKeys.items(), 'detail', questionId] as const,
-
-  // Competencies
   competencies: () => [...psychometricsKeys.all, 'competencies'] as const,
   competenciesList: (params: CompetencyReliabilityFilterParams) =>
     [...psychometricsKeys.competencies(), 'list', params] as const,
   competencyDetail: (competencyId: string) =>
     [...psychometricsKeys.competencies(), 'detail', competencyId] as const,
-
-  // Flagged items
   flagged: () => [...psychometricsKeys.all, 'flagged'] as const,
-
-  // Big Five
   bigFive: () => [...psychometricsKeys.all, 'big-five'] as const,
-};
-
-// ============================================================================
-// Query Options - Reusable configuration for different data types
-// ============================================================================
-
-// Aligned with server-side cacheLife profiles (see QueryProvider.tsx QUERY_STALE_TIMES)
-const STALE_TIMES = {
-  dashboard: 60 * 1000,        // entityData tier - dashboard changes with assessments
-  items: 60 * 1000,            // entityData tier - item data tied to entity changes
-  competencies: 5 * 60 * 1000, // userData tier - competency reliability is stable
-  bigFive: 10 * 60 * 1000,     // referenceData tier - personality traits very stable
-  flagged: 60 * 1000,          // entityData tier - flagged items important to stay fresh
 };
 
 // ============================================================================
@@ -92,15 +194,8 @@ const STALE_TIMES = {
 /**
  * Hook to fetch psychometrics dashboard overview
  */
-export function usePsychometricsDashboard(
-  options?: Omit<UseQueryOptions<PsychometricHealthReport, Error>, 'queryKey' | 'queryFn'>
-) {
-  return useQuery({
-    queryKey: psychometricsKeys.dashboard(),
-    queryFn: () => psychometricsApi.getDashboard(),
-    staleTime: STALE_TIMES.dashboard,
-    ...options,
-  });
+export function usePsychometricsDashboard() {
+  return useFetch(() => psychometricsApi.getDashboard());
 }
 
 // ============================================================================
@@ -112,183 +207,42 @@ export function usePsychometricsDashboard(
  */
 export function usePsychometricsItems(
   params: ItemStatisticsFilterParams = {},
-  options?: Omit<UseQueryOptions<Page<ItemStatistics>, Error>, 'queryKey' | 'queryFn'>
 ) {
-  return useQuery({
-    queryKey: psychometricsKeys.itemsList(params),
-    queryFn: () => psychometricsApi.getItems(params),
-    staleTime: STALE_TIMES.items,
-    ...options,
-  });
+  return useFetch(() => psychometricsApi.getItems(params));
 }
 
 /**
  * Hook to fetch single item detail
  */
-export function usePsychometricsItemDetail(
-  questionId: string,
-  options?: Omit<UseQueryOptions<ItemStatisticsDetail, Error>, 'queryKey' | 'queryFn'>
-) {
-  return useQuery({
-    queryKey: psychometricsKeys.itemDetail(questionId),
-    queryFn: () => psychometricsApi.getItemDetail(questionId),
-    staleTime: STALE_TIMES.items,
-    enabled: !!questionId,
-    ...options,
-  });
+export function usePsychometricsItemDetail(questionId: string) {
+  return useFetch(
+    () => psychometricsApi.getItemDetail(questionId),
+    !!questionId,
+  );
 }
 
 /**
  * Mutation hook to update item validity status
- * Includes optimistic update and cache invalidation
  */
 export function useUpdateItemStatus() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: ({
+  return useMutationFn(
+    ({
       questionId,
       request,
     }: {
       questionId: string;
       request: UpdateItemStatusRequest;
     }) => psychometricsApi.updateItemStatus(questionId, request),
-
-    onMutate: async ({ questionId, request }) => {
-      // Cancel outgoing refetches so they don't overwrite our optimistic update
-      await queryClient.cancelQueries({ queryKey: psychometricsKeys.items() });
-      await queryClient.cancelQueries({ queryKey: psychometricsKeys.flagged() });
-      await queryClient.cancelQueries({
-        queryKey: psychometricsKeys.itemDetail(questionId),
-      });
-
-      // Snapshot current caches for rollback
-      const previousItemDetail = queryClient.getQueryData<ItemStatisticsDetail>(
-        psychometricsKeys.itemDetail(questionId)
-      );
-      const previousItemsQueries = queryClient.getQueriesData<Page<ItemStatistics>>({
-        queryKey: psychometricsKeys.items(),
-      });
-      const previousFlagged = queryClient.getQueryData<FlaggedItemSummary[]>(
-        psychometricsKeys.flagged()
-      );
-
-      // Optimistically update item detail cache
-      if (previousItemDetail) {
-        queryClient.setQueryData<ItemStatisticsDetail>(
-          psychometricsKeys.itemDetail(questionId),
-          {
-            ...previousItemDetail,
-            validityStatus: request.newStatus,
-          }
-        );
-      }
-
-      // Optimistically update all cached items list pages
-      for (const [queryKey, data] of previousItemsQueries) {
-        if (!data) continue;
-        queryClient.setQueryData<Page<ItemStatistics>>(queryKey, {
-          ...data,
-          content: data.content.map((item) =>
-            item.questionId === questionId
-              ? { ...item, validityStatus: request.newStatus }
-              : item
-          ),
-        });
-      }
-
-      // Optimistically update flagged items cache
-      if (previousFlagged) {
-        if (request.newStatus !== ItemValidityStatus.FLAGGED_FOR_REVIEW) {
-          // Remove from flagged list if status is no longer FLAGGED_FOR_REVIEW
-          queryClient.setQueryData<FlaggedItemSummary[]>(
-            psychometricsKeys.flagged(),
-            previousFlagged.filter((item) => item.questionId !== questionId)
-          );
-        } else {
-          // Update status in flagged list if item remains flagged
-          queryClient.setQueryData<FlaggedItemSummary[]>(
-            psychometricsKeys.flagged(),
-            previousFlagged.map((item) =>
-              item.questionId === questionId
-                ? { ...item, validityStatus: request.newStatus }
-                : item
-            )
-          );
-        }
-      }
-
-      return { previousItemDetail, previousItemsQueries, previousFlagged };
-    },
-
-    onError: (_err, { questionId }, context) => {
-      // Rollback all caches to their previous state
-      if (context?.previousItemDetail) {
-        queryClient.setQueryData(
-          psychometricsKeys.itemDetail(questionId),
-          context.previousItemDetail
-        );
-      }
-      if (context?.previousItemsQueries) {
-        for (const [queryKey, data] of context.previousItemsQueries) {
-          queryClient.setQueryData(queryKey, data);
-        }
-      }
-      if (context?.previousFlagged) {
-        queryClient.setQueryData(
-          psychometricsKeys.flagged(),
-          context.previousFlagged
-        );
-      }
-    },
-
-    onSuccess: (updatedItem, { questionId }) => {
-      // Replace optimistic data with real server response
-      queryClient.setQueryData(
-        psychometricsKeys.itemDetail(questionId),
-        updatedItem
-      );
-    },
-
-    onSettled: () => {
-      // Always refetch to ensure server state consistency
-      queryClient.invalidateQueries({
-        queryKey: psychometricsKeys.items(),
-      });
-      queryClient.invalidateQueries({
-        queryKey: psychometricsKeys.flagged(),
-      });
-      queryClient.invalidateQueries({
-        queryKey: psychometricsKeys.dashboard(),
-      });
-    },
-  });
+  );
 }
 
 /**
  * Mutation hook to recalculate item statistics
  */
 export function useRecalculateItem() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (questionId: string) =>
-      psychometricsApi.recalculateItem(questionId),
-
-    onSuccess: (updatedItem, questionId) => {
-      // Update caches with new data
-      queryClient.setQueryData(
-        psychometricsKeys.itemDetail(questionId),
-        (old: ItemStatisticsDetail | undefined) =>
-          old ? { ...old, ...updatedItem } : undefined
-      );
-
-      // Invalidate items list
-      queryClient.invalidateQueries({
-        queryKey: psychometricsKeys.items(),
-      });
-    },
-  });
+  return useMutationFn((questionId: string) =>
+    psychometricsApi.recalculateItem(questionId),
+  );
 }
 
 // ============================================================================
@@ -300,30 +254,18 @@ export function useRecalculateItem() {
  */
 export function usePsychometricsCompetencies(
   params: CompetencyReliabilityFilterParams = {},
-  options?: Omit<UseQueryOptions<Page<CompetencyReliability>, Error>, 'queryKey' | 'queryFn'>
 ) {
-  return useQuery({
-    queryKey: psychometricsKeys.competenciesList(params),
-    queryFn: () => psychometricsApi.getCompetencies(params),
-    staleTime: STALE_TIMES.competencies,
-    ...options,
-  });
+  return useFetch(() => psychometricsApi.getCompetencies(params));
 }
 
 /**
  * Hook to fetch single competency detail
  */
-export function usePsychometricsCompetencyDetail(
-  competencyId: string,
-  options?: Omit<UseQueryOptions<CompetencyReliabilityDetail, Error>, 'queryKey' | 'queryFn'>
-) {
-  return useQuery({
-    queryKey: psychometricsKeys.competencyDetail(competencyId),
-    queryFn: () => psychometricsApi.getCompetencyDetail(competencyId),
-    staleTime: STALE_TIMES.competencies,
-    enabled: !!competencyId,
-    ...options,
-  });
+export function usePsychometricsCompetencyDetail(competencyId: string) {
+  return useFetch(
+    () => psychometricsApi.getCompetencyDetail(competencyId),
+    !!competencyId,
+  );
 }
 
 // ============================================================================
@@ -333,15 +275,8 @@ export function usePsychometricsCompetencyDetail(
 /**
  * Hook to fetch all flagged items
  */
-export function usePsychometricsFlaggedItems(
-  options?: Omit<UseQueryOptions<FlaggedItemSummary[], Error>, 'queryKey' | 'queryFn'>
-) {
-  return useQuery({
-    queryKey: psychometricsKeys.flagged(),
-    queryFn: () => psychometricsApi.getFlaggedItems(),
-    staleTime: STALE_TIMES.flagged,
-    ...options,
-  });
+export function usePsychometricsFlaggedItems() {
+  return useFetch(() => psychometricsApi.getFlaggedItems());
 }
 
 // ============================================================================
@@ -351,15 +286,8 @@ export function usePsychometricsFlaggedItems(
 /**
  * Hook to fetch Big Five trait reliability data
  */
-export function usePsychometricsBigFive(
-  options?: Omit<UseQueryOptions<BigFiveReliability[], Error>, 'queryKey' | 'queryFn'>
-) {
-  return useQuery({
-    queryKey: psychometricsKeys.bigFive(),
-    queryFn: () => psychometricsApi.getBigFiveReliability(),
-    staleTime: STALE_TIMES.bigFive,
-    ...options,
-  });
+export function usePsychometricsBigFive() {
+  return useFetch(() => psychometricsApi.getBigFiveReliability());
 }
 
 // ============================================================================
@@ -370,18 +298,7 @@ export function usePsychometricsBigFive(
  * Mutation hook to trigger psychometric audit
  */
 export function useTriggerAudit() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: () => psychometricsApi.triggerAudit(),
-
-    onSuccess: () => {
-      // Invalidate all psychometrics data after audit
-      queryClient.invalidateQueries({
-        queryKey: psychometricsKeys.all,
-      });
-    },
-  });
+  return useMutationFn(() => psychometricsApi.triggerAudit());
 }
 
 // ============================================================================
@@ -389,56 +306,36 @@ export function useTriggerAudit() {
 // ============================================================================
 
 /**
- * Prefetch dashboard data (useful for navigation)
+ * Prefetch dashboard data using Next.js router.
+ * These are no-ops after React Query removal since server-side caching
+ * via 'use cache' handles data prefetching at the route level.
+ *
+ * Kept as stubs for API compatibility during migration.
  */
-export function prefetchPsychometricsDashboard(queryClient: QueryClient) {
-  return queryClient.prefetchQuery({
-    queryKey: psychometricsKeys.dashboard(),
-    queryFn: () => psychometricsApi.getDashboard(),
-    staleTime: STALE_TIMES.dashboard,
-  });
+export function prefetchPsychometricsDashboard(_unused?: unknown) {
+  // No-op: Server-side 'use cache' functions handle caching.
+  // Route-level prefetching is handled by Next.js router.prefetch().
 }
 
-/**
- * Prefetch items list (useful for navigation from dashboard)
- */
 export function prefetchPsychometricsItems(
-  queryClient: QueryClient,
-  params: ItemStatisticsFilterParams = {}
+  _unused?: unknown,
+  _params?: ItemStatisticsFilterParams,
 ) {
-  return queryClient.prefetchQuery({
-    queryKey: psychometricsKeys.itemsList(params),
-    queryFn: () => psychometricsApi.getItems(params),
-    staleTime: STALE_TIMES.items,
-  });
+  // No-op: see prefetchPsychometricsDashboard
 }
 
-/**
- * Prefetch item detail (useful for hover on table rows)
- */
 export function prefetchPsychometricsItemDetail(
-  queryClient: QueryClient,
-  questionId: string
+  _unused?: unknown,
+  _questionId?: string,
 ) {
-  return queryClient.prefetchQuery({
-    queryKey: psychometricsKeys.itemDetail(questionId),
-    queryFn: () => psychometricsApi.getItemDetail(questionId),
-    staleTime: STALE_TIMES.items,
-  });
+  // No-op: see prefetchPsychometricsDashboard
 }
 
-/**
- * Prefetch competency detail (useful for hover on table rows)
- */
 export function prefetchPsychometricsCompetencyDetail(
-  queryClient: QueryClient,
-  competencyId: string
+  _unused?: unknown,
+  _competencyId?: string,
 ) {
-  return queryClient.prefetchQuery({
-    queryKey: psychometricsKeys.competencyDetail(competencyId),
-    queryFn: () => psychometricsApi.getCompetencyDetail(competencyId),
-    staleTime: STALE_TIMES.competencies,
-  });
+  // No-op: see prefetchPsychometricsDashboard
 }
 
 // ============================================================================
@@ -447,98 +344,20 @@ export function prefetchPsychometricsCompetencyDetail(
 
 /**
  * Mutation hook for batch status updates
- * Includes optimistic update and cache invalidation
  */
 export function useBatchUpdateItemStatus() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: ({
+  return useMutationFn(
+    ({
       questionIds,
       request,
     }: {
       questionIds: string[];
       request: UpdateItemStatusRequest;
-    }) => psychometricsApi.batchUpdateItemStatus(questionIds, request.newStatus, request.reason),
-
-    onMutate: async ({ questionIds, request }) => {
-      const questionIdSet = new Set(questionIds);
-
-      // Cancel outgoing refetches so they don't overwrite our optimistic update
-      await queryClient.cancelQueries({ queryKey: psychometricsKeys.items() });
-      await queryClient.cancelQueries({ queryKey: psychometricsKeys.flagged() });
-
-      // Snapshot current caches for rollback
-      const previousItemsQueries = queryClient.getQueriesData<Page<ItemStatistics>>({
-        queryKey: psychometricsKeys.items(),
-      });
-      const previousFlagged = queryClient.getQueryData<FlaggedItemSummary[]>(
-        psychometricsKeys.flagged()
-      );
-
-      // Optimistically update all cached items list pages
-      for (const [queryKey, data] of previousItemsQueries) {
-        if (!data) continue;
-        queryClient.setQueryData<Page<ItemStatistics>>(queryKey, {
-          ...data,
-          content: data.content.map((item) =>
-            questionIdSet.has(item.questionId)
-              ? { ...item, validityStatus: request.newStatus }
-              : item
-          ),
-        });
-      }
-
-      // Optimistically update flagged items cache
-      if (previousFlagged) {
-        if (request.newStatus !== ItemValidityStatus.FLAGGED_FOR_REVIEW) {
-          // Remove batch items from flagged list
-          queryClient.setQueryData<FlaggedItemSummary[]>(
-            psychometricsKeys.flagged(),
-            previousFlagged.filter((item) => !questionIdSet.has(item.questionId))
-          );
-        } else {
-          // Update status for batch items that are already in flagged list
-          queryClient.setQueryData<FlaggedItemSummary[]>(
-            psychometricsKeys.flagged(),
-            previousFlagged.map((item) =>
-              questionIdSet.has(item.questionId)
-                ? { ...item, validityStatus: request.newStatus }
-                : item
-            )
-          );
-        }
-      }
-
-      return { previousItemsQueries, previousFlagged };
-    },
-
-    onError: (_err, _variables, context) => {
-      // Rollback all caches to their previous state
-      if (context?.previousItemsQueries) {
-        for (const [queryKey, data] of context.previousItemsQueries) {
-          queryClient.setQueryData(queryKey, data);
-        }
-      }
-      if (context?.previousFlagged) {
-        queryClient.setQueryData(
-          psychometricsKeys.flagged(),
-          context.previousFlagged
-        );
-      }
-    },
-
-    onSettled: () => {
-      // Always refetch to ensure server state consistency
-      queryClient.invalidateQueries({
-        queryKey: psychometricsKeys.items(),
-      });
-      queryClient.invalidateQueries({
-        queryKey: psychometricsKeys.flagged(),
-      });
-      queryClient.invalidateQueries({
-        queryKey: psychometricsKeys.dashboard(),
-      });
-    },
-  });
+    }) =>
+      psychometricsApi.batchUpdateItemStatus(
+        questionIds,
+        request.newStatus,
+        request.reason,
+      ),
+  );
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -331,20 +331,18 @@ export function DevelopmentRecommendations({
   const isCompact = compact ?? isMobile;
 
   // Sort recommendations by priority
-  const sortedRecommendations = useMemo(() => {
-    const priorityOrder: Record<RecommendationPriority, number> = {
-      critical: 0,
-      high: 1,
-      medium: 2,
-      low: 3,
-    };
-    return [...recommendations].sort(
-      (a, b) => priorityOrder[a.priority] - priorityOrder[b.priority]
-    );
-  }, [recommendations]);
+  const priorityOrder: Record<RecommendationPriority, number> = {
+    critical: 0,
+    high: 1,
+    medium: 2,
+    low: 3,
+  };
+  const sortedRecommendations = [...recommendations].sort(
+    (a, b) => priorityOrder[a.priority] - priorityOrder[b.priority]
+  );
 
   // Group by priority if requested
-  const groupedRecommendations = useMemo(() => {
+  const groupedRecommendations = (() => {
     if (!groupByPriority) return null;
 
     const groups: Record<RecommendationPriority, DevelopmentRecommendation[]> = {
@@ -359,7 +357,7 @@ export function DevelopmentRecommendations({
     });
 
     return groups;
-  }, [sortedRecommendations, groupByPriority]);
+  })();
 
   // Visible recommendations
   const visibleRecommendations = showAll
@@ -369,12 +367,10 @@ export function DevelopmentRecommendations({
   const hasMore = recommendations.length > initialCount;
 
   // Calculate total estimated hours
-  const totalHours = useMemo(() => {
-    return recommendations.reduce(
-      (sum, rec) => sum + (rec.estimatedHours ?? 0),
-      0
-    );
-  }, [recommendations]);
+  const totalHours = recommendations.reduce(
+    (sum, rec) => sum + (rec.estimatedHours ?? 0),
+    0
+  );
 
   if (recommendations.length === 0) {
     return (

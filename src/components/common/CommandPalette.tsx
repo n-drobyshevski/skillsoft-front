@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@clerk/nextjs';
 import { useTranslations } from 'next-intl';
@@ -430,21 +430,18 @@ export function CommandPalette() {
   }, []);
 
   // Handle open change - clears query when closing
-  const handleOpenChange = useCallback((nextOpen: boolean) => {
+  const handleOpenChange = (nextOpen: boolean) => {
     setOpen(nextOpen);
     if (!nextOpen) {
       setQuery('');
     }
-  }, []);
+  };
 
-  const navigate = useCallback(
-    (path: string) => {
-      setOpen(false);
-      setQuery('');
-      router.push(path);
-    },
-    [router],
-  );
+  const navigate = (path: string) => {
+    setOpen(false);
+    setQuery('');
+    router.push(path);
+  };
 
   // Filter navigation entries by active lens
   const visibleNavEntries = NAVIGATION_ENTRIES.filter((entry) =>

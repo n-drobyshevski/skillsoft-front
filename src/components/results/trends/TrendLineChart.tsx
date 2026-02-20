@@ -1,6 +1,6 @@
 'use client';
 
-import { memo, useMemo, useState, useEffect } from 'react';
+import { memo, useState, useEffect } from 'react';
 import {
   LineChart,
   Line,
@@ -135,49 +135,44 @@ function TrendLineChartComponent({
   const t = useTranslations('results.trends');
   const locale = useLocale();
 
-  const config = useMemo(() => ({
+  const config = {
     height: isMobile ? 220 : 300,
     fontSize: isMobile ? 10 : 12,
     tickFontSize: isMobile ? 9 : 11,
     strokeWidth: isMobile ? 1.5 : 2,
     dotRadius: isMobile ? 3 : 4,
-  }), [isMobile]);
+  };
 
   // Build a competency name map from the data
-  const competencyNameMap = useMemo(() => {
-    const map: Record<string, string> = {};
-    data.forEach((dp) => {
-      dp.competencyScores.forEach((cs) => {
-        if (!map[cs.competencyId]) {
-          map[cs.competencyId] = cs.competencyName;
-        }
-      });
+  const competencyNameMap: Record<string, string> = {};
+  data.forEach((dp) => {
+    dp.competencyScores.forEach((cs) => {
+      if (!competencyNameMap[cs.competencyId]) {
+        competencyNameMap[cs.competencyId] = cs.competencyName;
+      }
     });
-    return map;
-  }, [data]);
+  });
 
   // Transform data for Recharts
-  const chartData = useMemo((): ChartDataPoint[] => {
-    return data.map((dp) => {
-      const point: ChartDataPoint = {
-        date: dp.completedAt,
-        dateLabel: formatDate(dp.completedAt, isMobile, locale),
-        overall: dp.overallPercentage,
-      };
+  const chartData: ChartDataPoint[] = data.map((dp) => {
+    const point: ChartDataPoint = {
+      date: dp.completedAt,
+      dateLabel: formatDate(dp.completedAt, isMobile, locale),
+      overall: dp.overallPercentage,
+    };
 
-      // Add selected competency scores
-      selectedCompetencies.forEach((compId) => {
-        const cs = dp.competencyScores.find((c) => c.competencyId === compId);
-        point[compId] = cs?.percentage ?? null;
-        if (showConfidenceBands && cs) {
-          point[`${compId}_ciLower`] = cs.ciLower ?? null;
-          point[`${compId}_ciUpper`] = cs.ciUpper ?? null;
-        }
-      });
-
-      return point;
+    // Add selected competency scores
+    selectedCompetencies.forEach((compId) => {
+      const cs = dp.competencyScores.find((c) => c.competencyId === compId);
+      point[compId] = cs?.percentage ?? null;
+      if (showConfidenceBands && cs) {
+        point[`${compId}_ciLower`] = cs.ciLower ?? null;
+        point[`${compId}_ciUpper`] = cs.ciUpper ?? null;
+      }
     });
-  }, [data, selectedCompetencies, showConfidenceBands, isMobile, locale]);
+
+    return point;
+  });
 
   if (data.length === 0) {
     return (

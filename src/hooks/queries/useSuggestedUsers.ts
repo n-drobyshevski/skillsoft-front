@@ -7,10 +7,11 @@
  * Filters out users who are already shared with (by email).
  *
  * Uses Clerk's useAuth() for client-side authentication.
+ *
+ * Migrated from React Query to simple useState + useEffect pattern.
  */
 
-import { useQuery } from '@tanstack/react-query';
-import { useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { useAuth } from '@clerk/nextjs';
 import type { User } from '@/types/user';
 import { UserRole } from '@/types/user';
@@ -52,11 +53,6 @@ function mapOrgRoleToUserRole(orgRole: string | undefined | null): UserRole {
   }
 }
 
-export const suggestedUsersKeys = {
-  all: ['suggestedUsers'] as const,
-  list: () => [...suggestedUsersKeys.all, 'list'] as const,
-};
-
 /**
  * Hook to fetch and filter suggested users for quick selection
  *
@@ -78,6 +74,13 @@ export function useSuggestedUsers(
 ) {
   const { userId, orgRole, isSignedIn } = useAuth();
 
+  const [allUsers, setAllUsers] = useState<User[] | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
+
+  // Track if already fetched to avoid re-fetching on every render
+  const hasFetched = useRef(false);
+
   // Build auth headers for client-side API calls
   const authHeaders = useMemo(() => {
     if (!userId) return null;
@@ -89,37 +92,50 @@ export function useSuggestedUsers(
     };
   }, [userId, orgRole]);
 
-  const {
-    data: allUsers,
-    isLoading,
-    error,
-  } = useQuery({
-    queryKey: suggestedUsersKeys.list(),
-    queryFn: async () => {
-      if (!authHeaders) {
-        return [];
+  // Fetch users once when authenticated
+  useEffect(() => {
+    if (!isSignedIn || !authHeaders || hasFetched.current) return;
+
+    let cancelled = false;
+    hasFetched.current = true;
+    setIsLoading(true);
+
+    (async () => {
+      try {
+        const response = await fetch(`${getApiBaseUrl()}/users`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            ...authHeaders,
+          },
+          mode: 'cors',
+          credentials: 'include',
+        });
+
+        if (!response.ok) {
+          throw new Error(`Failed to fetch users: ${response.status}`);
+        }
+
+        const users = (await response.json()) as User[];
+        if (!cancelled) {
+          setAllUsers(users);
+          setError(null);
+        }
+      } catch (err) {
+        if (!cancelled) {
+          setError(err instanceof Error ? err : new Error('Unknown error'));
+        }
+      } finally {
+        if (!cancelled) {
+          setIsLoading(false);
+        }
       }
+    })();
 
-      const response = await fetch(`${getApiBaseUrl()}/users`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          ...authHeaders,
-        },
-        mode: 'cors',
-        credentials: 'include',
-      });
-
-      if (!response.ok) {
-        throw new Error(`Failed to fetch users: ${response.status}`);
-      }
-
-      return response.json() as Promise<User[]>;
-    },
-    enabled: isSignedIn && !!authHeaders, // Only run when user is authenticated
-    staleTime: 60 * 1000, // 1 minute - users don't change frequently
-    gcTime: 5 * 60 * 1000, // 5 minutes garbage collection
-  });
+    return () => {
+      cancelled = true;
+    };
+  }, [isSignedIn, authHeaders]);
 
   // Filter and limit users
   const suggestedUsers = useMemo(() => {
