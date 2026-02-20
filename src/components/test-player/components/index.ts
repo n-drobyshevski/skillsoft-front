@@ -10,6 +10,10 @@ export type { AbandonDialogProps } from './AbandonDialog';
 export { NavigationErrorDialog } from './NavigationErrorDialog';
 export type { NavigationErrorDialogProps } from './NavigationErrorDialog';
 
+// Save Indicator
+export { SaveIndicator } from './SaveIndicator';
+export type { AnswerSaveStatus } from './SaveIndicator';
+
 // Swipe Components
 export { SwipeIndicators, SwipeHint } from './SwipeIndicators';
 export type { SwipeState, SwipeIndicatorsProps, SwipeHintProps } from './SwipeIndicators';

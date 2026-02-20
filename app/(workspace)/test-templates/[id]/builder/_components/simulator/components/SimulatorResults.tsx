@@ -1,6 +1,7 @@
 'use client';
 
 import React, { memo } from 'react';
+import { useTranslations } from 'next-intl';
 import { Clock, Target } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Strategy, STRATEGY_CONFIG } from '../strategy-context';
@@ -62,16 +63,18 @@ const StatsGrid = memo(function StatsGrid({
   durationMinutes,
   questionCount,
 }: StatsGridProps) {
+  const t = useTranslations('builder.simulator');
+
   return (
     <div className="grid grid-cols-2 gap-2">
       <StatCard
         icon={<Clock className="h-3.5 w-3.5 text-muted-foreground" aria-hidden="true" />}
-        label="Duration"
-        value={`${durationMinutes} min`}
+        label={t('results.duration')}
+        value={`${durationMinutes} ${t('results.min')}`}
       />
       <StatCard
         icon={<Target className="h-3.5 w-3.5 text-muted-foreground" aria-hidden="true" />}
-        label="Questions"
+        label={t('results.questions')}
         value={questionCount}
       />
     </div>

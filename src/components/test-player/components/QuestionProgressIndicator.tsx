@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 import type { QuestionState } from '../ImmersivePlayer';
 import {
@@ -38,20 +39,22 @@ export function QuestionProgressIndicator({
   onNavigate,
   allowNavigation = false,
 }: QuestionProgressIndicatorProps) {
+  const t = useTranslations('assessment');
+
   // Get status label for tooltip
   const getStatusLabel = (state: QuestionState, index: number): string => {
     const questionNum = index + 1;
     switch (state) {
       case 'answered':
-        return `Вопрос ${questionNum}: Отвечен`;
+        return t('progressIndicator.questionAnswered', { number: questionNum });
       case 'skipped':
-        return `Вопрос ${questionNum}: Пропущен`;
+        return t('progressIndicator.questionSkipped', { number: questionNum });
       case 'current':
-        return `Вопрос ${questionNum}: Текущий`;
+        return t('progressIndicator.questionCurrent', { number: questionNum });
       case 'pending':
-        return `Вопрос ${questionNum}: Ожидает`;
+        return t('progressIndicator.questionPending', { number: questionNum });
       default:
-        return `Вопрос ${questionNum}`;
+        return t('progressIndicator.questionDefault', { number: questionNum });
     }
   };
 

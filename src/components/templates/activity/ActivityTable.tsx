@@ -48,7 +48,7 @@ export function ActivityTable({
   const tTable = useTranslations('activity.table');
 
   return (
-    <div className={cn('overflow-hidden', className)}>
+    <div className={cn('overflow-x-auto', className)}>
       <Table>
         <TableHeader>
           <TableRow>

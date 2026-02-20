@@ -1,6 +1,7 @@
 'use client';
 
 import React, { memo, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { Badge } from '@/components/ui/badge';
 import {
   Collapsible,
@@ -102,6 +103,7 @@ export const SimulatorMobile = memo(function SimulatorMobile({
   teamId,
   fineTuneSettings,
 }: SimulatorMobileProps) {
+  const t = useTranslations('builder.simulator');
   const strategyConfig = STRATEGY_CONFIG[strategy];
 
   return (
@@ -116,7 +118,7 @@ export const SimulatorMobile = memo(function SimulatorMobile({
         return (
           <CollapsibleSection
             key={tab.id}
-            title={tab.title}
+            title={t(tab.titleKey as Parameters<typeof t>[0])}
             icon={
               <Icon
                 className={cn(

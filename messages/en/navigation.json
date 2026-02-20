@@ -69,5 +69,18 @@
     "psychDashboard": "Dashboard",
     "itemStatistics": "Item Statistics",
     "flaggedItems": "Flagged Items"
+  },
+  "commandPalette": {
+    "title": "Command Palette",
+    "description": "Search or jump to a page...",
+    "placeholder": "Search templates, competencies, or navigate...",
+    "noResults": "No results found.",
+    "searching": "Searching...",
+    "navigation": "Navigation",
+    "searchResults": "Search Results",
+    "templates": "Templates",
+    "createNewTemplate": "Create New Template",
+    "psychometrics": "Psychometrics",
+    "skillMapper": "Skill Mapper"
   }
 }

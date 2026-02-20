@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useMemo } from 'react';
+import { useTranslations } from 'next-intl';
 import { AnswerCard } from './cards/AnswerCard';
 import { AnswerSummaryItem, CompetencyGroup } from '@/store/review-store';
 import { ChevronDown } from 'lucide-react';
@@ -96,6 +97,7 @@ function CompetencyGroupSection({
   onToggleCard,
   onEditAnswer,
 }: CompetencyGroupSectionProps) {
+  const t = useTranslations('assessment');
   const [isGroupExpanded, setIsGroupExpanded] = React.useState(true);
 
   // Sort items within group by question index
@@ -127,11 +129,11 @@ function CompetencyGroupSection({
               {/* Group stats */}
               <div className="flex items-center gap-2 text-xs">
                 <span className="text-emerald-400 tabular-nums">
-                  {group.answeredCount} отв.
+                  {t('answerCard.answeredShort', { count: group.answeredCount })}
                 </span>
                 {group.skippedCount > 0 && (
                   <span className="text-amber-400 tabular-nums">
-                    {group.skippedCount} проп.
+                    {t('answerCard.skippedShort', { count: group.skippedCount })}
                   </span>
                 )}
               </div>

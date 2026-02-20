@@ -400,42 +400,27 @@ export function QuestionCard({
           {announcement}
         </div>
 
-        {/* Question header */}
+        {/* Question header - single DOM structure, responsive via CSS only */}
         <div className="space-y-4 mb-6">
-          {/* Mobile: Question number on separate line */}
-          <div className="flex items-center gap-3 sm:hidden">
+          {/* Question number + badge row (stacks on mobile, inline on desktop) */}
+          <div className="flex items-center sm:items-start gap-3 sm:gap-4">
             <span
               className="shrink-0 w-9 h-9 rounded-full bg-neutral-800 text-neutral-400 text-sm font-bold flex items-center justify-center"
               aria-label={`Question ${questionNumber}`}
             >
               {questionNumber}
             </span>
-            <span className="text-sm font-medium text-neutral-500">
-              {t('question')} {questionNumber}
-            </span>
-            {/* Question type badge (mobile) */}
-            <span className="ml-auto inline-block text-[10px] text-neutral-500 bg-neutral-800/50 px-2 py-1 rounded whitespace-nowrap">
-              {isSJT && t('situational')}
-              {isMCQ && t('choice')}
-              {isLikertType && t('scale')}
-              {isBehavioralExample && t('behavioral')}
-              {isOpenText && t('open')}
-            </span>
-          </div>
 
-          {/* Desktop: Question number beside text (original layout) */}
-          <div className="hidden sm:flex items-start gap-4">
-            <span
-              className="shrink-0 w-9 h-9 rounded-full bg-neutral-800 text-neutral-400 text-sm font-bold flex items-center justify-center"
-              aria-label={`Question ${questionNumber}`}
-            >
-              {questionNumber}
-            </span>
-            <div className="space-y-3 flex-1">
+            <div className="flex-1 space-y-3 min-w-0">
+              {/* Mobile: question label text shown inline beside number */}
+              <span className="text-sm font-medium text-neutral-500 sm:hidden">
+                {t('question')} {questionNumber}
+              </span>
+
               {/* Scenario (for SJT questions) */}
               {question.scenario && (
                 <div
-                  className="text-neutral-400 text-sm leading-relaxed italic border-l-2 border-neutral-700 pl-4 py-2 bg-neutral-800/20 rounded-r"
+                  className="text-neutral-400 text-sm leading-relaxed italic border-l-2 border-neutral-700 pl-3 sm:pl-4 py-2 bg-neutral-800/20 rounded-r"
                   role="note"
                   aria-label="Scenario context"
                 >
@@ -443,39 +428,20 @@ export function QuestionCard({
                 </div>
               )}
 
-              {/* Question text */}
-              <h2 className="text-lg sm:text-xl text-white font-medium leading-relaxed">
+              {/* Question text - single instance, responsive sizing */}
+              <h2 className="text-base sm:text-xl text-white font-medium leading-relaxed">
                 {question.questionText}
               </h2>
 
-              {/* Question type badge (desktop) */}
-              <span className="inline-block text-xs text-neutral-500 bg-neutral-800/50 px-2 py-1 rounded">
-                {isSJT && t('situationalQuestion')}
-                {isMCQ && t('multipleChoice')}
-                {isLikertType && t('ratingScale')}
-                {isBehavioralExample && t('behavioralExample')}
-                {isOpenText && t('openQuestion')}
+              {/* Question type badge - responsive text, aria-hidden to avoid double-reading */}
+              <span className="inline-block text-[10px] sm:text-xs text-neutral-500 bg-neutral-800/50 px-2 py-1 rounded whitespace-nowrap" aria-hidden="true">
+                {isSJT && (<><span className="sm:hidden">{t('situational')}</span><span className="hidden sm:inline">{t('situationalQuestion')}</span></>)}
+                {isMCQ && (<><span className="sm:hidden">{t('choice')}</span><span className="hidden sm:inline">{t('multipleChoice')}</span></>)}
+                {isLikertType && (<><span className="sm:hidden">{t('scale')}</span><span className="hidden sm:inline">{t('ratingScale')}</span></>)}
+                {isBehavioralExample && (<><span className="sm:hidden">{t('behavioral')}</span><span className="hidden sm:inline">{t('behavioralExample')}</span></>)}
+                {isOpenText && (<><span className="sm:hidden">{t('open')}</span><span className="hidden sm:inline">{t('openQuestion')}</span></>)}
               </span>
             </div>
-          </div>
-
-          {/* Mobile: Question content (scenario and text) */}
-          <div className="space-y-3 sm:hidden">
-            {/* Scenario (for SJT questions) */}
-            {question.scenario && (
-              <div
-                className="text-neutral-400 text-sm leading-relaxed italic border-l-2 border-neutral-700 pl-3 py-2 bg-neutral-800/20 rounded-r"
-                role="note"
-                aria-label="Scenario context"
-              >
-                {question.scenario}
-              </div>
-            )}
-
-            {/* Question text */}
-            <h2 className="text-base sm:text-xl text-white font-medium leading-relaxed">
-              {question.questionText}
-            </h2>
           </div>
         </div>
 

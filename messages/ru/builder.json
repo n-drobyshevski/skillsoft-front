@@ -1,0 +1,297 @@
+{
+  "workspace": {
+    "competencyLibrary": "Библиотека компетенций",
+    "canvas": "Конструктор",
+    "simulate": "Симуляция",
+    "add": "Добавить",
+    "addCompetencyFromLibrary": "Добавить компетенцию из библиотеки",
+    "lastSim": "Послед. тест",
+    "viewDetails": "Подробнее",
+    "builderNavigation": "Навигация конструктора"
+  },
+  "canvas": {
+    "structuralWorkbench": "Структурный конструктор",
+    "priorityTooltip": "Порядок задаёт приоритет. При ограниченном времени вопросы из верхних карточек задаются первыми.",
+    "undoLabel": "Отменить (Ctrl+Z)",
+    "redoLabel": "Повторить (Ctrl+Shift+Z)",
+    "undoTooltip": "Отменить",
+    "redoTooltip": "Повторить",
+    "undoKey": "Ctrl+Z",
+    "redoKey": "Ctrl+Shift+Z",
+    "balanceWeightsLabel": "Сбалансировать веса до среднего 1.0x",
+    "balanceWeightsTooltip": "Сбалансировать веса до среднего 1.0x",
+    "testDrive": "Пробный запуск",
+    "saveNow": "Сохранить",
+    "dragHint": "Перетащите компетенции сюда",
+    "dragHintAlt": "Или нажмите +, чтобы добавить из библиотеки",
+    "dropToAdd": "Отпустите, чтобы добавить компетенцию",
+    "undoneAnnouncement": "Отменено. Сейчас {count} компетенций.",
+    "redoneAnnouncement": "Повторено. Сейчас {count} компетенций.",
+    "weightsBalancedAnnouncement": "Веса сбалансированы. Среднее значение теперь 1.0x.",
+    "movedAnnouncement": "{name} перемещён {direction} на позицию {position}.",
+    "removedAnnouncement": "{name} удалён. Осталось {count} компетенций."
+  },
+  "library": {
+    "searchPlaceholder": "Поиск компетенций...",
+    "available": "{count} доступно",
+    "selected": "{count} выбрано",
+    "noCompetenciesFound": "Компетенции не найдены",
+    "tryAdjustingSearch": "Попробуйте изменить параметры поиска",
+    "addToCanvas": "Добавить {name} в конструктор",
+    "health": {
+      "noQuestions": "Нет доступных вопросов",
+      "limitedQuestions": "Ограниченное количество вопросов",
+      "goodInventory": "Хороший набор вопросов"
+    }
+  },
+  "card": {
+    "dragToReorder": "Удерживайте и перетащите для изменения порядка",
+    "collapseDetail": "Свернуть для краткого вида",
+    "expandOptions": "Развернуть для дополнительных параметров",
+    "weight": "Вес",
+    "weightTooltip": "Больший вес = больше вопросов. Порядок тоже важен — верхние карточки имеют приоритет.",
+    "difficulty": "Сложность",
+    "difficultyOptions": {
+      "foundational": "Базовый",
+      "foundationalShort": "Б",
+      "intermediate": "Средний",
+      "intermediateShort": "С",
+      "advanced": "Продвинутый",
+      "advancedShort": "П",
+      "expert": "Экспертный",
+      "expertShort": "Э"
+    },
+    "inventoryDepth": "Глубина банка вопросов",
+    "inventoryEMH": "Л/С/Т",
+    "sampleQuestion": "Пример вопроса",
+    "noSampleAvailable": "Пример недоступен",
+    "indicatorPriority": "Приоритет индикаторов",
+    "optimisticApply": "Оптимистичное применение",
+    "removeButton": "Удалить",
+    "removeTitle": "Удалить компетенцию?",
+    "removeDescription": "Компетенция <strong>{name}</strong> будет удалена из вашего тестового чертежа. Вы можете добавить её обратно из библиотеки в любое время.",
+    "removeCancel": "Отмена",
+    "removeConfirm": "Удалить",
+    "decreaseWeight": "Уменьшить вес",
+    "increaseWeight": "Увеличить вес"
+  },
+  "saveStatus": {
+    "allChangesSaved": "Все изменения сохранены",
+    "unsavedChanges": "Несохранённые изменения",
+    "saving": "Сохранение...",
+    "saved": "Сохранено",
+    "saveFailed": "Ошибка сохранения",
+    "offline": "Офлайн — изменения сохранены локально",
+    "retrying": "Повторная попытка...",
+    "savedAgo": "Сохранено {time}",
+    "unsaved": "Не сохранено",
+    "retryingProgress": "Повтор ({attempt}/3)...",
+    "offlineShort": "Офлайн",
+    "lastSaved": "Последнее сохранение: {time}",
+    "changesWillSync": "Изменения синхронизируются при восстановлении связи",
+    "unsavedChangesLabel": "Несохранённые изменения",
+    "timeAgo": {
+      "justNow": "только что",
+      "secondsAgo": "{seconds} сек назад",
+      "minutesAgo": "{minutes} мин назад",
+      "hoursAgo": "{hours} ч назад"
+    }
+  },
+  "conflict": {
+    "title": "Обнаружен конфликт чертежа",
+    "description": "Другая вкладка браузера внесла изменения в этот чертёж. Выберите способ разрешения:",
+    "detectedAgo": "Конфликт обнаружен {time}",
+    "yourChanges": "Ваши изменения",
+    "otherTab": "Другая вкладка",
+    "competencies": "{count} компетенций",
+    "newItems": "+{count} новых",
+    "onlyInYourVersion": "Только в вашей версии:",
+    "onlyInOtherTab": "Только в другой вкладке:",
+    "inBoth": "В обеих ({count}):",
+    "moreItems": "ещё +{count}",
+    "keepMine": "Оставить мои",
+    "useTheirs": "Использовать их",
+    "mergeBoth": "Объединить оба"
+  },
+  "simulator": {
+    "testDrive": "Пробный запуск",
+    "runSimulation": "Запустить симуляцию",
+    "runningSimulation": "Выполняется симуляция...",
+    "rerunSimulation": "Повторить симуляцию",
+    "rerun": "Повторить",
+    "running": "Выполняется...",
+    "loadingResults": "Загрузка результатов симуляции",
+    "loadingResultsText": "Загрузка результатов симуляции...",
+    "personas": {
+      "perfect": "Идеальный",
+      "perfectDescription": "Идеальный кандидат",
+      "random": "Случайный",
+      "randomDescription": "Случайные ответы",
+      "failing": "Слабый",
+      "failingDescription": "Слабый кандидат",
+      "candidate": "{persona} кандидат",
+      "changePersona": "Сменить персону"
+    },
+    "score": {
+      "simulatedScore": "Результат симуляции",
+      "pass": "Пройдено",
+      "fail": "Не пройдено",
+      "toPass": "/ {score}% для прохождения",
+      "jobFitScore": "Оценка соответствия должности",
+      "qualified": "Подходит",
+      "belowThreshold": "Ниже порога",
+      "toQualify": "/ {score}% для соответствия",
+      "teamGapAnalysis": "Анализ разрыва в команде",
+      "aboveTeam": "на {gap}% выше команды",
+      "belowTeam": "на {gap}% ниже команды",
+      "atTeam": "на уровне команды ({gap}%)",
+      "individual": "Индивидуальный",
+      "teamBenchmark": "Показатель команды",
+      "competencyProfile": "Профиль компетенций",
+      "discoveryMode": "Режим исследования",
+      "competencies": "компетенций",
+      "noPassFail": "Без оценки сдал/не сдал — формируется паспорт компетенций",
+      "competencyProfileAssessment": "Оценка профиля компетенций"
+    },
+    "warnings": {
+      "inventoryWarnings": "Предупреждения по банку вопросов",
+      "questions": "{count} вопросов"
+    },
+    "error": {
+      "title": "Ошибка симулятора",
+      "defaultMessage": "Произошла непредвиденная ошибка при отображении симулятора.",
+      "tryAgain": "Попробовать снова",
+      "errorDetails": "Подробности ошибки (только разработка)"
+    },
+    "strategy": {
+      "missingConfiguration": "Отсутствует конфигурация",
+      "incomplete": "Не завершено",
+      "learnMore": "Подробнее о стратегии «{label}»",
+      "configurationIncomplete": "конфигурация не завершена"
+    },
+    "emptyState": {
+      "addCompetencies": "Добавьте компетенции для симуляции",
+      "readyToSimulate": "Готово к симуляции",
+      "configurationNeeded": "Требуется настройка",
+      "noCompetencies": {
+        "universal": "Перетащите компетенции из библиотеки для построения профиля оценки",
+        "jobFit": "Добавьте компетенции, связанные с должностью, для симуляции оценки соответствия",
+        "teamGap": "Добавьте командные компетенции для симуляции анализа разрывов"
+      },
+      "noSimulation": {
+        "universal": "Нажмите «Запустить», чтобы увидеть, как оценка определит профиль компетенций",
+        "jobFit": "Нажмите «Запустить», чтобы увидеть прогноз соответствия должности",
+        "teamGap": "Нажмите «Запустить», чтобы проанализировать разрывы относительно команды"
+      },
+      "missingConfig": {
+        "universal": "Для этой стратегии дополнительная настройка не требуется",
+        "jobFit": "Укажите код O*NET SOC в настройках шаблона для анализа соответствия должности",
+        "teamGap": "Выберите команду в настройках шаблона для анализа разрывов"
+      },
+      "goToSettings": "Перейти к настройкам"
+    },
+    "configure": {
+      "testYourBlueprint": "Протестируйте ваш чертёж",
+      "runDescription": "Запустите симуляцию, чтобы увидеть, как кандидаты будут проходить эту оценку. Выберите тестовую персону для различных сценариев.",
+      "selectTestPersona": "Выберите тестовую персону",
+      "selectPersonaDescription": "Выберите, как симулированный кандидат будет отвечать",
+      "addCompetenciesToEnable": "Добавьте компетенции в чертёж, чтобы включить симуляцию"
+    },
+    "results": {
+      "detailedAnalysis": "Детальный анализ",
+      "questionTimeline": "Хронология вопросов",
+      "coverageAnalytics": "Аналитика покрытия",
+      "howThisWorks": "Как это работает",
+      "tip": "Совет:",
+      "tipContent": "Используйте плавающую кнопку настроек для регулировки строгости и насыщенности, затем перезапустите для сравнения результатов.",
+      "duration": "Длительность",
+      "questions": "Вопросы",
+      "min": "мин"
+    },
+    "fineTune": {
+      "title": "Тонкая настройка",
+      "description": "Настройте параметры симуляции и перезапустите, чтобы увидеть эффект.",
+      "openSettings": "Открыть настройки тонкой настройки",
+      "strictness": "Строгость",
+      "strictnessDescription": "Более высокие значения ужесточают оценку и снижают случайность выбора вопросов.",
+      "saturation": "Защита от насыщения",
+      "saturationDescription": "Предотвращает чрезмерное использование одного и того же пула компетенций при повторных попытках.",
+      "allowBacktracking": "Разрешить возврат",
+      "allowBacktrackingDescription": "Позволяет кандидатам возвращаться и изменять предыдущие ответы.",
+      "saveSettings": "Сохранить настройки",
+      "applyAndRerun": "Применить и повторить"
+    },
+    "preflight": {
+      "issuesDetected": "Обнаружено {count} {count, plural, one {проблема} few {проблемы} other {проблем}}",
+      "configurationRequired": "Требуется настройка",
+      "preflightWarnings": "Предварительные предупреждения"
+    },
+    "selectionReason": {
+      "coverageGap": "Пробел в покрытии",
+      "calibration": "Калибровка",
+      "adaptiveCheck": "Адаптивная проверка",
+      "randomized": "Случайный выбор",
+      "backstop": "Страховка"
+    },
+    "strategyHelp": {
+      "universalBaseline": {
+        "title": "Универсальная базовая оценка",
+        "points": {
+          "coverage": "Оценивает широкое покрытие компетенций",
+          "passport": "Формирует паспорт/профиль компетенций",
+          "noPassFail": "Без оценки сдал/не сдал — направлена на исследование",
+          "bestFor": "Подходит для: анализа потребностей в обучении, планирования карьеры"
+        }
+      },
+      "targetedFit": {
+        "title": "Оценка соответствия должности",
+        "points": {
+          "aligned": "Привязана к требованиям должности O*NET при указании SOC-кода",
+          "weighted": "Взвешенная оценка относительно профиля должности",
+          "threshold": "Чёткий порог прохождения/непрохождения",
+          "bestFor": "Подходит для: найма, подбора на должность, продвижения"
+        }
+      },
+      "dynamicGap": {
+        "title": "Анализ разрывов в команде",
+        "points": {
+          "compares": "Сравнивает индивидуальные результаты с показателями команды",
+          "identifies": "Выявляет взаимодополняющие сильные стороны и области развития",
+          "settings": "Выберите команду в настройках для включения сравнения",
+          "bestFor": "Подходит для: формирования команд, планирования преемственности"
+        }
+      }
+    },
+    "strategyConfig": {
+      "universalBaseline": {
+        "label": "Универсальная базовая",
+        "shortLabel": "Базовая",
+        "description": "Общая оценка компетенций для любой роли"
+      },
+      "targetedFit": {
+        "label": "Оценка соответствия должности",
+        "shortLabel": "Должность",
+        "description": "Оценка для конкретной роли на основе стандартов O*NET"
+      },
+      "dynamicGap": {
+        "label": "Анализ разрывов в команде",
+        "shortLabel": "Команда",
+        "description": "Сравнение кандидата с показателями команды"
+      }
+    },
+    "sections": {
+      "assessmentProfile": "Профиль оценки",
+      "resultsPreview": "Предварительный просмотр результатов",
+      "questionFlow": "Последовательность вопросов",
+      "coverageAnalysis": "Анализ покрытия",
+      "fineTune": "Тонкая настройка",
+      "jobAlignment": "Соответствие должности",
+      "fitPreview": "Предпросмотр соответствия",
+      "skillCoverage": "Покрытие навыков",
+      "teamComparison": "Сравнение с командой",
+      "gapAnalysis": "Анализ разрывов",
+      "teamFitPreview": "Предпросмотр командного соответствия",
+      "analytics": "Аналитика"
+    }
+  }
+}

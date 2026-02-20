@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';
@@ -20,6 +21,7 @@ interface FineTuneTabProps {
 }
 
 export default function FineTuneTab(props: FineTuneTabProps) {
+  const t = useTranslations('builder.simulator');
   const {
     strictness,
     saturation,
@@ -37,12 +39,12 @@ export default function FineTuneTab(props: FineTuneTabProps) {
       <div className="p-3 rounded-xl border bg-muted/30 space-y-3">
         <div className="flex items-center gap-2">
           <SlidersHorizontal className="h-4 w-4 text-muted-foreground" />
-          <span className="text-sm font-medium">Fine tune</span>
+          <span className="text-sm font-medium">{t('fineTune.title')}</span>
         </div>
 
         <div className="space-y-2">
           <div className="flex items-center justify-between text-xs text-muted-foreground">
-            <span>Strictness</span>
+            <span>{t('fineTune.strictness')}</span>
             <span className="font-semibold text-foreground">{strictness}</span>
           </div>
           <Slider
@@ -55,13 +57,13 @@ export default function FineTuneTab(props: FineTuneTabProps) {
             className="[&_[role=slider]]:min-h-[24px] [&_[role=slider]]:min-w-[24px]"
           />
           <p className="text-[11px] text-muted-foreground">
-            Higher values tighten scoring and reduce randomness.
+            {t('fineTune.strictnessDescription')}
           </p>
         </div>
 
         <div className="space-y-2">
           <div className="flex items-center justify-between text-xs text-muted-foreground">
-            <span>Item saturation guard</span>
+            <span>{t('fineTune.saturation')}</span>
             <span className="font-semibold text-foreground">{saturation}%</span>
           </div>
           <Slider
@@ -74,14 +76,16 @@ export default function FineTuneTab(props: FineTuneTabProps) {
             className="[&_[role=slider]]:min-h-[24px] [&_[role=slider]]:min-w-[24px]"
           />
           <p className="text-[11px] text-muted-foreground">
-            Prevents overusing the same competency pool across attempts.
+            {t('fineTune.saturationDescription')}
           </p>
         </div>
 
         <div className="flex items-center justify-between rounded-lg border px-3 py-2 bg-background/60">
           <div className="space-y-0.5">
-            <Label className="text-sm">Allow backtracking</Label>
-            <p className="text-[11px] text-muted-foreground">Let candidates revisit previous items.</p>
+            <Label className="text-sm">{t('fineTune.allowBacktracking')}</Label>
+            <p className="text-[11px] text-muted-foreground">
+              {t('fineTune.allowBacktrackingDescription')}
+            </p>
           </div>
           <Switch
             checked={allowBacktracking}
@@ -97,14 +101,14 @@ export default function FineTuneTab(props: FineTuneTabProps) {
             onClick={onApply}
             disabled={disabled}
           >
-            Save settings
+            {t('fineTune.saveSettings')}
           </Button>
           <Button
             className="flex-1 min-h-[44px] md:min-h-0"
             onClick={onRun}
             disabled={disabled}
           >
-            {disabled ? 'Running...' : 'Apply & re-run'}
+            {disabled ? t('running') : t('fineTune.applyAndRerun')}
           </Button>
         </div>
       </div>

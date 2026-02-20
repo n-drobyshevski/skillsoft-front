@@ -131,7 +131,98 @@ export function SessionsTable({
 
   return (
     <>
-      <div className="overflow-x-auto">
+      {/* Mobile Card View */}
+      <div className="flex flex-col gap-2 md:hidden">
+        {sessions.map((session) => {
+          const isCompleted = session.status === SessionStatus.COMPLETED;
+
+          return (
+            <div
+              key={session.id}
+              className={cn(
+                "rounded-lg border bg-card p-3 shadow-sm",
+                isCompleted &&
+                  "cursor-pointer hover:bg-muted/50 active:bg-muted/60 transition-colors"
+              )}
+              onClick={() => handleRowClick(session)}
+              role={isCompleted ? "button" : undefined}
+              tabIndex={isCompleted ? 0 : undefined}
+              onKeyDown={(e) => {
+                if (isCompleted && (e.key === "Enter" || e.key === " ")) {
+                  e.preventDefault();
+                  handleRowClick(session);
+                }
+              }}
+            >
+              <div className="flex items-start justify-between mb-2">
+                <div className="min-w-0 flex-1 mr-2">
+                  <p className="font-medium text-sm truncate">
+                    {session.candidateName || "Anonymous"}
+                  </p>
+                  {session.candidateEmail && (
+                    <p className="text-xs text-muted-foreground truncate">
+                      {session.candidateEmail}
+                    </p>
+                  )}
+                </div>
+                <StatusBadge status={session.status} />
+              </div>
+
+              <div className="flex items-center justify-between mb-2">
+                <div className="text-xs text-muted-foreground">
+                  {session.score !== undefined ? (
+                    <span
+                      className={cn(
+                        "font-semibold text-sm",
+                        session.score >= passingScore
+                          ? "text-green-600"
+                          : "text-red-600"
+                      )}
+                    >
+                      {session.score}%
+                    </span>
+                  ) : (
+                    <span className="text-muted-foreground text-sm">—</span>
+                  )}
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between text-xs text-muted-foreground">
+                <span>
+                  {session.durationMinutes
+                    ? `${session.durationMinutes} min`
+                    : "—"}
+                </span>
+                <span>
+                  {session.createdAt
+                    ? new Date(session.createdAt).toLocaleDateString()
+                    : "—"}
+                </span>
+              </div>
+
+              {isCompleted && (
+                <div className="mt-2 pt-2 border-t">
+                  <Button
+                    asChild
+                    variant="outline"
+                    size="sm"
+                    className="w-full h-8 text-xs text-primary hover:text-primary hover:bg-primary/5"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <Link href={`/test-templates/results/${session.id}`}>
+                      <ExternalLink className="h-3.5 w-3.5 mr-1.5" />
+                      View Full Results
+                    </Link>
+                  </Button>
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Desktop Table View */}
+      <div className="hidden md:block overflow-x-auto">
         <Table>
           <TableHeader>
             <TableRow className="bg-muted/5 hover:bg-muted/5">
@@ -140,10 +231,10 @@ export function SessionsTable({
               </TableHead>
               <TableHead className="min-w-[100px]">Status</TableHead>
               <TableHead className="min-w-[80px]">Score</TableHead>
-              <TableHead className="hidden md:table-cell min-w-[100px]">
+              <TableHead className="min-w-[100px]">
                 Duration
               </TableHead>
-              <TableHead className="hidden md:table-cell min-w-[120px]">
+              <TableHead className="min-w-[120px]">
                 Started
               </TableHead>
               <TableHead className="text-right pr-4 min-w-[80px]">
@@ -165,28 +256,22 @@ export function SessionsTable({
                   )}
                   onClick={() => handleRowClick(session)}
                 >
-                  <TableCell className="pl-4 py-3 align-top sm:align-middle">
+                  <TableCell className="pl-4 py-3">
                     <div className="flex flex-col gap-0.5">
-                      <p className="font-medium text-sm truncate max-w-[140px] sm:max-w-xs">
+                      <p className="font-medium text-sm truncate max-w-xs">
                         {session.candidateName || "Anonymous"}
                       </p>
                       {session.candidateEmail && (
-                        <p className="text-xs text-muted-foreground truncate max-w-[140px] sm:max-w-xs">
+                        <p className="text-xs text-muted-foreground truncate max-w-xs">
                           {session.candidateEmail}
                         </p>
                       )}
-                      {/* Mobile-only date display */}
-                      <p className="text-[10px] text-muted-foreground md:hidden mt-1">
-                        {session.createdAt
-                          ? new Date(session.createdAt).toLocaleDateString()
-                          : ""}
-                      </p>
                     </div>
                   </TableCell>
-                  <TableCell className="py-3 align-top sm:align-middle">
+                  <TableCell className="py-3">
                     <StatusBadge status={session.status} />
                   </TableCell>
-                  <TableCell className="py-3 align-top sm:align-middle">
+                  <TableCell className="py-3">
                     {session.score !== undefined ? (
                       <span
                         className={cn(
@@ -202,18 +287,18 @@ export function SessionsTable({
                       <span className="text-muted-foreground text-sm">—</span>
                     )}
                   </TableCell>
-                  <TableCell className="hidden md:table-cell text-sm">
+                  <TableCell className="text-sm">
                     {session.durationMinutes
                       ? `${session.durationMinutes} min`
                       : "—"}
                   </TableCell>
-                  <TableCell className="hidden md:table-cell text-muted-foreground text-sm">
+                  <TableCell className="text-muted-foreground text-sm">
                     {session.createdAt
                       ? new Date(session.createdAt).toLocaleDateString()
                       : "—"}
                   </TableCell>
                   <TableCell
-                    className="text-right pr-4 py-3 align-top sm:align-middle"
+                    className="text-right pr-4 py-3"
                     onClick={(e) => e.stopPropagation()}
                   >
                     {isCompleted && (
@@ -226,7 +311,7 @@ export function SessionsTable({
                         <Link
                           href={`/test-templates/results/${session.id}`}
                         >
-                          <span className="hidden sm:inline mr-1">Full</span>
+                          <span className="mr-1">Full</span>
                           <ExternalLink className="h-4 w-4" />
                         </Link>
                       </Button>

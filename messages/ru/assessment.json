@@ -89,5 +89,103 @@
     "continueWithoutSaving": "Продолжить без сохранения",
     "retry": "Попробовать снова",
     "retrying": "Повторяем..."
+  },
+  "player": {
+    "validation": {
+      "noCurrentQuestion": "Нет текущего вопроса",
+      "pleaseSelectOrEnter": "Пожалуйста, выберите или введите ответ",
+      "pleaseSelectAtLeastOne": "Пожалуйста, выберите хотя бы один вариант",
+      "answerMustBeText": "Ответ должен быть текстом",
+      "pleaseEnterAnswer": "Пожалуйста, введите ответ",
+      "answerTooShort": "Ответ слишком короткий. {remaining, plural, one {Необходимо ещё # символ} few {Необходимо ещё # символа} many {Необходимо ещё # символов} other {Необходимо ещё # символов}}",
+      "pleaseSelectOption": "Пожалуйста, выберите вариант ответа",
+      "pleaseCheckAnswer": "Пожалуйста, проверьте ваш ответ"
+    },
+    "toast": {
+      "retryAttempt": "Повторная попытка... ({attempt}/{maxRetries})",
+      "sessionCancelled": "Сессия была отменена",
+      "testAlreadyCompleted": "Тест уже завершён",
+      "invalidNavigation": "Недействительный переход к следующему вопросу",
+      "questionNotFound": "Вопрос не найден",
+      "failedToSaveAnswer": "Не удалось сохранить ответ",
+      "savingAttempt": "Сохранение... (попытка {attempt}/{maxRetries})",
+      "cannotSkipLast": "Последний вопрос нельзя пропустить",
+      "failedToSkipQuestion": "Не удалось пропустить вопрос",
+      "testCannotBeCompleted": "Тест не может быть завершён",
+      "failedToCompleteTest": "Не удалось завершить тест",
+      "failedToCancelTest": "Не удалось отменить тест",
+      "answerSaved": "Ответ сохранён",
+      "changesNotSaved": "Изменения не сохранены",
+      "failedToNavigate": "Не удалось перейти к вопросу",
+      "failedToLoadSummary": "Не удалось загрузить сводку ответов",
+      "sessionNotFound": "Сессия не найдена. Возможно, она была удалена.",
+      "testAlreadyCompleted2": "Тест уже был завершён",
+      "testTimedOut": "Время выполнения теста истекло",
+      "cannotCompleteInStatus": "Невозможно завершить тест в статусе: {status}",
+      "cannotCompleteChanged": "Тест не может быть завершён. Возможно, он уже был завершён или отменён.",
+      "serverError": "Ошибка сервера. Попробуйте ещё раз."
+    },
+    "summary": {
+      "questionNumber": "Вопрос {number}",
+      "skippedAnswer": "Пропущено",
+      "selectedCount": "Выбрано: {count}",
+      "answerGiven": "Ответ дан",
+      "otherQuestions": "Другие вопросы",
+      "likertValue": "{value}/5"
+    },
+    "dialog": {
+      "exitTitle": "Выйти из теста?",
+      "exitDescription": "Ваш прогресс будет сохранён. Вы сможете продолжить позже.",
+      "continueTest": "Продолжить тест",
+      "exitButton": "Выйти",
+      "timeExpiredTitle": "Время истекло",
+      "timeExpiredDescription": "Отведённое время на тест закончилось. Ваши ответы будут сохранены автоматически.",
+      "viewResults": "Посмотреть результаты"
+    },
+    "navigation": {
+      "backDisabled": "Возврат к предыдущим вопросам отключён для этого теста",
+      "firstQuestion": "Это первый вопрос"
+    }
+  },
+  "progressIndicator": {
+    "questionAnswered": "Вопрос {number}: Отвечен",
+    "questionSkipped": "Вопрос {number}: Пропущен",
+    "questionCurrent": "Вопрос {number}: Текущий",
+    "questionPending": "Вопрос {number}: Ожидает",
+    "questionDefault": "Вопрос {number}"
+  },
+  "answerCard": {
+    "statusAnswered": "Отвечено",
+    "statusSkipped": "Пропущено",
+    "statusFlagged": "Отмечено",
+    "statusPending": "Ожидание",
+    "typeScale": "Шкала",
+    "typeSituational": "Ситуация",
+    "typeChoice": "Выбор",
+    "typeText": "Текст",
+    "typeBehavioral": "Пример",
+    "typeDefault": "Вопрос",
+    "timeSeconds": "{seconds}с",
+    "editButton": "Изменить",
+    "skippedPreview": "Пропущено",
+    "questionWasSkipped": "Вопрос был пропущен",
+    "selectedAnswer": "Выбранный ответ:",
+    "yourAnswer": "Ваш ответ:",
+    "noQuestionsWithStatus": "Нет вопросов с выбранным статусом",
+    "answeredShort": "{count} отв.",
+    "skippedShort": "{count} проп."
+  },
+  "submission": {
+    "submittingResults": "Отправка результатов...",
+    "pleaseWait": "Пожалуйста, подождите. Это может занять несколько секунд.",
+    "attemptOf": "Попытка {current} из {max}",
+    "submissionError": "Ошибка отправки",
+    "retryButton": "Повторить попытку",
+    "backToReview": "Вернуться к просмотру",
+    "maxAttemptsExceeded": "Превышено количество попыток. Попробуйте позже или обратитесь в поддержку."
+  },
+  "timer": {
+    "noLimit": "Без ограничения",
+    "expired": "Время истекло"
   }
 }

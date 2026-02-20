@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { useTranslations } from 'next-intl';
 import { ClipboardList, Briefcase, Users, HelpCircle, AlertTriangle } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -44,22 +45,45 @@ interface StrategyHeroBadgeProps {
 // ============================================
 
 function StrategyHelpContent({ strategy }: { strategy: Strategy }) {
+  const t = useTranslations('builder.simulator');
   const content = STRATEGY_HELP_CONTENT[strategy];
 
   return (
     <div className="space-y-2">
-      <p className="font-medium text-sm">{content.title}</p>
+      <p className="font-medium text-sm">{t(content.titleKey as Parameters<typeof t>[0])}</p>
       <ul className="text-xs text-muted-foreground space-y-1">
-        {content.points.map((point, i) => (
+        {content.pointKeys.map((key, i) => (
           <li key={i} className="flex items-start gap-1.5">
             <span className="text-primary mt-0.5 shrink-0">*</span>
-            <span>{point}</span>
+            <span>{t(key as Parameters<typeof t>[0])}</span>
           </li>
         ))}
       </ul>
     </div>
   );
 }
+
+// ============================================
+// STRATEGY LABEL HELPERS
+// ============================================
+
+const STRATEGY_LABEL_KEYS: Record<Strategy, string> = {
+  UNIVERSAL_BASELINE: 'strategyConfig.universalBaseline.label',
+  TARGETED_FIT: 'strategyConfig.targetedFit.label',
+  DYNAMIC_GAP_ANALYSIS: 'strategyConfig.dynamicGap.label',
+};
+
+const STRATEGY_SHORT_LABEL_KEYS: Record<Strategy, string> = {
+  UNIVERSAL_BASELINE: 'strategyConfig.universalBaseline.shortLabel',
+  TARGETED_FIT: 'strategyConfig.targetedFit.shortLabel',
+  DYNAMIC_GAP_ANALYSIS: 'strategyConfig.dynamicGap.shortLabel',
+};
+
+const STRATEGY_DESCRIPTION_KEYS: Record<Strategy, string> = {
+  UNIVERSAL_BASELINE: 'strategyConfig.universalBaseline.description',
+  TARGETED_FIT: 'strategyConfig.targetedFit.description',
+  DYNAMIC_GAP_ANALYSIS: 'strategyConfig.dynamicGap.description',
+};
 
 // ============================================
 // MAIN COMPONENT
@@ -71,8 +95,13 @@ export function StrategyHeroBadge({
   variant = 'compact',
   className,
 }: StrategyHeroBadgeProps) {
+  const t = useTranslations('builder.simulator');
   const config = STRATEGY_CONFIG[strategy];
   const Icon = STRATEGY_ICONS[strategy];
+
+  const label = t(STRATEGY_LABEL_KEYS[strategy] as Parameters<typeof t>[0]);
+  const shortLabel = t(STRATEGY_SHORT_LABEL_KEYS[strategy] as Parameters<typeof t>[0]);
+  const description = t(STRATEGY_DESCRIPTION_KEYS[strategy] as Parameters<typeof t>[0]);
 
   const hasValidationIssues = validation && !validation.isValid;
 
@@ -92,13 +121,13 @@ export function StrategyHeroBadge({
                 className
               )}
               role="status"
-              aria-label={`Strategy: ${config.label}${hasValidationIssues ? ' (configuration incomplete)' : ''}`}
+              aria-label={`${t('testDrive')}: ${label}${hasValidationIssues ? ` (${t('strategy.configurationIncomplete')})` : ''}`}
             >
               <Icon
                 className={cn('h-3.5 w-3.5 shrink-0', config.iconText)}
                 aria-hidden="true"
               />
-              <span className="text-xs font-medium">{config.shortLabel}</span>
+              <span className="text-xs font-medium">{shortLabel}</span>
               {hasValidationIssues && (
                 <AlertTriangle
                   className="h-3 w-3 text-amber-500 shrink-0"
@@ -113,7 +142,7 @@ export function StrategyHeroBadge({
               <div className="mt-2 pt-2 border-t border-border">
                 <div className="flex items-center gap-1.5 text-amber-500 font-medium text-xs mb-1">
                   <AlertTriangle className="h-3 w-3" />
-                  Missing Configuration
+                  {t('strategy.missingConfiguration')}
                 </div>
                 <ul className="text-xs text-muted-foreground space-y-0.5">
                   {validation.missingRequirements.map((req, i) => (
@@ -139,7 +168,7 @@ export function StrategyHeroBadge({
         className
       )}
       role="region"
-      aria-label={`Strategy: ${config.label}`}
+      aria-label={`${t('testDrive')}: ${label}`}
     >
       {/* Accent line at top */}
       <div
@@ -158,7 +187,7 @@ export function StrategyHeroBadge({
       {/* Content */}
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 flex-wrap">
-          <span className="text-sm font-semibold">{config.label}</span>
+          <span className="text-sm font-semibold">{label}</span>
           {hasValidationIssues && (
             <TooltipProvider delayDuration={200}>
               <Tooltip>
@@ -168,12 +197,12 @@ export function StrategyHeroBadge({
                     className="text-[10px] bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/50 dark:text-amber-400 dark:border-amber-800 gap-1"
                   >
                     <AlertTriangle className="h-2.5 w-2.5" aria-hidden="true" />
-                    Incomplete
+                    {t('strategy.incomplete')}
                   </Badge>
                 </TooltipTrigger>
                 <TooltipContent side="right" className="max-w-xs">
                   <div className="space-y-1">
-                    <div className="font-medium text-xs">Missing Configuration</div>
+                    <div className="font-medium text-xs">{t('strategy.missingConfiguration')}</div>
                     <ul className="text-xs text-muted-foreground space-y-0.5">
                       {validation?.missingRequirements.map((req, i) => (
                         <li key={i}>* {req}</li>
@@ -189,7 +218,7 @@ export function StrategyHeroBadge({
               <TooltipTrigger asChild>
                 <button
                   className="p-0.5 rounded hover:bg-muted/50 transition-colors"
-                  aria-label={`Learn more about ${config.label}`}
+                  aria-label={t('strategy.learnMore', { label })}
                 >
                   <HelpCircle className="h-3.5 w-3.5 text-muted-foreground" />
                 </button>
@@ -201,7 +230,7 @@ export function StrategyHeroBadge({
           </TooltipProvider>
         </div>
         <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">
-          {config.description}
+          {description}
         </p>
       </div>
     </div>

@@ -16,7 +16,10 @@ import {
 
 export interface TabConfig {
   id: string;
+  /** Hardcoded English fallback title */
   title: string;
+  /** Translation key under builder.simulator.sections.* — use this for i18n rendering */
+  titleKey: string;
   icon: string;
   defaultOpen: boolean;
   priority: number;
@@ -111,6 +114,7 @@ function sectionToTab(section: StrategySection): TabConfig {
   return {
     id: section.id,
     title: section.title,
+    titleKey: section.titleKey,
     icon: section.icon,
     defaultOpen: section.defaultOpen,
     priority: section.priority,

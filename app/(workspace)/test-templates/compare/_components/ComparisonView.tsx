@@ -9,11 +9,16 @@ import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import type { CandidateComparison } from '@/types/domain';
 
+import dynamic from 'next/dynamic';
 import { RankingCards } from './RankingCards';
-import { ComparisonRadar } from './ComparisonRadar';
 import { CompetencyTable } from './CompetencyTable';
 import { GapCoverageMatrix } from './GapCoverageMatrix';
 import { ComplementarityPairs } from './ComplementarityPairs';
+
+const ComparisonRadar = dynamic(
+  () => import('./ComparisonRadar').then(m => m.ComparisonRadar),
+  { ssr: false, loading: () => <div className="h-80 animate-pulse bg-muted rounded-lg" /> }
+);
 
 /**
  * Color palette for up to 5 candidates.

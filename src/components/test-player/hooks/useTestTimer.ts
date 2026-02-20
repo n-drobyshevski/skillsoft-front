@@ -173,18 +173,26 @@ export function useTestTimer({
 }
 
 /**
- * Format time remaining for display with context
+ * Format time remaining for display with context.
+ *
+ * @param seconds - Time remaining in seconds (null = no limit).
+ * @param labels  - Translated label strings for "no limit" and "expired" states.
+ *                  When omitted, returns translation keys (`assessment.timer.noLimit`
+ *                  and `assessment.timer.expired`) so the caller can translate them.
  */
-export function formatTimeWithContext(seconds: number | null): {
+export function formatTimeWithContext(
+  seconds: number | null,
+  labels?: { noLimit: string; expired: string },
+): {
   text: string;
   urgency: 'normal' | 'warning' | 'critical';
 } {
   if (seconds === null) {
-    return { text: 'Без ограничения', urgency: 'normal' };
+    return { text: labels?.noLimit ?? 'No time limit', urgency: 'normal' };
   }
 
   if (seconds <= 0) {
-    return { text: 'Время истекло', urgency: 'critical' };
+    return { text: labels?.expired ?? 'Time expired', urgency: 'critical' };
   }
 
   const formatted = formatTime(seconds);

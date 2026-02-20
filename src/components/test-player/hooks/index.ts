@@ -15,7 +15,7 @@ export {
   useAnswerSubmission,
 } from './useAnswerSubmission';
 export type {
-  ValidationResult,
+  ValidationResult as AnswerValidationResult,
   UseAnswerSubmissionProps,
   UseAnswerSubmissionReturn,
 } from './useAnswerSubmission';
@@ -63,3 +63,48 @@ export type {
   NavigationActions,
   NavigationStore,
 } from './useNavigationState';
+
+// ============================================================================
+// Composed Hooks (used by ImmersivePlayer)
+// ============================================================================
+
+// Timer Management Hook
+export { useTimerManagement } from './useTimerManagement';
+export type {
+  UseTimerManagementProps,
+  UseTimerManagementReturn,
+} from './useTimerManagement';
+
+// Answer Management Hook
+export { useAnswerManagement } from './useAnswerManagement';
+export type {
+  ValidationResult,
+  UseAnswerManagementProps,
+  UseAnswerManagementReturn,
+} from './useAnswerManagement';
+
+// Question Navigation Hook
+export { useQuestionNavigation } from './useQuestionNavigation';
+export type {
+  UseQuestionNavigationProps,
+  UseQuestionNavigationReturn,
+} from './useQuestionNavigation';
+
+// Answer Summary Hook
+export { useAnswerSummary } from './useAnswerSummary';
+export type {
+  UseAnswerSummaryProps,
+  UseAnswerSummaryReturn,
+} from './useAnswerSummary';
+
+// Test-Drive Sync Hook
+export { useTestDriveSync } from './useTestDriveSync';
+export type {
+  UseTestDriveSyncProps,
+} from './useTestDriveSync';
+
+// Immersive Mode Hook
+export { useImmersiveMode } from './useImmersiveMode';
+export type {
+  UseImmersiveModeProps,
+} from './useImmersiveMode';

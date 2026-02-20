@@ -1,6 +1,7 @@
 'use client';
 
 import React, { memo } from 'react';
+import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -53,6 +54,8 @@ function PreflightWarningsTooltip({
   warnings,
   children,
 }: PreflightWarningsTooltipProps) {
+  const t = useTranslations('builder.simulator');
+
   if (warnings.length === 0) return <>{children}</>;
 
   return (
@@ -63,7 +66,7 @@ function PreflightWarningsTooltip({
           <div className="space-y-1">
             <div className="flex items-center gap-1.5 text-amber-500 font-medium text-xs">
               <AlertTriangle className="h-3.5 w-3.5" />
-              Pre-flight warnings
+              {t('preflight.preflightWarnings')}
             </div>
             <ul className="text-xs text-muted-foreground space-y-0.5">
               {warnings.map((warning, i) => (
@@ -98,6 +101,8 @@ const RunButton = memo(function RunButton({
   warningCount,
   focusColor,
 }: RunButtonProps) {
+  const t = useTranslations('builder.simulator');
+
   return (
     <div className="relative">
       <Button
@@ -112,10 +117,10 @@ const RunButton = memo(function RunButton({
         disabled={isSimulating || !canSimulate}
         aria-label={
           isSimulating
-            ? 'Running simulation'
+            ? t('running')
             : hasWarnings
-              ? `Run simulation (${warningCount} warnings)`
-              : 'Run simulation'
+              ? `${t('runSimulation')} (${warningCount} warnings)`
+              : t('runSimulation')
         }
       >
         {isSimulating ? (
@@ -125,7 +130,7 @@ const RunButton = memo(function RunButton({
         ) : (
           <Play className="h-3 w-3" aria-hidden="true" />
         )}
-        Run
+        {t('rerun')}
       </Button>
       {hasWarnings && (
         <Badge
@@ -154,6 +159,7 @@ export const SimulatorHeader = memo(function SimulatorHeader({
   preflight,
   variant = 'desktop',
 }: SimulatorHeaderProps) {
+  const t = useTranslations('builder.simulator');
   const strategyConfig = STRATEGY_CONFIG[strategy];
   const warningMessages = [
     ...preflight.errors.map((e) => e.message),
@@ -172,7 +178,7 @@ export const SimulatorHeader = memo(function SimulatorHeader({
       {/* Persona Selector + Run Button */}
       <div className="flex items-center justify-between">
         <span className="text-xs font-medium text-muted-foreground">
-          Test Persona
+          {t('testDrive')}
         </span>
 
         <PreflightWarningsTooltip warnings={warningMessages}>

@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense } from "react";
+import { Suspense, useState, useEffect, useCallback } from "react";
 import { usePathname } from "next/navigation";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/layout/app-sidebar";
@@ -11,7 +11,11 @@ import { BreadcrumbProvider } from "@/context/BreadcrumbContext";
 import { LensInitializer } from "@/components/providers/LensInitializer";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ViewModeProvider, useViewMode, shouldBeFocused } from "@/context/ViewModeContext";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
+import { CommandPalette } from "@/components/common/CommandPalette";
+
+const SIDEBAR_PREFERENCE_KEY = "skillsoft-sidebar-open";
 
 /**
  * Content skeleton for initial page load
@@ -39,10 +43,43 @@ function WorkspaceLayoutContent({ children }: { children: React.ReactNode }) {
   const isImmersive = viewMode === "immersive";
   // Focused mode: keeps sidebar visible but constrains height (e.g., builder page)
   const isFocused = shouldBeFocused(pathname);
+  const isMobile = useIsMobile();
+
+  // Determine sidebar default: open on desktop, closed on mobile.
+  // Check localStorage for user preference; fall back to !isMobile.
+  const [sidebarOpen, setSidebarOpen] = useState<boolean | undefined>(undefined);
+
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem(SIDEBAR_PREFERENCE_KEY);
+      if (stored !== null) {
+        setSidebarOpen(stored === "true");
+      } else {
+        // No stored preference: desktop open, mobile closed
+        setSidebarOpen(!isMobile);
+      }
+    } catch {
+      setSidebarOpen(!isMobile);
+    }
+  }, [isMobile]);
+
+  // Persist sidebar preference to localStorage
+  const handleOpenChange = useCallback((open: boolean) => {
+    setSidebarOpen(open);
+    try {
+      localStorage.setItem(SIDEBAR_PREFERENCE_KEY, String(open));
+    } catch {
+      // localStorage unavailable (e.g. private browsing quota exceeded)
+    }
+  }, []);
+
+  // Use the resolved value, defaulting to false during SSR/hydration
+  const resolvedOpen = sidebarOpen ?? false;
 
   return (
     <SidebarProvider
-      defaultOpen={false}
+      open={resolvedOpen}
+      onOpenChange={handleOpenChange}
       style={{
         "--sidebar-width": "15rem",
         "--sidebar-width-mobile": "16rem",
@@ -123,6 +160,7 @@ export default function WorkspaceShell({ children }: { children: React.ReactNode
       <LensInitializer />
       <HeaderProvider>
         <BreadcrumbProvider>
+          <CommandPalette />
           <WorkspaceLayoutContent>
             {children}
           </WorkspaceLayoutContent>

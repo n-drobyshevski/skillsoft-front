@@ -11,6 +11,7 @@
  */
 
 import React, { memo, useMemo, useState, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import {
   Radar,
   RadarChart,
@@ -495,6 +496,7 @@ interface PersonaIndicatorProps {
 }
 
 function PersonaIndicator({ persona }: PersonaIndicatorProps) {
+  const t = useTranslations('builder.simulator');
   const config = personaConfig[persona];
   const IconMap: Record<string, React.ElementType> = {
     Sparkles,
@@ -511,7 +513,9 @@ function PersonaIndicator({ persona }: PersonaIndicatorProps) {
       )}
     >
       <Icon className={cn('h-3.5 w-3.5', config.color)} />
-      <span className={config.color}>{config.label} Candidate Profile</span>
+      <span className={config.color}>
+        {t('personas.candidate', { persona: t(config.labelKey as Parameters<typeof t>[0]) })}
+      </span>
     </div>
   );
 }
@@ -526,8 +530,9 @@ interface ScoreSummaryProps {
 }
 
 function ScoreSummary({ data, strategy }: ScoreSummaryProps) {
+  const t = useTranslations('builder.simulator');
   const config = STRATEGY_CONFIG[strategy];
-  const passedLabel = data.passed ? 'Passed' : 'Below Threshold';
+  const passedLabel = data.passed ? t('score.pass') : t('score.belowThreshold');
   const PassedIcon = data.passed ? CheckCircle2 : XCircle;
 
   return (
@@ -546,7 +551,7 @@ function ScoreSummary({ data, strategy }: ScoreSummaryProps) {
               </span>
             </div>
             <div>
-              <p className="text-sm font-medium">Overall Score</p>
+              <p className="text-sm font-medium">{t('score.simulatedScore')}</p>
               <p className="text-xs text-muted-foreground">
                 Threshold: {data.passingThreshold}%
               </p>
@@ -880,6 +885,7 @@ export const SimulatedResultsTab = memo(function SimulatedResultsTab({
     [result, strategy, persona, passingScore, onetSocCode, teamId]
   );
 
+  const t = useTranslations('builder.simulator');
   const strategyConfig = STRATEGY_CONFIG[strategy];
 
   return (
@@ -888,7 +894,7 @@ export const SimulatedResultsTab = memo(function SimulatedResultsTab({
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <FileCheck className={cn('h-4 w-4', strategyConfig.iconText)} />
-          <span className="text-sm font-medium">Results Preview</span>
+          <span className="text-sm font-medium">{t('results.detailedAnalysis')}</span>
         </div>
         <PersonaIndicator persona={persona} />
       </div>
@@ -926,15 +932,14 @@ export const SimulatedResultsTab = memo(function SimulatedResultsTab({
         <CompetencyScores
           scores={simulatedData.competencyScores}
           threshold={passingScore}
-          title="Competency Breakdown"
+          title={t('score.competencyProfile')}
           showAll={simulatedData.competencyScores.length <= 8}
         />
       )}
 
       {/* Disclaimer */}
       <p className="text-[10px] text-muted-foreground text-center pt-2">
-        Simulated results based on {personaConfig[persona].label.toLowerCase()} candidate profile.
-        Actual results will vary.
+        {t('score.competencyProfileAssessment')}
       </p>
     </div>
   );

@@ -23,6 +23,7 @@ import { cn } from "@/lib/utils";
 import { GripVertical, ChevronDown, ChevronUp, Trash2, Minus, Plus } from "lucide-react";
 import { BlueprintCompetency, type Difficulty } from "../actions";
 import { getSampleQuestion } from "../actions";
+import { useTranslations } from "next-intl";
 import { useBlueprintWorkspace } from "./BlueprintWorkspaceProvider";
 
 interface Indicator {
@@ -68,6 +69,7 @@ export function CompetencySmartCard({
   onWeightChange,
   disableSortable = false,
 }: CompetencySmartCardProps) {
+  const t = useTranslations('builder.card');
   const [isExpanded, setIsExpanded] = useState(false);
   const [indicators, setIndicators] = useState<Indicator[]>(() => {
     // If competency already has indicatorWeights, use them
@@ -168,7 +170,7 @@ export function CompetencySmartCard({
               "hover:bg-muted/60 active:bg-muted/80 transition-all",
               "focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1"
             )}
-            aria-label="Hold and drag to reorder"
+            aria-label={t('dragToReorder')}
           >
           <GripVertical className="h-4 w-4 text-muted-foreground/40 group-hover:text-muted-foreground/70" />
         </button>
@@ -209,7 +211,7 @@ export function CompetencySmartCard({
           <Tooltip>
             <TooltipTrigger asChild>
               <div className="flex items-center gap-2 px-2 py-1 rounded-md bg-muted/30 border border-border/30">
-                <span className="text-[10px] text-muted-foreground font-medium">Weight</span>
+                <span className="text-[10px] text-muted-foreground font-medium">{t('weight')}</span>
                 <div className="w-16">
                   <Slider
                     value={[competency.weight ?? 1]}
@@ -227,7 +229,7 @@ export function CompetencySmartCard({
               </div>
             </TooltipTrigger>
             <TooltipContent side="bottom" className="text-xs max-w-xs">
-              Higher weight = more questions. Order also matters - top cards get priority.
+              {t('weightTooltip')}
             </TooltipContent>
           </Tooltip>
         </div>
@@ -243,7 +245,7 @@ export function CompetencySmartCard({
             "rounded-lg hover:bg-muted active:scale-95 transition-all"
           )}
           onClick={() => setIsExpanded((prev) => !prev)}
-          aria-label={isExpanded ? "Collapse for less detail" : "Expand for more options"}
+          aria-label={isExpanded ? t('collapseDetail') : t('expandOptions')}
         >
           {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
         </Button>
@@ -253,7 +255,7 @@ export function CompetencySmartCard({
       <div className="md:hidden px-2 sm:px-4 pb-2 sm:pb-3 space-y-2">
         {/* M1: Touch-optimized weight stepper with visual feedback */}
         <div className="flex items-center gap-2 sm:gap-3 p-2 sm:p-2.5 rounded-lg bg-muted/20 border border-border/30">
-          <span className="text-[11px] sm:text-xs text-muted-foreground font-medium shrink-0">Weight</span>
+          <span className="text-[11px] sm:text-xs text-muted-foreground font-medium shrink-0">{t('weight')}</span>
           <div className="flex-1 flex items-center justify-center gap-3">
             <Button
               variant="outline"
@@ -261,7 +263,7 @@ export function CompetencySmartCard({
               className="h-10 w-10 shrink-0 rounded-full active:scale-90 active:bg-destructive/10 touch-manipulation transition-all"
               onClick={() => onWeightChange(Math.max(0.5, Math.round(((competency.weight ?? 1) - 0.1) * 10) / 10))}
               disabled={isPending || (competency.weight ?? 1) <= 0.5}
-              aria-label="Decrease weight"
+              aria-label={t('decreaseWeight')}
             >
               <Minus className="h-4 w-4" />
             </Button>
@@ -283,7 +285,7 @@ export function CompetencySmartCard({
               className="h-10 w-10 shrink-0 rounded-full active:scale-90 active:bg-primary/10 touch-manipulation transition-all"
               onClick={() => onWeightChange(Math.min(2.0, Math.round(((competency.weight ?? 1) + 0.1) * 10) / 10))}
               disabled={isPending || (competency.weight ?? 1) >= 2.0}
-              aria-label="Increase weight"
+              aria-label={t('increaseWeight')}
             >
               <Plus className="h-4 w-4" />
             </Button>
@@ -291,7 +293,7 @@ export function CompetencySmartCard({
         </div>
         {/* U6: Mobile difficulty selector */}
         <div className="flex items-center gap-2 p-2 rounded-lg bg-muted/20 border border-border/30">
-          <span className="text-[11px] sm:text-xs text-muted-foreground font-medium shrink-0">Difficulty</span>
+          <span className="text-[11px] sm:text-xs text-muted-foreground font-medium shrink-0">{t('difficulty')}</span>
           <div className="flex-1 flex rounded-md border border-border/40 overflow-hidden">
             {DIFFICULTY_OPTIONS.map((opt) => (
               <button
@@ -317,8 +319,8 @@ export function CompetencySmartCard({
           {/* Inventory depth */}
           <div className="space-y-2 overflow-hidden">
             <div className="flex items-center justify-between gap-2">
-              <Label className="text-[11px] sm:text-xs font-semibold text-foreground/90 truncate">Inventory depth</Label>
-              <span className="text-[10px] sm:text-[11px] text-muted-foreground/70 font-medium shrink-0">E/M/H</span>
+              <Label className="text-[11px] sm:text-xs font-semibold text-foreground/90 truncate">{t('inventoryDepth')}</Label>
+              <span className="text-[10px] sm:text-[11px] text-muted-foreground/70 font-medium shrink-0">{t('inventoryEMH')}</span>
             </div>
             <div className="flex items-center gap-1.5 sm:gap-2">
               <div className="flex-1 min-w-0 h-2.5 sm:h-3 rounded-full bg-muted/60 overflow-hidden border border-border/40 shadow-inner flex">
@@ -338,7 +340,7 @@ export function CompetencySmartCard({
 
           {/* Sample question */}
           <div className="space-y-2 overflow-hidden">
-            <Label className="text-[11px] sm:text-xs font-semibold text-foreground/90">Sample question</Label>
+            <Label className="text-[11px] sm:text-xs font-semibold text-foreground/90">{t('sampleQuestion')}</Label>
             <div className="rounded-lg border border-border/40 bg-background p-2 sm:p-3 text-xs sm:text-sm text-muted-foreground min-h-[48px] sm:min-h-[56px] leading-relaxed shadow-sm overflow-hidden">
               {isSampleLoading ? (
                 <div className="space-y-2">
@@ -348,7 +350,7 @@ export function CompetencySmartCard({
               ) : sampleQuestion ? (
                 <span className="text-foreground/80 break-words">{sampleQuestion}</span>
               ) : (
-                <span>No sample available</span>
+                <span>{t('noSampleAvailable')}</span>
               )}
             </div>
           </div>
@@ -356,8 +358,8 @@ export function CompetencySmartCard({
           {/* Indicator tuning */}
           <div className="space-y-2 sm:space-y-2.5">
             <div className="flex items-center justify-between">
-              <Label className="text-[11px] sm:text-xs font-semibold text-foreground/90">Indicator priority</Label>
-              <span className="text-[9px] sm:text-[10px] text-muted-foreground/70 font-medium">Optimistic apply</span>
+              <Label className="text-[11px] sm:text-xs font-semibold text-foreground/90">{t('indicatorPriority')}</Label>
+              <span className="text-[9px] sm:text-[10px] text-muted-foreground/70 font-medium">{t('optimisticApply')}</span>
             </div>
             {indicators.map((indicator) => (
               <div key={indicator.id} className="flex items-center gap-1.5 sm:gap-2">
@@ -390,24 +392,26 @@ export function CompetencySmartCard({
                   )}
                 >
                   <Trash2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                  Remove
+                  {t('removeButton')}
                 </Button>
               </AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader>
-                  <AlertDialogTitle>Remove competency?</AlertDialogTitle>
+                  <AlertDialogTitle>{t('removeTitle')}</AlertDialogTitle>
                   <AlertDialogDescription>
-                    This will remove <strong>{competency.name}</strong> from your test blueprint.
-                    You can add it back from the library at any time.
+                    {t.rich('removeDescription', {
+                      name: competency.name,
+                      strong: (chunks) => <strong>{chunks}</strong>,
+                    })}
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                  <AlertDialogCancel className="min-h-[44px] md:min-h-0">Cancel</AlertDialogCancel>
+                  <AlertDialogCancel className="min-h-[44px] md:min-h-0">{t('removeCancel')}</AlertDialogCancel>
                   <AlertDialogAction
                     onClick={onRemove}
                     className="min-h-[44px] md:min-h-0 bg-destructive text-destructive-foreground hover:bg-destructive/90"
                   >
-                    Remove
+                    {t('removeConfirm')}
                   </AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>

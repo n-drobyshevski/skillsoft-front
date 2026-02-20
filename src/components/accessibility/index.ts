@@ -27,10 +27,11 @@ export {
   SkipLinks,
   MainContentAnchor,
   NavigationAnchor,
-  SkipLinkTarget,
+  SkipLinkTargetAnchor,
   SKIP_LINK_PRESETS,
 } from './SkipLinks';
 export type {
   SkipLinksProps,
+  SkipLinkTarget,
   SkipLinkTargetProps,
 } from './SkipLinks';

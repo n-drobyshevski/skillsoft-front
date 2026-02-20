@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 import { TestAnswer } from '@/types/domain';
 
@@ -18,12 +19,13 @@ interface SJTAnswerExpandedProps {
  * SJTAnswerPreview - Shows selected option letter (A, B, C, D) in collapsed view
  */
 export function SJTAnswerPreview({ answer, answerDisplayText }: SJTAnswerPreviewProps) {
+  const t = useTranslations('assessment');
   const isSkipped = answer?.isSkipped;
   const hasAnswer = answer?.selectedOptionIds?.length;
 
   if (isSkipped || !hasAnswer) {
     return (
-      <span className="text-xs text-amber-400">Пропущено</span>
+      <span className="text-xs text-amber-400">{t('answerCard.skippedPreview')}</span>
     );
   }
 
@@ -46,13 +48,14 @@ export function SJTAnswerPreview({ answer, answerDisplayText }: SJTAnswerPreview
  * SJTAnswerExpanded - Shows selected option with context in expanded view
  */
 export function SJTAnswerExpanded({ answer, answerDisplayText }: SJTAnswerExpandedProps) {
+  const t = useTranslations('assessment');
   const isSkipped = answer?.isSkipped;
   const hasAnswer = answer?.selectedOptionIds?.length;
 
   if (isSkipped || !hasAnswer) {
     return (
       <div className="text-center py-4">
-        <span className="text-sm text-amber-400">Вопрос был пропущен</span>
+        <span className="text-sm text-amber-400">{t('answerCard.questionWasSkipped')}</span>
       </div>
     );
   }
@@ -63,7 +66,7 @@ export function SJTAnswerExpanded({ answer, answerDisplayText }: SJTAnswerExpand
 
   return (
     <div className="py-2">
-      <p className="text-xs text-neutral-500 mb-2">Выбранный ответ:</p>
+      <p className="text-xs text-neutral-500 mb-2">{t('answerCard.selectedAnswer')}</p>
       <div
         className={cn(
           "flex items-start gap-3 p-3 rounded-lg",

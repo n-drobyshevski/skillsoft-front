@@ -13,7 +13,11 @@ import {
   Grid3x3,
   TrendingUp,
 } from 'lucide-react';
-import CompetencyRadarChart from '@/components/data-display/charts/CompetencyRadarChart';
+import dynamic from 'next/dynamic';
+import {
+  LazyCompetencyRadarChart as CompetencyRadarChart,
+  LazyIndicatorHeatmap as IndicatorHeatmap,
+} from '@/components/data-display/charts/LazyChartsBundle';
 import { ChartErrorBoundary } from '@/components/charts/ChartErrorBoundary';
 import { JobFitHero } from './JobFitHero';
 import { CompetencyProfile } from '../shared/CompetencyProfile';
@@ -23,9 +27,7 @@ import {
   GapAnalysisChart,
   DevelopmentRecommendations,
   HiringScorecard,
-  TrendOverview,
 } from '@/components/results';
-import { IndicatorHeatmap } from '@/components/results/IndicatorHeatmap';
 import {
   toGapData,
   generateRecommendationsFromGaps,
@@ -33,6 +35,11 @@ import {
 import type { GapDataPoint } from '@/types/results';
 import type { TrendDataPoint } from '@/types/domain';
 import { testResultsApi } from '@/services/api/results';
+
+const TrendOverview = dynamic(
+  () => import('@/components/results/trends/TrendOverview').then(m => m.TrendOverview),
+  { ssr: false, loading: () => <div className="h-64 animate-pulse bg-muted rounded-lg" /> }
+);
 
 /**
  * Job Fit Result View for Scenario B (O*NET Benchmark Comparison).

@@ -2,7 +2,10 @@
  * Authenticated Test Session Adapter
  *
  * Implementation of TestSessionAdapter for authenticated users using Clerk.
- * Wraps testSessionsClientApi and passes X-User-Id header for authentication.
+ * Wraps testSessionsClientApi and passes HMAC-signed authentication headers.
+ *
+ * Each API call obtains fresh HMAC-signed headers via the getSignedAuthHeaders
+ * server action so that timestamps remain valid and replay attacks are prevented.
  *
  * @module adapters/authenticated-test-session-adapter
  */
@@ -10,6 +13,7 @@
 import {
   testSessionsClientApi,
 } from '@/services/api.client';
+import { getSignedAuthHeaders } from '@/services/roleApi';
 import type {
   CurrentQuestionResponse,
   SubmitAnswerRequest,
@@ -26,7 +30,7 @@ import type {
 /**
  * Authenticated Test Session Adapter
  *
- * Uses Clerk userId for authentication via X-User-Id header.
+ * Uses Clerk userId for authentication via HMAC-signed headers.
  * Supports all features including test-drive mode and answer review.
  */
 export class AuthenticatedTestSessionAdapter implements TestSessionAdapter {
@@ -43,7 +47,8 @@ export class AuthenticatedTestSessionAdapter implements TestSessionAdapter {
   // Private State
   // ============================================
 
-  private readonly authHeaders: Record<string, string>;
+  private readonly userId: string;
+  private readonly userRole: string;
 
   // ============================================
   // Constructor
@@ -52,16 +57,30 @@ export class AuthenticatedTestSessionAdapter implements TestSessionAdapter {
   /**
    * Create an authenticated adapter.
    *
-   * @param authHeaders - Headers containing X-User-Id from Clerk
+   * @param userId - The Clerk user ID
+   * @param userRole - The user's role string (e.g., 'ADMIN', 'EDITOR', 'USER')
    *
    * @example
    * ```typescript
    * const { userId } = useAuth();
-   * const adapter = new AuthenticatedTestSessionAdapter({ 'X-User-Id': userId || '' });
+   * const adapter = new AuthenticatedTestSessionAdapter(userId || '', 'USER');
    * ```
    */
-  constructor(authHeaders: Record<string, string>) {
-    this.authHeaders = authHeaders;
+  constructor(userId: string, userRole: string = 'USER') {
+    this.userId = userId;
+    this.userRole = userRole;
+  }
+
+  // ============================================
+  // Internal: Fresh signed headers per request
+  // ============================================
+
+  /**
+   * Get fresh HMAC-signed auth headers for a request.
+   * Each call generates a new timestamp + signature via the server action.
+   */
+  private async getHeaders(): Promise<Record<string, string>> {
+    return getSignedAuthHeaders(this.userId, this.userRole);
   }
 
   // ============================================
@@ -69,7 +88,8 @@ export class AuthenticatedTestSessionAdapter implements TestSessionAdapter {
   // ============================================
 
   async getSession(sessionId: string): Promise<SessionData> {
-    const session = await testSessionsClientApi.getSessionById(sessionId, this.authHeaders);
+    const headers = await this.getHeaders();
+    const session = await testSessionsClientApi.getSessionById(sessionId, headers);
 
     if (!session) {
       throw new Error(`Session not found: ${sessionId}`);
@@ -80,7 +100,8 @@ export class AuthenticatedTestSessionAdapter implements TestSessionAdapter {
   }
 
   async getCurrentQuestion(sessionId: string): Promise<CurrentQuestionResponse> {
-    const question = await testSessionsClientApi.getCurrentQuestion(sessionId, this.authHeaders);
+    const headers = await this.getHeaders();
+    const question = await testSessionsClientApi.getCurrentQuestion(sessionId, headers);
 
     if (!question) {
       throw new Error(`Question not found for session: ${sessionId}`);
@@ -97,18 +118,21 @@ export class AuthenticatedTestSessionAdapter implements TestSessionAdapter {
     sessionId: string,
     request: SubmitAnswerRequest
   ): Promise<TestAnswer> {
-    return testSessionsClientApi.submitAnswer(sessionId, request, this.authHeaders);
+    const headers = await this.getHeaders();
+    return testSessionsClientApi.submitAnswer(sessionId, request, headers);
   }
 
   async navigateToQuestion(
     sessionId: string,
     questionIndex: number
   ): Promise<void> {
-    await testSessionsClientApi.navigateToQuestion(sessionId, questionIndex, this.authHeaders);
+    const headers = await this.getHeaders();
+    await testSessionsClientApi.navigateToQuestion(sessionId, questionIndex, headers);
   }
 
   async getSessionAnswers(sessionId: string): Promise<TestAnswer[]> {
-    return testSessionsClientApi.getSessionAnswers(sessionId, this.authHeaders);
+    const headers = await this.getHeaders();
+    return testSessionsClientApi.getSessionAnswers(sessionId, headers);
   }
 
   // ============================================
@@ -121,7 +145,8 @@ export class AuthenticatedTestSessionAdapter implements TestSessionAdapter {
     _takerInfo?: AnonymousTakerInfo
   ): Promise<CompletionResult> {
     // Authenticated mode doesn't use takerInfo - user identity comes from Clerk
-    const result = await testSessionsClientApi.completeSession(sessionId, this.authHeaders);
+    const headers = await this.getHeaders();
+    const result = await testSessionsClientApi.completeSession(sessionId, headers);
 
     return {
       resultId: result.id,
@@ -130,7 +155,8 @@ export class AuthenticatedTestSessionAdapter implements TestSessionAdapter {
   }
 
   async abandonSession(sessionId: string): Promise<void> {
-    await testSessionsClientApi.abandonSession(sessionId, this.authHeaders);
+    const headers = await this.getHeaders();
+    await testSessionsClientApi.abandonSession(sessionId, headers);
   }
 
   // ============================================
@@ -157,16 +183,18 @@ export class AuthenticatedTestSessionAdapter implements TestSessionAdapter {
  * Factory function to create an authenticated adapter from Clerk userId.
  *
  * @param userId - Clerk user ID
+ * @param userRole - The user's role string (defaults to 'USER')
  * @returns Configured adapter
  *
  * @example
  * ```typescript
  * const { userId } = useAuth();
- * const adapter = createAuthenticatedAdapter(userId || '');
+ * const adapter = createAuthenticatedAdapter(userId || '', 'ADMIN');
  * ```
  */
-export function createAuthenticatedAdapter(userId: string): AuthenticatedTestSessionAdapter {
-  return new AuthenticatedTestSessionAdapter({
-    'X-User-Id': userId,
-  });
+export function createAuthenticatedAdapter(
+  userId: string,
+  userRole: string = 'USER'
+): AuthenticatedTestSessionAdapter {
+  return new AuthenticatedTestSessionAdapter(userId, userRole);
 }

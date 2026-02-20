@@ -1,6 +1,7 @@
 'use client';
 
 import React, { memo, useMemo } from 'react';
+import { useTranslations } from 'next-intl';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { cn } from '@/lib/utils';
 import { Strategy, STRATEGY_CONFIG } from '../strategy-context';
@@ -40,6 +41,7 @@ export const SimulatorTabs = memo(function SimulatorTabs({
   teamId,
   fineTuneSettings,
 }: SimulatorTabsProps) {
+  const t = useTranslations('builder.simulator');
   const strategyConfig = STRATEGY_CONFIG[strategy];
 
   // Filter to only show available tabs (max 5 for UI)
@@ -74,7 +76,7 @@ export const SimulatorTabs = memo(function SimulatorTabs({
               )}
             >
               <Icon className="h-4 w-4" aria-hidden="true" />
-              <span className="truncate max-w-full">{tab.title}</span>
+              <span className="truncate max-w-full">{t(tab.titleKey as Parameters<typeof t>[0])}</span>
             </TabsTrigger>
           );
         })}

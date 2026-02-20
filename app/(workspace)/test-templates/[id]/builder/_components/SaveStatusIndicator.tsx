@@ -3,6 +3,7 @@
 import React from 'react';
 import { CheckCircle2, AlertCircle, Loader2, Cloud, CloudOff, RefreshCw, WifiOff } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useTranslations } from 'next-intl';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import type { SaveStatus } from '@/hooks/useAutoSave';
 
@@ -17,63 +18,68 @@ interface SaveStatusIndicatorProps {
   className?: string;
 }
 
-function formatTimeAgo(date: Date): string {
+function formatTimeAgo(date: Date, t: ReturnType<typeof useTranslations>): string {
   const seconds = Math.floor((Date.now() - date.getTime()) / 1000);
 
-  if (seconds < 5) return 'just now';
-  if (seconds < 60) return `${seconds}s ago`;
-  if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
-  if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
+  if (seconds < 5) return t('timeAgo.justNow');
+  if (seconds < 60) return t('timeAgo.secondsAgo', { seconds });
+  if (seconds < 3600) return t('timeAgo.minutesAgo', { minutes: Math.floor(seconds / 60) });
+  if (seconds < 86400) return t('timeAgo.hoursAgo', { hours: Math.floor(seconds / 3600) });
   return date.toLocaleDateString();
 }
 
-const statusConfig: Record<
+const statusIconConfig: Record<
   SaveStatus,
   {
     icon: React.ElementType;
-    label: string;
     color: string;
     animate?: boolean;
   }
 > = {
   idle: {
     icon: Cloud,
-    label: 'All changes saved',
     color: 'text-muted-foreground',
   },
   pending: {
     icon: Cloud,
-    label: 'Unsaved changes',
     color: 'text-amber-500',
   },
   saving: {
     icon: Loader2,
-    label: 'Saving...',
     color: 'text-primary',
     animate: true,
   },
   saved: {
     icon: CheckCircle2,
-    label: 'Saved',
     color: 'text-emerald-500',
   },
   error: {
     icon: AlertCircle,
-    label: 'Save failed',
     color: 'text-destructive',
   },
   offline: {
     icon: WifiOff,
-    label: 'Offline - changes saved locally',
     color: 'text-amber-600',
   },
   retrying: {
     icon: RefreshCw,
-    label: 'Retrying...',
     color: 'text-primary',
     animate: true,
   },
 };
+
+function useStatusLabels() {
+  const t = useTranslations('builder.saveStatus');
+  return {
+    idle: t('allChangesSaved'),
+    pending: t('unsavedChanges'),
+    saving: t('saving'),
+    saved: t('saved'),
+    error: t('saveFailed'),
+    offline: t('offline'),
+    retrying: t('retrying'),
+  } as Record<SaveStatus, string>;
+}
 
 export function SaveStatusIndicator({
   status,
@@ -83,26 +89,29 @@ export function SaveStatusIndicator({
   retryAttempt = 0,
   className,
 }: SaveStatusIndicatorProps) {
+  const t = useTranslations('builder.saveStatus');
+  const statusLabels = useStatusLabels();
+
   // Determine effective status for display
   const effectiveStatus = hasUnsavedChanges && status === 'idle' ? 'pending' : status;
-  const effectiveConfig = statusConfig[effectiveStatus];
+  const effectiveConfig = statusIconConfig[effectiveStatus];
   const EffectiveIcon = effectiveConfig.icon;
 
   // Generate label based on status
   const getLabel = () => {
     if (effectiveStatus === 'saved' && lastSaved) {
-      return `Saved ${formatTimeAgo(lastSaved)}`;
+      return t('savedAgo', { time: formatTimeAgo(lastSaved, t) });
     }
     if (effectiveStatus === 'pending') {
-      return 'Unsaved';
+      return t('unsaved');
     }
     if (effectiveStatus === 'retrying' && retryAttempt > 0) {
-      return `Retrying (${retryAttempt}/3)...`;
+      return t('retryingProgress', { attempt: retryAttempt });
     }
     if (effectiveStatus === 'offline') {
-      return 'Offline';
+      return t('offlineShort');
     }
-    return effectiveConfig.label;
+    return statusLabels[effectiveStatus];
   };
 
   const content = (
@@ -140,12 +149,12 @@ export function SaveStatusIndicator({
               <span className="font-medium">{getLabel()}</span>
               {lastSaved && (
                 <span className="text-muted-foreground">
-                  Last saved: {formatTimeAgo(lastSaved)}
+                  {t('lastSaved', { time: formatTimeAgo(lastSaved, t) })}
                 </span>
               )}
               {effectiveStatus === 'offline' && (
                 <span className="text-muted-foreground">
-                  Changes will sync when back online
+                  {t('changesWillSync')}
                 </span>
               )}
             </div>
@@ -168,6 +177,7 @@ export function UnsavedDot({
   hasUnsavedChanges: boolean;
   className?: string;
 }) {
+  const t = useTranslations('builder.saveStatus');
   if (!hasUnsavedChanges) return null;
 
   return (
@@ -177,7 +187,7 @@ export function UnsavedDot({
         'animate-pulse',
         className
       )}
-      aria-label="Unsaved changes"
+      aria-label={t('unsavedChangesLabel')}
     />
   );
 }

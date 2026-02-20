@@ -89,5 +89,103 @@
     "continueWithoutSaving": "Continue Without Saving",
     "retry": "Try Again",
     "retrying": "Retrying..."
+  },
+  "player": {
+    "validation": {
+      "noCurrentQuestion": "No current question",
+      "pleaseSelectOrEnter": "Please select or enter an answer",
+      "pleaseSelectAtLeastOne": "Please select at least one option",
+      "answerMustBeText": "Answer must be text",
+      "pleaseEnterAnswer": "Please enter an answer",
+      "answerTooShort": "Answer is too short. {remaining, plural, one {# more character} other {# more characters}} needed",
+      "pleaseSelectOption": "Please select an answer option",
+      "pleaseCheckAnswer": "Please check your answer"
+    },
+    "toast": {
+      "retryAttempt": "Retrying... ({attempt}/{maxRetries})",
+      "sessionCancelled": "Session was cancelled",
+      "testAlreadyCompleted": "Test already completed",
+      "invalidNavigation": "Invalid navigation to next question",
+      "questionNotFound": "Question not found",
+      "failedToSaveAnswer": "Failed to save answer",
+      "savingAttempt": "Saving... (attempt {attempt}/{maxRetries})",
+      "cannotSkipLast": "The last question cannot be skipped",
+      "failedToSkipQuestion": "Failed to skip question",
+      "testCannotBeCompleted": "Test cannot be completed",
+      "failedToCompleteTest": "Failed to complete test",
+      "failedToCancelTest": "Failed to cancel test",
+      "answerSaved": "Answer saved",
+      "changesNotSaved": "Changes not saved",
+      "failedToNavigate": "Failed to navigate to question",
+      "failedToLoadSummary": "Failed to load answer summary",
+      "sessionNotFound": "Session not found. It may have been deleted.",
+      "testAlreadyCompleted2": "Test has already been completed",
+      "testTimedOut": "Test time has expired",
+      "cannotCompleteInStatus": "Cannot complete test in status: {status}",
+      "cannotCompleteChanged": "Test cannot be completed. It may have already been completed or cancelled.",
+      "serverError": "Server error. Please try again."
+    },
+    "summary": {
+      "questionNumber": "Question {number}",
+      "skippedAnswer": "Skipped",
+      "selectedCount": "Selected: {count}",
+      "answerGiven": "Answer given",
+      "otherQuestions": "Other questions",
+      "likertValue": "{value}/5"
+    },
+    "dialog": {
+      "exitTitle": "Exit test?",
+      "exitDescription": "Your progress will be saved. You can continue later.",
+      "continueTest": "Continue Test",
+      "exitButton": "Exit",
+      "timeExpiredTitle": "Time Expired",
+      "timeExpiredDescription": "The allotted time for the test has ended. Your answers will be saved automatically.",
+      "viewResults": "View Results"
+    },
+    "navigation": {
+      "backDisabled": "Going back to previous questions is disabled for this test",
+      "firstQuestion": "This is the first question"
+    }
+  },
+  "progressIndicator": {
+    "questionAnswered": "Question {number}: Answered",
+    "questionSkipped": "Question {number}: Skipped",
+    "questionCurrent": "Question {number}: Current",
+    "questionPending": "Question {number}: Pending",
+    "questionDefault": "Question {number}"
+  },
+  "answerCard": {
+    "statusAnswered": "Answered",
+    "statusSkipped": "Skipped",
+    "statusFlagged": "Flagged",
+    "statusPending": "Pending",
+    "typeScale": "Scale",
+    "typeSituational": "Situational",
+    "typeChoice": "Choice",
+    "typeText": "Text",
+    "typeBehavioral": "Behavioral",
+    "typeDefault": "Question",
+    "timeSeconds": "{seconds}s",
+    "editButton": "Edit",
+    "skippedPreview": "Skipped",
+    "questionWasSkipped": "Question was skipped",
+    "selectedAnswer": "Selected answer:",
+    "yourAnswer": "Your answer:",
+    "noQuestionsWithStatus": "No questions with the selected status",
+    "answeredShort": "{count} ans.",
+    "skippedShort": "{count} skip."
+  },
+  "submission": {
+    "submittingResults": "Submitting results...",
+    "pleaseWait": "Please wait. This may take a few seconds.",
+    "attemptOf": "Attempt {current} of {max}",
+    "submissionError": "Submission error",
+    "retryButton": "Retry",
+    "backToReview": "Back to review",
+    "maxAttemptsExceeded": "Maximum attempts exceeded. Please try again later or contact support."
+  },
+  "timer": {
+    "noLimit": "No time limit",
+    "expired": "Time expired"
   }
 }

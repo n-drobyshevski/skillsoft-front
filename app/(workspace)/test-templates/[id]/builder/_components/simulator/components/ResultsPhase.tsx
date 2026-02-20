@@ -9,6 +9,7 @@
  */
 
 import React, { memo, Suspense, lazy } from 'react';
+import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -22,7 +23,7 @@ import {
 import { Loader2, Play, RefreshCw, Sparkles, Shuffle, TrendingDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Strategy, STRATEGY_CONFIG } from '../strategy-context';
-import { SimulationResult, SimulationProfile } from '../types';
+import { SimulationResult, SimulationProfile, personaConfig } from '../types';
 import { TabConfig } from '../hooks/useStrategyTabs';
 import { StrategyScoreDisplay } from '../StrategyScoreDisplay';
 import { SimulatorResults } from './SimulatorResults';
@@ -84,12 +85,6 @@ const PERSONA_ICONS: Record<SimulationProfile, React.ElementType> = {
   FAILING_CANDIDATE: TrendingDown,
 };
 
-const PERSONA_LABELS: Record<SimulationProfile, string> = {
-  PERFECT_CANDIDATE: 'Perfect',
-  RANDOM_GUESSER: 'Random',
-  FAILING_CANDIDATE: 'Failing',
-};
-
 // ============================================
 // FLOATING ACTION BAR
 // ============================================
@@ -109,8 +104,10 @@ const FloatingActionBar = memo(function FloatingActionBar({
   isSimulating,
   strategy,
 }: FloatingActionBarProps) {
+  const t = useTranslations('builder.simulator');
   const config = STRATEGY_CONFIG[strategy];
   const Icon = PERSONA_ICONS[selectedProfile];
+  const profiles = Object.keys(personaConfig) as SimulationProfile[];
 
   return (
     <div
@@ -131,18 +128,18 @@ const FloatingActionBar = memo(function FloatingActionBar({
           <SelectValue>
             <div className="flex items-center gap-2">
               <Icon className="h-4 w-4" />
-              <span>{PERSONA_LABELS[selectedProfile]}</span>
+              <span>{t(personaConfig[selectedProfile].labelKey as Parameters<typeof t>[0])}</span>
             </div>
           </SelectValue>
         </SelectTrigger>
         <SelectContent>
-          {(Object.keys(PERSONA_LABELS) as SimulationProfile[]).map((profile) => {
+          {profiles.map((profile) => {
             const ProfileIcon = PERSONA_ICONS[profile];
             return (
               <SelectItem key={profile} value={profile}>
                 <div className="flex items-center gap-2">
                   <ProfileIcon className="h-4 w-4" />
-                  <span>{PERSONA_LABELS[profile]}</span>
+                  <span>{t(personaConfig[profile].labelKey as Parameters<typeof t>[0])}</span>
                 </div>
               </SelectItem>
             );
@@ -159,12 +156,12 @@ const FloatingActionBar = memo(function FloatingActionBar({
         {isSimulating ? (
           <>
             <Loader2 className="h-4 w-4 animate-spin" />
-            Running...
+            {t('running')}
           </>
         ) : (
           <>
             <RefreshCw className="h-4 w-4" />
-            Re-run Simulation
+            {t('rerunSimulation')}
           </>
         )}
       </Button>
@@ -191,8 +188,10 @@ const ResultsHeader = memo(function ResultsHeader({
   isSimulating,
   strategy,
 }: ResultsHeaderProps) {
+  const t = useTranslations('builder.simulator');
   const config = STRATEGY_CONFIG[strategy];
   const Icon = PERSONA_ICONS[selectedProfile];
+  const profiles = Object.keys(personaConfig) as SimulationProfile[];
 
   return (
     <div className="flex items-center justify-between gap-3 mb-4">
@@ -200,7 +199,11 @@ const ResultsHeader = memo(function ResultsHeader({
       <div className="flex items-center gap-2">
         <Badge variant="outline" className="gap-1.5 py-1 px-2">
           <Icon className="h-3.5 w-3.5" />
-          <span className="text-xs">{PERSONA_LABELS[selectedProfile]} Candidate</span>
+          <span className="text-xs">
+            {t('personas.candidate', {
+              persona: t(personaConfig[selectedProfile].labelKey as Parameters<typeof t>[0]),
+            })}
+          </span>
         </Badge>
       </div>
 
@@ -213,16 +216,16 @@ const ResultsHeader = memo(function ResultsHeader({
           disabled={isSimulating}
         >
           <SelectTrigger className="w-[120px] h-8 text-xs">
-            <SelectValue placeholder="Change persona" />
+            <SelectValue placeholder={t('personas.changePersona')} />
           </SelectTrigger>
           <SelectContent>
-            {(Object.keys(PERSONA_LABELS) as SimulationProfile[]).map((profile) => {
+            {profiles.map((profile) => {
               const ProfileIcon = PERSONA_ICONS[profile];
               return (
                 <SelectItem key={profile} value={profile}>
                   <div className="flex items-center gap-2">
                     <ProfileIcon className="h-3.5 w-3.5" />
-                    <span>{PERSONA_LABELS[profile]}</span>
+                    <span>{t(personaConfig[profile].labelKey as Parameters<typeof t>[0])}</span>
                   </div>
                 </SelectItem>
               );
@@ -242,7 +245,7 @@ const ResultsHeader = memo(function ResultsHeader({
           ) : (
             <RefreshCw className="h-3.5 w-3.5" />
           )}
-          Re-run
+          {t('rerun')}
         </Button>
       </div>
     </div>

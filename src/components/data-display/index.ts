@@ -11,5 +11,13 @@ export { default as StatsCard } from './StatsCard';
 export { default as EntitiesTable } from './Table';
 export { default as TableSkeleton } from './TableSkeleton';
 
+// Unified stats card (Phase E consolidation - replaces 8 historical variants)
+export { UnifiedStatsCard, UnifiedStatsGrid } from './UnifiedStatsCard';
+export type {
+  UnifiedStatsCardProps,
+  UnifiedStatsCardTrend,
+  UnifiedStatsGridProps,
+} from './UnifiedStatsCard';
+
 // Charts sub-module
 export * from './charts';

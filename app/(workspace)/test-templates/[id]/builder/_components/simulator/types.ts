@@ -6,30 +6,32 @@ export const personaConfig: Record<
   SimulationProfile,
   {
     icon: string;
-    label: string;
-    description: string;
+    /** Translation key under builder.simulator.personas.* */
+    labelKey: string;
+    /** Translation key under builder.simulator.personas.* */
+    descriptionKey: string;
     color: string;
     bgColor: string;
   }
 > = {
   PERFECT_CANDIDATE: {
     icon: 'Sparkles',
-    label: 'Perfect',
-    description: 'Ideal candidate',
+    labelKey: 'personas.perfect',
+    descriptionKey: 'personas.perfectDescription',
     color: 'text-emerald-600 dark:text-emerald-400',
     bgColor: 'bg-emerald-50 dark:bg-emerald-950/50 border-emerald-200 dark:border-emerald-800',
   },
   RANDOM_GUESSER: {
     icon: 'Shuffle',
-    label: 'Random',
-    description: 'Random answers',
+    labelKey: 'personas.random',
+    descriptionKey: 'personas.randomDescription',
     color: 'text-amber-600 dark:text-amber-400',
     bgColor: 'bg-amber-50 dark:bg-amber-950/50 border-amber-200 dark:border-amber-800',
   },
   FAILING_CANDIDATE: {
     icon: 'TrendingDown',
-    label: 'Failing',
-    description: 'Poor performer',
+    labelKey: 'personas.failing',
+    descriptionKey: 'personas.failingDescription',
     color: 'text-red-600 dark:text-red-400',
     bgColor: 'bg-red-50 dark:bg-red-950/50 border-red-200 dark:border-red-800',
   },
@@ -49,6 +51,23 @@ export const difficultyLevelMap: Record<Difficulty, number> = {
   EXPERT: 4,
 };
 
+/**
+ * Translation key references for selection reasons.
+ * Components that can use hooks should call t(selectionReasonKeys[reason]) at render time.
+ */
+export const selectionReasonKeys: Record<SelectionReason, string> = {
+  COVERAGE_GAP: 'selectionReason.coverageGap',
+  CALIBRATION: 'selectionReason.calibration',
+  ADAPTIVE_CHECK: 'selectionReason.adaptiveCheck',
+  RANDOMIZED: 'selectionReason.randomized',
+  BACKSTOP: 'selectionReason.backstop',
+};
+
+/**
+ * Static English display labels for selection reasons.
+ * Use in non-hook contexts (e.g., chart data transforms inside useMemo).
+ * For full i18n support use selectionReasonKeys with useTranslations.
+ */
 export const selectionReasonLabels: Record<SelectionReason, string> = {
   COVERAGE_GAP: 'Coverage gap',
   CALIBRATION: 'Calibration',

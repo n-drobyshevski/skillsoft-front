@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { useTranslations } from 'next-intl';
 import { motion, AnimatePresence } from 'motion/react';
 import { ChevronDown, CheckCircle, SkipForward, Flag, Pencil } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -20,53 +21,58 @@ interface AnswerCardProps {
   onEdit: () => void;
 }
 
-const STATUS_CONFIG: Record<QuestionStatus, {
+/** Static style config for status badges (labels are provided via translations) */
+const STATUS_STYLE_CONFIG: Record<QuestionStatus, {
   bgColor: string;
   textColor: string;
   borderColor: string;
   icon: React.ReactNode;
-  label: string;
 }> = {
   answered: {
     bgColor: 'bg-emerald-500/20',
     textColor: 'text-emerald-400',
     borderColor: 'border-emerald-500/30',
     icon: <CheckCircle className="w-3.5 h-3.5" />,
-    label: 'Отвечено',
   },
   skipped: {
     bgColor: 'bg-amber-500/20',
     textColor: 'text-amber-400',
     borderColor: 'border-amber-500/30',
     icon: <SkipForward className="w-3.5 h-3.5" />,
-    label: 'Пропущено',
   },
   flagged: {
     bgColor: 'bg-blue-500/20',
     textColor: 'text-blue-400',
     borderColor: 'border-blue-500/30',
     icon: <Flag className="w-3.5 h-3.5" />,
-    label: 'Отмечено',
   },
   pending: {
     bgColor: 'bg-neutral-700/50',
     textColor: 'text-neutral-500',
     borderColor: 'border-neutral-700',
     icon: null,
-    label: 'Ожидание',
   },
 };
 
-const QUESTION_TYPE_LABELS: Partial<Record<QuestionType, string>> = {
-  LIKERT: 'Шкала',
-  LIKERT_SCALE: 'Шкала',
-  SJT: 'Ситуация',
-  SITUATIONAL_JUDGMENT: 'Ситуация',
-  MCQ: 'Выбор',
-  MULTIPLE_CHOICE: 'Выбор',
-  SINGLE_CHOICE: 'Выбор',
-  OPEN_TEXT: 'Текст',
-  BEHAVIORAL_EXAMPLE: 'Пример',
+/** Maps status keys to translation keys */
+const STATUS_LABEL_KEYS: Record<QuestionStatus, string> = {
+  answered: 'answerCard.statusAnswered',
+  skipped: 'answerCard.statusSkipped',
+  flagged: 'answerCard.statusFlagged',
+  pending: 'answerCard.statusPending',
+};
+
+/** Maps question type enum values to translation keys */
+const QUESTION_TYPE_LABEL_KEYS: Partial<Record<QuestionType, string>> = {
+  LIKERT: 'answerCard.typeScale',
+  LIKERT_SCALE: 'answerCard.typeScale',
+  SJT: 'answerCard.typeSituational',
+  SITUATIONAL_JUDGMENT: 'answerCard.typeSituational',
+  MCQ: 'answerCard.typeChoice',
+  MULTIPLE_CHOICE: 'answerCard.typeChoice',
+  SINGLE_CHOICE: 'answerCard.typeChoice',
+  OPEN_TEXT: 'answerCard.typeText',
+  BEHAVIORAL_EXAMPLE: 'answerCard.typeBehavioral',
 };
 
 /**
@@ -86,8 +92,11 @@ export function AnswerCard({
   onToggle,
   onEdit,
 }: AnswerCardProps) {
-  const statusConfig = STATUS_CONFIG[item.status];
-  const questionTypeLabel = QUESTION_TYPE_LABELS[item.questionType] || 'Вопрос';
+  const t = useTranslations('assessment');
+  const statusStyles = STATUS_STYLE_CONFIG[item.status];
+  const statusLabel = t(STATUS_LABEL_KEYS[item.status]);
+  const questionTypeLabelKey = QUESTION_TYPE_LABEL_KEYS[item.questionType];
+  const questionTypeLabel = questionTypeLabelKey ? t(questionTypeLabelKey) : t('answerCard.typeDefault');
 
   // Determine which preview/expanded component to use
   const isLikert = item.questionType === 'LIKERT' || item.questionType === 'LIKERT_SCALE';
@@ -124,8 +133,8 @@ export function AnswerCard({
               className={cn(
                 "shrink-0 w-8 h-8 rounded-full flex items-center justify-center",
                 "text-sm font-bold tabular-nums",
-                statusConfig.bgColor,
-                statusConfig.textColor
+                statusStyles.bgColor,
+                statusStyles.textColor
               )}
             >
               {questionNumber}
@@ -157,9 +166,9 @@ export function AnswerCard({
             )}
 
             {/* Status icon */}
-            {statusConfig.icon && (
-              <div className={cn("shrink-0", statusConfig.textColor)}>
-                {statusConfig.icon}
+            {statusStyles.icon && (
+              <div className={cn("shrink-0", statusStyles.textColor)}>
+                {statusStyles.icon}
               </div>
             )}
 
@@ -212,7 +221,7 @@ export function AnswerCard({
                       )}
                       {item.timeSpentSeconds > 0 && (
                         <span className="tabular-nums">
-                          {item.timeSpentSeconds}с
+                          {t('answerCard.timeSeconds', { seconds: item.timeSpentSeconds })}
                         </span>
                       )}
                     </div>
@@ -226,7 +235,7 @@ export function AnswerCard({
                       className="text-xs h-8 px-3 border-neutral-700 hover:bg-neutral-800 hover:text-white"
                     >
                       <Pencil className="w-3 h-3 mr-1.5" />
-                      Изменить
+                      {t('answerCard.editButton')}
                     </Button>
                   </div>
                 </div>

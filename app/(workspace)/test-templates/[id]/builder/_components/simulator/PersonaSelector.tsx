@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { useTranslations } from 'next-intl';
 import { Sparkles, Shuffle, TrendingDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { SimulationProfile, personaConfig } from './types';
@@ -18,6 +19,8 @@ interface PersonaSelectorProps {
 }
 
 export function PersonaSelector({ selected, onSelect, disabled }: PersonaSelectorProps) {
+  const t = useTranslations('builder.simulator');
+
   return (
     <div className="grid grid-cols-3 gap-2">
       {(Object.keys(personaConfig) as SimulationProfile[]).map((profile) => {
@@ -46,7 +49,7 @@ export function PersonaSelector({ selected, onSelect, disabled }: PersonaSelecto
                 isSelected ? config.color : 'text-muted-foreground'
               )}
             >
-              {config.label}
+              {t(config.labelKey as Parameters<typeof t>[0])}
             </span>
           </button>
         );

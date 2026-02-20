@@ -15,7 +15,10 @@ export type Strategy = 'UNIVERSAL_BASELINE' | 'TARGETED_FIT' | 'DYNAMIC_GAP_ANAL
 
 export interface StrategySection {
   id: string;
+  /** Hardcoded English fallback title (kept for non-UI uses) */
   title: string;
+  /** Translation key under builder.simulator.sections.* */
+  titleKey: string;
   icon: string;
   defaultOpen: boolean;
   priority: number; // Lower = higher priority
@@ -98,11 +101,11 @@ export const STRATEGY_CONFIG: Record<Strategy, StrategyDisplayConfig> = {
     badgeBg: 'bg-primary hover:bg-primary/90',
     focusColor: 'focus-visible:ring-primary/50',
     sections: [
-      { id: 'insights', title: 'Assessment Profile', icon: 'Radar', defaultOpen: true, priority: 1 },
-      { id: 'simulated-results', title: 'Results Preview', icon: 'FileCheck', defaultOpen: false, priority: 2 },
-      { id: 'timeline', title: 'Question Flow', icon: 'LineChart', defaultOpen: false, priority: 3 },
-      { id: 'analytics', title: 'Coverage Analysis', icon: 'BarChart3', defaultOpen: false, priority: 4 },
-      { id: 'finetune', title: 'Fine Tune', icon: 'SlidersHorizontal', defaultOpen: false, priority: 5 },
+      { id: 'insights', title: 'Assessment Profile', titleKey: 'sections.assessmentProfile', icon: 'Radar', defaultOpen: true, priority: 1 },
+      { id: 'simulated-results', title: 'Results Preview', titleKey: 'sections.resultsPreview', icon: 'FileCheck', defaultOpen: false, priority: 2 },
+      { id: 'timeline', title: 'Question Flow', titleKey: 'sections.questionFlow', icon: 'LineChart', defaultOpen: false, priority: 3 },
+      { id: 'analytics', title: 'Coverage Analysis', titleKey: 'sections.coverageAnalysis', icon: 'BarChart3', defaultOpen: false, priority: 4 },
+      { id: 'finetune', title: 'Fine Tune', titleKey: 'sections.fineTune', icon: 'SlidersHorizontal', defaultOpen: false, priority: 5 },
     ],
   },
 
@@ -119,11 +122,11 @@ export const STRATEGY_CONFIG: Record<Strategy, StrategyDisplayConfig> = {
     badgeBg: 'bg-emerald-500 hover:bg-emerald-600',
     focusColor: 'focus-visible:ring-emerald-500/50',
     sections: [
-      { id: 'job-alignment', title: 'Job Alignment', icon: 'Briefcase', defaultOpen: true, priority: 1, requiresData: 'onetSocCode' },
-      { id: 'simulated-results', title: 'Fit Preview', icon: 'FileCheck', defaultOpen: false, priority: 2 },
-      { id: 'timeline', title: 'Question Flow', icon: 'LineChart', defaultOpen: false, priority: 3 },
-      { id: 'analytics', title: 'Skill Coverage', icon: 'CheckSquare', defaultOpen: false, priority: 4 },
-      { id: 'finetune', title: 'Fine Tune', icon: 'SlidersHorizontal', defaultOpen: false, priority: 5 },
+      { id: 'job-alignment', title: 'Job Alignment', titleKey: 'sections.jobAlignment', icon: 'Briefcase', defaultOpen: true, priority: 1, requiresData: 'onetSocCode' },
+      { id: 'simulated-results', title: 'Fit Preview', titleKey: 'sections.fitPreview', icon: 'FileCheck', defaultOpen: false, priority: 2 },
+      { id: 'timeline', title: 'Question Flow', titleKey: 'sections.questionFlow', icon: 'LineChart', defaultOpen: false, priority: 3 },
+      { id: 'analytics', title: 'Skill Coverage', titleKey: 'sections.skillCoverage', icon: 'CheckSquare', defaultOpen: false, priority: 4 },
+      { id: 'finetune', title: 'Fine Tune', titleKey: 'sections.fineTune', icon: 'SlidersHorizontal', defaultOpen: false, priority: 5 },
     ],
   },
 
@@ -140,12 +143,12 @@ export const STRATEGY_CONFIG: Record<Strategy, StrategyDisplayConfig> = {
     badgeBg: 'bg-blue-500 hover:bg-blue-600',
     focusColor: 'focus-visible:ring-blue-500/50',
     sections: [
-      { id: 'team-comparison', title: 'Team Comparison', icon: 'Users', defaultOpen: true, priority: 1, requiresData: 'teamId' },
-      { id: 'gap-analysis', title: 'Gap Analysis', icon: 'GitCompareArrows', defaultOpen: true, priority: 2, requiresData: 'teamId' },
-      { id: 'simulated-results', title: 'Team Fit Preview', icon: 'FileCheck', defaultOpen: false, priority: 3 },
-      { id: 'timeline', title: 'Question Flow', icon: 'LineChart', defaultOpen: false, priority: 4 },
-      { id: 'analytics', title: 'Analytics', icon: 'BarChart3', defaultOpen: false, priority: 5 },
-      { id: 'finetune', title: 'Fine Tune', icon: 'SlidersHorizontal', defaultOpen: false, priority: 6 },
+      { id: 'team-comparison', title: 'Team Comparison', titleKey: 'sections.teamComparison', icon: 'Users', defaultOpen: true, priority: 1, requiresData: 'teamId' },
+      { id: 'gap-analysis', title: 'Gap Analysis', titleKey: 'sections.gapAnalysis', icon: 'GitCompareArrows', defaultOpen: true, priority: 2, requiresData: 'teamId' },
+      { id: 'simulated-results', title: 'Team Fit Preview', titleKey: 'sections.teamFitPreview', icon: 'FileCheck', defaultOpen: false, priority: 3 },
+      { id: 'timeline', title: 'Question Flow', titleKey: 'sections.questionFlow', icon: 'LineChart', defaultOpen: false, priority: 4 },
+      { id: 'analytics', title: 'Analytics', titleKey: 'sections.analytics', icon: 'BarChart3', defaultOpen: false, priority: 5 },
+      { id: 'finetune', title: 'Fine Tune', titleKey: 'sections.fineTune', icon: 'SlidersHorizontal', defaultOpen: false, priority: 6 },
     ],
   },
 };
@@ -258,34 +261,36 @@ export { personaConfig } from './types';
 
 // ============================================
 // STRATEGY HELP CONTENT
+// Translation keys under builder.simulator.strategyHelp.*
+// Components should call t(key) at render time.
 // ============================================
 
 export const STRATEGY_HELP_CONTENT = {
   UNIVERSAL_BASELINE: {
-    title: 'Universal Baseline Assessment',
-    points: [
-      'Evaluates broad competency coverage',
-      'Generates a competency passport/profile',
-      'No pass/fail scoring - discovery focused',
-      'Best for: Training needs analysis, career planning',
+    titleKey: 'strategyHelp.universalBaseline.title',
+    pointKeys: [
+      'strategyHelp.universalBaseline.points.coverage',
+      'strategyHelp.universalBaseline.points.passport',
+      'strategyHelp.universalBaseline.points.noPassFail',
+      'strategyHelp.universalBaseline.points.bestFor',
     ],
   },
   TARGETED_FIT: {
-    title: 'Job Fit Assessment',
-    points: [
-      'Aligned to O*NET job requirements when SOC code is set',
-      'Weighted scoring against job profile',
-      'Clear pass/fail threshold',
-      'Best for: Hiring, role matching, promotions',
+    titleKey: 'strategyHelp.targetedFit.title',
+    pointKeys: [
+      'strategyHelp.targetedFit.points.aligned',
+      'strategyHelp.targetedFit.points.weighted',
+      'strategyHelp.targetedFit.points.threshold',
+      'strategyHelp.targetedFit.points.bestFor',
     ],
   },
   DYNAMIC_GAP_ANALYSIS: {
-    title: 'Team Gap Analysis',
-    points: [
-      'Compares individual scores against team benchmarks',
-      'Identifies complementary strengths and development gaps',
-      'Select a team in settings to enable comparison',
-      'Best for: Team building, succession planning',
+    titleKey: 'strategyHelp.dynamicGap.title',
+    pointKeys: [
+      'strategyHelp.dynamicGap.points.compares',
+      'strategyHelp.dynamicGap.points.identifies',
+      'strategyHelp.dynamicGap.points.settings',
+      'strategyHelp.dynamicGap.points.bestFor',
     ],
   },
 } as const;

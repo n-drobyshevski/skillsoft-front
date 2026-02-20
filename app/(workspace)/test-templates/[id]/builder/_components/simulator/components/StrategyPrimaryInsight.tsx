@@ -13,6 +13,7 @@
  */
 
 import React, { memo, useMemo } from 'react';
+import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
@@ -68,6 +69,7 @@ function UniversalBaselineInsight({
   result: SimulationResult;
   passingScore: number;
 }) {
+  const t = useTranslations('builder.simulator');
   const config = STRATEGY_CONFIG.UNIVERSAL_BASELINE;
   const competencyData = result.distributionByCompetency || [];
   const totalQuestions = result.sampleQuestions.length;
@@ -84,7 +86,7 @@ function UniversalBaselineInsight({
       <CardHeader className="pb-2">
         <CardTitle className="text-sm flex items-center gap-2">
           <LayoutGrid className={cn('h-4 w-4', config.iconText)} />
-          Competency Profile Preview
+          {t('score.competencyProfile')}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -93,11 +95,11 @@ function UniversalBaselineInsight({
           <div className="flex items-center gap-2">
             <Target className="h-4 w-4 text-muted-foreground" />
             <span className="text-sm text-muted-foreground">
-              {competencyData.length} Competencies
+              {competencyData.length} {t('score.competencies')}
             </span>
           </div>
           <Badge variant="secondary" className="tabular-nums">
-            {totalQuestions} Questions
+            {totalQuestions} {t('results.questions')}
           </Badge>
         </div>
 
@@ -131,7 +133,7 @@ function UniversalBaselineInsight({
 
         {/* Insight */}
         <p className="text-xs text-muted-foreground">
-          This assessment generates a competency passport across all areas without pass/fail scoring.
+          {t('score.noPassFail')}
         </p>
       </CardContent>
     </Card>
@@ -151,6 +153,7 @@ function TargetedFitInsight({
   passingScore: number;
   onetSocCode?: string;
 }) {
+  const t = useTranslations('builder.simulator');
   const config = STRATEGY_CONFIG.TARGETED_FIT;
   const score = result.simulatedScore ?? 0;
   const passed = score >= passingScore;
@@ -163,7 +166,7 @@ function TargetedFitInsight({
       <CardHeader className="pb-2">
         <CardTitle className="text-sm flex items-center gap-2">
           <Briefcase className={cn('h-4 w-4', config.iconText)} />
-          Job Fit Assessment
+          {t('score.jobFitScore')}
           {onetSocCode && (
             <Badge variant="outline" className="text-[10px] ml-auto">
               {onetSocCode}
@@ -191,7 +194,7 @@ function TargetedFitInsight({
                 passed ? 'text-emerald-700 dark:text-emerald-400' : 'text-red-700 dark:text-red-400'
               )}
             >
-              {passed ? 'Meets Requirements' : 'Below Threshold'}
+              {passed ? t('score.qualified') : t('score.belowThreshold')}
             </span>
           </div>
           <div className="text-4xl font-bold tabular-nums mb-1">
@@ -205,7 +208,7 @@ function TargetedFitInsight({
             )}
           />
           <div className="text-xs text-muted-foreground mt-2">
-            Passing threshold: {passingScore}%
+            {t('score.toQualify', { score: passingScore })}
           </div>
         </div>
 
@@ -214,7 +217,7 @@ function TargetedFitInsight({
           <div className="flex items-center justify-between p-3 rounded-lg border">
             <div className="flex items-center gap-2">
               <Target className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm">Job Alignment</span>
+              <span className="text-sm">{t('score.jobFitScore')}</span>
             </div>
             <div className="flex items-center gap-2">
               <span className="text-lg font-semibold tabular-nums">{alignmentScore}%</span>
@@ -246,6 +249,7 @@ function DynamicGapInsight({
   teamId?: string;
   teamName?: string;
 }) {
+  const t = useTranslations('builder.simulator');
   const config = STRATEGY_CONFIG.DYNAMIC_GAP_ANALYSIS;
   const score = result.simulatedScore ?? 0;
 
@@ -258,12 +262,16 @@ function DynamicGapInsight({
   const strengthCount = Math.ceil(competencyData.length * 0.4);
   const gapCount = Math.floor(competencyData.length * 0.3);
 
+  const gapLabel = isAboveAvg
+    ? t('score.aboveTeam', { gap: Math.abs(gap) })
+    : t('score.belowTeam', { gap: Math.abs(gap) });
+
   return (
     <Card className={cn('border-2', config.border)}>
       <CardHeader className="pb-2">
         <CardTitle className="text-sm flex items-center gap-2">
           <Users className={cn('h-4 w-4', config.iconText)} />
-          Team Comparison
+          {t('score.teamGapAnalysis')}
           {teamName && (
             <Badge variant="outline" className="text-[10px] ml-auto">
               {teamName}
@@ -280,7 +288,7 @@ function DynamicGapInsight({
           )}
         >
           <div className="text-sm text-muted-foreground mb-1">
-            vs Team Average ({teamAvg}%)
+            {t('score.teamBenchmark')} ({teamAvg}%)
           </div>
           <div
             className={cn(
@@ -294,12 +302,12 @@ function DynamicGapInsight({
             {isAboveAvg ? (
               <>
                 <TrendingUp className="h-4 w-4 text-blue-500" />
-                <span className="text-sm text-blue-600 dark:text-blue-400">Above Average</span>
+                <span className="text-sm text-blue-600 dark:text-blue-400">{gapLabel}</span>
               </>
             ) : (
               <>
                 <TrendingDown className="h-4 w-4 text-amber-500" />
-                <span className="text-sm text-amber-600 dark:text-amber-400">Below Average</span>
+                <span className="text-sm text-amber-600 dark:text-amber-400">{gapLabel}</span>
               </>
             )}
           </div>
@@ -310,7 +318,9 @@ function DynamicGapInsight({
           <div className="p-3 rounded-lg bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800">
             <div className="flex items-center gap-2 mb-1">
               <TrendingUp className="h-4 w-4 text-emerald-600" />
-              <span className="text-xs text-emerald-700 dark:text-emerald-400">Strengths</span>
+              <span className="text-xs text-emerald-700 dark:text-emerald-400">
+                {t('score.individual')}
+              </span>
             </div>
             <div className="text-2xl font-bold text-emerald-700 dark:text-emerald-400 tabular-nums">
               {strengthCount}
@@ -319,7 +329,9 @@ function DynamicGapInsight({
           <div className="p-3 rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800">
             <div className="flex items-center gap-2 mb-1">
               <TrendingDown className="h-4 w-4 text-amber-600" />
-              <span className="text-xs text-amber-700 dark:text-amber-400">Gaps</span>
+              <span className="text-xs text-amber-700 dark:text-amber-400">
+                {t('score.teamGapAnalysis')}
+              </span>
             </div>
             <div className="text-2xl font-bold text-amber-700 dark:text-amber-400 tabular-nums">
               {gapCount}
@@ -329,7 +341,7 @@ function DynamicGapInsight({
 
         {!teamId && (
           <p className="text-xs text-muted-foreground text-center">
-            Select a team in settings to enable detailed comparison.
+            {t('emptyState.missingConfig.teamGap')}
           </p>
         )}
       </CardContent>

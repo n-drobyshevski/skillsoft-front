@@ -12,6 +12,7 @@
  */
 
 import React, { memo } from 'react';
+import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Loader2, Play, Sparkles } from 'lucide-react';
@@ -63,6 +64,7 @@ const RunCTA = memo(function RunCTA({
   canSimulate,
   strategy,
 }: RunCTAProps) {
+  const t = useTranslations('builder.simulator');
   const config = STRATEGY_CONFIG[strategy];
 
   return (
@@ -79,12 +81,12 @@ const RunCTA = memo(function RunCTA({
       {isSimulating ? (
         <>
           <Loader2 className="h-5 w-5 animate-spin" />
-          Running Simulation...
+          {t('runningSimulation')}
         </>
       ) : (
         <>
           <Play className="h-5 w-5" />
-          Run Simulation
+          {t('runSimulation')}
         </>
       )}
     </Button>
@@ -104,6 +106,7 @@ const StrategyIntro = memo(function StrategyIntro({
   strategy,
   validation,
 }: StrategyIntroProps) {
+  const t = useTranslations('builder.simulator');
   const config = STRATEGY_CONFIG[strategy];
 
   return (
@@ -114,11 +117,10 @@ const StrategyIntro = memo(function StrategyIntro({
         </div>
         <div className="flex-1 min-w-0">
           <h3 className="text-sm font-semibold mb-1">
-            Test Your Blueprint
+            {t('configure.testYourBlueprint')}
           </h3>
           <p className="text-xs text-muted-foreground">
-            Run a simulation to preview how candidates will experience this assessment.
-            Choose a test persona to see different performance scenarios.
+            {t('configure.runDescription')}
           </p>
         </div>
       </div>
@@ -141,12 +143,14 @@ const PersonaSelectionCard = memo(function PersonaSelectionCard({
   onProfileChange,
   isSimulating,
 }: PersonaSelectionCardProps) {
+  const t = useTranslations('builder.simulator');
+
   return (
     <Card className="border-dashed">
       <CardHeader className="pb-3">
-        <CardTitle className="text-sm font-medium">Select Test Persona</CardTitle>
+        <CardTitle className="text-sm font-medium">{t('configure.selectTestPersona')}</CardTitle>
         <CardDescription className="text-xs">
-          Choose how the simulated candidate will perform
+          {t('configure.selectPersonaDescription')}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -174,6 +178,7 @@ export const ConfigurePhase = memo(function ConfigurePhase({
   preflight,
   variant = 'desktop',
 }: ConfigurePhaseProps) {
+  const t = useTranslations('builder.simulator');
   const config = STRATEGY_CONFIG[strategy];
 
   return (
@@ -213,7 +218,7 @@ export const ConfigurePhase = memo(function ConfigurePhase({
         {/* Helper text */}
         {!preflight.canSimulate && (
           <p className="text-xs text-muted-foreground text-center mt-2">
-            Add competencies to your blueprint to enable simulation
+            {t('configure.addCompetenciesToEnable')}
           </p>
         )}
       </div>

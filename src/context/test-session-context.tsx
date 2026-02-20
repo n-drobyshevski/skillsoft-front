@@ -59,7 +59,7 @@ interface TestSessionProviderProps {
  *
  * Usage:
  * ```tsx
- * const adapter = new AuthenticatedTestSessionAdapter(authHeaders);
+ * const adapter = new AuthenticatedTestSessionAdapter(userId, userRole);
  *
  * <TestSessionProvider adapter={adapter}>
  *   <ImmersivePlayer session={session} ... />

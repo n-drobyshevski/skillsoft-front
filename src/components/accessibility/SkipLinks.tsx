@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 
 /**
@@ -12,13 +13,16 @@ import { cn } from '@/lib/utils';
  * - Multiple skip targets support
  * - Smooth scroll to target
  * - Focus management
+ * - Bilingual support (EN/RU) via next-intl accessibility namespace
  */
 
 export interface SkipLinkTarget {
   /** ID of the target element */
   id: string;
-  /** Label for the skip link */
-  label: string;
+  /** Translation key within the 'accessibility' namespace (e.g. 'skipToMainContent') */
+  labelKey: string;
+  /** Fallback label if translation is unavailable */
+  fallbackLabel: string;
 }
 
 export interface SkipLinksProps {
@@ -30,11 +34,13 @@ export interface SkipLinksProps {
 
 // Default skip links for most pages
 const defaultLinks: SkipLinkTarget[] = [
-  { id: 'main-content', label: 'Skip to main content' },
-  { id: 'navigation', label: 'Skip to navigation' },
+  { id: 'main-content', labelKey: 'skipToMainContent', fallbackLabel: 'Skip to main content' },
+  { id: 'navigation', labelKey: 'skipToNavigation', fallbackLabel: 'Skip to navigation' },
 ];
 
 export function SkipLinks({ links = defaultLinks, className }: SkipLinksProps) {
+  const t = useTranslations('accessibility');
+
   const handleClick = (e: React.MouseEvent<HTMLAnchorElement>, targetId: string) => {
     e.preventDefault();
     const target = document.getElementById(targetId);
@@ -79,7 +85,7 @@ export function SkipLinks({ links = defaultLinks, className }: SkipLinksProps) {
                 'focus:translate-y-0'
               )}
             >
-              {link.label}
+              {t(link.labelKey as Parameters<typeof t>[0])}
             </a>
           </li>
         ))}
@@ -127,7 +133,7 @@ export interface SkipLinkTargetProps {
   className?: string;
 }
 
-export function SkipLinkTarget({ id, label, className }: SkipLinkTargetProps) {
+export function SkipLinkTargetAnchor({ id, label, className }: SkipLinkTargetProps) {
   return (
     <div
       id={id}
@@ -139,33 +145,34 @@ export function SkipLinkTarget({ id, label, className }: SkipLinkTargetProps) {
 }
 
 /**
- * Preset skip link configurations for different page types
+ * Preset skip link configurations for different page types.
+ * Each entry uses a translation key from the 'accessibility' namespace.
  */
 export const SKIP_LINK_PRESETS = {
   dashboard: [
-    { id: 'main-content', label: 'Skip to main content' },
-    { id: 'sidebar', label: 'Skip to sidebar' },
-    { id: 'quick-actions', label: 'Skip to quick actions' },
+    { id: 'main-content', labelKey: 'skipToMainContent', fallbackLabel: 'Skip to main content' },
+    { id: 'sidebar', labelKey: 'skipToSidebar', fallbackLabel: 'Skip to sidebar' },
+    { id: 'quick-actions', labelKey: 'skipToQuickActions', fallbackLabel: 'Skip to quick actions' },
   ],
   table: [
-    { id: 'main-content', label: 'Skip to main content' },
-    { id: 'table-content', label: 'Skip to table' },
-    { id: 'pagination', label: 'Skip to pagination' },
+    { id: 'main-content', labelKey: 'skipToMainContent', fallbackLabel: 'Skip to main content' },
+    { id: 'table-content', labelKey: 'skipToTable', fallbackLabel: 'Skip to table' },
+    { id: 'pagination', labelKey: 'skipToPagination', fallbackLabel: 'Skip to pagination' },
   ],
   form: [
-    { id: 'main-content', label: 'Skip to main content' },
-    { id: 'form-content', label: 'Skip to form' },
-    { id: 'form-actions', label: 'Skip to form actions' },
+    { id: 'main-content', labelKey: 'skipToMainContent', fallbackLabel: 'Skip to main content' },
+    { id: 'form-content', labelKey: 'skipToForm', fallbackLabel: 'Skip to form' },
+    { id: 'form-actions', labelKey: 'skipToFormActions', fallbackLabel: 'Skip to form actions' },
   ],
   testPlayer: [
-    { id: 'main-content', label: 'Skip to question' },
-    { id: 'answer-options', label: 'Skip to answer options' },
-    { id: 'navigation', label: 'Skip to navigation' },
+    { id: 'main-content', labelKey: 'skipToQuestion', fallbackLabel: 'Skip to question' },
+    { id: 'answer-options', labelKey: 'skipToAnswerOptions', fallbackLabel: 'Skip to answer options' },
+    { id: 'navigation', labelKey: 'skipToNavigation', fallbackLabel: 'Skip to navigation' },
   ],
   psychometrics: [
-    { id: 'main-content', label: 'Skip to main content' },
-    { id: 'charts', label: 'Skip to charts' },
-    { id: 'data-table', label: 'Skip to data table' },
+    { id: 'main-content', labelKey: 'skipToMainContent', fallbackLabel: 'Skip to main content' },
+    { id: 'charts', labelKey: 'skipToCharts', fallbackLabel: 'Skip to charts' },
+    { id: 'data-table', labelKey: 'skipToDataTable', fallbackLabel: 'Skip to data table' },
   ],
 } as const;
 

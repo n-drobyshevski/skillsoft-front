@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useTransition, useState } from 'react';
+import { useMemo, useTransition, useState, useCallback } from 'react';
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
@@ -12,6 +12,7 @@ import { PerformanceStatGrid } from '@/components/activity';
 import { TestSessionSummary, TestResult, SessionStatus } from '@/types/domain';
 import { cn } from '@/lib/utils';
 import { useTranslations, useLocale } from 'next-intl';
+import { PullToRefresh } from '@/components/mobile';
 
 // Extended session type with result
 export interface EnrichedTestSession extends TestSessionSummary {
@@ -48,6 +49,11 @@ export function MyTestsContent({ sessions, initialTab = 'all' }: MyTestsContentP
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
+
+  const handleRefresh = useCallback(async () => {
+    router.refresh();
+    await new Promise((resolve) => setTimeout(resolve, 500));
+  }, [router]);
 
   // Optimistic tab state - updates immediately on click
   const urlTab = (searchParams.get('tab') as TabValue) || initialTab;
@@ -182,6 +188,7 @@ export function MyTestsContent({ sessions, initialTab = 'all' }: MyTestsContentP
   }
 
   return (
+    <PullToRefresh onRefresh={handleRefresh}>
     <div className="space-y-4 sm:space-y-6">
       {/* Summary Stats Dashboard */}
       <SummaryStats counts={counts} activeTab={activeTab} onTabChange={handleTabChange} />
@@ -262,6 +269,7 @@ export function MyTestsContent({ sessions, initialTab = 'all' }: MyTestsContentP
         })}
       </Tabs>
     </div>
+    </PullToRefresh>
   );
 }
 

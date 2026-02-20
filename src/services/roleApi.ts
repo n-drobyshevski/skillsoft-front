@@ -16,6 +16,7 @@
 import { connection } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { UserRole } from '@/types/user';
+import { signAuthHeaders } from '@/lib/hmac';
 
 /**
  * Get the role from Clerk organization role string.
@@ -79,9 +80,13 @@ export async function getAuthHeaders(): Promise<Record<string, string>> {
       });
     }
 
+    // Generate HMAC signature headers (no-op if HMAC_SHARED_SECRET is not set)
+    const hmacHeaders = signAuthHeaders(userId, userRole);
+
     return {
       'X-User-Id': userId,
       'X-User-Role': userRole,
+      ...hmacHeaders,
     };
   } catch (error) {
     // Re-throw Next.js internal errors (PPR bailout, prerender signals, redirects)
@@ -161,6 +166,33 @@ export async function fetchWithRole(
     mode: 'cors',
     credentials: 'include',
   });
+}
+
+/**
+ * Generate signed authentication headers for client-side API calls.
+ *
+ * Client components cannot access HMAC_SHARED_SECRET (it's server-only).
+ * They should call this server action to obtain headers with HMAC signatures.
+ *
+ * @param userId - The Clerk user ID
+ * @param userRole - The user's role string (e.g., 'ADMIN', 'EDITOR', 'USER')
+ * @returns Headers object with X-User-Id, X-User-Role, and HMAC signature headers
+ */
+export async function getSignedAuthHeaders(
+  userId: string,
+  userRole: string
+): Promise<Record<string, string>> {
+  if (!userId) {
+    return {};
+  }
+
+  const hmacHeaders = signAuthHeaders(userId, userRole);
+
+  return {
+    'X-User-Id': userId,
+    'X-User-Role': userRole,
+    ...hmacHeaders,
+  };
 }
 
 /**

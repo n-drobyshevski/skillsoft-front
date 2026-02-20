@@ -6,14 +6,24 @@ import * as React from "react";
 export const BREAKPOINTS = {
   xs: 320,   // Small phones
   sm: 640,   // Large phones / small tablets
-  md: 768,   // Tablets (sidebar threshold)
+  md: 768,   // Tablets (sidebar threshold) — canonical mobile/desktop boundary
   lg: 1024,  // Small laptops
   xl: 1280,  // Desktops
   '2xl': 1536, // Large monitors
 } as const;
 
 export type Breakpoint = 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl';
-export type DeviceType = 'mobile' | 'tablet' | 'desktop';
+
+/**
+ * Device type categories.
+ *
+ * Canonical boundary definitions:
+ * - phone:   < 640px  (xs only)
+ * - mobile:  < 768px  (xs + sm) — matches Tailwind `md` breakpoint, standard mobile boundary
+ * - tablet:  768px – 1023px (md)
+ * - desktop: >= 1024px (lg, xl, 2xl)
+ */
+export type DeviceType = 'phone' | 'tablet' | 'desktop';
 
 /**
  * Enhanced breakpoint hook with granular device detection.
@@ -21,14 +31,20 @@ export type DeviceType = 'mobile' | 'tablet' | 'desktop';
  * Returns both the current breakpoint name and device type category.
  * SSR-safe with hydration handling to prevent mismatch errors.
  *
- * Device categories:
- * - mobile: < 640px (xs)
- * - tablet: 640px - 1023px (sm, md)
- * - desktop: >= 1024px (lg, xl, 2xl)
+ * Canonical mobile boundary is 768px (Tailwind `md`), which is what
+ * `useIsMobile()` in use-mobile.ts uses. All flags below are derived
+ * from this single source of truth.
+ *
+ * Device flags:
+ * - isPhone:          < 640px  (xs — very small phones)
+ * - isMobile:         < 768px  (xs + sm — standard mobile, matches `useIsMobile()`)
+ * - isTablet:         768px – 1023px (md — tablet-sized viewports)
+ * - isDesktop:        >= 1024px (lg, xl, 2xl)
+ * - isMobileOrTablet: < 1024px (phone + tablet combined; useful for sidebar decisions)
  *
  * @example
  * ```tsx
- * const { breakpoint, deviceType, isMobile, isTablet, isDesktop } = useBreakpoint();
+ * const { breakpoint, isMobile, isTablet, isDesktop } = useBreakpoint();
  *
  * if (isMobile) {
  *   return <MobileLayout />;
@@ -78,28 +94,48 @@ export function useBreakpoint() {
     };
   }, []);
 
-  // Derive device type from breakpoint
+  const breakpointOrder: Breakpoint[] = ['xs', 'sm', 'md', 'lg', 'xl', '2xl'];
+  const currentIndex = breakpointOrder.indexOf(breakpoint);
+
+  // Derive device type from breakpoint using canonical 768px mobile boundary
   const deviceType: DeviceType = React.useMemo(() => {
-    if (breakpoint === 'xs') return 'mobile';
-    if (breakpoint === 'sm' || breakpoint === 'md') return 'tablet';
+    if (breakpoint === 'xs' || breakpoint === 'sm') return 'phone';
+    if (breakpoint === 'md') return 'tablet';
     return 'desktop';
   }, [breakpoint]);
 
   return {
     /** Current breakpoint name (xs, sm, md, lg, xl, 2xl) */
     breakpoint,
-    /** Device category (mobile, tablet, desktop) */
+    /** Device category (phone, tablet, desktop) */
     deviceType,
-    /** True if viewport is mobile size (< 640px) */
-    isMobile: deviceType === 'mobile',
-    /** True if viewport is tablet size (640px - 1023px) */
-    isTablet: deviceType === 'tablet',
-    /** True if viewport is desktop size (>= 1024px) */
-    isDesktop: deviceType === 'desktop',
+    /**
+     * True if viewport is phone size (< 640px).
+     * Use this for layouts targeting only very small screens.
+     */
+    isPhone: breakpoint === 'xs',
+    /**
+     * True if viewport is mobile size (< 768px).
+     * This matches the canonical Tailwind `md` breakpoint and is
+     * equivalent to `useIsMobile()`. This is the standard flag to
+     * use for mobile-vs-desktop layout decisions.
+     */
+    isMobile: currentIndex < breakpointOrder.indexOf('md'),
+    /**
+     * True if viewport is tablet size (768px – 1023px).
+     */
+    isTablet: breakpoint === 'md',
+    /**
+     * True if viewport is desktop size (>= 1024px).
+     */
+    isDesktop: currentIndex >= breakpointOrder.indexOf('lg'),
     /** True if client has hydrated (safe to use window APIs) */
     isHydrated,
-    /** True if viewport is mobile or tablet (< 1024px) */
-    isMobileOrTablet: deviceType === 'mobile' || deviceType === 'tablet',
+    /**
+     * True if viewport is mobile or tablet (< 1024px).
+     * Useful for sidebar collapse and navigation decisions.
+     */
+    isMobileOrTablet: currentIndex < breakpointOrder.indexOf('lg'),
     /** Viewport width in pixels (only accurate after hydration) */
     width: isHydrated ? (typeof window !== 'undefined' ? window.innerWidth : 0) : 0,
   };

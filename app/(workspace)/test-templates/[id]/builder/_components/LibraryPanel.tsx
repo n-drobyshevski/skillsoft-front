@@ -22,6 +22,7 @@ import {
   Target,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useTranslations } from 'next-intl';
 import { useBlueprintWorkspace } from './BlueprintWorkspaceProvider';
 import { LibraryCompetency, HealthStatus } from '../actions';
 import type { ActiveDragData } from './BuilderDndProvider';
@@ -40,23 +41,24 @@ interface LibraryPanelProps {
 // ============================================
 
 function HealthIndicator({ health }: { health: HealthStatus }) {
+  const t = useTranslations('builder.library.health');
   const config = {
     CRITICAL: {
       icon: AlertCircle,
-      label: 'No questions available',
+      label: t('noQuestions'),
       className:
         'bg-red-50 dark:bg-red-950/50 text-red-600 dark:text-red-400 border-red-200 dark:border-red-800',
     },
     MODERATE: {
       icon: AlertTriangle,
-      label: 'Limited questions available',
+      label: t('limitedQuestions'),
       // Fixed: Changed text-amber-600 to text-amber-700 for WCAG AA contrast (5.2:1)
       className:
         'bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-800',
     },
     HEALTHY: {
       icon: CheckCircle2,
-      label: 'Good question inventory',
+      label: t('goodInventory'),
       className:
         'bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800',
     },
@@ -125,6 +127,7 @@ function DraggableCompetencyItem({
   isSelected,
   onAdd,
 }: Omit<CompetencyItemProps, 'enableDrag'>) {
+  const tLib = useTranslations('builder.library');
   const isCritical = competency.health === 'CRITICAL';
   const isDisabled = isCritical || isSelected;
 
@@ -193,7 +196,7 @@ function DraggableCompetencyItem({
             onAdd();
           }}
           onPointerDown={(e) => e.stopPropagation()}
-          aria-label={`Add ${competency.name} to canvas`}
+          aria-label={tLib('addToCanvas', { name: competency.name })}
         >
           <Plus className="h-4 w-4" />
         </Button>
@@ -211,6 +214,7 @@ function StaticCompetencyItem({
   isSelected,
   onAdd,
 }: Omit<CompetencyItemProps, 'enableDrag'>) {
+  const tLib = useTranslations('builder.library');
   const isCritical = competency.health === 'CRITICAL';
   const isDisabled = isCritical || isSelected;
 
@@ -252,7 +256,7 @@ function StaticCompetencyItem({
             e.stopPropagation();
             onAdd();
           }}
-          aria-label={`Add ${competency.name} to canvas`}
+          aria-label={tLib('addToCanvas', { name: competency.name })}
         >
           <Plus className="h-4 w-4" />
         </Button>
@@ -351,6 +355,7 @@ const ROW_HEIGHT_HEADER = 36;
 const ROW_HEIGHT_ITEM = 56;
 
 export function LibraryPanel({ onAdd }: LibraryPanelProps) {
+  const t = useTranslations('builder.library');
   const { libraryCompetencies, state, addCompetency } = useBlueprintWorkspace();
   const [searchQuery, setSearchQuery] = useState('');
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -423,7 +428,7 @@ export function LibraryPanel({ onAdd }: LibraryPanelProps) {
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Search competencies..."
+            placeholder={t('searchPlaceholder')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-10 h-11 text-sm rounded-xl bg-muted/40 border-0 focus-visible:bg-background focus-visible:ring-2 focus-visible:ring-primary/20"
@@ -432,9 +437,9 @@ export function LibraryPanel({ onAdd }: LibraryPanelProps) {
 
         {/* Stats */}
         <div className="flex items-center gap-4 mt-2 text-[11px] text-muted-foreground">
-          <span>{filteredCompetencies.length} available</span>
+          <span>{t('available', { count: filteredCompetencies.length })}</span>
           <span className="text-primary font-medium">
-            {selectedIds.length} selected
+            {t('selected', { count: selectedIds.length })}
           </span>
         </div>
       </div>
@@ -444,9 +449,9 @@ export function LibraryPanel({ onAdd }: LibraryPanelProps) {
         {virtualRows.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-12 text-center px-3">
             <Brain className="h-10 w-10 text-muted-foreground/30 mb-3" />
-            <p className="text-sm text-muted-foreground">No competencies found</p>
+            <p className="text-sm text-muted-foreground">{t('noCompetenciesFound')}</p>
             <p className="text-xs text-muted-foreground/70 mt-1">
-              Try adjusting your search
+              {t('tryAdjustingSearch')}
             </p>
           </div>
         ) : (

@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { useTranslations } from 'next-intl';
 import { Loader2, AlertTriangle, RefreshCw, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { SubmissionError } from '@/store/review-store';
@@ -29,6 +30,8 @@ export function SubmissionProgress({
   onRetry,
   onCancel,
 }: SubmissionProgressProps) {
+  const t = useTranslations('assessment');
+
   if (!isSubmitting && !error) return null;
 
   return (
@@ -45,14 +48,14 @@ export function SubmissionProgress({
               <Loader2 className="w-16 h-16 text-emerald-500 animate-spin mx-auto" />
             </div>
             <h3 className="text-xl font-semibold text-white mb-2">
-              Отправка результатов...
+              {t('submission.submittingResults')}
             </h3>
             <p className="text-sm text-neutral-400">
-              Пожалуйста, подождите. Это может занять несколько секунд.
+              {t('submission.pleaseWait')}
             </p>
             {attempts > 1 && (
               <p className="text-xs text-neutral-500 mt-3">
-                Попытка {attempts} из 3
+                {t('submission.attemptOf', { current: attempts, max: 3 })}
               </p>
             )}
           </div>
@@ -65,7 +68,7 @@ export function SubmissionProgress({
               </div>
             </div>
             <h3 className="text-xl font-semibold text-white mb-2">
-              Ошибка отправки
+              {t('submission.submissionError')}
             </h3>
             <p className="text-sm text-neutral-400 mb-6">
               {error.message}
@@ -78,7 +81,7 @@ export function SubmissionProgress({
                   className="w-full bg-emerald-600 hover:bg-emerald-500"
                 >
                   <RefreshCw className="w-4 h-4 mr-2" />
-                  Повторить попытку
+                  {t('submission.retryButton')}
                 </Button>
               )}
               <Button
@@ -87,13 +90,13 @@ export function SubmissionProgress({
                 className="w-full border-neutral-700 hover:bg-neutral-800"
               >
                 <X className="w-4 h-4 mr-2" />
-                Вернуться к просмотру
+                {t('submission.backToReview')}
               </Button>
             </div>
 
             {attempts >= 3 && (
               <p className="text-xs text-neutral-500 mt-4">
-                Превышено количество попыток. Попробуйте позже или обратитесь в поддержку.
+                {t('submission.maxAttemptsExceeded')}
               </p>
             )}
           </div>

@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { useTranslations } from 'next-intl';
 import { Badge } from '@/components/ui/badge';
 import { CheckCircle2, AlertTriangle } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -28,6 +29,7 @@ interface ScoreDisplayProps {
 }
 
 export function ScoreDisplay({ score, passingScore, profile }: ScoreDisplayProps) {
+  const t = useTranslations('builder.simulator');
   const config = personaColors[profile];
   const passed = score >= passingScore;
 
@@ -35,24 +37,26 @@ export function ScoreDisplay({ score, passingScore, profile }: ScoreDisplayProps
     <div className={cn('p-4 rounded-xl border', config.bgColor)}>
       <div className="flex items-center justify-between mb-2">
         <span className="text-xs font-medium text-muted-foreground">
-          Simulated Score
+          {t('score.simulatedScore')}
         </span>
         {passed ? (
           <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-200 text-[10px]">
             <CheckCircle2 className="h-3 w-3 mr-1" />
-            Pass
+            {t('score.pass')}
           </Badge>
         ) : (
           <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200 text-[10px]">
             <AlertTriangle className="h-3 w-3 mr-1" />
-            Fail
+            {t('score.fail')}
           </Badge>
         )}
       </div>
 
       <div className="flex items-baseline gap-2">
         <span className={cn('text-3xl font-bold', config.color)}>{score}%</span>
-        <span className="text-xs text-muted-foreground">/ {passingScore}% to pass</span>
+        <span className="text-xs text-muted-foreground">
+          {t('score.toPass', { score: passingScore })}
+        </span>
       </div>
 
       {/* Progress bar */}

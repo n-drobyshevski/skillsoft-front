@@ -26,9 +26,12 @@ import {
   Clock,
 } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useCallback } from "react";
 import { TestSession, TestTemplateSummary } from "@/types/domain";
 import { UserStats } from "@/types/user";
 import { ClientOnly } from "@/components/common/ClientOnly";
+import { PullToRefresh } from "@/components/mobile";
 import { LazyCompetencyByCategoryBarChart as CompetencyByCategoryBarChart } from '@/lib/lazy-charts';
 import { useActiveLens } from "@/hooks/useLens";
 import { useTranslations } from 'next-intl';
@@ -131,6 +134,13 @@ export default function DashboardContent({
   const activeLens = useActiveLens();
   const isUserLens = activeLens === 'user';
   const t = useTranslations('dashboard');
+  const router = useRouter();
+
+  const handleRefresh = useCallback(async () => {
+    router.refresh();
+    // Allow time for server component data to propagate
+    await new Promise((resolve) => setTimeout(resolve, 500));
+  }, [router]);
 
   const motionProps = prefersReducedMotion
     ? { initial: "visible", animate: "visible" }
@@ -170,6 +180,7 @@ export default function DashboardContent({
   };
 
   return (
+    <PullToRefresh onRefresh={handleRefresh}>
     <div className="flex flex-1 flex-col gap-6 sm:gap-8 p-4 sm:p-6 lg:p-8 max-w-[1600px] mx-auto w-full">
 
       {/* ===== HEADER ===== */}
@@ -504,5 +515,6 @@ export default function DashboardContent({
         </motion.div>
       </DashboardGrid>
     </div>
+    </PullToRefresh>
   );
 }

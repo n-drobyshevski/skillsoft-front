@@ -69,5 +69,18 @@
     "psychDashboard": "Дашборд",
     "itemStatistics": "Статистика вопросов",
     "flaggedItems": "Отмеченные"
+  },
+  "commandPalette": {
+    "title": "Командная палитра",
+    "description": "Поиск или переход на страницу...",
+    "placeholder": "Поиск шаблонов, компетенций или навигация...",
+    "noResults": "Результаты не найдены.",
+    "searching": "Поиск...",
+    "navigation": "Навигация",
+    "searchResults": "Результаты поиска",
+    "templates": "Шаблоны",
+    "createNewTemplate": "Создать новый шаблон",
+    "psychometrics": "Психометрика",
+    "skillMapper": "Карта навыков"
   }
 }

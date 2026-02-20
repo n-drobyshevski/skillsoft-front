@@ -12,6 +12,7 @@ import { SimulatorPanel } from "./simulator";
 import { BuilderDndProvider } from "./BuilderDndProvider";
 import { useBlueprintWorkspace } from "./BlueprintWorkspaceProvider";
 import { useNetworkStatus } from "@/hooks/useNetworkStatus";
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 
 // Phase 3.1: Lazy-loaded panels for mobile to reduce initial bundle
@@ -245,6 +246,7 @@ const TABS = ["canvas", "simulate"] as const;
 type TabType = typeof TABS[number];
 
 function MobileLayout() {
+  const t = useTranslations('builder.workspace');
   // We use standard state instead of Tabs to prevent unmounting components
   // This preserves the Canvas state (pan/zoom/nodes) when switching views
   const [activeTab, setActiveTab] = useState<TabType>("canvas");
@@ -394,7 +396,7 @@ function MobileLayout() {
             )}
           >
             <div className="flex items-center justify-between mb-2">
-              <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">Last Sim</span>
+              <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">{t('lastSim')}</span>
               {simulationResult.simulatedScore !== undefined && (
                 simulationResult.simulatedScore >= (state.passingScore ?? 70) ? (
                   <CheckCircle2 className="h-4 w-4 text-emerald-500" />
@@ -428,7 +430,7 @@ function MobileLayout() {
                 "hover:underline active:opacity-70"
               )}
             >
-              View details →
+              {t('viewDetails')} →
             </button>
           </div>
         )}
@@ -450,7 +452,7 @@ function MobileLayout() {
           <SheetHeader className="px-4 pb-2 border-b">
             <SheetTitle className="flex items-center gap-2">
               <Library className="h-5 w-5 text-primary" />
-              Competency Library
+              {t('competencyLibrary')}
             </SheetTitle>
           </SheetHeader>
           <div className="flex-1 overflow-hidden">
@@ -472,7 +474,7 @@ function MobileLayout() {
         {/* Navigation with Material Design 3 patterns - Center action for Add */}
         <nav
           role="navigation"
-          aria-label="Builder navigation"
+          aria-label={t('builderNavigation')}
           className="grid grid-cols-3 h-16 items-center"
         >
           {/* Canvas Tab */}
@@ -498,7 +500,7 @@ function MobileLayout() {
             >
               <Layers className="h-5 w-5" strokeWidth={activeTab === "canvas" ? 2.5 : 2} />
             </div>
-            <span className="text-xs font-medium tracking-tight">Canvas</span>
+            <span className="text-xs font-medium tracking-tight">{t('canvas')}</span>
           </button>
 
           {/* Center Action - Add (opens Library Sheet) */}
@@ -510,7 +512,7 @@ function MobileLayout() {
               "active:scale-95 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary",
               "text-primary"
             )}
-            aria-label="Add competency from library"
+            aria-label={t('addCompetencyFromLibrary')}
           >
             <div
               className={cn(
@@ -522,7 +524,7 @@ function MobileLayout() {
             >
               <Plus className="h-5 w-5" strokeWidth={2.5} />
             </div>
-            <span className="text-xs font-medium tracking-tight">Add</span>
+            <span className="text-xs font-medium tracking-tight">{t('add')}</span>
           </button>
 
           {/* Simulate Tab */}
@@ -548,7 +550,7 @@ function MobileLayout() {
             >
               <Beaker className="h-5 w-5" strokeWidth={activeTab === "simulate" ? 2.5 : 2} />
             </div>
-            <span className="text-xs font-medium tracking-tight">Simulate</span>
+            <span className="text-xs font-medium tracking-tight">{t('simulate')}</span>
           </button>
         </nav>
       </div>

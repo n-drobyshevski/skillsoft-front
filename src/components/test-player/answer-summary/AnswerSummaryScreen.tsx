@@ -1,6 +1,7 @@
 'use client';
 
 import { useRef, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import { AnimatePresence } from 'motion/react';
 import { useShallow } from 'zustand/react/shallow';
 import { SummaryHero } from './SummaryHero';
@@ -56,6 +57,7 @@ export function AnswerSummaryScreen({
   isSubmitting,
 }: AnswerSummaryScreenProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
+  const t = useTranslations('assessment');
 
   // Store state
   const { activeFilter, sortOrder, expandedCardIds, scrollPosition, submissionError, submissionAttempts } = useReviewStore(
@@ -223,7 +225,7 @@ export function AnswerSummaryScreen({
             {sortedAnswers.length === 0 && activeFilter !== 'all' && (
               <div className="text-center py-12">
                 <p className="text-neutral-500">
-                  Нет вопросов с выбранным статусом
+                  {t('answerCard.noQuestionsWithStatus')}
                 </p>
               </div>
             )}

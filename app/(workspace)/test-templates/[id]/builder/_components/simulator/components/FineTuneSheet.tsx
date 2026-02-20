@@ -9,6 +9,7 @@
  */
 
 import React, { memo, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import {
   Sheet,
@@ -63,6 +64,7 @@ interface FloatingTriggerProps {
 }
 
 const FloatingTrigger = memo(function FloatingTrigger({ strategy }: FloatingTriggerProps) {
+  const t = useTranslations('builder.simulator');
   const config = STRATEGY_CONFIG[strategy];
 
   return (
@@ -77,7 +79,7 @@ const FloatingTrigger = memo(function FloatingTrigger({ strategy }: FloatingTrig
         'hover:scale-105 active:scale-95',
         config.border
       )}
-      aria-label="Open Fine Tune settings"
+      aria-label={t('fineTune.openSettings')}
     >
       <SlidersHorizontal className={cn('h-6 w-6', config.iconText)} />
     </Button>
@@ -107,12 +109,14 @@ const SettingsContent = memo(function SettingsContent({
   onAllowBacktrackingChange,
   isSimulating,
 }: SettingsContentProps) {
+  const t = useTranslations('builder.simulator');
+
   return (
     <div className="space-y-6 px-4">
       {/* Strictness Slider */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <Label className="text-sm font-medium">Strictness</Label>
+          <Label className="text-sm font-medium">{t('fineTune.strictness')}</Label>
           <span className="text-sm font-semibold tabular-nums bg-muted px-2 py-0.5 rounded">
             {strictness}
           </span>
@@ -127,14 +131,14 @@ const SettingsContent = memo(function SettingsContent({
           className="[&_[role=slider]]:h-6 [&_[role=slider]]:w-6"
         />
         <p className="text-xs text-muted-foreground">
-          Higher values tighten scoring and reduce randomness in question selection.
+          {t('fineTune.strictnessDescription')}
         </p>
       </div>
 
       {/* Saturation Slider */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <Label className="text-sm font-medium">Item Saturation Guard</Label>
+          <Label className="text-sm font-medium">{t('fineTune.saturation')}</Label>
           <span className="text-sm font-semibold tabular-nums bg-muted px-2 py-0.5 rounded">
             {saturation}%
           </span>
@@ -149,16 +153,16 @@ const SettingsContent = memo(function SettingsContent({
           className="[&_[role=slider]]:h-6 [&_[role=slider]]:w-6"
         />
         <p className="text-xs text-muted-foreground">
-          Prevents overusing the same competency pool across multiple test attempts.
+          {t('fineTune.saturationDescription')}
         </p>
       </div>
 
       {/* Backtracking Toggle */}
       <div className="flex items-center justify-between p-4 rounded-xl border bg-muted/30">
         <div className="space-y-1 pr-4">
-          <Label className="text-sm font-medium">Allow Backtracking</Label>
+          <Label className="text-sm font-medium">{t('fineTune.allowBacktracking')}</Label>
           <p className="text-xs text-muted-foreground">
-            Let candidates revisit and change previous answers.
+            {t('fineTune.allowBacktrackingDescription')}
           </p>
         </div>
         <Switch
@@ -188,6 +192,7 @@ export const FineTuneSheet = memo(function FineTuneSheet({
   onRun,
   isSimulating,
 }: FineTuneSheetProps) {
+  const t = useTranslations('builder.simulator');
   const [isOpen, setIsOpen] = useState(false);
   const config = STRATEGY_CONFIG[strategy];
 
@@ -216,10 +221,10 @@ export const FineTuneSheet = memo(function FineTuneSheet({
         <SheetHeader className="pb-2">
           <SheetTitle className="flex items-center gap-2">
             <SlidersHorizontal className={cn('h-5 w-5', config.iconText)} />
-            Fine Tune Settings
+            {t('fineTune.title')}
           </SheetTitle>
           <SheetDescription>
-            Adjust simulation parameters and re-run to see the effects.
+            {t('fineTune.description')}
           </SheetDescription>
         </SheetHeader>
 
@@ -244,7 +249,7 @@ export const FineTuneSheet = memo(function FineTuneSheet({
             onClick={handleApplyAndClose}
             disabled={isSimulating}
           >
-            Save Settings
+            {t('fineTune.saveSettings')}
           </Button>
           <Button
             className={cn('flex-1 h-12 gap-2', config.badgeBg)}
@@ -254,12 +259,12 @@ export const FineTuneSheet = memo(function FineTuneSheet({
             {isSimulating ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin" />
-                Running...
+                {t('running')}
               </>
             ) : (
               <>
                 <RefreshCw className="h-4 w-4" />
-                Apply & Re-run
+                {t('fineTune.applyAndRerun')}
               </>
             )}
           </Button>

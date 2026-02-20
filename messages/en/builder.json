@@ -1,0 +1,297 @@
+{
+  "workspace": {
+    "competencyLibrary": "Competency Library",
+    "canvas": "Canvas",
+    "simulate": "Simulate",
+    "add": "Add",
+    "addCompetencyFromLibrary": "Add competency from library",
+    "lastSim": "Last Sim",
+    "viewDetails": "View details",
+    "builderNavigation": "Builder navigation"
+  },
+  "canvas": {
+    "structuralWorkbench": "Structural Workbench",
+    "priorityTooltip": "Order sets priority. When time is tight, cards near the top are asked first.",
+    "undoLabel": "Undo (Ctrl+Z)",
+    "redoLabel": "Redo (Ctrl+Shift+Z)",
+    "undoTooltip": "Undo",
+    "redoTooltip": "Redo",
+    "undoKey": "Ctrl+Z",
+    "redoKey": "Ctrl+Shift+Z",
+    "balanceWeightsLabel": "Balance weights to average 1.0x",
+    "balanceWeightsTooltip": "Balance weights to avg 1.0x",
+    "testDrive": "Test Drive",
+    "saveNow": "Save Now",
+    "dragHint": "Drag competencies here",
+    "dragHintAlt": "Or click + to add from library",
+    "dropToAdd": "Drop to add competency",
+    "undoneAnnouncement": "Undone. {count} competencies now.",
+    "redoneAnnouncement": "Redone. {count} competencies now.",
+    "weightsBalancedAnnouncement": "Weights balanced. Average is now 1.0x.",
+    "movedAnnouncement": "{name} moved {direction} to position {position}.",
+    "removedAnnouncement": "{name} removed. {count} competencies remaining."
+  },
+  "library": {
+    "searchPlaceholder": "Search competencies...",
+    "available": "{count} available",
+    "selected": "{count} selected",
+    "noCompetenciesFound": "No competencies found",
+    "tryAdjustingSearch": "Try adjusting your search",
+    "addToCanvas": "Add {name} to canvas",
+    "health": {
+      "noQuestions": "No questions available",
+      "limitedQuestions": "Limited questions available",
+      "goodInventory": "Good question inventory"
+    }
+  },
+  "card": {
+    "dragToReorder": "Hold and drag to reorder",
+    "collapseDetail": "Collapse for less detail",
+    "expandOptions": "Expand for more options",
+    "weight": "Weight",
+    "weightTooltip": "Higher weight = more questions. Order also matters - top cards get priority.",
+    "difficulty": "Difficulty",
+    "difficultyOptions": {
+      "foundational": "Foundational",
+      "foundationalShort": "F",
+      "intermediate": "Intermediate",
+      "intermediateShort": "I",
+      "advanced": "Advanced",
+      "advancedShort": "A",
+      "expert": "Expert",
+      "expertShort": "E"
+    },
+    "inventoryDepth": "Inventory depth",
+    "inventoryEMH": "E/M/H",
+    "sampleQuestion": "Sample question",
+    "noSampleAvailable": "No sample available",
+    "indicatorPriority": "Indicator priority",
+    "optimisticApply": "Optimistic apply",
+    "removeButton": "Remove",
+    "removeTitle": "Remove competency?",
+    "removeDescription": "This will remove <strong>{name}</strong> from your test blueprint. You can add it back from the library at any time.",
+    "removeCancel": "Cancel",
+    "removeConfirm": "Remove",
+    "decreaseWeight": "Decrease weight",
+    "increaseWeight": "Increase weight"
+  },
+  "saveStatus": {
+    "allChangesSaved": "All changes saved",
+    "unsavedChanges": "Unsaved changes",
+    "saving": "Saving...",
+    "saved": "Saved",
+    "saveFailed": "Save failed",
+    "offline": "Offline - changes saved locally",
+    "retrying": "Retrying...",
+    "savedAgo": "Saved {time}",
+    "unsaved": "Unsaved",
+    "retryingProgress": "Retrying ({attempt}/3)...",
+    "offlineShort": "Offline",
+    "lastSaved": "Last saved: {time}",
+    "changesWillSync": "Changes will sync when back online",
+    "unsavedChangesLabel": "Unsaved changes",
+    "timeAgo": {
+      "justNow": "just now",
+      "secondsAgo": "{seconds}s ago",
+      "minutesAgo": "{minutes}m ago",
+      "hoursAgo": "{hours}h ago"
+    }
+  },
+  "conflict": {
+    "title": "Blueprint Conflict Detected",
+    "description": "Another browser tab made changes to this blueprint. Choose how to resolve:",
+    "detectedAgo": "Conflict detected {time}",
+    "yourChanges": "Your Changes",
+    "otherTab": "Other Tab",
+    "competencies": "{count} competencies",
+    "newItems": "+{count} new",
+    "onlyInYourVersion": "Only in your version:",
+    "onlyInOtherTab": "Only in other tab:",
+    "inBoth": "In both ({count}):",
+    "moreItems": "+{count} more",
+    "keepMine": "Keep Mine",
+    "useTheirs": "Use Theirs",
+    "mergeBoth": "Merge Both"
+  },
+  "simulator": {
+    "testDrive": "Test Drive",
+    "runSimulation": "Run Simulation",
+    "runningSimulation": "Running Simulation...",
+    "rerunSimulation": "Re-run Simulation",
+    "rerun": "Re-run",
+    "running": "Running...",
+    "loadingResults": "Loading simulation results",
+    "loadingResultsText": "Loading simulation results...",
+    "personas": {
+      "perfect": "Perfect",
+      "perfectDescription": "Ideal candidate",
+      "random": "Random",
+      "randomDescription": "Random answers",
+      "failing": "Failing",
+      "failingDescription": "Poor performer",
+      "candidate": "{persona} Candidate",
+      "changePersona": "Change persona"
+    },
+    "score": {
+      "simulatedScore": "Simulated Score",
+      "pass": "Pass",
+      "fail": "Fail",
+      "toPass": "/ {score}% to pass",
+      "jobFitScore": "Job Fit Score",
+      "qualified": "Qualified",
+      "belowThreshold": "Below Threshold",
+      "toQualify": "/ {score}% to qualify",
+      "teamGapAnalysis": "Team Gap Analysis",
+      "aboveTeam": "{gap}% above team",
+      "belowTeam": "{gap}% below team",
+      "atTeam": "{gap}% at team",
+      "individual": "Individual",
+      "teamBenchmark": "Team Benchmark",
+      "competencyProfile": "Competency Profile",
+      "discoveryMode": "Discovery Mode",
+      "competencies": "competencies",
+      "noPassFail": "No pass/fail scoring - this assessment builds a competency passport",
+      "competencyProfileAssessment": "Competency Profile Assessment"
+    },
+    "warnings": {
+      "inventoryWarnings": "Inventory Warnings",
+      "questions": "{count} questions"
+    },
+    "error": {
+      "title": "Simulator Error",
+      "defaultMessage": "An unexpected error occurred while rendering the simulator.",
+      "tryAgain": "Try Again",
+      "errorDetails": "Error details (dev only)"
+    },
+    "strategy": {
+      "missingConfiguration": "Missing Configuration",
+      "incomplete": "Incomplete",
+      "learnMore": "Learn more about {label}",
+      "configurationIncomplete": "configuration incomplete"
+    },
+    "emptyState": {
+      "addCompetencies": "Add competencies to simulate",
+      "readyToSimulate": "Ready to simulate",
+      "configurationNeeded": "Configuration needed",
+      "noCompetencies": {
+        "universal": "Drag competencies from the library to build a competency profile assessment",
+        "jobFit": "Add job-relevant competencies to simulate job fit scoring",
+        "teamGap": "Add team competencies to simulate gap analysis"
+      },
+      "noSimulation": {
+        "universal": "Click Run to preview how the assessment will evaluate competency breadth",
+        "jobFit": "Click Run to see predicted job fit scores based on persona profiles",
+        "teamGap": "Click Run to analyze individual vs team benchmark gaps"
+      },
+      "missingConfig": {
+        "universal": "No additional configuration required for this strategy",
+        "jobFit": "Set an O*NET SOC code in template settings to enable job fit alignment insights",
+        "teamGap": "Select a team in template settings to enable gap comparison features"
+      },
+      "goToSettings": "Go to Settings"
+    },
+    "configure": {
+      "testYourBlueprint": "Test Your Blueprint",
+      "runDescription": "Run a simulation to preview how candidates will experience this assessment. Choose a test persona to see different performance scenarios.",
+      "selectTestPersona": "Select Test Persona",
+      "selectPersonaDescription": "Choose how the simulated candidate will perform",
+      "addCompetenciesToEnable": "Add competencies to your blueprint to enable simulation"
+    },
+    "results": {
+      "detailedAnalysis": "Detailed Analysis",
+      "questionTimeline": "Question Timeline",
+      "coverageAnalytics": "Coverage Analytics",
+      "howThisWorks": "How This Works",
+      "tip": "Tip:",
+      "tipContent": "Use the floating settings button to adjust strictness and saturation, then re-run to compare results.",
+      "duration": "Duration",
+      "questions": "Questions",
+      "min": "min"
+    },
+    "fineTune": {
+      "title": "Fine Tune Settings",
+      "description": "Adjust simulation parameters and re-run to see the effects.",
+      "openSettings": "Open Fine Tune settings",
+      "strictness": "Strictness",
+      "strictnessDescription": "Higher values tighten scoring and reduce randomness in question selection.",
+      "saturation": "Item Saturation Guard",
+      "saturationDescription": "Prevents overusing the same competency pool across multiple test attempts.",
+      "allowBacktracking": "Allow Backtracking",
+      "allowBacktrackingDescription": "Let candidates revisit and change previous answers.",
+      "saveSettings": "Save Settings",
+      "applyAndRerun": "Apply & Re-run"
+    },
+    "preflight": {
+      "issuesDetected": "{count} {count, plural, one {issue} other {issues}} detected",
+      "configurationRequired": "Configuration Required",
+      "preflightWarnings": "Pre-flight Warnings"
+    },
+    "selectionReason": {
+      "coverageGap": "Coverage gap",
+      "calibration": "Calibration",
+      "adaptiveCheck": "Adaptive check",
+      "randomized": "Randomized",
+      "backstop": "Backstop"
+    },
+    "strategyHelp": {
+      "universalBaseline": {
+        "title": "Universal Baseline Assessment",
+        "points": {
+          "coverage": "Evaluates broad competency coverage",
+          "passport": "Generates a competency passport/profile",
+          "noPassFail": "No pass/fail scoring - discovery focused",
+          "bestFor": "Best for: Training needs analysis, career planning"
+        }
+      },
+      "targetedFit": {
+        "title": "Job Fit Assessment",
+        "points": {
+          "aligned": "Aligned to O*NET job requirements when SOC code is set",
+          "weighted": "Weighted scoring against job profile",
+          "threshold": "Clear pass/fail threshold",
+          "bestFor": "Best for: Hiring, role matching, promotions"
+        }
+      },
+      "dynamicGap": {
+        "title": "Team Gap Analysis",
+        "points": {
+          "compares": "Compares individual scores against team benchmarks",
+          "identifies": "Identifies complementary strengths and development gaps",
+          "settings": "Select a team in settings to enable comparison",
+          "bestFor": "Best for: Team building, succession planning"
+        }
+      }
+    },
+    "strategyConfig": {
+      "universalBaseline": {
+        "label": "Universal Baseline",
+        "shortLabel": "Baseline",
+        "description": "General competency assessment for any role"
+      },
+      "targetedFit": {
+        "label": "Job Fit Assessment",
+        "shortLabel": "Job Fit",
+        "description": "Role-specific assessment aligned with O*NET standards"
+      },
+      "dynamicGap": {
+        "label": "Team Gap Analysis",
+        "shortLabel": "Team Fit",
+        "description": "Compare candidate against team baseline"
+      }
+    },
+    "sections": {
+      "assessmentProfile": "Assessment Profile",
+      "resultsPreview": "Results Preview",
+      "questionFlow": "Question Flow",
+      "coverageAnalysis": "Coverage Analysis",
+      "fineTune": "Fine Tune",
+      "jobAlignment": "Job Alignment",
+      "fitPreview": "Fit Preview",
+      "skillCoverage": "Skill Coverage",
+      "teamComparison": "Team Comparison",
+      "gapAnalysis": "Gap Analysis",
+      "teamFitPreview": "Team Fit Preview",
+      "analytics": "Analytics"
+    }
+  }
+}

@@ -45,6 +45,8 @@ import lens from './lens.json';
 import profile from './profile.json';
 import anonymousTest from './anonymousTest.json';
 import landing from './landing.json';
+import accessibility from './accessibility.json';
+import builder from './builder.json';
 
 const messages = {
   common,
@@ -87,6 +89,8 @@ const messages = {
   profile,
   anonymousTest,
   landing,
+  accessibility,
+  builder,
 } as const;
 
 export default messages;

@@ -7,11 +7,15 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Award, Lightbulb, Brain, Target, GitCompareArrows, AlertTriangle, CheckCircle2, ShieldAlert, TrendingUp, ChevronDown, History, Grid3X3 } from 'lucide-react';
-import { LazyBigFiveRadarSimple as BigFiveRadarSimple, LazyCompetencyRadarChart as CompetencyRadarChart, LazyIndicatorHeatmap as IndicatorHeatmap } from '@/lib/lazy-charts';
+import {
+  LazyBigFiveRadarSimple as BigFiveRadarSimple,
+  LazyCompetencyRadarChart as CompetencyRadarChart,
+  LazyIndicatorHeatmap as IndicatorHeatmap,
+} from '@/components/data-display/charts/LazyChartsBundle';
 import type { CompetencyRadarDataPoint } from '@/components/data-display/charts/CompetencyRadarChart';
+import dynamic from 'next/dynamic';
 import { BigFiveMappingInsights } from '@/components/charts/BigFiveMappingInsights';
 import { ChartErrorBoundary } from '@/components/charts/ChartErrorBoundary';
-import { TrendOverview } from '@/components/results';
 import { useBigFiveProjectionDetailed, getBigFiveLabels } from '@/hooks/useBigFiveProjection';
 import { getScoreInterpretation, getProficiencyLabel } from '@/lib/scoreInterpretation';
 import { testResultsApi } from '@/services/api/results';
@@ -21,6 +25,11 @@ import { ProfilePatternSummary } from './ProfilePatternSummary';
 import { CompetencyProfile } from '../shared/CompetencyProfile';
 import { ActionButtonsBar } from '../shared/ActionButtonsBar';
 import { BaseResultViewProps } from '../shared/types';
+
+const TrendOverview = dynamic(
+  () => import('@/components/results/trends/TrendOverview').then(m => m.TrendOverview),
+  { ssr: false, loading: () => <div className="h-64 animate-pulse bg-muted rounded-lg" /> }
+);
 
 /**
  * Trait key mapping for i18n lookup.

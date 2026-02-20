@@ -17,6 +17,7 @@
  */
 
 import React, { memo, Suspense, lazy } from 'react';
+import { useTranslations } from 'next-intl';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
@@ -109,6 +110,8 @@ const QuickStats = memo(function QuickStats({
   durationMinutes,
   questionCount,
 }: QuickStatsProps) {
+  const t = useTranslations('builder.simulator');
+
   return (
     <div className="grid grid-cols-2 gap-3">
       <Card className="border-dashed">
@@ -118,10 +121,10 @@ const QuickStats = memo(function QuickStats({
           </div>
           <div>
             <div className="text-[10px] text-muted-foreground uppercase tracking-wider">
-              Duration
+              {t('results.duration')}
             </div>
             <div className="text-lg font-bold tabular-nums">
-              {durationMinutes} min
+              {durationMinutes} {t('results.min')}
             </div>
           </div>
         </CardContent>
@@ -134,7 +137,7 @@ const QuickStats = memo(function QuickStats({
           </div>
           <div>
             <div className="text-[10px] text-muted-foreground uppercase tracking-wider">
-              Questions
+              {t('results.questions')}
             </div>
             <div className="text-lg font-bold tabular-nums">
               {questionCount}
@@ -155,19 +158,20 @@ interface HelpContentProps {
 }
 
 const HelpContent = memo(function HelpContent({ strategy }: HelpContentProps) {
+  const t = useTranslations('builder.simulator');
   const content = STRATEGY_HELP_CONTENT[strategy];
 
   return (
     <div className="space-y-3 p-2">
       <ul className="list-disc pl-4 space-y-2 text-sm text-muted-foreground">
-        {content.points.map((point, i) => (
-          <li key={i}>{point}</li>
+        {content.pointKeys.map((key, i) => (
+          <li key={i}>{t(key as Parameters<typeof t>[0])}</li>
         ))}
       </ul>
       <div className="pt-3 border-t">
         <p className="text-xs text-muted-foreground">
-          <span className="font-medium">Tip:</span> Use the floating settings button
-          to adjust strictness and saturation, then re-run to compare results.
+          <span className="font-medium">{t('results.tip')}</span>{' '}
+          {t('results.tipContent')}
         </p>
       </div>
     </div>
@@ -187,6 +191,7 @@ const SecondarySections = memo(function SecondarySections({
   result,
   strategy,
 }: SecondarySectionsProps) {
+  const t = useTranslations('builder.simulator');
   const config = STRATEGY_CONFIG[strategy];
 
   return (
@@ -199,7 +204,7 @@ const SecondarySections = memo(function SecondarySections({
         <AccordionTrigger className="px-4 py-3 hover:no-underline hover:bg-muted/30 min-h-[52px]">
           <div className="flex items-center gap-2">
             <LineChart className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm font-medium">Question Timeline</span>
+            <span className="text-sm font-medium">{t('results.questionTimeline')}</span>
           </div>
         </AccordionTrigger>
         <AccordionContent className="px-2 pb-2">
@@ -217,7 +222,7 @@ const SecondarySections = memo(function SecondarySections({
         <AccordionTrigger className="px-4 py-3 hover:no-underline hover:bg-muted/30 min-h-[52px]">
           <div className="flex items-center gap-2">
             <BarChart3 className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm font-medium">Coverage Analytics</span>
+            <span className="text-sm font-medium">{t('results.coverageAnalytics')}</span>
           </div>
         </AccordionTrigger>
         <AccordionContent className="px-2 pb-2">
@@ -235,7 +240,7 @@ const SecondarySections = memo(function SecondarySections({
         <AccordionTrigger className="px-4 py-3 hover:no-underline hover:bg-muted/30 min-h-[52px]">
           <div className="flex items-center gap-2">
             <HelpCircle className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm font-medium">How This Works</span>
+            <span className="text-sm font-medium">{t('results.howThisWorks')}</span>
           </div>
         </AccordionTrigger>
         <AccordionContent className="px-2 pb-2">
@@ -260,6 +265,8 @@ export const MobilePriorityStack = memo(function MobilePriorityStack({
   teamName,
   fineTuneSettings,
 }: MobilePriorityStackProps) {
+  const t = useTranslations('builder.simulator');
+
   return (
     <div className="space-y-4 pb-20">
       {/* 1. Primary Insight (Always Expanded) */}
@@ -281,7 +288,7 @@ export const MobilePriorityStack = memo(function MobilePriorityStack({
       {/* 3. Secondary Sections (Accordion) */}
       <div>
         <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2 px-1">
-          Detailed Analysis
+          {t('results.detailedAnalysis')}
         </h3>
         <SecondarySections result={result} strategy={strategy} />
       </div>

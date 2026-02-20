@@ -16,6 +16,7 @@ import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { AlertTriangle, GitMerge, ArrowLeft, ArrowRight, Clock } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useTranslations } from 'next-intl';
 import type { ConflictInfo } from '@/hooks/useMultiTabSync';
 import type { BlueprintCompetency } from '../actions';
 

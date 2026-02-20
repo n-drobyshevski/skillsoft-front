@@ -9,6 +9,7 @@
  */
 
 import React, { memo, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import {
@@ -68,6 +69,7 @@ interface CompactAlertProps {
 }
 
 function CompactAlert({ validation, className }: CompactAlertProps) {
+  const t = useTranslations('builder.simulator');
   const [isExpanded, setIsExpanded] = useState(false);
   const allIssues = [...validation.errors, ...validation.warnings];
   const hasErrors = validation.hasErrors;
@@ -97,7 +99,7 @@ function CompactAlert({ validation, className }: CompactAlertProps) {
                 )}
               />
               <span className="text-xs font-medium">
-                {allIssues.length} {allIssues.length === 1 ? 'issue' : 'issues'} detected
+                {t('preflight.issuesDetected', { count: allIssues.length })}
               </span>
             </div>
             <ChevronDown
@@ -130,6 +132,7 @@ interface FullAlertProps {
 }
 
 function FullAlert({ validation, className }: FullAlertProps) {
+  const t = useTranslations('builder.simulator');
   const allIssues = [...validation.errors, ...validation.warnings];
   const hasErrors = validation.hasErrors;
 
@@ -150,7 +153,7 @@ function FullAlert({ validation, className }: FullAlertProps) {
         )}
       />
       <AlertTitle className="text-sm">
-        {hasErrors ? 'Configuration Required' : 'Pre-flight Warnings'}
+        {hasErrors ? t('preflight.configurationRequired') : t('preflight.preflightWarnings')}
       </AlertTitle>
       <AlertDescription>
         <ul className="mt-2 space-y-1.5">

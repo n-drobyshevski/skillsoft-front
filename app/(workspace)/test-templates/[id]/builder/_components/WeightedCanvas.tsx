@@ -15,9 +15,12 @@ import { CompetencySmartCard } from "./CompetencySmartCard";
 import { SaveStatusIndicator } from "./SaveStatusIndicator";
 import { InsertionIndicator } from "./InsertionIndicator";
 import { useBlueprintHistory, type HistoryActionType } from "@/hooks/useBlueprintHistory";
+import { useTranslations } from "next-intl";
 import { STRATEGY_HELP_CONTENT, type Strategy } from "./simulator/strategy-context";
 
 export function WeightedCanvas() {
+  const t = useTranslations('builder.canvas');
+  const tSim = useTranslations('builder.simulator');
   const {
     state,
     isPending,
@@ -99,7 +102,7 @@ export function WeightedCanvas() {
     if (previousState) {
       isRestoringRef.current = true;
       setCompetencies(previousState);
-      setAriaAnnouncement(`Undone. ${previousState.length} competencies now.`);
+      setAriaAnnouncement(t('undoneAnnouncement', { count: previousState.length }));
     }
   }, [historyUndo, setCompetencies]);
 
@@ -108,7 +111,7 @@ export function WeightedCanvas() {
     if (nextState) {
       isRestoringRef.current = true;
       setCompetencies(nextState);
-      setAriaAnnouncement(`Redone. ${nextState.length} competencies now.`);
+      setAriaAnnouncement(t('redoneAnnouncement', { count: nextState.length }));
     }
   }, [historyRedo, setCompetencies]);
 
@@ -131,7 +134,7 @@ export function WeightedCanvas() {
       weight: Math.round((c.weight ?? 1) * factor * 10) / 10,
     }));
     setCompetencies(balanced);
-    setAriaAnnouncement(`Weights balanced. Average is now 1.0x.`);
+    setAriaAnnouncement(t('weightsBalancedAnnouncement'));
   }, [state.competencies, setCompetencies]);
 
   // U3: Move card up/down via keyboard (Alt+Arrow)
@@ -143,7 +146,7 @@ export function WeightedCanvas() {
     reordered.splice(newIndex, 0, moved);
     setCompetencies(reordered);
     setFocusedCardIndex(newIndex);
-    setAriaAnnouncement(`${moved.name} moved ${direction} to position ${newIndex + 1}.`);
+    setAriaAnnouncement(t('movedAnnouncement', { name: moved.name, direction, position: newIndex + 1 }));
   }, [state.competencies, setCompetencies]);
 
   // Keyboard shortcuts: Ctrl+Z (undo), Ctrl+Shift+Z (redo), Ctrl+S (save)
@@ -205,7 +208,7 @@ export function WeightedCanvas() {
       <div className="flex items-center justify-between px-2 sm:px-3 md:px-4 py-2 sm:py-2.5 md:py-3 border-b bg-background/50 shrink-0 overflow-hidden">
         <div className="flex items-center gap-1 sm:gap-2 min-w-0 shrink">
           <Sparkles className="h-4 w-4 text-primary shrink-0" />
-          <span className="text-sm font-medium hidden sm:inline truncate">Structural Workbench</span>
+          <span className="text-sm font-medium hidden sm:inline truncate">{t('structuralWorkbench')}</span>
           <Badge variant="secondary" className="text-[10px] ml-0 sm:ml-1 shrink-0 hidden xs:inline-flex">
             {state.competencies.length}
           </Badge>
@@ -215,7 +218,7 @@ export function WeightedCanvas() {
                 <Info className="h-4 w-4 text-muted-foreground shrink-0 hidden sm:block" />
               </TooltipTrigger>
               <TooltipContent className="text-xs max-w-xs">
-                Order sets priority. When time is tight, cards near the top are asked first.
+                {t('priorityTooltip')}
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
@@ -247,13 +250,13 @@ export function WeightedCanvas() {
                 className="h-8 w-8 sm:h-10 sm:w-10 md:h-8 md:w-8 active:scale-95"
                 onClick={handleUndo}
                 disabled={!canUndo || isPending}
-                aria-label="Undo (Ctrl+Z)"
+                aria-label={t('undoLabel')}
               >
                 <Undo2 className="h-4 w-4" />
               </Button>
             </TooltipTrigger>
             <TooltipContent side="bottom" className="text-xs">
-              Undo <kbd className="ml-1.5 px-1.5 py-0.5 bg-muted rounded text-[10px] font-mono">Ctrl+Z</kbd>
+              {t('undoTooltip')} <kbd className="ml-1.5 px-1.5 py-0.5 bg-muted rounded text-[10px] font-mono">{t('undoKey')}</kbd>
             </TooltipContent>
           </Tooltip>
           <Tooltip>
@@ -264,13 +267,13 @@ export function WeightedCanvas() {
                 className="h-8 w-8 sm:h-10 sm:w-10 md:h-8 md:w-8 active:scale-95"
                 onClick={handleRedo}
                 disabled={!canRedo || isPending}
-                aria-label="Redo (Ctrl+Shift+Z)"
+                aria-label={t('redoLabel')}
               >
                 <Redo2 className="h-4 w-4" />
               </Button>
             </TooltipTrigger>
             <TooltipContent side="bottom" className="text-xs">
-              Redo <kbd className="ml-1.5 px-1.5 py-0.5 bg-muted rounded text-[10px] font-mono">Ctrl+Shift+Z</kbd>
+              {t('redoTooltip')} <kbd className="ml-1.5 px-1.5 py-0.5 bg-muted rounded text-[10px] font-mono">{t('redoKey')}</kbd>
             </TooltipContent>
           </Tooltip>
           {/* U4: Balance Weights button */}
@@ -283,13 +286,13 @@ export function WeightedCanvas() {
                   className="h-8 w-8 sm:h-10 sm:w-10 md:h-8 md:w-8 active:scale-95"
                   onClick={handleBalanceWeights}
                   disabled={isPending}
-                  aria-label="Balance weights to average 1.0x"
+                  aria-label={t('balanceWeightsLabel')}
                 >
                   <Scale className="h-4 w-4" />
                 </Button>
               </TooltipTrigger>
               <TooltipContent side="bottom" className="text-xs">
-                Balance weights to avg 1.0x
+                {t('balanceWeightsTooltip')}
               </TooltipContent>
             </Tooltip>
           )}
@@ -301,7 +304,7 @@ export function WeightedCanvas() {
             disabled={state.competencies.length === 0}
           >
             <Play className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-            <span className="hidden sm:inline">Test Drive</span>
+            <span className="hidden sm:inline">{t('testDrive')}</span>
           </Button>
           {/* Manual save button - only visible when there are unsaved changes */}
           {hasUnsavedChanges && (
@@ -312,7 +315,7 @@ export function WeightedCanvas() {
               disabled={isSaving || isPending}
             >
               {isSaving ? <Loader2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 animate-spin" /> : <Save className="h-3.5 w-3.5 sm:h-4 sm:w-4" />}
-              <span className="hidden sm:inline">Save Now</span>
+              <span className="hidden sm:inline">{t('saveNow')}</span>
             </Button>
           )}
         </div>
@@ -348,20 +351,20 @@ export function WeightedCanvas() {
                   >
                     <Sparkles className={cn("h-10 w-10 mb-3", showEmptyDropState ? "text-primary" : "text-muted-foreground/40")} />
                     <p className="text-sm font-medium">
-                      {showEmptyDropState ? "Drop to add competency" : "Drag competencies here"}
+                      {showEmptyDropState ? t('dropToAdd') : t('dragHint')}
                     </p>
                     <p className="text-xs mt-1 opacity-70">
-                      {showEmptyDropState ? "" : "Or click + to add from library"}
+                      {showEmptyDropState ? "" : t('dragHintAlt')}
                     </p>
                     {!showEmptyDropState && STRATEGY_HELP_CONTENT[state.strategy as Strategy] && (
                       <div className="mt-4 text-left w-full max-w-xs space-y-1.5">
                         <p className="text-xs font-medium text-muted-foreground/80">
-                          {STRATEGY_HELP_CONTENT[state.strategy as Strategy].title}
+                          {tSim(STRATEGY_HELP_CONTENT[state.strategy as Strategy].titleKey as Parameters<typeof tSim>[0])}
                         </p>
-                        {STRATEGY_HELP_CONTENT[state.strategy as Strategy].points.slice(0, 2).map((point, i) => (
+                        {STRATEGY_HELP_CONTENT[state.strategy as Strategy].pointKeys.slice(0, 2).map((key, i) => (
                           <p key={i} className="text-[11px] text-muted-foreground/60 flex items-start gap-1.5">
                             <span className="mt-0.5 shrink-0">&#8226;</span>
-                            <span>{point}</span>
+                            <span>{tSim(key as Parameters<typeof tSim>[0])}</span>
                           </p>
                         ))}
                       </div>
@@ -392,7 +395,7 @@ export function WeightedCanvas() {
                         isPending={isPending}
                         onRemove={() => {
                           removeCompetency(comp.id);
-                          setAriaAnnouncement(`${comp.name} removed. ${state.competencies.length - 1} competencies remaining.`);
+                          setAriaAnnouncement(t('removedAnnouncement', { name: comp.name, count: state.competencies.length - 1 }));
                         }}
                         onWeightChange={(val) => setCompetencies(state.competencies.map((c) => c.id === comp.id ? { ...c, weight: val } : c))}
                       />
@@ -414,17 +417,17 @@ export function WeightedCanvas() {
               {state.competencies.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-12 px-4 rounded-xl border-2 border-dashed border-muted-foreground/20 text-muted-foreground">
                   <Sparkles className="h-10 w-10 mb-3 text-muted-foreground/40" />
-                  <p className="text-sm font-medium">Drag competencies here</p>
-                  <p className="text-xs mt-1 opacity-70">Or click + to add from library</p>
+                  <p className="text-sm font-medium">{t('dragHint')}</p>
+                  <p className="text-xs mt-1 opacity-70">{t('dragHintAlt')}</p>
                   {STRATEGY_HELP_CONTENT[state.strategy as Strategy] && (
                     <div className="mt-4 text-left w-full max-w-xs space-y-1.5">
                       <p className="text-xs font-medium text-muted-foreground/80">
-                        {STRATEGY_HELP_CONTENT[state.strategy as Strategy].title}
+                        {tSim(STRATEGY_HELP_CONTENT[state.strategy as Strategy].titleKey as Parameters<typeof tSim>[0])}
                       </p>
-                      {STRATEGY_HELP_CONTENT[state.strategy as Strategy].points.slice(0, 2).map((point, i) => (
+                      {STRATEGY_HELP_CONTENT[state.strategy as Strategy].pointKeys.slice(0, 2).map((key, i) => (
                         <p key={i} className="text-[11px] text-muted-foreground/60 flex items-start gap-1.5">
                           <span className="mt-0.5 shrink-0">&#8226;</span>
-                          <span>{point}</span>
+                          <span>{tSim(key as Parameters<typeof tSim>[0])}</span>
                         </p>
                       ))}
                     </div>

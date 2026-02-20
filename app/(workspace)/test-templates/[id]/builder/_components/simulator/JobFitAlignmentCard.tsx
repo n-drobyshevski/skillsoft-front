@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { useTranslations } from 'next-intl';
 import {
   Briefcase,
   TrendingDown,
@@ -63,6 +64,7 @@ function JobFitAlignmentSkeleton() {
 // ============================================
 
 function MissingOnetWarning() {
+  const t = useTranslations('builder.simulator');
   const config = STRATEGY_CONFIG.TARGETED_FIT;
 
   return (
@@ -80,11 +82,10 @@ function MissingOnetWarning() {
         />
         <div className="space-y-1">
           <p className="text-sm font-medium text-amber-700 dark:text-amber-300">
-            O*NET Code Not Configured
+            {t('strategy.missingConfiguration')}
           </p>
           <p className="text-xs text-amber-600 dark:text-amber-400">
-            Add an O*NET SOC code in the template settings to enable job-specific
-            alignment insights.
+            {t('emptyState.missingConfig.jobFit')}
           </p>
         </div>
       </div>
@@ -105,6 +106,7 @@ export function JobFitAlignmentCard({
   isLoading,
   className,
 }: JobFitAlignmentCardProps) {
+  const t = useTranslations('builder.simulator');
   const config = STRATEGY_CONFIG.TARGETED_FIT;
 
   // Show loading skeleton
@@ -124,7 +126,7 @@ export function JobFitAlignmentCard({
     <div
       className={cn('p-3 rounded-xl border space-y-3', config.border, config.bg, className)}
       role="region"
-      aria-label="Job Fit Alignment Analysis"
+      aria-label={t('score.jobFitScore')}
     >
       {/* Header */}
       <div className="flex items-center gap-2">
@@ -132,7 +134,7 @@ export function JobFitAlignmentCard({
           className={cn('h-4 w-4', config.iconText)}
           aria-hidden="true"
         />
-        <span className="text-sm font-medium">Job Fit Alignment</span>
+        <span className="text-sm font-medium">{t('score.jobFitScore')}</span>
       </div>
 
       {/* O*NET Info */}
@@ -171,7 +173,7 @@ export function JobFitAlignmentCard({
       {/* Coverage Progress */}
       <div className="space-y-1.5">
         <div className="flex items-center justify-between text-xs">
-          <span className="text-muted-foreground">Requirement Coverage</span>
+          <span className="text-muted-foreground">{t('warnings.inventoryWarnings')}</span>
           <span
             className={cn(
               'font-semibold tabular-nums',
@@ -188,7 +190,7 @@ export function JobFitAlignmentCard({
         <Progress
           value={coveragePercentage}
           className="h-2"
-          aria-label={`Requirement coverage: ${coveragePercentage}%`}
+          aria-label={`${t('warnings.inventoryWarnings')}: ${coveragePercentage}%`}
         />
       </div>
 
@@ -196,7 +198,7 @@ export function JobFitAlignmentCard({
       {topGaps.length > 0 && (
         <div className="space-y-1.5">
           <span className="text-xs font-medium text-muted-foreground">
-            Development Areas
+            {t('score.belowThreshold')}
           </span>
           <div className="space-y-1">
             {topGaps.map((gap) => (
@@ -221,7 +223,9 @@ export function JobFitAlignmentCard({
       {/* Strengths */}
       {topStrengths.length > 0 && (
         <div className="space-y-1.5">
-          <span className="text-xs font-medium text-muted-foreground">Strengths</span>
+          <span className="text-xs font-medium text-muted-foreground">
+            {t('score.qualified')}
+          </span>
           <div className="flex flex-wrap gap-1.5">
             {topStrengths.map((strength) => (
               <Badge

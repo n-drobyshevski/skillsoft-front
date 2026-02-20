@@ -48,3 +48,6 @@ export { ChartPreloader } from './ChartPreloader';
 
 // Navigation prefetching
 export { PrefetchLink } from './PrefetchLink';
+
+// Command Palette
+export { CommandPalette } from './CommandPalette';

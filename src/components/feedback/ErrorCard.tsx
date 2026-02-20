@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardTitle } from "@/components/ui/card";
-import React, { useState } from "react";
+import React from "react";
 
 export default function ErrorCard({
     error,
@@ -16,6 +16,12 @@ export default function ErrorCard({
 							Error Loading Page
 						</CardTitle>
 						<CardDescription className="mb-6">{error}</CardDescription>
+						{callback && (
+							<Button onClick={callback} variant="outline" className="mt-2">
+								Try Again
+							</Button>
+						)}
 					</CardContent>
 				</Card>
-			</div>;     }
+			</div>;
+}
