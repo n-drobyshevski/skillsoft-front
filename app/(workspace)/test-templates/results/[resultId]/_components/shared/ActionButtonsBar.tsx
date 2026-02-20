@@ -18,7 +18,9 @@ import {
   Check,
   Printer,
   Link2,
+  ClipboardList,
 } from 'lucide-react';
+import { ManagerSummary } from './ManagerSummary';
 import { ActionButtonsBarProps, ActionType } from './types';
 
 /**
@@ -68,6 +70,11 @@ const ACTION_STYLE: Record<ActionType, {
     labelKey: 'shareWithTeam',
     icon: Send,
     variant: 'outline'
+  },
+  manager_summary: {
+    labelKey: 'managerSummary',
+    icon: ClipboardList,
+    variant: 'secondary'
   }
 };
 
@@ -84,11 +91,12 @@ function downloadAsPrint() {
  * Renders scenario-appropriate action buttons with real handlers.
  * Includes Export PDF and Copy Link actions with i18n support.
  */
-export function ActionButtonsBar({ templateId, resultId, actions }: ActionButtonsBarProps) {
+export function ActionButtonsBar({ templateId, resultId, actions, result, template }: ActionButtonsBarProps) {
   const router = useRouter();
   const t = useTranslations('results.actions');
   const [loadingAction, setLoadingAction] = useState<ActionType | null>(null);
   const [linkCopied, setLinkCopied] = useState(false);
+  const [managerSummaryOpen, setManagerSummaryOpen] = useState(false);
 
   /**
    * Copies the result share URL to clipboard.
@@ -178,6 +186,10 @@ export function ActionButtonsBar({ templateId, resultId, actions }: ActionButton
         case 'team_dashboard':
           router.push('/test-templates');
           break;
+
+        case 'manager_summary':
+          setManagerSummaryOpen(true);
+          break;
       }
     } catch {
       toast.error(t('actionFailed'));
@@ -265,6 +277,16 @@ export function ActionButtonsBar({ templateId, resultId, actions }: ActionButton
             </Button>
           );
         })}
+
+      {/* Manager Summary Dialog */}
+      {actions.includes('manager_summary') && result && template && (
+        <ManagerSummary
+          result={result}
+          template={template}
+          open={managerSummaryOpen}
+          onOpenChange={setManagerSummaryOpen}
+        />
+      )}
     </div>
   );
 }

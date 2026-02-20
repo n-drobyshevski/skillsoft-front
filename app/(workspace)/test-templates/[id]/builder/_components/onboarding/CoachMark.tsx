@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState, useRef } from 'react';
 import { createPortal } from 'react-dom';
+import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { X, ChevronLeft, ChevronRight, Sparkles } from 'lucide-react';
@@ -41,6 +42,7 @@ export function CoachMark({
   onSkip,
   onComplete,
 }: CoachMarkProps) {
+  const t = useTranslations('builder.onboarding');
   const [targetRect, setTargetRect] = useState<TargetRect | null>(null);
   const [isVisible, setIsVisible] = useState(false);
   const tooltipRef = useRef<HTMLDivElement>(null);
@@ -189,7 +191,7 @@ export function CoachMark({
               <Sparkles className="h-4 w-4 text-primary" />
             </div>
             <span className="text-xs font-medium text-muted-foreground">
-              Step {stepIndex + 1} of {totalSteps}
+              {t('step', { current: stepIndex + 1, total: totalSteps })}
             </span>
           </div>
           <Button
@@ -197,7 +199,7 @@ export function CoachMark({
             size="icon"
             className="h-7 w-7 -mr-2"
             onClick={onSkip}
-            aria-label="Skip tour"
+            aria-label={t('skipTour')}
           >
             <X className="h-4 w-4" />
           </Button>
@@ -249,7 +251,7 @@ export function CoachMark({
               className="gap-1"
             >
               <ChevronLeft className="h-4 w-4" />
-              Back
+              {t('back')}
             </Button>
 
             <Button
@@ -258,10 +260,10 @@ export function CoachMark({
               className="gap-1"
             >
               {isLastStep ? (
-                'Get Started'
+                t('getStarted')
               ) : (
                 <>
-                  Next
+                  {t('next')}
                   <ChevronRight className="h-4 w-4" />
                 </>
               )}

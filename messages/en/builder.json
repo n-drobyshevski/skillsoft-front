@@ -10,7 +10,7 @@
     "builderNavigation": "Builder navigation"
   },
   "canvas": {
-    "structuralWorkbench": "Structural Workbench",
+    "assessmentBlueprint": "Assessment Blueprint",
     "priorityTooltip": "Order sets priority. When time is tight, cards near the top are asked first.",
     "undoLabel": "Undo (Ctrl+Z)",
     "redoLabel": "Redo (Ctrl+Shift+Z)",
@@ -18,8 +18,8 @@
     "redoTooltip": "Redo",
     "undoKey": "Ctrl+Z",
     "redoKey": "Ctrl+Shift+Z",
-    "balanceWeightsLabel": "Balance weights to average 1.0x",
-    "balanceWeightsTooltip": "Balance weights to avg 1.0x",
+    "balanceWeightsLabel": "Balance importance levels evenly",
+    "balanceWeightsTooltip": "Balance importance levels evenly",
     "testDrive": "Test Drive",
     "saveNow": "Save Now",
     "dragHint": "Drag competencies here",
@@ -27,7 +27,7 @@
     "dropToAdd": "Drop to add competency",
     "undoneAnnouncement": "Undone. {count} competencies now.",
     "redoneAnnouncement": "Redone. {count} competencies now.",
-    "weightsBalancedAnnouncement": "Weights balanced. Average is now 1.0x.",
+    "weightsBalancedAnnouncement": "Importance levels balanced evenly.",
     "movedAnnouncement": "{name} moved {direction} to position {position}.",
     "removedAnnouncement": "{name} removed. {count} competencies remaining."
   },
@@ -48,8 +48,8 @@
     "dragToReorder": "Hold and drag to reorder",
     "collapseDetail": "Collapse for less detail",
     "expandOptions": "Expand for more options",
-    "weight": "Weight",
-    "weightTooltip": "Higher weight = more questions. Order also matters - top cards get priority.",
+    "importance": "Importance",
+    "importanceTooltip": "Higher importance = more questions. Order also matters - top cards get priority.",
     "difficulty": "Difficulty",
     "difficultyOptions": {
       "foundational": "Foundational",
@@ -61,6 +61,12 @@
       "expert": "Expert",
       "expertShort": "E"
     },
+    "importanceLevel": {
+      "low": "Low",
+      "medium": "Medium",
+      "high": "High",
+      "critical": "Critical"
+    },
     "inventoryDepth": "Inventory depth",
     "inventoryEMH": "E/M/H",
     "sampleQuestion": "Sample question",
@@ -69,11 +75,11 @@
     "optimisticApply": "Optimistic apply",
     "removeButton": "Remove",
     "removeTitle": "Remove competency?",
-    "removeDescription": "This will remove <strong>{name}</strong> from your test blueprint. You can add it back from the library at any time.",
+    "removeDescription": "This will remove <strong>{name}</strong> from your assessment blueprint. You can add it back from the library at any time.",
     "removeCancel": "Cancel",
     "removeConfirm": "Remove",
-    "decreaseWeight": "Decrease weight",
-    "increaseWeight": "Increase weight"
+    "decreaseImportance": "Decrease importance",
+    "increaseImportance": "Increase importance"
   },
   "saveStatus": {
     "allChangesSaved": "All changes saved",
@@ -123,8 +129,8 @@
     "loadingResults": "Loading simulation results",
     "loadingResultsText": "Loading simulation results...",
     "personas": {
-      "perfect": "Perfect",
-      "perfectDescription": "Ideal candidate",
+      "perfect": "Ideal",
+      "perfectDescription": "Ideal profile",
       "random": "Random",
       "randomDescription": "Random answers",
       "failing": "Failing",
@@ -292,6 +298,30 @@
       "gapAnalysis": "Gap Analysis",
       "teamFitPreview": "Team Fit Preview",
       "analytics": "Analytics"
+    }
+  },
+  "onboarding": {
+    "step": "Step {current} of {total}",
+    "skip": "Skip",
+    "next": "Next",
+    "back": "Back",
+    "getStarted": "Get Started",
+    "skipTour": "Skip tour",
+    "welcome": {
+      "title": "Welcome to Assessment Blueprint",
+      "content": "This is your workspace for building competency-based assessments. You can add competencies, set their importance, and preview how candidates will experience the test."
+    },
+    "library": {
+      "title": "Add Competencies",
+      "content": "Browse and search the competency library here. Drag competencies to the canvas or click the + button to add them to your assessment."
+    },
+    "importance": {
+      "title": "Set Importance Levels",
+      "content": "Adjust how important each competency is. Higher importance means more questions will be generated for that area. You can set Low, Medium, High, or Critical."
+    },
+    "simulator": {
+      "title": "Preview Results",
+      "content": "Use the simulator to see how your assessment will perform. Choose different test personas and run simulations to preview candidate scores and question distribution."
     }
   }
 }

@@ -24,6 +24,7 @@ import { LazyTeamSaturationRadar as TeamSaturationRadar, LazyIndicatorHeatmap as
 import { toTeamSaturationData, toTeamSaturationDataSimulated } from '@/lib/result-transformers';
 import { isTeamFitMetrics } from '@/types/domain';
 import { teamsApi } from '@/services/api/teams';
+import { OnboardingRecommendations } from './OnboardingRecommendations';
 
 /**
  * Team Fit Result View for Scenario C (Team Compatibility Analysis).
@@ -371,11 +372,20 @@ export function TeamFitResultView({ result, template }: BaseResultViewProps) {
           passingScore={passingScore}
         />
 
+        {/* Onboarding Recommendations */}
+        <OnboardingRecommendations
+          competencyScores={competencyScores}
+          bigFiveProfile={bigFiveProfile}
+          teamMetrics={teamFitMetrics}
+        />
+
         {/* Action buttons */}
         <ActionButtonsBar
           templateId={result.templateId}
           resultId={result.id}
-          actions={['team_dashboard', 'retake', 'share_with_team']}
+          actions={['team_dashboard', 'retake', 'share_with_team', 'manager_summary']}
+          result={result}
+          template={template}
         />
       </div>
     </div>

@@ -1,15 +1,18 @@
 'use client';
 
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, useState, useMemo } from 'react';
 import { useTranslations } from 'next-intl';
-import { AnimatePresence } from 'motion/react';
+import { AnimatePresence, motion } from 'motion/react';
 import { useShallow } from 'zustand/react/shallow';
+import { ChevronDown, ChevronUp } from 'lucide-react';
 import { SummaryHero } from './SummaryHero';
 import { FilterBar } from './FilterBar';
 import { SkippedWarningBanner } from './SkippedWarningBanner';
 import { AnswerCardList } from './AnswerCardList';
+import { CompactAnswerRow } from './cards/CompactAnswerRow';
 import { ActionFooter } from './ActionFooter';
 import { SubmissionProgress } from './SubmissionProgress';
+import { Button } from '@/components/ui/button';
 import {
   useReviewStore,
   useFilteredAnswers,
@@ -33,11 +36,16 @@ interface AnswerSummaryScreenProps {
 /**
  * AnswerSummaryScreen - Main container for the answer review interface
  *
+ * Progressive disclosure pattern:
+ * - Default: compact summary view showing question status at a glance
+ * - Detailed: full expandable answer cards with filtering/sorting
+ * - Auto-expands to detailed view when skipped questions exist
+ *
  * Displays:
  * - Summary hero with completion stats
- * - Filter bar for filtering answers
+ * - Compact answer list (default) or detailed answer cards (toggle)
+ * - Filter bar for filtering answers (detailed mode only)
  * - Skipped questions warning (if any)
- * - Scrollable list of answer cards
  * - Action footer with back/submit buttons
  * - Submission progress overlay
  *
@@ -91,21 +99,28 @@ export function AnswerSummaryScreen({
       flagged: answers.filter((a) => a.status === 'flagged').length,
     };
 
+  const hasSkipped = stats.skipped > 0;
+
+  // Progressive disclosure: compact (default) vs detailed view
+  // Auto-expand to detailed mode when skipped questions exist
+  const [isDetailedView, setIsDetailedView] = useState(hasSkipped);
+
   // Filter answers based on active filter
   const filteredAnswers = activeFilter === 'all'
       ? answers
       : answers.filter((item) => item.status === activeFilter);
 
   // Sort filtered answers
-  const sortedAnswers = (() => {
+  const sortedAnswers = useMemo(() => {
     const sorted = [...filteredAnswers];
 
     switch (sortOrder) {
-      case 'status':
+      case 'status': {
         // Sort by status: skipped first, then answered, then pending
-        const statusOrder = { skipped: 0, flagged: 1, pending: 2, answered: 3 };
+        const statusOrder: Record<string, number> = { skipped: 0, flagged: 1, pending: 2, answered: 3 };
         sorted.sort((a, b) => statusOrder[a.status] - statusOrder[b.status]);
         break;
+      }
       case 'competency':
         // Sort by competency name, then by question index
         sorted.sort((a, b) => {
@@ -122,7 +137,12 @@ export function AnswerSummaryScreen({
     }
 
     return sorted;
-  })();
+  }, [filteredAnswers, sortOrder]);
+
+  // Compact view always shows answers in original order (no filtering/sorting)
+  const compactAnswers = useMemo(() => {
+    return [...answers].sort((a, b) => a.questionIndex - b.questionIndex);
+  }, [answers]);
 
   // Filter counts for FilterBar
   const filterCounts = {
@@ -147,8 +167,9 @@ export function AnswerSummaryScreen({
     onEditAnswer(questionId, questionIndex);
   };
 
-  // Handle review skipped - filter to skipped and scroll to top
+  // Handle review skipped - switch to detailed view, filter to skipped, scroll to top
   const handleReviewSkipped = () => {
+    setIsDetailedView(true);
     setActiveFilter('skipped');
     if (scrollRef.current) {
       scrollRef.current.scrollTop = 0;
@@ -167,7 +188,6 @@ export function AnswerSummaryScreen({
   };
 
   const isAllAnswered = stats.answered >= stats.total;
-  const hasSkipped = stats.skipped > 0;
   const canSubmit = stats.answered > 0;
 
   return (
@@ -191,44 +211,92 @@ export function AnswerSummaryScreen({
           </div>
         </div>
 
-        {/* Filter bar - sticky */}
-        <FilterBar
-          activeFilter={activeFilter}
-          onFilterChange={setActiveFilter}
-          sortOrder={sortOrder}
-          onSortChange={setSortOrder}
-          counts={filterCounts}
-        />
+        {/* Filter bar - only visible in detailed mode */}
+        {isDetailedView && (
+          <FilterBar
+            activeFilter={activeFilter}
+            onFilterChange={setActiveFilter}
+            sortOrder={sortOrder}
+            onSortChange={setSortOrder}
+            counts={filterCounts}
+          />
+        )}
 
         {/* Main content */}
         <div className="px-3 sm:px-4 py-4 sm:py-6">
           <div className="max-w-3xl mx-auto">
-            {/* Skipped warning banner */}
-            {hasSkipped && activeFilter === 'all' && (
+            {/* Skipped warning banner - visible in both modes */}
+            {hasSkipped && (isDetailedView ? activeFilter === 'all' : true) && (
               <SkippedWarningBanner
                 skippedCount={stats.skipped}
                 onReviewSkipped={handleReviewSkipped}
               />
             )}
 
-            {/* Answer list */}
-            <AnswerCardList
-              items={sortedAnswers}
-              competencyGroups={sortOrder === 'competency' ? competencyGroups : undefined}
-              expandedCardIds={expandedCardIds}
-              onToggleCard={toggleCardExpanded}
-              onEditAnswer={handleEditAnswer}
-              groupByCompetency={sortOrder === 'competency'}
-            />
-
-            {/* Empty state for filtered view */}
-            {sortedAnswers.length === 0 && activeFilter !== 'all' && (
-              <div className="text-center py-12">
-                <p className="text-neutral-500">
-                  {t('answerCard.noQuestionsWithStatus')}
-                </p>
+            {/* Compact answer list (default view) */}
+            {!isDetailedView && (
+              <div className="space-y-1">
+                {compactAnswers.map((item) => (
+                  <CompactAnswerRow
+                    key={item.questionId}
+                    item={item}
+                    questionNumber={item.questionIndex + 1}
+                  />
+                ))}
               </div>
             )}
+
+            {/* Detailed answer list (toggled view) */}
+            <AnimatePresence mode="wait">
+              {isDetailedView && (
+                <motion.div
+                  key="detailed-view"
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.3, ease: 'easeInOut' }}
+                >
+                  <AnswerCardList
+                    items={sortedAnswers}
+                    competencyGroups={sortOrder === 'competency' ? competencyGroups : undefined}
+                    expandedCardIds={expandedCardIds}
+                    onToggleCard={toggleCardExpanded}
+                    onEditAnswer={handleEditAnswer}
+                    groupByCompetency={sortOrder === 'competency'}
+                  />
+
+                  {/* Empty state for filtered view */}
+                  {sortedAnswers.length === 0 && activeFilter !== 'all' && (
+                    <div className="text-center py-12">
+                      <p className="text-neutral-500">
+                        {t('answerCard.noQuestionsWithStatus')}
+                      </p>
+                    </div>
+                  )}
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Review Details toggle button */}
+            <div className="mt-4 flex justify-center">
+              <Button
+                variant="ghost"
+                onClick={() => setIsDetailedView((prev) => !prev)}
+                className="text-sm text-neutral-400 hover:text-white hover:bg-neutral-800/50 gap-2"
+              >
+                {isDetailedView ? (
+                  <>
+                    <ChevronUp className="w-4 h-4" />
+                    {t('answerSummary.hideDetails')}
+                  </>
+                ) : (
+                  <>
+                    <ChevronDown className="w-4 h-4" />
+                    {t('answerSummary.reviewDetails')}
+                  </>
+                )}
+              </Button>
+            </div>
           </div>
         </div>
       </div>

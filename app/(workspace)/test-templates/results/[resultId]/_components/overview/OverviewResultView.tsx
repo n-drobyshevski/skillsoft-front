@@ -638,7 +638,9 @@ export function OverviewResultView({ result, template }: BaseResultViewProps) {
         <ActionButtonsBar
           templateId={result.templateId}
           resultId={result.id}
-          actions={['download_profile', 'retake', 'save_to_profile']}
+          actions={['download_profile', 'retake', 'save_to_profile', 'manager_summary']}
+          result={result}
+          template={template}
         />
       </div>
     </div>

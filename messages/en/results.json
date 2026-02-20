@@ -237,7 +237,202 @@
     "backToTests": "Back to Tests",
     "teamDashboard": "Team Dashboard",
     "shareWithTeam": "Share with Team",
+    "managerSummary": "Summary",
     "resultSaved": "Result saved to your profile",
     "actionFailed": "Action failed. Please try again."
+  },
+  "nextSteps": {
+    "interviewGuide": {
+      "title": "Interview Guide",
+      "description": "Behavioral interview questions for {count} competency gaps",
+      "print": "Print",
+      "gapSeverity": "Gap: {score}% vs {threshold}% required",
+      "suggestedQuestions": "Suggested Interview Questions",
+      "starNote": "Use STAR format: ask about a Situation, Task, Action, and Result.",
+      "severityHigh": "Critical",
+      "severityMedium": "Moderate",
+      "severityLow": "Minor",
+      "questions": {
+        "leadership": {
+          "q1": "Describe a time when you had to lead a team through a challenging project. What was your approach, and what was the outcome?",
+          "q2": "Tell me about a situation where you had to make a difficult decision that affected your team. How did you handle it?",
+          "q3": "Give an example of when you mentored or developed someone on your team. What strategies did you use?"
+        },
+        "communication": {
+          "q1": "Tell me about a time you had to explain a complex idea to someone without technical background. How did you ensure they understood?",
+          "q2": "Describe a situation where miscommunication led to a problem. How did you resolve it?",
+          "q3": "Give an example of when you had to deliver difficult feedback. How did you approach the conversation?"
+        },
+        "problem_solving": {
+          "q1": "Describe a complex problem you encountered at work. Walk me through your problem-solving process.",
+          "q2": "Tell me about a time you had to make a decision with incomplete information. What was your approach?",
+          "q3": "Give an example of when your initial solution to a problem did not work. How did you adapt?"
+        },
+        "teamwork": {
+          "q1": "Tell me about a time you worked with a difficult team member. How did you handle the situation?",
+          "q2": "Describe a project where collaboration was essential to success. What role did you play?",
+          "q3": "Give an example of when you had to resolve a conflict between team members. What was the outcome?"
+        },
+        "adaptability": {
+          "q1": "Describe a time when priorities changed suddenly. How did you adjust your approach?",
+          "q2": "Tell me about a situation where you had to learn something new quickly to complete a task. How did you approach it?",
+          "q3": "Give an example of when you faced significant uncertainty. How did you maintain effectiveness?"
+        },
+        "technical": {
+          "q1": "Describe a challenging technical problem you solved. What tools or methods did you use?",
+          "q2": "Tell me about a time you had to quickly learn a new technology. How did you get up to speed?",
+          "q3": "Give an example of when you improved a technical process or system. What was the impact?"
+        },
+        "planning": {
+          "q1": "Describe how you organized a complex project with multiple deadlines. What was your planning process?",
+          "q2": "Tell me about a time when your plan did not go as expected. How did you adjust?",
+          "q3": "Give an example of how you prioritize tasks when everything seems urgent."
+        },
+        "creativity": {
+          "q1": "Tell me about an innovative solution you proposed at work. What inspired it?",
+          "q2": "Describe a time when you had to think outside the box to solve a problem.",
+          "q3": "Give an example of when you challenged the status quo. What was the result?"
+        },
+        "ethics": {
+          "q1": "Describe a situation where you faced an ethical dilemma at work. How did you handle it?",
+          "q2": "Tell me about a time you had to stand up for what was right, even when it was unpopular.",
+          "q3": "Give an example of how you maintain accountability and integrity in your work."
+        },
+        "customer_focus": {
+          "q1": "Tell me about a time you went above and beyond for a customer or client. What did you do?",
+          "q2": "Describe a situation where you had to balance customer needs with business constraints.",
+          "q3": "Give an example of when you turned a negative customer experience into a positive one."
+        },
+        "general": {
+          "q1": "Describe a recent accomplishment you are proud of in this competency area. What made it successful?",
+          "q2": "Tell me about a time you received constructive feedback in this area. How did you respond?",
+          "q3": "Give an example of how you have developed this skill over time. What steps did you take?"
+        }
+      }
+    },
+    "onboarding": {
+      "title": "Onboarding Recommendations",
+      "description": "Actionable onboarding guidance based on team dynamics analysis",
+      "communicationStyle": "Communication Style",
+      "teamRole": "Team Role Fit",
+      "focusAreas": "Recommended Focus Areas",
+      "styles": {
+        "collaborative": {
+          "label": "Collaborative Communicator",
+          "description": "Naturally engages others and builds consensus. Thrives in open discussion and group brainstorming. Pair with structured check-ins to maintain focus."
+        },
+        "assertive": {
+          "label": "Assertive Communicator",
+          "description": "Direct and action-oriented. Communicates clearly and decisively. May benefit from active listening exercises during onboarding."
+        },
+        "analytical": {
+          "label": "Analytical Communicator",
+          "description": "Prefers data-driven discussion and well-structured communication. Give advance notice of meetings with clear agendas."
+        },
+        "reflective": {
+          "label": "Reflective Communicator",
+          "description": "Thoughtful and deliberate. Prefers written communication and time to process. Provide written summaries of key discussions."
+        },
+        "creative": {
+          "label": "Creative Communicator",
+          "description": "Open to ideas and enjoys brainstorming. Encourage idea-sharing sessions and provide creative problem-solving opportunities."
+        },
+        "structured": {
+          "label": "Structured Communicator",
+          "description": "Values clarity, consistency, and process. Provide clear documentation and well-defined communication channels."
+        },
+        "balanced": {
+          "label": "Balanced Communicator",
+          "description": "Adaptable communication style. Can adjust to different team dynamics and situations."
+        }
+      },
+      "roles": {
+        "specialist": {
+          "label": "Domain Specialist",
+          "description": "Deep expertise in specific areas. Leverage their knowledge for mentoring and technical guidance in their strength areas."
+        },
+        "leader": {
+          "label": "Natural Leader",
+          "description": "High capability across multiple areas. Consider early project leadership or initiative ownership opportunities."
+        },
+        "gapFiller": {
+          "label": "Gap Filler",
+          "description": "Brings skills the team currently lacks. Prioritize tasks that leverage their unique contributions to team diversity."
+        },
+        "collaborator": {
+          "label": "Team Collaborator",
+          "description": "Balanced skills with strong interpersonal ability. Ideal for cross-functional tasks and bridge-building between sub-teams."
+        },
+        "generalist": {
+          "label": "Versatile Generalist",
+          "description": "Consistent performance across all areas. Effective in utility roles and can support multiple workstreams."
+        },
+        "contributor": {
+          "label": "Developing Contributor",
+          "description": "Building foundational skills. Pair with experienced team members for structured learning opportunities."
+        }
+      },
+      "confidence": {
+        "high": "High confidence",
+        "medium": "Moderate confidence",
+        "low": "Preliminary"
+      },
+      "focusItems": {
+        "teamIntegration": {
+          "title": "Team Integration Sessions",
+          "description": "Schedule informal 1-on-1s with each team member in the first two weeks. Focus on understanding team workflows and communication norms."
+        },
+        "leverageStrengths": {
+          "title": "Leverage Communication Strengths",
+          "description": "Assign early presentations or facilitation roles to help establish credibility and build team rapport quickly."
+        },
+        "gradualExposure": {
+          "title": "Gradual Team Exposure",
+          "description": "Start with smaller group interactions before full-team settings. Provide written materials ahead of meetings for preparation."
+        },
+        "buildRelationships": {
+          "title": "Relationship Building",
+          "description": "Create opportunities for informal interaction such as pair programming, lunch meetings, or collaborative side projects."
+        },
+        "skillDevelopment": {
+          "title": "Targeted Skill Development",
+          "description": "Identify 1-2 key competency gaps and create a 30-60-90 day development plan with specific learning objectives and mentor support."
+        },
+        "differentiateRole": {
+          "title": "Role Differentiation",
+          "description": "Clarify distinct responsibilities early to avoid overlap with existing team members. Focus on areas where they add unique value."
+        },
+        "mentorship": {
+          "title": "Buddy/Mentor Assignment",
+          "description": "Pair with an experienced team member who can provide context, answer questions, and facilitate knowledge transfer."
+        }
+      }
+    },
+    "managerSummary": {
+      "title": "Summary for Manager",
+      "dialogDescription": "Printable one-page candidate assessment summary",
+      "candidateId": "Candidate ID",
+      "assessmentDate": "Assessment Date",
+      "templateName": "Assessment",
+      "duration": "Duration",
+      "passed": "Passed",
+      "notPassed": "Not Passed",
+      "questionsCompleted": "{answered} of {total} questions completed",
+      "strengths": "Key Strengths",
+      "development": "Development Areas",
+      "recommendation": "Recommendation",
+      "noData": "No competency data available",
+      "print": "Print Summary",
+      "close": "Close",
+      "recommendations": {
+        "stronglyRecommend": "Strongly recommend for the position. The candidate demonstrates exceptional competency across all key areas with significant strengths that exceed requirements.",
+        "recommend": "Recommend for the position. The candidate meets the benchmark requirements and shows solid competency across assessed areas.",
+        "conditionalConsider": "Consider with conditions. The candidate shows promise but has notable gaps that should be addressed through targeted development or further evaluation.",
+        "notRecommend": "Not recommended at this time. The candidate has significant competency gaps that require substantial development before meeting position requirements.",
+        "strongProfile": "Strong competency profile. The candidate demonstrates advanced proficiency across assessed areas with clear signature strengths.",
+        "moderateProfile": "Moderate competency profile. The candidate shows solid foundational skills with identified areas for continued professional development.",
+        "developingProfile": "Developing competency profile. The candidate is building foundational skills and would benefit from structured development opportunities."
+      }
+    }
   }
 }

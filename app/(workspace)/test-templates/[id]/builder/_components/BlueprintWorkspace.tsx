@@ -14,6 +14,7 @@ import { useBlueprintWorkspace } from "./BlueprintWorkspaceProvider";
 import { useNetworkStatus } from "@/hooks/useNetworkStatus";
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
+import { BuilderOnboarding } from "./onboarding/BuilderOnboarding";
 
 // Phase 3.1: Lazy-loaded panels for mobile to reduce initial bundle
 // These are only loaded when the tab is first accessed
@@ -187,6 +188,7 @@ function DesktopLayout() {
 
   return (
     <BuilderDndProvider>
+      <BuilderOnboarding />
       <div className="flex h-full w-full overflow-hidden">
         <ResizablePanelGroup
           direction="horizontal"

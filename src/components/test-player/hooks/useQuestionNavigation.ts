@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { TestSession, SessionQuestion, SubmitAnswerRequest, QuestionType } from '@/types/domain';
@@ -126,7 +126,7 @@ export function useQuestionNavigation({
   // Internal: Load Question
   // ========================================================================
 
-  const loadQuestion = useCallback(async (direction: 'forward' | 'backward') => {
+  const loadQuestion = async (direction: 'forward' | 'backward') => {
     try {
       const response = await retryWithBackoff(
         () => adapter
@@ -229,13 +229,13 @@ export function useQuestionNavigation({
       toast.error(getUserFriendlyErrorMessage(error));
     }
     questionStartTime.current = Date.now();
-  }, [adapter, session.id, effectiveAuthHeaders, setState, setCurrentAnswer, setValidationError, onTimerSync, onQuestionLoaded, questionStartTime, router, t]);
+  };
 
   // ========================================================================
   // Internal: Auto-save helper
   // ========================================================================
 
-  const autoSaveIfDirty = useCallback(async (): Promise<boolean> => {
+  const autoSaveIfDirty = async (): Promise<boolean> => {
     const questionId = currentQuestion?.id;
     const navStore = useNavigationState.getState();
     const isDirty = questionId ? navStore.isDirty(questionId) : false;
@@ -295,13 +295,13 @@ export function useQuestionNavigation({
     });
 
     return true;
-  }, [currentQuestion, currentAnswer, validateAnswer, buildAnswerRequest, adapter, session.id, effectiveAuthHeaders, setState, t]);
+  };
 
   // ========================================================================
   // Internal: Session error handler
   // ========================================================================
 
-  const handleSessionStateError = useCallback((apiError: ApiError): boolean => {
+  const handleSessionStateError = (apiError: ApiError): boolean => {
     if (apiError.status === 400 || apiError.status === 403) {
       const errorMessage = apiError.message || '';
       if (errorMessage.toLowerCase().includes('abandon')) {
@@ -319,13 +319,13 @@ export function useQuestionNavigation({
       }
     }
     return false;
-  }, [router, setState, t]);
+  };
 
   // ========================================================================
   // Public: Navigate to next question
   // ========================================================================
 
-  const handleNext = useCallback(async () => {
+  const handleNext = async () => {
     if (state.isSubmitting) return;
 
     const validation = validateAnswer(currentAnswer);
@@ -404,13 +404,13 @@ export function useQuestionNavigation({
     }
 
     setState(prev => ({ ...prev, isSubmitting: false }));
-  }, [state.isSubmitting, state.questionIndex, state.totalQuestions, currentAnswer, currentQuestion, validateAnswer, setValidationError, setState, buildAnswerRequest, adapter, session.id, effectiveAuthHeaders, loadQuestion, onEnterSummary, router, t]);
+  };
 
   // ========================================================================
   // Public: Navigate to previous question with auto-save
   // ========================================================================
 
-  const handlePrevious = useCallback(async () => {
+  const handlePrevious = async () => {
     if (!state.allowBackNavigation || state.isSubmitting) return;
     if (state.questionIndex <= 0) return;
 
@@ -445,13 +445,13 @@ export function useQuestionNavigation({
     }
 
     setState(prev => ({ ...prev, isSubmitting: false }));
-  }, [state.allowBackNavigation, state.isSubmitting, state.questionIndex, adapter, session.id, effectiveAuthHeaders, setState, autoSaveIfDirty, loadQuestion, handleSessionStateError, currentQuestion?.id]);
+  };
 
   // ========================================================================
   // Public: Navigate to a specific question by index (dot navigation)
   // ========================================================================
 
-  const handleNavigateToQuestion = useCallback(async (targetIndex: number) => {
+  const handleNavigateToQuestion = async (targetIndex: number) => {
     if (!state.allowBackNavigation || state.isSubmitting) return;
     if (targetIndex === state.questionIndex) return;
     if (targetIndex < 0 || targetIndex >= state.totalQuestions) return;
@@ -491,13 +491,13 @@ export function useQuestionNavigation({
     }
 
     setState(prev => ({ ...prev, isSubmitting: false }));
-  }, [state.allowBackNavigation, state.isSubmitting, state.questionIndex, state.totalQuestions, state.questionStates, adapter, session.id, effectiveAuthHeaders, setState, autoSaveIfDirty, loadQuestion, handleSessionStateError, currentQuestion?.id]);
+  };
 
   // ========================================================================
   // Public: Skip current question
   // ========================================================================
 
-  const handleSkip = useCallback(async () => {
+  const handleSkip = async () => {
     if (!state.allowSkip || state.isSubmitting) return;
 
     if (state.questionIndex + 1 >= state.totalQuestions) {
@@ -572,13 +572,13 @@ export function useQuestionNavigation({
     }
 
     setState(prev => ({ ...prev, isSubmitting: false }));
-  }, [state.allowSkip, state.isSubmitting, state.questionIndex, state.totalQuestions, currentQuestion, adapter, session.id, effectiveAuthHeaders, questionStartTime, setState, setCurrentAnswer, setValidationError, loadQuestion, router, t]);
+  };
 
   // ========================================================================
   // Public: Handle test completion
   // ========================================================================
 
-  const handleComplete = useCallback(async () => {
+  const handleComplete = async () => {
     if (state.isSubmitting) return;
 
     setState(prev => ({ ...prev, isSubmitting: true }));
@@ -654,17 +654,17 @@ export function useQuestionNavigation({
       toast.error(t('player.toast.failedToCompleteTest'));
       setState(prev => ({ ...prev, isSubmitting: false }));
     }
-  }, [state.isSubmitting, currentQuestion, currentAnswer, buildAnswerRequest, adapter, session.id, effectiveAuthHeaders, setState, onComplete, onError, router, t]);
+  };
 
   // ========================================================================
   // Public: Handle exit/abandon
   // ========================================================================
 
-  const handleExit = useCallback(() => {
+  const handleExit = () => {
     setShowAbandonDialog(true);
-  }, []);
+  };
 
-  const handleAbandonTest = useCallback(async () => {
+  const handleAbandonTest = async () => {
     try {
       if (adapter) {
         await adapter.abandonSession(session.id);
@@ -683,13 +683,13 @@ export function useQuestionNavigation({
     } finally {
       setShowAbandonDialog(false);
     }
-  }, [adapter, session.id, effectiveAuthHeaders, onAbandon, router, t]);
+  };
 
   // ========================================================================
   // Public: Navigation error recovery
   // ========================================================================
 
-  const handleRetryNavigation = useCallback(async () => {
+  const handleRetryNavigation = async () => {
     if (!pendingNavigation) return;
 
     setIsRetryingNavigation(true);
@@ -765,15 +765,15 @@ export function useQuestionNavigation({
     } finally {
       setIsRetryingNavigation(false);
     }
-  }, [pendingNavigation, currentQuestion, currentAnswer, validateAnswer, buildAnswerRequest, adapter, session.id, effectiveAuthHeaders, setState, state.questionIndex, loadQuestion, t]);
+  };
 
-  const handleDismissNavigationError = useCallback(() => {
+  const handleDismissNavigationError = () => {
     setShowNavigationError(false);
     setNavigationError(null);
     setPendingNavigation(null);
-  }, []);
+  };
 
-  const handleContinueWithoutSaving = useCallback(async () => {
+  const handleContinueWithoutSaving = async () => {
     if (!pendingNavigation) return;
 
     const { direction, targetIndex } = pendingNavigation;
@@ -802,7 +802,7 @@ export function useQuestionNavigation({
       console.error('Continue without saving failed:', error);
       toast.error(t('player.toast.failedToNavigate'));
     }
-  }, [pendingNavigation, currentQuestion?.id, adapter, session.id, effectiveAuthHeaders, state.questionIndex, loadQuestion, t]);
+  };
 
   return {
     handleNext,

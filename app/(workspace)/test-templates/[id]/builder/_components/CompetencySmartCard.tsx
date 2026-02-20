@@ -25,6 +25,7 @@ import { BlueprintCompetency, type Difficulty } from "../actions";
 import { getSampleQuestion } from "../actions";
 import { useTranslations } from "next-intl";
 import { useBlueprintWorkspace } from "./BlueprintWorkspaceProvider";
+import { getImportanceLevelKey, importanceLevelColors } from "./utils/importanceLabel";
 
 interface Indicator {
   id: string;
@@ -180,7 +181,7 @@ export function CompetencySmartCard({
           <div className="flex items-center gap-1 sm:gap-2 mt-1 text-[11px] sm:text-xs text-muted-foreground overflow-hidden">
             <span className="font-medium text-foreground/70 shrink-0">{competency.questionCount}q</span>
             <span className="text-border/50 shrink-0">•</span>
-            <span className="text-muted-foreground/80 truncate">{competency.weight?.toFixed(1) ?? 1}x</span>
+            <span className={cn("truncate", importanceLevelColors[getImportanceLevelKey(competency.weight ?? 1)])}>{t(`importanceLevel.${getImportanceLevelKey(competency.weight ?? 1)}`)}</span>
           </div>
         </div>
 
@@ -211,7 +212,7 @@ export function CompetencySmartCard({
           <Tooltip>
             <TooltipTrigger asChild>
               <div className="flex items-center gap-2 px-2 py-1 rounded-md bg-muted/30 border border-border/30">
-                <span className="text-[10px] text-muted-foreground font-medium">{t('weight')}</span>
+                <span className="text-[10px] text-muted-foreground font-medium">{t('importance')}</span>
                 <div className="w-16">
                   <Slider
                     value={[competency.weight ?? 1]}
@@ -223,13 +224,13 @@ export function CompetencySmartCard({
                     className="[&_[data-slot=slider-thumb]]:h-3 [&_[data-slot=slider-thumb]]:w-3"
                   />
                 </div>
-                <span className="font-mono text-xs text-foreground/80 w-7 text-right">
-                  {(competency.weight ?? 1).toFixed(1)}
+                <span className={cn("text-xs w-14 text-right font-medium", importanceLevelColors[getImportanceLevelKey(competency.weight ?? 1)])}>
+                  {t(`importanceLevel.${getImportanceLevelKey(competency.weight ?? 1)}`)}
                 </span>
               </div>
             </TooltipTrigger>
             <TooltipContent side="bottom" className="text-xs max-w-xs">
-              {t('weightTooltip')}
+              {t('importanceTooltip')}
             </TooltipContent>
           </Tooltip>
         </div>
@@ -253,9 +254,9 @@ export function CompetencySmartCard({
 
       {/* Mobile controls - weight stepper + difficulty selector */}
       <div className="md:hidden px-2 sm:px-4 pb-2 sm:pb-3 space-y-2">
-        {/* M1: Touch-optimized weight stepper with visual feedback */}
+        {/* M1: Touch-optimized importance stepper with visual feedback */}
         <div className="flex items-center gap-2 sm:gap-3 p-2 sm:p-2.5 rounded-lg bg-muted/20 border border-border/30">
-          <span className="text-[11px] sm:text-xs text-muted-foreground font-medium shrink-0">{t('weight')}</span>
+          <span className="text-[11px] sm:text-xs text-muted-foreground font-medium shrink-0">{t('importance')}</span>
           <div className="flex-1 flex items-center justify-center gap-3">
             <Button
               variant="outline"
@@ -263,15 +264,15 @@ export function CompetencySmartCard({
               className="h-10 w-10 shrink-0 rounded-full active:scale-90 active:bg-destructive/10 touch-manipulation transition-all"
               onClick={() => onWeightChange(Math.max(0.5, Math.round(((competency.weight ?? 1) - 0.1) * 10) / 10))}
               disabled={isPending || (competency.weight ?? 1) <= 0.5}
-              aria-label={t('decreaseWeight')}
+              aria-label={t('decreaseImportance')}
             >
               <Minus className="h-4 w-4" />
             </Button>
             <div className="flex flex-col items-center">
-              <span className="font-mono text-lg font-semibold text-foreground w-14 text-center tabular-nums transition-all">
-                {(competency.weight ?? 1).toFixed(1)}x
+              <span className={cn("text-base font-semibold w-16 text-center transition-all", importanceLevelColors[getImportanceLevelKey(competency.weight ?? 1)])}>
+                {t(`importanceLevel.${getImportanceLevelKey(competency.weight ?? 1)}`)}
               </span>
-              {/* Visual weight bar indicator */}
+              {/* Visual importance bar indicator */}
               <div className="w-12 h-1 mt-1 rounded-full bg-muted overflow-hidden">
                 <div
                   className="h-full rounded-full bg-primary transition-all duration-200"
@@ -285,7 +286,7 @@ export function CompetencySmartCard({
               className="h-10 w-10 shrink-0 rounded-full active:scale-90 active:bg-primary/10 touch-manipulation transition-all"
               onClick={() => onWeightChange(Math.min(2.0, Math.round(((competency.weight ?? 1) + 0.1) * 10) / 10))}
               disabled={isPending || (competency.weight ?? 1) >= 2.0}
-              aria-label={t('increaseWeight')}
+              aria-label={t('increaseImportance')}
             >
               <Plus className="h-4 w-4" />
             </Button>

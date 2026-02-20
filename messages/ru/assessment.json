@@ -154,6 +154,12 @@
     "questionPending": "Вопрос {number}: Ожидает",
     "questionDefault": "Вопрос {number}"
   },
+  "answerSummary": {
+    "reviewDetails": "Показать подробности",
+    "hideDetails": "Скрыть подробности",
+    "compactScore": "{score}/{max}",
+    "questionLabel": "В{number}"
+  },
   "answerCard": {
     "statusAnswered": "Отвечено",
     "statusSkipped": "Пропущено",
@@ -184,8 +190,34 @@
     "backToReview": "Вернуться к просмотру",
     "maxAttemptsExceeded": "Превышено количество попыток. Попробуйте позже или обратитесь в поддержку."
   },
+  "sjt": {
+    "scenarioLabel": "Ситуация",
+    "responsePrompt": "На основе описанной ситуации выберите лучший ответ:"
+  },
+  "star": {
+    "situation": {
+      "label": "Ситуация",
+      "hint": "Опишите контекст или ситуацию"
+    },
+    "task": {
+      "label": "Задача",
+      "hint": "Какова была ваша роль или обязанность?"
+    },
+    "action": {
+      "label": "Действие",
+      "hint": "Какие конкретные действия вы предприняли?"
+    },
+    "result": {
+      "label": "Результат",
+      "hint": "Каков был результат?"
+    },
+    "characterCount": "{current}/{minimum} символов минимум",
+    "charactersMet": "Минимум достигнут"
+  },
   "timer": {
     "noLimit": "Без ограничения",
-    "expired": "Время истекло"
+    "expired": "Время истекло",
+    "remaining": "{minutes}:{seconds} осталось",
+    "warning": "Осталось менее 3 минут"
   }
 }

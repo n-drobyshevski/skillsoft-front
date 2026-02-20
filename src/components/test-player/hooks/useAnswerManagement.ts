@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useTranslations } from 'next-intl';
 import { SessionQuestion, TestAnswer, SubmitAnswerRequest, QuestionType, CurrentQuestionResponse } from '@/types/domain';
 import { MIN_CHARS_OPEN_TEXT, MIN_CHARS_BEHAVIORAL } from '../QuestionCard';
@@ -119,7 +119,7 @@ export function useAnswerManagement({
   // Validation
   // ========================================================================
 
-  const validateAnswer = useCallback((value: string | number | string[] | undefined): ValidationResult => {
+  const validateAnswer = (value: string | number | string[] | undefined): ValidationResult => {
     if (!currentQuestion) {
       return { valid: false, error: t('player.validation.noCurrentQuestion') };
     }
@@ -192,36 +192,34 @@ export function useAnswerManagement({
 
     // Default: if we have any value, it's valid
     return { valid: true };
-  }, [currentQuestion, t]);
+  };
 
   // ========================================================================
   // Computed: is answer valid
   // ========================================================================
 
-  const isAnswerValid = useMemo(() => {
-    const validation = validateAnswer(currentAnswer);
+  const validation = validateAnswer(currentAnswer);
 
-    // Debug logging in development
-    if (process.env.NODE_ENV === 'development') {
-      // eslint-disable-next-line no-console
-      console.log('[useAnswerManagement] Validation check:', {
-        currentAnswer,
-        answerType: typeof currentAnswer,
-        isArray: Array.isArray(currentAnswer),
-        valid: validation.valid,
-        error: validation.error,
-        questionType: currentQuestion?.questionType,
-      });
-    }
+  // Debug logging in development
+  if (process.env.NODE_ENV === 'development') {
+    // eslint-disable-next-line no-console
+    console.log('[useAnswerManagement] Validation check:', {
+      currentAnswer,
+      answerType: typeof currentAnswer,
+      isArray: Array.isArray(currentAnswer),
+      valid: validation.valid,
+      error: validation.error,
+      questionType: currentQuestion?.questionType,
+    });
+  }
 
-    return validation.valid;
-  }, [validateAnswer, currentAnswer, currentQuestion?.questionType]);
+  const isAnswerValid = validation.valid;
 
   // ========================================================================
   // Build SubmitAnswerRequest
   // ========================================================================
 
-  const buildAnswerRequest = useCallback((value: string | number | string[]): SubmitAnswerRequest => {
+  const buildAnswerRequest = (value: string | number | string[]): SubmitAnswerRequest => {
     const timeSpentSeconds = Math.floor((Date.now() - questionStartTime.current) / 1000);
     const request: SubmitAnswerRequest = {
       sessionId,
@@ -249,13 +247,13 @@ export function useAnswerManagement({
     }
 
     return request;
-  }, [sessionId, currentQuestion]);
+  };
 
   // ========================================================================
   // Handle answer change (for QuestionCard)
   // ========================================================================
 
-  const handleAnswer = useCallback((value: string | number | string[]) => {
+  const handleAnswer = (value: string | number | string[]) => {
     if (!currentQuestion) return;
 
     // Debug logging in development
@@ -275,7 +273,7 @@ export function useAnswerManagement({
 
     // Optimistic update
     setCurrentAnswer(value);
-  }, [currentQuestion]);
+  };
 
   return {
     currentAnswer,

@@ -30,6 +30,7 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { useBlueprintWorkspace } from "./BlueprintWorkspaceProvider";
 import { LibraryCompetency } from "../actions";
+import { getImportanceLevelKey, importanceLevelColors } from "./utils/importanceLabel";
 
 // ============================================
 // TYPES
@@ -379,8 +380,7 @@ function DragPreview({ data, activeCompetency }: DragPreviewProps) {
           </span>
         </div>
         <div className="mt-2 text-xs text-muted-foreground">
-          {activeCompetency.questionCount} questions • Weight{" "}
-          {activeCompetency.weight?.toFixed(1) ?? 1}x
+          {activeCompetency.questionCount} questions
         </div>
       </div>
     );

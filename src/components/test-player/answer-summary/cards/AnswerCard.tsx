@@ -205,7 +205,7 @@ export function AnswerCard({
                     {isLikert ? (
                       <LikertAnswerExpanded answer={item.answer} />
                     ) : isSJT ? (
-                      <SJTAnswerExpanded answer={item.answer} answerDisplayText={item.answerDisplayText} />
+                      <SJTAnswerExpanded answer={item.answer} answerDisplayText={item.answerDisplayText} scenario={item.scenario} />
                     ) : (
                       <MCQAnswerExpanded answer={item.answer} answerDisplayText={item.answerDisplayText} />
                     )}

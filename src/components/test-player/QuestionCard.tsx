@@ -2,10 +2,12 @@
 
 import React, { useState, useId, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
+import { BookOpen } from 'lucide-react';
 import { SessionQuestion, AnswerValue, QuestionType } from '@/types/domain';
 import { Card, CardContent } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
+import { StarResponseInput, STAR_MIN_CHARS } from '@/components/test-player/StarResponseInput';
 
 interface QuestionCardProps {
   question: SessionQuestion;
@@ -35,7 +37,7 @@ interface QuestionCardProps {
  */
 // Validation constants (exported for use in ImmersivePlayer)
 export const MIN_CHARS_OPEN_TEXT = 20;
-export const MIN_CHARS_BEHAVIORAL = 50;
+export const MIN_CHARS_BEHAVIORAL = STAR_MIN_CHARS;
 
 export function QuestionCard({
   question,
@@ -77,7 +79,8 @@ export function QuestionCard({
 
   const isBehavioralExample = question.questionType === QuestionType.BEHAVIORAL_EXAMPLE;
 
-  const isTextInput = isOpenText || isBehavioralExample;
+  const isTextInput = isOpenText;
+  // Note: isBehavioralExample is handled separately by StarResponseInput
 
   // Debounce timer ref for text input
   const debounceTimerRef = React.useRef<NodeJS.Timeout | null>(null);
@@ -113,17 +116,11 @@ export function QuestionCard({
     }
   }, [question.id, selectedValue, isTextInput]);
 
-  // Render text input (OPEN_TEXT, BEHAVIORAL_EXAMPLE)
+  // Render text input (OPEN_TEXT only)
   const renderTextInput = () => {
-    const placeholder = isBehavioralExample
-      ? t('describeSituation')
-      : t('enterAnswer');
-
-    const hint = isBehavioralExample
-      ? t('describeSituationHint')
-      : t('writeDetailedAnswer');
-
-    const minChars = isBehavioralExample ? MIN_CHARS_BEHAVIORAL : MIN_CHARS_OPEN_TEXT;
+    const placeholder = t('enterAnswer');
+    const hint = t('writeDetailedAnswer');
+    const minChars = MIN_CHARS_OPEN_TEXT;
     const charCount = textInput.length;
     const isValid = charCount >= minChars;
     const charsRemaining = minChars - charCount;
@@ -302,8 +299,20 @@ export function QuestionCard({
   };
 
   // Render standard options (MCQ, SJT) with native radio inputs
+  // SJT uses blue accent, MCQ uses emerald accent
   const renderStandardOptions = () => {
     if (!question.answerOptions || question.answerOptions.length === 0) return null;
+
+    // SJT uses blue accent colors, MCQ keeps emerald
+    const accentSelected = isSJT
+      ? 'border-blue-500 bg-blue-500/10 shadow-lg shadow-blue-500/10'
+      : 'border-emerald-500 bg-emerald-500/10 shadow-lg shadow-emerald-500/10';
+    const accentFocus = isSJT
+      ? 'has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-blue-500/50 has-[:focus-visible]:border-blue-500'
+      : 'has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-emerald-500/50 has-[:focus-visible]:border-emerald-500';
+    const accentIndicator = isSJT
+      ? 'border-blue-500 bg-blue-500 text-white scale-110'
+      : 'border-emerald-500 bg-emerald-500 text-white scale-110';
 
     return (
       <fieldset className="space-y-3">
@@ -327,9 +336,9 @@ export function QuestionCard({
                 className={cn(
                   "w-full flex items-start text-left min-h-[56px] p-4 rounded-lg border-2 transition-all duration-200 cursor-pointer",
                   "hover:border-neutral-600 hover:bg-neutral-800/50 active:scale-[0.99]",
-                  "has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-emerald-500/50 has-[:focus-visible]:border-emerald-500",
+                  accentFocus,
                   isSelected
-                    ? "border-emerald-500 bg-emerald-500/10 shadow-lg shadow-emerald-500/10"
+                    ? accentSelected
                     : "border-neutral-700 bg-neutral-800/30"
                 )}
               >
@@ -350,7 +359,7 @@ export function QuestionCard({
                     className={cn(
                       "shrink-0 w-7 h-7 rounded-full border-2 flex items-center justify-center text-xs font-bold transition-all",
                       isSelected
-                        ? "border-emerald-500 bg-emerald-500 text-white scale-110"
+                        ? accentIndicator
                         : "border-neutral-600 text-neutral-500"
                     )}
                     aria-hidden="true"
@@ -379,7 +388,14 @@ export function QuestionCard({
 
   // Determine which renderer to use
   let answerContent = null;
-  if (isTextInput) {
+  if (isBehavioralExample) {
+    answerContent = (
+      <StarResponseInput
+        value={(selectedValue as string) || ''}
+        onChange={(val) => onAnswer(val)}
+      />
+    );
+  } else if (isTextInput) {
     answerContent = renderTextInput();
   } else if (isLikertType) {
     answerContent = renderLikertScale();
@@ -388,7 +404,10 @@ export function QuestionCard({
   }
 
   return (
-    <Card className="bg-neutral-900/50 border-neutral-800 shadow-2xl">
+    <Card className={cn(
+      "bg-neutral-900/50 border-neutral-800 shadow-2xl",
+      isSJT && "border-l-4 border-l-blue-500"
+    )}>
       <CardContent className="p-6 sm:p-8">
         {/* Live region for selection announcements */}
         <div
@@ -417,8 +436,27 @@ export function QuestionCard({
                 {t('question')} {questionNumber}
               </span>
 
-              {/* Scenario (for SJT questions) */}
-              {question.scenario && (
+              {/* Enhanced scenario block (for SJT questions) */}
+              {isSJT && question.scenario && (
+                <div
+                  className="bg-blue-50 dark:bg-blue-950/30 rounded-lg p-4 border border-blue-200 dark:border-blue-800"
+                  role="note"
+                  aria-label={t('sjt.scenarioLabel')}
+                >
+                  <div className="flex items-center gap-2 mb-2">
+                    <BookOpen className="w-4 h-4 text-blue-500 dark:text-blue-400 shrink-0" aria-hidden="true" />
+                    <span className="text-xs font-semibold uppercase tracking-wide text-blue-600 dark:text-blue-400">
+                      {t('sjt.scenarioLabel')}
+                    </span>
+                  </div>
+                  <p className="text-sm leading-relaxed text-blue-900 dark:text-blue-100/80">
+                    {question.scenario}
+                  </p>
+                </div>
+              )}
+
+              {/* Non-SJT scenario fallback (other question types with scenario) */}
+              {!isSJT && question.scenario && (
                 <div
                   className="text-neutral-400 text-sm leading-relaxed italic border-l-2 border-neutral-700 pl-3 sm:pl-4 py-2 bg-neutral-800/20 rounded-r"
                   role="note"
@@ -434,7 +472,15 @@ export function QuestionCard({
               </h2>
 
               {/* Question type badge - responsive text, aria-hidden to avoid double-reading */}
-              <span className="inline-block text-[10px] sm:text-xs text-neutral-500 bg-neutral-800/50 px-2 py-1 rounded whitespace-nowrap" aria-hidden="true">
+              <span
+                className={cn(
+                  "inline-block text-[10px] sm:text-xs px-2 py-1 rounded whitespace-nowrap",
+                  isSJT
+                    ? "text-blue-300 bg-blue-500/20 font-medium"
+                    : "text-neutral-500 bg-neutral-800/50"
+                )}
+                aria-hidden="true"
+              >
                 {isSJT && (<><span className="sm:hidden">{t('situational')}</span><span className="hidden sm:inline">{t('situationalQuestion')}</span></>)}
                 {isMCQ && (<><span className="sm:hidden">{t('choice')}</span><span className="hidden sm:inline">{t('multipleChoice')}</span></>)}
                 {isLikertType && (<><span className="sm:hidden">{t('scale')}</span><span className="hidden sm:inline">{t('ratingScale')}</span></>)}
@@ -445,6 +491,16 @@ export function QuestionCard({
           </div>
         </div>
 
+        {/* Vertical connector line + response prompt for SJT */}
+        {isSJT && question.scenario && (
+          <div className="mb-4">
+            <div className="border-l-2 border-blue-300 dark:border-blue-700 ml-4 h-4" aria-hidden="true" />
+            <p className="text-sm text-blue-400 dark:text-blue-300 font-medium ml-4 pl-3">
+              {t('sjt.responsePrompt')}
+            </p>
+          </div>
+        )}
+
         {/* Answer section */}
         <div className="mt-6">
           {answerContent}
@@ -452,7 +508,7 @@ export function QuestionCard({
 
         {/* Question type hint */}
         {isSJT && (
-          <p className="mt-6 text-xs text-neutral-500 text-center bg-neutral-800/30 py-3 rounded border border-neutral-700/50">
+          <p className="mt-6 text-xs text-blue-400/70 text-center bg-blue-500/5 py-3 rounded border border-blue-500/20">
             {t('selectBestOption')}
           </p>
         )}

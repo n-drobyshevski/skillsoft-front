@@ -28,6 +28,7 @@ import {
   DevelopmentRecommendations,
   HiringScorecard,
 } from '@/components/results';
+import { InterviewGuide } from './InterviewGuide';
 import {
   toGapData,
   generateRecommendationsFromGaps,
@@ -433,12 +434,20 @@ export function JobFitResultView({ result, template }: BaseResultViewProps) {
           </Card>
         )}
 
+        {/* Interview Guide for gap competencies */}
+        <InterviewGuide
+          competencyScores={competencyScores}
+          passingScore={passingScore}
+        />
+
         {/* Action buttons */}
         <div className="print-hidden">
           <ActionButtonsBar
             templateId={result.templateId}
             resultId={result.id}
-            actions={['download_report', 'retake', 'share']}
+            actions={['download_report', 'retake', 'share', 'manager_summary']}
+            result={result}
+            template={template}
           />
         </div>
       </div>

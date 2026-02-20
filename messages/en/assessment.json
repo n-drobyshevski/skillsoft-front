@@ -154,6 +154,12 @@
     "questionPending": "Question {number}: Pending",
     "questionDefault": "Question {number}"
   },
+  "answerSummary": {
+    "reviewDetails": "Review Details",
+    "hideDetails": "Hide Details",
+    "compactScore": "{score}/{max}",
+    "questionLabel": "Q{number}"
+  },
   "answerCard": {
     "statusAnswered": "Answered",
     "statusSkipped": "Skipped",
@@ -184,8 +190,34 @@
     "backToReview": "Back to review",
     "maxAttemptsExceeded": "Maximum attempts exceeded. Please try again later or contact support."
   },
+  "sjt": {
+    "scenarioLabel": "Scenario",
+    "responsePrompt": "Based on the scenario above, choose the best response:"
+  },
+  "star": {
+    "situation": {
+      "label": "Situation",
+      "hint": "Describe the context or situation"
+    },
+    "task": {
+      "label": "Task",
+      "hint": "What was your role or responsibility?"
+    },
+    "action": {
+      "label": "Action",
+      "hint": "What specific actions did you take?"
+    },
+    "result": {
+      "label": "Result",
+      "hint": "What was the outcome?"
+    },
+    "characterCount": "{current}/{minimum} characters minimum",
+    "charactersMet": "Minimum met"
+  },
   "timer": {
     "noLimit": "No time limit",
-    "expired": "Time expired"
+    "expired": "Time expired",
+    "remaining": "{minutes}:{seconds} remaining",
+    "warning": "Less than 3 minutes remaining"
   }
 }

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useMemo } from 'react';
-import { X, Clock, Eye } from 'lucide-react';
+import { X, Eye } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -22,6 +22,7 @@ import {
 } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 import { useIsTestDriveMode } from '@/store/test-drive-store';
+import { TimerProgressBar } from '@/components/test-player/components';
 import type { QuestionState } from '@/components/test-player/ImmersivePlayer';
 
 interface EnhancedSessionHeaderProps {
@@ -30,6 +31,14 @@ interface EnhancedSessionHeaderProps {
   totalQuestions: number;
   questionStates: QuestionState[];
   timeRemaining: number | null;
+  /** Total time the timer was started with (for progress bar percentage) */
+  totalSeconds?: number | null;
+  /** Compact formatted time (M:SS) for numeric countdown */
+  compactFormattedTime?: string;
+  /** Whether timer is in warning state (<3 min) */
+  timerIsWarning?: boolean;
+  /** Whether timer is in critical state (<1 min) */
+  timerIsCritical?: boolean;
   allowNavigation?: boolean;
   allowSkip?: boolean;
   onExit: () => void;
@@ -70,6 +79,10 @@ export function EnhancedSessionHeader({
   totalQuestions,
   questionStates,
   timeRemaining,
+  totalSeconds = null,
+  compactFormattedTime = '--:--',
+  timerIsWarning = false,
+  timerIsCritical = false,
   allowNavigation = false,
   allowSkip = false,
   onExit,
@@ -96,16 +109,8 @@ export function EnhancedSessionHeader({
     };
   }, [questionStates, totalQuestions]);
 
-  // Format time display
-  const formatTime = (seconds: number): string => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
-  };
-
-  // Time warning states
-  const isTimeWarning = timeRemaining !== null && timeRemaining <= 300; // 5 min
-  const isTimeCritical = timeRemaining !== null && timeRemaining <= 60; // 1 min
+  // Whether we have timer data for the progress bar
+  const hasTimer = timeRemaining !== null && totalSeconds !== null && totalSeconds > 0;
 
   // Determine if dots should be shown
   const showDots = (allowNavigation || allowSkip) && totalQuestions <= 30;
@@ -237,30 +242,6 @@ export function EnhancedSessionHeader({
           {/* Divider */}
           <div className="w-px h-4 bg-neutral-700" />
 
-          {/* Timer */}
-          {timeRemaining !== null ? (
-            <div
-              className={cn(
-                'flex items-center gap-1.5 px-2 py-1 rounded-md font-mono text-sm whitespace-nowrap transition-all',
-                isTimeCritical
-                  ? 'bg-red-950/40 text-red-400 animate-pulse'
-                  : isTimeWarning
-                    ? 'bg-amber-950/40 text-amber-400'
-                    : 'bg-neutral-800/50 text-neutral-400'
-              )}
-              role="timer"
-              aria-live={isTimeCritical ? 'assertive' : isTimeWarning ? 'polite' : 'off'}
-            >
-              <Clock className="h-3.5 w-3.5" />
-              <span>{formatTime(timeRemaining)}</span>
-            </div>
-          ) : (
-            <span className="text-xs text-neutral-500">Без ограничений</span>
-          )}
-
-          {/* Divider */}
-          <div className="w-px h-4 bg-neutral-700" />
-
           {/* Progress Bar (inline) */}
           <Tooltip>
             <TooltipTrigger asChild>
@@ -341,24 +322,6 @@ export function EnhancedSessionHeader({
               </Badge>
             )}
 
-            {/* Timer */}
-            {timeRemaining !== null && (
-              <div
-                className={cn(
-                  'shrink-0 flex items-center gap-1 px-1.5 py-0.5 rounded font-mono text-[11px] transition-all',
-                  isTimeCritical
-                    ? 'bg-red-950/40 text-red-400 animate-pulse'
-                    : isTimeWarning
-                      ? 'bg-amber-950/40 text-amber-400'
-                      : 'bg-neutral-800/50 text-neutral-400'
-                )}
-                role="timer"
-                aria-live={isTimeCritical ? 'assertive' : isTimeWarning ? 'polite' : 'off'}
-              >
-                <Clock className="h-3 w-3" />
-                <span>{formatTime(timeRemaining)}</span>
-              </div>
-            )}
           </div>
 
           {/* Row 2: Counter + Progress Bar + Percentage */}
@@ -434,6 +397,17 @@ export function EnhancedSessionHeader({
           </div>
         )}
       </div>
+
+      {/* Timer Progress Bar — full-width bar under header content */}
+      {hasTimer && (
+        <TimerProgressBar
+          totalSeconds={totalSeconds}
+          remainingSeconds={timeRemaining}
+          compactFormattedTime={compactFormattedTime}
+          isWarning={timerIsWarning}
+          isCritical={timerIsCritical}
+        />
+      )}
     </header>
   );
 }

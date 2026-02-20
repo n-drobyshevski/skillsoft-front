@@ -17,13 +17,17 @@ export interface UseTimerManagementProps {
 export interface UseTimerManagementReturn {
   /** Current time remaining in seconds */
   timeRemaining: number | null;
+  /** Total time the timer was started with (for percentage calculations) */
+  totalSeconds: number | null;
   /** Whether the timeout dialog should be shown */
   showTimeoutDialog: boolean;
   /** Control the timeout dialog visibility */
   setShowTimeoutDialog: (show: boolean) => void;
   /** Formatted time string (MM:SS or HH:MM:SS) */
   formattedTime: string;
-  /** Whether timer is in warning state (<5 min) */
+  /** Compact formatted time string (M:SS — no leading zero on minutes) */
+  compactFormattedTime: string;
+  /** Whether timer is in warning state (<3 min) */
   isWarning: boolean;
   /** Whether timer is in critical state (<1 min) */
   isCritical: boolean;
@@ -51,9 +55,11 @@ export function useTimerManagement({
 
   return {
     timeRemaining: timer.timeRemaining,
+    totalSeconds: timer.totalSeconds,
     showTimeoutDialog,
     setShowTimeoutDialog,
     formattedTime: timer.formattedTime,
+    compactFormattedTime: timer.compactFormattedTime,
     isWarning: timer.isWarning,
     isCritical: timer.isCritical,
     isExpired: timer.isExpired,

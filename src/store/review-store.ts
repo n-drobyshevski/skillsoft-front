@@ -55,6 +55,9 @@ export interface AnswerSummaryItem {
   competencyId?: string;
   competencyName?: string;
 
+  // Scenario text (SJT questions only)
+  scenario?: string;
+
   // Answer data
   answer: TestAnswer | null;
   answerDisplayText: string;  // Human-readable answer summary
@@ -598,6 +601,7 @@ export function createAnswerSummaryItem(
     behavioralIndicatorId: question.behavioralIndicatorId,
     competencyId: question.competencyId,
     competencyName,
+    scenario: question.scenario,
     answer,
     answerDisplayText: formatAnswerDisplay(answer, question),
     status,

@@ -14,6 +14,10 @@ export type { NavigationErrorDialogProps } from './NavigationErrorDialog';
 export { SaveIndicator } from './SaveIndicator';
 export type { AnswerSaveStatus } from './SaveIndicator';
 
+// Timer Progress Bar
+export { TimerProgressBar } from './TimerProgressBar';
+export type { TimerProgressBarProps } from './TimerProgressBar';
+
 // Swipe Components
 export { SwipeIndicators, SwipeHint } from './SwipeIndicators';
 export type { SwipeState, SwipeIndicatorsProps, SwipeHintProps } from './SwipeIndicators';

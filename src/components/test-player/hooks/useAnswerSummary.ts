@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { TestSession, SessionQuestion, TestAnswer, QuestionType, CurrentQuestionResponse } from '@/types/domain';
@@ -159,20 +159,20 @@ export function useAnswerSummary({
   // Public: Cache a question (called from navigation hook)
   // ========================================================================
 
-  const cacheQuestion = useCallback((question: SessionQuestion) => {
+  const cacheQuestion = (question: SessionQuestion) => {
     questionsCache.current.set(question.id, {
       questionText: question.questionText,
       questionType: question.questionType,
       behavioralIndicatorId: question.behavioralIndicatorId,
       competencyId: question.competencyId,
     });
-  }, []);
+  };
 
   // ========================================================================
   // Internal: Format answer for display
   // ========================================================================
 
-  const formatAnswerForSummary = useCallback((answer: TestAnswer | null): string => {
+  const formatAnswerForSummary = (answer: TestAnswer | null): string => {
     if (!answer || answer.isSkipped) {
       return t('player.summary.skippedAnswer');
     }
@@ -190,13 +190,13 @@ export function useAnswerSummary({
     }
 
     return t('player.summary.answerGiven');
-  }, [t]);
+  };
 
   // ========================================================================
   // Internal: Load question (for editing from summary)
   // ========================================================================
 
-  const loadQuestionForEdit = useCallback(async (direction: 'forward' | 'backward') => {
+  const loadQuestionForEdit = async (direction: 'forward' | 'backward') => {
     try {
       const response = adapter
         ? await adapter.getCurrentQuestion(session.id)
@@ -250,13 +250,13 @@ export function useAnswerSummary({
       throw error;
     }
     questionStartTime.current = Date.now();
-  }, [adapter, session.id, effectiveAuthHeaders, setState, setCurrentAnswer, setValidationError, onTimerSync, questionStartTime, cacheQuestion]);
+  };
 
   // ========================================================================
   // Public: Enter answer summary
   // ========================================================================
 
-  const handleEnterSummary = useCallback(async () => {
+  const handleEnterSummary = async () => {
     setState(prev => ({ ...prev, isSubmitting: true }));
 
     try {
@@ -299,22 +299,22 @@ export function useAnswerSummary({
     }
 
     setState(prev => ({ ...prev, isSubmitting: false }));
-  }, [adapter, session, effectiveAuthHeaders, setState, enterReviewPhase, formatAnswerForSummary, t]);
+  };
 
   // ========================================================================
   // Public: Go back from summary
   // ========================================================================
 
-  const handleGoBackFromSummary = useCallback(() => {
+  const handleGoBackFromSummary = () => {
     setShowSummary(false);
     resetReviewStore();
-  }, [resetReviewStore]);
+  };
 
   // ========================================================================
   // Public: Edit an answer from summary
   // ========================================================================
 
-  const handleEditFromSummary = useCallback(async (questionId: string, questionIndex: number) => {
+  const handleEditFromSummary = async (questionId: string, questionIndex: number) => {
     setShowSummary(false);
     setState(prev => ({ ...prev, isSubmitting: true }));
 
@@ -332,13 +332,13 @@ export function useAnswerSummary({
     }
 
     setState(prev => ({ ...prev, isSubmitting: false }));
-  }, [adapter, session.id, effectiveAuthHeaders, state.questionIndex, setState, loadQuestionForEdit, t]);
+  };
 
   // ========================================================================
   // Public: Submit from summary
   // ========================================================================
 
-  const handleSubmitFromSummary = useCallback(async () => {
+  const handleSubmitFromSummary = async () => {
     if (isSummarySubmitting) return;
 
     setIsSummarySubmitting(true);
@@ -479,7 +479,7 @@ export function useAnswerSummary({
     } finally {
       setIsSummarySubmitting(false);
     }
-  }, [isSummarySubmitting, adapter, session.id, effectiveAuthHeaders, startSubmission, completeSubmission, failSubmission, onComplete, onError, router, t]);
+  };
 
   return {
     showSummary,

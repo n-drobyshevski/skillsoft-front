@@ -121,7 +121,8 @@ export type ActionType =
   | 'share'
   | 'back_to_list'
   | 'team_dashboard'
-  | 'share_with_team';
+  | 'share_with_team'
+  | 'manager_summary';
 
 /**
  * Props for action buttons bar
@@ -130,6 +131,10 @@ export interface ActionButtonsBarProps {
   templateId: string;
   resultId: string;
   actions: ActionType[];
+  /** Required when 'manager_summary' action is included */
+  result?: import('@/types/domain').TestResult;
+  /** Required when 'manager_summary' action is included */
+  template?: import('@/types/domain').TestTemplate;
 }
 
 /**

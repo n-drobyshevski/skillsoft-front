@@ -28,6 +28,9 @@ export interface UseTestTimerReturn {
   /** Current time remaining in seconds */
   timeRemaining: number | null;
 
+  /** Total time the timer was started with (for percentage calculations) */
+  totalSeconds: number | null;
+
   /** Whether timer has expired */
   isExpired: boolean;
 
@@ -39,6 +42,9 @@ export interface UseTestTimerReturn {
 
   /** Formatted time string (MM:SS or HH:MM:SS) */
   formattedTime: string;
+
+  /** Compact formatted time string (M:SS — no leading zero on minutes) */
+  compactFormattedTime: string;
 
   /** Pause the timer */
   pause: () => void;
@@ -54,7 +60,7 @@ export interface UseTestTimerReturn {
 }
 
 /**
- * Format seconds to time string
+ * Format seconds to time string (zero-padded: MM:SS or HH:MM:SS)
  */
 function formatTime(seconds: number): string {
   if (seconds < 0) return '00:00';
@@ -70,14 +76,30 @@ function formatTime(seconds: number): string {
   return `${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
 }
 
-// Default warning thresholds (5 min, 2 min, 1 min, 30 sec)
-const DEFAULT_WARNING_THRESHOLDS = [300, 120, 60, 30];
+/**
+ * Format seconds to compact time string (no leading zero: M:SS)
+ * Used for the countdown display when < 3 minutes remain.
+ */
+function formatTimeCompact(seconds: number): string {
+  if (seconds < 0) return '0:00';
+
+  const minutes = Math.floor(seconds / 60);
+  const secs = seconds % 60;
+
+  return `${minutes}:${secs.toString().padStart(2, '0')}`;
+}
+
+// Default warning thresholds (3 min, 2 min, 1 min, 30 sec)
+const DEFAULT_WARNING_THRESHOLDS = [180, 120, 60, 30];
 
 // Critical threshold (under 1 minute)
 const CRITICAL_THRESHOLD = 60;
 
-// Warning threshold (under 5 minutes)
-const WARNING_THRESHOLD = 300;
+// Warning threshold (under 3 minutes)
+const WARNING_THRESHOLD = 180;
+
+// Numeric countdown visibility threshold (under 3 minutes)
+export const NUMERIC_COUNTDOWN_THRESHOLD = 180;
 
 export function useTestTimer({
   initialSeconds,
@@ -89,6 +111,9 @@ export function useTestTimer({
   const [timeRemaining, setTimeRemaining] = useState<number | null>(initialSeconds);
   const [isExpired, setIsExpired] = useState(false);
   const [isInternalPaused, setIsInternalPaused] = useState(isPaused);
+
+  // Store the total seconds the timer was started with (for percentage calculation)
+  const totalSecondsRef = useRef<number | null>(initialSeconds);
 
   // Track triggered warnings to prevent duplicates
   const triggeredWarnings = useRef<Set<number>>(new Set());
@@ -140,6 +165,7 @@ export function useTestTimer({
 
   const reset = (newSeconds: number | null) => {
     setTimeRemaining(newSeconds);
+    totalSecondsRef.current = newSeconds;
     setIsExpired(false);
     triggeredWarnings.current.clear();
   };
@@ -158,13 +184,16 @@ export function useTestTimer({
   const isWarning = timeRemaining !== null && timeRemaining <= WARNING_THRESHOLD && timeRemaining > 0;
   const isCritical = timeRemaining !== null && timeRemaining <= CRITICAL_THRESHOLD && timeRemaining > 0;
   const formattedTime = timeRemaining !== null ? formatTime(timeRemaining) : '--:--';
+  const compactFormattedTime = timeRemaining !== null ? formatTimeCompact(timeRemaining) : '--:--';
 
   return {
     timeRemaining,
+    totalSeconds: totalSecondsRef.current,
     isExpired,
     isWarning,
     isCritical,
     formattedTime,
+    compactFormattedTime,
     pause,
     resume,
     reset,

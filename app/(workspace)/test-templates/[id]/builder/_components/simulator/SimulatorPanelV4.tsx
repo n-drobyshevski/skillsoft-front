@@ -35,6 +35,7 @@ import { useAvailableStrategyTabs, useDefaultTab } from './hooks/useStrategyTabs
 import { usePreflightValidation } from './hooks/usePreflightValidation';
 
 // Components
+import { useTranslations } from 'next-intl';
 import { SimulatorErrorBoundary } from './SimulatorErrorBoundary';
 import { StrategyLoadingSkeleton } from './StrategyLoadingSkeleton';
 import { StrategyEmptyState } from './StrategyEmptyState';
@@ -42,6 +43,7 @@ import { ConfigurePhase } from './components/ConfigurePhase';
 import { ResultsPhase } from './components/ResultsPhase';
 import { MobilePriorityStack } from './components/MobilePriorityStack';
 import { SimulatorTabs } from './components/SimulatorTabs';
+import { personaConfig } from './types';
 
 // ============================================
 // TYPES
@@ -106,6 +108,9 @@ function MobileResultsView({
   isSimulating,
   fineTuneSettings,
 }: MobileResultsViewProps) {
+  const t = useTranslations('builder.simulator');
+  const profiles = Object.keys(personaConfig) as SimulationProfile[];
+
   return (
     <div className="flex flex-col">
       {/* Priority Stack Layout */}
@@ -119,7 +124,7 @@ function MobileResultsView({
         fineTuneSettings={fineTuneSettings}
       />
 
-      {/* Floating Action Bar for Re-run — offset for mobile bottom nav (h-16 = 64px + safe area) */}
+      {/* Floating Action Bar for Re-run -- offset for mobile bottom nav (h-16 = 64px + safe area) */}
       <div
         className={cn(
           'sticky bottom-0 left-0 right-0 z-30',
@@ -137,9 +142,11 @@ function MobileResultsView({
             'focus:outline-none focus:ring-2 focus:ring-ring'
           )}
         >
-          <option value="PERFECT_CANDIDATE">Perfect</option>
-          <option value="RANDOM_GUESSER">Random</option>
-          <option value="FAILING_CANDIDATE">Failing</option>
+          {profiles.map((profile) => (
+            <option key={profile} value={profile}>
+              {t(personaConfig[profile].labelKey as Parameters<typeof t>[0])}
+            </option>
+          ))}
         </select>
 
         {/* Re-run Button */}
@@ -157,11 +164,11 @@ function MobileResultsView({
           {isSimulating ? (
             <>
               <span className="animate-spin">⟳</span>
-              Running...
+              {t('running')}
             </>
           ) : (
             <>
-              ↻ Re-run Simulation
+              ↻ {t('rerunSimulation')}
             </>
           )}
         </button>

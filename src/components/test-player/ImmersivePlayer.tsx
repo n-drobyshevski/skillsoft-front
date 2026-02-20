@@ -187,7 +187,11 @@ export function ImmersivePlayer({
 
   const {
     timeRemaining,
+    totalSeconds,
     showTimeoutDialog,
+    compactFormattedTime,
+    isWarning: timerIsWarning,
+    isCritical: timerIsCritical,
     syncTimer,
   } = useTimerManagement({
     initialSeconds: initialQuestion.timeRemainingSeconds ?? null,
@@ -384,6 +388,10 @@ export function ImmersivePlayer({
         totalQuestions={state.totalQuestions}
         questionStates={state.questionStates}
         timeRemaining={timeRemaining}
+        totalSeconds={totalSeconds}
+        compactFormattedTime={compactFormattedTime}
+        timerIsWarning={timerIsWarning}
+        timerIsCritical={timerIsCritical}
         allowNavigation={state.allowBackNavigation}
         allowSkip={state.allowSkip}
         onExit={handleExit}
