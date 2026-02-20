@@ -11,6 +11,7 @@
  */
 
 import React, { useMemo, memo, useDeferredValue, useState, useEffect, useCallback } from 'react';
+import { useTranslations } from 'next-intl';
 import { Badge } from '@/components/ui/badge';
 import { BarChart3, Gauge, ChevronDown, ChevronUp, PieChartIcon } from 'lucide-react';
 import {
@@ -59,6 +60,8 @@ const CompetencyPieChart = memo(function CompetencyPieChart({
   data,
   isLoaded,
 }: CompetencyPieChartProps) {
+  const t = useTranslations('builder.simulator');
+
   if (!isLoaded) {
     return (
       <div className="h-[180px] sm:h-[220px] flex items-center justify-center">
@@ -68,7 +71,7 @@ const CompetencyPieChart = memo(function CompetencyPieChart({
   }
 
   if (data.length === 0) {
-    return <p className="text-xs text-muted-foreground py-4 text-center">No competencies selected</p>;
+    return <p className="text-xs text-muted-foreground py-4 text-center">{t('analytics.noCompetencies')}</p>;
   }
 
   return (
@@ -107,6 +110,8 @@ const DifficultyBarChart = memo(function DifficultyBarChart({
   data,
   isLoaded,
 }: DifficultyBarChartProps) {
+  const t = useTranslations('builder.simulator');
+
   if (!isLoaded) {
     return (
       <div className="h-[180px] sm:h-[220px] flex items-center justify-center">
@@ -116,7 +121,7 @@ const DifficultyBarChart = memo(function DifficultyBarChart({
   }
 
   if (data.length === 0) {
-    return <p className="text-xs text-muted-foreground py-4 text-center">No difficulty data</p>;
+    return <p className="text-xs text-muted-foreground py-4 text-center">{t('analytics.noDifficultyData')}</p>;
   }
 
   return (
@@ -223,10 +228,12 @@ interface SelectionReasonsBadgesProps {
 const SelectionReasonsBadges = memo(function SelectionReasonsBadges({
   data,
 }: SelectionReasonsBadgesProps) {
+  const t = useTranslations('builder.simulator');
+
   if (data.length === 0) {
     return (
       <p className="text-xs text-muted-foreground py-2 text-center">
-        Run a simulation to see selection logic
+        {t('analytics.runToSeeLogic')}
       </p>
     );
   }
@@ -250,6 +257,7 @@ const SelectionReasonsBadges = memo(function SelectionReasonsBadges({
 export const AnalyticsTabOptimized = memo(function AnalyticsTabOptimized({
   result,
 }: AnalyticsTabOptimizedProps) {
+  const t = useTranslations('builder.simulator');
   const [isLoaded, setIsLoaded] = useState(false);
 
   // Lazy load charts after initial render
@@ -310,7 +318,7 @@ export const AnalyticsTabOptimized = memo(function AnalyticsTabOptimized({
     <div className="space-y-3">
       {/* Coverage by Competency */}
       <CollapsibleSection
-        title="Coverage by competency"
+        title={t('analytics.coverageByCompetency')}
         icon={<PieChartIcon className="h-4 w-4 text-muted-foreground" />}
         defaultOpen={true}
       >
@@ -320,7 +328,7 @@ export const AnalyticsTabOptimized = memo(function AnalyticsTabOptimized({
 
       {/* Difficulty Balance */}
       <CollapsibleSection
-        title="Difficulty balance"
+        title={t('analytics.difficultyBalance')}
         icon={<BarChart3 className="h-4 w-4 text-muted-foreground" />}
         defaultOpen={true}
       >
@@ -329,7 +337,7 @@ export const AnalyticsTabOptimized = memo(function AnalyticsTabOptimized({
 
       {/* Selection Reasons */}
       <CollapsibleSection
-        title="Selection reasons"
+        title={t('analytics.selectionReasons')}
         icon={<Gauge className="h-4 w-4 text-muted-foreground" />}
         defaultOpen={false}
       >

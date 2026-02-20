@@ -28,6 +28,7 @@ import {
 import { sortableKeyboardCoordinates, arrayMove } from "@dnd-kit/sortable";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { useTranslations } from "next-intl";
 import { useBlueprintWorkspace } from "./BlueprintWorkspaceProvider";
 import { LibraryCompetency } from "../actions";
 import { getImportanceLevelKey, importanceLevelColors } from "./utils/importanceLabel";
@@ -338,6 +339,8 @@ interface DragPreviewProps {
 }
 
 function DragPreview({ data, activeCompetency }: DragPreviewProps) {
+  const t = useTranslations('builder.library');
+
   if (data.type === "library-item") {
     // Compact preview for library items
     return (
@@ -350,7 +353,7 @@ function DragPreview({ data, activeCompetency }: DragPreviewProps) {
       >
         <div className="flex items-center gap-2">
           <Badge variant="secondary" className="text-[9px] px-1.5 py-0.5 shrink-0">
-            {data.category.replace(/_/g, " ")}
+            {t(`categories.${data.category.toLowerCase()}` as Parameters<typeof t>[0])}
           </Badge>
           <span className="text-xs font-medium text-foreground truncate">
             {data.name}
@@ -373,14 +376,14 @@ function DragPreview({ data, activeCompetency }: DragPreviewProps) {
       >
         <div className="flex items-center gap-3">
           <Badge variant="secondary" className="text-[10px] px-2 py-0.5">
-            {activeCompetency.category.replace(/_/g, " ")}
+            {t(`categories.${activeCompetency.category.toLowerCase()}` as Parameters<typeof t>[0])}
           </Badge>
           <span className="text-sm font-semibold text-foreground">
             {activeCompetency.name}
           </span>
         </div>
         <div className="mt-2 text-xs text-muted-foreground">
-          {activeCompetency.questionCount} questions
+          {t('questionsCount', { count: activeCompetency.questionCount })}
         </div>
       </div>
     );

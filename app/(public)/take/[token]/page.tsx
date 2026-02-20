@@ -1,9 +1,15 @@
 'use client';
 
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { anonymousTestApi, type AnonymousSessionResponse, type ApiError } from '@/services/anonymousApi';
+import Script from 'next/script';
+import {
+  anonymousTestApi,
+  type AnonymousSessionResponse,
+  type ApiError,
+  type CaptchaConfig,
+} from '@/services/anonymousApi';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -13,14 +19,13 @@ import {
   Clock,
   CheckCircle,
   XCircle,
-  AlertTriangle,
   ArrowRight,
   Loader2,
   RefreshCw,
   Shield,
 } from 'lucide-react';
 
-type PageStatus = 'loading' | 'ready' | 'error';
+type PageStatus = 'loading' | 'captcha' | 'ready' | 'error';
 
 interface ErrorState {
   title: string;
@@ -35,6 +40,9 @@ interface ErrorState {
  * This page is accessed via share link (e.g., /take/abc123).
  * It validates the share link token, displays template information,
  * and allows the user to start the test.
+ *
+ * When CAPTCHA is enabled, users must complete hCaptcha verification
+ * before a session is created.
  */
 export default function AnonymousTestLandingPage() {
   const router = useRouter();
@@ -47,9 +55,33 @@ export default function AnonymousTestLandingPage() {
   const [error, setError] = useState<ErrorState | null>(null);
   const [isStarting, setIsStarting] = useState(false);
 
+  // CAPTCHA state
+  const [captchaConfig, setCaptchaConfig] = useState<CaptchaConfig | null>(null);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const [captchaReady, setCaptchaReady] = useState(false);
+  const captchaContainerRef = useRef<HTMLDivElement>(null);
+  const captchaWidgetId = useRef<string | null>(null);
+
   /**
-   * Create a new session when the page loads.
-   * This validates the share link and creates a session.
+   * Create session with optional CAPTCHA token.
+   */
+  const createNewSession = useCallback(async (hCaptchaToken?: string) => {
+    setStatus('loading');
+    setError(null);
+
+    try {
+      const newSession = await anonymousTestApi.createSession(token, hCaptchaToken || undefined);
+      setSession(newSession);
+      setStatus('ready');
+    } catch (err) {
+      const apiError = err as ApiError;
+      setError(mapError(apiError, t));
+      setStatus('error');
+    }
+  }, [token, t]);
+
+  /**
+   * Initialize the page: check for existing session, then CAPTCHA config.
    */
   const initSession = useCallback(async () => {
     if (!token) {
@@ -69,7 +101,6 @@ export default function AnonymousTestLandingPage() {
       // Check if we already have a session for this token
       const stored = anonymousTestApi.getCredentials();
       if (stored.sessionId && stored.accessToken) {
-        // Try to resume existing session
         try {
           const existingSession = await anonymousTestApi.getSession(
             stored.sessionId,
@@ -79,25 +110,71 @@ export default function AnonymousTestLandingPage() {
           setStatus('ready');
           return;
         } catch {
-          // Session expired or invalid, clear and create new
           anonymousTestApi.clearCredentials();
         }
       }
 
-      // Create new session
-      const newSession = await anonymousTestApi.createSession(token);
-      setSession(newSession);
-      setStatus('ready');
+      // Check if CAPTCHA is required
+      const config = await anonymousTestApi.getCaptchaConfig();
+      setCaptchaConfig(config);
+
+      if (config.enabled && config.siteKey) {
+        // Show CAPTCHA step — session will be created after verification
+        setStatus('captcha');
+      } else {
+        // No CAPTCHA — create session immediately
+        await createNewSession();
+      }
     } catch (err) {
       const apiError = err as ApiError;
       setError(mapError(apiError, t));
       setStatus('error');
     }
-  }, [token, t]);
+  }, [token, t, createNewSession]);
 
   useEffect(() => {
     initSession();
   }, [initSession]);
+
+  /**
+   * Render hCaptcha widget when the script is loaded and container is ready.
+   */
+  useEffect(() => {
+    if (
+      status === 'captcha' &&
+      captchaReady &&
+      captchaConfig?.siteKey &&
+      captchaContainerRef.current &&
+      captchaWidgetId.current === null
+    ) {
+      const hcaptcha = (window as unknown as Record<string, unknown>).hcaptcha as {
+        render: (container: HTMLElement, params: Record<string, unknown>) => string;
+      } | undefined;
+
+      if (hcaptcha) {
+        captchaWidgetId.current = hcaptcha.render(captchaContainerRef.current, {
+          sitekey: captchaConfig.siteKey,
+          callback: (responseToken: string) => {
+            setCaptchaToken(responseToken);
+          },
+          'error-callback': () => {
+            setCaptchaToken(null);
+          },
+          'expired-callback': () => {
+            setCaptchaToken(null);
+          },
+        });
+      }
+    }
+  }, [status, captchaReady, captchaConfig?.siteKey]);
+
+  /**
+   * Handle CAPTCHA verification complete — create session.
+   */
+  const handleCaptchaSubmit = useCallback(async () => {
+    if (!captchaToken) return;
+    await createNewSession(captchaToken);
+  }, [captchaToken, createNewSession]);
 
   /**
    * Start the test and navigate to the test-taking page.
@@ -106,7 +183,6 @@ export default function AnonymousTestLandingPage() {
     if (!session) return;
 
     setIsStarting(true);
-    // Navigate to the test-taking page
     router.push(`/take/${token}/session/${session.sessionId}`);
   }, [router, token, session]);
 
@@ -115,6 +191,8 @@ export default function AnonymousTestLandingPage() {
    */
   const handleRetry = useCallback(() => {
     anonymousTestApi.clearCredentials();
+    setCaptchaToken(null);
+    captchaWidgetId.current = null;
     initSession();
   }, [initSession]);
 
@@ -134,6 +212,42 @@ export default function AnonymousTestLandingPage() {
               <Skeleton className="h-12 w-1/2" />
             </div>
           </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  // CAPTCHA verification step
+  if (status === 'captcha') {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-background to-muted/30">
+        <Script
+          src="https://js.hcaptcha.com/1/api.js?render=explicit"
+          strategy="afterInteractive"
+          onReady={() => setCaptchaReady(true)}
+        />
+        <Card className="w-full max-w-lg">
+          <CardHeader className="text-center">
+            <div className="mx-auto w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+              <Shield className="h-8 w-8 text-primary" />
+            </div>
+            <CardTitle className="text-xl">{t('captcha.title')}</CardTitle>
+            <CardDescription>{t('captcha.description')}</CardDescription>
+          </CardHeader>
+          <CardContent className="flex justify-center">
+            <div ref={captchaContainerRef} />
+          </CardContent>
+          <CardFooter>
+            <Button
+              onClick={handleCaptchaSubmit}
+              className="w-full"
+              size="lg"
+              disabled={!captchaToken}
+            >
+              {t('captcha.continue')}
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
+          </CardFooter>
         </Card>
       </div>
     );

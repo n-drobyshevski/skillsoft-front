@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { AlertTriangle, RefreshCw } from 'lucide-react';
 
@@ -29,6 +30,7 @@ interface ErrorFallbackProps {
 }
 
 function ErrorFallback({ error, onReset }: ErrorFallbackProps) {
+  const t = useTranslations('builder.simulator');
   return (
     <div
       className="flex flex-col items-center justify-center p-6 text-center"
@@ -42,10 +44,10 @@ function ErrorFallback({ error, onReset }: ErrorFallbackProps) {
         />
       </div>
 
-      <p className="text-sm font-medium text-foreground mb-1">Simulator Error</p>
+      <p className="text-sm font-medium text-foreground mb-1">{t('error.title')}</p>
 
       <p className="text-xs text-muted-foreground mb-4 max-w-xs">
-        {error?.message || 'An unexpected error occurred while rendering the simulator.'}
+        {error?.message || t('error.defaultMessage')}
       </p>
 
       <Button
@@ -55,14 +57,14 @@ function ErrorFallback({ error, onReset }: ErrorFallbackProps) {
         className="gap-2 focus-visible:ring-red-500/50"
       >
         <RefreshCw className="h-3.5 w-3.5" aria-hidden="true" />
-        Try Again
+        {t('error.tryAgain')}
       </Button>
 
       {/* Development-only error details */}
       {process.env.NODE_ENV === 'development' && error?.stack && (
         <details className="mt-4 w-full max-w-md text-left">
           <summary className="text-xs text-muted-foreground cursor-pointer hover:text-foreground">
-            Error details (dev only)
+            {t('error.errorDetails')}
           </summary>
           <pre className="mt-2 p-2 bg-muted rounded text-[10px] overflow-auto max-h-32">
             {error.stack}

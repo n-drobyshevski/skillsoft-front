@@ -177,13 +177,13 @@ export function validateStrategy(
 
   if (strategy === 'TARGETED_FIT') {
     if (!onetSocCode) {
-      missingRequirements.push('O*NET SOC code required for job alignment insights');
+      missingRequirements.push('validation.onetRequired');
     }
   }
 
   if (strategy === 'DYNAMIC_GAP_ANALYSIS') {
     if (!teamId) {
-      missingRequirements.push('Team selection required for gap analysis');
+      missingRequirements.push('validation.teamRequired');
     }
   }
 

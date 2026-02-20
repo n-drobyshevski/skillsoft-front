@@ -30,8 +30,11 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   Clock,
+  Copy,
+  Link2,
   Send,
   Loader2,
   AlertTriangle,
@@ -41,6 +44,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { useTabFocusTracking } from '@/hooks/useTabFocusTracking';
 
 type PageStatus = 'loading' | 'ready' | 'error';
 
@@ -86,6 +90,13 @@ export default function AnonymousTestSessionPage() {
 
   // Final results state
   const [finalResult, setFinalResult] = useState<AnonymousTestResult | null>(null);
+  const [resultViewToken, setResultViewToken] = useState<string | null>(null);
+  // Session expiry for timeout warning
+  const [sessionExpiresAt, setSessionExpiresAt] = useState<string | null>(null);
+  const [expiryWarningShown, setExpiryWarningShown] = useState(false);
+
+  // Tab focus tracking — disabled once the test is complete (finalResult is set)
+  const { getTabSwitchCount } = useTabFocusTracking(!finalResult);
 
   // Get access token from storage
   const accessToken = useMemo(() => {
@@ -173,6 +184,7 @@ export default function AnonymousTestSessionPage() {
 
       setSession(normalizedSession);
       setCurrentQuestion(normalizedQuestion);
+      setSessionExpiresAt(sessionData.expiresAt);
       setStatus('ready');
     } catch (err) {
       const apiError = err as ApiError;
@@ -190,6 +202,29 @@ export default function AnonymousTestSessionPage() {
   useEffect(() => {
     loadSession();
   }, [loadSession]);
+
+  // Session expiry warning — show toast at 30 minutes remaining
+  useEffect(() => {
+    if (!sessionExpiresAt || expiryWarningShown || finalResult) return;
+
+    const checkExpiry = () => {
+      const remaining = new Date(sessionExpiresAt).getTime() - Date.now();
+      const thirtyMinutes = 30 * 60 * 1000;
+
+      if (remaining <= thirtyMinutes && remaining > 0) {
+        setExpiryWarningShown(true);
+        const minutesLeft = Math.ceil(remaining / 60000);
+        toast.warning(t('warning.sessionExpiring'), {
+          description: t('warning.sessionExpiringDescription', { minutes: minutesLeft }),
+          duration: 10000,
+        });
+      }
+    };
+
+    checkExpiry();
+    const interval = setInterval(checkExpiry, 60000); // Check every minute
+    return () => clearInterval(interval);
+  }, [sessionExpiresAt, expiryWarningShown, finalResult, t]);
 
   /**
    * Handle test completion from ImmersivePlayer.
@@ -217,6 +252,15 @@ export default function AnonymousTestSessionPage() {
 
     setIsSubmittingInfo(true);
     try {
+      // Fire-and-forget: send tab switch count before completing the session.
+      // Failures are swallowed intentionally — this is advisory metadata only.
+      const tabSwitchCount = getTabSwitchCount();
+      if (accessToken) {
+        anonymousTestApi.updateSessionMetadata(sessionId, accessToken, tabSwitchCount).catch(() => {
+          // Silently ignore — metadata loss does not affect test completion
+        });
+      }
+
       // Complete the session with taker info
       const result = await adapter.completeSession(sessionId, takerInfo);
 
@@ -232,6 +276,11 @@ export default function AnonymousTestSessionPage() {
           passed: result.inlineResult.passed,
           competencyBreakdown: result.inlineResult.competencyBreakdown,
         });
+      }
+
+      // Store result view token for "Copy Link" button
+      if (result.resultViewToken) {
+        setResultViewToken(result.resultViewToken);
       }
 
       setShowTakerInfoDialog(false);
@@ -369,7 +418,24 @@ export default function AnonymousTestSessionPage() {
             )}
           </CardContent>
 
-          <CardFooter>
+          <CardFooter className="flex flex-col gap-3">
+            {resultViewToken && (
+              <Button
+                variant="outline"
+                onClick={() => {
+                  const resultUrl = `${window.location.origin}/results/${resultViewToken}`;
+                  navigator.clipboard.writeText(resultUrl).then(() => {
+                    toast.success(t('result.linkCopied'));
+                  }).catch(() => {
+                    toast.error(t('result.linkCopyFailed'));
+                  });
+                }}
+                className="w-full"
+              >
+                <Link2 className="mr-2 h-4 w-4" />
+                {t('result.copyLink')}
+              </Button>
+            )}
             <Button
               onClick={() => {
                 anonymousTestApi.clearCredentials();
@@ -454,6 +520,23 @@ export default function AnonymousTestSessionPage() {
                   placeholder={t('complete.notesPlaceholder')}
                   rows={3}
                 />
+              </div>
+
+              {/* GDPR Consent */}
+              <div className="flex items-start gap-3 rounded-md border p-3">
+                <Checkbox
+                  id="gdprConsent"
+                  checked={takerInfo.gdprConsentGiven || false}
+                  onCheckedChange={(checked) =>
+                    setTakerInfo({ ...takerInfo, gdprConsentGiven: checked === true })
+                  }
+                />
+                <Label
+                  htmlFor="gdprConsent"
+                  className="text-sm leading-relaxed font-normal cursor-pointer"
+                >
+                  {t('complete.gdprConsent')}
+                </Label>
               </div>
             </div>
 

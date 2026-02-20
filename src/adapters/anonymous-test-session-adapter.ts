@@ -265,16 +265,20 @@ export class AnonymousTestSessionAdapter implements TestSessionAdapter {
       lastName: takerInfo.lastName,
       email: takerInfo.email,
       notes: takerInfo.notes,
+      gdprConsentGiven: takerInfo.gdprConsentGiven,
     };
 
-    const result = await anonymousTestApi.completeSession(
+    const response = await anonymousTestApi.completeSession(
       sessionId,
       apiTakerInfo,
       this.accessToken
     );
 
+    const result = response.result;
+
     return {
       resultId: result.id,
+      resultViewToken: response.resultViewToken,
       inlineResult: {
         id: result.id,
         sessionId: result.sessionId,

@@ -175,7 +175,7 @@ function DraggableCompetencyItem({
       <div className="flex-1 min-w-0">
         <p className="text-sm font-medium leading-tight truncate">{competency.name}</p>
         <p className="text-[11px] text-muted-foreground truncate">
-          {competency.category.replace(/_/g, ' ').toLowerCase()}
+          {tLib(`categories.${competency.category.toLowerCase()}` as Parameters<typeof tLib>[0])}
         </p>
       </div>
       <HealthIndicator health={competency.health} />
@@ -236,7 +236,7 @@ function StaticCompetencyItem({
       <div className="flex-1 min-w-0">
         <p className="text-sm font-medium leading-tight truncate">{competency.name}</p>
         <p className="text-[11px] text-muted-foreground truncate">
-          {competency.category.replace(/_/g, ' ').toLowerCase()}
+          {tLib(`categories.${competency.category.toLowerCase()}` as Parameters<typeof tLib>[0])}
         </p>
       </div>
       <HealthIndicator health={competency.health} />
@@ -313,11 +313,12 @@ function CategoryGroup({
   onAdd,
   enableDrag = false,
 }: CategoryGroupProps) {
+  const t = useTranslations('builder.library');
   return (
     <div className="space-y-2">
       <div className="flex items-center gap-2 px-1">
         <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
-          {category.replace(/_/g, ' ')}
+          {t(`categories.${category.toLowerCase()}` as Parameters<typeof t>[0])}
         </span>
         <span className="text-[10px] text-muted-foreground/60">
           ({competencies.length})
@@ -473,7 +474,7 @@ export function LibraryPanel({ onAdd }: LibraryPanelProps) {
                     }}
                   >
                     <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
-                      {row.category.replace(/_/g, ' ')}
+                      {t(`categories.${row.category.toLowerCase()}` as Parameters<typeof t>[0])}
                     </span>
                     <span className="text-[10px] text-muted-foreground/60">
                       ({row.count})

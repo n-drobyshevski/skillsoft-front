@@ -409,3 +409,13 @@ export function useSharedWithMeCount() {
     true,
   );
 }
+
+/**
+ * Hook to fetch per-link statistics (sessions, completion rate, avg score, pass rate).
+ */
+export function useShareLinkStats(templateId: string, linkId: string) {
+  return useFetch(
+    () => templateSharingApi.getShareLinkStats(templateId, linkId),
+    !!templateId && !!linkId,
+  );
+}

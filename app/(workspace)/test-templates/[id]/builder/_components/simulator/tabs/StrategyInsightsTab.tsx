@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useMemo } from 'react';
+import { useTranslations } from 'next-intl';
 import { ClipboardList, LayoutGrid, Brain, Users } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
@@ -62,6 +63,7 @@ function extractCompetencyData(result: SimulationResult): CompetencyDistribution
 // ============================================
 
 function UniversalBaselineInsights({ result }: { result: SimulationResult }) {
+  const t = useTranslations('builder.simulator');
   const config = STRATEGY_CONFIG.UNIVERSAL_BASELINE;
   const competencyData = useMemo(() => extractCompetencyData(result), [result]);
 
@@ -75,11 +77,11 @@ function UniversalBaselineInsights({ result }: { result: SimulationResult }) {
               className={cn('h-4 w-4', config.iconText)}
               aria-hidden="true"
             />
-            <span className="text-sm font-medium">Assessment Profile</span>
+            <span className="text-sm font-medium">{t('sections.assessmentProfile')}</span>
           </div>
           <Badge variant="outline" className="text-[10px] tabular-nums gap-1">
             <LayoutGrid className="h-3 w-3" aria-hidden="true" />
-            {competencyData.length} competencies
+            {competencyData.length} {t('score.competencies')}
           </Badge>
         </div>
 
@@ -95,11 +97,11 @@ function UniversalBaselineInsights({ result }: { result: SimulationResult }) {
         <div className="flex flex-wrap items-center gap-3 mt-2 pt-2 border-t border-border/50">
           <div className="flex items-center gap-1.5">
             <div className="w-2.5 h-2.5 rounded-full bg-blue-500" />
-            <span className="text-[10px] text-muted-foreground">Competency Weights</span>
+            <span className="text-[10px] text-muted-foreground">{t('insights.competencyWeights')}</span>
           </div>
           <div className="flex items-center gap-1.5">
             <div className="w-2.5 h-2.5 rounded-full bg-violet-500" />
-            <span className="text-[10px] text-muted-foreground">Big Five Traits</span>
+            <span className="text-[10px] text-muted-foreground">{t('insights.bigFiveTraits')}</span>
           </div>
         </div>
       </div>
@@ -110,11 +112,10 @@ function UniversalBaselineInsights({ result }: { result: SimulationResult }) {
           <Brain className="h-4 w-4 text-violet-500 mt-0.5 shrink-0" aria-hidden="true" />
           <div className="space-y-1">
             <p className="text-xs text-muted-foreground">
-              The radar chart shows how competencies are distributed in this assessment,
-              with an estimated Big Five personality profile based on the competency mix.
+              {t('insights.radarDescription')}
             </p>
             <p className="text-[10px] text-muted-foreground/70">
-              Actual personality scores will be refined after O*NET competency mapping.
+              {t('insights.radarDisclaimer')}
             </p>
           </div>
         </div>

@@ -159,7 +159,7 @@ export function JobFitAlignmentCard({
               target="_blank"
               rel="noopener noreferrer"
               className="text-muted-foreground hover:text-primary transition-colors"
-              aria-label="View on O*NET OnLine (opens in new tab)"
+              aria-label={t('onetAriaLabel')}
             >
               <ExternalLink className="h-3 w-3" />
             </a>

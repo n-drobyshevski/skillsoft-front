@@ -42,7 +42,23 @@
       "noQuestions": "Нет доступных вопросов",
       "limitedQuestions": "Ограниченное количество вопросов",
       "goodInventory": "Хороший набор вопросов"
-    }
+    },
+    "categories": {
+      "cognitive": "Когнитивные",
+      "interpersonal": "Межличностные",
+      "leadership": "Лидерские",
+      "technical": "Технические",
+      "self_management": "Самоуправление",
+      "communication": "Коммуникативные",
+      "organizational": "Организационные",
+      "analytical": "Аналитические",
+      "adaptability": "Адаптивность",
+      "collaboration": "Сотрудничество",
+      "critical_thinking": "Критическое мышление",
+      "emotional_intelligence": "Эмоциональный интеллект",
+      "time_management": "Управление временем"
+    },
+    "questionsCount": "{count} вопросов"
   },
   "card": {
     "dragToReorder": "Удерживайте и перетащите для изменения порядка",
@@ -298,7 +314,105 @@
       "gapAnalysis": "Анализ разрывов",
       "teamFitPreview": "Предпросмотр командного соответствия",
       "analytics": "Аналитика"
-    }
+    },
+    "teamComparison": {
+      "title": "Сравнение с командой",
+      "ariaLabel": "Анализ сравнения с командой",
+      "overallGap": "{gap}% в целом",
+      "teamFallbackName": "Команда {id}",
+      "vsTeamAverage": "Индивидуальный результат и среднее по команде",
+      "legendTeamAvg": "Среднее",
+      "legendIndividual": "Индивидуальный",
+      "notConfigured": "Команда не настроена",
+      "notConfiguredDescription": "Выберите команду в настройках шаблона для анализа сравнения и разрывов."
+    },
+    "simulatedResults": {
+      "competencyScores": "Результаты по компетенциям",
+      "tooltipScore": "Результат:",
+      "tooltipPassed": "Пройдено",
+      "tooltipBelowThreshold": "Ниже порога",
+      "competenciesAssessed": "Оценено компетенций: {count}",
+      "personalityProfile": "Профиль личности",
+      "bigFiveOcean": "Пятифакторная модель (OCEAN)",
+      "noCompetencyData": "Нет данных по компетенциям",
+      "noCompetencies": "Нет компетенций",
+      "threshold": "Порог: {score}%",
+      "totalQuestions": "{count} вопросов",
+      "estimatedDuration": "~{minutes} мин",
+      "topStrengths": "Сильные стороны",
+      "growthAreas": "Зоны роста",
+      "jobAlignmentScore": "Соответствие должности",
+      "jobRequirementsCovered": "{percentage}% требований должности покрыто",
+      "teamGapScore": "Разрыв с командой",
+      "aboveTeamAverage": "Выше среднего по команде",
+      "belowTeamAverage": "Ниже среднего по команде — возможность для развития",
+      "complementarySkills": "Дополняющие навыки (выше команды)",
+      "developmentFocus": "Фокус развития (ниже команды)",
+      "moreCompetencies": "ещё +{count} компетенций"
+    },
+    "analytics": {
+      "noCompetencies": "Компетенции не выбраны",
+      "noDifficultyData": "Нет данных по сложности",
+      "runToSeeLogic": "Запустите симуляцию, чтобы увидеть логику отбора",
+      "coverageByCompetency": "Покрытие по компетенциям",
+      "difficultyBalance": "Баланс сложности",
+      "selectionReasons": "Причины отбора"
+    },
+    "timeline": {
+      "runToViewPath": "Запустите симуляцию для просмотра адаптивного пути",
+      "abilityShift": "Сдвиг способности:",
+      "noSampleQuestions": "Нет доступных примеров вопросов.",
+      "adaptiveCurve": "Адаптивная кривая",
+      "questionsCount": "Вопросы ({count})",
+      "scrollToSeeAll": "Прокрутите для просмотра всех"
+    },
+    "insights": {
+      "competencyWeights": "Веса компетенций",
+      "bigFiveTraits": "Пятифакторная модель",
+      "radarDescription": "Радарная диаграмма показывает распределение компетенций в данной оценке с прогнозом профиля личности по пятифакторной модели на основе набора компетенций.",
+      "radarDisclaimer": "Фактические показатели личности будут уточнены после привязки к компетенциям O*NET."
+    },
+    "toasts": {
+      "failedToSave": "Ошибка сохранения",
+      "changesReverted": "— изменения отменены",
+      "changesMerged": "Изменения объединены из обеих вкладок",
+      "keptYourChanges": "Ваши изменения сохранены",
+      "appliedOtherChanges": "Применены изменения из другой вкладки",
+      "simulationFailed": "Ошибка симуляции",
+      "blueprintSaved": "Шаблон сохранён"
+    },
+    "radar": {
+      "noCompetencies": "Компетенции не выбраны",
+      "ariaLabel": "Радарная диаграмма с {count} компетенциями",
+      "ariaLabelWithBigFive": "Радарная диаграмма с {count} компетенциями и пятифакторной моделью личности",
+      "competencyWeight": "Вес компетенции",
+      "bigFive": "Пятифакторная модель",
+      "weight": "Вес:",
+      "score": "Балл:",
+      "scoreName": "Балл",
+      "trait": "Черта",
+      "relativeWeight": "Относительный вес в оценке",
+      "estimatedTrait": "Предполагаемая черта личности",
+      "questionsAbbrev": "{count}в"
+    },
+    "bigFive": {
+      "openness": "Открытость",
+      "opennessShort": "Откр",
+      "conscientiousness": "Добросовестность",
+      "conscientiousnessShort": "Добр",
+      "extraversion": "Экстраверсия",
+      "extraversionShort": "Экстр",
+      "agreeableness": "Доброжелательность",
+      "agreeablenessShort": "Дружл",
+      "emotionalStability": "Эмоциональная устойчивость",
+      "emotionalStabilityShort": "Стаб"
+    },
+    "validation": {
+      "onetRequired": "Код O*NET SOC необходим для анализа соответствия должности",
+      "teamRequired": "Выбор команды необходим для анализа разрывов"
+    },
+    "onetLink": "O*NET: {code}",
+    "onetAriaLabel": "Открыть на O*NET OnLine (откроется в новой вкладке)"
   },
   "onboarding": {
     "step": "Шаг {current} из {total}",

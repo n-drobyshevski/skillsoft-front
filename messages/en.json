@@ -5089,6 +5089,11 @@
       "title": "Privacy Notice",
       "description": "Your responses are anonymous. Only your name will be shared with the test administrator."
     },
+    "captcha": {
+      "title": "Verification Required",
+      "description": "Please complete the verification below to continue to the test.",
+      "continue": "Continue"
+    },
     "action": {
       "startTest": "Start Test",
       "starting": "Starting...",
@@ -5117,7 +5122,12 @@
       "genericTitle": "Something Went Wrong",
       "genericDesc": "An unexpected error occurred. Please try again.",
       "nameRequired": "First name and last name are required.",
-      "timeUp": "Time is up! Please submit your answers."
+      "timeUp": "Time is up! Please submit your answers.",
+      "sessionExpired": "Your session has expired."
+    },
+    "warning": {
+      "sessionExpiring": "Session expiring soon",
+      "sessionExpiringDescription": "Your session will expire in {minutes} minutes. Please finish and submit your test."
     },
     "progress": {
       "question": "Question"
@@ -5133,6 +5143,7 @@
       "emailPlaceholder": "Enter your email",
       "notes": "Notes (optional)",
       "notesPlaceholder": "Any additional notes",
+      "gdprConsent": "I consent to the processing of my personal data for the purpose of this assessment. My data will be stored securely and used only for evaluation purposes.",
       "submit": "Submit Results",
       "submitting": "Submitting..."
     },
@@ -5148,7 +5159,10 @@
       "thankYou": "Thank you for completing the test.",
       "correct": "correct answers",
       "timeTaken": "total time",
-      "breakdown": "Competency Breakdown"
+      "breakdown": "Competency Breakdown",
+      "copyLink": "Copy Result Link",
+      "linkCopied": "Result link copied to clipboard. Valid for 7 days.",
+      "linkCopyFailed": "Failed to copy link to clipboard"
     }
   },
   "landing": {

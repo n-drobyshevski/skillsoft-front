@@ -49,7 +49,7 @@ import {
   getScoreColorClass,
   getProgressBarColor,
 } from '../utils/generateSimulatedResults';
-import { BigFiveProfile, getBigFiveLabels } from '@/hooks/useBigFiveProjection';
+import { BigFiveProfile } from '@/hooks/useBigFiveProjection';
 
 // ============================================
 // TYPES
@@ -143,6 +143,7 @@ function CompetencyRadarChart({
   competencyScores,
   passingScore,
 }: CompetencyRadarProps) {
+  const t = useTranslations('builder.simulator');
   const isMobile = useIsMobile();
   const colors = useComputedColors();
 
@@ -165,7 +166,7 @@ function CompetencyRadarChart({
   if (competencyScores.length === 0) {
     return (
       <div className="flex items-center justify-center h-32 text-xs text-muted-foreground">
-        No competencies
+        {t('simulatedResults.noCompetencies')}
       </div>
     );
   }
@@ -175,7 +176,7 @@ function CompetencyRadarChart({
       <CardHeader className="pb-1 pt-2.5 px-3">
         <CardTitle className="text-[11px] font-medium flex items-center gap-1.5 text-blue-600 dark:text-blue-400">
           <Target className="h-3.5 w-3.5" />
-          Competency Scores
+          {t('simulatedResults.competencyScores')}
         </CardTitle>
       </CardHeader>
       <CardContent className="px-1 pb-2">
@@ -230,7 +231,7 @@ function CompetencyRadarChart({
               />
 
               <Radar
-                name="Score"
+                name={t('radar.scoreName')}
                 dataKey="value"
                 stroke="#3b82f6"
                 strokeWidth={2}
@@ -257,7 +258,7 @@ function CompetencyRadarChart({
                       </p>
                       <div className="flex items-center justify-between gap-3">
                         <span className="text-[10px]" style={{ color: colors.mutedForeground }}>
-                          Score:
+                          {t('simulatedResults.tooltipScore')}
                         </span>
                         <span className="text-base font-bold tabular-nums text-blue-600">
                           {item.value}%
@@ -270,7 +271,7 @@ function CompetencyRadarChart({
                           <XCircle className="h-3 w-3 text-red-500" />
                         )}
                         <span className="text-[10px]" style={{ color: colors.mutedForeground }}>
-                          {item.passed ? 'Passed' : 'Below threshold'}
+                          {item.passed ? t('simulatedResults.tooltipPassed') : t('simulatedResults.tooltipBelowThreshold')}
                         </span>
                       </div>
                     </div>
@@ -281,7 +282,7 @@ function CompetencyRadarChart({
           </ResponsiveContainer>
         </div>
         <p className="text-[9px] text-muted-foreground text-center mt-1">
-          {competencyScores.length} competencies assessed
+          {t('simulatedResults.competenciesAssessed', { count: competencyScores.length })}
         </p>
       </CardContent>
     </Card>
@@ -300,12 +301,20 @@ const BIG_FIVE_TRAIT_COLORS: Record<keyof BigFiveProfile, string> = {
   EMOTIONAL_STABILITY: '#06b6d4',
 };
 
-const BIG_FIVE_SHORT_LABELS: Record<keyof BigFiveProfile, string> = {
-  OPENNESS: 'Open',
-  CONSCIENTIOUSNESS: 'Consc',
-  EXTRAVERSION: 'Extra',
-  AGREEABLENESS: 'Agree',
-  EMOTIONAL_STABILITY: 'Stable',
+const BIG_FIVE_SHORT_LABEL_KEYS: Record<keyof BigFiveProfile, string> = {
+  OPENNESS: 'bigFive.opennessShort',
+  CONSCIENTIOUSNESS: 'bigFive.conscientiousnessShort',
+  EXTRAVERSION: 'bigFive.extraversionShort',
+  AGREEABLENESS: 'bigFive.agreeablenessShort',
+  EMOTIONAL_STABILITY: 'bigFive.emotionalStabilityShort',
+};
+
+const BIG_FIVE_FULL_LABEL_KEYS: Record<keyof BigFiveProfile, string> = {
+  OPENNESS: 'bigFive.openness',
+  CONSCIENTIOUSNESS: 'bigFive.conscientiousness',
+  EXTRAVERSION: 'bigFive.extraversion',
+  AGREEABLENESS: 'bigFive.agreeableness',
+  EMOTIONAL_STABILITY: 'bigFive.emotionalStability',
 };
 
 interface BigFiveRadarProps {
@@ -313,22 +322,22 @@ interface BigFiveRadarProps {
 }
 
 function BigFiveRadarChart({ bigFiveProfile }: BigFiveRadarProps) {
+  const t = useTranslations('builder.simulator');
   const isMobile = useIsMobile();
   const colors = useComputedColors();
-  const bigFiveLabels = getBigFiveLabels();
 
   // Transform Big Five data for radar chart
   const radarData = useMemo(() => {
     return Object.entries(bigFiveProfile).map(([key, value]) => ({
       subject: isMobile
-        ? BIG_FIVE_SHORT_LABELS[key as keyof BigFiveProfile]
-        : bigFiveLabels[key as keyof BigFiveProfile],
-      fullName: bigFiveLabels[key as keyof BigFiveProfile],
+        ? t(BIG_FIVE_SHORT_LABEL_KEYS[key as keyof BigFiveProfile] as Parameters<typeof t>[0])
+        : t(BIG_FIVE_FULL_LABEL_KEYS[key as keyof BigFiveProfile] as Parameters<typeof t>[0]),
+      fullName: t(BIG_FIVE_FULL_LABEL_KEYS[key as keyof BigFiveProfile] as Parameters<typeof t>[0]),
       value,
       traitKey: key as keyof BigFiveProfile,
       color: BIG_FIVE_TRAIT_COLORS[key as keyof BigFiveProfile],
     }));
-  }, [bigFiveProfile, bigFiveLabels, isMobile]);
+  }, [bigFiveProfile, isMobile, t]);
 
   const chartHeight = isMobile ? 180 : 220;
   const fontSize = isMobile ? 8 : 10;
@@ -338,7 +347,7 @@ function BigFiveRadarChart({ bigFiveProfile }: BigFiveRadarProps) {
       <CardHeader className="pb-1 pt-2.5 px-3">
         <CardTitle className="text-[11px] font-medium flex items-center gap-1.5 text-violet-600 dark:text-violet-400">
           <Sparkles className="h-3.5 w-3.5" />
-          Personality Profile
+          {t('simulatedResults.personalityProfile')}
         </CardTitle>
       </CardHeader>
       <CardContent className="px-1 pb-2">
@@ -396,7 +405,7 @@ function BigFiveRadarChart({ bigFiveProfile }: BigFiveRadarProps) {
               />
 
               <Radar
-                name="Trait"
+                name={t('radar.trait')}
                 dataKey="value"
                 stroke="#8b5cf6"
                 strokeWidth={2}
@@ -429,7 +438,7 @@ function BigFiveRadarChart({ bigFiveProfile }: BigFiveRadarProps) {
                       </div>
                       <div className="flex items-center justify-between gap-3">
                         <span className="text-[10px]" style={{ color: colors.mutedForeground }}>
-                          Score:
+                          {t('simulatedResults.tooltipScore')}
                         </span>
                         <span
                           className="text-base font-bold tabular-nums"
@@ -446,7 +455,7 @@ function BigFiveRadarChart({ bigFiveProfile }: BigFiveRadarProps) {
           </ResponsiveContainer>
         </div>
         <p className="text-[9px] text-muted-foreground text-center mt-1">
-          Big Five (OCEAN) traits
+          {t('simulatedResults.bigFiveOcean')}
         </p>
       </CardContent>
     </Card>
@@ -468,10 +477,11 @@ function SimulatedProfileCharts({
   bigFiveProfile,
   passingScore,
 }: SimulatedProfileChartsProps) {
+  const t = useTranslations('builder.simulator');
   if (competencyScores.length === 0) {
     return (
       <div className="flex items-center justify-center h-40 text-sm text-muted-foreground">
-        No competency data available
+        {t('simulatedResults.noCompetencyData')}
       </div>
     );
   }
@@ -553,7 +563,7 @@ function ScoreSummary({ data, strategy }: ScoreSummaryProps) {
             <div>
               <p className="text-sm font-medium">{t('score.simulatedScore')}</p>
               <p className="text-xs text-muted-foreground">
-                Threshold: {data.passingThreshold}%
+                {t('simulatedResults.threshold', { score: data.passingThreshold })}
               </p>
             </div>
           </div>
@@ -578,8 +588,8 @@ function ScoreSummary({ data, strategy }: ScoreSummaryProps) {
         </div>
 
         <div className="flex justify-between text-xs text-muted-foreground mt-2">
-          <span>{data.totalQuestions} questions</span>
-          <span>~{data.estimatedDuration} min</span>
+          <span>{t('simulatedResults.totalQuestions', { count: data.totalQuestions })}</span>
+          <span>{t('simulatedResults.estimatedDuration', { minutes: data.estimatedDuration })}</span>
         </div>
       </CardContent>
     </Card>
@@ -603,6 +613,7 @@ function CompetencyScores({
   title,
   showAll = false,
 }: CompetencyScoresProps) {
+  const t = useTranslations('builder.simulator');
   const displayScores = showAll ? scores : scores.slice(0, 5);
 
   return (
@@ -640,7 +651,7 @@ function CompetencyScores({
                   score.confidence === 'low' && 'border-muted-foreground'
                 )}
               >
-                {score.questionCount}q
+                {t('radar.questionsAbbrev', { count: score.questionCount })}
               </Badge>
             </div>
           </div>
@@ -648,7 +659,7 @@ function CompetencyScores({
       </div>
       {!showAll && scores.length > 5 && (
         <p className="text-xs text-muted-foreground text-center pt-1">
-          +{scores.length - 5} more competencies
+          {t('simulatedResults.moreCompetencies', { count: scores.length - 5 })}
         </p>
       )}
     </div>
@@ -666,6 +677,7 @@ interface StrengthsGapsProps {
 }
 
 function StrengthsGaps({ strengths, gaps, threshold }: StrengthsGapsProps) {
+  const t = useTranslations('builder.simulator');
   return (
     <div className="grid grid-cols-2 gap-3">
       {/* Strengths */}
@@ -673,7 +685,7 @@ function StrengthsGaps({ strengths, gaps, threshold }: StrengthsGapsProps) {
         <CardHeader className="pb-2 pt-3 px-3">
           <CardTitle className="text-xs font-medium flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400">
             <TrendingUp className="h-3.5 w-3.5" />
-            Top Strengths
+            {t('simulatedResults.topStrengths')}
           </CardTitle>
         </CardHeader>
         <CardContent className="px-3 pb-3">
@@ -695,7 +707,7 @@ function StrengthsGaps({ strengths, gaps, threshold }: StrengthsGapsProps) {
         <CardHeader className="pb-2 pt-3 px-3">
           <CardTitle className="text-xs font-medium flex items-center gap-1.5 text-amber-600 dark:text-amber-400">
             <AlertCircle className="h-3.5 w-3.5" />
-            Growth Areas
+            {t('simulatedResults.growthAreas')}
           </CardTitle>
         </CardHeader>
         <CardContent className="px-3 pb-3">
@@ -724,6 +736,7 @@ interface JobAlignmentSectionProps {
 }
 
 function JobAlignmentSection({ data }: JobAlignmentSectionProps) {
+  const t = useTranslations('builder.simulator');
   if (!data.jobAlignmentScore) return null;
 
   return (
@@ -735,13 +748,13 @@ function JobAlignmentSection({ data }: JobAlignmentSectionProps) {
           </div>
           <div className="flex-1">
             <div className="flex items-center justify-between">
-              <p className="text-sm font-medium">Job Alignment Score</p>
+              <p className="text-sm font-medium">{t('simulatedResults.jobAlignmentScore')}</p>
               <span className="text-lg font-bold text-emerald-600 dark:text-emerald-400">
                 {data.jobAlignmentScore}%
               </span>
             </div>
             <p className="text-xs text-muted-foreground">
-              {data.onetCoverage}% of job requirements covered
+              {t('simulatedResults.jobRequirementsCovered', { percentage: data.onetCoverage ?? 0 })}
             </p>
           </div>
         </div>
@@ -766,6 +779,7 @@ interface TeamGapSectionProps {
 }
 
 function TeamGapSection({ data, threshold }: TeamGapSectionProps) {
+  const t = useTranslations('builder.simulator');
   if (data.teamGap === undefined) return null;
 
   const isPositive = data.teamGap >= 0;
@@ -781,7 +795,7 @@ function TeamGapSection({ data, threshold }: TeamGapSectionProps) {
             </div>
             <div className="flex-1">
               <div className="flex items-center justify-between">
-                <p className="text-sm font-medium">Team Gap Score</p>
+                <p className="text-sm font-medium">{t('simulatedResults.teamGapScore')}</p>
                 <div className="flex items-center gap-1">
                   <GapIcon
                     className={cn(
@@ -806,8 +820,8 @@ function TeamGapSection({ data, threshold }: TeamGapSectionProps) {
               </div>
               <p className="text-xs text-muted-foreground">
                 {isPositive
-                  ? 'Above team average'
-                  : 'Below team average - development opportunity'}
+                  ? t('simulatedResults.aboveTeamAverage')
+                  : t('simulatedResults.belowTeamAverage')}
               </p>
             </div>
           </div>
@@ -819,7 +833,7 @@ function TeamGapSection({ data, threshold }: TeamGapSectionProps) {
         <div className="p-3 rounded-lg border border-emerald-200 dark:border-emerald-800/50 bg-emerald-50/30 dark:bg-emerald-950/10">
           <p className="text-xs font-medium text-emerald-700 dark:text-emerald-400 mb-2 flex items-center gap-1.5">
             <Target className="h-3.5 w-3.5" />
-            Complementary Skills (Above Team)
+            {t('simulatedResults.complementarySkills')}
           </p>
           <div className="flex flex-wrap gap-1.5">
             {data.complementarySkills.map((s) => (
@@ -840,7 +854,7 @@ function TeamGapSection({ data, threshold }: TeamGapSectionProps) {
         <div className="p-3 rounded-lg border border-amber-200 dark:border-amber-800/50 bg-amber-50/30 dark:bg-amber-950/10">
           <p className="text-xs font-medium text-amber-700 dark:text-amber-400 mb-2 flex items-center gap-1.5">
             <AlertCircle className="h-3.5 w-3.5" />
-            Development Focus (Below Team)
+            {t('simulatedResults.developmentFocus')}
           </p>
           <div className="flex flex-wrap gap-1.5">
             {data.growthAreas.map((g) => (

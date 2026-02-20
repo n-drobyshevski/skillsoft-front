@@ -146,7 +146,7 @@ export function StrategyHeroBadge({
                 </div>
                 <ul className="text-xs text-muted-foreground space-y-0.5">
                   {validation.missingRequirements.map((req, i) => (
-                    <li key={i}>* {req}</li>
+                    <li key={i}>* {t(req as Parameters<typeof t>[0])}</li>
                   ))}
                 </ul>
               </div>
@@ -205,7 +205,7 @@ export function StrategyHeroBadge({
                     <div className="font-medium text-xs">{t('strategy.missingConfiguration')}</div>
                     <ul className="text-xs text-muted-foreground space-y-0.5">
                       {validation?.missingRequirements.map((req, i) => (
-                        <li key={i}>* {req}</li>
+                        <li key={i}>* {t(req as Parameters<typeof t>[0])}</li>
                       ))}
                     </ul>
                   </div>

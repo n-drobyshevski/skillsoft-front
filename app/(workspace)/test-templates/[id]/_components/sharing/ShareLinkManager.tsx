@@ -46,7 +46,11 @@ import {
   Clock,
   Eye,
   AlertCircle,
+  BarChart3,
   CheckCircle2,
+  ChevronDown,
+  ChevronUp,
+  Users,
   XCircle,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -63,6 +67,7 @@ import {
   useCanCreateLink,
   useCreateShareLink,
   useRevokeShareLink,
+  useShareLinkStats,
 } from '@/hooks/queries';
 import { toast } from 'sonner';
 import { addDays } from '@/lib/date-utils';
@@ -349,6 +354,7 @@ export function ShareLinkManager({
             <LinkListItem
               key={link.id}
               link={link}
+              templateId={templateId}
               canManage={canManage}
               isRevoking={revoking === link.id}
               isMobile={isMobile}
@@ -383,6 +389,7 @@ export function ShareLinkManager({
 
 interface LinkListItemProps {
   link: ShareLink;
+  templateId: string;
   canManage: boolean;
   isRevoking: boolean;
   isMobile?: boolean;
@@ -393,6 +400,7 @@ interface LinkListItemProps {
 
 function LinkListItem({
   link,
+  templateId,
   canManage,
   isRevoking,
   isMobile = false,
@@ -403,6 +411,7 @@ function LinkListItem({
   const isExpired = link.expiresAt && new Date(link.expiresAt) < new Date();
   const isUsedUp = link.maxUses != null && link.usageCount >= link.maxUses;
   const isInvalid = isExpired || isUsedUp || !!link.revokedAt;
+  const [showStats, setShowStats] = useState(false);
 
   return (
     <div
@@ -448,7 +457,20 @@ function LinkListItem({
             ? t('listItem.expired')
             : t('listItem.expiresIn', { time: formatFutureRelativeTime(link.expiresAt) })}
         </span>
+        {link.usageCount > 0 && (
+          <button
+            type="button"
+            onClick={() => setShowStats(!showStats)}
+            className="flex items-center gap-1 text-primary hover:underline ml-auto"
+          >
+            <BarChart3 className="h-3 w-3" />
+            {showStats ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+          </button>
+        )}
       </div>
+
+      {/* Expandable Analytics */}
+      {showStats && <LinkAnalytics templateId={templateId} linkId={link.id} />}
 
       {/* Actions Row */}
       {!isInvalid && (
@@ -496,6 +518,59 @@ function LinkListItem({
           )}
         </div>
       )}
+    </div>
+  );
+}
+
+function LinkAnalytics({ templateId, linkId }: { templateId: string; linkId: string }) {
+  const { data: stats, isLoading } = useShareLinkStats(templateId, linkId);
+
+  if (isLoading) {
+    return (
+      <div className="grid grid-cols-4 gap-2 pt-1">
+        {[1, 2, 3, 4].map((i) => (
+          <Skeleton key={i} className="h-10 w-full rounded" />
+        ))}
+      </div>
+    );
+  }
+
+  if (!stats) return null;
+
+  return (
+    <div className="grid grid-cols-4 gap-2 pt-1">
+      <div className="rounded bg-muted/50 p-2 text-center">
+        <div className="text-sm font-semibold">{stats.totalSessions}</div>
+        <div className="text-[10px] text-muted-foreground flex items-center justify-center gap-0.5">
+          <Users className="h-2.5 w-2.5" />
+          Sessions
+        </div>
+      </div>
+      <div className="rounded bg-muted/50 p-2 text-center">
+        <div className="text-sm font-semibold">{stats.completedResults}</div>
+        <div className="text-[10px] text-muted-foreground flex items-center justify-center gap-0.5">
+          <CheckCircle2 className="h-2.5 w-2.5" />
+          Completed
+        </div>
+      </div>
+      <div className="rounded bg-muted/50 p-2 text-center">
+        <div className="text-sm font-semibold">
+          {stats.averageScore != null ? `${stats.averageScore.toFixed(0)}%` : '—'}
+        </div>
+        <div className="text-[10px] text-muted-foreground flex items-center justify-center gap-0.5">
+          <BarChart3 className="h-2.5 w-2.5" />
+          Avg Score
+        </div>
+      </div>
+      <div className="rounded bg-muted/50 p-2 text-center">
+        <div className="text-sm font-semibold">
+          {stats.passRate != null ? `${stats.passRate.toFixed(0)}%` : '—'}
+        </div>
+        <div className="text-[10px] text-muted-foreground flex items-center justify-center gap-0.5">
+          <CheckCircle2 className="h-2.5 w-2.5 text-green-500" />
+          Pass Rate
+        </div>
+      </div>
     </div>
   );
 }

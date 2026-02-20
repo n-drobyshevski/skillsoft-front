@@ -23,9 +23,10 @@ import {
   CheckCircle2,
   Clock,
 } from 'lucide-react';
-import { SessionsTable } from './_components';
+import { SessionsTable, AnonymousResultsList } from './_components';
 import { isReservedTestTemplateSegment } from '@/lib/routing-constants';
 import Loading from './loading';
+import { Link2 } from 'lucide-react';
 
 // Extended session type with additional fields that may come from API
 type ExtendedSession = TestSession & {
@@ -283,6 +284,27 @@ async function ResultsData({ id, filters }: { id: string; filters: { status?: st
             sessions={sessions}
             templateId={id}
             templateGoal={template.goal}
+            passingScore={template.passingScore}
+          />
+        </CardContent>
+      </Card>
+
+      {/* Anonymous Results Section */}
+      <Card className="border shadow-sm overflow-hidden">
+        <CardHeader className="p-4 sm:p-6">
+          <div className="flex items-center gap-2">
+            <Link2 className="h-5 w-5 text-muted-foreground" />
+            <div>
+              <CardTitle className="text-lg sm:text-xl">Anonymous Results</CardTitle>
+              <CardDescription className="text-xs sm:text-sm mt-1">
+                Results from anonymous test takers via share links
+              </CardDescription>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent className="p-4 sm:p-6 pt-0">
+          <AnonymousResultsList
+            templateId={id}
             passingScore={template.passingScore}
           />
         </CardContent>

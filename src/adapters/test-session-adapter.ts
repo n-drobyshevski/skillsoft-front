@@ -32,6 +32,7 @@ export interface AnonymousTakerInfo {
   lastName: string;
   email?: string;
   notes?: string;
+  gdprConsentGiven?: boolean;
 }
 
 /**
@@ -68,6 +69,8 @@ export interface CompletionResult {
   resultId: string;
   /** Inline result data for anonymous mode immediate display */
   inlineResult?: InlineResultData;
+  /** HMAC-signed token for persistent result access (anonymous sessions only) */
+  resultViewToken?: string;
 }
 
 /**

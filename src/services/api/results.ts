@@ -12,6 +12,7 @@ import type {
 
 // Test endpoints - paths are relative to the v1 base URL
 const TEST_RESULTS_BASE = '/tests/results';
+const TEMPLATES_BASE = '/tests/templates';
 
 export const testResultsApi = {
   /**
@@ -140,5 +141,143 @@ export const testResultsApi = {
       cache: 'no-store',
       authHeaders,
     });
+  },
+};
+
+// ==================== ANONYMOUS RESULTS (Owner View) ====================
+
+/**
+ * Anonymous result summary returned by the backend.
+ */
+export interface AnonymousResultSummary {
+  resultId: string;
+  sessionId: string;
+  takerName: string;
+  takerEmail: string | null;
+  overallPercentage: number;
+  passed: boolean;
+  completedAt: string;
+  shareLinkLabel: string | null;
+  totalTimeSeconds: number;
+  questionsAnswered: number;
+  questionsSkipped: number;
+  /** True when time anomaly detection flagged this result (avg < 15s per question). Absent for normal results. */
+  suspiciouslyFast?: boolean;
+  /** Advisory: number of times the taker switched away from the test tab. Null for older sessions. */
+  tabSwitchCount?: number;
+}
+
+/**
+ * Anonymous session stats returned by the backend.
+ */
+export interface AnonymousSessionStats {
+  totalSessions: number;
+  completedSessions: number;
+  abandonedSessions: number;
+  inProgressSessions: number;
+  completionRate: number;
+}
+
+/**
+ * Paginated response wrapper.
+ */
+export interface PageResponse<T> {
+  content: T[];
+  totalElements: number;
+  totalPages: number;
+  size: number;
+  number: number;
+}
+
+/**
+ * Filter options for anonymous results.
+ */
+export interface AnonymousResultFilters {
+  dateFrom?: string;  // ISO datetime string
+  dateTo?: string;    // ISO datetime string
+  minScore?: number;
+  maxScore?: number;
+  passed?: boolean;
+  shareLinkId?: string;
+}
+
+/**
+ * API functions for fetching anonymous results (owner view).
+ * These call the TemplateAnonymousResultsController endpoints.
+ */
+export const anonymousResultsApi = {
+  /**
+   * Get anonymous session statistics for a template.
+   */
+  getStats: async (templateId: string): Promise<AnonymousSessionStats> => {
+    const authHeaders = await getAuthHeaders();
+    return fetchApi(`${TEMPLATES_BASE}/${templateId}/anonymous-stats`, {
+      cache: 'no-store',
+      authHeaders,
+    });
+  },
+
+  /**
+   * List anonymous results for a template (paginated, with optional filters).
+   */
+  listResults: async (
+    templateId: string,
+    page = 0,
+    size = 20,
+    filters?: AnonymousResultFilters
+  ): Promise<PageResponse<AnonymousResultSummary>> => {
+    const authHeaders = await getAuthHeaders();
+    const params = new URLSearchParams();
+    params.set('page', String(page));
+    params.set('size', String(size));
+    params.set('sort', 'completedAt,desc');
+
+    if (filters) {
+      if (filters.dateFrom) params.set('dateFrom', filters.dateFrom);
+      if (filters.dateTo) params.set('dateTo', filters.dateTo);
+      if (filters.minScore != null) params.set('minScore', String(filters.minScore));
+      if (filters.maxScore != null) params.set('maxScore', String(filters.maxScore));
+      if (filters.passed != null) params.set('passed', String(filters.passed));
+      if (filters.shareLinkId) params.set('shareLinkId', filters.shareLinkId);
+    }
+
+    return fetchApi(
+      `${TEMPLATES_BASE}/${templateId}/anonymous-results?${params.toString()}`,
+      {
+        cache: 'no-store',
+        authHeaders,
+      }
+    );
+  },
+
+  /**
+   * Download anonymous results as CSV.
+   * Uses authenticated fetch and triggers browser download via blob URL.
+   */
+  exportCsv: async (templateId: string): Promise<void> => {
+    const authHeaders = await getAuthHeaders();
+    const { getApiBaseUrl } = await import('./core');
+    const baseUrl = getApiBaseUrl();
+    const url = `${baseUrl}${TEMPLATES_BASE}/${templateId}/anonymous-results/export`;
+
+    const response = await fetch(url, {
+      headers: {
+        ...authHeaders,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Export failed: ${response.status}`);
+    }
+
+    const blob = await response.blob();
+    const downloadUrl = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = downloadUrl;
+    a.download = `anonymous-results-${templateId}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(downloadUrl);
   },
 };

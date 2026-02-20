@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { useTranslations } from 'next-intl';
 import { Badge } from '@/components/ui/badge';
 import {
   CheckCircle2,
@@ -79,6 +80,7 @@ function UniversalBaselineDisplay({
   profile: SimulationProfile;
   className?: string;
 }) {
+  const t = useTranslations('builder.simulator');
   const config = STRATEGY_CONFIG.UNIVERSAL_BASELINE;
   const persona = personaConfig[profile];
 
@@ -91,7 +93,7 @@ function UniversalBaselineDisplay({
         className
       )}
       role="region"
-      aria-label="Competency Profile Assessment"
+      aria-label={t('score.competencyProfileAssessment')}
     >
       {/* Accent line */}
       <div
@@ -101,13 +103,13 @@ function UniversalBaselineDisplay({
 
       <div className="flex items-center justify-between mb-3">
         <span className="text-xs font-medium text-muted-foreground">
-          Competency Profile
+          {t('score.competencyProfile')}
         </span>
         <Badge
           variant="outline"
           className="text-[10px] bg-primary/10 text-primary border-primary/20"
         >
-          Discovery Mode
+          {t('score.discoveryMode')}
         </Badge>
       </div>
 
@@ -119,12 +121,12 @@ function UniversalBaselineDisplay({
           <span className={cn('text-2xl font-bold tabular-nums', config.iconText)}>
             {competencyCount}
           </span>
-          <span className="text-sm text-muted-foreground ml-1.5">competencies</span>
+          <span className="text-sm text-muted-foreground ml-1.5">{t('score.competencies')}</span>
         </div>
       </div>
 
       <p className="text-xs text-muted-foreground mt-3">
-        No pass/fail scoring - this assessment builds a competency passport
+        {t('score.noPassFail')}
       </p>
     </div>
   );
@@ -147,6 +149,7 @@ function TargetedFitDisplay({
   onetSocCode?: string;
   className?: string;
 }) {
+  const t = useTranslations('builder.simulator');
   const config = STRATEGY_CONFIG.TARGETED_FIT;
   const persona = personaConfig[profile];
   const passed = score >= passingScore;
@@ -159,7 +162,7 @@ function TargetedFitDisplay({
         className
       )}
       role="region"
-      aria-label={`Job Fit Score: ${score}%${passed ? ', Qualified' : ', Below Threshold'}`}
+      aria-label={`${t('score.jobFitScore')}: ${score}%${passed ? `, ${t('score.qualified')}` : `, ${t('score.belowThreshold')}`}`}
     >
       {/* Accent line */}
       <div
@@ -175,7 +178,7 @@ function TargetedFitDisplay({
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-2">
           <Briefcase className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
-          <span className="text-xs font-medium text-muted-foreground">Job Fit Score</span>
+          <span className="text-xs font-medium text-muted-foreground">{t('score.jobFitScore')}</span>
         </div>
         {passed ? (
           <Badge
@@ -183,7 +186,7 @@ function TargetedFitDisplay({
             className="bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/50 dark:text-emerald-400 dark:border-emerald-800 text-[10px]"
           >
             <CheckCircle2 className="h-3 w-3 mr-1" aria-hidden="true" />
-            Qualified
+            {t('score.qualified')}
           </Badge>
         ) : (
           <Badge
@@ -191,7 +194,7 @@ function TargetedFitDisplay({
             className="bg-red-50 text-red-700 border-red-200 dark:bg-red-950/50 dark:text-red-400 dark:border-red-800 text-[10px]"
           >
             <AlertTriangle className="h-3 w-3 mr-1" aria-hidden="true" />
-            Below Threshold
+            {t('score.belowThreshold')}
           </Badge>
         )}
       </div>
@@ -200,7 +203,7 @@ function TargetedFitDisplay({
         <span className={cn('text-3xl font-bold tabular-nums', persona.color)}>
           {score}%
         </span>
-        <span className="text-xs text-muted-foreground">/ {passingScore}% to qualify</span>
+        <span className="text-xs text-muted-foreground">{t('score.toQualify', { score: passingScore })}</span>
       </div>
 
       {/* Progress bar with threshold marker */}
@@ -220,9 +223,10 @@ function TargetedFitDisplay({
           target="_blank"
           rel="noopener noreferrer"
           className="flex items-center gap-1.5 mt-3 text-xs text-muted-foreground hover:text-primary transition-colors"
+          aria-label={t('onetAriaLabel')}
         >
           <Briefcase className="h-3 w-3" aria-hidden="true" />
-          O*NET: {onetSocCode}
+          {t('onetLink', { code: onetSocCode })}
           <ExternalLink className="h-3 w-3" aria-hidden="true" />
         </a>
       )}
@@ -249,6 +253,7 @@ function DynamicGapDisplay({
   teamName?: string;
   className?: string;
 }) {
+  const t = useTranslations('builder.simulator');
   const config = STRATEGY_CONFIG.DYNAMIC_GAP_ANALYSIS;
   const persona = personaConfig[profile];
   const gap = score - teamBenchmark;
@@ -268,7 +273,7 @@ function DynamicGapDisplay({
         className
       )}
       role="region"
-      aria-label={`Team Gap Analysis: ${Math.abs(gap)}% ${gapDirection} team average`}
+      aria-label={`${t('score.teamGapAnalysis')}: ${t(gapDirection === 'above' ? 'score.aboveTeam' : gapDirection === 'below' ? 'score.belowTeam' : 'score.atTeam', { gap: Math.abs(gap) })}`}
     >
       {/* Accent line */}
       <div
@@ -280,7 +285,7 @@ function DynamicGapDisplay({
         <div className="flex items-center gap-2">
           <Users className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
           <span className="text-xs font-medium text-muted-foreground">
-            Team Gap Analysis
+            {t('score.teamGapAnalysis')}
           </span>
         </div>
         <Badge
@@ -297,7 +302,7 @@ function DynamicGapDisplay({
         >
           {getTrendIcon()}
           <span className="ml-1">
-            {Math.abs(gap)}% {gapDirection} team
+            {t(gapDirection === 'above' ? 'score.aboveTeam' : gapDirection === 'below' ? 'score.belowTeam' : 'score.atTeam', { gap: Math.abs(gap) })}
           </span>
         </Badge>
       </div>
@@ -307,7 +312,7 @@ function DynamicGapDisplay({
         {/* Individual score */}
         <div className="space-y-1">
           <div className="flex items-center justify-between text-xs">
-            <span className="text-muted-foreground">Individual</span>
+            <span className="text-muted-foreground">{t('score.individual')}</span>
             <span className={cn('font-semibold tabular-nums', persona.color)}>
               {score}%
             </span>
@@ -327,7 +332,7 @@ function DynamicGapDisplay({
         {/* Team benchmark */}
         <div className="space-y-1">
           <div className="flex items-center justify-between text-xs">
-            <span className="text-muted-foreground">Team Benchmark</span>
+            <span className="text-muted-foreground">{t('score.teamBenchmark')}</span>
             <span className="font-semibold text-blue-600 dark:text-blue-400 tabular-nums">
               {teamBenchmark}%
             </span>
@@ -340,7 +345,7 @@ function DynamicGapDisplay({
       {(teamId || teamName) && (
         <div className="flex items-center gap-1.5 mt-3 text-xs text-muted-foreground">
           <Users className="h-3 w-3" aria-hidden="true" />
-          <span>{teamName || `Team ${teamId}`}</span>
+          <span>{teamName || t('teamComparison.teamFallbackName', { id: teamId ?? '' })}</span>
         </div>
       )}
     </div>

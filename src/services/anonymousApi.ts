@@ -25,32 +25,66 @@ const getApiBaseUrl = () => {
   return `${protocol}://${apiUrl}/api${versionPath}`;
 };
 
-// Session token storage key
-const SESSION_TOKEN_KEY = 'skillsoft_anonymous_session_token';
-const SESSION_ID_KEY = 'skillsoft_anonymous_session_id';
+// Session credential storage key (localStorage for persistence across tab closes)
+const SESSION_CREDENTIALS_KEY = 'skillsoft_anonymous_session';
+
+// Client-side TTL for stored credentials (24 hours in milliseconds)
+const SESSION_TTL_MS = 24 * 60 * 60 * 1000;
+
+interface StoredCredentials {
+  sessionId: string;
+  accessToken: string;
+  expiresAt: number; // Unix timestamp in ms
+}
 
 /**
- * Store session credentials in sessionStorage.
- * Uses sessionStorage so credentials are cleared when browser tab closes.
+ * Store session credentials in localStorage with a 24h TTL.
+ * Uses localStorage so credentials persist across tab closes, enabling
+ * session resume after browser crashes or accidental tab closes.
  */
 export function storeSessionCredentials(sessionId: string, accessToken: string): void {
   if (typeof window !== 'undefined') {
-    sessionStorage.setItem(SESSION_TOKEN_KEY, accessToken);
-    sessionStorage.setItem(SESSION_ID_KEY, sessionId);
+    const credentials: StoredCredentials = {
+      sessionId,
+      accessToken,
+      expiresAt: Date.now() + SESSION_TTL_MS,
+    };
+    localStorage.setItem(SESSION_CREDENTIALS_KEY, JSON.stringify(credentials));
   }
 }
 
 /**
- * Get stored session credentials.
+ * Get stored session credentials, checking TTL before returning.
+ * Returns null values if credentials are missing or expired.
  */
 export function getStoredSessionCredentials(): { sessionId: string | null; accessToken: string | null } {
   if (typeof window === 'undefined') {
     return { sessionId: null, accessToken: null };
   }
-  return {
-    sessionId: sessionStorage.getItem(SESSION_ID_KEY),
-    accessToken: sessionStorage.getItem(SESSION_TOKEN_KEY),
-  };
+
+  const raw = localStorage.getItem(SESSION_CREDENTIALS_KEY);
+  if (!raw) {
+    return { sessionId: null, accessToken: null };
+  }
+
+  try {
+    const credentials: StoredCredentials = JSON.parse(raw);
+
+    // Check client-side TTL
+    if (Date.now() > credentials.expiresAt) {
+      localStorage.removeItem(SESSION_CREDENTIALS_KEY);
+      return { sessionId: null, accessToken: null };
+    }
+
+    return {
+      sessionId: credentials.sessionId,
+      accessToken: credentials.accessToken,
+    };
+  } catch {
+    // Corrupted data — clear and return null
+    localStorage.removeItem(SESSION_CREDENTIALS_KEY);
+    return { sessionId: null, accessToken: null };
+  }
 }
 
 /**
@@ -58,8 +92,7 @@ export function getStoredSessionCredentials(): { sessionId: string | null; acces
  */
 export function clearSessionCredentials(): void {
   if (typeof window !== 'undefined') {
-    sessionStorage.removeItem(SESSION_TOKEN_KEY);
-    sessionStorage.removeItem(SESSION_ID_KEY);
+    localStorage.removeItem(SESSION_CREDENTIALS_KEY);
   }
 }
 
@@ -130,6 +163,7 @@ export interface AnonymousTakerInfo {
   lastName: string;
   email?: string;
   notes?: string;
+  gdprConsentGiven?: boolean;
 }
 
 /**
@@ -150,6 +184,37 @@ export interface AnonymousTestResult {
     maxScore: number;
     percentage: number;
   }>;
+}
+
+/**
+ * Completion response wrapping result + persistent view token.
+ */
+export interface AnonymousCompletionResponse {
+  result: AnonymousTestResult;
+  resultViewToken: string;
+}
+
+/**
+ * Public result accessible via HMAC-signed token.
+ */
+export interface PublicAnonymousResult {
+  resultId: string;
+  takerName: string;
+  templateName: string;
+  overallPercentage: number;
+  passed: boolean;
+  competencyBreakdown: Array<{
+    competencyId: string;
+    competencyName: string;
+    score: number;
+    maxScore: number;
+    percentage: number;
+  }>;
+  totalTimeSeconds: number;
+  questionsAnswered: number;
+  questionsSkipped: number;
+  totalQuestions: number;
+  completedAt: string;
 }
 
 /**
@@ -255,16 +320,48 @@ async function handleErrorResponse(response: Response): Promise<never> {
 // ============================================
 
 /**
+ * CAPTCHA configuration from the backend.
+ */
+export interface CaptchaConfig {
+  enabled: boolean;
+  siteKey: string | null;
+}
+
+/**
+ * Fetch CAPTCHA configuration from the backend.
+ * Used by the landing page to decide whether to show hCaptcha.
+ */
+export async function getCaptchaConfig(): Promise<CaptchaConfig> {
+  try {
+    const response = await fetch(`${getApiBaseUrl()}/anonymous/config/captcha`);
+    if (!response.ok) {
+      return { enabled: false, siteKey: null };
+    }
+    return await response.json();
+  } catch {
+    return { enabled: false, siteKey: null };
+  }
+}
+
+/**
  * Create a new anonymous session from a share link token.
  */
-export async function createAnonymousSession(shareToken: string): Promise<AnonymousSessionResponse> {
+export async function createAnonymousSession(
+  shareToken: string,
+  captchaToken?: string
+): Promise<AnonymousSessionResponse> {
   try {
+    const body: Record<string, string> = { shareToken };
+    if (captchaToken) {
+      body.captchaToken = captchaToken;
+    }
+
     const response = await fetch(`${getApiBaseUrl()}/anonymous/sessions`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ shareToken }),
+      body: JSON.stringify(body),
     });
 
     if (!response.ok) {
@@ -338,7 +435,9 @@ export async function getCurrentQuestion(
 }
 
 /**
- * Submit an answer to a question.
+ * Submit an answer to a question with automatic retry on network failure.
+ * Uses exponential backoff (500ms, 1s, 2s) for up to 3 attempts.
+ * Backend submitAnswer is idempotent, so retries are safe.
  */
 export async function submitAnswer(
   sessionId: string,
@@ -346,23 +445,49 @@ export async function submitAnswer(
   selectedOptionIndex: number,
   accessToken?: string
 ): Promise<AnonymousAnswer> {
-  try {
-    const response = await fetchWithSessionToken(`/sessions/${sessionId}/answers`, {
-      method: 'POST',
-      body: JSON.stringify({ questionId, selectedOptionIndex }),
-    }, accessToken);
+  const RETRY_DELAYS = [500, 1000, 2000];
+  let lastError: unknown;
 
-    if (!response.ok) {
-      await handleErrorResponse(response);
-    }
+  for (let attempt = 0; attempt <= RETRY_DELAYS.length; attempt++) {
+    try {
+      const response = await fetchWithSessionToken(`/sessions/${sessionId}/answers`, {
+        method: 'POST',
+        body: JSON.stringify({ questionId, selectedOptionIndex }),
+      }, accessToken);
 
-    return await response.json();
-  } catch (error) {
-    if (error instanceof Error && 'status' in error) {
-      throw error;
+      if (!response.ok) {
+        // Don't retry client errors (4xx) — only server/network errors
+        if (response.status >= 400 && response.status < 500) {
+          await handleErrorResponse(response);
+        }
+        // Server errors (5xx) — retry
+        if (attempt < RETRY_DELAYS.length) {
+          await new Promise((resolve) => setTimeout(resolve, RETRY_DELAYS[attempt]));
+          continue;
+        }
+        await handleErrorResponse(response);
+      }
+
+      return await response.json();
+    } catch (error) {
+      lastError = error;
+      // Re-throw API errors (4xx) immediately — don't retry
+      if (error instanceof Error && 'status' in error && ((error as ApiError).status ?? 0) < 500) {
+        throw error;
+      }
+      // Retry on network errors and 5xx
+      if (attempt < RETRY_DELAYS.length) {
+        await new Promise((resolve) => setTimeout(resolve, RETRY_DELAYS[attempt]));
+        continue;
+      }
     }
-    throw createNetworkError(error instanceof Error ? error : undefined);
   }
+
+  // All retries exhausted
+  if (lastError instanceof Error && 'status' in lastError) {
+    throw lastError;
+  }
+  throw createNetworkError(lastError instanceof Error ? lastError : undefined);
 }
 
 /**
@@ -423,12 +548,13 @@ export async function updateTimeRemaining(
 
 /**
  * Complete the test session with taker information.
+ * Returns the result wrapped with a persistent view token.
  */
 export async function completeSession(
   sessionId: string,
   takerInfo: AnonymousTakerInfo,
   accessToken?: string
-): Promise<AnonymousTestResult> {
+): Promise<AnonymousCompletionResponse> {
   try {
     const response = await fetchWithSessionToken(`/sessions/${sessionId}/complete`, {
       method: 'POST',
@@ -474,6 +600,60 @@ export async function getResult(
 }
 
 /**
+ * Update advisory session metadata (e.g. tab switch count).
+ *
+ * This is fire-and-forget from the caller's perspective — failures are
+ * intentionally swallowed so they never block the completion flow.
+ * Returns the raw Response so callers can inspect status if needed.
+ */
+export async function updateSessionMetadata(
+  sessionId: string,
+  sessionToken: string,
+  tabSwitchCount: number
+): Promise<Response> {
+  return fetchWithSessionToken(
+    `/sessions/${sessionId}/metadata`,
+    {
+      method: 'PATCH',
+      body: JSON.stringify({ tabSwitchCount }),
+    },
+    sessionToken
+  );
+}
+
+/**
+ * Get a public anonymous result by its HMAC-signed view token.
+ * This endpoint does not require authentication.
+ */
+export async function getPublicResult(token: string): Promise<PublicAnonymousResult> {
+  const API_VERSION = process.env.NEXT_PUBLIC_API_VERSION || 'v1';
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+  const versionPath = API_VERSION ? `/${API_VERSION}` : '';
+  let baseUrl: string;
+  if (!apiUrl) {
+    baseUrl = `http://localhost:8080/api${versionPath}`;
+  } else {
+    const protocol = apiUrl.includes('localhost') || apiUrl.includes('127.0.0.1') ? 'http' : 'https';
+    baseUrl = `${protocol}://${apiUrl}/api${versionPath}`;
+  }
+
+  try {
+    const response = await fetch(`${baseUrl}/public/results/${token}`);
+
+    if (!response.ok) {
+      await handleErrorResponse(response);
+    }
+
+    return await response.json();
+  } catch (error) {
+    if (error instanceof Error && 'status' in error) {
+      throw error;
+    }
+    throw createNetworkError(error instanceof Error ? error : undefined);
+  }
+}
+
+/**
  * Anonymous Test API object for organized imports.
  */
 export const anonymousTestApi = {
@@ -483,8 +663,11 @@ export const anonymousTestApi = {
   submitAnswer,
   navigateToQuestion,
   updateTimeRemaining,
+  updateSessionMetadata,
   completeSession,
   getResult,
+  getPublicResult,
+  getCaptchaConfig,
   // Utility functions
   storeCredentials: storeSessionCredentials,
   getCredentials: getStoredSessionCredentials,

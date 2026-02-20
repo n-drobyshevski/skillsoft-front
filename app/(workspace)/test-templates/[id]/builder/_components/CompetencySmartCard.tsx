@@ -55,11 +55,11 @@ const difficultyPalette = {
   hard: "bg-orange-500",
 };
 
-const DIFFICULTY_OPTIONS: { value: Difficulty; label: string; short: string; color: string }[] = [
-  { value: "FOUNDATIONAL", label: "Foundational", short: "F", color: "bg-emerald-500 text-white" },
-  { value: "INTERMEDIATE", label: "Intermediate", short: "I", color: "bg-amber-500 text-white" },
-  { value: "ADVANCED", label: "Advanced", short: "A", color: "bg-orange-500 text-white" },
-  { value: "EXPERT", label: "Expert", short: "E", color: "bg-red-500 text-white" },
+const DIFFICULTY_OPTIONS: { value: Difficulty; key: string; color: string }[] = [
+  { value: "FOUNDATIONAL", key: "foundational", color: "bg-emerald-500 text-white" },
+  { value: "INTERMEDIATE", key: "intermediate", color: "bg-amber-500 text-white" },
+  { value: "ADVANCED", key: "advanced", color: "bg-orange-500 text-white" },
+  { value: "EXPERT", key: "expert", color: "bg-red-500 text-white" },
 ];
 
 export function CompetencySmartCard({
@@ -199,9 +199,9 @@ export function CompetencySmartCard({
                     ? opt.color
                     : "bg-muted/30 text-muted-foreground hover:bg-muted/60"
                 )}
-                title={opt.label}
+                title={t(`difficultyOptions.${opt.key}`)}
               >
-                {opt.short}
+                {t(`difficultyOptions.${opt.key}Short`)}
               </button>
             ))}
           </div>
@@ -308,7 +308,7 @@ export function CompetencySmartCard({
                     : "bg-muted/30 text-muted-foreground"
                 )}
               >
-                {opt.short}
+                {t(`difficultyOptions.${opt.key}Short`)}
               </button>
             ))}
           </div>

@@ -11,6 +11,7 @@ import React, {
   type ReactNode,
 } from 'react';
 import { toast } from 'sonner';
+import { useTranslations } from 'next-intl';
 import { useAutoSave, type SaveStatus } from '@/hooks/useAutoSave';
 import { useMultiTabSync } from '@/hooks/useMultiTabSync';
 import {
@@ -134,6 +135,8 @@ export function BlueprintWorkspaceProvider({
   templateName,
   isReadOnly = false,
 }: BlueprintWorkspaceProviderProps) {
+  const t = useTranslations('builder.simulator');
+
   // ============================================
   // STORE INITIALIZATION
   // ============================================
@@ -216,7 +219,7 @@ export function BlueprintWorkspaceProvider({
       // Rollback to last server-confirmed state after all retries exhausted
       storeRollback();
       const message = error instanceof Error ? error.message : 'Failed to save';
-      toast.error(`${message} — changes reverted`);
+      toast.error(`${message} ${t('toasts.changesReverted')}`);
     },
     debounceMs: 2000,
     maxWaitMs: 10000,
@@ -279,10 +282,10 @@ export function BlueprintWorkspaceProvider({
         storeSetCompetencies(resolved);
         toast.success(
           resolution === 'merge'
-            ? 'Changes merged from both tabs'
+            ? t('toasts.changesMerged')
             : resolution === 'keep_local'
-              ? 'Kept your changes'
-              : 'Applied changes from other tab'
+              ? t('toasts.keptYourChanges')
+              : t('toasts.appliedOtherChanges')
         );
       }
     },
@@ -322,7 +325,7 @@ export function BlueprintWorkspaceProvider({
           storeSetSimulating(false);
         }
       } catch {
-        toast.error('Simulation failed');
+        toast.error(t('toasts.simulationFailed'));
         storeSetSimulating(false);
       }
     },
@@ -333,7 +336,7 @@ export function BlueprintWorkspaceProvider({
   const saveBlueprint = useCallback(async () => {
     const success = await saveNow();
     if (success) {
-      toast.success('Blueprint saved');
+      toast.success(t('toasts.blueprintSaved'));
     }
     return success;
   }, [saveNow]);

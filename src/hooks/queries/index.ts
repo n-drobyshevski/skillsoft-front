@@ -66,4 +66,5 @@ export {
   // Shared With Me
   useSharedWithMe,
   useSharedWithMeCount,
+  useShareLinkStats,
 } from './useTemplateSharingQuery';

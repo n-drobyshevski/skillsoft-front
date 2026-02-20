@@ -40,6 +40,7 @@ export const SHARED_NAMESPACES = [
   'table',
   'filter',
   'sort',
+  'accessibility',
 ] as const;
 
 /**
@@ -71,6 +72,7 @@ export const TEST_TEMPLATES_NAMESPACES = [
   'help',
   'shared',
   'myTests',
+  'builder',
 ] as const;
 
 /**

@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { useTranslations } from 'next-intl';
 import {
   Users,
   TrendingUp,
@@ -89,6 +90,7 @@ function TeamComparisonSkeleton() {
 // ============================================
 
 function MissingTeamWarning() {
+  const t = useTranslations('builder.simulator');
   return (
     <div
       className="p-4 rounded-xl border border-purple-200 bg-purple-50 dark:bg-purple-950/30 dark:border-purple-800/50"
@@ -101,11 +103,10 @@ function MissingTeamWarning() {
         />
         <div className="space-y-1">
           <p className="text-sm font-medium text-purple-700 dark:text-purple-300">
-            Team Not Configured
+            {t('teamComparison.notConfigured')}
           </p>
           <p className="text-xs text-purple-600 dark:text-purple-400">
-            Select a team in the template settings to enable team comparison and gap
-            analysis.
+            {t('teamComparison.notConfiguredDescription')}
           </p>
         </div>
       </div>
@@ -125,6 +126,7 @@ export function TeamComparisonCard({
   isLoading,
   className,
 }: TeamComparisonCardProps) {
+  const t = useTranslations('builder.simulator');
   const config = STRATEGY_CONFIG.DYNAMIC_GAP_ANALYSIS;
 
   // Show loading skeleton
@@ -147,13 +149,13 @@ export function TeamComparisonCard({
     <div
       className={cn('p-3 rounded-xl border space-y-3', config.border, config.bg, className)}
       role="region"
-      aria-label="Team Comparison Analysis"
+      aria-label={t('teamComparison.ariaLabel')}
     >
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Users className={cn('h-4 w-4', config.iconText)} aria-hidden="true" />
-          <span className="text-sm font-medium">Team Comparison</span>
+          <span className="text-sm font-medium">{t('teamComparison.title')}</span>
         </div>
         <Badge
           variant="outline"
@@ -167,22 +169,21 @@ export function TeamComparisonCard({
               'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/50 dark:text-blue-400 dark:border-blue-800'
           )}
         >
-          {overallGap > 0 ? '+' : ''}
-          {overallGap}% overall
+          {overallGap > 0 ? '+' : ''}{t('teamComparison.overallGap', { gap: overallGap })}
         </Badge>
       </div>
 
       {/* Team Info */}
       <div className={cn('flex items-center gap-2 p-2 rounded-lg border', config.iconBg, config.border)}>
         <Users className={cn('h-4 w-4 shrink-0', config.iconText)} aria-hidden="true" />
-        <span className="text-sm truncate">{teamName || `Team ${teamId}`}</span>
+        <span className="text-sm truncate">{teamName || t('teamComparison.teamFallbackName', { id: teamId })}</span>
       </div>
 
       {/* Comparison Bars */}
       <div className="space-y-2">
         <div className="flex items-center gap-2 text-[10px] text-muted-foreground">
           <BarChart3 className="h-3 w-3" aria-hidden="true" />
-          <span>Individual vs Team Average</span>
+          <span>{t('teamComparison.vsTeamAverage')}</span>
         </div>
 
         {topComparisons.map((comp) => {
@@ -247,11 +248,11 @@ export function TeamComparisonCard({
             className="h-2 w-4 rounded bg-blue-200 dark:bg-blue-800/50"
             aria-hidden="true"
           />
-          <span>Team Avg</span>
+          <span>{t('teamComparison.legendTeamAvg')}</span>
         </div>
         <div className="flex items-center gap-1">
           <div className="h-1.5 w-4 rounded bg-blue-500" aria-hidden="true" />
-          <span>Individual</span>
+          <span>{t('teamComparison.legendIndividual')}</span>
         </div>
       </div>
     </div>

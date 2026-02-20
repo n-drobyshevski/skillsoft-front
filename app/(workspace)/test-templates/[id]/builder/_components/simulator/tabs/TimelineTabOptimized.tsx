@@ -11,6 +11,7 @@
  */
 
 import React, { useMemo, memo, useDeferredValue, useState, useEffect, useCallback, CSSProperties, ReactElement } from 'react';
+import { useTranslations } from 'next-intl';
 import { List } from 'react-window';
 import { Badge } from '@/components/ui/badge';
 import { LineChart as LineChartIcon, ChevronDown, ChevronUp } from 'lucide-react';
@@ -58,10 +59,12 @@ interface AdaptiveCurveChartProps {
 }
 
 const AdaptiveCurveChart = memo(function AdaptiveCurveChart({ data }: AdaptiveCurveChartProps) {
+  const t = useTranslations('builder.simulator');
+
   if (data.length === 0) {
     return (
       <p className="text-xs text-muted-foreground py-4 text-center">
-        Run a simulation to view the adaptive path
+        {t('timeline.runToViewPath')}
       </p>
     );
   }
@@ -120,6 +123,8 @@ interface QuestionCardProps {
 }
 
 const QuestionCard = memo(function QuestionCard({ question, index }: QuestionCardProps) {
+  const t = useTranslations('builder.simulator');
+
   return (
     <div className="pr-2 h-full"> {/* Right padding for scroll area */}
       <div className="flex items-start gap-3 p-3 rounded-xl border bg-background/80 h-[112px]">
@@ -149,7 +154,7 @@ const QuestionCard = memo(function QuestionCard({ question, index }: QuestionCar
           </p>
           {typeof question.abilityDelta === 'number' && (
             <div className="text-[11px] text-muted-foreground">
-              Ability shift: {question.abilityDelta > 0 ? '+' : ''}{question.abilityDelta}
+              {t('timeline.abilityShift')} {question.abilityDelta > 0 ? '+' : ''}{question.abilityDelta}
             </div>
           )}
         </div>
@@ -200,6 +205,7 @@ export const TimelineTabOptimized = memo(function TimelineTabOptimized({
   result,
   maxListHeight = 600,
 }: TimelineTabOptimizedProps) {
+  const t = useTranslations('builder.simulator');
   const [isChartVisible, setIsChartVisible] = useState(true);
   const [isChartLoaded, setIsChartLoaded] = useState(false);
 
@@ -246,7 +252,7 @@ export const TimelineTabOptimized = memo(function TimelineTabOptimized({
   }, []);
 
   if (itemCount === 0) {
-    return <p className="text-xs text-muted-foreground">No sample questions available.</p>;
+    return <p className="text-xs text-muted-foreground">{t('timeline.noSampleQuestions')}</p>;
   }
 
   return (
@@ -259,7 +265,7 @@ export const TimelineTabOptimized = memo(function TimelineTabOptimized({
         >
           <div className="flex items-center gap-2">
             <LineChartIcon className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm font-medium">Adaptive curve</span>
+            <span className="text-sm font-medium">{t('timeline.adaptiveCurve')}</span>
           </div>
           {isChartVisible ? (
             <ChevronUp className="h-4 w-4 text-muted-foreground" />
@@ -285,11 +291,11 @@ export const TimelineTabOptimized = memo(function TimelineTabOptimized({
       <div className="space-y-2">
         <div className="flex items-center justify-between px-1">
           <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-            Questions ({itemCount})
+            {t('timeline.questionsCount', { count: itemCount })}
           </span>
           {shouldVirtualize && (
             <span className="text-[10px] text-muted-foreground">
-              Scroll to see all
+              {t('timeline.scrollToSeeAll')}
             </span>
           )}
         </div>

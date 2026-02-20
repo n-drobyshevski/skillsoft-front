@@ -3,8 +3,6 @@
 import React from 'react';
 import {
   AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
   AlertDialogFooter,
@@ -15,7 +13,6 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { AlertTriangle, GitMerge, ArrowLeft, ArrowRight, Clock } from 'lucide-react';
-import { cn } from '@/lib/utils';
 import { useTranslations } from 'next-intl';
 import type { ConflictInfo } from '@/hooks/useMultiTabSync';
 import type { BlueprintCompetency } from '../actions';
@@ -40,6 +37,9 @@ export function ConflictResolutionDialog({
   onResolve,
   onDismiss,
 }: ConflictResolutionDialogProps) {
+  const t = useTranslations('builder.conflict');
+  const tTime = useTranslations('builder.saveStatus.timeAgo');
+
   if (!conflict) {
     return null;
   }
@@ -47,7 +47,16 @@ export function ConflictResolutionDialog({
   const localCount = conflict.localState.length;
   const remoteCount = conflict.remoteState.length;
   const timeDiff = Date.now() - conflict.timestamp;
-  const timeAgo = formatTimeAgo(timeDiff);
+
+  const timeAgo = (() => {
+    const seconds = Math.floor(timeDiff / 1000);
+    if (seconds < 5) return tTime('justNow');
+    if (seconds < 60) return tTime('secondsAgo', { seconds });
+    const minutes = Math.floor(seconds / 60);
+    if (minutes < 60) return tTime('minutesAgo', { minutes });
+    const hours = Math.floor(minutes / 60);
+    return tTime('hoursAgo', { hours });
+  })();
 
   // Find differences
   const localIds = new Set(conflict.localState.map((c) => c.id));
@@ -63,10 +72,10 @@ export function ConflictResolutionDialog({
         <AlertDialogHeader>
           <AlertDialogTitle className="flex items-center gap-2 text-amber-600">
             <AlertTriangle className="h-5 w-5" />
-            Blueprint Conflict Detected
+            {t('title')}
           </AlertDialogTitle>
           <AlertDialogDescription>
-            Another browser tab made changes to this blueprint. Choose how to resolve:
+            {t('description')}
           </AlertDialogDescription>
         </AlertDialogHeader>
 
@@ -75,7 +84,7 @@ export function ConflictResolutionDialog({
           <div className="flex items-center justify-between text-sm text-muted-foreground">
             <div className="flex items-center gap-1.5">
               <Clock className="h-3.5 w-3.5" />
-              <span>Conflict detected {timeAgo}</span>
+              <span>{t('detectedAgo', { time: timeAgo })}</span>
             </div>
             <div className="flex items-center gap-2">
               <Badge variant="outline" className="text-xs">
@@ -91,14 +100,14 @@ export function ConflictResolutionDialog({
               <div className="flex items-center gap-2 mb-2">
                 <ArrowLeft className="h-4 w-4 text-blue-600" />
                 <span className="text-sm font-medium text-blue-700 dark:text-blue-400">
-                  Your Changes
+                  {t('yourChanges')}
                 </span>
               </div>
               <div className="text-xs text-muted-foreground">
-                {localCount} competencies
+                {t('competencies', { count: localCount })}
                 {onlyInLocal.length > 0 && (
                   <span className="text-green-600 ml-1">
-                    (+{onlyInLocal.length} new)
+                    ({t('newItems', { count: onlyInLocal.length })})
                   </span>
                 )}
               </div>
@@ -109,14 +118,14 @@ export function ConflictResolutionDialog({
               <div className="flex items-center gap-2 mb-2">
                 <ArrowRight className="h-4 w-4 text-purple-600" />
                 <span className="text-sm font-medium text-purple-700 dark:text-purple-400">
-                  Other Tab
+                  {t('otherTab')}
                 </span>
               </div>
               <div className="text-xs text-muted-foreground">
-                {remoteCount} competencies
+                {t('competencies', { count: remoteCount })}
                 {onlyInRemote.length > 0 && (
                   <span className="text-green-600 ml-1">
-                    (+{onlyInRemote.length} new)
+                    ({t('newItems', { count: onlyInRemote.length })})
                   </span>
                 )}
               </div>
@@ -129,7 +138,7 @@ export function ConflictResolutionDialog({
               <div className="space-y-2 text-xs">
                 {onlyInLocal.length > 0 && (
                   <div>
-                    <span className="font-medium text-blue-600">Only in your version:</span>
+                    <span className="font-medium text-blue-600">{t('onlyInYourVersion')}</span>
                     <ul className="mt-1 space-y-0.5 pl-3">
                       {onlyInLocal.map((c) => (
                         <li key={c.id} className="text-muted-foreground">
@@ -141,7 +150,7 @@ export function ConflictResolutionDialog({
                 )}
                 {onlyInRemote.length > 0 && (
                   <div>
-                    <span className="font-medium text-purple-600">Only in other tab:</span>
+                    <span className="font-medium text-purple-600">{t('onlyInOtherTab')}</span>
                     <ul className="mt-1 space-y-0.5 pl-3">
                       {onlyInRemote.map((c) => (
                         <li key={c.id} className="text-muted-foreground">
@@ -154,11 +163,11 @@ export function ConflictResolutionDialog({
                 {inBoth.length > 0 && (
                   <div>
                     <span className="font-medium text-muted-foreground">
-                      In both ({inBoth.length}):
+                      {t('inBoth', { count: inBoth.length })}
                     </span>
                     <span className="text-muted-foreground ml-1">
                       {inBoth.slice(0, 3).map((c) => c.name).join(', ')}
-                      {inBoth.length > 3 && ` +${inBoth.length - 3} more`}
+                      {inBoth.length > 3 && ` ${t('moreItems', { count: inBoth.length - 3 })}`}
                     </span>
                   </div>
                 )}
@@ -174,7 +183,7 @@ export function ConflictResolutionDialog({
             onClick={() => onResolve('keep_local')}
           >
             <ArrowLeft className="h-4 w-4 text-blue-600" />
-            Keep Mine
+            {t('keepMine')}
           </Button>
           <Button
             variant="outline"
@@ -182,34 +191,17 @@ export function ConflictResolutionDialog({
             onClick={() => onResolve('use_remote')}
           >
             <ArrowRight className="h-4 w-4 text-purple-600" />
-            Use Theirs
+            {t('useTheirs')}
           </Button>
           <Button
             className="flex-1 gap-2"
             onClick={() => onResolve('merge')}
           >
             <GitMerge className="h-4 w-4" />
-            Merge Both
+            {t('mergeBoth')}
           </Button>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
   );
-}
-
-// ============================================
-// HELPERS
-// ============================================
-
-function formatTimeAgo(ms: number): string {
-  const seconds = Math.floor(ms / 1000);
-
-  if (seconds < 5) return 'just now';
-  if (seconds < 60) return `${seconds}s ago`;
-
-  const minutes = Math.floor(seconds / 60);
-  if (minutes < 60) return `${minutes}m ago`;
-
-  const hours = Math.floor(minutes / 60);
-  return `${hours}h ago`;
 }

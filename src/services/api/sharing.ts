@@ -14,6 +14,7 @@ import type {
   CreateShareLinkRequest,
   LinkValidationResult,
   LinkCountInfo,
+  ShareLinkStats,
   TemplateVisibility,
   SharePermission,
   SharedTemplatesResponse,
@@ -292,6 +293,16 @@ export const templateSharingApi = {
   getLinkCount: async (templateId: string): Promise<LinkCountInfo> => {
     const authHeaders = await getAuthHeaders();
     return fetchApi(`${TEMPLATES_BASE}/${templateId}/links/count`, {
+      authHeaders,
+    });
+  },
+
+  /**
+   * Get per-link statistics (sessions, completion rate, avg score, pass rate).
+   */
+  getShareLinkStats: async (templateId: string, linkId: string): Promise<ShareLinkStats> => {
+    const authHeaders = await getAuthHeaders();
+    return fetchApi(`${TEMPLATES_BASE}/${templateId}/share-links/${linkId}/stats`, {
       authHeaders,
     });
   },

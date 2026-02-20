@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { useTranslations } from 'next-intl';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 import { Strategy, STRATEGY_CONFIG } from './strategy-context';
@@ -83,13 +84,14 @@ export function StrategyLoadingSkeleton({
   strategy,
   className,
 }: StrategyLoadingSkeletonProps) {
+  const t = useTranslations('builder.simulator');
   const config = STRATEGY_CONFIG[strategy];
 
   return (
     <div
       className={cn('space-y-4 animate-pulse', className)}
       role="status"
-      aria-label="Loading simulation results"
+      aria-label={t('loadingResults')}
     >
       {/* Strategy badge skeleton */}
       <div className={cn('p-3 rounded-xl border', config.border, config.bg)}>
@@ -124,7 +126,7 @@ export function StrategyLoadingSkeleton({
       <Skeleton className="h-24 w-full rounded-xl" />
 
       {/* Screen reader text */}
-      <span className="sr-only">Loading simulation results...</span>
+      <span className="sr-only">{t('loadingResultsText')}</span>
     </div>
   );
 }

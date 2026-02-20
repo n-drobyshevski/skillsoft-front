@@ -1473,6 +1473,17 @@ export interface LinkCountInfo {
 }
 
 /**
+ * Per-link statistics returned by the share link stats endpoint.
+ */
+export interface ShareLinkStats {
+  shareLinkId: string;
+  totalSessions: number;
+  completedResults: number;
+  averageScore: number | null;
+  passRate: number | null;
+}
+
+/**
  * Template shared with the current user.
  * Combines template summary with sharing metadata.
  */

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useMemo, useState, useEffect, useRef, useCallback } from 'react';
+import { useTranslations } from 'next-intl';
 import {
   Radar,
   RadarChart,
@@ -233,6 +234,7 @@ export const SimulationCombinedRadar = React.memo<SimulationCombinedRadarProps>(
     variant = 'default',
     className,
   }) => {
+    const t = useTranslations('builder.simulator');
     const containerRef = useRef<HTMLDivElement>(null);
     const containerWidth = useContainerSize(containerRef);
     const colors = useComputedColors();
@@ -270,7 +272,7 @@ export const SimulationCombinedRadar = React.memo<SimulationCombinedRadarProps>(
           )}
           style={{ height: chartHeight }}
         >
-          No competencies selected
+          {t('radar.noCompetencies')}
         </div>
       );
     }
@@ -307,9 +309,10 @@ export const SimulationCombinedRadar = React.memo<SimulationCombinedRadarProps>(
         className={cn('w-full', className)}
         style={{ height: chartHeight }}
         role="img"
-        aria-label={`Radar chart showing ${radarData.competencies.length} competencies${
-          showBigFive ? ' and Big Five personality traits' : ''
-        }`}
+        aria-label={showBigFive
+          ? t('radar.ariaLabelWithBigFive', { count: radarData.competencies.length })
+          : t('radar.ariaLabel', { count: radarData.competencies.length })
+        }
       >
         <ResponsiveContainer width="100%" height="100%">
           <RadarChart
@@ -387,7 +390,7 @@ export const SimulationCombinedRadar = React.memo<SimulationCombinedRadarProps>(
 
             {/* Competency radar */}
             <Radar
-              name="Competency Weight"
+              name={t('radar.competencyWeight')}
               dataKey="competency"
               stroke="#3b82f6"
               strokeWidth={isNarrow ? 1.5 : 2}
@@ -402,7 +405,7 @@ export const SimulationCombinedRadar = React.memo<SimulationCombinedRadarProps>(
             {/* Big Five radar (if enabled) */}
             {showBigFive && radarData.bigFive.length > 0 && (
               <Radar
-                name="Big Five"
+                name={t('radar.bigFive')}
                 dataKey="bigFive"
                 stroke="#8b5cf6"
                 strokeWidth={isNarrow ? 1.5 : 2}
@@ -473,7 +476,7 @@ export const SimulationCombinedRadar = React.memo<SimulationCombinedRadarProps>(
                         className="text-xs"
                         style={{ color: colors.mutedForeground }}
                       >
-                        {isCompetency ? 'Weight:' : 'Score:'}
+                        {isCompetency ? t('radar.weight') : t('radar.score')}
                       </span>
                       <span
                         className="text-lg font-bold tabular-nums"
@@ -487,7 +490,7 @@ export const SimulationCombinedRadar = React.memo<SimulationCombinedRadarProps>(
                         className="text-[10px] mt-1.5 pt-1.5 border-t border-border/50"
                         style={{ color: colors.mutedForeground }}
                       >
-                        Relative weight in assessment
+                        {t('radar.relativeWeight')}
                       </p>
                     )}
                     {!isCompetency && (
@@ -495,7 +498,7 @@ export const SimulationCombinedRadar = React.memo<SimulationCombinedRadarProps>(
                         className="text-[10px] mt-1.5 pt-1.5 border-t border-border/50"
                         style={{ color: colors.mutedForeground }}
                       >
-                        Estimated personality trait
+                        {t('radar.estimatedTrait')}
                       </p>
                     )}
                   </div>

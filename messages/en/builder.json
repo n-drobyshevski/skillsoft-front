@@ -42,7 +42,23 @@
       "noQuestions": "No questions available",
       "limitedQuestions": "Limited questions available",
       "goodInventory": "Good question inventory"
-    }
+    },
+    "categories": {
+      "cognitive": "Cognitive",
+      "interpersonal": "Interpersonal",
+      "leadership": "Leadership",
+      "technical": "Technical",
+      "self_management": "Self-management",
+      "communication": "Communication",
+      "organizational": "Organizational",
+      "analytical": "Analytical",
+      "adaptability": "Adaptability",
+      "collaboration": "Collaboration",
+      "critical_thinking": "Critical Thinking",
+      "emotional_intelligence": "Emotional Intelligence",
+      "time_management": "Time Management"
+    },
+    "questionsCount": "{count} questions"
   },
   "card": {
     "dragToReorder": "Hold and drag to reorder",
@@ -298,7 +314,105 @@
       "gapAnalysis": "Gap Analysis",
       "teamFitPreview": "Team Fit Preview",
       "analytics": "Analytics"
-    }
+    },
+    "teamComparison": {
+      "title": "Team Comparison",
+      "ariaLabel": "Team Comparison Analysis",
+      "overallGap": "{gap}% overall",
+      "teamFallbackName": "Team {id}",
+      "vsTeamAverage": "Individual vs Team Average",
+      "legendTeamAvg": "Team Avg",
+      "legendIndividual": "Individual",
+      "notConfigured": "Team Not Configured",
+      "notConfiguredDescription": "Select a team in the template settings to enable team comparison and gap analysis."
+    },
+    "simulatedResults": {
+      "competencyScores": "Competency Scores",
+      "tooltipScore": "Score:",
+      "tooltipPassed": "Passed",
+      "tooltipBelowThreshold": "Below threshold",
+      "competenciesAssessed": "{count} competencies assessed",
+      "personalityProfile": "Personality Profile",
+      "bigFiveOcean": "Big Five (OCEAN) traits",
+      "noCompetencyData": "No competency data available",
+      "noCompetencies": "No competencies",
+      "threshold": "Threshold: {score}%",
+      "totalQuestions": "{count} questions",
+      "estimatedDuration": "~{minutes} min",
+      "topStrengths": "Top Strengths",
+      "growthAreas": "Growth Areas",
+      "jobAlignmentScore": "Job Alignment Score",
+      "jobRequirementsCovered": "{percentage}% of job requirements covered",
+      "teamGapScore": "Team Gap Score",
+      "aboveTeamAverage": "Above team average",
+      "belowTeamAverage": "Below team average - development opportunity",
+      "complementarySkills": "Complementary Skills (Above Team)",
+      "developmentFocus": "Development Focus (Below Team)",
+      "moreCompetencies": "+{count} more competencies"
+    },
+    "analytics": {
+      "noCompetencies": "No competencies selected",
+      "noDifficultyData": "No difficulty data",
+      "runToSeeLogic": "Run a simulation to see selection logic",
+      "coverageByCompetency": "Coverage by competency",
+      "difficultyBalance": "Difficulty balance",
+      "selectionReasons": "Selection reasons"
+    },
+    "timeline": {
+      "runToViewPath": "Run a simulation to view the adaptive path",
+      "abilityShift": "Ability shift:",
+      "noSampleQuestions": "No sample questions available.",
+      "adaptiveCurve": "Adaptive curve",
+      "questionsCount": "Questions ({count})",
+      "scrollToSeeAll": "Scroll to see all"
+    },
+    "insights": {
+      "competencyWeights": "Competency Weights",
+      "bigFiveTraits": "Big Five Traits",
+      "radarDescription": "The radar chart shows how competencies are distributed in this assessment, with an estimated Big Five personality profile based on the competency mix.",
+      "radarDisclaimer": "Actual personality scores will be refined after O*NET competency mapping."
+    },
+    "toasts": {
+      "failedToSave": "Failed to save",
+      "changesReverted": "— changes reverted",
+      "changesMerged": "Changes merged from both tabs",
+      "keptYourChanges": "Kept your changes",
+      "appliedOtherChanges": "Applied changes from other tab",
+      "simulationFailed": "Simulation failed",
+      "blueprintSaved": "Blueprint saved"
+    },
+    "radar": {
+      "noCompetencies": "No competencies selected",
+      "ariaLabel": "Radar chart showing {count} competencies",
+      "ariaLabelWithBigFive": "Radar chart showing {count} competencies and Big Five personality traits",
+      "competencyWeight": "Competency Weight",
+      "bigFive": "Big Five",
+      "weight": "Weight:",
+      "score": "Score:",
+      "scoreName": "Score",
+      "trait": "Trait",
+      "relativeWeight": "Relative weight in assessment",
+      "estimatedTrait": "Estimated personality trait",
+      "questionsAbbrev": "{count}q"
+    },
+    "bigFive": {
+      "openness": "Openness",
+      "opennessShort": "Open",
+      "conscientiousness": "Conscientiousness",
+      "conscientiousnessShort": "Consc",
+      "extraversion": "Extraversion",
+      "extraversionShort": "Extra",
+      "agreeableness": "Agreeableness",
+      "agreeablenessShort": "Agree",
+      "emotionalStability": "Emotional Stability",
+      "emotionalStabilityShort": "Stable"
+    },
+    "validation": {
+      "onetRequired": "O*NET SOC code required for job alignment insights",
+      "teamRequired": "Team selection required for gap analysis"
+    },
+    "onetLink": "O*NET: {code}",
+    "onetAriaLabel": "View on O*NET OnLine (opens in new tab)"
   },
   "onboarding": {
     "step": "Step {current} of {total}",
