@@ -32,6 +32,20 @@ export function SJTAnswerPreview({ answer, answerDisplayText }: SJTAnswerPreview
     );
   }
 
+  // Validate format: first char should be A-Z letter followed by ":"
+  const isOptionFormat = /^[A-Z]:/.test(answerDisplayText.substring(0, 2));
+
+  if (!isOptionFormat) {
+    // Fallback: generic display when no option data available
+    return (
+      <div className="flex items-center gap-2">
+        <span className="text-xs text-neutral-400 truncate max-w-[120px]">
+          {answerDisplayText}
+        </span>
+      </div>
+    );
+  }
+
   // Extract option letter from display text (e.g., "A: Some text...")
   const optionLetter = answerDisplayText.charAt(0);
 
@@ -64,9 +78,12 @@ export function SJTAnswerExpanded({ answer, answerDisplayText, scenario }: SJTAn
     );
   }
 
-  // Extract option letter and text
-  const optionLetter = answerDisplayText.charAt(0);
-  const optionText = answerDisplayText.substring(3); // Remove "A: " prefix
+  // Validate format: first char should be A-Z letter followed by ":"
+  const isOptionFormat = /^[A-Z]:/.test(answerDisplayText.substring(0, 2));
+
+  // Extract option letter and text (with fallback for non-standard format)
+  const optionLetter = isOptionFormat ? answerDisplayText.charAt(0) : '?';
+  const optionText = isOptionFormat ? answerDisplayText.substring(3) : answerDisplayText;
 
   return (
     <div className="py-2 space-y-3">

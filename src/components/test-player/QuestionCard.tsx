@@ -284,10 +284,10 @@ export function QuestionCard({
           })}
         </div>
 
-        {/* Scale hint - accessible to screen readers via aria-describedby */}
+        {/* Scale hint - kept for aria-describedby, visually hidden since card-level hint is shown */}
         <p
           id={scaleHintId}
-          className="text-xs text-neutral-400 text-center"
+          className="sr-only"
         >
           {t('selectScaleValue', {
             min: question.answerOptions[0]?.value || 1,
@@ -406,7 +406,8 @@ export function QuestionCard({
   return (
     <Card className={cn(
       "bg-neutral-900/50 border-neutral-800 shadow-2xl",
-      isSJT && "border-l-4 border-l-blue-500"
+      isSJT && "border-l-4 border-l-blue-500",
+      isLikertType && "border-l-4 border-l-emerald-500"
     )}>
       <CardContent className="p-6 sm:p-8">
         {/* Live region for selection announcements */}
@@ -477,7 +478,9 @@ export function QuestionCard({
                   "inline-block text-[10px] sm:text-xs px-2 py-1 rounded whitespace-nowrap",
                   isSJT
                     ? "text-blue-300 bg-blue-500/20 font-medium"
-                    : "text-neutral-500 bg-neutral-800/50"
+                    : isLikertType
+                      ? "text-emerald-300 bg-emerald-500/20 font-medium"
+                      : "text-neutral-500 bg-neutral-800/50"
                 )}
                 aria-hidden="true"
               >
@@ -510,6 +513,11 @@ export function QuestionCard({
         {isSJT && (
           <p className="mt-6 text-xs text-blue-400/70 text-center bg-blue-500/5 py-3 rounded border border-blue-500/20">
             {t('selectBestOption')}
+          </p>
+        )}
+        {isLikertType && (
+          <p className="mt-6 text-xs text-emerald-400/70 text-center bg-emerald-500/5 py-3 rounded border border-emerald-500/20">
+            {t('selectScaleHint')}
           </p>
         )}
       </CardContent>

@@ -288,6 +288,7 @@
     "open": "Open",
     "selectScaleValue": "Select a value on the scale from {min} to {max}",
     "selectBestOption": "Select the most appropriate answer for this situation",
+    "selectScaleHint": "Select the rating that best reflects your response",
     "describeSituation": "Describe a specific situation from your experience...",
     "enterAnswer": "Enter your answer...",
     "describeSituationHint": "Describe a specific situation, what you did, and what was the result",

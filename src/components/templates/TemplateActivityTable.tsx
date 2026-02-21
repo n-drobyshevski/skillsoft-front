@@ -176,7 +176,7 @@ export function TemplateActivityTable({
   };
 
   // Fetch on mount and filter changes
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+   
   useEffect(() => {
     fetchData();
   }, [templateId, filters]);

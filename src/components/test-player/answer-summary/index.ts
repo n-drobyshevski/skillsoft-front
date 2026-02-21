@@ -1,15 +1,16 @@
 /**
  * Answer Summary Review Components
  *
- * Components for displaying a summary of all answers before test submission.
- * Allows users to review their responses and optionally edit them.
+ * Segmented attention flow: "Needs Attention" (skipped + flagged)
+ * and "Completed" (answered, collapsed by default).
  */
 
 export { AnswerSummaryScreen } from './AnswerSummaryScreen';
 export { SummaryHero } from './SummaryHero';
-export { FilterBar } from './FilterBar';
+export { AllCompleteState } from './AllCompleteState';
+export { AttentionSegment } from './AttentionSegment';
+export { CompletedSegment } from './CompletedSegment';
 export { AnswerCardList } from './AnswerCardList';
 export { AnswerCard } from './cards/AnswerCard';
 export { ActionFooter } from './ActionFooter';
 export { SubmissionProgress } from './SubmissionProgress';
-export { SkippedWarningBanner } from './SkippedWarningBanner';

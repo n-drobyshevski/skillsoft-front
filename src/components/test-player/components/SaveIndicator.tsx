@@ -52,15 +52,15 @@ export function SaveIndicator({ status, className }: SaveIndicatorProps) {
     <AnimatePresence>
       {visible && (
         <motion.div
-          initial={{ opacity: 0, y: 4 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -4 }}
+          initial={{ opacity: 0, y: 6, scale: 0.95 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          exit={{ opacity: 0, y: -6, scale: 0.95 }}
           transition={{ duration: 0.15 }}
           className={cn(
-            'flex items-center gap-1.5 text-xs',
-            status === 'saving' && 'text-neutral-400',
-            status === 'saved' && 'text-emerald-400',
-            status === 'error' && 'text-red-400',
+            'flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full backdrop-blur-sm',
+            status === 'saving' && 'text-neutral-300 bg-neutral-800/60',
+            status === 'saved' && 'text-emerald-300 bg-emerald-950/50',
+            status === 'error' && 'text-red-300 bg-red-950/50',
             className,
           )}
           role="status"

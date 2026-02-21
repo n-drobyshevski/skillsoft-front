@@ -434,10 +434,8 @@ export function ImmersivePlayer({
         </div>
       </main>
 
-      {/* Save status indicator */}
-      <div className="flex justify-center pb-1">
-        <SaveIndicator status={saveStatus} />
-      </div>
+      {/* Save status indicator — floating overlay so it never displaces layout */}
+      <SaveIndicator status={saveStatus} className="fixed bottom-20 left-1/2 -translate-x-1/2 z-40 pointer-events-none" />
 
       <QuestionNavigation
         canGoBack={state.allowBackNavigation && state.questionIndex > 0}

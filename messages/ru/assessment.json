@@ -67,6 +67,7 @@
   "open": "Открытый",
   "selectScaleValue": "Выберите значение на шкале от {min} до {max}",
   "selectBestOption": "Выберите наиболее подходящий ответ для данной ситуации",
+  "selectScaleHint": "Выберите оценку, которая лучше всего отражает ваш ответ",
   "describeSituation": "Опишите конкретную ситуацию из вашего опыта...",
   "enterAnswer": "Введите ваш ответ...",
   "describeSituationHint": "Опишите конкретную ситуацию, что вы сделали, и каков был результат",
@@ -158,7 +159,17 @@
     "reviewDetails": "Показать подробности",
     "hideDetails": "Скрыть подробности",
     "compactScore": "{score}/{max}",
-    "questionLabel": "В{number}"
+    "questionLabel": "В{number}",
+    "allCompleteTitle": "Все вопросы отвечены!",
+    "allCompleteDescription": "Вы готовы отправить оценку. Просмотрите ответы ниже или отправьте сейчас.",
+    "needsAttention": "Требуют внимания",
+    "needsAttentionLabel": "Вопросы, требующие внимания",
+    "skippedStat": "{count, plural, one {# пропущен} few {# пропущено} many {# пропущено} other {# пропущено}}",
+    "flaggedStat": "{count, plural, one {# отмечен} few {# отмечено} many {# отмечено} other {# отмечено}}",
+    "answerThisQuestion": "Ответить на вопрос",
+    "reviewThisQuestion": "Просмотреть вопрос",
+    "completedCount": "{count, plural, one {# отвеченный вопрос} few {# отвеченных вопроса} many {# отвеченных вопросов} other {# отвеченных вопросов}}",
+    "completedLabel": "Отвеченные вопросы"
   },
   "answerCard": {
     "statusAnswered": "Отвечено",

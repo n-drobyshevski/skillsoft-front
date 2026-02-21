@@ -7,10 +7,11 @@ export { CompletionDialog } from './CompletionDialog';
 export {
   AnswerSummaryScreen,
   SummaryHero,
-  FilterBar,
+  AllCompleteState,
+  AttentionSegment,
+  CompletedSegment,
   AnswerCardList,
   AnswerCard,
   ActionFooter,
   SubmissionProgress,
-  SkippedWarningBanner,
 } from './answer-summary';

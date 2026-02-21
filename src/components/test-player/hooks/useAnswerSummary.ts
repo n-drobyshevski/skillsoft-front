@@ -31,10 +31,13 @@ import type { PlayerState } from './usePlayerState';
 
 /** Cached question data for answer summary display */
 interface CachedQuestionData {
+  id: string;
   questionText: string;
   questionType: QuestionType;
   behavioralIndicatorId: string;
   competencyId?: string;
+  scenario?: string;
+  answerOptions?: Array<{ id?: string; text?: string; label?: string; value?: number }>;
 }
 
 export interface UseAnswerSummaryProps {
@@ -138,10 +141,13 @@ export function useAnswerSummary({
     if (initialQuestion.question) {
       const q = initialQuestion.question;
       questionsCache.current.set(q.id, {
+        id: q.id,
         questionText: q.questionText,
         questionType: q.questionType,
         behavioralIndicatorId: q.behavioralIndicatorId,
         competencyId: q.competencyId,
+        scenario: q.scenario,
+        answerOptions: q.answerOptions,
       });
     }
     // Only run on mount
@@ -161,10 +167,13 @@ export function useAnswerSummary({
 
   const cacheQuestion = (question: SessionQuestion) => {
     questionsCache.current.set(question.id, {
+      id: question.id,
       questionText: question.questionText,
       questionType: question.questionType,
       behavioralIndicatorId: question.behavioralIndicatorId,
       competencyId: question.competencyId,
+      scenario: question.scenario,
+      answerOptions: question.answerOptions,
     });
   };
 
@@ -172,11 +181,60 @@ export function useAnswerSummary({
   // Internal: Format answer for display
   // ========================================================================
 
-  const formatAnswerForSummary = (answer: TestAnswer | null): string => {
+  const formatAnswerForSummary = (
+    answer: TestAnswer | null,
+    cachedQuestion?: CachedQuestionData,
+  ): string => {
     if (!answer || answer.isSkipped) {
       return t('player.summary.skippedAnswer');
     }
 
+    // Rich formatting when question data is available
+    if (cachedQuestion) {
+      switch (cachedQuestion.questionType) {
+        case 'SJT':
+        case 'SITUATIONAL_JUDGMENT': {
+          if (answer.selectedOptionIds?.length) {
+            const optionId = answer.selectedOptionIds[0];
+            const optionIndex = cachedQuestion.answerOptions?.findIndex(opt => opt.id === optionId);
+            if (optionIndex !== undefined && optionIndex >= 0) {
+              const letter = String.fromCharCode(65 + optionIndex);
+              const option = cachedQuestion.answerOptions?.at(optionIndex);
+              const text = option?.text || option?.label || '';
+              return `${letter}${text ? `: ${text.substring(0, 50)}${text.length > 50 ? '...' : ''}` : ''}`;
+            }
+          }
+          break;
+        }
+        case 'MCQ':
+        case 'MULTIPLE_CHOICE':
+        case 'SINGLE_CHOICE': {
+          if (answer.selectedOptionIds?.length) {
+            const selectedOptions = cachedQuestion.answerOptions?.filter(
+              opt => opt.id && answer.selectedOptionIds?.includes(opt.id)
+            );
+            if (selectedOptions?.length) {
+              return selectedOptions.map(opt => opt.text || opt.label).filter(Boolean).join(', ').substring(0, 100);
+            }
+          }
+          break;
+        }
+        case 'LIKERT':
+        case 'LIKERT_SCALE': {
+          if (answer.likertValue !== undefined) {
+            const option = cachedQuestion.answerOptions?.find(
+              opt => opt.value === answer.likertValue
+            );
+            if (option?.label || option?.text) {
+              return option.label || option.text || t('player.summary.likertValue', { value: answer.likertValue });
+            }
+          }
+          break;
+        }
+      }
+    }
+
+    // Fallback to generic formatting
     if (answer.likertValue !== undefined) {
       return t('player.summary.likertValue', { value: answer.likertValue });
     }
@@ -279,8 +337,9 @@ export function useAnswerSummary({
           questionType: cachedQuestion?.questionType || ('LIKERT' as QuestionType),
           behavioralIndicatorId: cachedQuestion?.behavioralIndicatorId || '',
           competencyId: cachedQuestion?.competencyId,
+          scenario: cachedQuestion?.scenario,
           answer,
-          answerDisplayText: formatAnswerForSummary(answer),
+          answerDisplayText: formatAnswerForSummary(answer, cachedQuestion),
           status: answer?.isSkipped ? 'skipped' : answer ? 'answered' : 'pending',
           timeSpentSeconds: answer?.timeSpentSeconds || 0,
           answeredAt: answer?.answeredAt || null,

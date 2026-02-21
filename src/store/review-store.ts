@@ -127,14 +127,11 @@ interface ReviewState {
   /** When submission started (for timeout detection) */
   submissionStartedAt: number | null;
 
-  /** Active filter in the summary view */
-  activeFilter: 'all' | 'answered' | 'skipped' | 'flagged';
-
-  /** Sort order for the answer list */
-  sortOrder: 'order' | 'status' | 'competency';
-
   /** Expanded card IDs (for accordion behavior) */
   expandedCardIds: Set<string>;
+
+  /** Whether the "Completed" segment is expanded (collapsed by default) */
+  isCompletedExpanded: boolean;
 }
 
 interface ReviewActions {
@@ -177,12 +174,6 @@ interface ReviewActions {
   groupAnswersByCompetency: (answers: AnswerSummaryItem[]) => void;
 
   // UI state
-  /** Set the active filter */
-  setActiveFilter: (filter: ReviewState['activeFilter']) => void;
-
-  /** Set the sort order */
-  setSortOrder: (order: ReviewState['sortOrder']) => void;
-
   /** Toggle a card's expanded state */
   toggleCardExpanded: (cardId: string) => void;
 
@@ -191,6 +182,9 @@ interface ReviewActions {
 
   /** Collapse all cards */
   collapseAllCards: () => void;
+
+  /** Toggle the completed segment expansion */
+  toggleCompletedExpanded: () => void;
 
   /** Save scroll position before editing */
   saveScrollPosition: (position: number) => void;
@@ -213,9 +207,8 @@ const initialState: ReviewState = {
   submissionAttempts: 0,
   lastSubmissionError: null,
   submissionStartedAt: null,
-  activeFilter: 'all',
-  sortOrder: 'order',
   expandedCardIds: new Set(),
+  isCompletedExpanded: false,
 };
 
 /**
@@ -346,14 +339,6 @@ export const useReviewStore = create<ReviewStore>()(
     },
 
     // UI state
-    setActiveFilter: (filter) => {
-      set({ activeFilter: filter });
-    },
-
-    setSortOrder: (order) => {
-      set({ sortOrder: order });
-    },
-
     toggleCardExpanded: (cardId) => {
       set(state => {
         const newSet = new Set(state.expandedCardIds);
@@ -374,6 +359,10 @@ export const useReviewStore = create<ReviewStore>()(
 
     collapseAllCards: () => {
       set({ expandedCardIds: new Set() });
+    },
+
+    toggleCompletedExpanded: () => {
+      set(state => ({ isCompletedExpanded: !state.isCompletedExpanded }));
     },
 
     saveScrollPosition: (position) => {
@@ -456,10 +445,6 @@ export const useAnswersCache = () =>
 export const useCompetencyGroups = () =>
   useReviewStore(state => state.competencyGroups);
 
-/** Get active filter */
-export const useActiveFilter = () =>
-  useReviewStore(state => state.activeFilter);
-
 /** Get expanded card IDs */
 export const useExpandedCardIds = () =>
   useReviewStore(state => state.expandedCardIds);
@@ -489,17 +474,32 @@ export const useSummaryStats = () =>
     })
   );
 
-/** Get filtered answers based on active filter */
-export const useFilteredAnswers = () =>
-  useReviewStore(state => {
-    const { answersCache, activeFilter } = state;
+/** Get items that need attention (skipped + flagged), sorted by question index */
+export const useAttentionItems = () =>
+  useReviewStore(state =>
+    state.answersCache
+      .filter(item => item.status === 'skipped' || item.status === 'flagged')
+      .sort((a, b) => a.questionIndex - b.questionIndex)
+  );
 
-    if (activeFilter === 'all') {
-      return answersCache;
-    }
+/** Get completed/answered items, sorted by question index */
+export const useCompletedItems = () =>
+  useReviewStore(state =>
+    state.answersCache
+      .filter(item => item.status === 'answered')
+      .sort((a, b) => a.questionIndex - b.questionIndex)
+  );
 
-    return answersCache.filter(item => item.status === activeFilter);
-  });
+/** Check if all questions are answered (no skipped or flagged) */
+export const useIsAllComplete = () =>
+  useReviewStore(state =>
+    state.answersCache.length > 0 &&
+    state.answersCache.every(item => item.status === 'answered')
+  );
+
+/** Get whether the completed segment is expanded */
+export const useIsCompletedExpanded = () =>
+  useReviewStore(state => state.isCompletedExpanded);
 
 // ============================================
 // UTILITY FUNCTIONS

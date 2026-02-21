@@ -67,6 +67,7 @@
   "open": "Open",
   "selectScaleValue": "Select a value on the scale from {min} to {max}",
   "selectBestOption": "Select the most appropriate answer for this situation",
+  "selectScaleHint": "Select the rating that best reflects your response",
   "describeSituation": "Describe a specific situation from your experience...",
   "enterAnswer": "Enter your answer...",
   "describeSituationHint": "Describe a specific situation, what you did, and what was the result",
@@ -158,7 +159,17 @@
     "reviewDetails": "Review Details",
     "hideDetails": "Hide Details",
     "compactScore": "{score}/{max}",
-    "questionLabel": "Q{number}"
+    "questionLabel": "Q{number}",
+    "allCompleteTitle": "All questions answered!",
+    "allCompleteDescription": "You're ready to submit your assessment. Review your answers below or submit now.",
+    "needsAttention": "Needs Attention",
+    "needsAttentionLabel": "Questions that need attention",
+    "skippedStat": "{count, plural, one {# skipped} other {# skipped}}",
+    "flaggedStat": "{count, plural, one {# flagged} other {# flagged}}",
+    "answerThisQuestion": "Answer this question",
+    "reviewThisQuestion": "Review this question",
+    "completedCount": "{count, plural, one {# answered question} other {# answered questions}}",
+    "completedLabel": "Answered questions"
   },
   "answerCard": {
     "statusAnswered": "Answered",

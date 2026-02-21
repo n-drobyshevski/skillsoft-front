@@ -1,25 +1,20 @@
 'use client';
 
-import { useRef, useEffect, useState, useMemo } from 'react';
-import { useTranslations } from 'next-intl';
-import { AnimatePresence, motion } from 'motion/react';
+import { useRef, useEffect, useState } from 'react';
+import { AnimatePresence } from 'motion/react';
 import { useShallow } from 'zustand/react/shallow';
-import { ChevronDown, ChevronUp } from 'lucide-react';
 import { SummaryHero } from './SummaryHero';
-import { FilterBar } from './FilterBar';
-import { SkippedWarningBanner } from './SkippedWarningBanner';
-import { AnswerCardList } from './AnswerCardList';
-import { CompactAnswerRow } from './cards/CompactAnswerRow';
+import { AllCompleteState } from './AllCompleteState';
+import { AttentionSegment } from './AttentionSegment';
+import { CompletedSegment } from './CompletedSegment';
 import { ActionFooter } from './ActionFooter';
 import { SubmissionProgress } from './SubmissionProgress';
-import { Button } from '@/components/ui/button';
+import { CompletionDialog } from '../CompletionDialog';
 import {
   useReviewStore,
-  useFilteredAnswers,
-  useSummaryStats,
   AnswerSummaryItem,
-  CompetencyGroup,
 } from '@/store/review-store';
+import type { CompetencyGroup } from '@/store/review-store';
 import { TestSession } from '@/types/domain';
 
 interface AnswerSummaryScreenProps {
@@ -34,45 +29,35 @@ interface AnswerSummaryScreenProps {
 }
 
 /**
- * AnswerSummaryScreen - Main container for the answer review interface
+ * AnswerSummaryScreen - Segmented attention flow layout
  *
- * Progressive disclosure pattern:
- * - Default: compact summary view showing question status at a glance
- * - Detailed: full expandable answer cards with filtering/sorting
- * - Auto-expands to detailed view when skipped questions exist
+ * Two segments:
+ * 1. "Needs Attention" (skipped + flagged) -- always visible
+ * 2. "All Answered" (completed) -- collapsed by default
  *
- * Displays:
- * - Summary hero with completion stats
- * - Compact answer list (default) or detailed answer cards (toggle)
- * - Filter bar for filtering answers (detailed mode only)
- * - Skipped questions warning (if any)
- * - Action footer with back/submit buttons
- * - Submission progress overlay
- *
- * Uses the review-store for state management of:
- * - Filters and sorting
- * - Expanded card states
- * - Scroll position preservation
+ * When all questions are answered, shows celebration state.
+ * Wires CompletionDialog for submit confirmation.
  */
 export function AnswerSummaryScreen({
   session,
   answers,
-  competencyGroups,
-  timeRemaining,
   onGoBack,
   onSubmit,
   onEditAnswer,
   isSubmitting,
 }: AnswerSummaryScreenProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
-  const t = useTranslations('assessment');
+  const [showCompletionDialog, setShowCompletionDialog] = useState(false);
 
   // Store state
-  const { activeFilter, sortOrder, expandedCardIds, scrollPosition, submissionError, submissionAttempts } = useReviewStore(
+  const {
+    isCompletedExpanded,
+    scrollPosition,
+    submissionError,
+    submissionAttempts,
+  } = useReviewStore(
     useShallow((state) => ({
-      activeFilter: state.activeFilter,
-      sortOrder: state.sortOrder,
-      expandedCardIds: state.expandedCardIds,
+      isCompletedExpanded: state.isCompletedExpanded,
       scrollPosition: state.scrollPosition,
       submissionError: state.lastSubmissionError,
       submissionAttempts: state.submissionAttempts,
@@ -80,77 +65,39 @@ export function AnswerSummaryScreen({
   );
 
   // Store actions
-  const { setActiveFilter, setSortOrder, toggleCardExpanded, saveScrollPosition, retrySubmission, cancelSubmission } = useReviewStore(
+  const {
+    toggleCompletedExpanded,
+    saveScrollPosition,
+    retrySubmission,
+    cancelSubmission,
+  } = useReviewStore(
     useShallow((state) => ({
-      setActiveFilter: state.setActiveFilter,
-      setSortOrder: state.setSortOrder,
-      toggleCardExpanded: state.toggleCardExpanded,
+      toggleCompletedExpanded: state.toggleCompletedExpanded,
       saveScrollPosition: state.saveScrollPosition,
       retrySubmission: state.retrySubmission,
       cancelSubmission: state.cancelSubmission,
     }))
   );
 
-  // Calculate stats
+  // Derive segments
+  const attentionItems = answers
+    .filter(a => a.status === 'skipped' || a.status === 'flagged')
+    .sort((a, b) => a.questionIndex - b.questionIndex);
+
+  const completedItems = answers
+    .filter(a => a.status === 'answered')
+    .sort((a, b) => a.questionIndex - b.questionIndex);
+
   const stats = {
-      total: answers.length,
-      answered: answers.filter((a) => a.status === 'answered').length,
-      skipped: answers.filter((a) => a.status === 'skipped').length,
-      flagged: answers.filter((a) => a.status === 'flagged').length,
-    };
-
-  const hasSkipped = stats.skipped > 0;
-
-  // Progressive disclosure: compact (default) vs detailed view
-  // Auto-expand to detailed mode when skipped questions exist
-  const [isDetailedView, setIsDetailedView] = useState(hasSkipped);
-
-  // Filter answers based on active filter
-  const filteredAnswers = activeFilter === 'all'
-      ? answers
-      : answers.filter((item) => item.status === activeFilter);
-
-  // Sort filtered answers
-  const sortedAnswers = useMemo(() => {
-    const sorted = [...filteredAnswers];
-
-    switch (sortOrder) {
-      case 'status': {
-        // Sort by status: skipped first, then answered, then pending
-        const statusOrder: Record<string, number> = { skipped: 0, flagged: 1, pending: 2, answered: 3 };
-        sorted.sort((a, b) => statusOrder[a.status] - statusOrder[b.status]);
-        break;
-      }
-      case 'competency':
-        // Sort by competency name, then by question index
-        sorted.sort((a, b) => {
-          const compCompare = (a.competencyName || '').localeCompare(b.competencyName || '');
-          if (compCompare !== 0) return compCompare;
-          return a.questionIndex - b.questionIndex;
-        });
-        break;
-      case 'order':
-      default:
-        // Sort by question index (original order)
-        sorted.sort((a, b) => a.questionIndex - b.questionIndex);
-        break;
-    }
-
-    return sorted;
-  }, [filteredAnswers, sortOrder]);
-
-  // Compact view always shows answers in original order (no filtering/sorting)
-  const compactAnswers = useMemo(() => {
-    return [...answers].sort((a, b) => a.questionIndex - b.questionIndex);
-  }, [answers]);
-
-  // Filter counts for FilterBar
-  const filterCounts = {
-    all: answers.length,
-    answered: stats.answered,
-    skipped: stats.skipped,
-    flagged: stats.flagged,
+    total: answers.length,
+    answered: completedItems.length,
+    skipped: answers.filter(a => a.status === 'skipped').length,
+    flagged: answers.filter(a => a.status === 'flagged').length,
   };
+
+  const isAllAnswered = stats.answered >= stats.total;
+  const hasSkipped = stats.skipped > 0;
+  const canSubmit = stats.answered > 0;
 
   // Restore scroll position on mount
   useEffect(() => {
@@ -167,13 +114,15 @@ export function AnswerSummaryScreen({
     onEditAnswer(questionId, questionIndex);
   };
 
-  // Handle review skipped - switch to detailed view, filter to skipped, scroll to top
-  const handleReviewSkipped = () => {
-    setIsDetailedView(true);
-    setActiveFilter('skipped');
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = 0;
-    }
+  // Handle submit button click -- open confirmation dialog
+  const handleSubmitClick = () => {
+    setShowCompletionDialog(true);
+  };
+
+  // Handle confirmed submission
+  const handleConfirmSubmit = () => {
+    setShowCompletionDialog(false);
+    onSubmit();
   };
 
   // Handle retry submission
@@ -181,14 +130,6 @@ export function AnswerSummaryScreen({
     retrySubmission();
     onSubmit();
   };
-
-  // Handle cancel submission
-  const handleCancelSubmission = () => {
-    cancelSubmission();
-  };
-
-  const isAllAnswered = stats.answered >= stats.total;
-  const canSubmit = stats.answered > 0;
 
   return (
     <div className="min-h-screen min-h-[100dvh] bg-neutral-950 flex flex-col">
@@ -206,97 +147,34 @@ export function AnswerSummaryScreen({
               skippedCount={stats.skipped}
               flaggedCount={stats.flagged}
               templateName={session.templateName}
-              timeRemaining={timeRemaining}
             />
           </div>
         </div>
 
-        {/* Filter bar - only visible in detailed mode */}
-        {isDetailedView && (
-          <FilterBar
-            activeFilter={activeFilter}
-            onFilterChange={setActiveFilter}
-            sortOrder={sortOrder}
-            onSortChange={setSortOrder}
-            counts={filterCounts}
-          />
-        )}
-
         {/* Main content */}
         <div className="px-3 sm:px-4 py-4 sm:py-6">
-          <div className="max-w-3xl mx-auto">
-            {/* Skipped warning banner - visible in both modes */}
-            {hasSkipped && (isDetailedView ? activeFilter === 'all' : true) && (
-              <SkippedWarningBanner
-                skippedCount={stats.skipped}
-                onReviewSkipped={handleReviewSkipped}
+          <div className="max-w-3xl mx-auto space-y-6">
+            {/* Celebration state OR segmented flow */}
+            {isAllAnswered ? (
+              <AllCompleteState />
+            ) : (
+              <>
+                {/* Attention segment: skipped + flagged */}
+                <AttentionSegment
+                  items={attentionItems}
+                  onEditAnswer={handleEditAnswer}
+                />
+              </>
+            )}
+
+            {/* Completed segment: collapsible answered items */}
+            {completedItems.length > 0 && (
+              <CompletedSegment
+                items={completedItems}
+                isExpanded={isCompletedExpanded}
+                onToggle={toggleCompletedExpanded}
               />
             )}
-
-            {/* Compact answer list (default view) */}
-            {!isDetailedView && (
-              <div className="space-y-1">
-                {compactAnswers.map((item) => (
-                  <CompactAnswerRow
-                    key={item.questionId}
-                    item={item}
-                    questionNumber={item.questionIndex + 1}
-                  />
-                ))}
-              </div>
-            )}
-
-            {/* Detailed answer list (toggled view) */}
-            <AnimatePresence mode="wait">
-              {isDetailedView && (
-                <motion.div
-                  key="detailed-view"
-                  initial={{ height: 0, opacity: 0 }}
-                  animate={{ height: 'auto', opacity: 1 }}
-                  exit={{ height: 0, opacity: 0 }}
-                  transition={{ duration: 0.3, ease: 'easeInOut' }}
-                >
-                  <AnswerCardList
-                    items={sortedAnswers}
-                    competencyGroups={sortOrder === 'competency' ? competencyGroups : undefined}
-                    expandedCardIds={expandedCardIds}
-                    onToggleCard={toggleCardExpanded}
-                    onEditAnswer={handleEditAnswer}
-                    groupByCompetency={sortOrder === 'competency'}
-                  />
-
-                  {/* Empty state for filtered view */}
-                  {sortedAnswers.length === 0 && activeFilter !== 'all' && (
-                    <div className="text-center py-12">
-                      <p className="text-neutral-500">
-                        {t('answerCard.noQuestionsWithStatus')}
-                      </p>
-                    </div>
-                  )}
-                </motion.div>
-              )}
-            </AnimatePresence>
-
-            {/* Review Details toggle button */}
-            <div className="mt-4 flex justify-center">
-              <Button
-                variant="ghost"
-                onClick={() => setIsDetailedView((prev) => !prev)}
-                className="text-sm text-neutral-400 hover:text-white hover:bg-neutral-800/50 gap-2"
-              >
-                {isDetailedView ? (
-                  <>
-                    <ChevronUp className="w-4 h-4" />
-                    {t('answerSummary.hideDetails')}
-                  </>
-                ) : (
-                  <>
-                    <ChevronDown className="w-4 h-4" />
-                    {t('answerSummary.reviewDetails')}
-                  </>
-                )}
-              </Button>
-            </div>
           </div>
         </div>
       </div>
@@ -304,11 +182,22 @@ export function AnswerSummaryScreen({
       {/* Action footer - sticky */}
       <ActionFooter
         onGoBack={onGoBack}
-        onSubmit={onSubmit}
+        onSubmit={handleSubmitClick}
         isSubmitting={isSubmitting}
         isAllAnswered={isAllAnswered}
         hasSkipped={hasSkipped}
         canSubmit={canSubmit}
+      />
+
+      {/* Completion confirmation dialog */}
+      <CompletionDialog
+        open={showCompletionDialog}
+        onOpenChange={setShowCompletionDialog}
+        onComplete={handleConfirmSubmit}
+        answeredCount={stats.answered}
+        totalQuestions={stats.total}
+        skippedCount={stats.skipped}
+        isSubmitting={isSubmitting}
       />
 
       {/* Submission progress overlay */}
@@ -319,7 +208,7 @@ export function AnswerSummaryScreen({
             error={submissionError}
             attempts={submissionAttempts}
             onRetry={handleRetry}
-            onCancel={handleCancelSubmission}
+            onCancel={cancelSubmission}
           />
         )}
       </AnimatePresence>
