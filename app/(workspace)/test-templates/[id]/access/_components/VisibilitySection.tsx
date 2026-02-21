@@ -10,6 +10,8 @@ interface VisibilitySectionProps {
   templateId: string;
   isOwner: boolean;
   canManage: boolean;
+  templateStatus: 'DRAFT' | 'PUBLISHED' | 'ARCHIVED';
+  onVisibilityChange?: () => void;
 }
 
 /**
@@ -24,6 +26,8 @@ export function VisibilitySection({
   templateId,
   isOwner,
   canManage,
+  templateStatus,
+  onVisibilityChange,
 }: VisibilitySectionProps) {
   const t = useTranslations('template.access.visibility');
   const { data: visibility, isLoading } = useTemplateVisibility(templateId);
@@ -48,6 +52,8 @@ export function VisibilitySection({
             activeLinksCount={visibility.activeLinksCount}
             isOwner={isOwner}
             canManage={canManage}
+            templateStatus={templateStatus}
+            onVisibilityChange={onVisibilityChange}
           />
         ) : null}
       </CardContent>

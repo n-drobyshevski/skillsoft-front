@@ -33,6 +33,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { TemplateVisibility } from '@/types/domain';
+import { isApiError } from '@/types/errors';
 import { useChangeVisibility } from '@/hooks/queries';
 import { toast } from 'sonner';
 import { useTranslations } from 'next-intl';
@@ -44,6 +45,7 @@ interface VisibilitySelectorProps {
   activeLinksCount?: number;
   isOwner?: boolean;
   canManage?: boolean;
+  templateStatus?: 'DRAFT' | 'PUBLISHED' | 'ARCHIVED';
   onVisibilityChange?: (visibility: TemplateVisibility) => void;
 }
 
@@ -86,6 +88,7 @@ export function VisibilitySelector({
   activeLinksCount = 0,
   isOwner = false,
   canManage = false,
+  templateStatus = 'PUBLISHED',
   onVisibilityChange,
 }: VisibilitySelectorProps) {
   const t = useTranslations('template.access.visibility');
@@ -99,6 +102,18 @@ export function VisibilitySelector({
 
   const canEdit = isOwner || canManage;
   const isMobile = useMaxBreakpoint('md');
+
+  const isOptionDisabled = (vis: TemplateVisibility): boolean => {
+    if (templateStatus === 'ARCHIVED') return true;
+    if (templateStatus === 'DRAFT' && vis !== TemplateVisibility.PRIVATE) return true;
+    return false;
+  };
+
+  const getDisabledReason = (vis: TemplateVisibility): string | null => {
+    if (templateStatus === 'ARCHIVED') return t('archivedLocked');
+    if (templateStatus === 'DRAFT' && vis !== TemplateVisibility.PRIVATE) return t('draftLocked');
+    return null;
+  };
 
   const handleVisibilitySelect = (value: string) => {
     const newVisibility = value as TemplateVisibility;
@@ -129,7 +144,11 @@ export function VisibilitySelector({
       toast.success(t('changedTo', { visibility: t(`options.${visibility.toLowerCase()}`) }));
       onVisibilityChange?.(visibility);
     } catch (error) {
-      toast.error(tToast('visibilityFailed'));
+      if (isApiError(error) && error.status === 400) {
+        toast.error(error.message);
+      } else {
+        toast.error(tToast('visibilityFailed'));
+      }
       console.error('Visibility change error:', error);
     }
   };
@@ -165,6 +184,8 @@ export function VisibilitySelector({
             changeVisibility.isPending &&
             (pendingVisibility === visibility ||
               (!pendingVisibility && isSelected));
+          const optDisabled = isOptionDisabled(visibility);
+          const disabledReason = getDisabledReason(visibility);
 
           return (
             <Tooltip key={visibility}>
@@ -172,13 +193,14 @@ export function VisibilitySelector({
                 <ToggleGroupItem
                   value={visibility}
                   aria-label={t(`options.${visibility.toLowerCase()}`)}
-                  disabled={!canEdit || changeVisibility.isPending}
+                  disabled={optDisabled || !canEdit || changeVisibility.isPending}
                   className={cn(
                     'flex-1 flex items-center justify-center gap-1.5 py-2.5 px-2',
                     'text-xs font-medium rounded-md transition-all',
                     'data-[state=on]:bg-background data-[state=on]:shadow-sm',
                     isSelected && config.color,
-                    !canEdit && 'cursor-not-allowed opacity-60'
+                    !canEdit && 'cursor-not-allowed opacity-60',
+                    optDisabled && 'opacity-40'
                   )}
                 >
                   {isPending ? (
@@ -198,7 +220,9 @@ export function VisibilitySelector({
                 </ToggleGroupItem>
               </TooltipTrigger>
               <TooltipContent side="bottom" className="max-w-[200px] text-center">
-                <p className="text-xs">{t(`options.${visibility.toLowerCase()}Desc`)}</p>
+                <p className="text-xs">
+                  {disabledReason || t(`options.${visibility.toLowerCase()}Desc`)}
+                </p>
               </TooltipContent>
             </Tooltip>
           );
@@ -224,6 +248,63 @@ export function VisibilitySelector({
         const config = visibilityConfig[visibility];
         const Icon = config.icon;
         const isSelected = currentVisibility === visibility;
+        const optDisabled = isOptionDisabled(visibility);
+        const disabledReason = getDisabledReason(visibility);
+
+        const labelElement = (
+          <Label
+            htmlFor={`visibility-${visibility}`}
+            className={cn(
+              'flex items-center gap-3 rounded-lg border p-3 cursor-pointer',
+              'transition-all duration-200',
+              canEdit && !optDisabled && 'hover:bg-accent/50',
+              isSelected
+                ? `${config.borderColor} ${config.bgColor}`
+                : 'border-border bg-card',
+              (optDisabled || !canEdit) && 'cursor-not-allowed opacity-40'
+            )}
+          >
+            <div
+              className={cn(
+                'p-2 rounded-md transition-colors shrink-0',
+                isSelected ? 'bg-white/50 dark:bg-black/20' : 'bg-muted'
+              )}
+            >
+              <Icon
+                className={cn(
+                  'h-4 w-4 transition-colors',
+                  isSelected ? config.color : 'text-muted-foreground'
+                )}
+              />
+            </div>
+
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2">
+                <span className="font-medium text-sm">
+                  {t(`options.${visibility.toLowerCase()}`)}
+                </span>
+                {isSelected && (
+                  <Check className="h-3.5 w-3.5 text-primary" />
+                )}
+                {visibility === TemplateVisibility.LINK &&
+                  activeLinksCount > 0 && (
+                    <Badge variant="secondary" className="text-xs h-5 px-1.5">
+                      {activeLinksCount}
+                    </Badge>
+                  )}
+              </div>
+              <p className="text-xs text-muted-foreground line-clamp-1">
+                {t(`options.${visibility.toLowerCase()}Desc`)}
+              </p>
+            </div>
+
+            {changeVisibility.isPending &&
+              (pendingVisibility === visibility ||
+                (!pendingVisibility && isSelected)) && (
+                <Loader2 className="h-4 w-4 animate-spin text-muted-foreground shrink-0" />
+              )}
+          </Label>
+        );
 
         return (
           <div key={visibility} className="relative">
@@ -231,59 +312,20 @@ export function VisibilitySelector({
               value={visibility}
               id={`visibility-${visibility}`}
               className="sr-only"
+              disabled={optDisabled}
             />
-            <Label
-              htmlFor={`visibility-${visibility}`}
-              className={cn(
-                'flex items-center gap-3 rounded-lg border p-3 cursor-pointer',
-                'transition-all duration-200',
-                canEdit && 'hover:bg-accent/50',
-                isSelected
-                  ? `${config.borderColor} ${config.bgColor}`
-                  : 'border-border bg-card',
-                !canEdit && 'cursor-not-allowed opacity-60'
-              )}
-            >
-              <div
-                className={cn(
-                  'p-2 rounded-md transition-colors shrink-0',
-                  isSelected ? 'bg-white/50 dark:bg-black/20' : 'bg-muted'
-                )}
-              >
-                <Icon
-                  className={cn(
-                    'h-4 w-4 transition-colors',
-                    isSelected ? config.color : 'text-muted-foreground'
-                  )}
-                />
-              </div>
-
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2">
-                  <span className="font-medium text-sm">
-                    {t(`options.${visibility.toLowerCase()}`)}
-                  </span>
-                  {isSelected && (
-                    <Check className="h-3.5 w-3.5 text-primary" />
-                  )}
-                  {visibility === TemplateVisibility.LINK &&
-                    activeLinksCount > 0 && (
-                      <Badge variant="secondary" className="text-xs h-5 px-1.5">
-                        {activeLinksCount}
-                      </Badge>
-                    )}
-                </div>
-                <p className="text-xs text-muted-foreground line-clamp-1">
-                  {t(`options.${visibility.toLowerCase()}Desc`)}
-                </p>
-              </div>
-
-              {changeVisibility.isPending &&
-                (pendingVisibility === visibility ||
-                  (!pendingVisibility && isSelected)) && (
-                  <Loader2 className="h-4 w-4 animate-spin text-muted-foreground shrink-0" />
-                )}
-            </Label>
+            {disabledReason ? (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div>{labelElement}</div>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p className="text-xs">{disabledReason}</p>
+                </TooltipContent>
+              </Tooltip>
+            ) : (
+              labelElement
+            )}
           </div>
         );
       })}

@@ -62,7 +62,7 @@ const mockActiveLink: ShareLink = {
   createdById: 'owner-1',
   createdAt: new Date().toISOString(),
   expiresAt: new Date(Date.now() + 86400000 * 7).toISOString(), // In 7 days
-  usageCount: 5,
+  currentUses: 5,
   label: 'Interview Link',
   isActive: true,
 };
@@ -76,7 +76,7 @@ const mockExpiredLink: ShareLink = {
   createdById: 'owner-1',
   createdAt: new Date(Date.now() - 86400000 * 10).toISOString(), // 10 days ago
   expiresAt: new Date(Date.now() - 86400000).toISOString(), // Yesterday
-  usageCount: 10,
+  currentUses: 10,
   label: 'Expired Link',
   isActive: true,
 };
@@ -90,7 +90,7 @@ const mockUsedUpLink: ShareLink = {
   createdById: 'owner-1',
   createdAt: new Date().toISOString(),
   expiresAt: new Date(Date.now() + 86400000 * 7).toISOString(),
-  usageCount: 10,
+  currentUses: 10,
   maxUses: 10, // Limit reached
   label: 'Used Up Link',
   isActive: true,

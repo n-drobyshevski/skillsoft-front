@@ -1329,6 +1329,7 @@ export interface VisibilityInfo {
   ownerName?: string;
   activeSharesCount: number;
   activeLinksCount: number;
+  templateStatus: 'DRAFT' | 'PUBLISHED' | 'ARCHIVED';
 }
 
 /**
@@ -1419,7 +1420,7 @@ export interface ShareLink {
   label?: string;
   expiresAt: string;
   maxUses?: number;
-  usageCount: number;
+  currentUses: number;
   createdById: string;
   createdByName?: string;
   createdAt: string;

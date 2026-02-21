@@ -1367,11 +1367,14 @@
           "warning": "Anyone with these links will no longer be able to access this template.",
           "confirm": "Revoke & Change"
         },
-        "changedTo": "Visibility changed to {visibility}"
+        "changedTo": "Visibility changed to {visibility}",
+        "draftLocked": "Publish the template first to change visibility",
+        "archivedLocked": "Archived templates cannot change visibility"
       },
       "people": {
         "title": "People with access",
         "description": "Share this template with specific users or teams",
+        "publicNote": "All authenticated users already have access. Individual shares grant elevated permissions (Edit/Manage).",
         "form": {
           "tabs": {
             "email": "By Email",

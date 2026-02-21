@@ -52,6 +52,7 @@ export function createMockVisibilityInfo(
     ownerName: 'Test Owner',
     activeSharesCount: 0,
     activeLinksCount: 0,
+    templateStatus: 'PUBLISHED' as const,
     ...overrides,
   };
 }
@@ -127,7 +128,7 @@ export function createMockShareLink(
       permission,
       label: 'Test Link',
       expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
-      usageCount: 0,
+      currentUses: 0,
       createdById: 'owner-1',
       createdByName: 'Test Owner',
       createdAt: new Date().toISOString(),
@@ -148,7 +149,7 @@ export function createMockShareLink(
     permission: SharePermission.VIEW,
     label: 'Test Link',
     expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), // 7 days
-    usageCount: 0,
+    currentUses: 0,
     createdById: 'owner-1',
     createdByName: 'Test Owner',
     createdAt: new Date().toISOString(),
@@ -559,7 +560,7 @@ export const sharingHandlers = [
           } satisfies LinkValidationResult);
         }
 
-        if (link.maxUses && link.usageCount >= link.maxUses) {
+        if (link.maxUses && link.currentUses >= link.maxUses) {
           return HttpResponse.json({
             valid: false,
             reason: 'MAX_USES_REACHED',

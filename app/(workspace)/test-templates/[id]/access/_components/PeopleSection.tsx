@@ -4,7 +4,7 @@ import { useState, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Plus, Loader2, Mail, Users } from 'lucide-react';
+import { Plus, Loader2, Mail, Users, Info } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -31,6 +31,7 @@ interface PeopleSectionProps {
   isOwner: boolean;
   canManage: boolean;
   isMobile: boolean;
+  showPublicNote?: boolean;
 }
 
 type ShareUserFormValues = {
@@ -55,6 +56,7 @@ export function PeopleSection({
   isOwner,
   canManage,
   isMobile,
+  showPublicNote = false,
 }: PeopleSectionProps) {
   const t = useTranslations('template.access.people');
   const tToast = useTranslations('template.access.toast');
@@ -156,6 +158,14 @@ export function PeopleSection({
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
+        {showPublicNote && (
+          <div className="flex items-start gap-2 rounded-lg border border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-950/30 p-3 text-sm">
+            <Info className="h-4 w-4 text-blue-600 dark:text-blue-400 shrink-0 mt-0.5" />
+            <p className="text-blue-700 dark:text-blue-300 text-xs">
+              {t('publicNote')}
+            </p>
+          </div>
+        )}
         {/* Invitation Form with Tabs */}
         {canEdit && (
           <div className={cn(

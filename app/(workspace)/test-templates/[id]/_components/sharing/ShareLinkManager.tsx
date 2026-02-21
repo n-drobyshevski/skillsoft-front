@@ -107,9 +107,9 @@ export function ShareLinkManager({
   const tToast = useTranslations('template.access.toast');
   const { formatRelativeTime, formatFutureRelativeTime, formatDateTime } = useFormattedDates();
 
-  const { data: links, isLoading: linksLoading } = useActiveShareLinks(templateId);
-  const { data: linkCount } = useLinkCount(templateId);
-  const { data: canCreate } = useCanCreateLink(templateId);
+  const { data: links, isLoading: linksLoading, refetch: refetchLinks } = useActiveShareLinks(templateId);
+  const { data: linkCount, refetch: refetchCount } = useLinkCount(templateId);
+  const { data: canCreate, refetch: refetchCanCreate } = useCanCreateLink(templateId);
 
   const createLink = useCreateShareLink();
   const revokeLink = useRevokeShareLink();
@@ -140,6 +140,9 @@ export function ShareLinkManager({
       });
 
       toast.success(tToast('linkCreated'));
+      refetchLinks();
+      refetchCount();
+      refetchCanCreate();
       setShowCreateForm(false);
       form.reset();
     } catch (error) {
@@ -153,6 +156,9 @@ export function ShareLinkManager({
     try {
       await revokeLink.mutateAsync({ templateId, linkId });
       toast.success(tToast('linkRevoked'));
+      refetchLinks();
+      refetchCount();
+      refetchCanCreate();
     } catch (error) {
       toast.error(tToast('linkRevokeFailed'));
       console.error('Revoke link error:', error);
@@ -409,7 +415,7 @@ function LinkListItem({
   formatFutureRelativeTime,
 }: LinkListItemProps) {
   const isExpired = link.expiresAt && new Date(link.expiresAt) < new Date();
-  const isUsedUp = link.maxUses != null && link.usageCount >= link.maxUses;
+  const isUsedUp = link.maxUses != null && link.currentUses >= link.maxUses;
   const isInvalid = isExpired || isUsedUp || !!link.revokedAt;
   const [showStats, setShowStats] = useState(false);
 
@@ -449,7 +455,7 @@ function LinkListItem({
       <div className="flex items-center gap-4 text-xs text-muted-foreground">
         <span className="flex items-center gap-1">
           <Eye className="h-3 w-3" />
-          {t('listItem.uses', { count: link.usageCount, max: link.maxUses ?? 0 })}
+          {t('listItem.uses', { count: link.currentUses, max: link.maxUses ?? 0 })}
         </span>
         <span className="flex items-center gap-1">
           <Clock className="h-3 w-3" />
@@ -457,7 +463,7 @@ function LinkListItem({
             ? t('listItem.expired')
             : t('listItem.expiresIn', { time: formatFutureRelativeTime(link.expiresAt) })}
         </span>
-        {link.usageCount > 0 && (
+        {link.currentUses > 0 && (
           <button
             type="button"
             onClick={() => setShowStats(!showStats)}
