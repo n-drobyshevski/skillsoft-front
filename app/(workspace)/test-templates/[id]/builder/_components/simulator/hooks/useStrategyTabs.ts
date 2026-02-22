@@ -88,24 +88,6 @@ export function useDefaultTab(options: UseStrategyTabsOptions): string {
   return availableTabs[0]?.id ?? 'timeline';
 }
 
-/**
- * Returns primary and secondary tabs split for mobile priority stack UI.
- * Primary = first available tab (always expanded)
- * Secondary = remaining tabs (collapsed accordion)
- */
-export function useStrategyTabsSplit(options: UseStrategyTabsOptions) {
-  const availableTabs = useAvailableStrategyTabs(options);
-
-  return useMemo(() => {
-    if (availableTabs.length === 0) {
-      return { primary: null, secondary: [] };
-    }
-
-    const [primary, ...secondary] = availableTabs;
-    return { primary, secondary };
-  }, [availableTabs]);
-}
-
 // ============================================
 // HELPER FUNCTIONS
 // ============================================
@@ -137,21 +119,4 @@ function isSectionAvailable(
     default:
       return true;
   }
-}
-
-/**
- * Map tab IDs to their corresponding lazy component names.
- * Used for dynamic component rendering.
- */
-export const TAB_COMPONENT_MAP: Record<string, string> = {
-  results: 'ResultsTab',
-  questions: 'QuestionsTab',
-};
-
-/**
- * Returns the actual component type for a tab ID.
- * Handles aliases (e.g., 'job-alignment' -> 'insights' component)
- */
-export function getTabComponentType(tabId: string): string {
-  return TAB_COMPONENT_MAP[tabId] ?? 'ResultsTab';
 }

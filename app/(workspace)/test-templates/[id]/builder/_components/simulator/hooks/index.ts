@@ -8,9 +8,6 @@ export {
   useStrategyTabs,
   useAvailableStrategyTabs,
   useDefaultTab,
-  useStrategyTabsSplit,
-  getTabComponentType,
-  TAB_COMPONENT_MAP,
   type TabConfig,
 } from './useStrategyTabs';
 
@@ -20,10 +17,3 @@ export {
   type PreflightWarning,
   type PreflightValidationResult,
 } from './usePreflightValidation';
-
-// Performance hooks
-export {
-  useChartDefer,
-  useLazyLoad,
-  useChartPreload,
-} from './useChartDefer';

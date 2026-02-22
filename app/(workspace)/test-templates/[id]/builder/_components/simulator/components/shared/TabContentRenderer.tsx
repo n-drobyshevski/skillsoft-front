@@ -23,18 +23,6 @@ export function TabSkeleton() {
   );
 }
 
-export interface FineTuneSettings {
-  strictness: number;
-  saturation: number;
-  allowBacktracking: boolean;
-  onStrictnessChange: (value: number) => void;
-  onSaturationChange: (value: number) => void;
-  onAllowBacktrackingChange: (value: boolean) => void;
-  onApply: () => void;
-  onRun: () => void;
-  disabled: boolean;
-}
-
 interface TabContentRendererProps {
   tabId: string;
   result: SimulationResult;
@@ -43,7 +31,6 @@ interface TabContentRendererProps {
   passingScore: number;
   onetSocCode?: string;
   teamId?: string;
-  fineTuneSettings: FineTuneSettings;
 }
 
 export function TabContentRenderer({

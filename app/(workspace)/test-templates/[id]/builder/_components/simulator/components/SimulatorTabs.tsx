@@ -8,7 +8,6 @@ import { Strategy, STRATEGY_CONFIG } from '../strategy-context';
 import { SimulationResult, SimulationProfile } from '../types';
 import { TabConfig } from '../hooks/useStrategyTabs';
 import { getIcon, TabContentRenderer } from './shared';
-import type { FineTuneSettings } from './shared';
 
 // ============================================
 // TYPES
@@ -23,7 +22,6 @@ interface SimulatorTabsProps {
   passingScore: number;
   onetSocCode?: string;
   teamId?: string;
-  fineTuneSettings: FineTuneSettings;
 }
 
 // ============================================
@@ -39,7 +37,6 @@ export const SimulatorTabs = memo(function SimulatorTabs({
   passingScore,
   onetSocCode,
   teamId,
-  fineTuneSettings,
 }: SimulatorTabsProps) {
   const t = useTranslations('builder.simulator');
   const strategyConfig = STRATEGY_CONFIG[strategy];
@@ -89,7 +86,6 @@ export const SimulatorTabs = memo(function SimulatorTabs({
             passingScore={passingScore}
             onetSocCode={onetSocCode}
             teamId={teamId}
-            fineTuneSettings={fineTuneSettings}
           />
         </TabsContent>
       ))}
