@@ -20,6 +20,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 import { AssessmentQuestion } from "@/types/domain";
 import { getQuestionsCached } from "@/services/api.cache";
+import { getEntityStatsCached } from "@/services/api.cache.stats";
 import { Button } from "@/components/ui/button";
 import FlexibleStatsCards from "@/components/data-display/FlexibleStatsCards";
 import PageHeader from "@/components/common/PageHeader";
@@ -34,19 +35,22 @@ interface EnrichedQuestion extends AssessmentQuestion {
 
 async function getQuestionsData() {
   try {
-    const questions = await getQuestionsCached();
+    const [questions, entityStats] = await Promise.all([
+      getQuestionsCached().catch(() => null),
+      getEntityStatsCached(),
+    ]);
     if (!Array.isArray(questions)) {
-      return { questions: [], error: "Invalid data format from server." };
+      return { questions: [], entityStats, error: "Invalid data format from server." };
     }
-    return { questions, error: null };
+    return { questions, entityStats, error: null };
   } catch (error) {
     console.error("Failed to fetch questions:", error);
-    return { questions: [], error: "Failed to load assessment questions." };
+    return { questions: [], entityStats: null, error: "Failed to load assessment questions." };
   }
 }
 
 export default async function AssessmentQuestionsPage() {
-  const { questions, error } = await getQuestionsData();
+  const { questions, entityStats, error } = await getQuestionsData();
   const t = await getTranslations("question");
 
   return (
@@ -70,15 +74,10 @@ export default async function AssessmentQuestionsPage() {
         data={{
           type: "assessment-questions",
           stats: {
-            total: questions.length,
-            withIndicators: Math.floor(questions.length * 0.85),
-            averageScore: questions.length > 0 ? 75.5 : 0,
-            hardQuestions: questions.filter(q => q.difficultyLevel === "EXPERT" || q.difficultyLevel === "ADVANCED").length,
-            trend: {
-              value: "+8%",
-              label: "from last month",
-              isPositive: true
-            }
+            total: entityStats?.questions.total ?? questions.length,
+            withIndicators: entityStats?.questions.withActiveIndicators ?? 0,
+            averageTimeLimitSeconds: entityStats?.questions.averageTimeLimitSeconds ?? 0,
+            hardQuestions: entityStats?.questions.hardQuestions ?? questions.filter(q => q.difficultyLevel === "EXPERT" || q.difficultyLevel === "ADVANCED").length,
           }
         }}
         loading={!questions}

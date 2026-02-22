@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { getCompetenciesCached } from "@/services/api.cache";
+import { getEntityStatsCached } from "@/services/api.cache.stats";
 import FlexibleStatsCards from "@/components/data-display/FlexibleStatsCards";
 import PageHeader from "@/components/common/PageHeader";
 import CompetenciesTable from "./_components/CompetenciesTable";
@@ -26,20 +27,23 @@ export async function generateMetadata(): Promise<Metadata> {
 
 async function getCompetenciesData() {
   try {
-    const competencies = await getCompetenciesCached();
+    const [competencies, entityStats] = await Promise.all([
+      getCompetenciesCached().catch(() => null),
+      getEntityStatsCached(),
+    ]);
     if (!Array.isArray(competencies)) {
-      return { competencies: [] };
+      return { competencies: [], entityStats };
     }
-    return { competencies };
+    return { competencies, entityStats };
   } catch (error) {
     console.error("Failed to fetch competencies:", error);
-    return { competencies: [] };
+    return { competencies: [], entityStats: null };
   }
 }
 
 // Main component
 export default async function CompetenciesPage() {
-  const { competencies } = await getCompetenciesData();
+  const { competencies, entityStats } = await getCompetenciesData();
   const t = await getTranslations("competency");
 
   return (
@@ -61,14 +65,9 @@ export default async function CompetenciesPage() {
         data={{
           type: "competencies",
           stats: {
-            total: competencies.length,
-            withAssessments: competencies.filter(c => c.behavioralIndicators && c.behavioralIndicators.length > 0).length,
-            averageWeight: competencies.length > 0 ? 35 : 0,
-            trend: {
-              value: "+12%",
-              label: "from last month",
-              isPositive: true
-            }
+            total: entityStats?.competencies.total ?? competencies.length,
+            withAssessments: entityStats?.competencies.withIndicators ?? competencies.filter(c => c.behavioralIndicators && c.behavioralIndicators.length > 0).length,
+            averageWeight: entityStats?.competencies.averageIndicatorWeight ?? 0,
           }
         }}
         loading={!competencies}

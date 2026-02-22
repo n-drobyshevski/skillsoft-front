@@ -654,6 +654,33 @@ export interface Competency {
   lastModified: string;
 }
 
+export interface EntityStats {
+  competencies: {
+    total: number;
+    active: number;
+    withIndicators: number;
+    averageIndicatorWeight: number;
+    byCategory: Record<string, number>;
+  };
+  indicators: {
+    total: number;
+    active: number;
+    withQuestions: number;
+    measurable: number;
+    averageComplexity: number;
+    byContextScope: Record<string, number>;
+  };
+  questions: {
+    total: number;
+    active: number;
+    withActiveIndicators: number;
+    hardQuestions: number;
+    averageTimeLimitSeconds: number;
+    byDifficulty: Record<string, number>;
+    byQuestionType: Record<string, number>;
+  };
+}
+
 export interface DashboardStats {
   totalCompetencies: number;
   totalBehavioralIndicators: number;

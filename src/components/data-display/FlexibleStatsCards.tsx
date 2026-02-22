@@ -56,7 +56,7 @@ interface BehavioralIndicatorStats extends BaseEntityStats {
 
 interface AssessmentQuestionStats extends BaseEntityStats {
   withIndicators?: number;
-  averageScore?: number;
+  averageTimeLimitSeconds?: number;
   hardQuestions?: number;
 }
 
@@ -223,20 +223,18 @@ export default function FlexibleStatsCards({ data, loading = false, onCardClick 
           },
           {
             key: "with-assessments",
-            title: "With Assessments",
-            mobileTitle: "Assessed",
+            title: "With Indicators",
+            mobileTitle: "Linked",
             value: data.stats.withAssessments || 0,
             icon: CheckCircle2,
-            trend: { value: "+12%", label: FROM_LAST_MONTH, isPositive: true },
-            description: "Have assessments"
+            description: "Have indicators"
           },
           {
             key: "average-weight",
-            title: "Average Weight",
+            title: "Avg Indicator Weight",
             mobileTitle: "Avg Weight",
-            value: data.stats.averageWeight ? `${data.stats.averageWeight.toFixed(1)}%` : "N/A",
+            value: data.stats.averageWeight ? `${data.stats.averageWeight.toFixed(1)}` : "N/A",
             icon: BarChart3,
-            trend: { value: "+2.3%", label: FROM_LAST_MONTH, isPositive: true },
             description: "Mean weight"
           },
           {
@@ -245,7 +243,6 @@ export default function FlexibleStatsCards({ data, loading = false, onCardClick 
             mobileTitle: "Advanced",
             value: (data.stats.byLevel?.advanced || 0) + (data.stats.byLevel?.expert || 0),
             icon: TrendingUp,
-            trend: { value: "+8%", label: FROM_LAST_MONTH, isPositive: true },
             description: "High proficiency"
           }
         ];
@@ -267,7 +264,6 @@ export default function FlexibleStatsCards({ data, loading = false, onCardClick 
             mobileTitle: "Assessed",
             value: data.stats.withQuestions || 0,
             icon: HelpCircle,
-            trend: { value: "+15%", label: FROM_LAST_MONTH, isPositive: true },
             description: "Have questions"
           },
           {
@@ -276,7 +272,6 @@ export default function FlexibleStatsCards({ data, loading = false, onCardClick 
             mobileTitle: "Measurable",
             value: data.stats.measurable || 0,
             icon: Star,
-            trend: { value: "+5%", label: FROM_LAST_MONTH, isPositive: true },
             description: "Quantifiable"
           },
           {
@@ -285,7 +280,6 @@ export default function FlexibleStatsCards({ data, loading = false, onCardClick 
             mobileTitle: "Complexity",
             value: data.stats.averageComplexity ? data.stats.averageComplexity.toFixed(1) : "N/A",
             icon: Activity,
-            trend: { value: "+0.2", label: FROM_LAST_MONTH, isPositive: true },
             description: "Mean complexity"
           }
         ];
@@ -307,17 +301,15 @@ export default function FlexibleStatsCards({ data, loading = false, onCardClick 
             mobileTitle: "Linked",
             value: data.stats.withIndicators || 0,
             icon: Target,
-            trend: { value: "+25%", label: FROM_LAST_MONTH, isPositive: true },
             description: "Indicator-linked"
           },
           {
-            key: "average-score",
-            title: "Average Score",
-            mobileTitle: "Avg Score",
-            value: data.stats.averageScore ? `${data.stats.averageScore.toFixed(1)}%` : "N/A",
-            icon: Award,
-            trend: { value: "+3.5%", label: FROM_LAST_MONTH, isPositive: true },
-            description: "Performance"
+            key: "avg-time-limit",
+            title: "Avg Time Limit",
+            mobileTitle: "Avg Time",
+            value: data.stats.averageTimeLimitSeconds ? `${data.stats.averageTimeLimitSeconds.toFixed(1)}s` : "N/A",
+            icon: Clock,
+            description: "Per question"
           },
           {
             key: "hard-questions",
@@ -325,7 +317,6 @@ export default function FlexibleStatsCards({ data, loading = false, onCardClick 
             mobileTitle: "Hard",
             value: data.stats.hardQuestions || 0,
             icon: Zap,
-            trend: { value: "+7", label: FROM_LAST_MONTH, isPositive: false },
             description: "High difficulty"
           }
         ];

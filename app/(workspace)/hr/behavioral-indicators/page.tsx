@@ -26,6 +26,7 @@ import {
   getQuestionsCached,
   getCompetenciesCached,
 } from "@/services/api.cache";
+import { getEntityStatsCached } from "@/services/api.cache.stats";
 import IndicatorsTable from "./_components/IndicatorsTable";
 import TableSkeleton from "@/components/data-display/TableSkeleton";
 
@@ -36,13 +37,15 @@ interface EnrichedIndicator extends BehavioralIndicator {
 
 async function getIndicatorsData(): Promise<{
   indicators: EnrichedIndicator[];
+  entityStats: import("@/types/domain").EntityStats | null;
   error: string | null;
 }> {
   try {
-    const [indicatorsData, questionsData, competenciesData] = await Promise.all([
+    const [indicatorsData, questionsData, competenciesData, entityStats] = await Promise.all([
       getIndicatorsCached(),
       getQuestionsCached(),
       getCompetenciesCached(),
+      getEntityStatsCached(),
     ]);
 
     if (!Array.isArray(indicatorsData)) {
@@ -68,15 +71,15 @@ async function getIndicatorsData(): Promise<{
       competencyName: competencyMap?.[indicator.competencyId] || "N/A",
     }));
 
-    return { indicators: indicatorsWithDetails, error: null };
+    return { indicators: indicatorsWithDetails, entityStats: entityStats ?? null, error: null };
   } catch (error) {
     console.error("Failed to fetch indicators data:", error);
-    return { indicators: [], error: "Failed to load indicators." };
+    return { indicators: [], entityStats: null, error: "Failed to load indicators." };
   }
 }
 
 export default async function BehavioralIndicatorsPage() {
-  const { indicators, error } = await getIndicatorsData();
+  const { indicators, entityStats, error } = await getIndicatorsData();
   const t = await getTranslations("indicator");
 
   return (
@@ -99,18 +102,10 @@ export default async function BehavioralIndicatorsPage() {
         data={{
           type: "behavioral-indicators",
           stats: {
-            total: indicators.length,
-            withQuestions: indicators.filter((i) => i.questionCount > 0).length,
-            measurable: Math.floor(indicators.length * 0.7),
-            averageComplexity:
-              indicators.length > 0
-                ? Math.round((Math.random() * 2 + 2) * 10) / 10
-                : 0,
-            trend: {
-              value: "+15%",
-              label: "from last month",
-              isPositive: true,
-            },
+            total: entityStats?.indicators.total ?? indicators.length,
+            withQuestions: entityStats?.indicators.withQuestions ?? indicators.filter((i) => i.questionCount > 0).length,
+            measurable: entityStats?.indicators.measurable ?? 0,
+            averageComplexity: entityStats?.indicators.averageComplexity ?? 0,
           },
         }}
         loading={!indicators}
