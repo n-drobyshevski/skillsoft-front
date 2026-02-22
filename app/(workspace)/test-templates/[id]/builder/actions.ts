@@ -295,7 +295,8 @@ function generateMockSimulation(
  */
 export async function simulateTest(
   state: BlueprintState,
-  profile: SimulationProfile
+  profile: SimulationProfile,
+  abilityLevel?: number
 ): Promise<ActionResponse<SimulationResult>> {
   try {
     const authHeaders = await getAuthHeaders();
@@ -313,6 +314,7 @@ export async function simulateTest(
         saturationThreshold: state.saturationThreshold,
       },
       profile,
+      abilityLevel: abilityLevel ?? 50,
     };
 
     const response = await fetch(

@@ -7,7 +7,6 @@
 // Phase 1 (P0): Core decomposed components
 export { SimulatorResults, default as SimulatorResultsDefault } from './SimulatorResults';
 export { SimulatorTabs, default as SimulatorTabsDefault } from './SimulatorTabs';
-export { SimulatorMobile, default as SimulatorMobileDefault } from './SimulatorMobile';
 
 // Phase 3 (P1): Two-phase UI components
 export { PreflightWarningsAlert, default as PreflightWarningsAlertDefault } from './PreflightWarningsAlert';
@@ -16,5 +15,5 @@ export { ResultsPhase, default as ResultsPhaseDefault } from './ResultsPhase';
 
 // Phase 4 (P1): Mobile priority stack components
 export { FineTuneSheet, default as FineTuneSheetDefault } from './FineTuneSheet';
-export { StrategyPrimaryInsight, default as StrategyPrimaryInsightDefault } from './StrategyPrimaryInsight';
 export { MobilePriorityStack, default as MobilePriorityStackDefault } from './MobilePriorityStack';
+export { MobileResultsView } from './MobileResultsView';

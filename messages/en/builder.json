@@ -242,6 +242,8 @@
       "saturationDescription": "Prevents overusing the same competency pool across multiple test attempts.",
       "allowBacktracking": "Allow Backtracking",
       "allowBacktrackingDescription": "Let candidates revisit and change previous answers.",
+      "abilityLevel": "Ability Level",
+      "abilityLevelDescription": "Shifts the persona's response curve. Lower = weaker candidate, higher = stronger.",
       "saveSettings": "Save Settings",
       "applyAndRerun": "Apply & Re-run"
     },

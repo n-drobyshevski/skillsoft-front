@@ -19,6 +19,8 @@ interface FineTunePopoverProps {
   onSaturationChange: (value: number) => void;
   allowBacktracking: boolean;
   onAllowBacktrackingChange: (value: boolean) => void;
+  abilityLevel?: number;
+  onAbilityLevelChange?: (value: number) => void;
   onApply: () => void;
   onRun: () => void;
   disabled: boolean;
@@ -30,9 +32,11 @@ export function FineTunePopover(props: FineTunePopoverProps) {
     strictness,
     saturation,
     allowBacktracking,
+    abilityLevel = 50,
     onStrictnessChange,
     onSaturationChange,
     onAllowBacktrackingChange,
+    onAbilityLevelChange,
     onApply,
     onRun,
     disabled,
@@ -93,6 +97,28 @@ export function FineTunePopover(props: FineTunePopoverProps) {
               {t('fineTune.saturationDescription')}
             </p>
           </div>
+
+          {/* Ability Level */}
+          {onAbilityLevelChange && (
+            <div className="space-y-2">
+              <div className="flex items-center justify-between text-xs text-muted-foreground">
+                <span>{t('fineTune.abilityLevel')}</span>
+                <span className="font-semibold text-foreground">{abilityLevel}</span>
+              </div>
+              <Slider
+                value={[abilityLevel]}
+                min={0}
+                max={100}
+                step={1}
+                onValueChange={(val) => onAbilityLevelChange(val[0])}
+                disabled={disabled}
+                className="[&_[role=slider]]:min-h-[24px] [&_[role=slider]]:min-w-[24px]"
+              />
+              <p className="text-[11px] text-muted-foreground">
+                {t('fineTune.abilityLevelDescription')}
+              </p>
+            </div>
+          )}
 
           {/* Backtracking toggle */}
           <div className="flex items-center justify-between rounded-lg border px-3 py-2 bg-muted/30">

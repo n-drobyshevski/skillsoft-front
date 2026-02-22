@@ -47,6 +47,10 @@ interface FineTuneSheetProps {
   allowBacktracking: boolean;
   /** Callback when backtracking setting changes */
   onAllowBacktrackingChange: (value: boolean) => void;
+  /** Ability level (0-100) for IRT persona curves */
+  abilityLevel?: number;
+  /** Callback when ability level changes */
+  onAbilityLevelChange?: (value: number) => void;
   /** Callback to apply settings */
   onApply: () => void;
   /** Callback to apply and re-run simulation */
@@ -97,6 +101,8 @@ interface SettingsContentProps {
   onSaturationChange: (value: number) => void;
   allowBacktracking: boolean;
   onAllowBacktrackingChange: (value: boolean) => void;
+  abilityLevel?: number;
+  onAbilityLevelChange?: (value: number) => void;
   isSimulating: boolean;
 }
 
@@ -107,6 +113,8 @@ const SettingsContent = memo(function SettingsContent({
   onSaturationChange,
   allowBacktracking,
   onAllowBacktrackingChange,
+  abilityLevel = 50,
+  onAbilityLevelChange,
   isSimulating,
 }: SettingsContentProps) {
   const t = useTranslations('builder.simulator');
@@ -157,6 +165,30 @@ const SettingsContent = memo(function SettingsContent({
         </p>
       </div>
 
+      {/* Ability Level Slider */}
+      {onAbilityLevelChange && (
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <Label className="text-sm font-medium">{t('fineTune.abilityLevel')}</Label>
+            <span className="text-sm font-semibold tabular-nums bg-muted px-2 py-0.5 rounded">
+              {abilityLevel}
+            </span>
+          </div>
+          <Slider
+            value={[abilityLevel]}
+            min={0}
+            max={100}
+            step={1}
+            onValueChange={(val) => onAbilityLevelChange(val[0])}
+            disabled={isSimulating}
+            className="[&_[data-slot=slider-thumb]]:h-6 [&_[data-slot=slider-thumb]]:w-6"
+          />
+          <p className="text-xs text-muted-foreground">
+            {t('fineTune.abilityLevelDescription')}
+          </p>
+        </div>
+      )}
+
       {/* Backtracking Toggle */}
       <div className="flex items-center justify-between p-4 rounded-xl border bg-muted/30">
         <div className="space-y-1 pr-4">
@@ -188,6 +220,8 @@ export const FineTuneSheet = memo(function FineTuneSheet({
   onSaturationChange,
   allowBacktracking,
   onAllowBacktrackingChange,
+  abilityLevel,
+  onAbilityLevelChange,
   onApply,
   onRun,
   isSimulating,
@@ -237,6 +271,8 @@ export const FineTuneSheet = memo(function FineTuneSheet({
             onSaturationChange={onSaturationChange}
             allowBacktracking={allowBacktracking}
             onAllowBacktrackingChange={onAllowBacktrackingChange}
+            abilityLevel={abilityLevel}
+            onAbilityLevelChange={onAbilityLevelChange}
             isSimulating={isSimulating}
           />
         </div>

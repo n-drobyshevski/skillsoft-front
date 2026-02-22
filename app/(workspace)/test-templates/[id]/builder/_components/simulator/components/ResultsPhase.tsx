@@ -8,7 +8,7 @@
  * analysis and a floating re-run button for quick iteration.
  */
 
-import React, { memo, Suspense, lazy } from 'react';
+import React, { memo } from 'react';
 import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import {
@@ -23,10 +23,8 @@ import { cn } from '@/lib/utils';
 import { Strategy, STRATEGY_CONFIG } from '../strategy-context';
 import { SimulationResult, SimulationProfile, personaConfig } from '../types';
 import { TabConfig } from '../hooks/useStrategyTabs';
-import { StrategyScoreDisplay } from '../StrategyScoreDisplay';
 import { SimulatorResults } from './SimulatorResults';
 import { SimulatorTabs } from './SimulatorTabs';
-import { SimulatorMobile } from './SimulatorMobile';
 import { FineTunePopover } from './FineTunePopover';
 
 // ============================================
@@ -70,8 +68,6 @@ interface ResultsPhaseProps {
     onRun: () => void;
     disabled: boolean;
   };
-  /** Render variant */
-  variant?: 'desktop' | 'mobile';
 }
 
 // ============================================
@@ -85,91 +81,7 @@ const PERSONA_ICONS: Record<SimulationProfile, React.ElementType> = {
 };
 
 // ============================================
-// FLOATING ACTION BAR
-// ============================================
-
-interface FloatingActionBarProps {
-  selectedProfile: SimulationProfile;
-  onProfileChange: (profile: SimulationProfile) => void;
-  onRun: () => void;
-  isSimulating: boolean;
-  strategy: Strategy;
-}
-
-const FloatingActionBar = memo(function FloatingActionBar({
-  selectedProfile,
-  onProfileChange,
-  onRun,
-  isSimulating,
-  strategy,
-}: FloatingActionBarProps) {
-  const t = useTranslations('builder.simulator');
-  const config = STRATEGY_CONFIG[strategy];
-  const Icon = PERSONA_ICONS[selectedProfile];
-  const profiles = Object.keys(personaConfig) as SimulationProfile[];
-
-  return (
-    <div
-      className={cn(
-        'sticky bottom-0 left-0 right-0 z-10',
-        'p-3 -mx-3 -mb-3 mt-4',
-        'bg-background/95 backdrop-blur-sm border-t',
-        'flex items-center gap-2'
-      )}
-    >
-      {/* Compact Persona Selector */}
-      <Select
-        value={selectedProfile}
-        onValueChange={(v) => onProfileChange(v as SimulationProfile)}
-        disabled={isSimulating}
-      >
-        <SelectTrigger className="w-[140px] h-10">
-          <SelectValue>
-            <div className="flex items-center gap-2">
-              <Icon className="h-4 w-4" />
-              <span>{t(personaConfig[selectedProfile].labelKey as Parameters<typeof t>[0])}</span>
-            </div>
-          </SelectValue>
-        </SelectTrigger>
-        <SelectContent>
-          {profiles.map((profile) => {
-            const ProfileIcon = PERSONA_ICONS[profile];
-            return (
-              <SelectItem key={profile} value={profile}>
-                <div className="flex items-center gap-2">
-                  <ProfileIcon className="h-4 w-4" />
-                  <span>{t(personaConfig[profile].labelKey as Parameters<typeof t>[0])}</span>
-                </div>
-              </SelectItem>
-            );
-          })}
-        </SelectContent>
-      </Select>
-
-      {/* Re-run Button */}
-      <Button
-        onClick={onRun}
-        disabled={isSimulating}
-        className={cn('flex-1 h-10 gap-2', config.badgeBg)}
-      >
-        {isSimulating ? (
-          <>
-            <Loader2 className="h-4 w-4 animate-spin" />
-            {t('running')}
-          </>
-        ) : (
-          <>
-            <RefreshCw className="h-4 w-4" />
-            {t('rerunSimulation')}
-          </>
-        )}
-      </Button>
-    </div>
-  );
-});
-
-// ============================================
-// RESULTS HEADER (compact persona + re-run for desktop)
+// RESULTS HEADER (compact persona + re-run)
 // ============================================
 
 interface ResultsHeaderProps {
@@ -278,13 +190,11 @@ export const ResultsPhase = memo(function ResultsPhase({
   onetSocCode,
   teamId,
   fineTuneSettings,
-  variant = 'desktop',
 }: ResultsPhaseProps) {
   return (
     <div className="flex flex-col">
-      {/* Desktop: Header with persona selector, fine tune popover, and re-run */}
-      {variant === 'desktop' && (
-        <ResultsHeader
+      {/* Header with persona selector, fine tune popover, and re-run */}
+      <ResultsHeader
           selectedProfile={selectedProfile}
           onProfileChange={onProfileChange}
           onRun={onRun}
@@ -292,7 +202,6 @@ export const ResultsPhase = memo(function ResultsPhase({
           strategy={strategy}
           fineTuneSettings={fineTuneSettings}
         />
-      )}
 
       {/* Results Display */}
       <SimulatorResults
@@ -307,41 +216,17 @@ export const ResultsPhase = memo(function ResultsPhase({
       />
 
       {/* Tabs/Sections */}
-      {variant === 'mobile' ? (
-        <SimulatorMobile
-          tabs={tabs}
-          result={result}
-          strategy={strategy}
-          persona={selectedProfile}
-          passingScore={passingScore}
-          onetSocCode={onetSocCode}
-          teamId={teamId}
-          fineTuneSettings={fineTuneSettings}
-        />
-      ) : (
-        <SimulatorTabs
-          tabs={tabs}
-          defaultTab={defaultTab}
-          result={result}
-          strategy={strategy}
-          persona={selectedProfile}
-          passingScore={passingScore}
-          onetSocCode={onetSocCode}
-          teamId={teamId}
-          fineTuneSettings={fineTuneSettings}
-        />
-      )}
-
-      {/* Mobile: Floating Action Bar */}
-      {variant === 'mobile' && (
-        <FloatingActionBar
-          selectedProfile={selectedProfile}
-          onProfileChange={onProfileChange}
-          onRun={onRun}
-          isSimulating={isSimulating}
-          strategy={strategy}
-        />
-      )}
+      <SimulatorTabs
+        tabs={tabs}
+        defaultTab={defaultTab}
+        result={result}
+        strategy={strategy}
+        persona={selectedProfile}
+        passingScore={passingScore}
+        onetSocCode={onetSocCode}
+        teamId={teamId}
+        fineTuneSettings={fineTuneSettings}
+      />
     </div>
   );
 });

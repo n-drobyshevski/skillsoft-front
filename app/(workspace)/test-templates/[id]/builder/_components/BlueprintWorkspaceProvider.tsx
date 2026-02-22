@@ -69,7 +69,7 @@ interface BlueprintWorkspaceContextValue {
   ) => void;
   setCompetencies: (competencies: BlueprintCompetency[]) => void;
   updateSettings: (settings: Partial<BlueprintState>) => void;
-  runSimulation: (profile: SimulationProfile) => Promise<void>;
+  runSimulation: (profile: SimulationProfile, abilityLevel?: number) => Promise<void>;
   saveBlueprint: () => Promise<boolean>;
 }
 
@@ -313,11 +313,11 @@ export function BlueprintWorkspaceProvider({
 
   // runSimulation: orchestrates simulateTest server action + store updates
   const runSimulation = useCallback(
-    async (profile: SimulationProfile) => {
+    async (profile: SimulationProfile, abilityLevel?: number) => {
       storeSetSimulating(true);
       try {
         const currentState = useBlueprintStore.getState().state;
-        const result = await simulateTest(currentState, profile);
+        const result = await simulateTest(currentState, profile, abilityLevel);
         if (result.success) {
           storeSetSimulationResult(result.data);
         } else {

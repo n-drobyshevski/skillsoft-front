@@ -34,9 +34,10 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Strategy, STRATEGY_CONFIG, STRATEGY_HELP_CONTENT } from '../strategy-context';
-import { SimulationResult } from '../types';
+import { SimulationResult, SimulationProfile } from '../types';
 import { TabConfig } from '../hooks/useStrategyTabs';
-import { StrategyPrimaryInsight } from './StrategyPrimaryInsight';
+import { StrategyScoreDisplay } from '../StrategyScoreDisplay';
+import { WarningsList } from '../WarningsList';
 import { FineTuneSheet } from './FineTuneSheet';
 
 // ============================================
@@ -56,6 +57,8 @@ interface MobilePriorityStackProps {
   result: SimulationResult;
   /** Current assessment strategy */
   strategy: Strategy;
+  /** Selected simulation persona */
+  profile: SimulationProfile;
   /** Passing score threshold */
   passingScore: number;
   /** Number of competencies */
@@ -236,6 +239,7 @@ const SecondarySections = memo(function SecondarySections({
 export const MobilePriorityStack = memo(function MobilePriorityStack({
   result,
   strategy,
+  profile,
   passingScore,
   competencyCount,
   onetSocCode,
@@ -247,14 +251,18 @@ export const MobilePriorityStack = memo(function MobilePriorityStack({
 
   return (
     <div className="space-y-4 pb-[calc(5rem+env(safe-area-inset-bottom))]">
-      {/* 1. Primary Insight (Always Expanded) */}
-      <StrategyPrimaryInsight
-        result={result}
+      {/* 1. Score Display (Expanded variant for mobile) */}
+      <StrategyScoreDisplay
         strategy={strategy}
+        score={result.simulatedScore}
         passingScore={passingScore}
+        profile={profile}
+        competencyCount={competencyCount}
         onetSocCode={onetSocCode}
         teamId={teamId}
         teamName={teamName}
+        variant="expanded"
+        result={result}
       />
 
       {/* 2. Quick Stats (Always Visible) */}
@@ -262,6 +270,9 @@ export const MobilePriorityStack = memo(function MobilePriorityStack({
         durationMinutes={result.estimatedDurationMinutes}
         questionCount={result.sampleQuestions.length}
       />
+
+      {/* 2b. Inventory Warnings (parity with desktop) */}
+      <WarningsList warnings={result.warnings} />
 
       {/* 3. Secondary Sections (Accordion) */}
       <div>

@@ -35,15 +35,12 @@ import { useAvailableStrategyTabs, useDefaultTab } from './hooks/useStrategyTabs
 import { usePreflightValidation } from './hooks/usePreflightValidation';
 
 // Components
-import { useTranslations } from 'next-intl';
 import { SimulatorErrorBoundary } from './SimulatorErrorBoundary';
 import { SimulationLoadingStepper } from './SimulationLoadingStepper';
 import { StrategyEmptyState } from './StrategyEmptyState';
 import { ConfigurePhase } from './components/ConfigurePhase';
 import { ResultsPhase } from './components/ResultsPhase';
-import { MobilePriorityStack } from './components/MobilePriorityStack';
-import { SimulatorTabs } from './components/SimulatorTabs';
-import { personaConfig } from './types';
+import { MobileResultsView } from './components/MobileResultsView';
 
 // ============================================
 // TYPES
@@ -64,117 +61,6 @@ const preloadResultsTab = () =>
   import(/* webpackChunkName: "simulator-results-tab" */ './tabs/ResultsTab');
 const preloadQuestionsTab = () =>
   import(/* webpackChunkName: "simulator-questions-tab" */ './tabs/QuestionsTab');
-
-// ============================================
-// MOBILE RESULTS VIEW
-// ============================================
-
-interface MobileResultsViewProps {
-  result: NonNullable<ReturnType<typeof useBlueprintWorkspace>['simulationResult']>;
-  strategy: Strategy;
-  passingScore: number;
-  competencyCount: number;
-  onetSocCode?: string;
-  teamId?: string;
-  selectedProfile: SimulationProfile;
-  onProfileChange: (profile: SimulationProfile) => void;
-  onRun: () => void;
-  isSimulating: boolean;
-  fineTuneSettings: {
-    strictness: number;
-    saturation: number;
-    allowBacktracking: boolean;
-    onStrictnessChange: (value: number) => void;
-    onSaturationChange: (value: number) => void;
-    onAllowBacktrackingChange: (value: boolean) => void;
-    onApply: () => void;
-    onRun: () => void;
-    disabled: boolean;
-  };
-}
-
-function MobileResultsView({
-  result,
-  strategy,
-  passingScore,
-  competencyCount,
-  onetSocCode,
-  teamId,
-  selectedProfile,
-  onProfileChange,
-  onRun,
-  isSimulating,
-  fineTuneSettings,
-}: MobileResultsViewProps) {
-  const t = useTranslations('builder.simulator');
-  const profiles = Object.keys(personaConfig) as SimulationProfile[];
-
-  return (
-    <div className="flex flex-col">
-      {/* Priority Stack Layout */}
-      <MobilePriorityStack
-        result={result}
-        strategy={strategy}
-        passingScore={passingScore}
-        competencyCount={competencyCount}
-        onetSocCode={onetSocCode}
-        teamId={teamId}
-        fineTuneSettings={fineTuneSettings}
-      />
-
-      {/* Floating Action Bar for Re-run -- offset for mobile bottom nav (h-16 = 64px + safe area) */}
-      <div
-        className={cn(
-          'sticky bottom-0 left-0 right-0 z-30',
-          'p-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] bg-background/95 backdrop-blur-sm border-t',
-          'flex items-center gap-2'
-        )}
-      >
-        {/* Persona Quick Select */}
-        <select
-          value={selectedProfile}
-          onChange={(e) => onProfileChange(e.target.value as SimulationProfile)}
-          disabled={isSimulating}
-          className={cn(
-            'h-11 px-3 rounded-lg border bg-background text-sm appearance-none',
-            'focus:outline-none focus:ring-2 focus:ring-ring',
-            'dark:bg-muted dark:border-border dark:text-foreground'
-          )}
-        >
-          {profiles.map((profile) => (
-            <option key={profile} value={profile}>
-              {t(personaConfig[profile].labelKey as Parameters<typeof t>[0])}
-            </option>
-          ))}
-        </select>
-
-        {/* Re-run Button */}
-        <button
-          onClick={onRun}
-          disabled={isSimulating}
-          className={cn(
-            'flex-1 h-11 rounded-lg font-medium text-sm',
-            'flex items-center justify-center gap-2',
-            'transition-colors',
-            STRATEGY_CONFIG[strategy].badgeBg,
-            'text-white disabled:opacity-50'
-          )}
-        >
-          {isSimulating ? (
-            <>
-              <span className="animate-spin">⟳</span>
-              {t('running')}
-            </>
-          ) : (
-            <>
-              ↻ {t('rerunSimulation')}
-            </>
-          )}
-        </button>
-      </div>
-    </div>
-  );
-}
 
 // ============================================
 // MAIN COMPONENT
@@ -199,6 +85,7 @@ export function SimulatorPanelV4({ variant = 'desktop' }: SimulatorPanelV4Props)
   const [allowBacktracking, setAllowBacktracking] = useState<boolean>(
     state.adaptivity?.allowBacktracking ?? true
   );
+  const [abilityLevel, setAbilityLevel] = useState<number>(50);
 
   // ============================================
   // DERIVED STATE
@@ -284,8 +171,8 @@ export function SimulatorPanelV4({ variant = 'desktop' }: SimulatorPanelV4Props)
 
   const handleRunSimulation = useCallback(() => {
     applySettings();
-    runSimulation(selectedProfile);
-  }, [applySettings, runSimulation, selectedProfile]);
+    runSimulation(selectedProfile, abilityLevel);
+  }, [applySettings, runSimulation, selectedProfile, abilityLevel]);
 
   // ============================================
   // FINE TUNE SETTINGS OBJECT
@@ -296,14 +183,16 @@ export function SimulatorPanelV4({ variant = 'desktop' }: SimulatorPanelV4Props)
       strictness,
       saturation,
       allowBacktracking,
+      abilityLevel,
       onStrictnessChange: setStrictness,
       onSaturationChange: setSaturation,
       onAllowBacktrackingChange: setAllowBacktracking,
+      onAbilityLevelChange: setAbilityLevel,
       onApply: applySettings,
       onRun: handleRunSimulation,
       disabled: isSimulating,
     }),
-    [strictness, saturation, allowBacktracking, applySettings, handleRunSimulation, isSimulating]
+    [strictness, saturation, allowBacktracking, abilityLevel, applySettings, handleRunSimulation, isSimulating]
   );
 
   // ============================================
@@ -353,7 +242,6 @@ export function SimulatorPanelV4({ variant = 'desktop' }: SimulatorPanelV4Props)
             onetSocCode={state.onetSocCode}
             teamId={state.teamId}
             fineTuneSettings={fineTuneSettings}
-            variant="desktop"
           />
         );
 

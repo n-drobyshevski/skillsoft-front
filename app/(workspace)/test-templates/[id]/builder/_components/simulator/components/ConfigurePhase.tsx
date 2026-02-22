@@ -190,10 +190,8 @@ export const ConfigurePhase = memo(function ConfigurePhase({
         variant="expanded"
       />
 
-      {/* Intro Card - Explains what simulation does (hidden on mobile) */}
-      <div className="hidden md:block">
-        <StrategyIntro strategy={strategy} validation={validation} />
-      </div>
+      {/* Intro Card - Explains what simulation does */}
+      <StrategyIntro strategy={strategy} validation={validation} />
 
       {/* Preflight Warnings - Visible, not tooltip */}
       <PreflightWarningsAlert

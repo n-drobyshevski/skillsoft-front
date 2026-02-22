@@ -108,6 +108,7 @@ export interface SimulationResult {
   simulatedScore?: number;
   runLogs: string[];
   competencyScores?: Record<string, CompetencySimulationScore>;
+  abilityLevel?: number;
 }
 
 export interface CompetencySimulationScore {

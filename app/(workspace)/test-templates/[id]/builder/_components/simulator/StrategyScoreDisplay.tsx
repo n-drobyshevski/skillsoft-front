@@ -1,22 +1,25 @@
 'use client';
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useTranslations } from 'next-intl';
 import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
 import {
   CheckCircle2,
   AlertTriangle,
   LayoutGrid,
   Briefcase,
   Users,
+  Target,
   TrendingUp,
   TrendingDown,
   Minus,
   ExternalLink,
+  XCircle,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Strategy, STRATEGY_CONFIG, personaConfig } from './strategy-context';
-import { SimulationProfile } from './types';
+import { SimulationResult, SimulationProfile } from './types';
 
 // ============================================
 // TYPES
@@ -33,6 +36,10 @@ interface StrategyScoreDisplayProps {
   teamId?: string;
   teamName?: string;
   className?: string;
+  /** compact = desktop inline, expanded = mobile card with more detail */
+  variant?: 'compact' | 'expanded';
+  /** Required for expanded variant (competency distribution data) */
+  result?: SimulationResult;
 }
 
 // ============================================
@@ -75,14 +82,26 @@ function UniversalBaselineDisplay({
   competencyCount,
   profile,
   className,
+  expanded = false,
+  result,
 }: {
   competencyCount: number;
   profile: SimulationProfile;
   className?: string;
+  expanded?: boolean;
+  result?: SimulationResult;
 }) {
   const t = useTranslations('builder.simulator');
   const config = STRATEGY_CONFIG.UNIVERSAL_BASELINE;
-  const persona = personaConfig[profile];
+
+  const topCompetencies = useMemo(() => {
+    if (!expanded || !result?.distributionByCompetency) return [];
+    return [...result.distributionByCompetency]
+      .sort((a, b) => b.questionCount - a.questionCount)
+      .slice(0, 4);
+  }, [expanded, result?.distributionByCompetency]);
+
+  const totalQuestions = result?.sampleQuestions.length ?? 0;
 
   return (
     <div
@@ -90,6 +109,7 @@ function UniversalBaselineDisplay({
         'p-4 rounded-xl border relative overflow-hidden',
         config.border,
         config.bg,
+        expanded && 'border-2',
         className
       )}
       role="region"
@@ -102,9 +122,12 @@ function UniversalBaselineDisplay({
       />
 
       <div className="flex items-center justify-between mb-3">
-        <span className="text-xs font-medium text-muted-foreground">
-          {t('score.competencyProfile')}
-        </span>
+        <div className="flex items-center gap-2">
+          <LayoutGrid className={cn('h-4 w-4', config.iconText)} aria-hidden="true" />
+          <span className="text-xs font-medium text-muted-foreground">
+            {t('score.competencyProfile')}
+          </span>
+        </div>
         <Badge
           variant="outline"
           className="text-[10px] bg-primary/10 text-primary border-primary/20"
@@ -113,17 +136,47 @@ function UniversalBaselineDisplay({
         </Badge>
       </div>
 
-      <div className="flex items-center gap-3">
-        <div className={cn('p-2.5 rounded-xl', config.iconBg)}>
-          <LayoutGrid className={cn('h-6 w-6', config.iconText)} aria-hidden="true" />
+      {/* Summary row */}
+      <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
+        <div className="flex items-center gap-3">
+          <div className={cn('p-2 rounded-lg', config.iconBg)}>
+            <LayoutGrid className={cn('h-5 w-5', config.iconText)} aria-hidden="true" />
+          </div>
+          <div>
+            <span className={cn('text-2xl font-bold tabular-nums', config.iconText)}>
+              {competencyCount}
+            </span>
+            <span className="text-sm text-muted-foreground ml-1.5">{t('score.competencies')}</span>
+          </div>
         </div>
-        <div>
-          <span className={cn('text-2xl font-bold tabular-nums', config.iconText)}>
-            {competencyCount}
-          </span>
-          <span className="text-sm text-muted-foreground ml-1.5">{t('score.competencies')}</span>
-        </div>
+        {expanded && totalQuestions > 0 && (
+          <Badge variant="secondary" className="tabular-nums">
+            {totalQuestions} {t('results.questions')}
+          </Badge>
+        )}
       </div>
+
+      {/* Expanded: Top competencies grid */}
+      {expanded && topCompetencies.length > 0 && (
+        <div className="grid grid-cols-2 gap-2 mt-3">
+          {topCompetencies.map((comp) => {
+            const percentage = totalQuestions > 0
+              ? Math.round((comp.questionCount / totalQuestions) * 100)
+              : 0;
+            return (
+              <div key={comp.competencyId} className="p-3 rounded-lg border bg-background">
+                <div className="text-xs text-muted-foreground truncate mb-1">
+                  {comp.competencyName}
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-lg font-bold tabular-nums">{comp.questionCount}</span>
+                  <Badge variant="outline" className="text-[10px]">{percentage}%</Badge>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
 
       <p className="text-xs text-muted-foreground mt-3">
         {t('score.noPassFail')}
@@ -142,23 +195,27 @@ function TargetedFitDisplay({
   profile,
   onetSocCode,
   className,
+  expanded = false,
 }: {
   score: number;
   passingScore: number;
   profile: SimulationProfile;
   onetSocCode?: string;
   className?: string;
+  expanded?: boolean;
 }) {
   const t = useTranslations('builder.simulator');
   const config = STRATEGY_CONFIG.TARGETED_FIT;
   const persona = personaConfig[profile];
   const passed = score >= passingScore;
+  const alignmentScore = Math.min(100, Math.round(score * 1.1));
 
   return (
     <div
       className={cn(
         'p-4 rounded-xl border relative overflow-hidden',
         persona.bgColor,
+        expanded && 'border-2',
         className
       )}
       role="region"
@@ -180,6 +237,11 @@ function TargetedFitDisplay({
           <Briefcase className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
           <span className="text-xs font-medium text-muted-foreground">{t('score.jobFitScore')}</span>
         </div>
+        {onetSocCode && expanded && (
+          <Badge variant="outline" className="text-[10px] ml-auto mr-2">
+            {onetSocCode}
+          </Badge>
+        )}
         {passed ? (
           <Badge
             variant="outline"
@@ -199,25 +261,84 @@ function TargetedFitDisplay({
         )}
       </div>
 
-      <div className="flex items-baseline gap-2">
-        <span className={cn('text-3xl font-bold tabular-nums', persona.color)}>
-          {Math.round(score)}%
-        </span>
-        <span className="text-xs text-muted-foreground">{t('score.toQualify', { score: passingScore })}</span>
-      </div>
+      {/* Expanded: Centered prominent score */}
+      {expanded ? (
+        <div
+          className={cn(
+            'p-4 rounded-xl text-center mt-2',
+            passed ? 'bg-emerald-50 dark:bg-emerald-950/30' : 'bg-red-50 dark:bg-red-950/30'
+          )}
+        >
+          <div className="flex items-center justify-center gap-2 mb-2">
+            {passed ? (
+              <CheckCircle2 className="h-5 w-5 text-emerald-600" />
+            ) : (
+              <XCircle className="h-5 w-5 text-red-600" />
+            )}
+            <span
+              className={cn(
+                'text-sm font-medium',
+                passed ? 'text-emerald-700 dark:text-emerald-400' : 'text-red-700 dark:text-red-400'
+              )}
+            >
+              {passed ? t('score.qualified') : t('score.belowThreshold')}
+            </span>
+          </div>
+          <div className="text-4xl font-bold tabular-nums mb-1">
+            {Math.round(score)}%
+          </div>
+          <Progress
+            value={score}
+            className={cn(
+              'h-2 mt-2',
+              passed ? '[&>div]:bg-emerald-500' : '[&>div]:bg-red-500'
+            )}
+          />
+          <div className="text-xs text-muted-foreground mt-2">
+            {t('score.toQualify', { score: passingScore })}
+          </div>
+        </div>
+      ) : (
+        <>
+          <div className="flex items-baseline gap-2">
+            <span className={cn('text-3xl font-bold tabular-nums', persona.color)}>
+              {Math.round(score)}%
+            </span>
+            <span className="text-xs text-muted-foreground">{t('score.toQualify', { score: passingScore })}</span>
+          </div>
 
-      {/* Progress bar with threshold marker */}
-      <div className="mt-3">
-        <ProgressBar
-          value={score}
-          threshold={passingScore}
-          colorClass={passed ? 'bg-emerald-500' : 'bg-red-500'}
-          showThreshold
-        />
-      </div>
+          {/* Progress bar with threshold marker */}
+          <div className="mt-3">
+            <ProgressBar
+              value={score}
+              threshold={passingScore}
+              colorClass={passed ? 'bg-emerald-500' : 'bg-red-500'}
+              showThreshold
+            />
+          </div>
+        </>
+      )}
+
+      {/* Expanded: Alignment score */}
+      {expanded && onetSocCode && (
+        <div className="flex items-center justify-between p-3 rounded-lg border mt-3">
+          <div className="flex items-center gap-2">
+            <Target className="h-4 w-4 text-muted-foreground" />
+            <span className="text-sm">{t('score.jobFitScore')}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-lg font-semibold tabular-nums">{alignmentScore}%</span>
+            {alignmentScore >= 80 ? (
+              <TrendingUp className="h-4 w-4 text-emerald-500" />
+            ) : (
+              <TrendingDown className="h-4 w-4 text-amber-500" />
+            )}
+          </div>
+        </div>
+      )}
 
       {/* O*NET context */}
-      {onetSocCode && (
+      {onetSocCode && !expanded && (
         <a
           href={`https://www.onetonline.org/link/summary/${onetSocCode}`}
           target="_blank"
@@ -245,6 +366,8 @@ function DynamicGapDisplay({
   teamId,
   teamName,
   className,
+  expanded = false,
+  result,
 }: {
   score: number;
   teamBenchmark: number;
@@ -252,12 +375,19 @@ function DynamicGapDisplay({
   teamId?: string;
   teamName?: string;
   className?: string;
+  expanded?: boolean;
+  result?: SimulationResult;
 }) {
   const t = useTranslations('builder.simulator');
   const config = STRATEGY_CONFIG.DYNAMIC_GAP_ANALYSIS;
   const persona = personaConfig[profile];
   const gap = score - teamBenchmark;
   const gapDirection = gap > 5 ? 'above' : gap < -5 ? 'below' : 'at';
+  const isAboveAvg = gap >= 0;
+
+  const competencyData = result?.distributionByCompetency || [];
+  const strengthCount = Math.ceil(competencyData.length * 0.4);
+  const gapCount = Math.floor(competencyData.length * 0.3);
 
   const getTrendIcon = () => {
     if (gapDirection === 'above') return <TrendingUp className="h-4 w-4 text-emerald-500" />;
@@ -265,15 +395,21 @@ function DynamicGapDisplay({
     return <Minus className="h-4 w-4 text-blue-500" />;
   };
 
+  const gapLabel = t(
+    gapDirection === 'above' ? 'score.aboveTeam' : gapDirection === 'below' ? 'score.belowTeam' : 'score.atTeam',
+    { gap: Math.abs(gap) }
+  );
+
   return (
     <div
       className={cn(
         'p-4 rounded-xl border relative overflow-hidden',
         persona.bgColor,
+        expanded && 'border-2',
         className
       )}
       role="region"
-      aria-label={`${t('score.teamGapAnalysis')}: ${t(gapDirection === 'above' ? 'score.aboveTeam' : gapDirection === 'below' ? 'score.belowTeam' : 'score.atTeam', { gap: Math.abs(gap) })}`}
+      aria-label={`${t('score.teamGapAnalysis')}: ${gapLabel}`}
     >
       {/* Accent line */}
       <div
@@ -288,6 +424,11 @@ function DynamicGapDisplay({
             {t('score.teamGapAnalysis')}
           </span>
         </div>
+        {teamName && expanded && (
+          <Badge variant="outline" className="text-[10px] ml-auto mr-2">
+            {teamName}
+          </Badge>
+        )}
         <Badge
           variant="outline"
           className={cn(
@@ -301,52 +442,116 @@ function DynamicGapDisplay({
           )}
         >
           {getTrendIcon()}
-          <span className="ml-1">
-            {t(gapDirection === 'above' ? 'score.aboveTeam' : gapDirection === 'below' ? 'score.belowTeam' : 'score.atTeam', { gap: Math.abs(gap) })}
-          </span>
+          <span className="ml-1">{gapLabel}</span>
         </Badge>
       </div>
 
-      {/* Comparison visualization */}
-      <div className="space-y-3 mt-3">
-        {/* Individual score */}
-        <div className="space-y-1">
-          <div className="flex items-center justify-between text-xs">
-            <span className="text-muted-foreground">{t('score.individual')}</span>
-            <span className={cn('font-semibold tabular-nums', persona.color)}>
-              {Math.round(score)}%
-            </span>
+      {/* Expanded: Prominent centered gap display */}
+      {expanded ? (
+        <>
+          <div
+            className={cn(
+              'p-4 rounded-xl text-center mt-2',
+              isAboveAvg ? 'bg-blue-50 dark:bg-blue-950/30' : 'bg-amber-50 dark:bg-amber-950/30'
+            )}
+          >
+            <div className="text-sm text-muted-foreground mb-1">
+              {t('score.teamBenchmark')} ({Math.round(teamBenchmark)}%)
+            </div>
+            <div
+              className={cn(
+                'text-4xl font-bold tabular-nums',
+                isAboveAvg ? 'text-blue-600 dark:text-blue-400' : 'text-amber-600 dark:text-amber-400'
+              )}
+            >
+              {isAboveAvg ? '+' : ''}{Math.round(gap)}%
+            </div>
+            <div className="flex items-center justify-center gap-2 mt-2">
+              {getTrendIcon()}
+              <span
+                className={cn(
+                  'text-sm',
+                  isAboveAvg ? 'text-blue-600 dark:text-blue-400' : 'text-amber-600 dark:text-amber-400'
+                )}
+              >
+                {gapLabel}
+              </span>
+            </div>
           </div>
-          <ProgressBar
-            value={score}
-            colorClass={
-              gapDirection === 'above'
-                ? 'bg-emerald-500'
-                : gapDirection === 'below'
-                  ? 'bg-amber-500'
-                  : 'bg-blue-500'
-            }
-          />
-        </div>
 
-        {/* Team benchmark */}
-        <div className="space-y-1">
-          <div className="flex items-center justify-between text-xs">
-            <span className="text-muted-foreground">{t('score.teamBenchmark')}</span>
-            <span className="font-semibold text-blue-600 dark:text-blue-400 tabular-nums">
-              {teamBenchmark}%
-            </span>
+          {/* Strengths & Gaps Summary */}
+          <div className="grid grid-cols-2 gap-3 mt-3">
+            <div className="p-3 rounded-lg bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800">
+              <div className="flex items-center gap-2 mb-1">
+                <TrendingUp className="h-4 w-4 text-emerald-600" />
+                <span className="text-xs text-emerald-700 dark:text-emerald-400">
+                  {t('score.individual')}
+                </span>
+              </div>
+              <div className="text-2xl font-bold text-emerald-700 dark:text-emerald-400 tabular-nums">
+                {strengthCount}
+              </div>
+            </div>
+            <div className="p-3 rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800">
+              <div className="flex items-center gap-2 mb-1">
+                <TrendingDown className="h-4 w-4 text-amber-600" />
+                <span className="text-xs text-amber-700 dark:text-amber-400">
+                  {t('score.teamGapAnalysis')}
+                </span>
+              </div>
+              <div className="text-2xl font-bold text-amber-700 dark:text-amber-400 tabular-nums">
+                {gapCount}
+              </div>
+            </div>
           </div>
-          <ProgressBar value={teamBenchmark} colorClass="bg-blue-500/50" />
-        </div>
-      </div>
+        </>
+      ) : (
+        <>
+          {/* Compact: Comparison visualization */}
+          <div className="space-y-3 mt-3">
+            <div className="space-y-1">
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-muted-foreground">{t('score.individual')}</span>
+                <span className={cn('font-semibold tabular-nums', persona.color)}>
+                  {Math.round(score)}%
+                </span>
+              </div>
+              <ProgressBar
+                value={score}
+                colorClass={
+                  gapDirection === 'above'
+                    ? 'bg-emerald-500'
+                    : gapDirection === 'below'
+                      ? 'bg-amber-500'
+                      : 'bg-blue-500'
+                }
+              />
+            </div>
+            <div className="space-y-1">
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-muted-foreground">{t('score.teamBenchmark')}</span>
+                <span className="font-semibold text-blue-600 dark:text-blue-400 tabular-nums">
+                  {teamBenchmark}%
+                </span>
+              </div>
+              <ProgressBar value={teamBenchmark} colorClass="bg-blue-500/50" />
+            </div>
+          </div>
+        </>
+      )}
 
       {/* Team context */}
-      {(teamId || teamName) && (
+      {(teamId || teamName) && !expanded && (
         <div className="flex items-center gap-1.5 mt-3 text-xs text-muted-foreground">
           <Users className="h-3 w-3" aria-hidden="true" />
           <span>{teamName || t('teamComparison.teamFallbackName', { id: teamId ?? '' })}</span>
         </div>
+      )}
+
+      {!teamId && expanded && (
+        <p className="text-xs text-muted-foreground text-center mt-3">
+          {t('emptyState.missingConfig.teamGap')}
+        </p>
       )}
     </div>
   );
@@ -367,7 +572,11 @@ export function StrategyScoreDisplay({
   teamId,
   teamName,
   className,
+  variant = 'compact',
+  result,
 }: StrategyScoreDisplayProps) {
+  const expanded = variant === 'expanded';
+
   switch (strategy) {
     case 'UNIVERSAL_BASELINE':
       return (
@@ -375,6 +584,8 @@ export function StrategyScoreDisplay({
           competencyCount={competencyCount}
           profile={profile}
           className={className}
+          expanded={expanded}
+          result={result}
         />
       );
 
@@ -386,6 +597,7 @@ export function StrategyScoreDisplay({
           profile={profile}
           onetSocCode={onetSocCode}
           className={className}
+          expanded={expanded}
         />
       );
 
@@ -398,6 +610,8 @@ export function StrategyScoreDisplay({
           teamId={teamId}
           teamName={teamName}
           className={className}
+          expanded={expanded}
+          result={result}
         />
       );
 
