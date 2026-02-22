@@ -16,6 +16,7 @@ import {
   BadgeCounts,
 } from "@/config/navigation-config";
 import { NAVIGATION_CONFIG } from "@/config/navigation-data";
+import { getApiBaseUrl } from "@/services/api/core";
 
 /**
  * Hook return type
@@ -136,14 +137,8 @@ export function useNavigationBadgeCounts(): BadgeCounts {
 
     const fetchCounts = async () => {
       try {
-        const apiVersion = process.env.NEXT_PUBLIC_API_VERSION || 'v1';
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-        const baseUrl = apiUrl
-          ? `${apiUrl.includes('localhost') || apiUrl.includes('127.0.0.1') ? 'http' : 'https'}://${apiUrl}/api/${apiVersion}`
-          : `http://localhost:8080/api/${apiVersion}`;
-
         const response = await fetch(
-          `${baseUrl}/stats/navigation-badges?clerkUserId=${encodeURIComponent(userId)}`,
+          `${getApiBaseUrl()}/stats/navigation-badges?clerkUserId=${encodeURIComponent(userId)}`,
           { headers: { 'X-User-Id': userId }, mode: 'cors', credentials: 'include' }
         );
 
