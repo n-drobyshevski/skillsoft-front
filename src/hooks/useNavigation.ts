@@ -7,6 +7,8 @@
  * Part of UX Navigation Redesign - See docs/UX_STRATEGY.md
  */
 
+import { useState, useEffect } from "react";
+import { useAuth } from "@clerk/nextjs";
 import { useLensStore, LensType } from "@/store/lens-store";
 import {
   NavigationGroup,
@@ -126,14 +128,40 @@ export function useNavigation(): UseNavigationReturn {
  * ```
  */
 export function useNavigationBadgeCounts(): BadgeCounts {
-  // TODO: Connect to actual data sources
-  // This should be replaced with real API calls or store subscriptions
-  return {
-    inProgressTests: 0,
-    pendingCompetencies: 0,
-    flaggedItems: 0,
-    newUsers: 0,
-  };
+  const { userId } = useAuth();
+  const [counts, setCounts] = useState<BadgeCounts>({});
+
+  useEffect(() => {
+    if (!userId) return;
+
+    const fetchCounts = async () => {
+      try {
+        const apiVersion = process.env.NEXT_PUBLIC_API_VERSION || 'v1';
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+        const baseUrl = apiUrl
+          ? `${apiUrl.includes('localhost') || apiUrl.includes('127.0.0.1') ? 'http' : 'https'}://${apiUrl}/api/${apiVersion}`
+          : `http://localhost:8080/api/${apiVersion}`;
+
+        const response = await fetch(
+          `${baseUrl}/stats/navigation-badges?clerkUserId=${encodeURIComponent(userId)}`,
+          { headers: { 'X-User-Id': userId }, mode: 'cors', credentials: 'include' }
+        );
+
+        if (response.ok) {
+          const data = await response.json() as BadgeCounts;
+          setCounts(data);
+        }
+      } catch {
+        // Silently fail — return default empty counts
+      }
+    };
+
+    void fetchCounts();
+    const interval = setInterval(() => { void fetchCounts(); }, 60_000);
+    return () => clearInterval(interval);
+  }, [userId]);
+
+  return counts;
 }
 
 /**

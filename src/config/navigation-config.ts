@@ -111,6 +111,7 @@ export interface NavigationConfig {
  */
 export interface BadgeCounts {
   inProgressTests?: number;
+  sharedTemplates?: number;
   pendingCompetencies?: number;
   flaggedItems?: number;
   newUsers?: number;

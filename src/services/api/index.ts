@@ -24,3 +24,5 @@ export { passportApi } from './passport';
 export { assemblyApi } from './assembly';
 export { activityApi } from './activity';
 export { templateSharingApi } from './sharing';
+export { statsApi } from './stats';
+export type { NavigationBadgeCounts } from './stats';
