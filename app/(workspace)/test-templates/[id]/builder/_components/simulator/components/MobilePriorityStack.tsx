@@ -113,7 +113,7 @@ const QuickStats = memo(function QuickStats({
   const t = useTranslations('builder.simulator');
 
   return (
-    <div className="grid grid-cols-2 gap-3">
+    <div className="grid grid-cols-2 gap-2 sm:gap-3">
       <Card className="border-dashed">
         <CardContent className="p-3 flex items-center gap-3">
           <div className="p-2 rounded-lg bg-muted">
@@ -268,7 +268,7 @@ export const MobilePriorityStack = memo(function MobilePriorityStack({
   const t = useTranslations('builder.simulator');
 
   return (
-    <div className="space-y-4 pb-20">
+    <div className="space-y-4 pb-[calc(5rem+env(safe-area-inset-bottom))]">
       {/* 1. Primary Insight (Always Expanded) */}
       <StrategyPrimaryInsight
         result={result}

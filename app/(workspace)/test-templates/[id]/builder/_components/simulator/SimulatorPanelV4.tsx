@@ -128,7 +128,7 @@ function MobileResultsView({
       <div
         className={cn(
           'sticky bottom-0 left-0 right-0 z-30',
-          'p-3 bg-background/95 backdrop-blur-sm border-t',
+          'p-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] bg-background/95 backdrop-blur-sm border-t',
           'flex items-center gap-2'
         )}
       >
@@ -138,8 +138,9 @@ function MobileResultsView({
           onChange={(e) => onProfileChange(e.target.value as SimulationProfile)}
           disabled={isSimulating}
           className={cn(
-            'h-11 px-3 rounded-lg border bg-background text-sm',
-            'focus:outline-none focus:ring-2 focus:ring-ring'
+            'h-11 px-3 rounded-lg border bg-background text-sm appearance-none',
+            'focus:outline-none focus:ring-2 focus:ring-ring',
+            'dark:bg-muted dark:border-border dark:text-foreground'
           )}
         >
           {profiles.map((profile) => (

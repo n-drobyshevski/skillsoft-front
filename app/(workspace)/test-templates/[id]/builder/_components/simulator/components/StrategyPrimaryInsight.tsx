@@ -198,7 +198,7 @@ function TargetedFitInsight({
             </span>
           </div>
           <div className="text-4xl font-bold tabular-nums mb-1">
-            {score}%
+            {Math.round(score)}%
           </div>
           <Progress
             value={score}
@@ -288,7 +288,7 @@ function DynamicGapInsight({
           )}
         >
           <div className="text-sm text-muted-foreground mb-1">
-            {t('score.teamBenchmark')} ({teamAvg}%)
+            {t('score.teamBenchmark')} ({Math.round(teamAvg)}%)
           </div>
           <div
             className={cn(
@@ -296,7 +296,7 @@ function DynamicGapInsight({
               isAboveAvg ? 'text-blue-600 dark:text-blue-400' : 'text-amber-600 dark:text-amber-400'
             )}
           >
-            {isAboveAvg ? '+' : ''}{gap}%
+            {isAboveAvg ? '+' : ''}{Math.round(gap)}%
           </div>
           <div className="flex items-center justify-center gap-2 mt-2">
             {isAboveAvg ? (

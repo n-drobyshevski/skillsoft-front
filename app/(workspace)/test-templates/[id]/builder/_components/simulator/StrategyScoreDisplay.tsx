@@ -162,7 +162,7 @@ function TargetedFitDisplay({
         className
       )}
       role="region"
-      aria-label={`${t('score.jobFitScore')}: ${score}%${passed ? `, ${t('score.qualified')}` : `, ${t('score.belowThreshold')}`}`}
+      aria-label={`${t('score.jobFitScore')}: ${Math.round(score)}%${passed ? `, ${t('score.qualified')}` : `, ${t('score.belowThreshold')}`}`}
     >
       {/* Accent line */}
       <div
@@ -201,7 +201,7 @@ function TargetedFitDisplay({
 
       <div className="flex items-baseline gap-2">
         <span className={cn('text-3xl font-bold tabular-nums', persona.color)}>
-          {score}%
+          {Math.round(score)}%
         </span>
         <span className="text-xs text-muted-foreground">{t('score.toQualify', { score: passingScore })}</span>
       </div>
@@ -314,7 +314,7 @@ function DynamicGapDisplay({
           <div className="flex items-center justify-between text-xs">
             <span className="text-muted-foreground">{t('score.individual')}</span>
             <span className={cn('font-semibold tabular-nums', persona.color)}>
-              {score}%
+              {Math.round(score)}%
             </span>
           </div>
           <ProgressBar

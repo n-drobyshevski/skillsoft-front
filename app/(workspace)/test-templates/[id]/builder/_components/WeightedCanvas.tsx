@@ -18,7 +18,7 @@ import { useBlueprintHistory, type HistoryActionType } from "@/hooks/useBlueprin
 import { useTranslations } from "next-intl";
 import { STRATEGY_HELP_CONTENT, type Strategy } from "./simulator/strategy-context";
 
-export function WeightedCanvas() {
+export const WeightedCanvas = React.memo(function WeightedCanvas() {
   const t = useTranslations('builder.canvas');
   const tSim = useTranslations('builder.simulator');
   const {
@@ -208,7 +208,10 @@ export function WeightedCanvas() {
       <div className="flex items-center justify-between px-2 sm:px-3 md:px-4 py-2 sm:py-2.5 md:py-3 border-b bg-background/50 shrink-0 overflow-hidden">
         <div className="flex items-center gap-1 sm:gap-2 min-w-0 shrink">
           <Sparkles className="h-4 w-4 text-primary shrink-0" />
-          <span className="text-sm font-medium hidden sm:inline truncate">{t('assessmentBlueprint')}</span>
+          <span className="text-sm font-medium truncate">
+            <span className="sm:hidden">{t('blueprintShort')}</span>
+            <span className="hidden sm:inline">{t('assessmentBlueprint')}</span>
+          </span>
           <Badge variant="secondary" className="text-[10px] ml-0 sm:ml-1 shrink-0 hidden xs:inline-flex">
             {state.competencies.length}
           </Badge>
@@ -455,4 +458,4 @@ export function WeightedCanvas() {
       </ScrollArea>
     </div>
   );
-}
+});

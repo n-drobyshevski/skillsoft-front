@@ -72,7 +72,7 @@ const FloatingTrigger = memo(function FloatingTrigger({ strategy }: FloatingTrig
       variant="outline"
       size="icon"
       className={cn(
-        'fixed bottom-20 right-4 z-40',
+        'fixed bottom-32 right-4 z-40',
         'h-14 w-14 rounded-full shadow-lg',
         'bg-background/95 backdrop-blur-sm',
         'border-2 transition-all duration-200',
@@ -128,7 +128,7 @@ const SettingsContent = memo(function SettingsContent({
           step={1}
           onValueChange={(val) => onStrictnessChange(val[0])}
           disabled={isSimulating}
-          className="[&_[role=slider]]:h-6 [&_[role=slider]]:w-6"
+          className="[&_[data-slot=slider-thumb]]:h-6 [&_[data-slot=slider-thumb]]:w-6"
         />
         <p className="text-xs text-muted-foreground">
           {t('fineTune.strictnessDescription')}
@@ -150,7 +150,7 @@ const SettingsContent = memo(function SettingsContent({
           step={5}
           onValueChange={(val) => onSaturationChange(val[0])}
           disabled={isSimulating}
-          className="[&_[role=slider]]:h-6 [&_[role=slider]]:w-6"
+          className="[&_[data-slot=slider-thumb]]:h-6 [&_[data-slot=slider-thumb]]:w-6"
         />
         <p className="text-xs text-muted-foreground">
           {t('fineTune.saturationDescription')}

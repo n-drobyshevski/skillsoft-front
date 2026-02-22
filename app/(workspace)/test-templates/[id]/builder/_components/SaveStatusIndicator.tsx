@@ -128,7 +128,11 @@ export function SaveStatusIndicator({
           effectiveConfig.animate && 'animate-spin'
         )}
       />
-      {!compact && (
+      {compact ? (
+        <span className={cn('text-[10px]', effectiveConfig.color)}>
+          {statusLabels[effectiveStatus]}
+        </span>
+      ) : (
         <span className={cn('text-xs', effectiveConfig.color)}>
           {getLabel()}
         </span>

@@ -11,6 +11,7 @@
   },
   "canvas": {
     "assessmentBlueprint": "Assessment Blueprint",
+    "blueprintShort": "Blueprint",
     "priorityTooltip": "Order sets priority. When time is tight, cards near the top are asked first.",
     "undoLabel": "Undo (Ctrl+Z)",
     "redoLabel": "Redo (Ctrl+Shift+Z)",

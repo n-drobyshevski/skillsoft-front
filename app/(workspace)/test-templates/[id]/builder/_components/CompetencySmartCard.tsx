@@ -161,10 +161,8 @@ export function CompetencySmartCard({
             {...listeners}
             data-drag-handle
             className={cn(
-              // Small mobile (<480px): compact 32px touch target
-              "h-8 w-8 flex items-center justify-center shrink-0",
-              // Mobile (>=480px): 44px touch target
-              "sm:h-11 sm:w-11",
+              // Mobile: 44px touch target (WCAG 2.5.8)
+              "h-11 w-11 flex items-center justify-center shrink-0",
               // Desktop: smaller
               "md:h-auto md:w-auto md:p-2",
               "cursor-grab active:cursor-grabbing rounded-md touch-none",
@@ -173,7 +171,7 @@ export function CompetencySmartCard({
             )}
             aria-label={t('dragToReorder')}
           >
-          <GripVertical className="h-4 w-4 text-muted-foreground/40 group-hover:text-muted-foreground/70" />
+          <GripVertical className="h-4 w-4 text-muted-foreground/60 sm:text-muted-foreground/40 group-hover:text-muted-foreground/70" />
         </button>
 
         <div className="flex-1 min-w-0 overflow-hidden">
@@ -239,9 +237,8 @@ export function CompetencySmartCard({
           variant="ghost"
           size="icon"
           className={cn(
-            // Fixed sizes to prevent overflow accumulation
-            "h-8 w-8 shrink-0",
-            "sm:h-10 sm:w-10",
+            // 44px touch target on mobile (WCAG 2.5.8)
+            "h-11 w-11 shrink-0",
             "md:h-8 md:w-8",
             "rounded-lg hover:bg-muted active:scale-95 transition-all"
           )}
@@ -295,14 +292,14 @@ export function CompetencySmartCard({
         {/* U6: Mobile difficulty selector */}
         <div className="flex items-center gap-2 p-2 rounded-lg bg-muted/20 border border-border/30">
           <span className="text-[11px] sm:text-xs text-muted-foreground font-medium shrink-0">{t('difficulty')}</span>
-          <div className="flex-1 flex rounded-md border border-border/40 overflow-hidden">
+          <div className="flex-1 flex rounded-md border border-border/40 overflow-hidden min-w-0">
             {DIFFICULTY_OPTIONS.map((opt) => (
               <button
                 key={opt.value}
                 onClick={() => updateCompetency(competency.id, { difficulty: opt.value })}
                 disabled={isPending}
                 className={cn(
-                  "flex-1 py-1.5 text-[11px] font-medium transition-colors",
+                  "flex-1 min-w-0 py-1.5 text-[11px] font-medium transition-colors truncate",
                   (competency.difficulty ?? "INTERMEDIATE") === opt.value
                     ? opt.color
                     : "bg-muted/30 text-muted-foreground"
@@ -329,7 +326,7 @@ export function CompetencySmartCard({
                 <div className={cn("h-full shrink-0", difficultyPalette.medium)} style={{ width: `${(inventoryCounts.medium / total) * 100}%` }} />
                 <div className={cn("h-full shrink-0", difficultyPalette.hard)} style={{ width: `${(inventoryCounts.hard / total) * 100}%` }} />
               </div>
-              <div className="flex items-center gap-0.5 sm:gap-1 text-[9px] sm:text-[10px] text-muted-foreground/80 font-medium shrink-0">
+              <div className="flex items-center gap-0.5 sm:gap-1 text-[10px] sm:text-[11px] text-muted-foreground/80 font-medium shrink-0">
                 <span>{inventoryCounts.easy}</span>
                 <span>/</span>
                 <span>{inventoryCounts.medium}</span>
@@ -360,23 +357,25 @@ export function CompetencySmartCard({
           <div className="space-y-2 sm:space-y-2.5">
             <div className="flex items-center justify-between">
               <Label className="text-[11px] sm:text-xs font-semibold text-foreground/90">{t('indicatorPriority')}</Label>
-              <span className="text-[9px] sm:text-[10px] text-muted-foreground/70 font-medium">{t('optimisticApply')}</span>
+              <span className="text-[10px] sm:text-[11px] text-muted-foreground/70 font-medium">{t('optimisticApply')}</span>
             </div>
             {indicators.map((indicator) => (
-              <div key={indicator.id} className="flex items-center gap-1.5 sm:gap-2">
-                <span className="text-[10px] sm:text-xs w-12 sm:w-20 md:w-28 truncate text-foreground/80 font-medium shrink-0">{indicator.title}</span>
-                <div className="flex-1 min-w-0">
-                  <Slider
-                    value={[indicator.weight]}
-                    min={0}
-                    max={100}
-                    step={5}
-                    onValueChange={([val]) => handleIndicatorChange(indicator.id, val)}
-                    disabled={isPending}
-                    className="[&_[data-slot=slider-thumb]]:h-4 [&_[data-slot=slider-thumb]]:w-4 sm:[&_[data-slot=slider-thumb]]:h-5 sm:[&_[data-slot=slider-thumb]]:w-5 md:[&_[data-slot=slider-thumb]]:h-4 md:[&_[data-slot=slider-thumb]]:w-4 [&_[data-slot=slider-track]]:h-1.5"
-                  />
+              <div key={indicator.id} className="space-y-1 xs:space-y-0 xs:flex xs:items-center xs:gap-2">
+                <span className="text-[10px] sm:text-xs block xs:w-20 md:w-28 truncate text-foreground/80 font-medium xs:shrink-0">{indicator.title}</span>
+                <div className="flex items-center gap-1.5 sm:gap-2 w-full">
+                  <div className="flex-1 min-w-0">
+                    <Slider
+                      value={[indicator.weight]}
+                      min={0}
+                      max={100}
+                      step={5}
+                      onValueChange={([val]) => handleIndicatorChange(indicator.id, val)}
+                      disabled={isPending}
+                      className="[&_[data-slot=slider-thumb]]:h-4 [&_[data-slot=slider-thumb]]:w-4 sm:[&_[data-slot=slider-thumb]]:h-5 sm:[&_[data-slot=slider-thumb]]:w-5 md:[&_[data-slot=slider-thumb]]:h-4 md:[&_[data-slot=slider-thumb]]:w-4 [&_[data-slot=slider-track]]:h-1.5"
+                    />
+                  </div>
+                  <span className="text-[10px] text-muted-foreground w-7 sm:w-9 text-right shrink-0">{indicator.weight}%</span>
                 </div>
-                <span className="text-[10px] text-muted-foreground w-7 sm:w-9 text-right shrink-0">{indicator.weight}%</span>
               </div>
             ))}
           </div>

@@ -253,9 +253,7 @@ function MobileLayout() {
   // We use standard state instead of Tabs to prevent unmounting components
   // This preserves the Canvas state (pan/zoom/nodes) when switching views
   const [activeTab, setActiveTab] = useState<TabType>("canvas");
-  // Phase 2.4: Track slide direction for animations
-  const [slideDirection, setSlideDirection] = useState<"left" | "right" | null>(null);
-  const slideKeyRef = useRef(0); // Force re-render to trigger animation
+  // Slide direction tracking removed — now using CSS transitions instead of key-based remount
 
   // Phase 3.1: Track visited tabs for lazy hydration
   // Only load panel code when tab is first visited
@@ -293,14 +291,6 @@ function MobileLayout() {
       scrollPositionsRef.current[activeTab] = currentScrollRef.current.scrollTop;
     }
 
-    const currentIndex = TABS.indexOf(activeTab);
-    const newIndex = TABS.indexOf(newTab);
-    if (newIndex > currentIndex) {
-      setSlideDirection("left"); // Content slides in from right (navigating forward)
-    } else if (newIndex < currentIndex) {
-      setSlideDirection("right"); // Content slides in from left (navigating back)
-    }
-    slideKeyRef.current += 1;
     setActiveTab(newTab);
 
     // Phase 3.1: Mark tab as visited to trigger lazy load
@@ -347,14 +337,12 @@ function MobileLayout() {
         {/* Note: Library View removed - now accessed via bottom sheet only */}
 
         {/* Canvas View - Always rendered with content-visibility + CSS containment */}
+        {/* Uses CSS transitions instead of key-based remount to avoid re-rendering WeightedCanvas */}
         <div
           ref={canvasScrollRef}
-          key={`canvas-${slideKeyRef.current}`}
           className={cn(
-            "absolute inset-0 bg-background z-0 overflow-hidden",
-            activeTab === "canvas" ? "flex flex-col z-20" : "invisible",
-            activeTab === "canvas" && slideDirection === "right" && "animate-slide-in-right",
-            activeTab === "canvas" && slideDirection === "left" && "animate-slide-in-left"
+            "absolute inset-0 bg-background z-0 overflow-hidden transition-opacity duration-200",
+            activeTab === "canvas" ? "flex flex-col z-20 opacity-100" : "invisible opacity-0"
           )}
           style={{
             contentVisibility: activeTab === "canvas" ? "visible" : "auto",
@@ -371,12 +359,9 @@ function MobileLayout() {
         {visitedTabs.has("simulate") && (
           <div
             ref={simulateScrollRef}
-            key={`simulate-${slideKeyRef.current}`}
             className={cn(
-              "absolute inset-0 bg-background z-10 overflow-hidden",
-              activeTab === "simulate" ? "flex flex-col" : "hidden",
-              activeTab === "simulate" && slideDirection === "right" && "animate-slide-in-right",
-              activeTab === "simulate" && slideDirection === "left" && "animate-slide-in-left"
+              "absolute inset-0 bg-background z-10 overflow-hidden transition-opacity duration-200",
+              activeTab === "simulate" ? "flex flex-col opacity-100" : "hidden opacity-0"
             )}
             style={{
               // MOB-3: CSS containment on inactive panels to isolate layout/paint
@@ -429,7 +414,7 @@ function MobileLayout() {
             <button
               onClick={() => switchTab("simulate")}
               className={cn(
-                "w-full mt-2 py-1.5 text-xs font-medium text-primary",
+                "w-full mt-2 py-3 text-xs font-medium text-primary min-h-[44px]",
                 "hover:underline active:opacity-70"
               )}
             >
@@ -445,8 +430,8 @@ function MobileLayout() {
       <Sheet open={isLibrarySheetOpen} onOpenChange={setIsLibrarySheetOpen}>
         <SheetContent
           side="bottom"
-          className="h-[75dvh] flex flex-col p-0"
-          showCloseButton={false}
+          className="h-[75dvh] max-h-[calc(100dvh-3rem)] flex flex-col p-0"
+          showCloseButton={true}
         >
           {/* Drag handle for swipe affordance */}
           <div className="flex justify-center pt-3 pb-1">
@@ -498,7 +483,7 @@ function MobileLayout() {
             <div
               className={cn(
                 "flex items-center justify-center h-8 px-4 rounded-full transition-all duration-200",
-                activeTab === "canvas" && "bg-primary/10"
+                activeTab === "canvas" && "bg-primary/10 dark:bg-primary/20"
               )}
             >
               <Layers className="h-5 w-5" strokeWidth={activeTab === "canvas" ? 2.5 : 2} />
@@ -548,7 +533,7 @@ function MobileLayout() {
             <div
               className={cn(
                 "flex items-center justify-center h-8 px-4 rounded-full transition-all duration-200",
-                activeTab === "simulate" && "bg-primary/10"
+                activeTab === "simulate" && "bg-primary/10 dark:bg-primary/20"
               )}
             >
               <Beaker className="h-5 w-5" strokeWidth={activeTab === "simulate" ? 2.5 : 2} />

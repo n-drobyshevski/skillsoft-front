@@ -184,13 +184,13 @@ export function JobFitAlignmentCard({
                   : 'text-red-600 dark:text-red-400'
             )}
           >
-            {coveragePercentage}%
+            {Math.round(coveragePercentage)}%
           </span>
         </div>
         <Progress
           value={coveragePercentage}
           className="h-2"
-          aria-label={`${t('warnings.inventoryWarnings')}: ${coveragePercentage}%`}
+          aria-label={`${t('warnings.inventoryWarnings')}: ${Math.round(coveragePercentage)}%`}
         />
       </div>
 
@@ -212,7 +212,7 @@ export function JobFitAlignmentCard({
                   className="text-[10px] text-red-600 dark:text-red-400 border-red-200 dark:border-red-800 tabular-nums shrink-0"
                 >
                   <TrendingDown className="h-2.5 w-2.5 mr-0.5" aria-hidden="true" />
-                  {gap.gap}%
+                  {Math.round(gap.gap)}%
                 </Badge>
               </div>
             ))}

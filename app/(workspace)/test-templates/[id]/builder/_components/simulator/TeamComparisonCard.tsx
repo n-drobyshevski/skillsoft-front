@@ -205,7 +205,7 @@ export function TeamComparisonCard({
                     )}
                   >
                     {gap > 0 ? '+' : ''}
-                    {gap}%
+                    {Math.round(gap)}%
                   </span>
                 </div>
               </div>

@@ -261,7 +261,7 @@ function CompetencyRadarChart({
                           {t('simulatedResults.tooltipScore')}
                         </span>
                         <span className="text-base font-bold tabular-nums text-blue-600">
-                          {item.value}%
+                          {Math.round(item.value)}%
                         </span>
                       </div>
                       <div className="flex items-center gap-1 mt-1.5 pt-1.5 border-t border-border/50">
@@ -444,7 +444,7 @@ function BigFiveRadarChart({ bigFiveProfile }: BigFiveRadarProps) {
                           className="text-base font-bold tabular-nums"
                           style={{ color: item.color }}
                         >
-                          {item.value}%
+                          {Math.round(item.value)}%
                         </span>
                       </div>
                     </div>
@@ -557,7 +557,7 @@ function ScoreSummary({ data, strategy }: ScoreSummaryProps) {
               )}
             >
               <span className={cn('text-xl font-bold', config.iconText)}>
-                {data.overallScore}%
+                {Math.round(data.overallScore)}%
               </span>
             </div>
             <div>
@@ -750,7 +750,7 @@ function JobAlignmentSection({ data }: JobAlignmentSectionProps) {
             <div className="flex items-center justify-between">
               <p className="text-sm font-medium">{t('simulatedResults.jobAlignmentScore')}</p>
               <span className="text-lg font-bold text-emerald-600 dark:text-emerald-400">
-                {data.jobAlignmentScore}%
+                {Math.round(data.jobAlignmentScore ?? 0)}%
               </span>
             </div>
             <p className="text-xs text-muted-foreground">
@@ -814,7 +814,7 @@ function TeamGapSection({ data, threshold }: TeamGapSectionProps) {
                     )}
                   >
                     {isPositive ? '+' : ''}
-                    {data.teamGap}%
+                    {Math.round(data.teamGap ?? 0)}%
                   </span>
                 </div>
               </div>

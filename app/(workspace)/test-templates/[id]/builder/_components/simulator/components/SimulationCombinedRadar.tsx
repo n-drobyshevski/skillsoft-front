@@ -447,7 +447,7 @@ export const SimulationCombinedRadar = React.memo<SimulationCombinedRadarProps>(
                           {truncateLabel(item.subject, 12)}
                         </span>
                         <span className="text-xs font-bold tabular-nums" style={{ color }}>
-                          {value}%
+                          {Math.round(value)}%
                         </span>
                       </div>
                     </div>
@@ -482,7 +482,7 @@ export const SimulationCombinedRadar = React.memo<SimulationCombinedRadarProps>(
                         className="text-lg font-bold tabular-nums"
                         style={{ color }}
                       >
-                        {value}%
+                        {Math.round(value)}%
                       </span>
                     </div>
                     {isCompetency && (

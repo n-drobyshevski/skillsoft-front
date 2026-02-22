@@ -53,7 +53,7 @@ export function ScoreDisplay({ score, passingScore, profile }: ScoreDisplayProps
       </div>
 
       <div className="flex items-baseline gap-2">
-        <span className={cn('text-3xl font-bold', config.color)}>{score}%</span>
+        <span className={cn('text-3xl font-bold', config.color)}>{Math.round(score)}%</span>
         <span className="text-xs text-muted-foreground">
           {t('score.toPass', { score: passingScore })}
         </span>

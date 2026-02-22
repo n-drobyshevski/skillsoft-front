@@ -11,6 +11,7 @@
   },
   "canvas": {
     "assessmentBlueprint": "Шаблон оценки",
+    "blueprintShort": "Шаблон",
     "priorityTooltip": "Порядок задаёт приоритет. При ограниченном времени вопросы из верхних карточек задаются первыми.",
     "undoLabel": "Отменить (Ctrl+Z)",
     "redoLabel": "Повторить (Ctrl+Shift+Z)",

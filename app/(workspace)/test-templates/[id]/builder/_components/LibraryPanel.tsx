@@ -353,7 +353,7 @@ type VirtualRow =
   | { type: 'item'; competency: LibraryCompetency };
 
 const ROW_HEIGHT_HEADER = 36;
-const ROW_HEIGHT_ITEM = 56;
+const ROW_HEIGHT_ITEM = 64;
 
 export function LibraryPanel({ onAdd }: LibraryPanelProps) {
   const t = useTranslations('builder.library');
@@ -432,7 +432,7 @@ export function LibraryPanel({ onAdd }: LibraryPanelProps) {
             placeholder={t('searchPlaceholder')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10 h-11 text-sm rounded-xl bg-muted/40 border-0 focus-visible:bg-background focus-visible:ring-2 focus-visible:ring-primary/20"
+            className="pl-10 h-11 text-base sm:text-sm rounded-xl bg-muted/40 border-0 focus-visible:bg-background focus-visible:ring-2 focus-visible:ring-primary/20"
           />
         </div>
 
