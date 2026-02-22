@@ -25,7 +25,7 @@ export function WarningsList({ warnings }: WarningsListProps) {
       <div className="space-y-1.5">
         {warnings.slice(0, 5).map((warning) => (
           <div
-            key={warning.competencyId}
+            key={`${warning.competencyId}-${warning.difficulty}`}
             className="flex items-center gap-2 p-2 rounded-lg bg-amber-50 dark:bg-amber-950/30 text-xs"
           >
             <span className="flex-1 truncate text-amber-700 dark:text-amber-300">

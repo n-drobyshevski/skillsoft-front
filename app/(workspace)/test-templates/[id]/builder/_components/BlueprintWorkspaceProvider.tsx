@@ -415,11 +415,21 @@ function CompetencyResolver({
 }) {
   const competencies = use(competenciesPromise);
   const setLibrary = useBlueprintStore((s) => s.setLibraryCompetencies);
+  const isInitialized = useBlueprintStore((s) => s._initialized);
   const hasHydrated = useRef(false);
 
   useEffect(() => {
     if (hasHydrated.current) return;
+    // Wait for store initialization before setting library data.
+    // React fires child effects before parent effects, so without this guard
+    // the library data would be set and then immediately overwritten by
+    // blueprintInitialize({libraryCompetencies: []}) in the parent.
+    if (!isInitialized) return;
     hasHydrated.current = true;
+
+    if (!competencies || competencies.length === 0) {
+      console.warn('[CompetencyResolver] No competencies received — library will be empty');
+    }
 
     const library: LibraryCompetency[] = competencies.map((c) => ({
       id: c.id,
@@ -435,7 +445,7 @@ function CompetencyResolver({
     }));
 
     setLibrary(library);
-  }, [competencies, setLibrary]);
+  }, [competencies, setLibrary, isInitialized]);
 
   return null;
 }

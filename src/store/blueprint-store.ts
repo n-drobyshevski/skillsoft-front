@@ -207,14 +207,44 @@ export const useBlueprintStore = create<BlueprintStore>()(
         isReadOnly,
       }) => {
         set(
-          {
-            state: initialState,
-            serverState: initialState,
-            libraryCompetencies,
-            templateId,
-            templateName,
-            isReadOnly,
-            _initialized: true,
+          (prev) => {
+            // Preserve library if already populated (defense against effect ordering race)
+            const effectiveLibrary =
+              prev.libraryCompetencies.length > 0
+                ? prev.libraryCompetencies
+                : libraryCompetencies;
+
+            // If library was already populated, enrich initial "Unknown" competency names
+            let enrichedState = initialState;
+            if (effectiveLibrary.length > 0) {
+              const lookup = new Map(
+                effectiveLibrary.map((c) => [c.id, { name: c.name, category: c.category }])
+              );
+              enrichedState = {
+                ...initialState,
+                competencies: initialState.competencies.map((c) => {
+                  const enriched = lookup.get(c.id);
+                  if (enriched && (c.name === 'Unknown' || c.category === 'UNKNOWN')) {
+                    return {
+                      ...c,
+                      name: enriched.name || c.name,
+                      category: enriched.category || c.category,
+                    };
+                  }
+                  return c;
+                }),
+              };
+            }
+
+            return {
+              state: enrichedState,
+              serverState: enrichedState,
+              libraryCompetencies: effectiveLibrary,
+              templateId,
+              templateName,
+              isReadOnly,
+              _initialized: true,
+            };
           },
           false,
           'initialize'
