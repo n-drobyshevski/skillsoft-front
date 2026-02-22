@@ -164,6 +164,13 @@
       "newVersion": "Новая версия",
       "newVersionShort": "Новая"
     },
+    "versionDialog": {
+      "title": "Создать новую версию",
+      "description": "Будет создана новая черновая версия. Что сделать с текущей опубликованной версией?",
+      "keepPublished": "Оставить опубликованной",
+      "archiveOriginal": "Архивировать оригинал",
+      "cancel": "Отмена"
+    },
     "overview": {
       "configuration": "Конфигурация",
       "recentActivity": "Последняя активность",

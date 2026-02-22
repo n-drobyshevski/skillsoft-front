@@ -149,4 +149,21 @@ export const testTemplatesApi = {
       authHeaders,
     });
   },
+
+  /**
+   * Create a new version of an existing template.
+   * Preserves version chain via parentId linkage.
+   */
+  createNextVersion: async (
+    id: string,
+    archiveOriginal: boolean
+  ): Promise<TestTemplate> => {
+    const authHeaders = await getAuthHeaders();
+    return fetchApi(`${TEST_TEMPLATES_BASE}/${id}/versions`, {
+      method: 'POST',
+      body: JSON.stringify({ archiveOriginal }),
+      cache: 'no-store',
+      authHeaders,
+    });
+  },
 };

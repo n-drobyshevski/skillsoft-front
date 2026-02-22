@@ -164,6 +164,13 @@
       "newVersion": "New Version",
       "newVersionShort": "New"
     },
+    "versionDialog": {
+      "title": "Create New Version",
+      "description": "A new draft version will be created. What should happen to the current published version?",
+      "keepPublished": "Keep original published",
+      "archiveOriginal": "Archive original",
+      "cancel": "Cancel"
+    },
     "overview": {
       "configuration": "Configuration",
       "recentActivity": "Recent Activity",

@@ -747,6 +747,12 @@ export interface TestTemplate {
    * Frontend should disable "Start Test" button when this is false.
    */
   hasValidBlueprint?: boolean;
+  /** Version number (1 for originals, increments with each version) */
+  version?: number;
+  /** ID of the parent template (previous version in the chain) */
+  parentId?: string | null;
+  /** Lifecycle status: DRAFT, PUBLISHED, or ARCHIVED */
+  status?: 'DRAFT' | 'PUBLISHED' | 'ARCHIVED';
 }
 
 export interface TestTemplateSummary {
@@ -759,6 +765,8 @@ export interface TestTemplateSummary {
   passingScore: number;
   isActive: boolean;
   createdAt: string;
+  /** Lifecycle status */
+  status?: 'DRAFT' | 'PUBLISHED' | 'ARCHIVED';
 }
 
 /**

@@ -52,42 +52,19 @@ export async function publishTemplate(templateId: string) {
 }
 
 /**
- * Create a new version of a published template
- * Clones the template as a new draft (inactive)
+ * Create a new version of a published template using the backend versioning API.
+ * Preserves version chain via parentId linkage.
  */
-export async function createNewVersion(templateId: string) {
+export async function createNewVersion(templateId: string, archiveOriginal: boolean) {
   try {
-    // Fetch the current template
-    const template = await testTemplatesApi.getTemplateById(templateId);
-    
-    if (!template) {
-      return { success: false, error: 'Template not found' };
-    }
-
-    // Create a new template (will default to inactive on backend)
-    const newTemplate = await testTemplatesApi.createTemplate({
-      name: `${template.name} (Copy)`,
-      description: template.description,
-      goal: template.goal,
-      competencyIds: template.competencyIds,
-      timeLimitMinutes: template.timeLimitMinutes,
-      passingScore: template.passingScore,
-      allowBackNavigation: template.allowBackNavigation,
-      shuffleQuestions: template.shuffleQuestions,
-      shuffleOptions: template.shuffleOptions,
-      allowSkip: template.allowSkip,
-      showResultsImmediately: template.showResultsImmediately,
-      blueprint: template.blueprint,
-    });
-
-    // Ensure the new template is inactive (draft)
-    await testTemplatesApi.updateTemplate(newTemplate.id, { isActive: false });
+    const newTemplate = await testTemplatesApi.createNextVersion(templateId, archiveOriginal);
 
     // Revalidate all caches
+    await revalidateTemplateCache(templateId);
     await revalidateTemplateCache(newTemplate.id);
 
-    // Redirect to the new template
-    redirect(`/test-templates/${newTemplate.id}`);
+    // Redirect to the new draft version
+    redirect(`/test-templates/${newTemplate.id}/settings`);
   } catch (error) {
     // redirect throws an error, so we need to rethrow it
     if (error instanceof Error && error.message === 'NEXT_REDIRECT') {

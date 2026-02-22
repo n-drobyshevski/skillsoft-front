@@ -8,6 +8,17 @@ import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
+import {
   LayoutDashboard,
   Wrench,
   Settings,
@@ -123,25 +134,53 @@ export function NavTabs({ baseUrl, status, templateId, templateName }: NavTabsPr
       {/* 2. Actions Section (Moved here in DOM for Mobile Float Right) */}
       <div className="flex items-center gap-2 ml-auto pr-4 py-3 md:pr-0 md:py-0 md:order-3">
         {status === 'PUBLISHED' && (
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => {
-              startTransition(async () => {
-                await createNewVersion(templateId);
-              });
-            }}
-            disabled={isPending}
-            className="gap-1.5 h-8"
-          >
-            {isPending ? (
-              <Loader2 className="h-3.5 w-3.5 animate-spin" />
-            ) : (
-              <GitBranch className="h-3.5 w-3.5" />
-            )}
-            <span className="hidden sm:inline">{t('actions.newVersion')}</span>
-            <span className="inline sm:hidden">{t('actions.newVersionShort')}</span>
-          </Button>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button
+                size="sm"
+                variant="outline"
+                disabled={isPending}
+                className="gap-1.5 h-8"
+              >
+                {isPending ? (
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                ) : (
+                  <GitBranch className="h-3.5 w-3.5" />
+                )}
+                <span className="hidden sm:inline">{t('actions.newVersion')}</span>
+                <span className="inline sm:hidden">{t('actions.newVersionShort')}</span>
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>{t('versionDialog.title')}</AlertDialogTitle>
+                <AlertDialogDescription>
+                  {t('versionDialog.description')}
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter className="flex-col gap-2 sm:flex-row">
+                <AlertDialogCancel>{t('versionDialog.cancel')}</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={() => {
+                    startTransition(async () => {
+                      await createNewVersion(templateId, false);
+                    });
+                  }}
+                >
+                  {t('versionDialog.keepPublished')}
+                </AlertDialogAction>
+                <AlertDialogAction
+                  onClick={() => {
+                    startTransition(async () => {
+                      await createNewVersion(templateId, true);
+                    });
+                  }}
+                >
+                  {t('versionDialog.archiveOriginal')}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         )}
       </div>
 

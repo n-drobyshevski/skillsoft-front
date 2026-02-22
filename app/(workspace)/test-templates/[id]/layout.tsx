@@ -12,14 +12,6 @@ interface TemplateLayoutProps {
 }
 
 /**
- * Derive status from isActive field
- * isActive=true means PUBLISHED, isActive=false means DRAFT
- */
-function deriveStatus(isActive: boolean): TemplateStatus {
-  return isActive ? 'PUBLISHED' : 'DRAFT';
-}
-
-/**
  * Fetch template data server-side (once per layout)
  */
 async function getTemplateData(id: string) {
@@ -65,7 +57,7 @@ export default async function TemplateLayout({
   }
 
   const baseUrl = `/test-templates/${id}`;
-  const status = deriveStatus(template.isActive);
+  const status: TemplateStatus = (template.status as TemplateStatus) || (template.isActive ? 'PUBLISHED' : 'DRAFT');
 
   return (
     <>

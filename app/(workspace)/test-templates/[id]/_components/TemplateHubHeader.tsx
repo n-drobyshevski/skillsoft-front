@@ -13,6 +13,17 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { FileText, Send, GitBranch, ChevronRight, Loader2, Play, Eye, Share2 } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { cn } from "@/lib/utils";
 import { useStudioHeader } from "@/context/StudioHeaderContext";
 import { publishTemplate, createNewVersion } from "../actions";
@@ -70,12 +81,6 @@ export function TemplateHubHeader({
   const handlePublish = useCallback(() => {
     startTransition(async () => {
       await publishTemplate(templateId);
-    });
-  }, [templateId]);
-
-  const handleNewVersion = useCallback(() => {
-    startTransition(async () => {
-      await createNewVersion(templateId);
     });
   }, [templateId]);
 
@@ -164,20 +169,52 @@ export function TemplateHubHeader({
           )}
 
           {status === "PUBLISHED" && (
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={handleNewVersion}
-              disabled={isPending}
-              className="gap-1.5"
-            >
-              {isPending ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <GitBranch className="h-4 w-4" />
-              )}
-              Новая версия
-            </Button>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  disabled={isPending}
+                  className="gap-1.5"
+                >
+                  {isPending ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <GitBranch className="h-4 w-4" />
+                  )}
+                  Новая версия
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Создать новую версию</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Будет создана новая черновая версия. Что сделать с текущей опубликованной версией?
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter className="flex-col gap-2 sm:flex-row">
+                  <AlertDialogCancel>Отмена</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={() => {
+                      startTransition(async () => {
+                        await createNewVersion(templateId, false);
+                      });
+                    }}
+                  >
+                    Оставить опубликованной
+                  </AlertDialogAction>
+                  <AlertDialogAction
+                    onClick={() => {
+                      startTransition(async () => {
+                        await createNewVersion(templateId, true);
+                      });
+                    }}
+                  >
+                    Архивировать оригинал
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           )}
         </div>
       ),
@@ -186,7 +223,7 @@ export function TemplateHubHeader({
     return () => {
       resetHeader();
     };
-  }, [templateName, status, isPending, handlePublish, handleNewVersion, setHeader, resetHeader]);
+  }, [templateName, status, isPending, templateId, handlePublish, startTransition, setHeader, resetHeader]);
 
   return null;
 }
