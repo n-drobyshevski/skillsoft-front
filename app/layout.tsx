@@ -6,7 +6,6 @@ import { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import { ClerkProvider } from '@clerk/nextjs';
 import { Analytics } from '@vercel/analytics/next';
-import { SpeedInsights } from '@vercel/speed-insights/next';
 import { NextIntlClientProvider } from 'next-intl';
 import { getLocale, getMessages } from 'next-intl/server';
 import { LayoutProvider } from "@/components/layout/layout-provider";
@@ -15,6 +14,7 @@ import { shadcn } from '@clerk/themes';
 import { SkipLinks, MainContentAnchor } from "@/components/accessibility";
 import { HtmlLangSetter } from "@/components/providers/HtmlLangSetter";
 import { SHARED_NAMESPACES, pickMessages } from "@/i18n/namespaces";
+import { Insights } from "./insights";
 
 const inter = Inter({
 	subsets: ["latin", "cyrillic"],
@@ -160,7 +160,9 @@ export default function RootLayout({
 					<RootProviders>{children}</RootProviders>
 				</Suspense>
 				<Analytics />
-				<SpeedInsights />
+				<Suspense>
+					<Insights />
+				</Suspense>
 			</body>
 		</html>
 	);

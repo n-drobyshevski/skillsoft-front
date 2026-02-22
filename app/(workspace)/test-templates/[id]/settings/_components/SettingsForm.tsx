@@ -60,11 +60,13 @@ import {
   Crosshair,
   Settings2,
   ToggleRight,
+  Lock,
+  GitBranch,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { AssessmentGoal, AssessmentGoalInfo, TestTemplate } from '@/types/domain';
-import { updateTemplateSettings, archiveTemplate, deleteTemplate } from '../../actions';
+import { updateTemplateSettings, archiveTemplate, deleteTemplate, createNewVersion } from '../../actions';
 import { useTranslations } from 'next-intl';
 import { GoalConfigSection } from './GoalConfigSection';
 
@@ -147,6 +149,9 @@ export function SettingsForm({ template }: SettingsFormProps) {
   const t = useTranslations('template');
   const tCommon = useTranslations('common');
 
+  // Published/Archived templates are read-only — must create a new version to edit
+  const isReadOnly = template.status === 'PUBLISHED' || template.status === 'ARCHIVED';
+
   // Extract blueprint values with sensible defaults
   const blueprint = template.blueprint || {};
 
@@ -221,8 +226,44 @@ export function SettingsForm({ template }: SettingsFormProps) {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSave)}>
+        {/* Read-only banner for published/archived templates */}
+        {isReadOnly && (
+          <div className="mb-6 flex items-center justify-between gap-4 rounded-lg border-2 border-amber-500/50 bg-amber-50 p-4 dark:bg-amber-950/30">
+            <div className="flex items-center gap-3">
+              <Lock className="h-5 w-5 text-amber-600 dark:text-amber-400 shrink-0" />
+              <div>
+                <p className="text-sm font-medium text-amber-800 dark:text-amber-200">
+                  {t('readOnlyTitle')}
+                </p>
+                <p className="text-xs text-amber-700 dark:text-amber-300 mt-0.5">
+                  {t('readOnlyDescription')}
+                </p>
+              </div>
+            </div>
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              className="gap-1.5 shrink-0 border-amber-500/50 text-amber-700 hover:bg-amber-100 dark:text-amber-300 dark:hover:bg-amber-950/50"
+              disabled={isPending}
+              onClick={() => {
+                startTransition(async () => {
+                  await createNewVersion(template.id, false);
+                });
+              }}
+            >
+              {isPending ? (
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              ) : (
+                <GitBranch className="h-3.5 w-3.5" />
+              )}
+              {t('createNewVersion')}
+            </Button>
+          </div>
+        )}
+
         {/* Main 2-column grid */}
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-12 lg:gap-8">
+        <div className={cn("grid grid-cols-1 gap-6 lg:grid-cols-12 lg:gap-8", isReadOnly && "opacity-60 pointer-events-none")}>
 
           {/* LEFT COLUMN: Main Content (8/12) */}
           <div className="space-y-6 lg:col-span-8">
@@ -745,8 +786,8 @@ export function SettingsForm({ template }: SettingsFormProps) {
           </div>
         </div>
 
-        {/* Sticky Save Bar - Full Width */}
-        <div className="sticky bottom-0 z-10 mt-6 -mx-4 lg:-mx-6 border-t bg-background/95 backdrop-blur-sm">
+        {/* Sticky Save Bar - Full Width (hidden for read-only templates) */}
+        {!isReadOnly && <div className="sticky bottom-0 z-10 mt-6 -mx-4 lg:-mx-6 border-t bg-background/95 backdrop-blur-sm">
           <div className="px-4 lg:px-6 py-4">
             <div className="flex items-center justify-between gap-4">
               {/* Left side: Status indicator */}
@@ -800,7 +841,7 @@ export function SettingsForm({ template }: SettingsFormProps) {
               </div>
             </div>
           </div>
-        </div>
+        </div>}
       </form>
     </Form>
   );
