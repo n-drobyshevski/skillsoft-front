@@ -50,20 +50,45 @@ const knowledgeData = knowledgeDataRaw as ONetElementRaw[];
 const workStylesData = workStylesDataRaw as ONetElementRaw[];
 
 /**
- * Filter elements by SOC code and scale type (IM = Importance, LV = Level)
+ * Filter elements by SOC code and scale type (IM = Importance, LV = Level).
+ *
+ * O*NET uses hierarchical codes: broad (.00) and detailed (.01, .02, etc.).
+ * Element data files only contain detailed codes, so when the broad code
+ * yields no results we fall back to prefix-matching detailed codes.
  */
 function filterElementsBySocCode(
   data: ONetElementRaw[],
   socCode: string,
   scaleId: 'IM' | 'LV' = 'IM'
 ): ONetElementRaw[] {
-  return data.filter(
-    (d) =>
-      d['O*NET-SOC Code'] === socCode &&
-      d['Scale ID'] === scaleId &&
-      d['Recommend Suppress'] !== 'Y' &&
-      d['Not Relevant'] !== 'Y'
-  );
+  const baseFilter = (code: string) =>
+    data.filter(
+      (d) =>
+        d['O*NET-SOC Code'] === code &&
+        d['Scale ID'] === scaleId &&
+        d['Recommend Suppress'] !== 'Y' &&
+        d['Not Relevant'] !== 'Y'
+    );
+
+  // Try exact match first
+  const exact = baseFilter(socCode);
+  if (exact.length > 0) {
+    return exact;
+  }
+
+  // For broad codes (.00), fall back to the first matching detailed code
+  if (socCode.endsWith('.00')) {
+    const prefix = socCode.slice(0, -3); // e.g. "15-1255"
+    const detailedCode = data.find(
+      (d) => d['O*NET-SOC Code'].startsWith(prefix) && d['O*NET-SOC Code'] !== socCode
+    )?.['O*NET-SOC Code'];
+
+    if (detailedCode) {
+      return baseFilter(detailedCode);
+    }
+  }
+
+  return [];
 }
 
 /**

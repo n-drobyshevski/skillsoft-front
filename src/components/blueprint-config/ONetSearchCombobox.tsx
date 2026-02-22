@@ -47,7 +47,7 @@ export function ONetSearchCombobox({
   value,
   onChange,
   disabled = false,
-  placeholder = 'Search job titles...',
+  placeholder = 'Search by job title or O*NET code...',
   className,
 }: ONetSearchComboboxProps) {
   const [open, setOpen] = useState(false);
@@ -243,7 +243,7 @@ export function ONetSearchCombobox({
           <div className="flex items-center gap-2 border-b px-3 py-1">
             <Search className="h-4 w-4 text-muted-foreground shrink-0" />
             <CommandInput
-              placeholder="Search by job title..."
+              placeholder="Search by title or code (e.g. 15-1252)..."
               value={searchQuery}
               onValueChange={setSearchQuery}
               className="h-10 border-0 bg-transparent px-0 text-sm focus-visible:ring-0"

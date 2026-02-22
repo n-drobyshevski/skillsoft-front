@@ -76,16 +76,29 @@ function getSearchIndex(): Fuse<ONetJobTitle> {
 // =============================================================================
 
 /**
- * Search occupations by title or description.
- * Uses Fuse.js for fuzzy matching.
+ * Search occupations by title, description, or SOC code.
+ * Exact SOC code matches are prioritized, followed by Fuse.js fuzzy results.
  */
 export function searchOccupations(query: string, limit = 15): ONetJobTitle[] {
-  if (!query.trim()) {
+  const trimmed = query.trim();
+  if (!trimmed) {
     return [];
   }
 
+  // Check for exact or partial SOC code match (e.g. "15-1252", "15-1252.00")
+  const socCodePattern = /^\d{2}-?\d{0,4}\.?\d{0,2}$/;
+  if (socCodePattern.test(trimmed)) {
+    const codeQuery = trimmed.toLowerCase();
+    const codeMatches = allOccupations
+      .filter((o) => o.socCode.toLowerCase().startsWith(codeQuery))
+      .slice(0, limit);
+    if (codeMatches.length > 0) {
+      return codeMatches;
+    }
+  }
+
   const fuse = getSearchIndex();
-  const results = fuse.search(query, { limit });
+  const results = fuse.search(trimmed, { limit });
 
   return results.map((r) => r.item);
 }

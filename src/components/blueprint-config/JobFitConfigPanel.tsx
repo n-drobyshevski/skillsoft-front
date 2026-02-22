@@ -6,7 +6,6 @@ import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Slider } from '@/components/ui/slider';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import {
   FormField,
   FormItem,
@@ -22,6 +21,7 @@ import {
 } from '@/components/ui/collapsible';
 import { HelpTooltip } from '@/components/ui/help-tooltip';
 import { cn } from '@/lib/utils';
+import { Switch } from '@/components/ui/switch';
 import {
   Briefcase,
   SlidersHorizontal,
@@ -30,9 +30,10 @@ import {
   Target,
   AlertCircle,
   CheckCircle2,
+  Shield,
+  Zap,
 } from 'lucide-react';
 import { ONetSearchCombobox } from './ONetSearchCombobox';
-import { PassportSection, type DeltaConfig } from '@/components/passport';
 import type { ONetProfile, ONetBenchmark } from '@/types/domain';
 
 // ============================================================================
@@ -40,10 +41,6 @@ import type { ONetProfile, ONetBenchmark } from '@/types/domain';
 // ============================================================================
 
 interface JobFitConfigPanelProps {
-  /** Candidate's Clerk user ID for passport lookup */
-  candidateClerkUserId?: string | null;
-  /** Callback when delta config changes */
-  onDeltaConfigChange?: (config: DeltaConfig) => void;
   /** Additional class names */
   className?: string;
 }
@@ -73,37 +70,24 @@ function getStrictnessLabel(value: number) {
 // ============================================================================
 
 export function JobFitConfigPanel({
-  candidateClerkUserId,
-  onDeltaConfigChange,
   className,
 }: JobFitConfigPanelProps) {
   const form = useFormContext();
   const t = useTranslations('help.scenario.jobFit');
   const [onetProfile, setOnetProfile] = useState<ONetProfile | null>(null);
   const [benchmarkOpen, setBenchmarkOpen] = useState(false);
+  const [showAllBenchmarks, setShowAllBenchmarks] = useState(false);
 
   const onetSocCode = form.watch('onetSocCode');
   const strictnessLevel = form.watch('strictnessLevel') ?? 60;
-
-  // Get required competency IDs from O*NET profile
-  const requiredCompetencyIds = onetProfile?.benchmarks.map((b) => b.competencyCode) || [];
-
-  // Handle delta config change
-  const handleDeltaConfigChange = (config: DeltaConfig) => {
-    // Update form field with shouldDirty to enable save button
-    form.setValue('enableDeltaTesting', config.enabled, { shouldDirty: true });
-    form.setValue('candidateClerkUserId', candidateClerkUserId || '', { shouldDirty: true });
-    // Notify parent
-    onDeltaConfigChange?.(config);
-  };
+  const enableDeltaTesting = form.watch('enableDeltaTesting') ?? false;
 
   // Handle O*NET selection
   const handleONetChange = (socCode: string | undefined, profile?: ONetProfile) => {
     form.setValue('onetSocCode', socCode || '', { shouldDirty: true });
     if (profile) {
       setOnetProfile(profile);
-      // Auto-expand benchmark preview when profile loads
-      setBenchmarkOpen(true);
+      setShowAllBenchmarks(false);
     } else {
       setOnetProfile(null);
     }
@@ -145,9 +129,10 @@ export function JobFitConfigPanel({
           <Card className="border-blue-200 dark:border-blue-800 bg-blue-50/30 dark:bg-blue-950/20">
             <CardHeader className="py-3">
               <CollapsibleTrigger asChild>
-                <Button
-                  variant="ghost"
-                  className="w-full justify-between p-0 h-auto hover:bg-transparent"
+                <div
+                  role="button"
+                  tabIndex={0}
+                  className="flex w-full items-center justify-between cursor-pointer rounded-md p-0 hover:bg-accent/50 transition-colors"
                 >
                   <div className="flex items-center gap-2">
                     <CheckCircle2 className="h-4 w-4 text-blue-500" />
@@ -164,7 +149,7 @@ export function JobFitConfigPanel({
                   ) : (
                     <ChevronDown className="h-4 w-4 text-muted-foreground" />
                   )}
-                </Button>
+                </div>
               </CollapsibleTrigger>
               <CardDescription className="text-xs mt-1">
                 {onetProfile.occupationTitle}
@@ -174,13 +159,43 @@ export function JobFitConfigPanel({
             <CollapsibleContent>
               <CardContent className="pt-0 pb-3">
                 <div className="space-y-2">
-                  {onetProfile.benchmarks.slice(0, 5).map((benchmark) => (
-                    <BenchmarkItem key={benchmark.competencyCode} benchmark={benchmark} />
+                  {/* Show 3 on mobile, 5 on desktop by default; all when expanded */}
+                  {(showAllBenchmarks
+                    ? onetProfile.benchmarks
+                    : onetProfile.benchmarks.slice(0, 5)
+                  ).map((benchmark, idx) => (
+                    <BenchmarkItem
+                      key={benchmark.competencyCode}
+                      benchmark={benchmark}
+                      className={!showAllBenchmarks && idx >= 3 ? 'hidden sm:flex' : undefined}
+                    />
                   ))}
-                  {onetProfile.benchmarks.length > 5 && (
-                    <p className="text-xs text-muted-foreground text-center pt-1">
-                      +{onetProfile.benchmarks.length - 5} more competencies
-                    </p>
+                  {!showAllBenchmarks && onetProfile.benchmarks.length > 3 && (
+                    <button
+                      type="button"
+                      onClick={() => setShowAllBenchmarks(true)}
+                      className="w-full text-xs text-muted-foreground hover:text-foreground text-center pt-1 transition-colors"
+                    >
+                      {/* Mobile: show count minus 3, Desktop: show count minus 5 */}
+                      <span className="sm:hidden">
+                        Show all {onetProfile.benchmarks.length} competencies
+                      </span>
+                      <span className="hidden sm:inline">
+                        {onetProfile.benchmarks.length > 5
+                          ? `Show all ${onetProfile.benchmarks.length} competencies`
+                          : `Show all ${onetProfile.benchmarks.length} competencies`
+                        }
+                      </span>
+                    </button>
+                  )}
+                  {showAllBenchmarks && onetProfile.benchmarks.length > 5 && (
+                    <button
+                      type="button"
+                      onClick={() => setShowAllBenchmarks(false)}
+                      className="w-full text-xs text-muted-foreground hover:text-foreground text-center pt-1 transition-colors"
+                    >
+                      Show less
+                    </button>
                   )}
                 </div>
               </CardContent>
@@ -228,14 +243,83 @@ export function JobFitConfigPanel({
         )}
       />
 
-      {/* Passport & Delta Testing Section */}
+      {/* Competency Passport & Delta Testing */}
       <div className="border-t pt-4">
-        <PassportSection
-          clerkUserId={candidateClerkUserId}
-          requiredCompetencyIds={requiredCompetencyIds}
-          onDeltaConfigChange={handleDeltaConfigChange}
-          deltaTestingEnabled={!!onetSocCode}
-        />
+        <Card className={cn(
+          'border-dashed transition-colors',
+          enableDeltaTesting
+            ? 'border-amber-300 dark:border-amber-700 bg-amber-50/30 dark:bg-amber-950/20'
+            : 'border-border'
+        )}>
+          <CardHeader className="pb-3">
+            <div className="flex items-start justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <div className={cn(
+                  'p-2 rounded-lg transition-colors',
+                  enableDeltaTesting
+                    ? 'bg-amber-100 dark:bg-amber-900/50'
+                    : 'bg-muted'
+                )}>
+                  <Shield className={cn(
+                    'h-5 w-5 transition-colors',
+                    enableDeltaTesting
+                      ? 'text-amber-600 dark:text-amber-400'
+                      : 'text-muted-foreground'
+                  )} />
+                </div>
+                <div>
+                  <CardTitle className="text-sm flex items-center gap-1.5">
+                    {t('passportTitle')}
+                    <HelpTooltip content={t('passport')} variant="info" />
+                  </CardTitle>
+                  <CardDescription className="text-xs mt-0.5">
+                    {t('passportDesc')}
+                  </CardDescription>
+                </div>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent className="pt-0 space-y-3">
+            {/* Delta Testing Toggle */}
+            <FormField
+              control={form.control}
+              name="enableDeltaTesting"
+              render={({ field }) => (
+                <FormItem className="flex items-center justify-between gap-4 rounded-lg border p-3 hover:bg-muted/50 transition-colors">
+                  <div className="flex items-start gap-2.5 flex-1 min-w-0">
+                    <Zap className={cn(
+                      'h-4 w-4 shrink-0 mt-0.5',
+                      field.value ? 'text-amber-500' : 'text-muted-foreground'
+                    )} />
+                    <div className="space-y-0.5">
+                      <FormLabel className="text-sm font-medium cursor-pointer">
+                        {t('enableDelta')}
+                      </FormLabel>
+                      <FormDescription className="text-xs">
+                        {t('enableDeltaDesc')}
+                      </FormDescription>
+                    </div>
+                  </div>
+                  <FormControl>
+                    <Switch
+                      checked={field.value ?? false}
+                      onCheckedChange={field.onChange}
+                      disabled={!onetSocCode}
+                      className={cn(
+                        field.value && 'data-[state=checked]:bg-amber-500'
+                      )}
+                    />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+
+            {/* Status explanation */}
+            <p className="text-xs text-muted-foreground px-1">
+              {enableDeltaTesting ? t('deltaEnabled') : t('deltaDisabled')}
+            </p>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Warning if no job selected */}
@@ -257,15 +341,16 @@ export function JobFitConfigPanel({
 
 interface BenchmarkItemProps {
   benchmark: ONetBenchmark;
+  className?: string;
 }
 
-function BenchmarkItem({ benchmark }: BenchmarkItemProps) {
+function BenchmarkItem({ benchmark, className }: BenchmarkItemProps) {
   // Level is 1-7 scale, importance is 1-5 scale
   const levelPercent = ((benchmark.requiredLevel - 1) / 6) * 100;
   const importancePercent = ((benchmark.importance - 1) / 4) * 100;
 
   return (
-    <div className="flex items-center justify-between py-1.5 px-2 rounded-md bg-background/50">
+    <div className={cn("flex items-center justify-between py-1.5 px-2 rounded-md bg-background/50", className)}>
       <div className="flex items-center gap-2 min-w-0 flex-1">
         <Target className="h-3.5 w-3.5 text-blue-500 shrink-0" />
         <span className="text-xs font-medium truncate">{benchmark.competencyName}</span>

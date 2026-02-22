@@ -34,7 +34,7 @@ const TEMPLATES_BASE = '/tests/templates';
 export async function getActiveTemplatesCached(): Promise<TestTemplateSummary[]> {
   'use cache';
   cacheLife('entityData');
-  cacheTag('templates', 'active-templates');
+  cacheTag('test-templates', 'test-templates-active');
 
   try {
     const response = await fetch(`${getApiBaseUrl()}${TEMPLATES_BASE}/active`, {
@@ -55,7 +55,7 @@ export async function getActiveTemplatesCached(): Promise<TestTemplateSummary[]>
 export async function getTemplateCached(templateId: string): Promise<TestTemplate | null> {
   'use cache';
   cacheLife('entityData');
-  cacheTag('templates', `template-${templateId}`);
+  cacheTag('test-templates', `test-template-${templateId}`);
 
   try {
     const response = await fetch(`${getApiBaseUrl()}${TEMPLATES_BASE}/${templateId}`, {

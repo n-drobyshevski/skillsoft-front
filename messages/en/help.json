@@ -55,6 +55,13 @@
       "onetRole": "O*NET (Occupational Information Network) occupation codes define standardized job competency requirements based on extensive labor market research.",
       "benchmark": "The benchmark shows competencies and proficiency levels required for the selected job role, as defined by O*NET occupational data.",
       "deltaTesting": "Delta testing identifies and focuses only on the gaps between a candidate's existing competency passport and job requirements, reducing assessment length.",
+      "passport": "A Competency Passport is a candidate's aggregated record of previously measured competencies from past assessments. When delta testing is enabled, the system reuses existing scores and skips already-measured competencies, making the assessment shorter and more focused.",
+      "passportTitle": "Competency Passport",
+      "passportDesc": "Reuse previous assessment results to shorten future tests",
+      "deltaEnabled": "When a candidate with a valid passport takes this test, already-measured competencies will be skipped automatically.",
+      "deltaDisabled": "All competencies will be assessed regardless of prior results.",
+      "enableDelta": "Enable Delta Testing",
+      "enableDeltaDesc": "Skip competencies already measured in the candidate's passport",
       "strictness": {
         "title": "Benchmark Matching Strictness",
         "description": "Controls how closely a candidate must match the job benchmark to be considered a good fit.",

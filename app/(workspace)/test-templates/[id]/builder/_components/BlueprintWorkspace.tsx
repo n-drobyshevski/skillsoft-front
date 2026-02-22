@@ -188,7 +188,8 @@ function DesktopLayout() {
 
   return (
     <BuilderDndProvider>
-      <BuilderOnboarding />
+      {/* TODO: Re-enable onboarding wizard after demo */}
+      {/* <BuilderOnboarding /> */}
       <div className="flex h-full w-full overflow-hidden">
         <ResizablePanelGroup
           direction="horizontal"

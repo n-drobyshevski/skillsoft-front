@@ -55,11 +55,11 @@ function WorkspaceLayoutContent({ children }: { children: React.ReactNode }) {
       if (stored !== null) {
         setSidebarOpen(stored === "true");
       } else {
-        // No stored preference: desktop open, mobile closed
-        setSidebarOpen(!isMobile);
+        // No stored preference: closed by default
+        setSidebarOpen(false);
       }
     } catch {
-      setSidebarOpen(!isMobile);
+      setSidebarOpen(false);
     }
   }, [isMobile]);
 

@@ -20,8 +20,6 @@ import { useTranslations } from 'next-intl';
 interface GoalConfigSectionProps {
   /** Number of competencies selected in the template */
   selectedCompetencyCount: number;
-  /** Optional candidate Clerk user ID for Job Fit delta testing */
-  candidateClerkUserId?: string | null;
   /** Additional class name */
   className?: string;
 }
@@ -86,7 +84,6 @@ const defaultBlueprintValues: Record<AssessmentGoal, Record<string, unknown>> = 
 
 export function GoalConfigSection({
   selectedCompetencyCount,
-  candidateClerkUserId,
   className,
 }: GoalConfigSectionProps) {
   const form = useFormContext();
@@ -159,7 +156,7 @@ export function GoalConfigSection({
         )}
 
         {goal === AssessmentGoal.JOB_FIT && (
-          <JobFitConfigPanel candidateClerkUserId={candidateClerkUserId} />
+          <JobFitConfigPanel />
         )}
 
         {goal === AssessmentGoal.TEAM_FIT && <TeamFitConfigPanel />}
