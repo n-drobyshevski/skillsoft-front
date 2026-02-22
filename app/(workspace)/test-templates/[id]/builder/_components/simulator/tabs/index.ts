@@ -2,25 +2,12 @@
  * Simulator Tabs Index
  *
  * Centralized exports for simulator tab components.
- * Includes both standard and optimized versions.
+ * Two merged tabs: ResultsTab and QuestionsTab.
  */
 
-// Tab components
-export { default as FineTuneTab } from './FineTuneTab';
-export { default as StrategyInsightsTab } from './StrategyInsightsTab';
-
-// Optimized tabs (consolidated from legacy AnalyticsTab/TimelineTab)
-export {
-  TimelineTabOptimized,
-  TimelineTabOptimized as TimelineTab,
-  default as TimelineTabOptimizedDefault,
-} from './TimelineTabOptimized';
-
-export {
-  AnalyticsTabOptimized,
-  AnalyticsTabOptimized as AnalyticsTab,
-  default as AnalyticsTabOptimizedDefault,
-} from './AnalyticsTabOptimized';
+// Merged tab components
+export { ResultsTab, default as ResultsTabDefault } from './ResultsTab';
+export { QuestionsTab, default as QuestionsTabDefault } from './QuestionsTab';
 
 // Re-export types for convenience
 export type { SimulationResult } from '../types';

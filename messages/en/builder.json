@@ -10,7 +10,7 @@
     "builderNavigation": "Builder navigation"
   },
   "canvas": {
-    "assessmentBlueprint": "Assessment Blueprint",
+    "assessmentBlueprint": "Blueprint",
     "blueprintShort": "Blueprint",
     "priorityTooltip": "Order sets priority. When time is tight, cards near the top are asked first.",
     "undoLabel": "Undo (Ctrl+Z)",
@@ -92,7 +92,7 @@
     "optimisticApply": "Optimistic apply",
     "removeButton": "Remove",
     "removeTitle": "Remove competency?",
-    "removeDescription": "This will remove <strong>{name}</strong> from your assessment blueprint. You can add it back from the library at any time.",
+    "removeDescription": "This will remove <strong>{name}</strong> from your blueprint. You can add it back from the library at any time.",
     "removeCancel": "Cancel",
     "removeConfirm": "Remove",
     "decreaseImportance": "Decrease importance",
@@ -233,6 +233,7 @@
     },
     "fineTune": {
       "title": "Fine Tune Settings",
+      "tune": "Tune",
       "description": "Adjust simulation parameters and re-run to see the effects.",
       "openSettings": "Open Fine Tune settings",
       "strictness": "Strictness",
@@ -314,7 +315,10 @@
       "teamComparison": "Team Comparison",
       "gapAnalysis": "Gap Analysis",
       "teamFitPreview": "Team Fit Preview",
-      "analytics": "Analytics"
+      "analytics": "Analytics",
+      "questions": "Questions",
+      "jobFitResults": "Job Fit Results",
+      "teamGapResults": "Team Gap Results"
     },
     "teamComparison": {
       "title": "Team Comparison",
@@ -361,11 +365,12 @@
     },
     "timeline": {
       "runToViewPath": "Run a simulation to view the adaptive path",
-      "abilityShift": "Ability shift:",
       "noSampleQuestions": "No sample questions available.",
       "adaptiveCurve": "Adaptive curve",
       "questionsCount": "Questions ({count})",
-      "scrollToSeeAll": "Scroll to see all"
+      "scrollToSeeAll": "Scroll to see all",
+      "correct": "Correct",
+      "incorrect": "Incorrect"
     },
     "insights": {
       "competencyWeights": "Competency Weights",
@@ -413,7 +418,24 @@
       "teamRequired": "Team selection required for gap analysis"
     },
     "onetLink": "O*NET: {code}",
-    "onetAriaLabel": "View on O*NET OnLine (opens in new tab)"
+    "onetAriaLabel": "View on O*NET OnLine (opens in new tab)",
+    "loading": {
+      "phases": {
+        "assembling": "Assembling questions",
+        "assemblingSubtitle": "Selecting from question pool...",
+        "simulating": "Simulating responses",
+        "simulatingPerfect": "Running ideal response pattern...",
+        "simulatingRandom": "Generating random response pattern...",
+        "simulatingFailing": "Simulating low-performance pattern...",
+        "scoring": "Calculating scores",
+        "scoringDefault": "Evaluating response accuracy...",
+        "scoringJobFit": "Evaluating job fit alignment...",
+        "scoringTeamGap": "Comparing against team benchmark...",
+        "report": "Generating report",
+        "reportSubtitle": "Preparing visualization data...",
+        "stepOf": "Step {current} of {total}"
+      }
+    }
   },
   "onboarding": {
     "step": "Step {current} of {total}",
@@ -423,7 +445,7 @@
     "getStarted": "Get Started",
     "skipTour": "Skip tour",
     "welcome": {
-      "title": "Welcome to Assessment Blueprint",
+      "title": "Welcome to Blueprint",
       "content": "This is your workspace for building competency-based assessments. You can add competencies, set their importance, and preview how candidates will experience the test."
     },
     "library": {

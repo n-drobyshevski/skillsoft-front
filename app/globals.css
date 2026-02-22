@@ -1437,6 +1437,62 @@ img {
 	animation: fade-in-up 0.6s ease-out 0.5s both;
 }
 
+/* ===== PERSONA SELECTOR ICON ANIMATIONS ===== */
+
+@keyframes icon-twinkle {
+	0%, 100% { transform: scale(1.1) rotate(0deg); }
+	25% { transform: scale(1.25) rotate(12deg); }
+	50% { transform: scale(1.1) rotate(-8deg); }
+	75% { transform: scale(1.2) rotate(5deg); }
+}
+
+.animate-icon-twinkle {
+	animation: icon-twinkle 0.6s ease-in-out;
+}
+
+@keyframes icon-shuffle {
+	0%, 100% { transform: scale(1.1) translateX(0); }
+	20% { transform: scale(1.1) translateX(-3px); }
+	40% { transform: scale(1.1) translateX(3px); }
+	60% { transform: scale(1.1) translateX(-2px); }
+	80% { transform: scale(1.1) translateX(2px); }
+}
+
+.animate-icon-shuffle {
+	animation: icon-shuffle 0.5s ease-in-out;
+}
+
+@keyframes icon-bounce-down {
+	0%, 100% { transform: scale(1.1) translateY(0); }
+	30% { transform: scale(1.1) translateY(3px); }
+	50% { transform: scale(1.1) translateY(-2px); }
+	70% { transform: scale(1.1) translateY(2px); }
+}
+
+.animate-icon-bounce-down {
+	animation: icon-bounce-down 0.5s ease-in-out;
+}
+
+@keyframes persona-glow {
+	0% { box-shadow: 0 0 0 0 var(--persona-glow-color, rgba(0,0,0,0.1)); }
+	50% { box-shadow: 0 0 12px 4px var(--persona-glow-color, rgba(0,0,0,0.1)); }
+	100% { box-shadow: 0 0 0 0 var(--persona-glow-color, rgba(0,0,0,0.1)); }
+}
+
+.animate-persona-glow {
+	animation: persona-glow 0.8s ease-out;
+}
+
+/* SimulationLoadingStepper: checkmark scale-in on phase completion */
+@keyframes step-check-in {
+	from { opacity: 0; transform: scale(0.5) rotate(-15deg); }
+	to   { opacity: 1; transform: scale(1)   rotate(0deg);   }
+}
+
+.animate-step-check-in {
+	animation: step-check-in 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
 /* Shimmer effect for progress bars */
 .progress-shimmer {
 	position: relative;
@@ -1623,6 +1679,10 @@ img {
 	.animate-card-expand,
 	.animate-slide-in-left,
 	.animate-slide-in-right,
+	.animate-icon-twinkle,
+	.animate-icon-shuffle,
+	.animate-icon-bounce-down,
+	.animate-persona-glow,
 	.progress-shimmer::after {
 		animation: none !important;
 	}

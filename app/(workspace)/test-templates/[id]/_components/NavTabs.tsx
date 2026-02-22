@@ -52,8 +52,8 @@ interface NavTabsProps {
  * * Mobile Layout:
  * [ Title ....... Action ]
  * [ Scrollable Tabs...   ]
- * * Desktop Layout (Unchanged):
- * [ Title ... Centered Tabs ... Action ]
+ * * Desktop Layout:
+ * [ Title ............. Tabs | Action ]
  */
 export function NavTabs({ baseUrl, status, templateId, templateName }: NavTabsProps) {
   const segment = useSelectedLayoutSegment();
@@ -103,8 +103,8 @@ export function NavTabs({ baseUrl, status, templateId, templateName }: NavTabsPr
     )}>
       
       {/* 1. Title Section */}
-      <div className="flex items-center gap-3 min-w-0 pl-4 py-3 md:pl-0 md:py-0 md:order-1">
-        <span className="text-lg font-semibold text-foreground truncate max-w-[180px] sm:max-w-[300px]" title={templateName}>
+      <div className="flex items-center gap-3 min-w-0 pl-4 py-3 md:pl-0 md:py-0 md:w-full md:order-1">
+        <span className="text-lg font-semibold text-foreground line-clamp-2 md:truncate md:line-clamp-none" title={templateName}>
           {templateName}
         </span>
         {status === 'PUBLISHED' && (
@@ -187,7 +187,7 @@ export function NavTabs({ baseUrl, status, templateId, templateName }: NavTabsPr
       {/* 3. Tabs Section */}
       <div className={cn(
         "w-full overflow-x-auto scrollbar-hide", // Mobile: Full width, scrollable
-        "md:w-auto md:flex-1 md:flex md:justify-center md:overflow-visible md:order-2" // Desktop: Centered, flexible
+        "md:w-auto md:flex md:justify-end md:overflow-visible md:order-2" // Desktop: Right-aligned
       )}>
         <div className="flex px-4 md:px-0 w-max md:w-auto">
           {tabs.map((tab) => {

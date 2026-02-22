@@ -37,7 +37,7 @@ import { usePreflightValidation } from './hooks/usePreflightValidation';
 // Components
 import { useTranslations } from 'next-intl';
 import { SimulatorErrorBoundary } from './SimulatorErrorBoundary';
-import { StrategyLoadingSkeleton } from './StrategyLoadingSkeleton';
+import { SimulationLoadingStepper } from './SimulationLoadingStepper';
 import { StrategyEmptyState } from './StrategyEmptyState';
 import { ConfigurePhase } from './components/ConfigurePhase';
 import { ResultsPhase } from './components/ResultsPhase';
@@ -60,12 +60,10 @@ type SimulatorPhase = 'configure' | 'results' | 'loading';
 // PRELOAD FUNCTIONS (OPTIMIZED TABS)
 // ============================================
 
-const preloadAnalytics = () =>
-  import(/* webpackChunkName: "simulator-analytics-opt" */ './tabs/AnalyticsTabOptimized');
-const preloadTimeline = () =>
-  import(/* webpackChunkName: "simulator-timeline-opt" */ './tabs/TimelineTabOptimized');
-const preloadInsights = () =>
-  import(/* webpackChunkName: "simulator-insights" */ './tabs/StrategyInsightsTab');
+const preloadResultsTab = () =>
+  import(/* webpackChunkName: "simulator-results-tab" */ './tabs/ResultsTab');
+const preloadQuestionsTab = () =>
+  import(/* webpackChunkName: "simulator-questions-tab" */ './tabs/QuestionsTab');
 
 // ============================================
 // MOBILE RESULTS VIEW
@@ -259,12 +257,8 @@ export function SimulatorPanelV4({ variant = 'desktop' }: SimulatorPanelV4Props)
 
   useEffect(() => {
     if (simulationResult) {
-      preloadTimeline();
-      preloadInsights();
-      const timer = setTimeout(() => {
-        preloadAnalytics();
-      }, 100);
-      return () => clearTimeout(timer);
+      preloadResultsTab();
+      preloadQuestionsTab();
     }
   }, [simulationResult]);
 
@@ -319,7 +313,7 @@ export function SimulatorPanelV4({ variant = 'desktop' }: SimulatorPanelV4Props)
   const renderContent = () => {
     switch (currentPhase) {
       case 'loading':
-        return <StrategyLoadingSkeleton strategy={strategy} />;
+        return <SimulationLoadingStepper strategy={strategy} profile={selectedProfile} />;
 
       case 'results':
         if (!simulationResult) return null;

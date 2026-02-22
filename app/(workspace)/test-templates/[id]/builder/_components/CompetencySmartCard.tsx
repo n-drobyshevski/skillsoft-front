@@ -187,20 +187,25 @@ export function CompetencySmartCard({
         <div className="hidden md:flex items-center mr-2">
           <div className="flex rounded-md border border-border/40 overflow-hidden">
             {DIFFICULTY_OPTIONS.map((opt) => (
-              <button
-                key={opt.value}
-                onClick={() => updateCompetency(competency.id, { difficulty: opt.value })}
-                disabled={isPending}
-                className={cn(
-                  "px-2 py-1 text-[10px] font-medium transition-colors",
-                  (competency.difficulty ?? "INTERMEDIATE") === opt.value
-                    ? opt.color
-                    : "bg-muted/30 text-muted-foreground hover:bg-muted/60"
-                )}
-                title={t(`difficultyOptions.${opt.key}`)}
-              >
-                {t(`difficultyOptions.${opt.key}Short`)}
-              </button>
+              <Tooltip key={opt.value}>
+                <TooltipTrigger asChild>
+                  <button
+                    onClick={() => updateCompetency(competency.id, { difficulty: opt.value })}
+                    disabled={isPending}
+                    className={cn(
+                      "px-2 py-1 text-[10px] font-medium transition-colors",
+                      (competency.difficulty ?? "INTERMEDIATE") === opt.value
+                        ? opt.color
+                        : "bg-muted/30 text-muted-foreground hover:bg-muted/60"
+                    )}
+                  >
+                    {t(`difficultyOptions.${opt.key}Short`)}
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent side="bottom" className="text-xs">
+                  {t(`difficultyOptions.${opt.key}`)}
+                </TooltipContent>
+              </Tooltip>
             ))}
           </div>
         </div>
@@ -256,17 +261,17 @@ export function CompetencySmartCard({
           <span className="text-[11px] sm:text-xs text-muted-foreground font-medium shrink-0">{t('importance')}</span>
           <div className="flex-1 flex items-center justify-center gap-3">
             <Button
-              variant="outline"
+              variant="ghost"
               size="icon"
-              className="h-10 w-10 shrink-0 rounded-full active:scale-90 active:bg-destructive/10 touch-manipulation transition-all"
+              className="h-8 w-8 shrink-0 rounded-full active:scale-90 touch-manipulation transition-all"
               onClick={() => onWeightChange(Math.max(0.5, Math.round(((competency.weight ?? 1) - 0.1) * 10) / 10))}
               disabled={isPending || (competency.weight ?? 1) <= 0.5}
               aria-label={t('decreaseImportance')}
             >
-              <Minus className="h-4 w-4" />
+              <Minus className="h-3.5 w-3.5" />
             </Button>
             <div className="flex flex-col items-center">
-              <span className={cn("text-base font-semibold w-16 text-center transition-all", importanceLevelColors[getImportanceLevelKey(competency.weight ?? 1)])}>
+              <span className={cn("text-sm font-medium w-16 text-center transition-all", importanceLevelColors[getImportanceLevelKey(competency.weight ?? 1)])}>
                 {t(`importanceLevel.${getImportanceLevelKey(competency.weight ?? 1)}`)}
               </span>
               {/* Visual importance bar indicator */}
@@ -278,35 +283,41 @@ export function CompetencySmartCard({
               </div>
             </div>
             <Button
-              variant="outline"
+              variant="ghost"
               size="icon"
-              className="h-10 w-10 shrink-0 rounded-full active:scale-90 active:bg-primary/10 touch-manipulation transition-all"
+              className="h-8 w-8 shrink-0 rounded-full active:scale-90 touch-manipulation transition-all"
               onClick={() => onWeightChange(Math.min(2.0, Math.round(((competency.weight ?? 1) + 0.1) * 10) / 10))}
               disabled={isPending || (competency.weight ?? 1) >= 2.0}
               aria-label={t('increaseImportance')}
             >
-              <Plus className="h-4 w-4" />
+              <Plus className="h-3.5 w-3.5" />
             </Button>
           </div>
         </div>
         {/* U6: Mobile difficulty selector */}
-        <div className="flex items-center gap-2 p-2 rounded-lg bg-muted/20 border border-border/30">
+        <div className="flex items-center gap-2 px-2 py-1 rounded-lg bg-muted/20 border border-border/30">
           <span className="text-[11px] sm:text-xs text-muted-foreground font-medium shrink-0">{t('difficulty')}</span>
           <div className="flex-1 flex rounded-md border border-border/40 overflow-hidden min-w-0">
             {DIFFICULTY_OPTIONS.map((opt) => (
-              <button
-                key={opt.value}
-                onClick={() => updateCompetency(competency.id, { difficulty: opt.value })}
-                disabled={isPending}
-                className={cn(
-                  "flex-1 min-w-0 py-1.5 text-[11px] font-medium transition-colors truncate",
-                  (competency.difficulty ?? "INTERMEDIATE") === opt.value
-                    ? opt.color
-                    : "bg-muted/30 text-muted-foreground"
-                )}
-              >
-                {t(`difficultyOptions.${opt.key}Short`)}
-              </button>
+              <Tooltip key={opt.value}>
+                <TooltipTrigger asChild>
+                  <button
+                    onClick={() => updateCompetency(competency.id, { difficulty: opt.value })}
+                    disabled={isPending}
+                    className={cn(
+                      "flex-1 min-w-0 py-1 text-[11px] font-medium transition-colors truncate",
+                      (competency.difficulty ?? "INTERMEDIATE") === opt.value
+                        ? opt.color
+                        : "bg-muted/30 text-muted-foreground"
+                    )}
+                  >
+                    {t(`difficultyOptions.${opt.key}Short`)}
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent side="bottom" className="text-xs">
+                  {t(`difficultyOptions.${opt.key}`)}
+                </TooltipContent>
+              </Tooltip>
             ))}
           </div>
         </div>

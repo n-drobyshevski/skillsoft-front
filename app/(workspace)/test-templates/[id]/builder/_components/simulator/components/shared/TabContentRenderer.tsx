@@ -7,21 +7,12 @@ import { SimulationResult, SimulationProfile } from '../../types';
 import { HelpTab } from './HelpTab';
 
 // Lazy-loaded tab components (shared across desktop and mobile)
-const AnalyticsTab = lazy(
-  () => import(/* webpackChunkName: "simulator-analytics-opt" */ '../../tabs/AnalyticsTabOptimized')
+const ResultsTab = lazy(
+  () => import(/* webpackChunkName: "simulator-results-tab" */ '../../tabs/ResultsTab')
 );
-const TimelineTab = lazy(
-  () => import(/* webpackChunkName: "simulator-timeline-opt" */ '../../tabs/TimelineTabOptimized')
+const QuestionsTab = lazy(
+  () => import(/* webpackChunkName: "simulator-questions-tab" */ '../../tabs/QuestionsTab')
 );
-const StrategyInsightsTab = lazy(
-  () => import(/* webpackChunkName: "simulator-insights" */ '../../tabs/StrategyInsightsTab')
-);
-const SimulatedResultsTab = lazy(
-  () => import(/* webpackChunkName: "simulator-results" */ '../../tabs/SimulatedResultsTab')
-);
-
-// FineTuneTab is small (~5KB), direct import is better than lazy overhead
-import FineTuneTab from '../../tabs/FineTuneTab';
 
 export function TabSkeleton() {
   return (
@@ -63,35 +54,12 @@ export function TabContentRenderer({
   passingScore,
   onetSocCode,
   teamId,
-  fineTuneSettings,
 }: TabContentRendererProps) {
   switch (tabId) {
-    case 'timeline':
+    case 'results':
       return (
         <Suspense fallback={<TabSkeleton />}>
-          <TimelineTab result={result} />
-        </Suspense>
-      );
-
-    case 'insights':
-    case 'job-alignment':
-    case 'team-comparison':
-    case 'gap-analysis':
-      return (
-        <Suspense fallback={<TabSkeleton />}>
-          <StrategyInsightsTab
-            result={result}
-            strategy={strategy}
-            onetSocCode={onetSocCode}
-            teamId={teamId}
-          />
-        </Suspense>
-      );
-
-    case 'simulated-results':
-      return (
-        <Suspense fallback={<TabSkeleton />}>
-          <SimulatedResultsTab
+          <ResultsTab
             result={result}
             strategy={strategy}
             persona={persona}
@@ -102,27 +70,11 @@ export function TabContentRenderer({
         </Suspense>
       );
 
-    case 'analytics':
+    case 'questions':
       return (
         <Suspense fallback={<TabSkeleton />}>
-          <AnalyticsTab result={result} />
+          <QuestionsTab result={result} />
         </Suspense>
-      );
-
-    case 'finetune':
-    case 'fine':
-      return (
-        <FineTuneTab
-          strictness={fineTuneSettings.strictness}
-          onStrictnessChange={fineTuneSettings.onStrictnessChange}
-          saturation={fineTuneSettings.saturation}
-          onSaturationChange={fineTuneSettings.onSaturationChange}
-          allowBacktracking={fineTuneSettings.allowBacktracking}
-          onAllowBacktrackingChange={fineTuneSettings.onAllowBacktrackingChange}
-          onApply={fineTuneSettings.onApply}
-          onRun={fineTuneSettings.onRun}
-          disabled={fineTuneSettings.disabled}
-        />
       );
 
     case 'help':

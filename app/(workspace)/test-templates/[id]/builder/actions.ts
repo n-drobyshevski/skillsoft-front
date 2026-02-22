@@ -251,7 +251,6 @@ function generateMockSimulation(
         indicatorTitle: `${comp?.name || 'Competency'} - Key Indicator`,
         estimatedTimeSeconds: 60 + Math.floor(Math.random() * 60),
         selectionReason,
-        abilityDelta: Number(((Math.random() - 0.5) * 0.2).toFixed(2)),
       };
     }),
     warnings: state.competencies
@@ -338,6 +337,71 @@ export async function simulateTest(
 
     const result: SimulationResult = await response.json();
 
+    // Normalize: map backend QuestionSummaryDto field names to frontend QuestionSummary
+    // Backend sends: questionText, timeLimitSeconds, competencyName, indicatorTitle
+    // Frontend expects: text, estimatedTimeSeconds, competencyName, indicatorTitle
+    const competencyNames = new Map(
+      state.competencies.map((c) => [c.id, c.name])
+    );
+
+    if (result.sampleQuestions?.length) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      result.sampleQuestions = result.sampleQuestions.map((q: any) => ({
+        id: q.id as string,
+        competencyId: q.competencyId as string,
+        text: (q.text as string) || (q.questionText as string) || '',
+        difficulty: (q.difficulty as string) || 'INTERMEDIATE',
+        competencyName:
+          (q.competencyName as string) ||
+          competencyNames.get(q.competencyId as string) ||
+          'Unknown',
+        indicatorTitle: (q.indicatorTitle as string) || '',
+        estimatedTimeSeconds:
+          (q.estimatedTimeSeconds as number) ||
+          (q.timeLimitSeconds as number) ||
+          60,
+        selectionReason: q.selectionReason as SelectionReason | undefined,
+        simulatedCorrect: q.simulatedCorrect as boolean | undefined,
+        simulatedAnswer: q.simulatedAnswer as string | undefined,
+      }));
+    }
+
+    // Normalize: derive distributionByDifficulty from backend's composition field
+    // Backend returns composition as { FOUNDATIONAL: 5, INTERMEDIATE: 10, ... }
+    // Frontend expects distributionByDifficulty and difficultyDistribution
+    if (!result.distributionByDifficulty && !result.difficultyDistribution) {
+      if (result.composition && Object.keys(result.composition).length > 0) {
+        const difficulties: Difficulty[] = ['FOUNDATIONAL', 'INTERMEDIATE', 'ADVANCED', 'EXPERT'];
+        const isDifficultyKeyed = Object.keys(result.composition).some((k) =>
+          difficulties.includes(k as Difficulty)
+        );
+
+        if (isDifficultyKeyed) {
+          const dist = { FOUNDATIONAL: 0, INTERMEDIATE: 0, ADVANCED: 0, EXPERT: 0 } as Record<Difficulty, number>;
+          for (const [key, value] of Object.entries(result.composition)) {
+            if (difficulties.includes(key as Difficulty)) {
+              dist[key as Difficulty] = value;
+            }
+          }
+          result.distributionByDifficulty = dist;
+          result.difficultyDistribution = dist;
+        }
+      }
+
+      // Fallback: derive from sampleQuestions if composition wasn't difficulty-keyed
+      if (!result.distributionByDifficulty && result.sampleQuestions?.length) {
+        const dist = { FOUNDATIONAL: 0, INTERMEDIATE: 0, ADVANCED: 0, EXPERT: 0 } as Record<Difficulty, number>;
+        result.sampleQuestions.forEach((q) => {
+          const diff = (q.difficulty as Difficulty) || 'INTERMEDIATE';
+          if (dist[diff] !== undefined) {
+            dist[diff]++;
+          }
+        });
+        result.distributionByDifficulty = dist;
+        result.difficultyDistribution = dist;
+      }
+    }
+
     // Normalize: ensure distributionByCompetency is populated
     // Backend returns sampleQuestions with competencyId - derive distribution from that
     if (!result.distributionByCompetency?.length && result.sampleQuestions?.length) {
@@ -362,11 +426,6 @@ export async function simulateTest(
         }
         competencyMap.set(compId, existing);
       });
-
-      // Also try to get competency names from state that was passed
-      const competencyNames = new Map(
-        state.competencies.map((c) => [c.id, c.name])
-      );
 
       result.distributionByCompetency = Array.from(competencyMap.entries()).map(
         ([compId, data]) => ({

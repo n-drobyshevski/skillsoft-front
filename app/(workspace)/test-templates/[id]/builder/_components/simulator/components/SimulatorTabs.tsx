@@ -60,10 +60,7 @@ export const SimulatorTabs = memo(function SimulatorTabs({
       >
         {visibleTabs.map((tab) => {
           const Icon = getIcon(tab.icon);
-          const isStrategySpecific =
-            tab.id === 'insights' ||
-            tab.id === 'job-alignment' ||
-            tab.id === 'team-comparison';
+          const isStrategySpecific = tab.id === 'results';
 
           return (
             <TabsTrigger

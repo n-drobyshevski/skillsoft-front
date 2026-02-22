@@ -3,6 +3,7 @@
 import React, { Suspense, useState, useEffect, useRef, useCallback, lazy } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
+import type { ImperativePanelHandle } from "react-resizable-panels";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Beaker, Library, Layers, Plus, Clock, Target, CheckCircle2, XCircle } from "lucide-react";
 // Direct imports for desktop (always needed)
@@ -176,9 +177,21 @@ function DesktopLayout() {
   // Defer ResizablePanelGroup render until after hydration to avoid ID mismatch
   // react-resizable-panels generates dynamic IDs that differ between SSR and client
   const [isMounted, setIsMounted] = useState(false);
+  const libraryPanelRef = useRef<ImperativePanelHandle>(null);
+  const [isLibraryCollapsed, setIsLibraryCollapsed] = useState(true);
 
   useEffect(() => {
     setIsMounted(true);
+  }, []);
+
+  const toggleLibrary = useCallback(() => {
+    const panel = libraryPanelRef.current;
+    if (!panel) return;
+    if (panel.isCollapsed()) {
+      panel.expand();
+    } else {
+      panel.collapse();
+    }
   }, []);
 
   // Show skeleton during SSR and initial hydration
@@ -199,9 +212,13 @@ function DesktopLayout() {
           id="blueprint-workspace-layout"
         >
           <ResizablePanel
-            defaultSize={20}
+            ref={libraryPanelRef}
+            defaultSize={0}
             minSize={15}
             collapsible
+            collapsedSize={0}
+            onCollapse={() => setIsLibraryCollapsed(true)}
+            onExpand={() => setIsLibraryCollapsed(false)}
             className="border-r bg-muted/10 overflow-hidden"
             id="panel-library"
             order={1}
@@ -220,7 +237,7 @@ function DesktopLayout() {
             id="panel-canvas"
             order={2}
           >
-            <WeightedCanvas />
+            <WeightedCanvas onToggleLibrary={toggleLibrary} isLibraryCollapsed={isLibraryCollapsed} />
           </ResizablePanel>
 
           <ResizableHandle withHandle className="bg-border/80" />

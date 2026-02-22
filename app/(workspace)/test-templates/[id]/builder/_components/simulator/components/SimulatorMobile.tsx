@@ -110,10 +110,7 @@ export const SimulatorMobile = memo(function SimulatorMobile({
     <div className="mt-4 space-y-3">
       {tabs.map((tab) => {
         const Icon = getIcon(tab.icon);
-        const isStrategySpecific =
-          tab.id === 'insights' ||
-          tab.id === 'job-alignment' ||
-          tab.id === 'team-comparison';
+        const isStrategySpecific = tab.id === 'results';
 
         return (
           <CollapsibleSection

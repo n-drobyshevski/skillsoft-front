@@ -5,7 +5,6 @@
  */
 
 // Phase 1 (P0): Core decomposed components
-export { SimulatorHeader, default as SimulatorHeaderDefault } from './SimulatorHeader';
 export { SimulatorResults, default as SimulatorResultsDefault } from './SimulatorResults';
 export { SimulatorTabs, default as SimulatorTabsDefault } from './SimulatorTabs';
 export { SimulatorMobile, default as SimulatorMobileDefault } from './SimulatorMobile';

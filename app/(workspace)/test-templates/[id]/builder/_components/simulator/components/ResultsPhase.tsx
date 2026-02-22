@@ -11,8 +11,6 @@
 import React, { memo, Suspense, lazy } from 'react';
 import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Skeleton } from '@/components/ui/skeleton';
 import {
   Select,
   SelectContent,
@@ -20,7 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Loader2, Play, RefreshCw, Sparkles, Shuffle, TrendingDown } from 'lucide-react';
+import { Loader2, RefreshCw, Sparkles, Shuffle, TrendingDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Strategy, STRATEGY_CONFIG } from '../strategy-context';
 import { SimulationResult, SimulationProfile, personaConfig } from '../types';
@@ -29,6 +27,7 @@ import { StrategyScoreDisplay } from '../StrategyScoreDisplay';
 import { SimulatorResults } from './SimulatorResults';
 import { SimulatorTabs } from './SimulatorTabs';
 import { SimulatorMobile } from './SimulatorMobile';
+import { FineTunePopover } from './FineTunePopover';
 
 // ============================================
 // TYPES
@@ -179,6 +178,17 @@ interface ResultsHeaderProps {
   onRun: () => void;
   isSimulating: boolean;
   strategy: Strategy;
+  fineTuneSettings: {
+    strictness: number;
+    saturation: number;
+    allowBacktracking: boolean;
+    onStrictnessChange: (value: number) => void;
+    onSaturationChange: (value: number) => void;
+    onAllowBacktrackingChange: (value: boolean) => void;
+    onApply: () => void;
+    onRun: () => void;
+    disabled: boolean;
+  };
 }
 
 const ResultsHeader = memo(function ResultsHeader({
@@ -187,67 +197,65 @@ const ResultsHeader = memo(function ResultsHeader({
   onRun,
   isSimulating,
   strategy,
+  fineTuneSettings,
 }: ResultsHeaderProps) {
   const t = useTranslations('builder.simulator');
   const config = STRATEGY_CONFIG[strategy];
-  const Icon = PERSONA_ICONS[selectedProfile];
   const profiles = Object.keys(personaConfig) as SimulationProfile[];
 
   return (
-    <div className="flex items-center justify-between gap-3 mb-4">
-      {/* Current Persona Badge */}
-      <div className="flex items-center gap-2">
-        <Badge variant="outline" className="gap-1.5 py-1 px-2">
-          <Icon className="h-3.5 w-3.5" />
-          <span className="text-xs">
-            {t('personas.candidate', {
-              persona: t(personaConfig[selectedProfile].labelKey as Parameters<typeof t>[0]),
-            })}
-          </span>
-        </Badge>
-      </div>
+    <div className="flex items-center justify-end gap-2 mb-4">
+      {/* Persona Dropdown */}
+      <Select
+        value={selectedProfile}
+        onValueChange={(v) => onProfileChange(v as SimulationProfile)}
+        disabled={isSimulating}
+      >
+        <SelectTrigger className="w-[120px] h-8 text-xs">
+          <SelectValue placeholder={t('personas.changePersona')} />
+        </SelectTrigger>
+        <SelectContent>
+          {profiles.map((profile) => {
+            const ProfileIcon = PERSONA_ICONS[profile];
+            return (
+              <SelectItem key={profile} value={profile}>
+                <div className="flex items-center gap-2">
+                  <ProfileIcon className="h-3.5 w-3.5" />
+                  <span>{t(personaConfig[profile].labelKey as Parameters<typeof t>[0])}</span>
+                </div>
+              </SelectItem>
+            );
+          })}
+        </SelectContent>
+      </Select>
 
-      {/* Quick Actions */}
-      <div className="flex items-center gap-2">
-        {/* Persona Dropdown */}
-        <Select
-          value={selectedProfile}
-          onValueChange={(v) => onProfileChange(v as SimulationProfile)}
-          disabled={isSimulating}
-        >
-          <SelectTrigger className="w-[120px] h-8 text-xs">
-            <SelectValue placeholder={t('personas.changePersona')} />
-          </SelectTrigger>
-          <SelectContent>
-            {profiles.map((profile) => {
-              const ProfileIcon = PERSONA_ICONS[profile];
-              return (
-                <SelectItem key={profile} value={profile}>
-                  <div className="flex items-center gap-2">
-                    <ProfileIcon className="h-3.5 w-3.5" />
-                    <span>{t(personaConfig[profile].labelKey as Parameters<typeof t>[0])}</span>
-                  </div>
-                </SelectItem>
-              );
-            })}
-          </SelectContent>
-        </Select>
+      {/* Fine Tune Popover */}
+      <FineTunePopover
+        strictness={fineTuneSettings.strictness}
+        onStrictnessChange={fineTuneSettings.onStrictnessChange}
+        saturation={fineTuneSettings.saturation}
+        onSaturationChange={fineTuneSettings.onSaturationChange}
+        allowBacktracking={fineTuneSettings.allowBacktracking}
+        onAllowBacktrackingChange={fineTuneSettings.onAllowBacktrackingChange}
+        onApply={fineTuneSettings.onApply}
+        onRun={fineTuneSettings.onRun}
+        disabled={fineTuneSettings.disabled}
+      />
 
-        {/* Re-run Button */}
-        <Button
-          size="sm"
-          onClick={onRun}
-          disabled={isSimulating}
-          className={cn('h-8 gap-1.5', config.badgeBg)}
-        >
-          {isSimulating ? (
-            <Loader2 className="h-3.5 w-3.5 animate-spin" />
-          ) : (
-            <RefreshCw className="h-3.5 w-3.5" />
-          )}
-          {t('rerun')}
-        </Button>
-      </div>
+      {/* Re-run Button */}
+      <Button
+        size="sm"
+        onClick={onRun}
+        disabled={isSimulating}
+        className={cn('h-8 gap-1.5 text-xs', config.badgeBg)}
+      >
+        {isSimulating ? (
+          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+        ) : (
+          <RefreshCw className="h-3.5 w-3.5" />
+        )}
+        {t('rerun')}
+      </Button>
     </div>
   );
 });
@@ -274,7 +282,7 @@ export const ResultsPhase = memo(function ResultsPhase({
 }: ResultsPhaseProps) {
   return (
     <div className="flex flex-col">
-      {/* Desktop: Header with persona selector and re-run */}
+      {/* Desktop: Header with persona selector, fine tune popover, and re-run */}
       {variant === 'desktop' && (
         <ResultsHeader
           selectedProfile={selectedProfile}
@@ -282,6 +290,7 @@ export const ResultsPhase = memo(function ResultsPhase({
           onRun={onRun}
           isSimulating={isSimulating}
           strategy={strategy}
+          fineTuneSettings={fineTuneSettings}
         />
       )}
 

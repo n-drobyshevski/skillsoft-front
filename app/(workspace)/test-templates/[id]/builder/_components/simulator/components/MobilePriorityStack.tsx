@@ -27,7 +27,6 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion';
 import {
-  BarChart3,
   Clock,
   HelpCircle,
   LineChart,
@@ -44,11 +43,8 @@ import { FineTuneSheet } from './FineTuneSheet';
 // LAZY LOADED TAB COMPONENTS (OPTIMIZED)
 // ============================================
 
-const AnalyticsTab = lazy(
-  () => import(/* webpackChunkName: "simulator-analytics-opt" */ '../tabs/AnalyticsTabOptimized')
-);
-const TimelineTab = lazy(
-  () => import(/* webpackChunkName: "simulator-timeline-opt" */ '../tabs/TimelineTabOptimized')
+const QuestionsTab = lazy(
+  () => import(/* webpackChunkName: "simulator-questions-tab" */ '../tabs/QuestionsTab')
 );
 
 // ============================================
@@ -196,38 +192,20 @@ const SecondarySections = memo(function SecondarySections({
 
   return (
     <Accordion type="single" collapsible className="space-y-2">
-      {/* Timeline Section */}
+      {/* Questions Section (merged Timeline + Analytics) */}
       <AccordionItem
-        value="timeline"
+        value="questions"
         className="border rounded-xl overflow-hidden bg-muted/20"
       >
         <AccordionTrigger className="px-4 py-3 hover:no-underline hover:bg-muted/30 min-h-[52px]">
           <div className="flex items-center gap-2">
             <LineChart className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm font-medium">{t('results.questionTimeline')}</span>
+            <span className="text-sm font-medium">{t('sections.questions')}</span>
           </div>
         </AccordionTrigger>
         <AccordionContent className="px-2 pb-2">
           <Suspense fallback={<TabSkeleton />}>
-            <TimelineTab result={result} />
-          </Suspense>
-        </AccordionContent>
-      </AccordionItem>
-
-      {/* Analytics Section */}
-      <AccordionItem
-        value="analytics"
-        className="border rounded-xl overflow-hidden bg-muted/20"
-      >
-        <AccordionTrigger className="px-4 py-3 hover:no-underline hover:bg-muted/30 min-h-[52px]">
-          <div className="flex items-center gap-2">
-            <BarChart3 className="h-4 w-4 text-muted-foreground" />
-            <span className="text-sm font-medium">{t('results.coverageAnalytics')}</span>
-          </div>
-        </AccordionTrigger>
-        <AccordionContent className="px-2 pb-2">
-          <Suspense fallback={<TabSkeleton />}>
-            <AnalyticsTab result={result} />
+            <QuestionsTab result={result} />
           </Suspense>
         </AccordionContent>
       </AccordionItem>

@@ -5,9 +5,8 @@ import { SortableContext } from "@dnd-kit/sortable";
 import { useDroppable } from "@dnd-kit/core";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Info, Loader2, Play, Redo2, Save, Scale, Sparkles, Undo2 } from "lucide-react";
+import { Info, Loader2, PanelLeftClose, PanelLeftOpen, Play, Redo2, Save, Scale, Sparkles, Undo2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useBlueprintWorkspace } from "./BlueprintWorkspaceProvider";
 import { useBuilderDnd } from "./BuilderDndProvider";
@@ -18,7 +17,15 @@ import { useBlueprintHistory, type HistoryActionType } from "@/hooks/useBlueprin
 import { useTranslations } from "next-intl";
 import { STRATEGY_HELP_CONTENT, type Strategy } from "./simulator/strategy-context";
 
-export const WeightedCanvas = React.memo(function WeightedCanvas() {
+interface WeightedCanvasProps {
+  onToggleLibrary?: () => void;
+  isLibraryCollapsed?: boolean;
+}
+
+export const WeightedCanvas = React.memo(function WeightedCanvas({
+  onToggleLibrary,
+  isLibraryCollapsed,
+}: WeightedCanvasProps = {}) {
   const t = useTranslations('builder.canvas');
   const tSim = useTranslations('builder.simulator');
   const {
@@ -204,17 +211,31 @@ export const WeightedCanvas = React.memo(function WeightedCanvas() {
   }, [handleUndo, handleRedo, handleSave, focusedCardIndex, handleMoveCard]);
 
   return (
-    <div className="flex flex-col h-full min-h-0 overflow-hidden">
+    <div className="@container flex flex-col h-full min-h-0 overflow-hidden">
       <div className="flex items-center justify-between px-2 sm:px-3 md:px-4 py-2 sm:py-2.5 md:py-3 border-b bg-background/50 shrink-0 overflow-hidden">
         <div className="flex items-center gap-1 sm:gap-2 min-w-0 shrink">
-          <Sparkles className="h-4 w-4 text-primary shrink-0" />
-          <span className="text-sm font-medium truncate">
-            <span className="sm:hidden">{t('blueprintShort')}</span>
-            <span className="hidden sm:inline">{t('assessmentBlueprint')}</span>
-          </span>
-          <Badge variant="secondary" className="text-[10px] ml-0 sm:ml-1 shrink-0 hidden xs:inline-flex">
-            {state.competencies.length}
-          </Badge>
+          {onToggleLibrary && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 active:scale-95"
+                  onClick={onToggleLibrary}
+                  aria-label={isLibraryCollapsed ? "Show library" : "Hide library"}
+                >
+                  {isLibraryCollapsed ? (
+                    <PanelLeftOpen className="h-4 w-4" />
+                  ) : (
+                    <PanelLeftClose className="h-4 w-4" />
+                  )}
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" className="text-xs">
+                {isLibraryCollapsed ? "Show library" : "Hide library"}
+              </TooltipContent>
+            </Tooltip>
+          )}
           <TooltipProvider delayDuration={150}>
             <Tooltip>
               <TooltipTrigger asChild>
@@ -227,24 +248,25 @@ export const WeightedCanvas = React.memo(function WeightedCanvas() {
           </TooltipProvider>
         </div>
         <div className="flex items-center gap-0.5 sm:gap-1 md:gap-2 shrink-0">
-          {/* Auto-save status indicator */}
-          <SaveStatusIndicator
-            status={saveStatus}
-            lastSaved={lastSaved}
-            hasUnsavedChanges={hasUnsavedChanges}
-            retryAttempt={retryAttempt}
-            compact={false}
-            className="hidden sm:flex mr-2"
-          />
-          {/* Mobile: compact status */}
-          <SaveStatusIndicator
-            status={saveStatus}
-            lastSaved={lastSaved}
-            hasUnsavedChanges={hasUnsavedChanges}
-            retryAttempt={retryAttempt}
-            compact
-            className="sm:hidden mr-1"
-          />
+          {/* Save status - hide text when panel is narrow, icon-only via tooltip */}
+          <div className="hidden @[560px]:block mr-2">
+            <SaveStatusIndicator
+              status={saveStatus}
+              lastSaved={lastSaved}
+              hasUnsavedChanges={hasUnsavedChanges}
+              retryAttempt={retryAttempt}
+              compact={false}
+            />
+          </div>
+          <div className="block @[560px]:hidden mr-1">
+            <SaveStatusIndicator
+              status={saveStatus}
+              lastSaved={lastSaved}
+              hasUnsavedChanges={hasUnsavedChanges}
+              retryAttempt={retryAttempt}
+              compact
+            />
+          </div>
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
@@ -259,7 +281,7 @@ export const WeightedCanvas = React.memo(function WeightedCanvas() {
               </Button>
             </TooltipTrigger>
             <TooltipContent side="bottom" className="text-xs">
-              {t('undoTooltip')} <kbd className="ml-1.5 px-1.5 py-0.5 bg-muted rounded text-[10px] font-mono">{t('undoKey')}</kbd>
+              {t('undoTooltip')} <kbd className="ml-1.5 px-1.5 py-0.5 bg-background/20 rounded text-[10px] font-mono">{t('undoKey')}</kbd>
             </TooltipContent>
           </Tooltip>
           <Tooltip>
@@ -276,7 +298,7 @@ export const WeightedCanvas = React.memo(function WeightedCanvas() {
               </Button>
             </TooltipTrigger>
             <TooltipContent side="bottom" className="text-xs">
-              {t('redoTooltip')} <kbd className="ml-1.5 px-1.5 py-0.5 bg-muted rounded text-[10px] font-mono">{t('redoKey')}</kbd>
+              {t('redoTooltip')} <kbd className="ml-1.5 px-1.5 py-0.5 bg-background/20 rounded text-[10px] font-mono">{t('redoKey')}</kbd>
             </TooltipContent>
           </Tooltip>
           {/* U4: Balance Weights button */}
@@ -299,16 +321,23 @@ export const WeightedCanvas = React.memo(function WeightedCanvas() {
               </TooltipContent>
             </Tooltip>
           )}
-          <Button
-            variant="secondary"
-            size="sm"
-            className="h-8 sm:h-10 md:h-8 gap-1 sm:gap-1.5 px-2 sm:px-3 active:scale-95"
-            onClick={handleTestDrive}
-            disabled={state.competencies.length === 0}
-          >
-            <Play className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-            <span className="hidden sm:inline">{t('testDrive')}</span>
-          </Button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="secondary"
+                size="sm"
+                className="h-8 sm:h-10 md:h-8 gap-1 sm:gap-1.5 px-2 sm:px-3 active:scale-95"
+                onClick={handleTestDrive}
+                disabled={state.competencies.length === 0}
+              >
+                <Play className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                <span className="hidden @[480px]:inline">{t('testDrive')}</span>
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="bottom" className="text-xs @[480px]:hidden">
+              {t('testDrive')}
+            </TooltipContent>
+          </Tooltip>
           {/* Manual save button - only visible when there are unsaved changes */}
           {hasUnsavedChanges && (
             <Button

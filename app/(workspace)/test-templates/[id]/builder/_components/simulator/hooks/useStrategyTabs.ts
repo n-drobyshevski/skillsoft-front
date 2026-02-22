@@ -144,15 +144,8 @@ function isSectionAvailable(
  * Used for dynamic component rendering.
  */
 export const TAB_COMPONENT_MAP: Record<string, string> = {
-  timeline: 'TimelineTab',
-  insights: 'StrategyInsightsTab',
-  analytics: 'AnalyticsTab',
-  'job-alignment': 'StrategyInsightsTab', // Reuses insights with TARGETED_FIT
-  'team-comparison': 'StrategyInsightsTab', // Reuses insights with DYNAMIC_GAP_ANALYSIS
-  'gap-analysis': 'StrategyInsightsTab',
-  'simulated-results': 'SimulatedResultsTab',
-  finetune: 'FineTuneTab',
-  fine: 'FineTuneTab',
+  results: 'ResultsTab',
+  questions: 'QuestionsTab',
 };
 
 /**
@@ -160,5 +153,5 @@ export const TAB_COMPONENT_MAP: Record<string, string> = {
  * Handles aliases (e.g., 'job-alignment' -> 'insights' component)
  */
 export function getTabComponentType(tabId: string): string {
-  return TAB_COMPONENT_MAP[tabId] ?? 'TimelineTab';
+  return TAB_COMPONENT_MAP[tabId] ?? 'ResultsTab';
 }

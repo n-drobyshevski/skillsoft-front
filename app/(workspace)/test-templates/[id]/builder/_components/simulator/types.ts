@@ -12,6 +12,8 @@ export const personaConfig: Record<
     descriptionKey: string;
     color: string;
     bgColor: string;
+    glowColor: string;
+    iconAnimation: string;
   }
 > = {
   PERFECT_CANDIDATE: {
@@ -20,6 +22,8 @@ export const personaConfig: Record<
     descriptionKey: 'personas.perfectDescription',
     color: 'text-emerald-600 dark:text-emerald-400',
     bgColor: 'bg-emerald-50 dark:bg-emerald-950/50 border-emerald-200 dark:border-emerald-800',
+    glowColor: 'ring-emerald-400/50 dark:ring-emerald-400/30',
+    iconAnimation: 'animate-icon-twinkle',
   },
   RANDOM_GUESSER: {
     icon: 'Shuffle',
@@ -27,6 +31,8 @@ export const personaConfig: Record<
     descriptionKey: 'personas.randomDescription',
     color: 'text-amber-600 dark:text-amber-400',
     bgColor: 'bg-amber-50 dark:bg-amber-950/50 border-amber-200 dark:border-amber-800',
+    glowColor: 'ring-amber-400/50 dark:ring-amber-400/30',
+    iconAnimation: 'animate-icon-shuffle',
   },
   FAILING_CANDIDATE: {
     icon: 'TrendingDown',
@@ -34,6 +40,8 @@ export const personaConfig: Record<
     descriptionKey: 'personas.failingDescription',
     color: 'text-red-600 dark:text-red-400',
     bgColor: 'bg-red-50 dark:bg-red-950/50 border-red-200 dark:border-red-800',
+    glowColor: 'ring-red-400/50 dark:ring-red-400/30',
+    iconAnimation: 'animate-icon-bounce-down',
   },
 };
 

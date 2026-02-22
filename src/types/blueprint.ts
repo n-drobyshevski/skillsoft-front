@@ -77,7 +77,8 @@ export interface QuestionSummary {
   indicatorTitle: string;
   estimatedTimeSeconds: number;
   selectionReason?: SelectionReason;
-  abilityDelta?: number;
+  simulatedCorrect?: boolean;
+  simulatedAnswer?: string;
 }
 
 export interface InventoryWarning {

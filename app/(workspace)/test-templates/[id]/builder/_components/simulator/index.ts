@@ -5,14 +5,13 @@ export { SimulatorPanelV4 as SimulatorPanel } from './SimulatorPanelV4';
 
 // Core components
 export { PersonaSelector } from './PersonaSelector';
-export { ScoreDisplay } from './ScoreDisplay';
 export { WarningsList } from './WarningsList';
 
 // Strategy-aware components
 export { StrategyHeroBadge } from './StrategyHeroBadge';
 export { StrategyScoreDisplay } from './StrategyScoreDisplay';
 export { StrategyEmptyState } from './StrategyEmptyState';
-export { StrategyLoadingSkeleton } from './StrategyLoadingSkeleton';
+export { SimulationLoadingStepper } from './SimulationLoadingStepper';
 export { SimulatorErrorBoundary } from './SimulatorErrorBoundary';
 
 // Strategy-specific cards
