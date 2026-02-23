@@ -129,6 +129,11 @@ function MobileTemplateCard({
           >
             {template.name}
           </h3>
+          {template.version != null && (
+            <Badge variant="outline" className="shrink-0 text-[10px] px-1.5 py-0 h-4 font-medium text-muted-foreground">
+              v{template.version}
+            </Badge>
+          )}
           {isRecommended && (
             <Sparkles className="size-3.5 text-amber-500 shrink-0" aria-label={t('recommended')} />
           )}
@@ -233,6 +238,13 @@ function DesktopTemplateCard({
           <div className="flex items-center gap-2 flex-wrap">
             {/* Goal Badge */}
             <GoalBadge goal={template.goal || AssessmentGoal.OVERVIEW} />
+
+            {/* Version Badge */}
+            {template.version != null && (
+              <Badge variant="outline" className="text-xs font-medium px-2 py-0.5 text-muted-foreground">
+                v{template.version}
+              </Badge>
+            )}
 
             {/* Recommended Badge */}
             {isRecommended && (

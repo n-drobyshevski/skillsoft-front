@@ -100,6 +100,13 @@ export function OverviewHero({ template, isDraft, canEdit }: OverviewHeroProps) 
           >
             {goalDisplayName}
           </Badge>
+
+          {/* Version Badge */}
+          {template.version != null && (
+            <Badge variant="outline" className="text-xs font-medium text-muted-foreground">
+              v{template.version}
+            </Badge>
+          )}
         </div>
 
         {/* Template Name */}

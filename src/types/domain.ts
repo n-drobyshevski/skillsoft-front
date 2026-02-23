@@ -794,6 +794,8 @@ export interface TestTemplateSummary {
   createdAt: string;
   /** Lifecycle status */
   status?: 'DRAFT' | 'PUBLISHED' | 'ARCHIVED';
+  /** Template version number */
+  version?: number;
 }
 
 /**
