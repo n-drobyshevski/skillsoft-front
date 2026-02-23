@@ -178,6 +178,7 @@
     },
     "warnings": {
       "inventoryWarnings": "Inventory Warnings",
+      "assemblyWarnings": "Assembly Diagnostics",
       "questions": "{count} questions"
     },
     "error": {

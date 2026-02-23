@@ -82,11 +82,15 @@ export interface QuestionSummary {
 }
 
 export interface InventoryWarning {
-  competencyId: string;
-  competencyName: string;
-  difficulty: string;
-  currentCount: number;
-  severity: HealthStatus;
+  competencyId?: string | null;
+  competencyName?: string | null;
+  difficulty?: string | null;
+  currentCount?: number;
+  severity?: HealthStatus;
+  /** Warning severity: INFO, WARNING, ERROR */
+  level?: 'INFO' | 'WARNING' | 'ERROR';
+  /** Human-readable warning message */
+  message?: string;
 }
 
 export interface SimulationResult {

@@ -178,6 +178,7 @@
     },
     "warnings": {
       "inventoryWarnings": "Предупреждения по банку вопросов",
+      "assemblyWarnings": "Диагностика сборки",
       "questions": "{count} вопросов"
     },
     "error": {

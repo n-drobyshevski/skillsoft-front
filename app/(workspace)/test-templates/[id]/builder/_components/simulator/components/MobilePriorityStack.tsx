@@ -6,9 +6,8 @@
  * A mobile-optimized layout that prioritizes the most important content:
  *
  * 1. Primary Insight (always expanded) - Strategy-specific hero content
- * 2. Quick Stats (always visible) - Duration & question count
- * 3. Secondary Sections (accordion) - Timeline, Analytics, Help
- * 4. Floating Fine Tune Button - Always accessible via bottom sheet
+ * 2. Secondary Sections (accordion) - Timeline, Analytics, Help
+ * 3. Floating Fine Tune Button - Always accessible via bottom sheet
  *
  * Key UX improvements over collapsible-only approach:
  * - Reduces tap count to see important info (primary insight visible immediately)
@@ -18,7 +17,6 @@
 
 import React, { memo, Suspense, lazy } from 'react';
 import { useTranslations } from 'next-intl';
-import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
   Accordion,
@@ -27,10 +25,8 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion';
 import {
-  Clock,
   HelpCircle,
   LineChart,
-  Target,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Strategy, STRATEGY_CONFIG, STRATEGY_HELP_CONTENT } from '../strategy-context';
@@ -99,54 +95,6 @@ function TabSkeleton() {
 // ============================================
 // QUICK STATS
 // ============================================
-
-interface QuickStatsProps {
-  durationMinutes: number;
-  questionCount: number;
-}
-
-const QuickStats = memo(function QuickStats({
-  durationMinutes,
-  questionCount,
-}: QuickStatsProps) {
-  const t = useTranslations('builder.simulator');
-
-  return (
-    <div className="grid grid-cols-2 gap-2 sm:gap-3">
-      <Card className="border-dashed">
-        <CardContent className="p-3 flex items-center gap-3">
-          <div className="p-2 rounded-lg bg-muted">
-            <Clock className="h-4 w-4 text-muted-foreground" />
-          </div>
-          <div>
-            <div className="text-[10px] text-muted-foreground uppercase tracking-wider">
-              {t('results.duration')}
-            </div>
-            <div className="text-lg font-bold tabular-nums">
-              {durationMinutes} {t('results.min')}
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card className="border-dashed">
-        <CardContent className="p-3 flex items-center gap-3">
-          <div className="p-2 rounded-lg bg-muted">
-            <Target className="h-4 w-4 text-muted-foreground" />
-          </div>
-          <div>
-            <div className="text-[10px] text-muted-foreground uppercase tracking-wider">
-              {t('results.questions')}
-            </div>
-            <div className="text-lg font-bold tabular-nums">
-              {questionCount}
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
-  );
-});
 
 // ============================================
 // HELP CONTENT
@@ -265,13 +213,7 @@ export const MobilePriorityStack = memo(function MobilePriorityStack({
         result={result}
       />
 
-      {/* 2. Quick Stats (Always Visible) */}
-      <QuickStats
-        durationMinutes={result.estimatedDurationMinutes}
-        questionCount={result.sampleQuestions.length}
-      />
-
-      {/* 2b. Inventory Warnings (parity with desktop) */}
+      {/* Inventory Warnings */}
       <WarningsList warnings={result.warnings} />
 
       {/* 3. Secondary Sections (Accordion) */}
