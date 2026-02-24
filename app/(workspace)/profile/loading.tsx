@@ -1,35 +1,36 @@
-import { User } from 'lucide-react';
-import { Skeleton } from '@/components/ui/skeleton';
-import { UnifiedHeroBentoSkeleton } from './_components/UnifiedHeroBento';
-import { SkillsPersonalityCardSkeleton } from './_components/SkillsPersonalityCard';
-import { RecentResultsSectionSkeleton } from './_components/RecentResultsSection';
+import { Card, CardContent } from '@/components/ui/card';
+import { IdentitySectionSkeleton } from './_components/IdentitySection';
+import { PropertiesSectionSkeleton } from './_components/PropertiesSection';
+import { SkillsSectionSkeleton } from './_components/SkillsSection';
+import { PersonalitySectionSkeleton } from './_components/PersonalitySection';
+import { ResultsSectionSkeleton } from './_components/ResultsSection';
 
 /**
  * Profile Page Loading State
  *
- * Displays skeleton UI matching the bento grid layout
+ * Displays skeleton UI matching the flat card layout
  * while the page data is being fetched.
  */
 export default function ProfileLoading() {
   return (
-    <div className="min-h-screen bg-muted/30">
-      <div className="container max-w-6xl mx-auto px-4 sm:px-6 py-4 sm:py-6 md:py-8">
-        {/* Page Header Skeleton */}
-        <header className="mb-6">
-          <div className="flex items-center gap-2 sm:gap-3 mb-1 sm:mb-2">
-            <div className="p-2 sm:p-2.5 rounded-xl bg-primary/10">
-              <User className="size-5 sm:size-6 text-primary" />
-            </div>
-            <Skeleton className="h-7 sm:h-8 md:h-9 w-32 sm:w-40" />
-          </div>
-          <Skeleton className="h-4 sm:h-5 w-56 sm:w-72" />
-        </header>
-
-        {/* Bento Grid Skeleton — 3 sections */}
-        <div className="space-y-4 sm:space-y-6">
-          <UnifiedHeroBentoSkeleton />
-          <SkillsPersonalityCardSkeleton />
-          <RecentResultsSectionSkeleton />
+    <div className="min-h-screen bg-background">
+      <div className="mx-auto max-w-4xl px-4 sm:px-6 py-6 sm:py-8">
+        <div className="space-y-3">
+          <Card className="gap-0 py-0 rounded-lg shadow-none">
+            <CardContent><IdentitySectionSkeleton /></CardContent>
+          </Card>
+          <Card className="gap-0 py-0 rounded-lg shadow-none">
+            <CardContent><PropertiesSectionSkeleton /></CardContent>
+          </Card>
+          <Card className="gap-0 py-0 rounded-lg shadow-none">
+            <CardContent><SkillsSectionSkeleton /></CardContent>
+          </Card>
+          <Card className="gap-0 py-0 rounded-lg shadow-none">
+            <CardContent><PersonalitySectionSkeleton /></CardContent>
+          </Card>
+          <Card className="gap-0 py-0 rounded-lg shadow-none">
+            <CardContent><ResultsSectionSkeleton /></CardContent>
+          </Card>
         </div>
       </div>
     </div>

@@ -364,6 +364,12 @@
       "cta": "Take Assessment"
     }
   },
+  "sections": {
+    "overview": "Overview",
+    "skills": "Top Competencies",
+    "personality": "Personality",
+    "results": "Recent Results"
+  },
   "accessibility": {
     "profilePage": "Profile page",
     "heroSection": "User information section",

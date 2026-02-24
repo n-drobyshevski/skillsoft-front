@@ -43,7 +43,7 @@ export function TopCompetenciesCard({
         <CardHeader className="pb-2 sm:pb-3 px-3 sm:px-6">
           <CardTitle className="text-base sm:text-lg flex items-center gap-1.5 sm:gap-2">
             <div className="p-1.5 sm:p-2 rounded-lg bg-primary/10 shrink-0">
-              <Target className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+              <Target className="h-4 w-4 sm:h-5 sm:w-5 text-primary" aria-hidden="true" />
             </div>
             <span className="truncate">{t('title')}</span>
           </CardTitle>
@@ -66,7 +66,7 @@ export function TopCompetenciesCard({
           <div className="min-w-0 flex-1">
             <CardTitle className="text-base sm:text-lg flex items-center gap-1.5 sm:gap-2">
               <div className="p-1.5 sm:p-2 rounded-lg bg-primary/10 shrink-0">
-                <Target className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+                <Target className="h-4 w-4 sm:h-5 sm:w-5 text-primary" aria-hidden="true" />
               </div>
               <span className="truncate">{t('title')}</span>
             </CardTitle>
@@ -199,12 +199,12 @@ export function TrendIndicator({ trend }: { trend: 'up' | 'down' | 'stable' }) {
   const config = {
     up: {
       icon: TrendingUp,
-      className: 'text-emerald-500',
+      className: 'text-emerald-500 dark:text-emerald-400',
       labelKey: 'trend.up' as const,
     },
     down: {
       icon: TrendingDown,
-      className: 'text-red-500',
+      className: 'text-red-500 dark:text-red-400',
       labelKey: 'trend.down' as const,
     },
     stable: {

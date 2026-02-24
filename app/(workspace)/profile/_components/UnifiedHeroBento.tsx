@@ -24,6 +24,9 @@ interface UnifiedHeroBentoProps {
 }
 
 /**
+ * @deprecated Replaced by IdentitySection + PropertiesSection in the
+ * Linear/Notion profile redesign. Kept for reference only.
+ *
  * Unified Hero Bento - Apple Health-inspired profile card
  *
  * Merges ProfileHeroCard + QuickStatsGrid into a single bento card:

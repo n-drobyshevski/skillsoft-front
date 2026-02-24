@@ -364,6 +364,12 @@
       "cta": "Пройти тест"
     }
   },
+  "sections": {
+    "overview": "Обзор",
+    "skills": "Топ компетенции",
+    "personality": "Личность",
+    "results": "Последние результаты"
+  },
   "accessibility": {
     "profilePage": "Страница профиля",
     "heroSection": "Раздел информации о пользователе",

@@ -1,12 +1,14 @@
 import { Suspense } from 'react';
 import { currentUser } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
-import { User } from 'lucide-react';
 import { getTranslations } from 'next-intl/server';
 import { MainContentAnchor } from '@/components/accessibility/SkipLinks';
-import { UnifiedHeroBento, UnifiedHeroBentoSkeleton } from './_components/UnifiedHeroBento';
-import { SkillsPersonalityCard, SkillsPersonalityCardSkeleton } from './_components/SkillsPersonalityCard';
-import { RecentResultsSection, RecentResultsSectionSkeleton } from './_components/RecentResultsSection';
+import { Card, CardContent } from '@/components/ui/card';
+import { IdentitySection, IdentitySectionSkeleton } from './_components/IdentitySection';
+import { PropertiesSection, PropertiesSectionSkeleton } from './_components/PropertiesSection';
+import { SkillsSection, SkillsSectionSkeleton } from './_components/SkillsSection';
+import { PersonalitySection, PersonalitySectionSkeleton } from './_components/PersonalitySection';
+import { ResultsSection, ResultsSectionSkeleton } from './_components/ResultsSection';
 import {
   getAssessmentSummary,
   getCompetencyPassport,
@@ -27,20 +29,22 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 /**
- * Profile Page (Server Component) — Bento Grid Redesign
+ * Profile Page (Server Component) — Linear/Notion-style redesign
  *
- * Apple Health-inspired 3-section bento layout:
- * 1. UnifiedHeroBento: Avatar + identity + 3 stat cells + progress bar
- * 2. SkillsPersonalityCard: Tabbed card (Top Skills | Big Five Personality)
- * 3. RecentResultsSection: Filterable test results list
+ * Flat, document-like layout with 5 sections separated by dividers:
+ * 1. IdentitySection: Avatar + name + email + badges + actions (sync)
+ * 2. PropertiesSection: Property-row grid of stats + progress bar
+ * 3. SkillsSection: Top competencies list
+ * 4. PersonalitySection: Big Five horizontal bars
+ * 5. ResultsSection: Filterable test results table
  *
  * Performance:
- * - Preloaded parallel data fetch via getUnifiedProfileData
- * - 3 independent Suspense boundaries for streaming
- * - Staggered entry animations
+ * - Preloaded parallel data fetch via preloadProfileData
+ * - 4 independent Suspense boundaries for streaming
+ * - Identity section renders synchronously from Clerk data
  *
  * Accessibility (WCAG 2.1 AA):
- * - All sections have proper ARIA labels
+ * - All sections have proper ARIA region labels
  * - Touch targets minimum 44px
  * - Full keyboard navigation
  * - Screen reader friendly
@@ -51,9 +55,6 @@ export default async function ProfilePage() {
   if (!user) {
     redirect('/sign-in');
   }
-
-  // Get translations for this page
-  const t = await getTranslations('profile.page');
 
   // Preload all profile data immediately (starts parallel fetch)
   preloadProfileData(user.id);
@@ -76,51 +77,56 @@ export default async function ProfilePage() {
   const isEmailVerified = user.emailAddresses[0]?.verification?.status === 'verified';
 
   return (
-    <main id="main-content" className="min-h-screen bg-muted/30">
+    <main id="main-content" className="min-h-screen bg-background">
       <MainContentAnchor />
-      <div className="container max-w-6xl mx-auto px-4 sm:px-6 py-4 sm:py-6 md:py-8">
-        {/* Page Header */}
-        <header className="mb-6">
-          <div className="flex items-center gap-2 sm:gap-3 mb-1 sm:mb-2">
-            <div className="p-2 sm:p-2.5 rounded-xl bg-primary/10">
-              <User className="size-5 sm:size-6 text-primary" />
-            </div>
-            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight">
-              {t('title')}
-            </h1>
-          </div>
-          <p className="text-muted-foreground text-xs sm:text-sm md:text-base">
-            {t('description')}
-          </p>
-        </header>
-
-        {/* Bento Grid Layout — 3 sections */}
-        <div className="space-y-4 sm:space-y-6">
-          {/* Section 1: Unified Hero Bento (identity + stats + progress) */}
-          <div className="animate-in fade-in-0 duration-300">
-            <Suspense fallback={<UnifiedHeroBentoSkeleton />}>
-              <UnifiedHeroBentoLoader
-                userId={user.id}
+      <div className="mx-auto max-w-4xl px-4 sm:px-6 py-6 sm:py-8">
+        <div className="space-y-3">
+          {/* Section 1: Identity (sync — no Suspense needed) */}
+          <Card className="gap-0 py-0 rounded-lg shadow-none">
+            <CardContent>
+              <IdentitySection
                 userInfo={userInfo}
                 role={userRole}
                 isVerified={isEmailVerified}
               />
-            </Suspense>
-          </div>
+            </CardContent>
+          </Card>
 
-          {/* Section 2: Skills & Personality (tabbed card) */}
-          <div className="animate-in fade-in-0 duration-300" style={{ animationDelay: '75ms' }}>
-            <Suspense fallback={<SkillsPersonalityCardSkeleton />}>
-              <SkillsPersonalityLoader userId={user.id} />
-            </Suspense>
-          </div>
+          {/* Section 2: Properties/Stats */}
+          <Card className="gap-0 py-0 rounded-lg shadow-none">
+            <CardContent>
+              <Suspense fallback={<PropertiesSectionSkeleton />}>
+                <PropertiesLoader userId={user.id} userInfo={userInfo} />
+              </Suspense>
+            </CardContent>
+          </Card>
 
-          {/* Section 3: Recent Results */}
-          <div className="animate-in fade-in-0 duration-300" style={{ animationDelay: '150ms' }}>
-            <Suspense fallback={<RecentResultsSectionSkeleton />}>
-              <RecentResultsLoader userId={user.id} />
-            </Suspense>
-          </div>
+          {/* Section 3: Top Skills */}
+          <Card className="gap-0 py-0 rounded-lg shadow-none">
+            <CardContent>
+              <Suspense fallback={<SkillsSectionSkeleton />}>
+                <SkillsLoader userId={user.id} />
+              </Suspense>
+            </CardContent>
+          </Card>
+
+          {/* Section 4: Personality */}
+          <Card className="gap-0 py-0 rounded-lg shadow-none">
+            <CardContent>
+              <Suspense fallback={<PersonalitySectionSkeleton />}>
+                <PersonalityLoader userId={user.id} />
+              </Suspense>
+            </CardContent>
+          </Card>
+
+          {/* Section 5: Recent Results */}
+          <Card className="gap-0 py-0 rounded-lg shadow-none">
+            <CardContent>
+              <Suspense fallback={<ResultsSectionSkeleton />}>
+                <ResultsLoader userId={user.id} />
+              </Suspense>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </main>
@@ -132,49 +138,50 @@ export default async function ProfilePage() {
 // ============================================
 
 /**
- * Server component that fetches user stats and renders the hero bento
+ * Fetches assessment summary and renders the properties grid
  */
-async function UnifiedHeroBentoLoader({
+async function PropertiesLoader({
   userId,
   userInfo,
-  role,
-  isVerified,
 }: {
   userId: string;
   userInfo: ProfileUserInfo;
-  role: UserRole;
-  isVerified: boolean;
 }) {
   const summary = await getAssessmentSummary(userId);
-  return (
-    <UnifiedHeroBento
-      userInfo={userInfo}
-      role={role}
-      isVerified={isVerified}
-      summary={summary}
-    />
-  );
+  return <PropertiesSection userInfo={userInfo} summary={summary} />;
 }
 
 /**
- * Server component that fetches competency passport and renders tabbed card
+ * Fetches competency passport and renders the skills list
  */
-async function SkillsPersonalityLoader({ userId }: { userId: string }) {
+async function SkillsLoader({ userId }: { userId: string }) {
   const passport = await getCompetencyPassport(userId);
   return (
-    <SkillsPersonalityCard
+    <SkillsSection
       competencies={passport.topCompetencies}
       totalAssessments={passport.totalAssessmentsUsed}
-      bigFiveProfile={passport.bigFiveProfile}
-      confidence={passport.confidence}
     />
   );
 }
 
 /**
- * Server component that fetches and displays recent results
+ * Fetches competency passport and renders the personality bars
  */
-async function RecentResultsLoader({ userId }: { userId: string }) {
+async function PersonalityLoader({ userId }: { userId: string }) {
+  const passport = await getCompetencyPassport(userId);
+  return (
+    <PersonalitySection
+      bigFiveProfile={passport.bigFiveProfile}
+      confidence={passport.confidence}
+      totalAssessments={passport.totalAssessmentsUsed}
+    />
+  );
+}
+
+/**
+ * Fetches assessment summary and renders recent results
+ */
+async function ResultsLoader({ userId }: { userId: string }) {
   const summary = await getAssessmentSummary(userId);
-  return <RecentResultsSection results={summary.recentResults} />;
+  return <ResultsSection results={summary.recentResults} />;
 }

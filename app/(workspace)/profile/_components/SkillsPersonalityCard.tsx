@@ -35,6 +35,9 @@ interface SkillsPersonalityCardProps {
 }
 
 /**
+ * @deprecated Replaced by SkillsSection + PersonalitySection in the
+ * Linear/Notion profile redesign. Kept for reference only.
+ *
  * Skills & Personality Card - Tabbed bento card
  *
  * Combines TopCompetenciesCard + PersonalityPassportCard into

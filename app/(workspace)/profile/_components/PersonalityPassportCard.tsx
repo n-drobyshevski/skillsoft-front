@@ -71,7 +71,7 @@ export function PersonalityPassportCard({
         <CardHeader className="pb-2 sm:pb-3 px-3 sm:px-6">
           <CardTitle className="text-base sm:text-lg flex items-center gap-2">
             <div className="p-1.5 sm:p-2 rounded-lg bg-primary/10">
-              <Brain className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+              <Brain className="h-4 w-4 sm:h-5 sm:w-5 text-primary" aria-hidden="true" />
             </div>
             {t('title')}
           </CardTitle>
@@ -102,7 +102,7 @@ export function PersonalityPassportCard({
           <div>
             <CardTitle className="text-base sm:text-lg flex items-center gap-2">
               <div className="p-1.5 sm:p-2 rounded-lg bg-primary/10">
-                <Brain className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+                <Brain className="h-4 w-4 sm:h-5 sm:w-5 text-primary" aria-hidden="true" />
               </div>
               {t('title')}
             </CardTitle>
@@ -254,7 +254,7 @@ export function ConfidenceBadge({ confidence, t }: ConfidenceBadgeProps) {
       <Tooltip>
         <TooltipTrigger asChild>
           <Badge className={cn('text-xs cursor-help', className)}>
-            <Info className="h-3 w-3 mr-1" />
+            <Info className="h-3 w-3 mr-1" aria-hidden="true" />
             {label}
           </Badge>
         </TooltipTrigger>
