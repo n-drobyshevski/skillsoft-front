@@ -225,7 +225,6 @@ export const ResultsPhase = memo(function ResultsPhase({
         passingScore={passingScore}
         onetSocCode={onetSocCode}
         teamId={teamId}
-        fineTuneSettings={fineTuneSettings}
       />
     </div>
   );

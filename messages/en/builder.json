@@ -96,7 +96,18 @@
     "removeCancel": "Cancel",
     "removeConfirm": "Remove",
     "decreaseImportance": "Decrease importance",
-    "increaseImportance": "Increase importance"
+    "increaseImportance": "Increase importance",
+    "expandWarnings": "Show warnings and controls",
+    "expandDetails": "Show full details",
+    "collapseCard": "Collapse card",
+    "warningsCount": "{count, plural, one {# issue} other {# issues}}",
+    "availableOf": "{available}/{required}q",
+    "questionsShort": "{count}q",
+    "healthCritical": "No questions available in inventory",
+    "healthModerate": "Limited question inventory",
+    "lowQuestions": "Only {count} questions available",
+    "weightImbalance": "This competency has over 50% total weight",
+    "noSampleAvailable": "No sample available — run simulation first"
   },
   "saveStatus": {
     "allChangesSaved": "All changes saved",

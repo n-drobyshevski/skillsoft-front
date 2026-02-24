@@ -963,7 +963,54 @@
       "dropHereToAdd": "Перетащите сюда для добавления",
       "save": "Сохранить",
       "undo": "Отменить",
-      "redo": "Повторить"
+      "redo": "Повторить",
+      "card": {
+        "dragToReorder": "Перетащите для изменения порядка",
+        "expandWarnings": "Показать предупреждения и настройки",
+        "expandDetails": "Показать подробности",
+        "collapseCard": "Свернуть карточку",
+        "importance": "Важность",
+        "difficulty": "Сложность",
+        "importanceTooltip": "Вес этой компетенции в общей оценке",
+        "inventoryDepth": "Глубина банка вопросов",
+        "inventoryEMH": "Л / С / Т",
+        "sampleQuestion": "Пример вопроса",
+        "noSampleAvailable": "Нет примера — сначала запустите симуляцию",
+        "indicatorPriority": "Приоритет индикаторов",
+        "optimisticApply": "Применится при следующей симуляции",
+        "removeButton": "Удалить",
+        "removeTitle": "Удалить компетенцию",
+        "removeDescription": "Компетенция <strong>{name}</strong> будет удалена из структуры. Это действие можно отменить.",
+        "removeCancel": "Отмена",
+        "removeConfirm": "Удалить",
+        "decreaseImportance": "Уменьшить важность",
+        "increaseImportance": "Увеличить важность",
+        "collapseDetail": "Свернуть подробности",
+        "expandOptions": "Развернуть параметры",
+        "importanceLevel": {
+          "low": "Низкая",
+          "medium": "Средняя",
+          "high": "Высокая",
+          "critical": "Критическая"
+        },
+        "difficultyOptions": {
+          "foundational": "Базовый",
+          "intermediate": "Средний",
+          "advanced": "Продвинутый",
+          "expert": "Эксперт",
+          "foundationalShort": "Б",
+          "intermediateShort": "С",
+          "advancedShort": "П",
+          "expertShort": "Э"
+        },
+        "warningsCount": "{count, plural, one {# проблема} few {# проблемы} many {# проблем} other {# проблем}}",
+        "availableOf": "{available}/{required}в",
+        "questionsShort": "{count}в",
+        "healthCritical": "Нет доступных вопросов в банке",
+        "healthModerate": "Ограниченный банк вопросов",
+        "lowQuestions": "Доступно только {count} вопросов",
+        "weightImbalance": "Эта компетенция занимает более 50% общего веса"
+      }
     },
     "start": {
       "errors": {

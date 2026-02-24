@@ -57,12 +57,12 @@ export const getUserRecentResults = cache(async (
 });
 
 /**
- * Get all user results for aggregation (larger batch)
+ * Get all user results for aggregation (larger batch, with competency scores)
  */
 export const getAllUserResults = cache(async (clerkUserId: string): Promise<TestResult[]> => {
   try {
-    // Fetch up to 100 results for aggregation
-    const data = await testResultsApi.getUserResults(clerkUserId, 0, 100);
+    // Fetch up to 100 detailed results (with competency scores) for aggregation
+    const data = await testResultsApi.getUserResultsDetailed(clerkUserId, 0, 100);
     return data?.content || [];
   } catch (error) {
     // eslint-disable-next-line no-console

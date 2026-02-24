@@ -41,7 +41,7 @@ export const testResultsApi = {
   },
 
   /**
-   * Get all results for a user
+   * Get all results for a user (summary only, no competency scores)
    */
   getUserResults: async (clerkUserId: string, page = 0, size = 20): Promise<{
     content: TestResult[];
@@ -51,6 +51,23 @@ export const testResultsApi = {
     const authHeaders = await getAuthHeaders();
     return fetchApi(`${TEST_RESULTS_BASE}/user/${clerkUserId}?page=${page}&size=${size}`, {
       tags: [`user-results-${clerkUserId}`],
+      cache: 'no-store',
+      authHeaders,
+    });
+  },
+
+  /**
+   * Get all results for a user with full detail (including competency scores).
+   * Used by profile page for competency aggregation.
+   */
+  getUserResultsDetailed: async (clerkUserId: string, page = 0, size = 100): Promise<{
+    content: TestResult[];
+    totalElements: number;
+    totalPages: number;
+  }> => {
+    const authHeaders = await getAuthHeaders();
+    return fetchApi(`${TEST_RESULTS_BASE}/user/${clerkUserId}/detailed?page=${page}&size=${size}`, {
+      tags: [`user-results-detailed-${clerkUserId}`],
       cache: 'no-store',
       authHeaders,
     });

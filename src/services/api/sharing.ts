@@ -1,5 +1,5 @@
 import { getAuthHeaders } from '../roleApi';
-import { fetchApi, log } from './core';
+import { fetchApi } from './core';
 
 import type {
   VisibilityInfo,
@@ -312,42 +312,25 @@ export const templateSharingApi = {
   /**
    * Get templates shared with the current user.
    * Returns templates where the user has been granted access via shares.
-   *
-   * NOTE: Backend endpoint pending implementation.
-   * Required endpoint: GET /api/v1/tests/templates/shared-with-me
-   * Should return: { items: SharedTemplateItem[], total: number }
+   * Endpoint: GET /api/v1/tests/templates/shared-with-me
    */
   getSharedWithMe: async (): Promise<SharedTemplatesResponse> => {
-    try {
-      const authHeaders = await getAuthHeaders();
-      return await fetchApi(`${TEMPLATES_BASE}/shared-with-me`, {
-        tags: ['shared-templates'],
-        revalidate: 60,
-        authHeaders,
-      });
-    } catch {
-      // Graceful fallback if endpoint not yet implemented
-      // Log warning but return empty result to keep UI functional
-      log.warn('getSharedWithMe endpoint not available, returning empty result');
-      return { items: [], total: 0 };
-    }
+    const authHeaders = await getAuthHeaders();
+    return fetchApi(`${TEMPLATES_BASE}/shared-with-me`, {
+      tags: ['shared-templates'],
+      revalidate: 60,
+      authHeaders,
+    });
   },
 
   /**
    * Get count of templates shared with the current user.
-   *
-   * NOTE: Backend endpoint pending implementation.
-   * Required endpoint: GET /api/v1/tests/templates/shared-with-me/count
+   * Endpoint: GET /api/v1/tests/templates/shared-with-me/count
    */
   getSharedWithMeCount: async (): Promise<number> => {
-    try {
-      const authHeaders = await getAuthHeaders();
-      return await fetchApi(`${TEMPLATES_BASE}/shared-with-me/count`, {
-        authHeaders,
-      });
-    } catch {
-      // Graceful fallback if endpoint not yet implemented
-      return 0;
-    }
+    const authHeaders = await getAuthHeaders();
+    return fetchApi(`${TEMPLATES_BASE}/shared-with-me/count`, {
+      authHeaders,
+    });
   },
 };

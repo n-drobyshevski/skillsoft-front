@@ -96,7 +96,18 @@
     "removeCancel": "Отмена",
     "removeConfirm": "Удалить",
     "decreaseImportance": "Уменьшить важность",
-    "increaseImportance": "Увеличить важность"
+    "increaseImportance": "Увеличить важность",
+    "expandWarnings": "Показать предупреждения и настройки",
+    "expandDetails": "Показать подробности",
+    "collapseCard": "Свернуть карточку",
+    "warningsCount": "{count, plural, one {# проблема} few {# проблемы} many {# проблем} other {# проблем}}",
+    "availableOf": "{available}/{required}в",
+    "questionsShort": "{count}в",
+    "healthCritical": "Нет доступных вопросов в банке",
+    "healthModerate": "Ограниченный банк вопросов",
+    "lowQuestions": "Доступно только {count} вопросов",
+    "weightImbalance": "Эта компетенция занимает более 50% общего веса",
+    "noSampleAvailable": "Нет примера — сначала запустите симуляцию"
   },
   "saveStatus": {
     "allChangesSaved": "Все изменения сохранены",

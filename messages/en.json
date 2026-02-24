@@ -963,7 +963,54 @@
       "dropHereToAdd": "Drop here to add",
       "save": "Save",
       "undo": "Undo",
-      "redo": "Redo"
+      "redo": "Redo",
+      "card": {
+        "dragToReorder": "Drag to reorder",
+        "expandWarnings": "Show warnings and controls",
+        "expandDetails": "Show full details",
+        "collapseCard": "Collapse card",
+        "importance": "Importance",
+        "difficulty": "Difficulty",
+        "importanceTooltip": "How much weight this competency carries in the overall assessment",
+        "inventoryDepth": "Inventory Depth",
+        "inventoryEMH": "E / M / H",
+        "sampleQuestion": "Sample Question",
+        "noSampleAvailable": "No sample available — run simulation first",
+        "indicatorPriority": "Indicator Priority",
+        "optimisticApply": "Applied on next simulation",
+        "removeButton": "Remove",
+        "removeTitle": "Remove Competency",
+        "removeDescription": "This will remove <strong>{name}</strong> from the blueprint. This action can be undone.",
+        "removeCancel": "Cancel",
+        "removeConfirm": "Remove",
+        "decreaseImportance": "Decrease importance",
+        "increaseImportance": "Increase importance",
+        "collapseDetail": "Collapse details",
+        "expandOptions": "Expand options",
+        "importanceLevel": {
+          "low": "Low",
+          "medium": "Medium",
+          "high": "High",
+          "critical": "Critical"
+        },
+        "difficultyOptions": {
+          "foundational": "Foundational",
+          "intermediate": "Intermediate",
+          "advanced": "Advanced",
+          "expert": "Expert",
+          "foundationalShort": "F",
+          "intermediateShort": "I",
+          "advancedShort": "A",
+          "expertShort": "E"
+        },
+        "warningsCount": "{count, plural, one {# issue} other {# issues}}",
+        "availableOf": "{available}/{required}q",
+        "questionsShort": "{count}q",
+        "healthCritical": "No questions available in inventory",
+        "healthModerate": "Limited question inventory",
+        "lowQuestions": "Only {count} questions available",
+        "weightImbalance": "This competency has over 50% total weight"
+      }
     },
     "start": {
       "errors": {
