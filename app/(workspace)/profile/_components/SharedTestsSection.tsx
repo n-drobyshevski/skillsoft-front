@@ -72,6 +72,9 @@ const goalConfig: Record<AssessmentGoal, { labelKey: string; className: string }
 };
 
 /**
+ * @deprecated Removed from the profile bento grid redesign.
+ * Kept for reference; will be removed in a future cleanup.
+ *
  * SharedTestsSection - Profile component showing tests shared with the user
  *
  * Mobile-first design with:
@@ -83,7 +86,7 @@ const goalConfig: Record<AssessmentGoal, { labelKey: string; className: string }
  * - WCAG 2.1 AA compliant
  */
 export function SharedTestsSection({ items, total }: SharedTestsSectionProps) {
-  const t = useTranslations('users.profile.sharedTests');
+  const t = useTranslations('profile.sharedTests');
   const tCommon = useTranslations('common');
 
   // Sort by most recently shared
@@ -200,7 +203,7 @@ interface SharedTemplateCardProps {
 }
 
 function SharedTemplateCard({ item }: SharedTemplateCardProps) {
-  const t = useTranslations('users.profile.sharedTests');
+  const t = useTranslations('profile.sharedTests');
   const { formatRelativeTime, formatFutureRelativeTime } = useFormattedDates();
   const { template, permission, sharedBy, sharedAt, expiresAt } = item;
   const permConfig = permissionConfig[permission];

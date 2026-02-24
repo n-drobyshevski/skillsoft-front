@@ -22,7 +22,7 @@ import { LazyBigFiveChart as BigFiveRadarChart } from '@/lib/lazy-charts';
 /**
  * Trait colors matching the radar chart
  */
-const TRAIT_COLORS = {
+export const TRAIT_COLORS = {
   OPENNESS: { bg: 'bg-violet-100 dark:bg-violet-900/30', text: 'text-violet-600 dark:text-violet-400', bar: 'bg-violet-500' },
   CONSCIENTIOUSNESS: { bg: 'bg-blue-100 dark:bg-blue-900/30', text: 'text-blue-600 dark:text-blue-400', bar: 'bg-blue-500' },
   EXTRAVERSION: { bg: 'bg-amber-100 dark:bg-amber-900/30', text: 'text-amber-600 dark:text-amber-400', bar: 'bg-amber-500' },
@@ -33,7 +33,7 @@ const TRAIT_COLORS = {
 /**
  * Trait display order
  */
-const TRAIT_ORDER: Array<keyof BigFiveProfile> = [
+export const TRAIT_ORDER: Array<keyof BigFiveProfile> = [
   'OPENNESS',
   'CONSCIENTIOUSNESS',
   'EXTRAVERSION',
@@ -226,12 +226,12 @@ export function PersonalityPassportCard({
 // HELPER COMPONENTS
 // ============================================
 
-interface ConfidenceBadgeProps {
+export interface ConfidenceBadgeProps {
   confidence: ProjectionConfidence;
   t: ReturnType<typeof useTranslations<'profile.passport'>>;
 }
 
-function ConfidenceBadge({ confidence, t }: ConfidenceBadgeProps) {
+export function ConfidenceBadge({ confidence, t }: ConfidenceBadgeProps) {
   const config = {
     low: {
       className: 'text-amber-600 bg-amber-100 dark:text-amber-400 dark:bg-amber-900/30',

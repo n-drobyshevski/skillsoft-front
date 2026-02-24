@@ -65,7 +65,7 @@ export function RecentResultsSection({ results }: RecentResultsSectionProps) {
   // Empty state (no results at all)
   if (results.length === 0) {
     return (
-      <Card>
+      <Card className="rounded-2xl">
         <CardHeader className="pb-2 sm:pb-3 px-3 sm:px-6">
           <CardTitle className="text-base sm:text-lg flex items-center gap-2">
             <div className="p-1.5 sm:p-2 rounded-lg bg-primary/10">
@@ -86,7 +86,7 @@ export function RecentResultsSection({ results }: RecentResultsSectionProps) {
   }
 
   return (
-    <Card>
+    <Card className="rounded-2xl">
       <CardHeader className="pb-3 sm:pb-4 px-4 sm:px-6">
         <div className="flex flex-col gap-2 sm:gap-3 sm:flex-row sm:items-center sm:justify-between">
           <CardTitle className="text-base sm:text-lg flex items-center gap-2 shrink-0">
@@ -95,8 +95,8 @@ export function RecentResultsSection({ results }: RecentResultsSectionProps) {
             </div>
             {t('title')}
           </CardTitle>
-          {/* Filter container */}
-          <div className="flex items-center gap-2 min-w-0">
+          {/* Filter container - hidden on mobile for cleaner bento look */}
+          <div className="hidden sm:flex items-center gap-2 min-w-0">
             <div className="min-w-0 flex-1 sm:flex-initial overflow-hidden">
               <GoalFilterTabs
                 value={goalFilter}
@@ -136,7 +136,7 @@ export function RecentResultsSection({ results }: RecentResultsSectionProps) {
             className="py-4 sm:py-6"
           />
         ) : (
-          <div className="space-y-2">
+          <div className="space-y-1.5">
             {filteredResults.map((result) => (
               <ResultRow key={result.resultId} result={result} goalLabels={goalLabels} />
             ))}
@@ -180,16 +180,16 @@ function ResultRow({
       href={`/test-templates/results/${result.resultId}`}
       aria-label={ariaLabel}
       className={cn(
-        'flex items-center gap-2 sm:gap-3 w-full p-2 sm:p-3 rounded-xl border border-border transition-colors group touch-manipulation overflow-hidden',
+        'flex items-center gap-2 sm:gap-3 w-full p-2 sm:p-3 rounded-xl transition-colors group touch-manipulation overflow-hidden',
         'min-h-[44px]',
-        'hover:bg-muted/50',
+        'hover:bg-muted/40',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2'
       )}
     >
-      {/* Score Circle - Compact on mobile */}
+      {/* Score Circle */}
       <div
         className={cn(
-          'h-10 w-10 sm:h-12 sm:w-12 rounded-full flex items-center justify-center text-sm sm:text-base font-bold shrink-0',
+          'h-10 w-10 sm:h-14 sm:w-14 rounded-full flex items-center justify-center text-sm sm:text-base font-bold shrink-0',
           result.passed
             ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-300'
             : 'bg-amber-50 text-amber-700 dark:bg-amber-950/30 dark:text-amber-300'
@@ -231,7 +231,7 @@ function ResultRow({
 
 export function RecentResultsSectionSkeleton() {
   return (
-    <Card>
+    <Card className="rounded-2xl">
       <CardHeader className="pb-2 sm:pb-3 px-3 sm:px-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">

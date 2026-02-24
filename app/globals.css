@@ -1677,6 +1677,7 @@ img {
 	.animate-fall,
 	.animate-copy-success,
 	.animate-card-expand,
+	.animate-card-half-expand,
 	.animate-slide-in-left,
 	.animate-slide-in-right,
 	.animate-icon-twinkle,
@@ -2391,6 +2392,25 @@ textarea:focus-visible,
 	animation: card-content-expand 200ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 
+/* Card half-expansion animation for warnings + controls reveal */
+@keyframes card-half-expand {
+	from {
+		opacity: 0;
+		max-height: 0;
+		transform: translateY(-4px);
+	}
+
+	to {
+		opacity: 1;
+		max-height: 400px;
+		transform: translateY(0);
+	}
+}
+
+.animate-card-half-expand {
+	animation: card-half-expand 180ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
 /* Phase 2.4: Mobile tab slide transitions */
 @keyframes slide-in-from-left {
 	from {
@@ -2686,4 +2706,39 @@ textarea:focus-visible,
 	.bg-muted\/40 {
 		background: #f5f5f5 !important;
 	}
+}
+
+/* ============================================
+ * BENTO GRID UTILITIES
+ * Apple Health-inspired card animations and gradients
+ * ============================================ */
+
+/* Staggered entry animation delays for bento cards */
+.bento-stagger:nth-child(1) { animation-delay: 0ms; }
+.bento-stagger:nth-child(2) { animation-delay: 60ms; }
+.bento-stagger:nth-child(3) { animation-delay: 120ms; }
+.bento-stagger:nth-child(4) { animation-delay: 180ms; }
+.bento-stagger:nth-child(5) { animation-delay: 240ms; }
+.bento-stagger:nth-child(6) { animation-delay: 300ms; }
+
+/* Apple Health-inspired stat cell gradients (OKLCH) */
+.stat-gradient-blue {
+	background: linear-gradient(135deg, oklch(0.95 0.04 260) 0%, oklch(0.98 0.01 260) 100%);
+}
+.stat-gradient-emerald {
+	background: linear-gradient(135deg, oklch(0.95 0.04 163) 0%, oklch(0.98 0.01 163) 100%);
+}
+.stat-gradient-amber {
+	background: linear-gradient(135deg, oklch(0.95 0.04 85) 0%, oklch(0.98 0.01 85) 100%);
+}
+
+/* Dark mode gradient variants */
+.dark .stat-gradient-blue {
+	background: linear-gradient(135deg, oklch(0.22 0.03 260) 0%, oklch(0.18 0.01 260) 100%);
+}
+.dark .stat-gradient-emerald {
+	background: linear-gradient(135deg, oklch(0.22 0.03 163) 0%, oklch(0.18 0.01 163) 100%);
+}
+.dark .stat-gradient-amber {
+	background: linear-gradient(135deg, oklch(0.22 0.03 85) 0%, oklch(0.18 0.01 85) 100%);
 }

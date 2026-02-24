@@ -103,7 +103,7 @@ export function TopCompetenciesCard({
 // COMPETENCY ROW COMPONENT
 // ============================================
 
-function CompetencyRow({ competency, rank }: { competency: TopCompetency; rank: number }) {
+export function CompetencyRow({ competency, rank }: { competency: TopCompetency; rank: number }) {
   const t = useTranslations('profile.competencies');
 
   return (
@@ -173,7 +173,7 @@ function CompetencyRow({ competency, rank }: { competency: TopCompetency; rank: 
 // RANK BADGE COMPONENT
 // ============================================
 
-function RankBadge({ rank }: { rank: number }) {
+export function RankBadge({ rank }: { rank: number }) {
   return (
     <div
       className={cn(
@@ -193,7 +193,7 @@ function RankBadge({ rank }: { rank: number }) {
 // TREND INDICATOR COMPONENT
 // ============================================
 
-function TrendIndicator({ trend }: { trend: 'up' | 'down' | 'stable' }) {
+export function TrendIndicator({ trend }: { trend: 'up' | 'down' | 'stable' }) {
   const t = useTranslations('profile.competencies');
 
   const config = {
@@ -229,13 +229,13 @@ function TrendIndicator({ trend }: { trend: 'up' | 'down' | 'stable' }) {
 // HELPER FUNCTIONS
 // ============================================
 
-function getScoreColor(score: number): string {
+export function getScoreColor(score: number): string {
   if (score >= 80) return 'text-emerald-600 dark:text-emerald-400';
   if (score >= 60) return 'text-blue-600 dark:text-blue-400';
   return 'text-amber-600 dark:text-amber-400';
 }
 
-function getProgressBarColor(score: number): string {
+export function getProgressBarColor(score: number): string {
   if (score >= 80) return 'bg-emerald-500';
   if (score >= 60) return 'bg-blue-500';
   return 'bg-amber-500';

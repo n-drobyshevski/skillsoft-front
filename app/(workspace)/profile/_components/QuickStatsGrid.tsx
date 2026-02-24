@@ -20,6 +20,9 @@ interface QuickStatsGridProps {
 }
 
 /**
+ * @deprecated Replaced by UnifiedHeroBento (stats merged into hero bento card).
+ * Still used by profile/edit. Will be removed once edit page is updated.
+ *
  * Quick Stats Grid - Compact single-card layout
  *
  * Modern flat design with:

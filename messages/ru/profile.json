@@ -5,6 +5,11 @@
     "metaTitle": "Профиль | SkillSoft",
     "metaDescription": "Просмотр результатов тестов, паспорта компетенций и личностного профиля"
   },
+  "bento": {
+    "skillsTab": "Навыки",
+    "personalityTab": "Личность",
+    "profileComplete": "{value}% завершено"
+  },
   "hero": {
     "user": "Пользователь",
     "online": "В сети",
@@ -136,6 +141,7 @@
     "viewDetails": "Подробнее",
     "assessments": "{count, plural, one {# оценка} few {# оценки} many {# оценок} other {# оценок}}",
     "score": "Балл",
+    "rank": "Место",
     "trend": {
       "up": "Рост",
       "down": "Снижение",
@@ -193,15 +199,35 @@
     "viewAll": "Смотреть все",
     "take": "Пройти",
     "view": "Открыть",
+    "countLabel": "{count, plural, one {# доступный тест} few {# доступных теста} other {# доступных тестов}}",
+    "listLabel": "Тесты, доступные вам",
     "permissions": {
       "view": "Просмотр",
       "edit": "Редактирование",
       "manage": "Управление"
     },
+    "goals": {
+      "overview": "Обзор",
+      "jobFit": "Соответствие должности",
+      "teamFit": "Соответствие команде"
+    },
+    "stats": {
+      "competencies": "Компетенции",
+      "duration": "Длительность",
+      "minutes": "мин"
+    },
+    "actions": {
+      "view": "Открыть",
+      "take": "Пройти"
+    },
     "expires": "Истекает {time}",
     "expired": "Доступ истёк",
     "noExpiry": "Без ограничения",
     "empty": {
+      "title": "Нет доступных тестов",
+      "description": "Тесты, которыми с вами поделятся коллеги, появятся здесь"
+    },
+    "emptyState": {
       "title": "Нет доступных тестов",
       "description": "Тесты, которыми с вами поделятся коллеги, появятся здесь"
     },

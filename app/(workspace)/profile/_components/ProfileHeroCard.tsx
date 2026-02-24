@@ -20,6 +20,9 @@ interface ProfileHeroCardProps {
 }
 
 /**
+ * @deprecated Replaced by UnifiedHeroBento in the bento grid redesign.
+ * Kept for reference; will be removed in a future cleanup.
+ *
  * Profile Hero Card - Compact Mobile-First Design
  *
  * A clean, minimal hero card optimized for mobile:

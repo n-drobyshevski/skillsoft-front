@@ -6,6 +6,9 @@ import { Button } from '@/components/ui/button';
 import { Pencil, Settings } from 'lucide-react';
 
 /**
+ * @deprecated Replaced by action buttons embedded in UnifiedHeroBento.
+ * Kept for reference; will be removed in a future cleanup.
+ *
  * MobileProfileActionBar - Sticky bottom action bar for mobile devices
  *
  * Design principles:

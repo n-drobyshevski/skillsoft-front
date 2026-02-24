@@ -5,6 +5,11 @@
     "metaTitle": "Profile | SkillSoft",
     "metaDescription": "View your test results, competency passport, and personality profile"
   },
+  "bento": {
+    "skillsTab": "Top Skills",
+    "personalityTab": "Personality",
+    "profileComplete": "{value}% complete"
+  },
   "hero": {
     "user": "User",
     "online": "Online",
@@ -136,6 +141,7 @@
     "viewDetails": "View details",
     "assessments": "{count, plural, one {# assessment} other {# assessments}}",
     "score": "Score",
+    "rank": "Rank",
     "trend": {
       "up": "Improving",
       "down": "Declining",
@@ -193,15 +199,35 @@
     "viewAll": "View all",
     "take": "Take",
     "view": "View",
+    "countLabel": "{count, plural, one {# shared test} other {# shared tests}}",
+    "listLabel": "Tests shared with you",
     "permissions": {
       "view": "View",
       "edit": "Edit",
       "manage": "Manage"
     },
+    "goals": {
+      "overview": "Overview",
+      "jobFit": "Job Fit",
+      "teamFit": "Team Fit"
+    },
+    "stats": {
+      "competencies": "Competencies",
+      "duration": "Duration",
+      "minutes": "min"
+    },
+    "actions": {
+      "view": "View",
+      "take": "Take"
+    },
     "expires": "Expires {time}",
     "expired": "Access expired",
     "noExpiry": "No expiry",
     "empty": {
+      "title": "No shared tests",
+      "description": "Tests shared with you by colleagues will appear here"
+    },
+    "emptyState": {
       "title": "No shared tests",
       "description": "Tests shared with you by colleagues will appear here"
     },
