@@ -7,6 +7,7 @@ import type {
   BlueprintCompetency,
   LibraryCompetency,
   HealthStatus,
+  Difficulty,
 } from '@/types/blueprint';
 
 // ============================================
@@ -17,6 +18,13 @@ import type {
  * Blueprint store state - manages the core blueprint data
  * including competencies, settings, library, and server state.
  */
+/** Minimal indicator shape stored for the card's "Indicator priority" section. */
+export interface StoredIndicator {
+  id: string;
+  title: string;
+  weight: number;
+}
+
 interface BlueprintStoreState {
   /** Current local state (optimistic, triggers auto-save) */
   state: BlueprintState;
@@ -24,6 +32,10 @@ interface BlueprintStoreState {
   serverState: BlueprintState;
   /** Library competencies with health status */
   libraryCompetencies: LibraryCompetency[];
+  /** Behavioral indicators keyed by competency ID (populated from streamed domain data) */
+  indicatorsByCompetency: Record<string, StoredIndicator[]>;
+  /** Real question inventory per competency from heatmap (competencyId -> difficulty -> count) */
+  inventoryByCompetency: Record<string, Record<Difficulty, number>>;
   /** Template identifier */
   templateId: string;
   /** Template display name */
@@ -110,6 +122,17 @@ interface BlueprintStoreActions {
    * Also enriches canvas competency names/categories from the library data.
    */
   setLibraryCompetencies: (competencies: LibraryCompetency[]) => void;
+
+  /**
+   * Set behavioral indicators map (used by streaming data resolver).
+   */
+  setIndicatorsByCompetency: (map: Record<string, StoredIndicator[]>) => void;
+
+  /**
+   * Set real question inventory data from heatmap.
+   * Also enriches canvas competency questionCount with actual totals.
+   */
+  setInventoryByCompetency: (inventory: Record<string, Record<Difficulty, number>>) => void;
 }
 
 export type BlueprintStore = BlueprintStoreState & BlueprintStoreActions;
@@ -132,6 +155,8 @@ const defaultState: BlueprintStoreState = {
   state: defaultBlueprintState,
   serverState: defaultBlueprintState,
   libraryCompetencies: [],
+  indicatorsByCompetency: {},
+  inventoryByCompetency: {},
   templateId: '',
   templateName: '',
   isReadOnly: false,
@@ -145,12 +170,22 @@ const defaultState: BlueprintStoreState = {
 /**
  * Create a BlueprintCompetency from a LibraryCompetency with default values.
  */
-function toBlueprintCompetency(competency: LibraryCompetency): BlueprintCompetency {
+function toBlueprintCompetency(
+  competency: LibraryCompetency,
+  inventory?: Record<string, Record<Difficulty, number>>,
+): BlueprintCompetency {
+  // Use real inventory count if available, otherwise fall back to library data
+  const counts = inventory?.[competency.id];
+  const questionCount = counts
+    ? Object.values(counts).reduce((sum, n) => sum + n, 0)
+    : competency.questionCount;
+
   return {
     id: competency.id,
     name: competency.name,
     category: competency.category,
-    questionCount: Math.min(competency.questionCount, 5),
+    questionCount,
+    indicatorCount: competency.indicatorCount,
     weight: 1.0,
     difficulty: 'INTERMEDIATE',
   };
@@ -218,17 +253,18 @@ export const useBlueprintStore = create<BlueprintStore>()(
             let enrichedState = initialState;
             if (effectiveLibrary.length > 0) {
               const lookup = new Map(
-                effectiveLibrary.map((c) => [c.id, { name: c.name, category: c.category }])
+                effectiveLibrary.map((c) => [c.id, { name: c.name, category: c.category, indicatorCount: c.indicatorCount }])
               );
               enrichedState = {
                 ...initialState,
                 competencies: initialState.competencies.map((c) => {
                   const enriched = lookup.get(c.id);
-                  if (enriched && (c.name === 'Unknown' || c.category === 'UNKNOWN')) {
+                  if (enriched) {
                     return {
                       ...c,
-                      name: enriched.name || c.name,
-                      category: enriched.category || c.category,
+                      name: (c.name === 'Unknown' ? enriched.name : c.name) || c.name,
+                      category: (c.category === 'UNKNOWN' ? enriched.category : c.category) || c.category,
+                      indicatorCount: c.indicatorCount ?? enriched.indicatorCount,
                     };
                   }
                   return c;
@@ -252,7 +288,7 @@ export const useBlueprintStore = create<BlueprintStore>()(
       },
 
       addCompetency: (competency) => {
-        const { state: currentState } = get();
+        const { state: currentState, inventoryByCompetency } = get();
         const reason = validateAdd(competency, currentState.competencies);
 
         if (reason === 'duplicate') {
@@ -264,7 +300,7 @@ export const useBlueprintStore = create<BlueprintStore>()(
           return;
         }
 
-        const blueprintCompetency = toBlueprintCompetency(competency);
+        const blueprintCompetency = toBlueprintCompetency(competency, inventoryByCompetency);
 
         set(
           (prev) => ({
@@ -281,7 +317,7 @@ export const useBlueprintStore = create<BlueprintStore>()(
       },
 
       insertCompetencyAtIndex: (competency, index) => {
-        const { state: currentState } = get();
+        const { state: currentState, inventoryByCompetency } = get();
         const reason = validateAdd(competency, currentState.competencies);
 
         if (reason === 'duplicate') {
@@ -293,7 +329,7 @@ export const useBlueprintStore = create<BlueprintStore>()(
           return;
         }
 
-        const blueprintCompetency = toBlueprintCompetency(competency);
+        const blueprintCompetency = toBlueprintCompetency(competency, inventoryByCompetency);
 
         set(
           (prev) => {
@@ -442,24 +478,25 @@ export const useBlueprintStore = create<BlueprintStore>()(
       },
 
       setLibraryCompetencies: (competencies) => {
-        // Build a name/category lookup from the incoming competencies
+        // Build a name/category/indicatorCount lookup from the incoming competencies
         const lookup = new Map(
-          competencies.map((c) => [c.id, { name: c.name, category: c.category }])
+          competencies.map((c) => [c.id, { name: c.name, category: c.category, indicatorCount: c.indicatorCount }])
         );
 
         set(
           (prev) => ({
             libraryCompetencies: competencies,
-            // Enrich canvas competency names if they were placeholder "Unknown"
+            // Enrich canvas competency names and indicator counts
             state: {
               ...prev.state,
               competencies: prev.state.competencies.map((c) => {
                 const enriched = lookup.get(c.id);
-                if (enriched && (c.name === 'Unknown' || c.category === 'UNKNOWN')) {
+                if (enriched) {
                   return {
                     ...c,
-                    name: enriched.name || c.name,
-                    category: enriched.category || c.category,
+                    name: (c.name === 'Unknown' ? enriched.name : c.name) || c.name,
+                    category: (c.category === 'UNKNOWN' ? enriched.category : c.category) || c.category,
+                    indicatorCount: c.indicatorCount ?? enriched.indicatorCount,
                   };
                 }
                 return c;
@@ -468,6 +505,41 @@ export const useBlueprintStore = create<BlueprintStore>()(
           }),
           false,
           'setLibraryCompetencies'
+        );
+      },
+
+      setIndicatorsByCompetency: (map) => {
+        set({ indicatorsByCompetency: map }, false, 'setIndicatorsByCompetency');
+      },
+
+      setInventoryByCompetency: (inventory) => {
+        set(
+          (prev) => ({
+            inventoryByCompetency: inventory,
+            // Enrich canvas competency questionCount with real totals
+            state: {
+              ...prev.state,
+              competencies: prev.state.competencies.map((c) => {
+                const counts = inventory[c.id];
+                if (counts) {
+                  const total = Object.values(counts).reduce((sum, n) => sum + n, 0);
+                  return { ...c, questionCount: total };
+                }
+                return c;
+              }),
+            },
+            // Also enrich library competency questionCount
+            libraryCompetencies: prev.libraryCompetencies.map((c) => {
+              const counts = inventory[c.id];
+              if (counts) {
+                const total = Object.values(counts).reduce((sum, n) => sum + n, 0);
+                return { ...c, questionCount: total };
+              }
+              return c;
+            }),
+          }),
+          false,
+          'setInventoryByCompetency'
         );
       },
     })),

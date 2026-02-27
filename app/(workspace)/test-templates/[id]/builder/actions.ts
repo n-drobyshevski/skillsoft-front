@@ -97,11 +97,21 @@ export async function updateBlueprint(
   try {
     const authHeaders = await getAuthHeaders();
 
+    // Build competency weights map (only include non-default weights)
+    const competencyWeights: Record<string, number> = {};
+    for (const c of state.competencies) {
+      if (c.weight !== undefined && c.weight !== 1.0) {
+        competencyWeights[c.id] = c.weight;
+      }
+    }
+    const hasWeights = Object.keys(competencyWeights).length > 0;
+
     const updatePayload = {
       name: state.templateName,
       blueprint: {
         strategy: toBackendStrategy(state.strategy),
         competencyIds: state.competencies.map((c) => c.id),
+        ...(hasWeights && { competencyWeights }),
         adaptivity: state.adaptivity,
         includeBigFive: state.includeBigFive,
         onetSocCode: state.onetSocCode,
@@ -301,11 +311,21 @@ export async function simulateTest(
   try {
     const authHeaders = await getAuthHeaders();
 
+    // Build competency weights map for simulation (only non-default)
+    const simWeights: Record<string, number> = {};
+    for (const c of state.competencies) {
+      if (c.weight !== undefined && c.weight !== 1.0) {
+        simWeights[c.id] = c.weight;
+      }
+    }
+    const hasSimWeights = Object.keys(simWeights).length > 0;
+
     const simulatePayload = {
       templateId: state.templateId,
       blueprint: {
         strategy: toBackendStrategy(state.strategy),
         competencyIds: state.competencies.map((c) => c.id),
+        ...(hasSimWeights && { competencyWeights: simWeights }),
         adaptivity: state.adaptivity,
         includeBigFive: state.includeBigFive,
         onetSocCode: state.onetSocCode,
@@ -478,7 +498,17 @@ export async function fetchInventoryHealth(): Promise<
       );
     }
 
-    const result: InventoryHeatmap = await response.json();
+    // Backend returns { competencyHealth, detailedCounts, summary }
+    // Normalize to frontend InventoryHeatmap shape
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const raw: any = await response.json();
+    const result: InventoryHeatmap = {
+      competencyHealth: raw.competencyHealth ?? {},
+      detailedCounts: raw.detailedCounts ?? {},
+      totalCompetencies: raw.summary?.totalCompetencies ?? 0,
+      healthyCounts: raw.summary?.healthyCount ?? 0,
+      criticalCounts: raw.summary?.criticalCount ?? 0,
+    };
     return { success: true, data: result };
   } catch (error) {
     console.error('fetchInventoryHealth error:', error);

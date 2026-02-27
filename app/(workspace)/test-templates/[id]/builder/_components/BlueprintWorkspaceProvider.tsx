@@ -179,6 +179,7 @@ export function BlueprintWorkspaceProvider({
   const storeSetServerState = useBlueprintStore((s) => s.setServerState);
   const storeRollback = useBlueprintStore((s) => s.rollbackToServerState);
   const storeUpdateLibraryHealth = useBlueprintStore((s) => s.updateLibraryHealth);
+  const storeSetInventory = useBlueprintStore((s) => s.setInventoryByCompetency);
 
   // Simulation store state and actions
   const isSimulating = useSimulationStore((s) => s.isSimulating);
@@ -301,6 +302,20 @@ export function BlueprintWorkspaceProvider({
       const result = await fetchInventoryHealth();
       if (result.success) {
         storeUpdateLibraryHealth(result.data.competencyHealth);
+
+        // Parse detailedCounts ("compId:DIFFICULTY" -> count) into per-competency inventory
+        const inventory: Record<string, Record<string, number>> = {};
+        for (const [key, count] of Object.entries(result.data.detailedCounts)) {
+          const sepIdx = key.lastIndexOf(':');
+          if (sepIdx === -1) continue;
+          const compId = key.substring(0, sepIdx);
+          const difficulty = key.substring(sepIdx + 1);
+          if (!inventory[compId]) {
+            inventory[compId] = { FOUNDATIONAL: 0, INTERMEDIATE: 0, ADVANCED: 0, EXPERT: 0 };
+          }
+          inventory[compId][difficulty] = count;
+        }
+        storeSetInventory(inventory);
       }
     }
     loadHealth();
@@ -415,6 +430,7 @@ function CompetencyResolver({
 }) {
   const competencies = use(competenciesPromise);
   const setLibrary = useBlueprintStore((s) => s.setLibraryCompetencies);
+  const setIndicatorsMap = useBlueprintStore((s) => s.setIndicatorsByCompetency);
   const isInitialized = useBlueprintStore((s) => s._initialized);
   const hasHydrated = useRef(false);
 
@@ -431,21 +447,34 @@ function CompetencyResolver({
       console.warn('[CompetencyResolver] No competencies received — library will be empty');
     }
 
+    // questionCount is initially 0 — enriched with real data when inventory heatmap arrives
+    // via setInventoryByCompetency. Previously this incorrectly counted active indicators.
     const library: LibraryCompetency[] = competencies.map((c) => ({
       id: c.id,
       name: c.name,
       category: c.category,
       description: c.description || '',
-      questionCount:
-        c.behavioralIndicators?.reduce(
-          (sum, bi) => sum + (bi.isActive ? 1 : 0),
-          0
-        ) || 0,
+      questionCount: 0,
+      indicatorCount: c.behavioralIndicators?.filter((bi) => bi.isActive).length ?? 0,
       health: 'HEALTHY' as const,
     }));
 
+    // Build indicators map for expanded card "Indicator priority" section
+    const indicatorsMap: Record<string, import('@/store/blueprint-store').StoredIndicator[]> = {};
+    for (const c of competencies) {
+      const active = c.behavioralIndicators?.filter((bi) => bi.isActive) ?? [];
+      if (active.length > 0) {
+        indicatorsMap[c.id] = active.map((bi) => ({
+          id: bi.id,
+          title: bi.title,
+          weight: Math.round(bi.weight * 100),
+        }));
+      }
+    }
+
     setLibrary(library);
-  }, [competencies, setLibrary, isInitialized]);
+    setIndicatorsMap(indicatorsMap);
+  }, [competencies, setLibrary, setIndicatorsMap, isInitialized]);
 
   return null;
 }

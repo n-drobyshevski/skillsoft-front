@@ -35,6 +35,7 @@ export interface BlueprintCompetency {
   name: string;
   category: string;
   questionCount: number;
+  indicatorCount?: number;
   weight: number;
   difficulty?: Difficulty;
 }
@@ -65,6 +66,7 @@ export interface LibraryCompetency {
   category: string;
   description: string;
   questionCount: number;
+  indicatorCount: number;
   health: HealthStatus;
 }
 
@@ -144,6 +146,8 @@ export interface CompetencySimulationScore {
 
 export interface InventoryHeatmap {
   competencyHealth: Record<string, HealthStatus>;
+  /** Per-competency per-difficulty question counts. Key format: "competencyId:DIFFICULTY" */
+  detailedCounts: Record<string, number>;
   totalCompetencies: number;
   healthyCounts: number;
   criticalCounts: number;
