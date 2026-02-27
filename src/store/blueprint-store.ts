@@ -8,6 +8,7 @@ import type {
   LibraryCompetency,
   HealthStatus,
   Difficulty,
+  IndicatorInventory,
 } from '@/types/blueprint';
 
 // ============================================
@@ -36,6 +37,8 @@ interface BlueprintStoreState {
   indicatorsByCompetency: Record<string, StoredIndicator[]>;
   /** Real question inventory per competency from heatmap (competencyId -> difficulty -> count) */
   inventoryByCompetency: Record<string, Record<Difficulty, number>>;
+  /** Cached indicator-level inventory per competency (lazy-loaded on card expand) */
+  indicatorInventories: Record<string, IndicatorInventory>;
   /** Template identifier */
   templateId: string;
   /** Template display name */
@@ -133,6 +136,12 @@ interface BlueprintStoreActions {
    * Also enriches canvas competency questionCount with actual totals.
    */
   setInventoryByCompetency: (inventory: Record<string, Record<Difficulty, number>>) => void;
+
+  /**
+   * Fetch and cache indicator inventory for a competency.
+   * No-op if already cached. Called when a library card is expanded.
+   */
+  fetchIndicatorInventory: (competencyId: string) => Promise<void>;
 }
 
 export type BlueprintStore = BlueprintStoreState & BlueprintStoreActions;
@@ -157,6 +166,7 @@ const defaultState: BlueprintStoreState = {
   libraryCompetencies: [],
   indicatorsByCompetency: {},
   inventoryByCompetency: {},
+  indicatorInventories: {},
   templateId: '',
   templateName: '',
   isReadOnly: false,
@@ -542,6 +552,32 @@ export const useBlueprintStore = create<BlueprintStore>()(
           'setInventoryByCompetency'
         );
       },
+
+      fetchIndicatorInventory: async (competencyId) => {
+        // Skip if already cached
+        if (get().indicatorInventories[competencyId]) return;
+
+        try {
+          const { fetchIndicatorInventory: fetchAction } = await import(
+            '@/app/(workspace)/test-templates/[id]/builder/actions'
+          );
+          const result = await fetchAction(competencyId);
+          if (result.success) {
+            set(
+              (prev) => ({
+                indicatorInventories: {
+                  ...prev.indicatorInventories,
+                  [competencyId]: result.data,
+                },
+              }),
+              false,
+              'fetchIndicatorInventory'
+            );
+          }
+        } catch (error) {
+          console.error('Failed to fetch indicator inventory:', error);
+        }
+      },
     })),
     {
       name: 'BlueprintStore',
@@ -599,3 +635,10 @@ export const useBlueprintActions = () =>
       updateSettings: s.updateSettings,
     }))
   );
+
+/**
+ * Select cached indicator inventory for a specific competency.
+ * Returns undefined if not yet loaded.
+ */
+export const useIndicatorInventory = (competencyId: string) =>
+  useBlueprintStore((s) => s.indicatorInventories[competencyId]);
