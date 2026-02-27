@@ -49,6 +49,7 @@ import { CompetencyDistribution } from '../utils/transformSimulationToRadar';
 import { SimulationCombinedRadar } from '../components/SimulationCombinedRadar';
 import { JobFitAlignmentCard } from '../JobFitAlignmentCard';
 import { TeamComparisonCard } from '../TeamComparisonCard';
+import { buildONetProfile } from '@/lib/onet-profile-builder';
 
 // ============================================
 // PROPS
@@ -283,6 +284,11 @@ interface TargetedFitInsightsProps {
 function TargetedFitInsights({ result, onetSocCode }: TargetedFitInsightsProps) {
   const competencyData = useMemo(() => extractCompetencyData(result), [result]);
 
+  const jobTitle = useMemo(() => {
+    if (!onetSocCode) return undefined;
+    return buildONetProfile(onetSocCode).occupationTitle;
+  }, [onetSocCode]);
+
   // Generate mock gap data based on simulation results.
   // In a real implementation this would come from an O*NET API comparison.
   const gaps = competencyData
@@ -304,7 +310,7 @@ function TargetedFitInsights({ result, onetSocCode }: TargetedFitInsightsProps) 
   return (
     <JobFitAlignmentCard
       onetSocCode={onetSocCode}
-      jobTitle={onetSocCode ? 'Job Role' : undefined}
+      jobTitle={jobTitle}
       coveragePercentage={result.simulatedScore ?? 72}
       gaps={gaps}
       strengths={strengths}

@@ -1,14 +1,15 @@
 "use client";
 
+import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, Target, AlertTriangle, Crown, Calendar, Activity } from "lucide-react";
+import { Users, Target, Crown, Calendar, Activity, LayoutDashboard, Clock } from "lucide-react";
 import type { ManagedTeam, ManagedTeamProfile } from "@/types/team";
 import TeamMembersTab from "./TeamMembersTab";
-import TeamProfileTab from "./TeamProfileTab";
-import TeamGapsTab from "./TeamGapsTab";
-import TeamStatsGrid from "./TeamStatsGrid";
+import TeamOverviewTab from "./TeamOverviewTab";
+import TeamCompetenciesTab from "./TeamCompetenciesTab";
+import TeamActivityTab from "./TeamActivityTab";
 
 interface TeamStats {
   memberCount: number;
@@ -49,6 +50,7 @@ function InfoRow({
 
 export default function TeamDetailClient({ team, profile, stats }: TeamDetailClientProps) {
   const t = useTranslations('teams.detail');
+  const [activeTab, setActiveTab] = useState("overview");
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
@@ -131,35 +133,50 @@ export default function TeamDetailClient({ team, profile, stats }: TeamDetailCli
 
       {/* Main Content Area */}
       <div className="lg:col-span-9" role="main" aria-label="Team content">
-        <Tabs defaultValue="members" className="w-full">
-          <TabsList className="w-full grid grid-cols-3 h-11 p-1 bg-muted/50">
-            <TabsTrigger value="members" className="gap-2 data-[state=active]:shadow-sm min-h-[44px] sm:min-h-0 touch-manipulation">
-              <Users className="h-4 w-4 hidden sm:block" aria-hidden="true" />
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="w-full grid grid-cols-4 h-11 p-1 bg-muted/50">
+            <TabsTrigger value="overview" className="gap-1.5 text-xs sm:text-sm data-[state=active]:shadow-sm min-h-[44px] sm:min-h-0 touch-manipulation">
+              <LayoutDashboard className="h-4 w-4 hidden sm:block shrink-0" aria-hidden="true" />
+              {t('tabs.overview')}
+            </TabsTrigger>
+            <TabsTrigger value="members" className="gap-1.5 text-xs sm:text-sm data-[state=active]:shadow-sm min-h-[44px] sm:min-h-0 touch-manipulation">
+              <Users className="h-4 w-4 hidden sm:block shrink-0" aria-hidden="true" />
               {t('tabs.members')}
             </TabsTrigger>
-            <TabsTrigger value="profile" className="gap-2 data-[state=active]:shadow-sm min-h-[44px] sm:min-h-0 touch-manipulation">
-              <Target className="h-4 w-4 hidden sm:block" aria-hidden="true" />
-              {t('tabs.profile')}
+            <TabsTrigger value="competencies" className="gap-1.5 text-xs sm:text-sm data-[state=active]:shadow-sm min-h-[44px] sm:min-h-0 touch-manipulation">
+              <Target className="h-4 w-4 hidden sm:block shrink-0" aria-hidden="true" />
+              <span className="sm:hidden">{t('tabs.competenciesMobile')}</span>
+              <span className="hidden sm:inline">{t('tabs.competencies')}</span>
             </TabsTrigger>
-            <TabsTrigger value="gaps" className="gap-2 data-[state=active]:shadow-sm min-h-[44px] sm:min-h-0 touch-manipulation">
-              <AlertTriangle className="h-4 w-4 hidden sm:block" aria-hidden="true" />
-              {t('tabs.gaps')}
+            <TabsTrigger value="activity" className="gap-1.5 text-xs sm:text-sm data-[state=active]:shadow-sm min-h-[44px] sm:min-h-0 touch-manipulation">
+              <Clock className="h-4 w-4 hidden sm:block shrink-0" aria-hidden="true" />
+              {t('tabs.activity')}
             </TabsTrigger>
           </TabsList>
+
+          {/* Overview Tab */}
+          <TabsContent value="overview" className="mt-6">
+            <TeamOverviewTab
+              team={team}
+              profile={profile}
+              stats={stats}
+              onTabChange={setActiveTab}
+            />
+          </TabsContent>
 
           {/* Members Tab */}
           <TabsContent value="members" className="mt-6">
             <TeamMembersTab team={team} />
           </TabsContent>
 
-          {/* Profile Tab */}
-          <TabsContent value="profile" className="mt-6">
-            <TeamProfileTab profile={profile} />
+          {/* Competencies Tab */}
+          <TabsContent value="competencies" className="mt-6">
+            <TeamCompetenciesTab profile={profile} />
           </TabsContent>
 
-          {/* Gaps Tab */}
-          <TabsContent value="gaps" className="mt-6">
-            <TeamGapsTab profile={profile} />
+          {/* Activity Tab */}
+          <TabsContent value="activity" className="mt-6">
+            <TeamActivityTab team={team} />
           </TabsContent>
         </Tabs>
       </div>

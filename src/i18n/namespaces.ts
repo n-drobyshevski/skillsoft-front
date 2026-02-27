@@ -118,6 +118,7 @@ export const ADMIN_NAMESPACES = [
   ...SHARED_NAMESPACES,
   'users',
   'teams',
+  'help',
 ] as const;
 
 /**

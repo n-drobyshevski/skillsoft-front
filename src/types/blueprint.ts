@@ -81,6 +81,21 @@ export interface QuestionSummary {
   simulatedAnswer?: string;
 }
 
+export type WarningCode =
+  | 'BENCHMARK_LOOKUP_FALLBACK'
+  | 'INDICATOR_EXHAUSTED_BORROWING'
+  | 'FUZZY_MATCH_PASSPORT'
+  | 'FUZZY_MATCH_ONET'
+  | 'NO_INDICATORS_FOR_GAPS'
+  | 'NO_ACTIVE_QUESTIONS_INDICATOR'
+  | 'NO_ACTIVE_INDICATORS_COMPETENCY'
+  | 'NO_ACTIVE_INDICATORS_COMPETENCIES'
+  | 'NO_ONET_SOC_CODE'
+  | 'NO_ONET_PROFILE'
+  | 'INVENTORY_CRITICAL'
+  | 'INVENTORY_LIMITED'
+  | 'GENERIC';
+
 export interface InventoryWarning {
   competencyId?: string | null;
   competencyName?: string | null;
@@ -89,8 +104,12 @@ export interface InventoryWarning {
   severity?: HealthStatus;
   /** Warning severity: INFO, WARNING, ERROR */
   level?: 'INFO' | 'WARNING' | 'ERROR';
-  /** Human-readable warning message */
+  /** Machine-readable warning code for tooltip lookup */
+  code?: WarningCode | null;
+  /** Human-readable warning message (English fallback) */
   message?: string;
+  /** Dynamic parameters for i18n message interpolation */
+  params?: Record<string, string> | null;
 }
 
 export interface SimulationResult {

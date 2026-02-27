@@ -100,9 +100,11 @@
     "created": "Created {date}",
     "noLeader": "No leader assigned",
     "tabs": {
+      "overview": "Overview",
       "members": "Members",
-      "profile": "Profile",
-      "gaps": "Skill Gaps"
+      "competencies": "Competencies",
+      "competenciesMobile": "Skills",
+      "activity": "Activity"
     },
     "actions": {
       "edit": "Edit",
@@ -119,7 +121,8 @@
       "avgSaturation": "Avg. Saturation",
       "saturation": "Saturation",
       "skillGaps": "Skill Gaps",
-      "gaps": "Gaps"
+      "gaps": "Gaps",
+      "competenciesTracked": "Tracked"
     },
     "sections": {
       "statistics": "Statistics",
@@ -130,6 +133,55 @@
       "createdBy": "Created By",
       "createdAt": "Created At",
       "activatedAt": "Activated At"
+    },
+    "overview": {
+      "criticalGaps": {
+        "title": "Critical Gaps",
+        "viewAll": "View all",
+        "noGaps": "No critical gaps \u2014 team coverage looks good!"
+      },
+      "personality": {
+        "title": "Team Personality",
+        "noData": "No personality data available yet"
+      },
+      "recentActivity": {
+        "title": "Recent Activity",
+        "viewAll": "View all",
+        "noActivity": "No activity recorded yet"
+      }
+    },
+    "competencies": {
+      "title": "Competency Analysis",
+      "saturationHeader": "Competency Saturation",
+      "toggle": {
+        "all": "All",
+        "allFull": "All Competencies",
+        "gaps": "Gaps",
+        "gapsFull": "Gaps Only"
+      }
+    },
+    "activity": {
+      "title": "Team Activity",
+      "events": {
+        "memberJoined": "{name} joined the team",
+        "teamCreated": "Team was created",
+        "teamActivated": "Team was activated",
+        "teamArchived": "Team was archived",
+        "leaderSet": "{name} was promoted to leader"
+      },
+      "today": "Today",
+      "yesterday": "Yesterday",
+      "empty": {
+        "title": "No Activity",
+        "description": "Team activity will appear here as changes are made."
+      }
+    },
+    "help": {
+      "metricsOverview": "Key indicators showing team composition and competency coverage at a glance.",
+      "criticalGaps": "Competencies where team saturation falls below 30%. These represent the most urgent hiring or training needs.",
+      "teamPersonality": "Average Big Five personality trait scores across all team members who have completed assessments.",
+      "competencyToggle": "Switch between viewing all competencies or only those below the gap threshold.",
+      "saturation": "Percentage of team members who demonstrate proficiency in each competency, based on assessment results."
     },
     "members": {
       "role": {

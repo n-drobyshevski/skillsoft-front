@@ -190,7 +190,37 @@
     "warnings": {
       "inventoryWarnings": "Inventory Warnings",
       "assemblyWarnings": "Assembly Diagnostics",
-      "questions": "{count} questions"
+      "questions": "{count} questions",
+      "messages": {
+        "NO_ONET_SOC_CODE": "No O*NET SOC code provided in blueprint configuration.",
+        "NO_ONET_PROFILE": "No O*NET profile found for SOC code: {socCode}",
+        "BENCHMARK_LOOKUP_FALLBACK": "Competency name lookup matched only {matched}/{total} benchmarks. Falling back to full active competency scan.",
+        "FUZZY_MATCH_PASSPORT": "Fuzzy match for passport: benchmark \"{benchmark}\" matched to \"{match}\".",
+        "FUZZY_MATCH_ONET": "Fuzzy match: O*NET competency \"{onetName}\" matched to \"{match}\".",
+        "NO_INDICATORS_FOR_GAPS": "No indicators found for any gap competencies. Benchmark names could not be resolved to internal competencies.",
+        "NO_ACTIVE_QUESTIONS_INDICATOR": "No active questions found for indicator {indicatorId}.",
+        "INDICATOR_EXHAUSTED_BORROWING": "Indicator {indicatorId} exhausted: borrowing {count} questions from sibling indicators of competency {competencyId} (flagged for psychometric review).",
+        "NO_ACTIVE_INDICATORS_COMPETENCY": "No active behavioral indicators found for competency {competencyId}.",
+        "NO_ACTIVE_INDICATORS_COMPETENCIES": "{count} competencies have no active behavioral indicators.",
+        "INVENTORY_CRITICAL": "Critical: only {available} questions available for {competencyName} ({difficulty}), need {required}.",
+        "INVENTORY_LIMITED": "Limited questions ({available}) for {competencyName} ({difficulty}), recommended {recommended}."
+      },
+      "help": {
+        "BENCHMARK_LOOKUP_FALLBACK": "O*NET benchmark names don't match your internal competency names. The system scanned all active competencies as a fallback. To fix: align competency names with O*NET titles or add O*NET standard codes.",
+        "INDICATOR_EXHAUSTED_BORROWING": "This indicator ran out of unique questions, so the system borrowed from sibling indicators within the same competency. This may reduce measurement precision. Add more questions to the affected indicator.",
+        "FUZZY_MATCH_PASSPORT": "The candidate's passport used a different name than the O*NET benchmark. Fuzzy matching bridged the gap. Align competency names for exact matching.",
+        "FUZZY_MATCH_ONET": "An O*NET competency was matched via fuzzy logic instead of an exact name match. Add the O*NET standard code to the internal competency for precise mapping.",
+        "NO_INDICATORS_FOR_GAPS": "No O*NET benchmarks could be resolved to internal competencies with indicators. Verify your library has competencies matching the O*NET job profile with active behavioral indicators.",
+        "NO_ACTIVE_QUESTIONS_INDICATOR": "This behavioral indicator has no active questions in the bank. Create and activate questions for it so the assessment can measure it properly.",
+        "NO_ACTIVE_INDICATORS_COMPETENCY": "This competency has no active behavioral indicators. Add indicators so questions can be selected for it.",
+        "NO_ACTIVE_INDICATORS_COMPETENCIES": "Multiple competencies have no active behavioral indicators. Review your competency library and add indicators with questions.",
+        "NO_ONET_SOC_CODE": "Job Fit strategy requires an O*NET SOC code. Go to template Settings and enter a valid code (e.g., 15-1252.00).",
+        "NO_ONET_PROFILE": "No O*NET profile exists for this SOC code. Verify the code at onetonline.org.",
+        "INVENTORY_CRITICAL": "Very few questions available for this competency — not enough for a reliable assessment. Add more questions at different difficulty levels.",
+        "INVENTORY_LIMITED": "Fewer questions than recommended. The assessment will still work, but adding more questions would improve measurement reliability."
+      },
+      "showMore": "Show {count} more",
+      "showLess": "Show less"
     },
     "error": {
       "title": "Simulator Error",
