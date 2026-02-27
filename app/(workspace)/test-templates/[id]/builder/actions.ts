@@ -49,6 +49,8 @@ export type {
   InventoryHeatmap,
   SampleQuestionResponse,
   ActionResponse,
+  IndicatorQuestionStats,
+  IndicatorInventory,
 } from '@/types/blueprint';
 
 // Import types needed by server action implementations below
@@ -62,6 +64,7 @@ import type {
   InventoryHeatmap,
   SampleQuestionResponse,
   ActionResponse,
+  IndicatorInventory,
 } from '@/types/blueprint';
 
 // Import strategy mapping utilities (non-server-action exports)
@@ -515,6 +518,49 @@ export async function fetchInventoryHealth(): Promise<
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Failed to fetch inventory health',
+    };
+  }
+}
+
+/**
+ * Fetch per-indicator question inventory for a competency.
+ * Used by the library panel's expandable card to show indicator-level diagnostics.
+ */
+export async function fetchIndicatorInventory(
+  competencyId: string
+): Promise<ActionResponse<IndicatorInventory>> {
+  try {
+    const authHeaders = await getAuthHeaders();
+
+    const response = await fetch(
+      `${getApiBaseUrl()}/v1/competencies/${competencyId}/indicator-inventory`,
+      {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          ...authHeaders,
+        },
+        next: {
+          revalidate: 300,
+          tags: [`indicator-inventory:${competencyId}`],
+        },
+      }
+    );
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(
+        errorData.message || `Indicator inventory fetch failed: ${response.status}`
+      );
+    }
+
+    const data: IndicatorInventory = await response.json();
+    return { success: true, data };
+  } catch (error) {
+    console.error('fetchIndicatorInventory error:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to fetch indicator inventory',
     };
   }
 }
