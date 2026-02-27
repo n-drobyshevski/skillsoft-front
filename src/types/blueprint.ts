@@ -161,3 +161,21 @@ export interface SampleQuestionResponse {
 export type ActionResponse<T> =
   | { success: true; data: T }
   | { success: false; error: string };
+
+// ============================================
+// INDICATOR INVENTORY (Library Panel Expansion)
+// ============================================
+
+export interface IndicatorQuestionStats {
+  indicatorId: string;
+  title: string;
+  weight: number;
+  isActive: boolean;
+  totalQuestions: number;
+  questionsByDifficulty: Record<Difficulty, number>;
+}
+
+export interface IndicatorInventory {
+  competencyId: string;
+  indicators: IndicatorQuestionStats[];
+}
