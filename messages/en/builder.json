@@ -59,7 +59,29 @@
       "emotional_intelligence": "Emotional Intelligence",
       "time_management": "Time Management"
     },
-    "questionsCount": "{count} questions"
+    "questionsCount": "{count} questions",
+    "indicators": "Indicators ({count})",
+    "indicatorQuestions": "{count}q",
+    "difficultyLabels": {
+      "foundational": "F",
+      "intermediate": "I",
+      "advanced": "A",
+      "expert": "E"
+    },
+    "risk": {
+      "none": "Sufficient questions",
+      "low": "May borrow from siblings",
+      "high": "No questions — fully borrows"
+    },
+    "borrowingRisk": "Borrowing risk",
+    "riskNone": "None",
+    "riskLow": "Low",
+    "riskModerate": "Moderate",
+    "riskHigh": "High",
+    "indicatorsMayBorrow": "{count, plural, one {# indicator} other {# indicators}} may need to borrow",
+    "loading": "Loading indicator data...",
+    "expandCard": "Show indicator details for {name}",
+    "collapseCard": "Hide indicator details for {name}"
   },
   "card": {
     "dragToReorder": "Hold and drag to reorder",

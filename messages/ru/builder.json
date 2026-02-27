@@ -59,7 +59,29 @@
       "emotional_intelligence": "Эмоциональный интеллект",
       "time_management": "Управление временем"
     },
-    "questionsCount": "{count} вопросов"
+    "questionsCount": "{count} вопросов",
+    "indicators": "Индикаторы ({count})",
+    "indicatorQuestions": "{count}в",
+    "difficultyLabels": {
+      "foundational": "Б",
+      "intermediate": "С",
+      "advanced": "П",
+      "expert": "Э"
+    },
+    "risk": {
+      "none": "Достаточно вопросов",
+      "low": "Возможно заимствование",
+      "high": "Нет вопросов — полное заимствование"
+    },
+    "borrowingRisk": "Риск заимствования",
+    "riskNone": "Нет",
+    "riskLow": "Низкий",
+    "riskModerate": "Средний",
+    "riskHigh": "Высокий",
+    "indicatorsMayBorrow": "{count, plural, one {# индикатор может заимствовать} few {# индикатора могут заимствовать} other {# индикаторов могут заимствовать}}",
+    "loading": "Загрузка данных...",
+    "expandCard": "Показать детали индикаторов для {name}",
+    "collapseCard": "Скрыть детали индикаторов для {name}"
   },
   "card": {
     "dragToReorder": "Удерживайте и перетащите для изменения порядка",
