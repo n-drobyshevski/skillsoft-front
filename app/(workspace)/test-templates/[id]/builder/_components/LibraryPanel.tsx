@@ -20,12 +20,15 @@ import {
   Lightbulb,
   Clock,
   Target,
+  ChevronDown,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useTranslations } from 'next-intl';
 import { useBlueprintWorkspace } from './BlueprintWorkspaceProvider';
 import { LibraryCompetency, HealthStatus } from '../actions';
 import type { ActiveDragData } from './BuilderDndProvider';
+import { useBlueprintStore } from '@/store/blueprint-store';
+import { IndicatorExpansion } from './IndicatorExpansion';
 
 // ============================================
 // TYPES
@@ -116,6 +119,9 @@ interface CompetencyItemProps {
   onAdd: () => void;
   /** Enable drag-and-drop (desktop only, disabled for mobile sheet) */
   enableDrag?: boolean;
+  isExpanded?: boolean;
+  onToggleExpand?: () => void;
+  questionsPerCompetency?: number;
 }
 
 /**
@@ -126,6 +132,9 @@ function DraggableCompetencyItem({
   competency,
   isSelected,
   onAdd,
+  isExpanded,
+  onToggleExpand,
+  questionsPerCompetency,
 }: Omit<CompetencyItemProps, 'enableDrag'>) {
   const tLib = useTranslations('builder.library');
   const isCritical = competency.health === 'CRITICAL';
@@ -151,55 +160,75 @@ function DraggableCompetencyItem({
     <div
       ref={setNodeRef}
       className={cn(
-        'group flex items-center gap-2 p-2.5 rounded-lg border transition-all duration-150',
+        'group flex flex-col rounded-lg border transition-all duration-150',
         'border-l-[3px]',
         competency.health === 'CRITICAL' && 'border-l-red-500 dark:border-l-red-400',
         competency.health === 'MODERATE' && 'border-l-amber-500 dark:border-l-amber-400',
         competency.health === 'HEALTHY' && 'border-l-emerald-500 dark:border-l-emerald-400',
         isDisabled
           ? 'opacity-50 cursor-not-allowed bg-muted/30'
-          : 'cursor-grab active:cursor-grabbing hover:bg-muted/50 hover:shadow-sm',
+          : 'cursor-pointer hover:bg-muted/50 hover:shadow-sm',
         isSelected && 'ring-1 ring-primary/40 bg-primary/5',
         isDragging && 'opacity-50 ring-2 ring-primary/40'
       )}
-      {...attributes}
-      {...listeners}
+      onClick={() => !isDisabled && onToggleExpand?.()}
     >
-      <GripVertical
-        className={cn(
-          'h-4 w-4 text-muted-foreground/40 shrink-0 transition-opacity',
-          isDisabled ? 'opacity-0' : 'group-hover:text-muted-foreground/80'
-        )}
-      />
-      <CategoryIcon category={competency.category} />
-      <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium leading-tight truncate">{competency.name}</p>
-        <p className="text-[11px] text-muted-foreground truncate">
-          {tLib(`categories.${competency.category.toLowerCase()}` as Parameters<typeof tLib>[0])}
-        </p>
-      </div>
-      <HealthIndicator health={competency.health} />
-      {!isDisabled && (
-        <Button
-          variant="ghost"
-          size="icon"
-          className={cn(
-            'min-h-[44px] min-w-[44px] rounded-lg',
-            'md:h-8 md:w-8 md:min-h-0 md:min-w-0',
-            'md:opacity-60 md:group-hover:opacity-100',
-            'active:scale-95 active:bg-primary/15',
-            'hover:bg-primary/10 hover:text-primary',
-            'transition-all duration-150'
-          )}
-          onClick={(e) => {
-            e.stopPropagation();
-            onAdd();
-          }}
-          onPointerDown={(e) => e.stopPropagation()}
-          aria-label={tLib('addToCanvas', { name: competency.name })}
+      {/* Main row */}
+      <div className="flex items-center gap-2 p-2.5">
+        {/* Grip handle — only this area initiates drag */}
+        <div
+          className={cn('shrink-0 cursor-grab active:cursor-grabbing', isDisabled && 'opacity-0')}
+          {...attributes}
+          {...listeners}
         >
-          <Plus className="h-4 w-4" />
-        </Button>
+          <GripVertical className="h-4 w-4 text-muted-foreground/40 group-hover:text-muted-foreground/80 transition-opacity" />
+        </div>
+        <CategoryIcon category={competency.category} />
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-medium leading-tight truncate">{competency.name}</p>
+          <p className="text-[11px] text-muted-foreground truncate">
+            {tLib(`categories.${competency.category.toLowerCase()}` as Parameters<typeof tLib>[0])}
+          </p>
+        </div>
+        <ChevronDown
+          className={cn(
+            'h-3 w-3 text-muted-foreground/50 transition-transform duration-200 shrink-0',
+            isExpanded && 'rotate-180'
+          )}
+        />
+        <HealthIndicator health={competency.health} />
+        {!isDisabled && (
+          <Button
+            variant="ghost"
+            size="icon"
+            className={cn(
+              'min-h-[44px] min-w-[44px] rounded-lg',
+              'md:h-8 md:w-8 md:min-h-0 md:min-w-0',
+              'md:opacity-60 md:group-hover:opacity-100',
+              'active:scale-95 active:bg-primary/15',
+              'hover:bg-primary/10 hover:text-primary',
+              'transition-all duration-150'
+            )}
+            onClick={(e) => {
+              e.stopPropagation();
+              onAdd();
+            }}
+            onPointerDown={(e) => e.stopPropagation()}
+            aria-label={tLib('addToCanvas', { name: competency.name })}
+          >
+            <Plus className="h-4 w-4" />
+          </Button>
+        )}
+      </div>
+
+      {/* Expansion panel */}
+      {isExpanded && (
+        <div className="w-full border-t border-border/50 mt-1.5 pt-1">
+          <IndicatorExpansion
+            competencyId={competency.id}
+            questionsPerCompetency={questionsPerCompetency ?? 5}
+          />
+        </div>
       )}
     </div>
   );
@@ -213,6 +242,9 @@ function StaticCompetencyItem({
   competency,
   isSelected,
   onAdd,
+  isExpanded,
+  onToggleExpand,
+  questionsPerCompetency,
 }: Omit<CompetencyItemProps, 'enableDrag'>) {
   const tLib = useTranslations('builder.library');
   const isCritical = competency.health === 'CRITICAL';
@@ -221,45 +253,65 @@ function StaticCompetencyItem({
   return (
     <div
       className={cn(
-        'group flex items-center gap-2 p-2.5 rounded-lg border transition-all duration-150',
+        'group flex flex-col rounded-lg border transition-all duration-150',
         'border-l-[3px]',
         competency.health === 'CRITICAL' && 'border-l-red-500 dark:border-l-red-400',
         competency.health === 'MODERATE' && 'border-l-amber-500 dark:border-l-amber-400',
         competency.health === 'HEALTHY' && 'border-l-emerald-500 dark:border-l-emerald-400',
         isDisabled
           ? 'opacity-50 cursor-not-allowed bg-muted/30'
-          : 'hover:bg-muted/50 hover:shadow-sm',
+          : 'cursor-pointer hover:bg-muted/50 hover:shadow-sm',
         isSelected && 'ring-1 ring-primary/40 bg-primary/5'
       )}
+      onClick={() => !isDisabled && onToggleExpand?.()}
     >
-      <CategoryIcon category={competency.category} />
-      <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium leading-tight truncate">{competency.name}</p>
-        <p className="text-[11px] text-muted-foreground truncate">
-          {tLib(`categories.${competency.category.toLowerCase()}` as Parameters<typeof tLib>[0])}
-        </p>
-      </div>
-      <HealthIndicator health={competency.health} />
-      {!isDisabled && (
-        <Button
-          variant="ghost"
-          size="icon"
+      {/* Main row */}
+      <div className="flex items-center gap-2 p-2.5">
+        <CategoryIcon category={competency.category} />
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-medium leading-tight truncate">{competency.name}</p>
+          <p className="text-[11px] text-muted-foreground truncate">
+            {tLib(`categories.${competency.category.toLowerCase()}` as Parameters<typeof tLib>[0])}
+          </p>
+        </div>
+        <ChevronDown
           className={cn(
-            'min-h-[44px] min-w-[44px] rounded-lg',
-            'md:h-8 md:w-8 md:min-h-0 md:min-w-0',
-            'md:opacity-60 md:group-hover:opacity-100',
-            'active:scale-95 active:bg-primary/15',
-            'hover:bg-primary/10 hover:text-primary',
-            'transition-all duration-150'
+            'h-3 w-3 text-muted-foreground/50 transition-transform duration-200 shrink-0',
+            isExpanded && 'rotate-180'
           )}
-          onClick={(e) => {
-            e.stopPropagation();
-            onAdd();
-          }}
-          aria-label={tLib('addToCanvas', { name: competency.name })}
-        >
-          <Plus className="h-4 w-4" />
-        </Button>
+        />
+        <HealthIndicator health={competency.health} />
+        {!isDisabled && (
+          <Button
+            variant="ghost"
+            size="icon"
+            className={cn(
+              'min-h-[44px] min-w-[44px] rounded-lg',
+              'md:h-8 md:w-8 md:min-h-0 md:min-w-0',
+              'md:opacity-60 md:group-hover:opacity-100',
+              'active:scale-95 active:bg-primary/15',
+              'hover:bg-primary/10 hover:text-primary',
+              'transition-all duration-150'
+            )}
+            onClick={(e) => {
+              e.stopPropagation();
+              onAdd();
+            }}
+            aria-label={tLib('addToCanvas', { name: competency.name })}
+          >
+            <Plus className="h-4 w-4" />
+          </Button>
+        )}
+      </div>
+
+      {/* Expansion panel */}
+      {isExpanded && (
+        <div className="w-full border-t border-border/50 mt-1.5 pt-1">
+          <IndicatorExpansion
+            competencyId={competency.id}
+            questionsPerCompetency={questionsPerCompetency ?? 5}
+          />
+        </div>
       )}
     </div>
   );
@@ -273,6 +325,9 @@ function CompetencyItem({
   isSelected,
   onAdd,
   enableDrag = false,
+  isExpanded,
+  onToggleExpand,
+  questionsPerCompetency,
 }: CompetencyItemProps) {
   if (enableDrag) {
     return (
@@ -280,6 +335,9 @@ function CompetencyItem({
         competency={competency}
         isSelected={isSelected}
         onAdd={onAdd}
+        isExpanded={isExpanded}
+        onToggleExpand={onToggleExpand}
+        questionsPerCompetency={questionsPerCompetency}
       />
     );
   }
@@ -289,6 +347,9 @@ function CompetencyItem({
       competency={competency}
       isSelected={isSelected}
       onAdd={onAdd}
+      isExpanded={isExpanded}
+      onToggleExpand={onToggleExpand}
+      questionsPerCompetency={questionsPerCompetency}
     />
   );
 }
@@ -350,10 +411,12 @@ function CategoryGroup({
 
 type VirtualRow =
   | { type: 'header'; category: string; count: number }
-  | { type: 'item'; competency: LibraryCompetency };
+  | { type: 'item'; competency: LibraryCompetency; isExpanded: boolean };
 
 const ROW_HEIGHT_HEADER = 36;
 const ROW_HEIGHT_ITEM = 64;
+const ROW_HEIGHT_EXPANDED_BASE = 64 + 32 + 32; // card + header + footer
+const ROW_HEIGHT_PER_INDICATOR = 40;
 
 export function LibraryPanel({ onAdd }: LibraryPanelProps) {
   const t = useTranslations('builder.library');
@@ -366,6 +429,24 @@ export function LibraryPanel({ onAdd }: LibraryPanelProps) {
   const enableDrag = !onAdd;
 
   const selectedIds = state.competencies.map((c) => c.id);
+
+  // Accordion expansion state — only one card expanded at a time
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+  const fetchIndicatorInventory = useBlueprintStore((s) => s.fetchIndicatorInventory);
+  const indicatorInventories = useBlueprintStore((s) => s.indicatorInventories);
+
+  const handleToggleExpand = useCallback(
+    (competencyId: string) => {
+      setExpandedId((prev) => {
+        const newId = prev === competencyId ? null : competencyId;
+        if (newId) {
+          fetchIndicatorInventory(newId);
+        }
+        return newId;
+      });
+    },
+    [fetchIndicatorInventory]
+  );
 
   // Filter competencies by search
   const filteredCompetencies = libraryCompetencies.filter(
@@ -392,21 +473,34 @@ export function LibraryPanel({ onAdd }: LibraryPanelProps) {
     for (const category of sortedCategories) {
       rows.push({ type: 'header', category, count: grouped[category].length });
       for (const comp of grouped[category]) {
-        rows.push({ type: 'item', competency: comp });
+        rows.push({ type: 'item', competency: comp, isExpanded: expandedId === comp.id });
       }
     }
 
     return rows;
-  }, [filteredCompetencies]);
+  }, [filteredCompetencies, expandedId]);
 
   // Virtualizer for efficient rendering
   const virtualizer = useVirtualizer({
     count: virtualRows.length,
     getScrollElement: () => scrollContainerRef.current,
-    estimateSize: (index) =>
-      virtualRows[index].type === 'header' ? ROW_HEIGHT_HEADER : ROW_HEIGHT_ITEM,
+    estimateSize: (index) => {
+      const row = virtualRows[index];
+      if (row.type === 'header') return ROW_HEIGHT_HEADER;
+      if (row.isExpanded) {
+        const inv = indicatorInventories[row.competency.id];
+        const indicatorCount = inv?.indicators.length ?? 3;
+        return ROW_HEIGHT_EXPANDED_BASE + indicatorCount * ROW_HEIGHT_PER_INDICATOR;
+      }
+      return ROW_HEIGHT_ITEM;
+    },
     overscan: 8,
   });
+
+  // Re-measure the virtualizer when expansion state or loaded inventories change
+  React.useEffect(() => {
+    virtualizer.measure();
+  }, [expandedId, indicatorInventories, virtualizer]);
 
   // Handle add (click or mobile) - drag is now handled by useDraggable
   const handleAdd = useCallback(
@@ -498,6 +592,11 @@ export function LibraryPanel({ onAdd }: LibraryPanelProps) {
                     isSelected={selectedIds.includes(row.competency.id)}
                     onAdd={() => handleAdd(row.competency)}
                     enableDrag={enableDrag}
+                    isExpanded={row.isExpanded}
+                    onToggleExpand={() => handleToggleExpand(row.competency.id)}
+                    questionsPerCompetency={
+                      state.competencies.find((c) => c.id === row.competency.id)?.questionCount ?? 5
+                    }
                   />
                 </div>
               );
