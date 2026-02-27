@@ -172,6 +172,7 @@ function DraggableCompetencyItem({
         isDragging && 'opacity-50 ring-2 ring-primary/40'
       )}
       onClick={() => !isDisabled && onToggleExpand?.()}
+      aria-label={isExpanded ? tLib('collapseCard', { name: competency.name }) : tLib('expandCard', { name: competency.name })}
     >
       {/* Main row */}
       <div className="flex items-center gap-2 p-2.5">
@@ -264,6 +265,7 @@ function StaticCompetencyItem({
         isSelected && 'ring-1 ring-primary/40 bg-primary/5'
       )}
       onClick={() => !isDisabled && onToggleExpand?.()}
+      aria-label={isExpanded ? tLib('collapseCard', { name: competency.name }) : tLib('expandCard', { name: competency.name })}
     >
       {/* Main row */}
       <div className="flex items-center gap-2 p-2.5">
@@ -351,53 +353,6 @@ function CompetencyItem({
       onToggleExpand={onToggleExpand}
       questionsPerCompetency={questionsPerCompetency}
     />
-  );
-}
-
-// ============================================
-// CATEGORY GROUP
-// ============================================
-
-interface CategoryGroupProps {
-  category: string;
-  competencies: LibraryCompetency[];
-  selectedIds: string[];
-  onAdd: (competency: LibraryCompetency) => void;
-  /** Enable drag-and-drop (desktop only) */
-  enableDrag?: boolean;
-}
-
-function CategoryGroup({
-  category,
-  competencies,
-  selectedIds,
-  onAdd,
-  enableDrag = false,
-}: CategoryGroupProps) {
-  const t = useTranslations('builder.library');
-  return (
-    <div className="space-y-2">
-      <div className="flex items-center gap-2 px-1">
-        <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
-          {t(`categories.${category.toLowerCase()}` as Parameters<typeof t>[0])}
-        </span>
-        <span className="text-[10px] text-muted-foreground/60">
-          ({competencies.length})
-        </span>
-      </div>
-
-      <div className="space-y-1.5">
-        {competencies.map((comp) => (
-          <CompetencyItem
-            key={comp.id}
-            competency={comp}
-            isSelected={selectedIds.includes(comp.id)}
-            onAdd={() => onAdd(comp)}
-            enableDrag={enableDrag}
-          />
-        ))}
-      </div>
-    </div>
   );
 }
 
