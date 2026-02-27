@@ -93,8 +93,8 @@ async function TeamDetailData({ teamId }: { teamId: string }) {
       />
 
       {/* Main Content */}
-      <div className="flex-1 px-4 py-6 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-7xl space-y-6">
+      <div className="flex-1 p-4 sm:p-6 lg:p-8">
+        <div className="mx-auto max-w-[1600px] w-full space-y-6">
           {/* Mobile Stats Grid */}
           <TeamStatsGrid stats={stats} className="lg:hidden" />
 
@@ -114,10 +114,10 @@ export default async function TeamDetailPage({ params }: TeamDetailPageProps) {
   const { teamId } = await params;
 
   return (
-    <div className="flex flex-1 flex-col min-h-0">
+    <main id="main-content" className="flex flex-1 flex-col min-h-0">
       <Suspense fallback={<Loading />}>
         <TeamDetailData teamId={teamId} />
       </Suspense>
-    </div>
+    </main>
   );
 }

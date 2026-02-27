@@ -151,11 +151,11 @@ export default function DashboardMainColumn({
 
         {/* Category Distribution Chart */}
         <motion.div variants={fadeInUp}>
-          <Card>
+          <Card className="hover:shadow-md hover:border-primary/30 hover:-translate-y-px transition-all duration-200 motion-reduce:transition-none">
             <CardHeader className="pb-2">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-lg bg-muted flex items-center justify-center">
+                  <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-muted flex items-center justify-center">
                     <BarChart3 className="w-4 h-4 text-muted-foreground" />
                   </div>
                   <div>
@@ -163,12 +163,12 @@ export default function DashboardMainColumn({
                     <CardDescription className="text-xs">{t('byCategory')}</CardDescription>
                   </div>
                 </div>
-                <Link href="/hr/competencies">
-                  <Button variant="ghost" size="sm" className="text-xs gap-1.5">
+                <Button asChild variant="ghost" size="sm" className="text-xs gap-1.5 min-h-[44px] sm:min-h-0">
+                  <Link href="/hr/competencies">
                     {t('viewAll')}
                     <ArrowRight className="w-3 h-3" />
-                  </Button>
-                </Link>
+                  </Link>
+                </Button>
               </div>
             </CardHeader>
             <CardContent className="pt-2">
@@ -191,10 +191,10 @@ export default function DashboardMainColumn({
         {/* Progress & Standards Row */}
         <motion.div variants={fadeInUp} className="grid sm:grid-cols-2 gap-4">
           {/* Framework Progress */}
-          <Card>
+          <Card className="hover:shadow-md hover:border-primary/30 hover:-translate-y-px transition-all duration-200 motion-reduce:transition-none">
             <CardHeader className="pb-3">
               <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-lg bg-muted flex items-center justify-center">
+                <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-muted flex items-center justify-center">
                   <TrendingUp className="w-4 h-4 text-muted-foreground" />
                 </div>
                 <CardTitle className="text-base">{t('frameworkProgress')}</CardTitle>
@@ -204,14 +204,14 @@ export default function DashboardMainColumn({
               <div className="space-y-2">
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">{t('indicatorCoverage')}</span>
-                  <span className="font-medium">{Math.round(indicatorProgress)}%</span>
+                  <span className="font-medium tabular-nums">{Math.round(indicatorProgress)}%</span>
                 </div>
                 <Progress value={indicatorProgress} className="h-1.5" />
               </div>
               <div className="space-y-2">
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">{t('questionCoverage')}</span>
-                  <span className="font-medium">{Math.round(questionProgress)}%</span>
+                  <span className="font-medium tabular-nums">{Math.round(questionProgress)}%</span>
                 </div>
                 <Progress value={questionProgress} className="h-1.5" />
               </div>
@@ -222,10 +222,10 @@ export default function DashboardMainColumn({
           </Card>
 
           {/* International Standards */}
-          <Card>
+          <Card className="hover:shadow-md hover:border-primary/30 hover:-translate-y-px transition-all duration-200 motion-reduce:transition-none">
             <CardHeader className="pb-3">
               <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-lg bg-muted flex items-center justify-center">
+                <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-muted flex items-center justify-center">
                   <Globe2 className="w-4 h-4 text-muted-foreground" />
                 </div>
                 <div>

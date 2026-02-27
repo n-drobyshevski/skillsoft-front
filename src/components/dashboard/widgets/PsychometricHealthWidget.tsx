@@ -447,8 +447,8 @@ export function PsychometricHealthWidget({
   if (!data) {
     return (
       <Card className={cn('overflow-hidden', className)}>
-        <CardHeader className="flex flex-row items-center gap-2 pb-2">
-          <div className="w-9 h-9 rounded-lg bg-muted flex items-center justify-center">
+        <CardHeader className="flex flex-row items-center gap-3 pb-2">
+          <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-muted flex items-center justify-center">
             <Activity className="w-4 h-4 text-muted-foreground" />
           </div>
           <CardTitle className="text-base">{t('psychometricHealth')}</CardTitle>
@@ -496,8 +496,8 @@ export function PsychometricHealthWidget({
       />
 
       <CardHeader className="relative flex flex-row items-center justify-between pb-2">
-        <div className="flex items-center gap-2">
-          <div className="w-9 h-9 rounded-lg bg-muted flex items-center justify-center">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-muted flex items-center justify-center">
             <Activity className="w-4 h-4 text-muted-foreground" />
           </div>
           <div>
@@ -514,12 +514,12 @@ export function PsychometricHealthWidget({
             </Badge>
           </div>
         </div>
-        <Link href="/psychometrics">
-          <Button variant="ghost" size="sm" className="h-7 px-2">
+        <Button asChild variant="ghost" size="sm" className="h-7 px-2 min-h-[44px] sm:min-h-0">
+          <Link href="/psychometrics">
             <ChevronRight className="w-4 h-4" />
             <span className="sr-only">{t('viewAnalytics')}</span>
-          </Button>
-        </Link>
+          </Link>
+        </Button>
       </CardHeader>
 
       <CardContent className="relative space-y-4">
@@ -632,8 +632,8 @@ function PsychometricHealthWidgetSkeleton({
 }) {
   return (
     <Card className={cn('overflow-hidden', className)}>
-      <CardHeader className="flex flex-row items-center gap-2 pb-2">
-        <Skeleton className="w-9 h-9 rounded-lg" />
+      <CardHeader className="flex flex-row items-center gap-3 pb-2">
+        <Skeleton className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg" />
         <div className="space-y-1">
           <Skeleton className="h-4 w-32" />
           <Skeleton className="h-3 w-16" />

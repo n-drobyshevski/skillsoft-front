@@ -148,6 +148,7 @@ export default function StartTestDriveButton({
         variant="outline"
         className={cn(
           "border-amber-500/30 text-amber-600 hover:bg-amber-500/10 hover:text-amber-500 hover:border-amber-500/50 transition-all group",
+          "min-h-[44px] sm:min-h-0 touch-manipulation active:scale-[0.98] motion-reduce:transition-none",
           fullWidth && "w-full",
           className
         )}
@@ -155,12 +156,12 @@ export default function StartTestDriveButton({
       >
         {isLoading ? (
           <>
-            <Loader2 className="h-4 w-4 animate-spin mr-1.5" />
+            <Loader2 className="h-4 w-4 animate-spin mr-1.5 shrink-0" aria-hidden="true" />
             <span className="hidden sm:inline">{t('testDrive.loading')}</span>
           </>
         ) : (
           <>
-            <Eye className="h-3.5 w-3.5 sm:mr-1.5 transition-transform group-hover:scale-110" />
+            <Eye className="h-3.5 w-3.5 sm:mr-1.5 transition-transform group-hover:scale-110 shrink-0" aria-hidden="true" />
             <span className="hidden sm:inline font-medium">{t('testDrive.button')}</span>
             <span className="sm:hidden font-medium">{t('testDrive.buttonShort')}</span>
           </>

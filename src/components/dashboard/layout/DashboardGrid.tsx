@@ -38,7 +38,7 @@ export function DashboardGrid({ children, className }: DashboardGridProps) {
   return (
     <div
       className={cn(
-        'grid gap-4 sm:gap-6',
+        'grid gap-2.5 sm:gap-3',
         'grid-cols-2', // Mobile: 2 columns
         'md:grid-cols-8', // Tablet: 8 columns
         'lg:grid-cols-12', // Desktop: 12 columns

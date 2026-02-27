@@ -60,21 +60,21 @@ function StatusBadge({ status, label }: { status: TeamStatus; label: string }) {
   const config = {
     success: {
       icon: CheckCircle,
-      bg: "bg-emerald-50 dark:bg-emerald-900/20",
+      bg: "bg-emerald-100 dark:bg-emerald-900/30",
       text: "text-emerald-700 dark:text-emerald-400",
       border: "border-emerald-200 dark:border-emerald-800",
       dot: "bg-emerald-500",
     },
     default: {
       icon: FileEdit,
-      bg: "bg-amber-50 dark:bg-amber-900/20",
+      bg: "bg-amber-100 dark:bg-amber-900/30",
       text: "text-amber-700 dark:text-amber-400",
       border: "border-amber-200 dark:border-amber-800",
       dot: "bg-amber-500 animate-pulse",
     },
     secondary: {
       icon: Archive,
-      bg: "bg-gray-50 dark:bg-gray-900/20",
+      bg: "bg-gray-100 dark:bg-gray-900/30",
       text: "text-gray-700 dark:text-gray-400",
       border: "border-gray-200 dark:border-gray-800",
       dot: "bg-gray-500",
@@ -127,24 +127,22 @@ export default function TeamHeroSection({ team, statusLabel }: TeamHeroSectionPr
   };
 
   return (
-    <div className="relative">
-      {/* Gradient Background */}
-      <div className="absolute inset-0 h-32 sm:h-40 lg:h-48 bg-gradient-to-br from-primary/20 via-primary/10 to-violet-500/10 dark:from-primary/10 dark:via-primary/5 dark:to-violet-500/5" />
-      <div className="absolute inset-0 h-32 sm:h-40 lg:h-48 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-transparent via-transparent to-background/80" />
+    <div className="relative" role="region" aria-label="Team overview">
+      {/* Subtle Background */}
+      <div className="absolute inset-0 h-32 sm:h-40 lg:h-48 bg-muted/30 dark:bg-muted/10" />
 
       {/* Header Content */}
       <div className="relative px-4 pt-6 pb-4 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-7xl">
+        <div className="mx-auto max-w-[1600px] w-full">
           {/* Profile Card */}
-          <Card className="border-0 shadow-lg bg-card/95 backdrop-blur-sm">
+          <Card className="shadow-sm bg-card/95 backdrop-blur-sm">
             <CardContent className="p-4 sm:p-6">
               <div className="flex flex-col sm:flex-row gap-4 sm:gap-6">
                 {/* Avatar Section */}
                 <div className="flex flex-col items-center sm:items-start gap-3">
-                  <div className="relative group">
-                    <div className="absolute -inset-1 bg-gradient-to-br from-primary/50 to-violet-500/50 rounded-full opacity-0 group-hover:opacity-100 blur transition-opacity" />
-                    <Avatar className="relative h-20 w-20 sm:h-24 sm:w-24 lg:h-28 lg:w-28 border-4 border-background shadow-xl">
-                      <AvatarFallback className="text-xl sm:text-2xl lg:text-3xl font-bold bg-gradient-to-br from-primary to-violet-500 text-white">
+                  <div className="relative">
+                    <Avatar className="relative h-16 w-16 sm:h-20 sm:w-20 border-2 border-background shadow-sm">
+                      <AvatarFallback className="text-lg sm:text-xl font-bold bg-muted text-muted-foreground">
                         {initials}
                       </AvatarFallback>
                     </Avatar>
@@ -159,7 +157,7 @@ export default function TeamHeroSection({ team, statusLabel }: TeamHeroSectionPr
                 <div className="flex-1 min-w-0 text-center sm:text-left">
                   {/* Name and Status */}
                   <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
-                    <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight truncate">
+                    <h1 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight truncate">
                       {team.name}
                     </h1>
                     <StatusBadge status={team.status} label={statusLabel} />
@@ -175,19 +173,19 @@ export default function TeamHeroSection({ team, statusLabel }: TeamHeroSectionPr
                   {/* Meta Info */}
                   <div className="flex flex-wrap items-center justify-center sm:justify-start gap-x-4 gap-y-1 mt-3 text-sm text-muted-foreground">
                     <span className="flex items-center gap-1.5">
-                      <Users className="h-4 w-4" />
+                      <Users className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
                       <span>
                         {t('memberCount', { count: team.memberCount })}
                       </span>
                     </span>
                     {team.leader && (
                       <span className="flex items-center gap-1.5">
-                        <Crown className="h-4 w-4 text-amber-500" />
+                        <Crown className="h-3.5 w-3.5 shrink-0 text-amber-500 dark:text-amber-400" aria-hidden="true" />
                         <span>{team.leader.fullName}</span>
                       </span>
                     )}
                     <span className="flex items-center gap-1.5">
-                      <Calendar className="h-4 w-4" />
+                      <Calendar className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
                       <span>{t('created', { date: formatDate(team.createdAt) })}</span>
                     </span>
                   </div>
@@ -195,18 +193,18 @@ export default function TeamHeroSection({ team, statusLabel }: TeamHeroSectionPr
                   {/* Quick Stats Row (visible on larger screens) */}
                   <div className="hidden lg:flex items-center gap-6 mt-4 pt-4 border-t">
                     <div className="flex items-center gap-2">
-                      <div className="p-1.5 rounded-lg bg-primary/10">
-                        <Users className="h-4 w-4 text-primary" />
+                      <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center">
+                        <Users className="w-4 h-4 text-primary" aria-hidden="true" />
                       </div>
                       <div>
-                        <p className="text-lg font-bold">{team.memberCount}</p>
+                        <p className="text-lg font-bold tabular-nums">{team.memberCount}</p>
                         <p className="text-xs text-muted-foreground">{t('stats.members')}</p>
                       </div>
                     </div>
                     <Separator orientation="vertical" className="h-10" />
                     <div className="flex items-center gap-2">
-                      <div className="p-1.5 rounded-lg bg-amber-100 dark:bg-amber-900/30">
-                        <Crown className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+                      <div className="w-9 h-9 rounded-lg bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center">
+                        <Crown className="w-4 h-4 text-amber-600 dark:text-amber-400" aria-hidden="true" />
                       </div>
                       <div>
                         <p className="text-lg font-bold">
@@ -217,8 +215,8 @@ export default function TeamHeroSection({ team, statusLabel }: TeamHeroSectionPr
                     </div>
                     <Separator orientation="vertical" className="h-10" />
                     <div className="flex items-center gap-2">
-                      <div className="p-1.5 rounded-lg bg-violet-100 dark:bg-violet-900/30">
-                        <Calendar className="h-4 w-4 text-violet-600 dark:text-violet-400" />
+                      <div className="w-9 h-9 rounded-lg bg-violet-100 dark:bg-violet-900/30 flex items-center justify-center">
+                        <Calendar className="w-4 h-4 text-violet-600 dark:text-violet-400" aria-hidden="true" />
                       </div>
                       <div>
                         <p className="text-lg font-bold">{formatRelativeTime(team.createdAt)}</p>
@@ -230,27 +228,27 @@ export default function TeamHeroSection({ team, statusLabel }: TeamHeroSectionPr
 
                 {/* Action Buttons */}
                 <div className="flex sm:flex-col gap-2 justify-center">
-                  <Button variant="default" size="sm" asChild className="shadow-sm">
+                  <Button variant="default" size="sm" asChild className="shadow-xs min-h-[44px] sm:min-h-0 touch-manipulation">
                     <Link href={`/admin/teams/${team.id}/edit`}>
-                      <Edit className="h-4 w-4 mr-2" />
+                      <Edit className="h-4 w-4 mr-2" aria-hidden="true" />
                       <span className="hidden sm:inline">{t('actions.edit')}</span>
                     </Link>
                   </Button>
 
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="outline" size="sm" disabled={isPending}>
+                      <Button variant="outline" size="sm" disabled={isPending} className="min-h-[44px] sm:min-h-0 touch-manipulation">
                         {isPending ? (
-                          <Loader2 className="h-4 w-4 animate-spin sm:mr-2" />
+                          <Loader2 className="h-4 w-4 animate-spin sm:mr-2" aria-hidden="true" />
                         ) : (
-                          <MoreHorizontal className="h-4 w-4 sm:mr-2" />
+                          <MoreHorizontal className="h-4 w-4 sm:mr-2" aria-hidden="true" />
                         )}
                         <span className="hidden sm:inline">{t('actions.more')}</span>
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="w-48">
                       <DropdownMenuItem onClick={() => setIsAddMemberOpen(true)}>
-                        <UserPlus className="h-4 w-4 mr-2" />
+                        <UserPlus className="h-4 w-4 mr-2" aria-hidden="true" />
                         {t('actions.addMembers')}
                       </DropdownMenuItem>
 
@@ -259,7 +257,7 @@ export default function TeamHeroSection({ team, statusLabel }: TeamHeroSectionPr
                           className="text-emerald-600 dark:text-emerald-400"
                           onClick={() => setConfirmActivate(true)}
                         >
-                          <Play className="h-4 w-4 mr-2" />
+                          <Play className="h-4 w-4 mr-2" aria-hidden="true" />
                           {t('actions.activate')}
                         </DropdownMenuItem>
                       )}
@@ -271,7 +269,7 @@ export default function TeamHeroSection({ team, statusLabel }: TeamHeroSectionPr
                           className="text-destructive"
                           onClick={() => setConfirmArchive(true)}
                         >
-                          <Archive className="h-4 w-4 mr-2" />
+                          <Archive className="h-4 w-4 mr-2" aria-hidden="true" />
                           {t('actions.archive')}
                         </DropdownMenuItem>
                       )}

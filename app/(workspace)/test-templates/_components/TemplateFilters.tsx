@@ -181,13 +181,13 @@ export default function TemplateFilters({
       {/* Search Row */}
       <div className="flex items-center gap-2">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none shrink-0" aria-hidden="true" />
           <Input
             type="text"
             placeholder={t('filters.searchPlaceholder')}
             value={searchQuery}
             onChange={handleSearchChange}
-            className="pl-9 pr-8 h-9 text-sm"
+            className="pl-9 pr-8 min-h-[44px] sm:min-h-0 sm:h-9 text-sm"
             aria-label={t('filters.searchPlaceholder')}
           />
           {searchQuery && (
@@ -226,9 +226,9 @@ export default function TemplateFilters({
                   onFocus={() => handleTabHover(tab)}
                   className={cn(
                     'inline-flex flex-none items-center gap-1.5 px-3 sm:px-4 py-2 sm:py-1.5',
-                    'min-h-[40px] sm:min-h-[36px]',
+                    'min-h-[44px] sm:min-h-[36px]',
                     'data-[state=active]:bg-background data-[state=active]:shadow-sm',
-                    'text-xs sm:text-sm font-medium transition-all whitespace-nowrap rounded-md',
+                    'text-xs sm:text-sm font-medium transition-all whitespace-nowrap rounded-md touch-manipulation',
                     isPending && 'opacity-70'
                   )}
                 >
@@ -237,7 +237,7 @@ export default function TemplateFilters({
                   <Badge
                     variant="secondary"
                     className={cn(
-                      'min-w-5 sm:min-w-6 h-5 justify-center text-[11px] sm:text-xs px-1 sm:px-1.5 rounded-sm',
+                      'min-w-5 sm:min-w-6 h-5 justify-center text-xs-safe sm:text-xs px-1 sm:px-1.5 rounded-sm tabular-nums',
                       activeTab === tab && 'bg-primary text-primary-foreground'
                     )}
                   >

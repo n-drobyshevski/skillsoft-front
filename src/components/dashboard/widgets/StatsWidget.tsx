@@ -94,7 +94,7 @@ export function StatsWidget({
     return (
       <Card className={cn('h-full', className)}>
         <CardHeader className="flex flex-row items-center gap-3 p-4 pb-2">
-          <Skeleton className="w-10 h-10 rounded-xl" />
+          <Skeleton className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg" />
           <Skeleton className="h-4 w-24" />
         </CardHeader>
         <CardContent className="p-4 pt-0">
@@ -108,9 +108,9 @@ export function StatsWidget({
   const content = (
     <Card
       className={cn(
-        'h-full transition-all duration-200 group',
+        'h-full transition-all duration-200 motion-reduce:transition-none group',
         variantStyles[variant],
-        href && 'cursor-pointer hover:shadow-md active:scale-[0.99]',
+        href && 'cursor-pointer hover:shadow-md hover:border-primary/30 hover:-translate-y-px active:scale-[0.99]',
         className
       )}
     >
@@ -118,13 +118,13 @@ export function StatsWidget({
         <div className="flex items-center gap-3">
           <div
             className={cn(
-              'w-10 h-10 rounded-xl flex items-center justify-center shrink-0',
+              'w-8 h-8 sm:w-9 sm:h-9 rounded-lg flex items-center justify-center shrink-0',
               iconStyles[variant]
             )}
           >
-            <Icon className="w-5 h-5" aria-hidden="true" />
+            <Icon className="w-4 h-4" aria-hidden="true" />
           </div>
-          <CardTitle className="text-sm font-medium line-clamp-2">
+          <CardTitle className="text-base font-semibold leading-none line-clamp-2">
             {title}
             <span className="sr-only">, value is {value}</span>
           </CardTitle>

@@ -159,7 +159,7 @@ export default function TestTemplatesGrid({
         <div
           ref={gridRef}
           id="templates-grid"
-          className="grid gap-2 sm:gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+          className="grid gap-2.5 sm:gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
           role="grid"
           aria-label={t('grid.templateCount', { count: filteredTemplates.length })}
         >

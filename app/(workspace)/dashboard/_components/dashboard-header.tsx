@@ -1,6 +1,6 @@
 'use client';
 
-import { motion } from 'motion/react';
+import { motion, useReducedMotion } from 'motion/react';
 import { Button } from '@/components/ui/button';
 import { Play, Plus } from 'lucide-react';
 import Link from 'next/link';
@@ -23,6 +23,7 @@ interface DashboardHeaderProps {
 export default function DashboardHeader({ currentUser }: DashboardHeaderProps) {
   const activeLens = useActiveLens();
   const isUserLens = activeLens === 'user';
+  const prefersReducedMotion = useReducedMotion();
   const t = useTranslations('dashboard');
 
   const isAdmin = currentUser?.role === 'ADMIN';
@@ -37,9 +38,9 @@ export default function DashboardHeader({ currentUser }: DashboardHeaderProps) {
 
   return (
     <motion.header
-      initial={{ opacity: 0, y: -8 }}
+      initial={prefersReducedMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: -8 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4 }}
+      transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.4 }}
       className="flex flex-col gap-4"
     >
       <div className="space-y-1">
@@ -55,19 +56,19 @@ export default function DashboardHeader({ currentUser }: DashboardHeaderProps) {
       {/* Action buttons - stack on mobile, row on larger screens */}
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
         {isEditor && !isUserLens && (
-          <Link href="/hr/competencies/new" className="w-full sm:w-auto">
-            <Button variant="outline" size="default" className="w-full sm:w-auto gap-2 min-h-11 justify-center">
+          <Button asChild variant="outline" size="default" className="w-full sm:w-auto gap-2 min-h-11 justify-center">
+            <Link href="/hr/competencies/new">
               <Plus className="w-4 h-4" />
               <span>{t('addCompetency')}</span>
-            </Button>
-          </Link>
+            </Link>
+          </Button>
         )}
-        <Link href="/test-templates" className="w-full sm:w-auto">
-          <Button size="default" className="w-full sm:w-auto gap-2 min-h-11 justify-center">
+        <Button asChild size="default" className="w-full sm:w-auto gap-2 min-h-11 justify-center">
+          <Link href="/test-templates">
             <Play className="w-4 h-4" />
             <span>{isUserLens ? t('browseAssessments') : t('takeAssessment')}</span>
-          </Button>
-        </Link>
+          </Link>
+        </Button>
       </div>
     </motion.header>
   );

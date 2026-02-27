@@ -19,15 +19,16 @@ export function TemplatesPageHeader({ canCreate }: TemplatesPageHeaderProps) {
     <PageHeader
       title={t('title')}
       description={t('selectTemplate')}
+      variant="dashboard"
     >
       <div className="flex items-center gap-2 w-full sm:w-auto">
         <Link href="/test-templates/history" className="flex-1 sm:flex-none">
           <Button
             variant="outline"
             size="sm"
-            className="w-full sm:w-auto h-9 gap-1.5"
+            className="w-full sm:w-auto min-h-[44px] sm:min-h-0 sm:h-9 gap-1.5 touch-manipulation active:scale-[0.98] transition-all duration-150"
           >
-            <History className="h-4 w-4" />
+            <History className="h-4 w-4 shrink-0" aria-hidden="true" />
             <span className="hidden sm:inline">{t('myResults')}</span>
             <span className="sm:hidden">{t('results')}</span>
           </Button>
@@ -36,9 +37,9 @@ export function TemplatesPageHeader({ canCreate }: TemplatesPageHeaderProps) {
           <Link href="/test-templates/new" className="flex-1 sm:flex-none">
             <Button
               size="sm"
-              className="w-full sm:w-auto h-9 gap-1.5"
+              className="w-full sm:w-auto min-h-[44px] sm:min-h-0 sm:h-9 gap-1.5 touch-manipulation active:scale-[0.98] transition-all duration-150"
             >
-              <Plus className="h-4 w-4" />
+              <Plus className="h-4 w-4 shrink-0" aria-hidden="true" />
               <span className="hidden sm:inline">{t('newTemplate')}</span>
               <span className="sm:hidden">{tCommon('create')}</span>
             </Button>

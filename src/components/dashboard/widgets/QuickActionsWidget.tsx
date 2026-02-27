@@ -150,8 +150,8 @@ export function QuickActionsWidget({
   return (
     <Card className={cn('h-full', className)}>
       <CardHeader className="pb-2">
-        <div className="flex items-center gap-2">
-          <div className="w-9 h-9 rounded-lg bg-muted flex items-center justify-center">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-muted flex items-center justify-center">
             <Zap className="w-4 h-4 text-muted-foreground" />
           </div>
           <CardTitle className="text-base">{t('quickActions')}</CardTitle>
@@ -184,7 +184,7 @@ function ActionRow({
       <div
         className="flex items-center gap-3 p-3 -mx-3 rounded-lg hover:bg-muted/50 group cursor-pointer min-h-[48px] touch-manipulation hover:translate-x-0.5 active:scale-[0.99] transition-all duration-200 motion-reduce:transition-none"
       >
-        <div className="w-9 h-9 rounded-lg bg-muted flex items-center justify-center shrink-0">
+        <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-muted flex items-center justify-center shrink-0">
           <Icon className="w-4 h-4 text-muted-foreground" />
         </div>
         <div className="flex-1 min-w-0">
@@ -206,8 +206,8 @@ function QuickActionsWidgetSkeleton({ className }: { className?: string }) {
   return (
     <Card className={cn('h-full animate-pulse', className)}>
       <CardHeader className="pb-2">
-        <div className="flex items-center gap-2">
-          <Skeleton className="w-9 h-9 rounded-lg" />
+        <div className="flex items-center gap-3">
+          <Skeleton className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg" />
           <Skeleton className="h-4 w-24" />
         </div>
       </CardHeader>

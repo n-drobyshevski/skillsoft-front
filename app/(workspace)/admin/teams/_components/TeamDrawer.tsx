@@ -6,14 +6,12 @@ import { useTranslations } from "next-intl";
 import {
   Sheet,
   SheetContent,
-  SheetHeader,
   SheetTitle,
   SheetDescription,
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Separator } from "@/components/ui/separator";
 import {
   ManagedTeamSummary,
   TeamStatus,
@@ -21,16 +19,19 @@ import {
   getTeamStatusBadgeVariant,
 } from "@/types/team";
 import { useFormattedDates } from "@/hooks/useFormattedDates";
+import { useIsMobile } from "@/hooks/use-mobile";
 import {
   Users,
   Calendar,
-  ExternalLink,
   Crown,
   CheckCircle,
   FileEdit,
   Archive,
   Play,
-  UserPlus,
+  Layers,
+  FileText,
+  Pencil,
+  ChevronRight,
 } from "lucide-react";
 
 interface TeamDrawerProps {
@@ -41,30 +42,18 @@ interface TeamDrawerProps {
 
 export default function TeamDrawer({ open, onOpenChange, team }: TeamDrawerProps) {
   const t = useTranslations('teams');
-  const { formatDate, formatRelativeTime } = useFormattedDates();
-
-  const getStatusStyles = (status: TeamStatus) => {
-    const variant = getTeamStatusBadgeVariant(status);
-    switch (variant) {
-      case 'success':
-        return "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400";
-      case 'secondary':
-        return "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400";
-      default:
-        return "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400";
-    }
-  };
+  const tCommon = useTranslations('common');
+  const { formatDate } = useFormattedDates();
+  const isMobile = useIsMobile();
 
   const getStatusIcon = (status: TeamStatus) => {
     switch (status) {
-      case TeamStatus.DRAFT:
-        return <FileEdit className="h-3.5 w-3.5" />;
       case TeamStatus.ACTIVE:
-        return <CheckCircle className="h-3.5 w-3.5" />;
+        return <CheckCircle className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />;
       case TeamStatus.ARCHIVED:
-        return <Archive className="h-3.5 w-3.5" />;
+        return <Archive className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />;
       default:
-        return <FileEdit className="h-3.5 w-3.5" />;
+        return <FileEdit className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />;
     }
   };
 
@@ -78,123 +67,162 @@ export default function TeamDrawer({ open, onOpenChange, team }: TeamDrawerProps
   };
 
   const statusKey = getTeamStatusKey(team.status);
+  const statusVariant = getTeamStatusBadgeVariant(team.status);
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="w-full sm:max-w-md overflow-y-auto">
-        <SheetHeader className="pb-4">
-          <div className="flex items-start gap-4">
-            <Avatar className="h-16 w-16 border-2 border-background shadow-md">
-              <AvatarFallback className="bg-linear-to-br from-primary/20 to-primary/10 text-primary text-xl font-bold">
+      <SheetContent
+        className={`${
+          isMobile
+            ? "w-full max-w-full sm:max-w-full"
+            : "sm:max-w-lg"
+        } p-0 flex flex-col gap-0 border-l border-border/50`}
+        style={{
+          WebkitOverflowScrolling: 'touch',
+          paddingBottom: 'env(safe-area-inset-bottom)',
+        }}
+      >
+        {/* Header */}
+        <div className={`${isMobile ? "px-4 py-3" : "px-5 py-4"} border-b border-border/40`}>
+          <div className="flex items-start gap-3 pr-8">
+            <Avatar className="h-10 w-10 shrink-0">
+              <AvatarFallback className="bg-primary/10 text-primary text-sm font-bold">
                 {getTeamInitials(team.name)}
               </AvatarFallback>
             </Avatar>
             <div className="flex-1 min-w-0 space-y-1">
-              <SheetTitle className="text-xl">{team.name}</SheetTitle>
-              <Badge className={`${getStatusStyles(team.status)} gap-1.5`}>
-                {getStatusIcon(team.status)}
-                {t(`status.${statusKey}`)}
-              </Badge>
+              <SheetTitle className="text-base font-semibold leading-tight line-clamp-2 text-foreground">
+                {team.name}
+              </SheetTitle>
+              <SheetDescription className="text-xs text-muted-foreground">
+                {t('drawer.overview')}
+              </SheetDescription>
             </div>
           </div>
-          {team.description && (
-            <SheetDescription className="text-left pt-2">
-              {team.description}
-            </SheetDescription>
-          )}
-        </SheetHeader>
 
-        <Separator className="my-4" />
-
-        {/* Team Details */}
-        <div className="space-y-4">
-          <h4 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
-            {t('drawer.details')}
-          </h4>
-
-          <div className="grid gap-3">
-            {/* Members Count */}
-            <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
-              <div className="flex items-center gap-2 text-sm">
-                <Users className="h-4 w-4 text-muted-foreground" />
-                <span>{t('drawer.members')}</span>
-              </div>
-              <span className="font-semibold">{team.memberCount}</span>
-            </div>
-
-            {/* Leader */}
-            {team.leader && (
-              <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
-                <div className="flex items-center gap-2 text-sm">
-                  <Crown className="h-4 w-4 text-amber-500" />
-                  <span>{t('drawer.leader')}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Avatar className="h-6 w-6">
-                    {team.leader.imageUrl && (
-                      <AvatarImage src={team.leader.imageUrl} alt={team.leader.fullName} />
-                    )}
-                    <AvatarFallback className="text-xs">
-                      {team.leader.fullName.split(' ').map(n => n[0]).join('').toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                  <span className="font-medium text-sm">{team.leader.fullName}</span>
-                </div>
-              </div>
-            )}
-
-            {/* Created Date */}
-            <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
-              <div className="flex items-center gap-2 text-sm">
-                <Calendar className="h-4 w-4 text-muted-foreground" />
-                <span>{t('drawer.created')}</span>
-              </div>
-              <span className="text-sm">{formatDate(team.createdAt)}</span>
-            </div>
+          {/* Status Badge */}
+          <div className="flex items-center gap-1.5 flex-wrap mt-3">
+            <Badge
+              variant={statusVariant === 'success' ? 'default' : 'secondary'}
+              className="h-5 text-[11px] px-1.5 font-medium gap-1"
+            >
+              {getStatusIcon(team.status)}
+              {t(`status.${statusKey}`)}
+            </Badge>
+            <Badge
+              variant="outline"
+              className="h-5 text-[11px] px-1.5 font-medium tabular-nums"
+            >
+              <Users className="h-3 w-3 mr-0.5" aria-hidden="true" />
+              {team.memberCount}
+            </Badge>
           </div>
         </div>
 
-        <Separator className="my-4" />
+        {/* Scrollable Content */}
+        <div className="flex-1 overflow-y-auto">
+          <div className={`${isMobile ? "px-4 py-4" : "px-5 py-5"} space-y-5`}>
+            {/* Description Section */}
+            {team.description && (
+              <section className="space-y-2" role="region" aria-label={t('drawer.description')}>
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <FileText className="h-3.5 w-3.5" aria-hidden="true" />
+                  <h3 className="text-xs font-medium uppercase tracking-wide">{t('drawer.description')}</h3>
+                </div>
+                <p className="text-sm leading-relaxed text-foreground/90 pl-5">
+                  {team.description}
+                </p>
+              </section>
+            )}
 
-        {/* Actions */}
-        <div className="space-y-3">
-          <h4 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
-            {t('drawer.actions')}
-          </h4>
+            {/* Details Section */}
+            <section className="space-y-2" role="region" aria-label={t('drawer.details')}>
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <Layers className="h-3.5 w-3.5" aria-hidden="true" />
+                <h3 className="text-xs font-medium uppercase tracking-wide">{t('drawer.details')}</h3>
+              </div>
+              <dl className="space-y-1 pl-5">
+                {/* Leader */}
+                {team.leader && (
+                  <div className="flex items-center justify-between py-2 px-2 -mx-2 rounded-lg hover:bg-muted/50 transition-colors duration-200">
+                    <dt className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <Crown className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400 shrink-0" aria-hidden="true" />
+                      {t('drawer.leader')}
+                    </dt>
+                    <dd className="flex items-center gap-2">
+                      <Avatar className="h-5 w-5">
+                        {team.leader.imageUrl && (
+                          <AvatarImage src={team.leader.imageUrl} alt={team.leader.fullName} />
+                        )}
+                        <AvatarFallback className="text-[9px]">
+                          {team.leader.fullName.split(' ').map(n => n[0]).join('').toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                      <span className="text-sm font-medium">{team.leader.fullName}</span>
+                    </dd>
+                  </div>
+                )}
 
-          <div className="grid gap-2">
-            <Link href={`/admin/teams/${team.id}`} className="w-full">
-              <Button variant="outline" className="w-full justify-start gap-2">
-                <ExternalLink className="h-4 w-4" />
-                {t('drawer.viewDetails')}
-              </Button>
-            </Link>
+                {/* Created Date */}
+                <div className="flex items-center justify-between py-2 px-2 -mx-2 rounded-lg hover:bg-muted/50 transition-colors duration-200">
+                  <dt className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <Calendar className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                    {t('drawer.created')}
+                  </dt>
+                  <dd className="text-sm tabular-nums">{formatDate(team.createdAt)}</dd>
+                </div>
+              </dl>
+            </section>
+          </div>
+        </div>
 
-            <Link href={`/admin/teams/${team.id}/edit`} className="w-full">
-              <Button variant="outline" className="w-full justify-start gap-2">
-                <FileEdit className="h-4 w-4" />
-                {t('drawer.editTeam')}
-              </Button>
-            </Link>
-
-            <Button variant="outline" className="w-full justify-start gap-2">
-              <UserPlus className="h-4 w-4" />
-              {t('drawer.addMembers')}
-            </Button>
-
+        {/* Footer */}
+        <div className={`${isMobile ? "px-4 py-3" : "px-5 py-4"} border-t border-border/40 bg-muted/20`}>
+          <div className="flex items-center gap-2">
+            {/* Status action (left side) */}
             {team.status === TeamStatus.DRAFT && (
-              <Button className="w-full justify-start gap-2 bg-emerald-600 hover:bg-emerald-700">
-                <Play className="h-4 w-4" />
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-10 sm:h-8 min-h-[44px] sm:min-h-0 px-3 sm:px-2.5 text-xs text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 touch-manipulation"
+              >
+                <Play className="mr-1.5 h-3.5 w-3.5" aria-hidden="true" />
                 {t('drawer.activate')}
               </Button>
             )}
-
-            {team.status !== TeamStatus.ARCHIVED && (
-              <Button variant="destructive" className="w-full justify-start gap-2">
-                <Archive className="h-4 w-4" />
+            {team.status === TeamStatus.ACTIVE && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-10 sm:h-8 min-h-[44px] sm:min-h-0 px-3 sm:px-2.5 text-xs text-muted-foreground hover:text-destructive hover:bg-destructive/10 touch-manipulation"
+              >
+                <Archive className="mr-1.5 h-3.5 w-3.5" aria-hidden="true" />
                 {t('drawer.archive')}
               </Button>
             )}
+            <div className="flex-1" />
+            <Button
+              variant="ghost"
+              size="sm"
+              asChild
+              className="h-10 sm:h-8 min-h-[44px] sm:min-h-0 px-3 sm:px-2.5 text-xs text-muted-foreground hover:text-foreground touch-manipulation"
+            >
+              <Link href={`/admin/teams/${team.id}`}>
+                <ChevronRight className="mr-1.5 h-3.5 w-3.5" aria-hidden="true" />
+                {tCommon('viewDetails')}
+              </Link>
+            </Button>
+            <Button
+              variant="default"
+              size="sm"
+              asChild
+              className="h-10 sm:h-8 min-h-[44px] sm:min-h-0 px-4 sm:px-3 text-xs touch-manipulation"
+            >
+              <Link href={`/admin/teams/${team.id}/edit`}>
+                <Pencil className="mr-1.5 h-3.5 w-3.5" aria-hidden="true" />
+                {tCommon('edit')}
+              </Link>
+            </Button>
           </div>
         </div>
       </SheetContent>

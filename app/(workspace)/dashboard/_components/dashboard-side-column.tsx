@@ -8,7 +8,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ChevronRight, Play } from 'lucide-react';
+import { ChevronRight, Play, Users, Sparkles } from 'lucide-react';
 import Link from 'next/link';
 import type { UserStats } from '@/types/user';
 import { useActiveLens } from '@/hooks/useLens';
@@ -114,47 +114,46 @@ export default function DashboardSideColumn({
         {/* Admin: User Stats */}
         {isAdmin && userStats && (
           <motion.div variants={fadeInUp}>
-            <Card>
+            <Card className="hover:shadow-md hover:border-primary/30 hover:-translate-y-px transition-all duration-200 motion-reduce:transition-none">
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-lg bg-muted flex items-center justify-center">
-                      <svg className="w-4 h-4 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-                      </svg>
+                    <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-muted flex items-center justify-center">
+                      <Users className="w-4 h-4 text-muted-foreground" />
                     </div>
                     <CardTitle className="text-base">{t('users')}</CardTitle>
                   </div>
-                  <Link href="/admin/users">
-                    <Button variant="ghost" size="sm" className="h-7 px-2">
+                  <Button asChild variant="ghost" size="sm" className="h-7 px-2 min-h-[44px] sm:min-h-0">
+                    <Link href="/admin/users">
                       <ChevronRight className="w-4 h-4" />
-                    </Button>
-                  </Link>
+                      <span className="sr-only">{t('users')}</span>
+                    </Link>
+                  </Button>
                 </div>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-2 gap-3 mb-4">
                   <div className="text-center p-3 rounded-lg bg-muted/50">
-                    <p className="text-xl font-semibold">{userStats.totalUsers}</p>
+                    <p className="text-2xl font-bold tracking-tight tabular-nums">{userStats.totalUsers}</p>
                     <p className="text-xs text-muted-foreground">{t('total')}</p>
                   </div>
                   <div className="text-center p-3 rounded-lg bg-muted/50">
-                    <p className="text-xl font-semibold">{userStats.activeUsers}</p>
+                    <p className="text-2xl font-bold tracking-tight tabular-nums">{userStats.activeUsers}</p>
                     <p className="text-xs text-muted-foreground">{t('active')}</p>
                   </div>
                 </div>
                 <div className="border-t pt-3 space-y-2 text-sm">
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">{t('admins')}</span>
-                    <span className="font-medium">{userStats.byRole.admin}</span>
+                    <span className="font-medium tabular-nums">{userStats.byRole.admin}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">{t('editors')}</span>
-                    <span className="font-medium">{userStats.byRole.editor}</span>
+                    <span className="font-medium tabular-nums">{userStats.byRole.editor}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">{t('users')}</span>
-                    <span className="font-medium">{userStats.byRole.user}</span>
+                    <span className="font-medium tabular-nums">{userStats.byRole.user}</span>
                   </div>
                 </div>
               </CardContent>
@@ -164,13 +163,11 @@ export default function DashboardSideColumn({
 
         {/* Assessment CTA */}
         <motion.div variants={fadeInUp}>
-          <Card className="bg-gradient-to-br from-primary/5 via-transparent to-purple-500/5 border-primary/20">
+          <Card className="bg-linear-to-br from-primary/5 via-transparent to-purple-500/5 border-primary/20 hover:shadow-md hover:border-primary/30 hover:-translate-y-px transition-all duration-200 motion-reduce:transition-none">
             <CardContent className="p-5">
               <div className="flex items-start gap-4">
-                <div className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-                  <svg className="w-5 h-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
-                  </svg>
+                <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                  <Sparkles className="w-4 h-4 text-primary" />
                 </div>
                 <div className="space-y-3">
                   <div>
@@ -179,12 +176,12 @@ export default function DashboardSideColumn({
                       {t('discoverStrengths')}
                     </p>
                   </div>
-                  <Link href="/test-templates">
-                    <Button size="sm" className="gap-2">
+                  <Button asChild size="sm" className="gap-2 min-h-[44px] sm:min-h-0">
+                    <Link href="/test-templates">
                       <Play className="w-3.5 h-3.5" />
                       {t('startAssessment')}
-                    </Button>
-                  </Link>
+                    </Link>
+                  </Button>
                 </div>
               </div>
             </CardContent>

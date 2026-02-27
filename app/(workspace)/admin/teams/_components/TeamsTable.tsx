@@ -103,13 +103,13 @@ export default function TeamsTable({ teams }: TeamsTableProps) {
   const getStatusIcon = (status: TeamStatus) => {
     switch (status) {
       case TeamStatus.DRAFT:
-        return <FileEdit className="h-3.5 w-3.5" />;
+        return <FileEdit className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />;
       case TeamStatus.ACTIVE:
-        return <CheckCircle className="h-3.5 w-3.5" />;
+        return <CheckCircle className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />;
       case TeamStatus.ARCHIVED:
-        return <Archive className="h-3.5 w-3.5" />;
+        return <Archive className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />;
       default:
-        return <FileEdit className="h-3.5 w-3.5" />;
+        return <FileEdit className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />;
     }
   };
 
@@ -192,7 +192,7 @@ export default function TeamsTable({ teams }: TeamsTableProps) {
           className="-ml-4"
         >
           {t('table.columns.team')}
-          <ArrowUpDown className="ml-2 h-4 w-4" />
+          <ArrowUpDown className="ml-2 h-4 w-4 shrink-0" aria-hidden="true" />
         </Button>
       ),
       cell: ({ row }) => {
@@ -233,7 +233,7 @@ export default function TeamsTable({ teams }: TeamsTableProps) {
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           {t('table.columns.status')}
-          <ArrowUpDown className="ml-2 h-4 w-4" />
+          <ArrowUpDown className="ml-2 h-4 w-4 shrink-0" aria-hidden="true" />
         </Button>
       ),
       cell: ({ row }) => {
@@ -261,18 +261,18 @@ export default function TeamsTable({ teams }: TeamsTableProps) {
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           {t('table.columns.members')}
-          <ArrowUpDown className="ml-2 h-4 w-4" />
+          <ArrowUpDown className="ml-2 h-4 w-4 shrink-0" aria-hidden="true" />
         </Button>
       ),
       cell: ({ row }) => {
         const team = row.original;
         return (
           <div className="flex items-center gap-2">
-            <Users className="h-4 w-4 text-muted-foreground" />
-            <span className="font-medium">{team.memberCount}</span>
+            <Users className="h-4 w-4 text-muted-foreground shrink-0" aria-hidden="true" />
+            <span className="font-medium tabular-nums">{team.memberCount}</span>
             {team.leader && (
               <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                <Crown className="h-3 w-3 text-amber-500" />
+                <Crown className="h-3 w-3 text-amber-500 shrink-0" aria-hidden="true" />
                 <span className="truncate max-w-[100px]">{team.leader.fullName}</span>
               </div>
             )}
@@ -289,14 +289,14 @@ export default function TeamsTable({ teams }: TeamsTableProps) {
           className="hidden md:flex"
         >
           {t('table.columns.created')}
-          <ArrowUpDown className="ml-2 h-4 w-4" />
+          <ArrowUpDown className="ml-2 h-4 w-4 shrink-0" aria-hidden="true" />
         </Button>
       ),
       cell: ({ row }) => {
         const createdAt = row.getValue("createdAt") as string;
         return (
           <div className="hidden md:flex items-center gap-2 text-sm text-muted-foreground">
-            <Calendar className="h-3.5 w-3.5 opacity-70" />
+            <Calendar className="h-3.5 w-3.5 opacity-70 shrink-0" aria-hidden="true" />
             <span>{formatDate(createdAt)}</span>
           </div>
         );
@@ -312,11 +312,11 @@ export default function TeamsTable({ teams }: TeamsTableProps) {
             <DropdownMenuTrigger asChild>
               <Button
                 variant="ghost"
-                className="h-8 w-8 p-0 data-[state=open]:bg-muted"
+                className="h-8 w-8 p-0 data-[state=open]:bg-muted min-h-[44px] min-w-[44px] sm:min-h-0 sm:min-w-0 touch-manipulation"
                 onClick={(e) => e.stopPropagation()}
               >
                 <span className="sr-only">Open menu</span>
-                <MoreHorizontal className="h-4 w-4" />
+                <MoreHorizontal className="h-4 w-4" aria-hidden="true" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-[180px]">
@@ -334,7 +334,7 @@ export default function TeamsTable({ teams }: TeamsTableProps) {
                 e.stopPropagation();
                 handleViewDetails(team);
               }}>
-                <Eye className="mr-2 h-4 w-4" />
+                <Eye className="mr-2 h-4 w-4 shrink-0" aria-hidden="true" />
                 {t('table.menu.quickView')}
               </DropdownMenuItem>
               <DropdownMenuItem
@@ -343,7 +343,7 @@ export default function TeamsTable({ teams }: TeamsTableProps) {
                   router.push(`/admin/teams/${team.id}`);
                 }}
               >
-                <ExternalLink className="mr-2 h-4 w-4" />
+                <ExternalLink className="mr-2 h-4 w-4 shrink-0" aria-hidden="true" />
                 {t('table.menu.viewDetails')}
               </DropdownMenuItem>
               <DropdownMenuItem
@@ -352,7 +352,7 @@ export default function TeamsTable({ teams }: TeamsTableProps) {
                   router.push(`/admin/teams/${team.id}/edit`);
                 }}
               >
-                <UserCog className="mr-2 h-4 w-4" />
+                <UserCog className="mr-2 h-4 w-4 shrink-0" aria-hidden="true" />
                 {t('table.menu.editTeam')}
               </DropdownMenuItem>
               <DropdownMenuSeparator />
@@ -361,7 +361,7 @@ export default function TeamsTable({ teams }: TeamsTableProps) {
                   className="text-emerald-600 dark:text-emerald-400 focus:text-emerald-600"
                   onClick={(e) => e.stopPropagation()}
                 >
-                  <Play className="mr-2 h-4 w-4" />
+                  <Play className="mr-2 h-4 w-4 shrink-0" aria-hidden="true" />
                   {t('table.menu.activate')}
                 </DropdownMenuItem>
               )}
@@ -370,7 +370,7 @@ export default function TeamsTable({ teams }: TeamsTableProps) {
                   className="text-destructive focus:text-destructive"
                   onClick={(e) => e.stopPropagation()}
                 >
-                  <Archive className="mr-2 h-4 w-4" />
+                  <Archive className="mr-2 h-4 w-4 shrink-0" aria-hidden="true" />
                   {t('table.menu.archive')}
                 </DropdownMenuItem>
               )}
@@ -423,9 +423,9 @@ export default function TeamsTable({ teams }: TeamsTableProps) {
           <TabsList className="h-auto p-1 bg-muted/50 w-full grid grid-cols-4 gap-1">
             <TabsTrigger
               value="all"
-              className="data-[state=active]:bg-background data-[state=active]:shadow-sm gap-2 text-xs sm:text-sm"
+              className="data-[state=active]:bg-background data-[state=active]:shadow-sm gap-2 text-xs sm:text-sm min-h-[44px] sm:min-h-0 touch-manipulation"
             >
-              <UsersRound className="h-3.5 w-3.5 hidden sm:inline" />
+              <UsersRound className="h-3.5 w-3.5 hidden sm:inline shrink-0" aria-hidden="true" />
               {t('table.filters.all')}
               <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-xs">
                 {statusCounts.all}
@@ -433,9 +433,9 @@ export default function TeamsTable({ teams }: TeamsTableProps) {
             </TabsTrigger>
             <TabsTrigger
               value={TeamStatus.DRAFT}
-              className="data-[state=active]:bg-background data-[state=active]:shadow-sm gap-2 text-xs sm:text-sm"
+              className="data-[state=active]:bg-background data-[state=active]:shadow-sm gap-2 text-xs sm:text-sm min-h-[44px] sm:min-h-0 touch-manipulation"
             >
-              <FileEdit className="h-3.5 w-3.5 hidden sm:inline text-amber-500" />
+              <FileEdit className="h-3.5 w-3.5 hidden sm:inline text-amber-500 shrink-0" aria-hidden="true" />
               {t('table.filters.draft')}
               <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-xs">
                 {statusCounts[TeamStatus.DRAFT]}
@@ -443,9 +443,9 @@ export default function TeamsTable({ teams }: TeamsTableProps) {
             </TabsTrigger>
             <TabsTrigger
               value={TeamStatus.ACTIVE}
-              className="data-[state=active]:bg-background data-[state=active]:shadow-sm gap-2 text-xs sm:text-sm"
+              className="data-[state=active]:bg-background data-[state=active]:shadow-sm gap-2 text-xs sm:text-sm min-h-[44px] sm:min-h-0 touch-manipulation"
             >
-              <CheckCircle className="h-3.5 w-3.5 hidden sm:inline text-emerald-500" />
+              <CheckCircle className="h-3.5 w-3.5 hidden sm:inline text-emerald-500 shrink-0" aria-hidden="true" />
               {t('table.filters.active')}
               <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-xs">
                 {statusCounts[TeamStatus.ACTIVE]}
@@ -453,9 +453,9 @@ export default function TeamsTable({ teams }: TeamsTableProps) {
             </TabsTrigger>
             <TabsTrigger
               value={TeamStatus.ARCHIVED}
-              className="data-[state=active]:bg-background data-[state=active]:shadow-sm gap-2 text-xs sm:text-sm"
+              className="data-[state=active]:bg-background data-[state=active]:shadow-sm gap-2 text-xs sm:text-sm min-h-[44px] sm:min-h-0 touch-manipulation"
             >
-              <Archive className="h-3.5 w-3.5 hidden sm:inline text-gray-500" />
+              <Archive className="h-3.5 w-3.5 hidden sm:inline text-gray-500 shrink-0" aria-hidden="true" />
               {t('table.filters.archived')}
               <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-xs">
                 {statusCounts[TeamStatus.ARCHIVED]}
@@ -468,12 +468,12 @@ export default function TeamsTable({ teams }: TeamsTableProps) {
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
           {/* Search Input */}
           <div className="relative flex-1 w-full sm:max-w-sm">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
             <Input
               placeholder={t('table.search.placeholder')}
               value={globalFilter}
               onChange={(e) => setGlobalFilter(e.target.value)}
-              className="pl-9 h-9 w-full"
+              className="pl-9 h-11 sm:h-9 w-full"
             />
           </div>
 
@@ -483,20 +483,20 @@ export default function TeamsTable({ teams }: TeamsTableProps) {
               <span className="text-sm text-muted-foreground">
                 {t('table.bulk.selected', { count: selectedCount })}
               </span>
-              <Button variant="outline" size="sm" className="h-9 gap-2">
-                <Download className="h-4 w-4" />
+              <Button variant="outline" size="sm" className="h-9 gap-2 min-h-[44px] sm:min-h-0 touch-manipulation">
+                <Download className="h-4 w-4 shrink-0" aria-hidden="true" />
                 <span className="hidden sm:inline">{t('table.bulk.export')}</span>
               </Button>
-              <Button variant="outline" size="sm" className="h-9 gap-2 text-destructive hover:text-destructive">
-                <Trash2 className="h-4 w-4" />
+              <Button variant="outline" size="sm" className="h-9 gap-2 text-destructive hover:text-destructive min-h-[44px] sm:min-h-0 touch-manipulation">
+                <Trash2 className="h-4 w-4 shrink-0" aria-hidden="true" />
                 <span className="hidden sm:inline">{t('table.bulk.archive')}</span>
               </Button>
             </div>
           ) : (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm" className="h-9 gap-2 ml-auto">
-                  <SlidersHorizontal className="h-4 w-4" />
+                <Button variant="outline" size="sm" className="h-9 gap-2 ml-auto min-h-[44px] sm:min-h-0 touch-manipulation">
+                  <SlidersHorizontal className="h-4 w-4 shrink-0" aria-hidden="true" />
                   <span className="hidden sm:inline">{t('table.view.toggleColumns')}</span>
                 </Button>
               </DropdownMenuTrigger>
@@ -569,13 +569,13 @@ export default function TeamsTable({ teams }: TeamsTableProps) {
                   colSpan={columns.length}
                   className="h-32 text-center"
                 >
-                  <div className="flex flex-col items-center gap-2 py-4">
-                    <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center">
-                      <UsersRound className="h-6 w-6 text-muted-foreground" />
+                  <div className="flex flex-col items-center gap-3 py-8">
+                    <div className="w-16 h-16 rounded-2xl bg-muted flex items-center justify-center animate-in fade-in-0 zoom-in-95 duration-300">
+                      <UsersRound className="h-8 w-8 text-muted-foreground shrink-0" aria-hidden="true" />
                     </div>
-                    <div className="space-y-1">
-                      <p className="text-sm font-medium">{t('table.empty.noTeams')}</p>
-                      <p className="text-xs text-muted-foreground">
+                    <div className="space-y-1 text-center animate-in fade-in-0 duration-300 delay-75">
+                      <p className="text-base font-semibold max-w-[280px]">{t('table.empty.noTeams')}</p>
+                      <p className="text-sm text-muted-foreground max-w-[280px] leading-relaxed">
                         {globalFilter
                           ? t('table.empty.adjustSearch')
                           : t('table.empty.createFirst')}
@@ -619,30 +619,30 @@ export default function TeamsTable({ teams }: TeamsTableProps) {
               onClick={() => table.setPageIndex(0)}
               disabled={!table.getCanPreviousPage()}
             >
-              <ChevronsLeft className="h-4 w-4" />
+              <ChevronsLeft className="h-4 w-4 shrink-0" aria-hidden="true" />
             </Button>
             <Button
               variant="outline"
               size="icon"
-              className="h-8 w-8"
+              className="h-8 w-8 min-h-[44px] min-w-[44px] sm:min-h-0 sm:min-w-0 touch-manipulation"
               onClick={() => table.previousPage()}
               disabled={!table.getCanPreviousPage()}
             >
-              <ChevronLeft className="h-4 w-4" />
+              <ChevronLeft className="h-4 w-4 shrink-0" aria-hidden="true" />
             </Button>
             <span className="flex items-center gap-1 text-sm px-2">
-              <span className="font-medium">{table.getState().pagination.pageIndex + 1}</span>
+              <span className="font-medium tabular-nums">{table.getState().pagination.pageIndex + 1}</span>
               <span className="text-muted-foreground">/</span>
-              <span className="text-muted-foreground">{table.getPageCount()}</span>
+              <span className="text-muted-foreground tabular-nums">{table.getPageCount()}</span>
             </span>
             <Button
               variant="outline"
               size="icon"
-              className="h-8 w-8"
+              className="h-8 w-8 min-h-[44px] min-w-[44px] sm:min-h-0 sm:min-w-0 touch-manipulation"
               onClick={() => table.nextPage()}
               disabled={!table.getCanNextPage()}
             >
-              <ChevronRight className="h-4 w-4" />
+              <ChevronRight className="h-4 w-4 shrink-0" aria-hidden="true" />
             </Button>
             <Button
               variant="outline"
@@ -651,7 +651,7 @@ export default function TeamsTable({ teams }: TeamsTableProps) {
               onClick={() => table.setPageIndex(table.getPageCount() - 1)}
               disabled={!table.getCanNextPage()}
             >
-              <ChevronsRight className="h-4 w-4" />
+              <ChevronsRight className="h-4 w-4 shrink-0" aria-hidden="true" />
             </Button>
           </div>
         </div>

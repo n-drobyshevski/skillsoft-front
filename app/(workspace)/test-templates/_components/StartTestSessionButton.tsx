@@ -201,7 +201,7 @@ export default function StartTestSessionButton({
       <Button
         onClick={handleStartTest}
         disabled={isDisabled}
-        className={`${fullWidth ? "w-full" : ""} bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary shadow-lg hover:shadow-xl transition-all duration-300 group min-h-11 ${blueprintMissing ? "opacity-50 cursor-not-allowed" : ""}`}
+        className={`${fullWidth ? "w-full" : ""} bg-gradient-to-r from-primary to-primary/90 hover:from-primary/90 hover:to-primary shadow-lg hover:shadow-xl transition-all duration-300 group min-h-11 touch-manipulation active:scale-[0.98] motion-reduce:transition-none ${blueprintMissing ? "opacity-50 cursor-not-allowed" : ""}`}
         size={size}
       >
         {isLoading ? (
@@ -237,7 +237,7 @@ export default function StartTestSessionButton({
     <Button
       onClick={handleStartTest}
       disabled={isDisabled}
-      className={`${fullWidth ? "w-full" : ""} shadow-sm hover:shadow-md transition-all group ${blueprintMissing ? "opacity-50 cursor-not-allowed" : ""}`}
+      className={`${fullWidth ? "w-full" : ""} shadow-sm hover:shadow-md transition-all group min-h-[44px] sm:min-h-0 touch-manipulation active:scale-[0.98] motion-reduce:transition-none ${blueprintMissing ? "opacity-50 cursor-not-allowed" : ""}`}
       size={size}
     >
       {isLoading ? (

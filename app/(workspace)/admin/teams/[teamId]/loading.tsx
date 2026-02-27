@@ -10,8 +10,8 @@ export default function TeamDetailLoading() {
         <div className="absolute inset-0 h-32 sm:h-40 lg:h-48 bg-gradient-to-br from-primary/20 via-primary/10 to-violet-500/10 dark:from-primary/10 dark:via-primary/5 dark:to-violet-500/5" />
 
         <div className="relative px-4 pt-6 pb-4 sm:px-6 lg:px-8">
-          <div className="mx-auto max-w-7xl">
-            <Card className="border-0 shadow-lg bg-card/95 backdrop-blur-sm">
+          <div className="mx-auto max-w-[1600px] w-full">
+            <Card className="shadow-sm bg-card/95 backdrop-blur-sm">
               <CardContent className="p-4 sm:p-6">
                 <div className="flex flex-col sm:flex-row gap-4 sm:gap-6">
                   {/* Avatar Skeleton */}
@@ -44,7 +44,7 @@ export default function TeamDetailLoading() {
 
       {/* Main Content */}
       <div className="flex-1 px-4 py-6 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-7xl space-y-6">
+        <div className="mx-auto max-w-[1600px] w-full space-y-6">
           {/* Mobile Stats Grid Skeleton */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 lg:hidden">
             {Array.from({ length: 4 }).map((_, i) => (

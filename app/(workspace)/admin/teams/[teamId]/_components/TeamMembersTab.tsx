@@ -50,7 +50,7 @@ function MemberRoleBadge({ role, isLeader }: { role: TeamMemberRole; isLeader: b
   if (isLeader) {
     return (
       <Badge className="bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 gap-1">
-        <Crown className="h-3 w-3" />
+        <Crown className="h-3 w-3" aria-hidden="true" />
         {t('role.leader')}
       </Badge>
     );
@@ -58,7 +58,7 @@ function MemberRoleBadge({ role, isLeader }: { role: TeamMemberRole; isLeader: b
 
   return (
     <Badge variant="outline" className="gap-1">
-      <Shield className="h-3 w-3" />
+      <Shield className="h-3 w-3" aria-hidden="true" />
       {t('role.member')}
     </Badge>
   );
@@ -70,15 +70,15 @@ function EmptyMembersState({ onAddClick }: { onAddClick?: () => void }) {
   return (
     <Card className="border-dashed">
       <CardContent className="flex flex-col items-center justify-center py-12 text-center">
-        <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mb-4">
-          <Users className="h-8 w-8 text-muted-foreground" />
+        <div className="w-16 h-16 rounded-2xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center mb-4 animate-in fade-in-0 zoom-in-95 duration-300">
+          <Users className="h-8 w-8 text-blue-500 dark:text-blue-400" aria-hidden="true" />
         </div>
-        <h3 className="font-semibold text-lg mb-2">{t('empty.title')}</h3>
-        <p className="text-muted-foreground text-sm max-w-sm mb-4">
+        <h3 className="text-base font-semibold max-w-[280px] mb-2 animate-in fade-in-0 duration-300 delay-75">{t('empty.title')}</h3>
+        <p className="text-sm text-muted-foreground max-w-[280px] leading-relaxed mb-4 animate-in fade-in-0 duration-300 delay-100">
           {t('empty.description')}
         </p>
-        <Button onClick={onAddClick}>
-          <UserPlus className="h-4 w-4 mr-2" />
+        <Button variant="default" size="sm" className="min-h-[44px] touch-manipulation animate-in fade-in-0 duration-300 delay-150" onClick={onAddClick}>
+          <UserPlus className="h-4 w-4 mr-2" aria-hidden="true" />
           {t('empty.action')}
         </Button>
       </CardContent>
@@ -157,7 +157,7 @@ export default function TeamMembersTab({ team }: TeamMembersTabProps) {
       {/* Search and Actions Bar */}
       <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
         <div className="relative w-full sm:w-auto sm:min-w-[280px]">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" aria-hidden="true" />
           <Input
             placeholder={t('search.placeholder')}
             value={searchQuery}
@@ -165,15 +165,15 @@ export default function TeamMembersTab({ team }: TeamMembersTabProps) {
             className="pl-9"
           />
         </div>
-        <Button className="w-full sm:w-auto" onClick={() => setIsAddDialogOpen(true)}>
-          <UserPlus className="h-4 w-4 mr-2" />
+        <Button className="w-full sm:w-auto min-h-[44px] sm:min-h-0 touch-manipulation" onClick={() => setIsAddDialogOpen(true)}>
+          <UserPlus className="h-4 w-4 mr-2" aria-hidden="true" />
           {t('actions.addMember')}
         </Button>
       </div>
 
       {/* Members Grid */}
       {filteredMembers.length > 0 ? (
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid gap-4 sm:grid-cols-2" role="list" aria-label="Team members">
           {filteredMembers.map((member) => {
             const isLeader = member.userId === team.leader?.id;
             return (
@@ -192,7 +192,7 @@ export default function TeamMembersTab({ team }: TeamMembersTabProps) {
       ) : (
         <Card className="border-dashed">
           <CardContent className="flex flex-col items-center justify-center py-8 text-center">
-            <Search className="h-8 w-8 text-muted-foreground mb-2" />
+            <Search className="h-8 w-8 text-muted-foreground mb-2" aria-hidden="true" />
             <p className="text-muted-foreground">
               {t('search.noResults', { query: searchQuery })}
             </p>
@@ -253,7 +253,7 @@ function MemberCardWithActions({
   const initials = getTeamMemberInitials(member);
 
   return (
-    <Card className="hover:shadow-md transition-all hover:border-primary/30">
+    <Card className="hover:shadow-md hover:border-primary/30 hover:-translate-y-px transition-all duration-200" role="listitem">
       <CardContent className="p-4">
         <div className="flex items-start gap-4">
           {/* Avatar */}
@@ -261,15 +261,15 @@ function MemberCardWithActions({
             <Avatar className="h-12 w-12 border-2 border-background shadow-sm">
               {member.imageUrl && <AvatarImage src={member.imageUrl} alt={member.fullName} />}
               <AvatarFallback className={isLeader
-                ? "bg-gradient-to-br from-amber-400 to-amber-600 text-white"
-                : "bg-gradient-to-br from-primary/80 to-violet-500/80 text-white"
+                ? "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"
+                : "bg-muted text-muted-foreground"
               }>
                 {initials}
               </AvatarFallback>
             </Avatar>
             {isLeader && (
               <div className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-amber-500 flex items-center justify-center shadow-sm">
-                <Crown className="h-3 w-3 text-white" />
+                <Crown className="h-3 w-3 text-white" aria-hidden="true" />
               </div>
             )}
           </div>
@@ -282,12 +282,12 @@ function MemberCardWithActions({
             </div>
 
             <div className="flex items-center gap-2 mt-1 text-sm text-muted-foreground">
-              <Mail className="h-3.5 w-3.5 shrink-0" />
+              <Mail className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
               <span className="truncate">{member.email}</span>
             </div>
 
             <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
-              <Calendar className="h-3 w-3 shrink-0" />
+              <Calendar className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
               <span>{t('joinedAt', { date: formatDate(member.joinedAt) })}</span>
             </div>
           </div>
@@ -295,11 +295,11 @@ function MemberCardWithActions({
           {/* Actions */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-8 w-8" disabled={isPending}>
+              <Button variant="ghost" size="icon" className="h-8 w-8 min-h-[44px] min-w-[44px] sm:min-h-0 sm:min-w-0 touch-manipulation" disabled={isPending}>
                 {isPending ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
                 ) : (
-                  <MoreHorizontal className="h-4 w-4" />
+                  <MoreHorizontal className="h-4 w-4" aria-hidden="true" />
                 )}
                 <span className="sr-only">{t('actions.menu')}</span>
               </Button>
@@ -307,14 +307,14 @@ function MemberCardWithActions({
             <DropdownMenuContent align="end" className="w-48">
               <DropdownMenuItem asChild>
                 <Link href={`/admin/users/${member.userId}`}>
-                  <ExternalLink className="h-4 w-4 mr-2" />
+                  <ExternalLink className="h-4 w-4 mr-2" aria-hidden="true" />
                   {t('actions.viewProfile')}
                 </Link>
               </DropdownMenuItem>
 
               {!isLeader && (
                 <DropdownMenuItem onClick={onPromote}>
-                  <Crown className="h-4 w-4 mr-2" />
+                  <Crown className="h-4 w-4 mr-2" aria-hidden="true" />
                   {t('actions.makeLeader')}
                 </DropdownMenuItem>
               )}
@@ -322,7 +322,7 @@ function MemberCardWithActions({
               <DropdownMenuSeparator />
 
               <DropdownMenuItem className="text-destructive" onClick={onRemove}>
-                <UserMinus className="h-4 w-4 mr-2" />
+                <UserMinus className="h-4 w-4 mr-2" aria-hidden="true" />
                 {t('actions.remove')}
               </DropdownMenuItem>
             </DropdownMenuContent>

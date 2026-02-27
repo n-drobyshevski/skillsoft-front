@@ -65,9 +65,9 @@ export function CatalogTabs({ templates, sharedItems, sharedTotal }: CatalogTabs
           disabled={isPending}
           className={cn(
             'inline-flex items-center gap-1.5 px-3 sm:px-4 py-2 sm:py-1.5',
-            'min-h-[40px] sm:min-h-[36px]',
+            'min-h-[44px] sm:min-h-[36px]',
             'data-[state=active]:bg-background data-[state=active]:shadow-sm',
-            'text-xs sm:text-sm font-medium transition-all whitespace-nowrap rounded-md',
+            'text-xs sm:text-sm font-medium transition-all whitespace-nowrap rounded-md touch-manipulation',
             isPending && 'opacity-70'
           )}
         >
@@ -75,7 +75,7 @@ export function CatalogTabs({ templates, sharedItems, sharedTotal }: CatalogTabs
           <Badge
             variant="secondary"
             className={cn(
-              'min-w-5 sm:min-w-6 h-5 justify-center text-[11px] sm:text-xs px-1 sm:px-1.5 rounded-sm',
+              'min-w-5 sm:min-w-6 h-5 justify-center text-xs-safe sm:text-xs px-1 sm:px-1.5 rounded-sm tabular-nums',
               activeTab === 'available' && 'bg-primary text-primary-foreground'
             )}
           >
@@ -88,9 +88,9 @@ export function CatalogTabs({ templates, sharedItems, sharedTotal }: CatalogTabs
           disabled={isPending}
           className={cn(
             'inline-flex items-center gap-1.5 px-3 sm:px-4 py-2 sm:py-1.5',
-            'min-h-[40px] sm:min-h-[36px]',
+            'min-h-[44px] sm:min-h-[36px]',
             'data-[state=active]:bg-background data-[state=active]:shadow-sm',
-            'text-xs sm:text-sm font-medium transition-all whitespace-nowrap rounded-md',
+            'text-xs sm:text-sm font-medium transition-all whitespace-nowrap rounded-md touch-manipulation',
             isPending && 'opacity-70'
           )}
         >
@@ -99,7 +99,7 @@ export function CatalogTabs({ templates, sharedItems, sharedTotal }: CatalogTabs
             <Badge
               variant="secondary"
               className={cn(
-                'min-w-5 sm:min-w-6 h-5 justify-center text-[11px] sm:text-xs px-1 sm:px-1.5 rounded-sm',
+                'min-w-5 sm:min-w-6 h-5 justify-center text-xs-safe sm:text-xs px-1 sm:px-1.5 rounded-sm tabular-nums',
                 activeTab === 'shared' && 'bg-primary text-primary-foreground'
               )}
             >

@@ -1,23 +1,30 @@
 import React from 'react';
+import { cn } from '@/lib/utils';
 
 interface PageHeaderProps {
   title: string;
   description?: string;
   children?: React.ReactNode;
   className?: string;
+  /** 'document' uses semibold, 'dashboard' uses bold. Default: 'document' */
+  variant?: 'document' | 'dashboard';
 }
 
-export default function PageHeader({ 
-  title, 
-  description, 
+export default function PageHeader({
+  title,
+  description,
   children,
   className = "",
+  variant = "document",
 }: PageHeaderProps) {
   return (
     <div className={`flex flex-col gap-3 sm:gap-4 ${className}`}>
       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
         <div className="space-y-1 sm:space-y-2 min-w-0 flex-1">
-          <h2 className="text-xl font-semibold tracking-tight sm:text-2xl lg:text-3xl break-words">
+          <h2 className={cn(
+            "text-xl tracking-tight sm:text-2xl md:text-3xl break-words",
+            variant === 'dashboard' ? 'font-bold' : 'font-semibold'
+          )}>
             {title}
           </h2>
           {description && (

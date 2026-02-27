@@ -21,10 +21,12 @@ interface TeamProfileTabProps {
 
 function SaturationBar({
   competencyId,
+  competencyName,
   saturation,
   index,
 }: {
   competencyId: string;
+  competencyName: string;
   saturation: number;
   index: number;
 }) {
@@ -53,10 +55,7 @@ function SaturationBar({
     return "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400";
   };
 
-  // Truncate competency ID for display (showing last part)
-  const displayName = competencyId.includes('-')
-    ? competencyId.split('-').pop()
-    : competencyId.substring(0, 8);
+  const displayName = competencyName || competencyId.substring(0, 8);
 
   return (
     <div className="group hover:bg-muted/30 p-3 -mx-3 rounded-lg transition-colors">
@@ -72,7 +71,7 @@ function SaturationBar({
         <div className="flex items-center gap-2 shrink-0">
           <span className="text-sm font-semibold tabular-nums">{percentage}%</span>
           <Badge className={cn("text-xs gap-1", getBadgeStyles())}>
-            <status.icon className="h-3 w-3" />
+            <status.icon className="h-3 w-3" aria-hidden="true" />
             <span className="hidden sm:inline">{status.label}</span>
           </Badge>
         </div>
@@ -97,11 +96,11 @@ function EmptyProfileState() {
   return (
     <Card className="border-dashed">
       <CardContent className="flex flex-col items-center justify-center py-12 text-center">
-        <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mb-4">
-          <BarChart3 className="h-8 w-8 text-muted-foreground" />
+        <div className="w-16 h-16 rounded-2xl bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center mb-4 animate-in fade-in-0 zoom-in-95 duration-300">
+          <BarChart3 className="h-8 w-8 text-purple-500 dark:text-purple-400" aria-hidden="true" />
         </div>
-        <h3 className="font-semibold text-lg mb-2">{t('empty.title')}</h3>
-        <p className="text-muted-foreground text-sm max-w-sm">
+        <h3 className="text-base font-semibold max-w-[280px] mb-2 animate-in fade-in-0 duration-300 delay-75">{t('empty.title')}</h3>
+        <p className="text-sm text-muted-foreground max-w-[280px] leading-relaxed animate-in fade-in-0 duration-300 delay-100">
           {t('empty.description')}
         </p>
       </CardContent>
@@ -128,31 +127,31 @@ function ProfileSummaryCard({
   const lowCount = profile.competencySaturation.filter(c => c.saturation < 0.4).length;
 
   return (
-    <Card className="bg-gradient-to-br from-card to-muted/30">
+    <Card className="hover:shadow-md hover:border-primary/30 hover:-translate-y-px transition-all duration-200">
       <CardHeader className="pb-2">
-        <CardTitle className="text-sm font-semibold flex items-center gap-2 uppercase tracking-wider text-muted-foreground">
-          <div className="p-1.5 rounded-lg bg-primary/10">
-            <Target className="w-3.5 h-3.5 text-primary" />
+        <CardTitle className="text-base font-semibold leading-none flex items-center gap-2">
+          <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center">
+            <Target className="w-4 h-4 text-primary" aria-hidden="true" />
           </div>
           {t('summary.title')}
         </CardTitle>
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-          <div className="text-center p-3 rounded-xl bg-background/60 border border-border/50">
-            <p className="text-2xl font-bold text-primary">{Math.round(avgSaturation * 100)}%</p>
+          <div className="text-center p-3 rounded-xl bg-background/60 border border-border">
+            <p className="text-2xl font-bold tabular-nums text-primary">{Math.round(avgSaturation * 100)}%</p>
             <p className="text-xs text-muted-foreground mt-0.5">{t('summary.average')}</p>
           </div>
-          <div className="text-center p-3 rounded-xl bg-background/60 border border-border/50">
-            <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">{highCount}</p>
+          <div className="text-center p-3 rounded-xl bg-background/60 border border-border">
+            <p className="text-2xl font-bold tabular-nums text-emerald-600 dark:text-emerald-400">{highCount}</p>
             <p className="text-xs text-muted-foreground mt-0.5">{t('summary.high')}</p>
           </div>
-          <div className="text-center p-3 rounded-xl bg-background/60 border border-border/50">
-            <p className="text-2xl font-bold text-amber-600 dark:text-amber-400">{mediumCount}</p>
+          <div className="text-center p-3 rounded-xl bg-background/60 border border-border">
+            <p className="text-2xl font-bold tabular-nums text-amber-600 dark:text-amber-400">{mediumCount}</p>
             <p className="text-xs text-muted-foreground mt-0.5">{t('summary.medium')}</p>
           </div>
-          <div className="text-center p-3 rounded-xl bg-background/60 border border-border/50">
-            <p className="text-2xl font-bold text-red-600 dark:text-red-400">{lowCount}</p>
+          <div className="text-center p-3 rounded-xl bg-background/60 border border-border">
+            <p className="text-2xl font-bold tabular-nums text-red-600 dark:text-red-400">{lowCount}</p>
             <p className="text-xs text-muted-foreground mt-0.5">{t('summary.low')}</p>
           </div>
         </div>
@@ -179,10 +178,10 @@ export default function TeamProfileTab({ profile }: TeamProfileTabProps) {
       <ProfileSummaryCard profile={profile} />
 
       {/* Competency Saturation List */}
-      <Card>
+      <Card className="hover:shadow-md hover:border-primary/30 hover:-translate-y-px transition-all duration-200">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <TrendingUp className="h-5 w-5 text-primary" />
+          <CardTitle className="text-base font-semibold leading-none flex items-center gap-2">
+            <TrendingUp className="h-5 w-5 text-primary" aria-hidden="true" />
             {t('competencies.title')}
           </CardTitle>
           <CardDescription>
@@ -194,6 +193,7 @@ export default function TeamProfileTab({ profile }: TeamProfileTabProps) {
             <SaturationBar
               key={comp.competencyId}
               competencyId={comp.competencyId}
+              competencyName={comp.competencyName}
               saturation={comp.saturation}
               index={index}
             />
@@ -203,10 +203,10 @@ export default function TeamProfileTab({ profile }: TeamProfileTabProps) {
 
       {/* Personality Distribution (if available) */}
       {profile.averagePersonality && Object.keys(profile.averagePersonality).length > 0 && (
-        <Card>
+        <Card className="hover:shadow-md hover:border-primary/30 hover:-translate-y-px transition-all duration-200">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Activity className="h-5 w-5 text-violet-500" />
+            <CardTitle className="text-base font-semibold leading-none flex items-center gap-2">
+              <Activity className="h-5 w-5 text-violet-600 dark:text-violet-400" aria-hidden="true" />
               {t('personality.title')}
             </CardTitle>
             <CardDescription>

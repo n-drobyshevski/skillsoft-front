@@ -60,7 +60,7 @@ export function GoalBadge({ goal, variant = 'badge', className }: GoalBadgeProps
 
   if (variant === 'outline') {
     return (
-      <Badge variant="outline" className={cn('w-fit text-xs', config.badgeClass, className)}>
+      <Badge variant="outline" className={cn('w-fit text-xs-safe', config.badgeClass, className)}>
         {goalInfo.displayName}
       </Badge>
     );
@@ -69,9 +69,9 @@ export function GoalBadge({ goal, variant = 'badge', className }: GoalBadgeProps
   return (
     <Badge
       variant="secondary"
-      className={cn('text-xs font-medium px-2 py-0.5', config.badgeClass, className)}
+      className={cn('text-xs-safe font-medium px-2 py-0.5', config.badgeClass, className)}
     >
-      <GoalIcon className="h-3 w-3 mr-1" />
+      <GoalIcon className="h-3 w-3 mr-1 shrink-0" aria-hidden="true" />
       {goalInfo.displayName}
     </Badge>
   );

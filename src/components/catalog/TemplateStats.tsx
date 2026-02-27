@@ -35,13 +35,13 @@ export function TemplateStats({ template, variant = 'pills', className }: Templa
 
   if (variant === 'inline') {
     return (
-      <div className={cn('flex items-center gap-4 text-xs text-muted-foreground', className)}>
+      <div className={cn('flex items-center gap-4 text-xs text-muted-foreground tabular-nums', className)}>
         <span className="flex items-center gap-1">
-          <Target className="h-3 w-3" />
+          <Target className="h-3 w-3 shrink-0" aria-hidden="true" />
           {template.competencyCount} competencies
         </span>
         <span className="flex items-center gap-1">
-          <Clock className="h-3 w-3" />
+          <Clock className="h-3 w-3 shrink-0" aria-hidden="true" />
           {template.timeLimitMinutes} min
         </span>
       </div>
@@ -49,17 +49,17 @@ export function TemplateStats({ template, variant = 'pills', className }: Templa
   }
 
   return (
-    <div className={cn('flex flex-wrap gap-1.5', className)} aria-label={t('testConfiguration')}>
+    <div className={cn('flex flex-wrap gap-1.5 tabular-nums', className)} aria-label={t('testConfiguration')}>
       <span className="inline-flex items-center gap-1 text-xs text-muted-foreground bg-muted/50 rounded px-1.5 py-0.5">
-        <Clock className="h-3 w-3" />
+        <Clock className="h-3 w-3 shrink-0" aria-hidden="true" />
         {formatDuration(template.timeLimitMinutes, false)}
       </span>
       <span className="inline-flex items-center gap-1 text-xs text-muted-foreground bg-muted/50 rounded px-1.5 py-0.5">
-        <Target className="h-3 w-3" />
+        <Target className="h-3 w-3 shrink-0" aria-hidden="true" />
         {template.passingScore}%
       </span>
       <span className="inline-flex items-center gap-1 text-xs text-muted-foreground bg-muted/50 rounded px-1.5 py-0.5">
-        <BookOpen className="h-3 w-3" />
+        <BookOpen className="h-3 w-3 shrink-0" aria-hidden="true" />
         {template.competencyCount} {t('skills')}
       </span>
     </div>

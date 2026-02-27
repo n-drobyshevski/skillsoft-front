@@ -107,9 +107,9 @@ export function CompactStatCard({
       className={cn(
         'flex items-center gap-3 px-3 py-3 rounded-lg border bg-card',
         'h-[64px] min-h-[64px]',
-        'transition-all duration-200 group',
+        'transition-all duration-200 motion-reduce:transition-none group',
         getBorderStyles(variant),
-        href && 'cursor-pointer hover:shadow-md hover:border-primary/30 active:scale-[0.99]',
+        href && 'cursor-pointer hover:shadow-md hover:border-primary/30 hover:-translate-y-px active:scale-[0.99]',
         className
       )}
     >
@@ -190,9 +190,9 @@ export function CompactStatCardMobile({
         // Minimum height for consistency
         'min-h-[76px]',
         // Interactive states
-        'transition-all duration-200 group touch-manipulation',
+        'transition-all duration-200 motion-reduce:transition-none group touch-manipulation',
         getBorderStyles(variant),
-        href && 'cursor-pointer hover:shadow-md hover:border-primary/30 active:scale-[0.98]',
+        href && 'cursor-pointer hover:shadow-md hover:border-primary/30 hover:-translate-y-px active:scale-[0.98]',
         className
       )}
     >

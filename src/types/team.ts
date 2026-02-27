@@ -84,11 +84,13 @@ export interface TeamMemberProfileSummary {
 
 export interface CompetencySaturation {
   competencyId: string;
+  competencyName: string;
   saturation: number;
 }
 
 export interface SkillGap {
   competencyId: string;
+  competencyName: string;
   currentSaturation: number;
 }
 

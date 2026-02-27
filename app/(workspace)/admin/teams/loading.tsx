@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 
 export default function TeamsLoading() {
   return (
-    <div className="flex flex-1 flex-col gap-4 p-4 pt-6 md:gap-6 md:p-6">
+    <div className="flex flex-1 flex-col gap-4 sm:gap-6 p-4 pt-6 sm:p-6" aria-hidden="true">
       {/* Header Skeleton */}
       <div className="flex items-start justify-between gap-4">
         <div className="space-y-2">
@@ -13,28 +13,28 @@ export default function TeamsLoading() {
         <Skeleton className="h-10 w-32" />
       </div>
 
-      {/* Stats Row Skeleton */}
-      <div className="grid gap-4 grid-cols-2 lg:grid-cols-5">
+      {/* Stats Row Skeleton — mirrors StatsWidget structure */}
+      <div className="grid gap-3 sm:gap-4 grid-cols-2 lg:grid-cols-5">
         {Array.from({ length: 5 }).map((_, i) => (
-          <Card key={i} className="bg-card/50">
-            <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-              <Skeleton className="h-4 w-20" />
-              <Skeleton className="h-4 w-4 rounded" />
+          <Card key={i}>
+            <CardHeader className="flex flex-row items-center gap-3 p-4 pb-2">
+              <Skeleton className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg" />
+              <Skeleton className="h-4 w-24" />
             </CardHeader>
-            <CardContent>
-              <Skeleton className="h-8 w-12 mb-1" />
-              <Skeleton className="h-3 w-24" />
+            <CardContent className="p-4 pt-0">
+              <Skeleton className="h-8 w-16 mb-1" />
+              <Skeleton className="h-3 w-28" />
             </CardContent>
           </Card>
         ))}
       </div>
 
       {/* Tabs Skeleton */}
-      <Skeleton className="h-10 w-full" />
+      <Skeleton className="h-[44px] sm:h-10 w-full" />
 
       {/* Search Bar Skeleton */}
       <div className="flex items-center gap-4">
-        <Skeleton className="h-9 w-full max-w-sm" />
+        <Skeleton className="h-11 sm:h-9 w-full max-w-sm" />
         <Skeleton className="h-9 w-28 ml-auto" />
       </div>
 

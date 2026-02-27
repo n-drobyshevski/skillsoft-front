@@ -113,19 +113,19 @@ export default function MobileTemplateActions({
           </DrawerDescription>
 
           {/* Stats Row */}
-          <div className="flex items-center justify-center gap-3 mt-2 text-xs text-muted-foreground">
+          <div className="flex items-center justify-center gap-3 mt-2 text-xs text-muted-foreground tabular-nums">
             <span className="inline-flex items-center gap-1">
-              <Clock className="size-3" />
+              <Clock className="size-3 shrink-0" aria-hidden="true" />
               {formatDuration(template.timeLimitMinutes, t)}
             </span>
             <span className="text-muted-foreground/40">•</span>
             <span className="inline-flex items-center gap-1">
-              <Target className="size-3" />
+              <Target className="size-3 shrink-0" aria-hidden="true" />
               {template.passingScore}%
             </span>
             <span className="text-muted-foreground/40">•</span>
             <span className="inline-flex items-center gap-1">
-              <BookOpen className="size-3" />
+              <BookOpen className="size-3 shrink-0" aria-hidden="true" />
               {template.competencyCount} {t('skills')}
             </span>
           </div>
@@ -146,17 +146,17 @@ export default function MobileTemplateActions({
             <Link href={`/test-templates/${template.id}`} className="block no-underline">
               <Button
                 variant="outline"
-                className="w-full h-11 justify-center gap-2 text-sm font-medium"
+                className="w-full h-11 justify-center gap-2 text-sm font-medium touch-manipulation active:scale-[0.98] transition-all motion-reduce:transition-none"
                 onClick={() => onOpenChange(false)}
               >
-                <Eye className="h-4 w-4" />
+                <Eye className="h-4 w-4 shrink-0" aria-hidden="true" />
                 {t('details')}
               </Button>
             </Link>
 
             <Button
               variant="outline"
-              className="w-full h-11 justify-center gap-2 text-sm font-medium"
+              className="w-full h-11 justify-center gap-2 text-sm font-medium touch-manipulation active:scale-[0.98] transition-all motion-reduce:transition-none"
               onClick={() => onOpenChange(false)}
             >
               {tCommon('cancel')}
@@ -170,10 +170,10 @@ export default function MobileTemplateActions({
                 <Link href={`/test-templates/${template.id}/settings`} className="block no-underline">
                   <Button
                     variant="outline"
-                    className="w-full h-11 justify-center gap-2 text-sm font-medium"
+                    className="w-full h-11 justify-center gap-2 text-sm font-medium touch-manipulation active:scale-[0.98] transition-all motion-reduce:transition-none"
                     onClick={() => onOpenChange(false)}
                   >
-                    <Settings className="h-4 w-4" />
+                    <Settings className="h-4 w-4 shrink-0" aria-hidden="true" />
                     {t('settings')}
                   </Button>
                 </Link>
@@ -181,10 +181,10 @@ export default function MobileTemplateActions({
                 <Link href={`/test-templates/${template.id}/builder`} className="block no-underline">
                   <Button
                     variant="outline"
-                    className="w-full h-11 justify-center gap-2 text-sm font-medium"
+                    className="w-full h-11 justify-center gap-2 text-sm font-medium touch-manipulation active:scale-[0.98] transition-all motion-reduce:transition-none"
                     onClick={() => onOpenChange(false)}
                   >
-                    <Pencil className="h-4 w-4" />
+                    <Pencil className="h-4 w-4 shrink-0" aria-hidden="true" />
                     {tCommon('edit')}
                   </Button>
                 </Link>
@@ -193,10 +193,10 @@ export default function MobileTemplateActions({
               {/* Delete Action */}
               <Button
                 variant="outline"
-                className="w-full h-11 justify-center gap-2 text-sm font-medium text-destructive border-destructive/30 hover:bg-destructive/10 hover:text-destructive hover:border-destructive/50"
+                className="w-full h-11 justify-center gap-2 text-sm font-medium text-destructive border-destructive/30 hover:bg-destructive/10 hover:text-destructive hover:border-destructive/50 touch-manipulation active:scale-[0.98] motion-reduce:transition-none"
                 onClick={() => setDeleteDialogOpen(true)}
               >
-                <Trash2 className="h-4 w-4" />
+                <Trash2 className="h-4 w-4 shrink-0" aria-hidden="true" />
                 {tCommon('delete')}
               </Button>
             </>

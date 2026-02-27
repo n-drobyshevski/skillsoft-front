@@ -73,7 +73,7 @@ export function WidgetCard({
   return (
     <Card
       className={cn(
-        'transition-shadow hover:shadow-md h-full',
+        'transition-all duration-200 hover:shadow-md hover:-translate-y-px hover:border-primary/30 motion-reduce:transition-none h-full',
         // Priority-based ordering (applies on mobile, reset on desktop)
         priority === 'high' && 'order-first md:order-none',
         priority === 'low' && 'order-last md:order-none',
@@ -81,9 +81,9 @@ export function WidgetCard({
       )}
     >
       <CardHeader className="flex flex-row items-center justify-between pb-2">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           {Icon && (
-            <div className="w-9 h-9 rounded-lg bg-muted flex items-center justify-center shrink-0">
+            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-muted flex items-center justify-center shrink-0">
               <Icon className="w-4 h-4 text-muted-foreground" aria-hidden="true" />
             </div>
           )}
@@ -102,17 +102,18 @@ export function WidgetCard({
           )}
           {headerActions}
           {href && (
-            <Link href={href}>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-7 px-2"
-                aria-label={`View all ${title}`}
-              >
+            <Button
+              asChild
+              variant="ghost"
+              size="sm"
+              className="h-7 px-2 min-h-[44px] sm:min-h-0 touch-manipulation"
+              aria-label={`View all ${title}`}
+            >
+              <Link href={href}>
                 <ChevronRight className="w-4 h-4" />
                 <span className="sr-only">View all {title}</span>
-              </Button>
-            </Link>
+              </Link>
+            </Button>
           )}
         </div>
       </CardHeader>

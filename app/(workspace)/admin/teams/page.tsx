@@ -3,23 +3,11 @@ import Link from "next/link";
 import { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  TeamStatus,
-  ManagedTeamSummary,
-  TeamStats,
-} from "@/types/team";
-import {
-  UserPlus,
-  Users,
-  UsersRound,
-  FileEdit,
-  CheckCircle,
-  Archive,
-  AlertTriangle,
-} from "lucide-react";
+import { TeamStatus } from "@/types/team";
+import { UserPlus } from "lucide-react";
 import { getTeamsPageDataCached } from "@/services/api.cache.teams";
 import PageHeader from "@/components/common/PageHeader";
+import { TeamsStatsRow } from "./_components/TeamsStatsRow";
 import TeamsTableWrapper from "./_components/TeamsTableWrapper";
 import Loading from "./loading";
 
@@ -51,38 +39,6 @@ async function getTeamsData(t: (key: string) => string) {
   }
 }
 
-// Compact stats card component
-function StatCard({
-  title,
-  value,
-  icon: Icon,
-  description,
-  iconColor = "text-muted-foreground"
-}: {
-  title: string;
-  value: number | string;
-  icon: React.ElementType;
-  description?: string;
-  iconColor?: string;
-}) {
-  return (
-    <Card className="bg-card/50 backdrop-blur-sm">
-      <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-        <CardTitle className="text-sm font-medium text-muted-foreground">
-          {title}
-        </CardTitle>
-        <Icon className={`h-4 w-4 ${iconColor}`} />
-      </CardHeader>
-      <CardContent>
-        <div className="text-2xl font-bold">{value}</div>
-        {description && (
-          <p className="text-xs text-muted-foreground mt-1">{description}</p>
-        )}
-      </CardContent>
-    </Card>
-  );
-}
-
 /**
  * Async data-fetching component for teams content.
  * Wrapped in Suspense to enable PPR static shell.
@@ -108,43 +64,26 @@ async function TeamsData() {
   return (
     <>
       {/* Compact Stats Row */}
-      <div className="grid gap-4 grid-cols-2 lg:grid-cols-5">
-        <StatCard
-          title={t('stats.totalTeams')}
-          value={totalTeams}
-          icon={UsersRound}
-          description={t('stats.totalMembers', { count: totalMembers })}
-          iconColor="text-primary"
-        />
-        <StatCard
-          title={t('stats.avgTeamSize')}
-          value={avgTeamSize}
-          icon={Users}
-          description={t('stats.membersPerTeam')}
-          iconColor="text-emerald-500"
-        />
-        <StatCard
-          title={t('stats.draft')}
-          value={draftTeams}
-          icon={FileEdit}
-          description={t('stats.awaitingActivation')}
-          iconColor="text-amber-500"
-        />
-        <StatCard
-          title={t('stats.active')}
-          value={activeTeams}
-          icon={CheckCircle}
-          description={t('stats.readyForAssessment')}
-          iconColor="text-emerald-500"
-        />
-        <StatCard
-          title={t('stats.archived')}
-          value={archivedTeams}
-          icon={Archive}
-          description={t('stats.noLongerActive')}
-          iconColor="text-muted-foreground"
-        />
-      </div>
+      <TeamsStatsRow
+        totalTeams={totalTeams}
+        totalMembers={totalMembers}
+        avgTeamSize={avgTeamSize}
+        draftTeams={draftTeams}
+        activeTeams={activeTeams}
+        archivedTeams={archivedTeams}
+        labels={{
+          totalTeams: t('stats.totalTeams'),
+          totalMembers: t('stats.totalMembers', { count: totalMembers }),
+          avgTeamSize: t('stats.avgTeamSize'),
+          membersPerTeam: t('stats.membersPerTeam'),
+          draft: t('stats.draft'),
+          awaitingActivation: t('stats.awaitingActivation'),
+          active: t('stats.active'),
+          readyForAssessment: t('stats.readyForAssessment'),
+          archived: t('stats.archived'),
+          noLongerActive: t('stats.noLongerActive'),
+        }}
+      />
 
       {/* Error Message */}
       {error && (
@@ -170,19 +109,20 @@ export default async function TeamsPage() {
   const t = await getTranslations('teams');
 
   return (
-    <div className="flex flex-1 flex-col gap-4 p-4 pt-6 md:gap-6 md:p-6">
+    <div className="flex flex-1 flex-col gap-4 sm:gap-6 p-4 pt-6 sm:p-6">
       <PageHeader
         title={t('page.title')}
         description={t('page.description')}
+        variant="dashboard"
       >
         <div className="flex gap-2">
-          <Link href="/admin/teams/new">
-            <Button className="gap-2 shadow-sm">
-              <UserPlus className="h-4 w-4" />
+          <Button asChild className="gap-2 shadow-sm min-h-[44px] sm:min-h-0 touch-manipulation active:scale-[0.98]">
+            <Link href="/admin/teams/new">
+              <UserPlus className="h-4 w-4 shrink-0" aria-hidden="true" />
               <span className="hidden sm:inline">{t('actions.createTeam')}</span>
               <span className="sm:hidden">{t('actions.create')}</span>
-            </Button>
-          </Link>
+            </Link>
+          </Button>
         </div>
       </PageHeader>
 

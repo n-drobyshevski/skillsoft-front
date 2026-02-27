@@ -94,7 +94,7 @@ function MobileTemplateCard({
       href={`/test-templates/${template.id}/start`}
       className={cn(
         // Base container - horizontal flex, full width
-        "flex items-center gap-3 px-3 py-2.5 w-full",
+        "flex items-start gap-3 px-3 py-2.5 w-full",
         "bg-card rounded-md border",
         // No underline on link
         "no-underline",
@@ -102,9 +102,9 @@ function MobileTemplateCard({
         "border-l-[3px]",
         goalConfig.borderClass,
         // Touch interaction
-        "active:bg-accent/50 transition-colors touch-manipulation",
+        "active:bg-accent/50 active:scale-[0.98] transition-all touch-manipulation motion-reduce:transition-none",
         // Focus state
-        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:ring-offset-2"
       )}
       role="article"
       aria-labelledby={`template-title-${template.id}`}
@@ -112,25 +112,25 @@ function MobileTemplateCard({
       {/* Goal Icon Container */}
       <div
         className={cn(
-          "shrink-0 size-9 rounded-lg flex items-center justify-center",
+          "shrink-0 size-9 rounded-lg flex items-center justify-center mt-0.5",
           goalConfig.iconBgClass
         )}
       >
-        <GoalIcon className={cn("size-4", goalConfig.iconTextClass)} />
+        <GoalIcon className={cn("size-4", goalConfig.iconTextClass)} aria-hidden="true" />
       </div>
 
       {/* Content */}
       <div className="flex-1 min-w-0">
         {/* Title Row */}
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-start gap-1.5">
           <h3
             id={`template-title-${template.id}`}
-            className="text-sm font-medium truncate no-underline decoration-transparent"
+            className="text-sm font-medium line-clamp-2 no-underline decoration-transparent"
           >
             {template.name}
           </h3>
           {template.version != null && (
-            <Badge variant="outline" className="shrink-0 text-[10px] px-1.5 py-0 h-4 font-medium text-muted-foreground">
+            <Badge variant="outline" className="shrink-0 text-xs-safe px-1.5 py-0 h-4 font-medium text-muted-foreground">
               v{template.version}
             </Badge>
           )}
@@ -140,30 +140,30 @@ function MobileTemplateCard({
         </div>
 
         {/* Inline Stats Row */}
-        <div className="flex items-center gap-1.5 mt-0.5 text-xs text-muted-foreground">
+        <div className="flex items-center gap-1.5 mt-0.5 text-xs text-muted-foreground tabular-nums">
           <span className="inline-flex items-center gap-0.5">
-            <Clock className="size-3" />
+            <Clock className="size-3 shrink-0" aria-hidden="true" />
             {formatDuration(template.timeLimitMinutes, true, t)}
           </span>
           <span className="text-muted-foreground/40">•</span>
           <span className="inline-flex items-center gap-0.5">
-            <Target className="size-3" />
+            <Target className="size-3 shrink-0" aria-hidden="true" />
             {template.passingScore}%
           </span>
           <span className="text-muted-foreground/40">•</span>
           <span className="inline-flex items-center gap-0.5">
-            <BookOpen className="size-3" />
+            <BookOpen className="size-3 shrink-0" aria-hidden="true" />
             {template.competencyCount}
           </span>
         </div>
       </div>
 
       {/* Right Actions */}
-      <div className="flex items-center gap-0.5 shrink-0">
+      <div className="flex items-center gap-0.5 shrink-0 mt-0.5">
         <Button
           variant="ghost"
           size="icon"
-          className="size-8 text-muted-foreground"
+          className="size-8 min-h-[44px] min-w-[44px] sm:min-h-0 sm:min-w-0 text-muted-foreground touch-manipulation"
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
@@ -173,7 +173,7 @@ function MobileTemplateCard({
         >
           <MoreVertical className="size-4" />
         </Button>
-        <ChevronRight className="size-4 text-muted-foreground/50" />
+        <ChevronRight className="size-4 text-muted-foreground/50" aria-hidden="true" />
       </div>
     </Link>
   );
@@ -223,7 +223,7 @@ function DesktopTemplateCard({
     <Card
       className={cn(
         "group flex flex-col h-full bg-card overflow-hidden",
-        "hover:shadow-md hover:-translate-y-0.5 transition-all duration-200",
+        "hover:shadow-md hover:border-primary/30 hover:-translate-y-px transition-all duration-200 motion-reduce:transition-none",
         // Goal indicator as left border instead of top accent bar
         "border-l-[3px]",
         goalConfig.borderClass
@@ -249,7 +249,7 @@ function DesktopTemplateCard({
             {/* Recommended Badge */}
             {isRecommended && (
               <Badge className="bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300 text-xs font-medium px-2 py-0.5">
-                <Sparkles className="h-3 w-3 mr-1" />
+                <Sparkles className="h-3 w-3 mr-1 shrink-0" aria-hidden="true" />
                 {t('recommended')}
               </Badge>
             )}
@@ -267,7 +267,7 @@ function DesktopTemplateCard({
                 asChild
               >
                 <Link href={`/test-templates/${template.id}/builder`}>
-                  <Pencil className="h-4 w-4" />
+                  <Pencil className="h-4 w-4 shrink-0" aria-hidden="true" />
                 </Link>
               </Button>
             )}
@@ -281,7 +281,7 @@ function DesktopTemplateCard({
                   className="h-7 w-7 opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity"
                   aria-label={t('actions')}
                 >
-                  <MoreVertical className="h-4 w-4" />
+                  <MoreVertical className="h-4 w-4 shrink-0" aria-hidden="true" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-44">

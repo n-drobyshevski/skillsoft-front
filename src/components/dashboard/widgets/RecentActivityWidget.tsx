@@ -138,18 +138,18 @@ export function RecentActivityWidget({
   return (
     <Card className={cn('h-full', className)}>
       <CardHeader className="flex flex-row items-center justify-between pb-2">
-        <div className="flex items-center gap-2">
-          <div className="w-9 h-9 rounded-lg bg-muted flex items-center justify-center">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-muted flex items-center justify-center">
             <Clock className="w-4 h-4 text-muted-foreground" />
           </div>
           <CardTitle className="text-base">{t('recentActivity')}</CardTitle>
         </div>
-        <Link href="/test-results">
-          <Button variant="ghost" size="sm" className="h-7 px-2">
+        <Button asChild variant="ghost" size="sm" className="h-7 px-2 min-h-[44px] sm:min-h-0">
+          <Link href="/test-results">
             <ChevronRight className="w-4 h-4" />
             <span className="sr-only">{t('viewAllActivity')}</span>
-          </Button>
-        </Link>
+          </Link>
+        </Button>
       </CardHeader>
       <CardContent className="pt-1">
         {error ? (
@@ -386,8 +386,8 @@ function formatTimeAgo(date: Date): string {
 function RecentActivityWidgetSkeleton({ className }: { className?: string }) {
   return (
     <Card className={cn('h-full animate-pulse', className)}>
-      <CardHeader className="flex flex-row items-center gap-2 pb-2">
-        <Skeleton className="w-9 h-9 rounded-lg" />
+      <CardHeader className="flex flex-row items-center gap-3 pb-2">
+        <Skeleton className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg" />
         <Skeleton className="h-4 w-28" />
       </CardHeader>
       <CardContent className="pt-1">
