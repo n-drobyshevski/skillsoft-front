@@ -29,6 +29,7 @@ import { LibraryCompetency, HealthStatus } from '../actions';
 import type { ActiveDragData } from './BuilderDndProvider';
 import { useBlueprintStore } from '@/store/blueprint-store';
 import { IndicatorExpansion } from './IndicatorExpansion';
+import { fetchIndicatorInventory } from '../actions';
 
 // ============================================
 // TYPES
@@ -387,20 +388,24 @@ export function LibraryPanel({ onAdd }: LibraryPanelProps) {
 
   // Accordion expansion state — only one card expanded at a time
   const [expandedId, setExpandedId] = useState<string | null>(null);
-  const fetchIndicatorInventory = useBlueprintStore((s) => s.fetchIndicatorInventory);
+  const setIndicatorInventory = useBlueprintStore((s) => s.setIndicatorInventory);
   const indicatorInventories = useBlueprintStore((s) => s.indicatorInventories);
 
   const handleToggleExpand = useCallback(
     (competencyId: string) => {
       setExpandedId((prev) => {
         const newId = prev === competencyId ? null : competencyId;
-        if (newId) {
-          fetchIndicatorInventory(newId);
+        if (newId && !indicatorInventories[newId]) {
+          fetchIndicatorInventory(newId).then((result) => {
+            if (result.success) {
+              setIndicatorInventory(newId, result.data);
+            }
+          });
         }
         return newId;
       });
     },
-    [fetchIndicatorInventory]
+    [setIndicatorInventory, indicatorInventories]
   );
 
   // Filter competencies by search

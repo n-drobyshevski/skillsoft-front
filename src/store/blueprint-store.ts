@@ -138,10 +138,10 @@ interface BlueprintStoreActions {
   setInventoryByCompetency: (inventory: Record<string, Record<Difficulty, number>>) => void;
 
   /**
-   * Fetch and cache indicator inventory for a competency.
-   * No-op if already cached. Called when a library card is expanded.
+   * Cache indicator inventory for a competency.
+   * Called by the component after fetching via server action.
    */
-  fetchIndicatorInventory: (competencyId: string) => Promise<void>;
+  setIndicatorInventory: (competencyId: string, data: IndicatorInventory) => void;
 }
 
 export type BlueprintStore = BlueprintStoreState & BlueprintStoreActions;
@@ -553,30 +553,17 @@ export const useBlueprintStore = create<BlueprintStore>()(
         );
       },
 
-      fetchIndicatorInventory: async (competencyId) => {
-        // Skip if already cached
-        if (get().indicatorInventories[competencyId]) return;
-
-        try {
-          const { fetchIndicatorInventory: fetchAction } = await import(
-            '@/app/(workspace)/test-templates/[id]/builder/actions'
-          );
-          const result = await fetchAction(competencyId);
-          if (result.success) {
-            set(
-              (prev) => ({
-                indicatorInventories: {
-                  ...prev.indicatorInventories,
-                  [competencyId]: result.data,
-                },
-              }),
-              false,
-              'fetchIndicatorInventory'
-            );
-          }
-        } catch (error) {
-          console.error('Failed to fetch indicator inventory:', error);
-        }
+      setIndicatorInventory: (competencyId, data) => {
+        set(
+          (prev) => ({
+            indicatorInventories: {
+              ...prev.indicatorInventories,
+              [competencyId]: data,
+            },
+          }),
+          false,
+          'setIndicatorInventory'
+        );
       },
     })),
     {
