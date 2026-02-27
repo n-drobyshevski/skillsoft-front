@@ -393,19 +393,17 @@ export function LibraryPanel({ onAdd }: LibraryPanelProps) {
 
   const handleToggleExpand = useCallback(
     (competencyId: string) => {
-      setExpandedId((prev) => {
-        const newId = prev === competencyId ? null : competencyId;
-        if (newId && !indicatorInventories[newId]) {
-          fetchIndicatorInventory(newId).then((result) => {
-            if (result.success) {
-              setIndicatorInventory(newId, result.data);
-            }
-          });
-        }
-        return newId;
-      });
+      const newId = expandedId === competencyId ? null : competencyId;
+      setExpandedId(newId);
+      if (newId && !indicatorInventories[newId]) {
+        fetchIndicatorInventory(newId).then((result) => {
+          if (result.success) {
+            setIndicatorInventory(newId, result.data);
+          }
+        });
+      }
     },
-    [setIndicatorInventory, indicatorInventories]
+    [expandedId, setIndicatorInventory, indicatorInventories]
   );
 
   // Filter competencies by search
