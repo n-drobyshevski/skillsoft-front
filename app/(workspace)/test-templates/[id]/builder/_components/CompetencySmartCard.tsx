@@ -235,6 +235,11 @@ export function CompetencySmartCard({
             {/* Traffic light dot - mobile only */}
             <TrafficLightIndicator status={status} className="md:hidden" />
             <h4 className="text-sm md:text-base font-semibold truncate text-foreground">{competency.name}</h4>
+            {competency.onetRecommended && (
+              <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold uppercase bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300 shrink-0">
+                O*NET
+              </span>
+            )}
           </div>
           <div className="flex items-center gap-1 sm:gap-2 mt-0.5 text-[11px] sm:text-xs text-muted-foreground overflow-hidden">
             <Tooltip>

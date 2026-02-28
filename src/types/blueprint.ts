@@ -38,6 +38,8 @@ export interface BlueprintCompetency {
   indicatorCount?: number;
   weight: number;
   difficulty?: Difficulty;
+  /** Ephemeral flag — marks competencies auto-added from O*NET profile. Not persisted. */
+  onetRecommended?: boolean;
 }
 
 export interface AdaptivitySettings {
