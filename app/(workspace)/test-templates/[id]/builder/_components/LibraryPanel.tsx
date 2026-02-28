@@ -54,24 +54,35 @@ function HealthIndicator({
   health,
   competencyId,
   questionsPerCompetency,
+  targetDifficulty,
 }: {
   health: HealthStatus;
   competencyId: string;
   questionsPerCompetency: number;
+  targetDifficulty?: import('@/types/blueprint').Difficulty;
 }) {
   const tHealth = useTranslations('builder.library.health');
   const tLib = useTranslations('builder.library');
   const inventory = useIndicatorInventory(competencyId);
 
-  // Check indicator-level risk from cached inventory
+  // Check indicator-level risk from cached inventory.
+  // Two checks:
+  //   1. Even-split: indicator has fewer total questions than its fair share
+  //   2. Difficulty-gap: indicator has < 2 questions at the target difficulty,
+  //      which will force the assembler to borrow from siblings
   let atRiskCount = 0;
   if (inventory) {
     const activeIndicators = inventory.indicators.filter((ind) => ind.isActive);
     if (activeIndicators.length > 0) {
-      const expected = Math.ceil(questionsPerCompetency / activeIndicators.length);
-      atRiskCount = activeIndicators.filter(
-        (ind) => ind.totalQuestions < expected
-      ).length;
+      const expectedTotal = Math.ceil(questionsPerCompetency / activeIndicators.length);
+      const diff = targetDifficulty ?? 'INTERMEDIATE';
+
+      atRiskCount = activeIndicators.filter((ind) => {
+        if (ind.totalQuestions < expectedTotal) return true;
+        // Check difficulty-specific availability (assembler MIN_QUESTIONS_PER_GAP = 2)
+        const atDifficulty = ind.questionsByDifficulty?.[diff] ?? 0;
+        return atDifficulty < 2;
+      }).length;
     }
   }
 
@@ -147,6 +158,7 @@ interface CompetencyItemProps {
   isExpanded?: boolean;
   onToggleExpand?: () => void;
   questionsPerCompetency?: number;
+  targetDifficulty?: import('@/types/blueprint').Difficulty;
 }
 
 /**
@@ -160,6 +172,7 @@ function DraggableCompetencyItem({
   isExpanded,
   onToggleExpand,
   questionsPerCompetency,
+  targetDifficulty,
 }: Omit<CompetencyItemProps, 'enableDrag'>) {
   const tLib = useTranslations('builder.library');
   const isCritical = competency.health === 'CRITICAL';
@@ -209,6 +222,7 @@ function DraggableCompetencyItem({
           health={competency.health}
           competencyId={competency.id}
           questionsPerCompetency={questionsPerCompetency ?? 5}
+          targetDifficulty={targetDifficulty}
         />
         <CategoryIcon category={competency.category} />
         <div className="flex-1 min-w-0">
@@ -280,6 +294,7 @@ function StaticCompetencyItem({
   isExpanded,
   onToggleExpand,
   questionsPerCompetency,
+  targetDifficulty,
 }: Omit<CompetencyItemProps, 'enableDrag'>) {
   const tLib = useTranslations('builder.library');
   const isCritical = competency.health === 'CRITICAL';
@@ -303,6 +318,7 @@ function StaticCompetencyItem({
           health={competency.health}
           competencyId={competency.id}
           questionsPerCompetency={questionsPerCompetency ?? 5}
+          targetDifficulty={targetDifficulty}
         />
         <CategoryIcon category={competency.category} />
         <div className="flex-1 min-w-0">
@@ -373,6 +389,7 @@ function CompetencyItem({
   isExpanded,
   onToggleExpand,
   questionsPerCompetency,
+  targetDifficulty,
 }: CompetencyItemProps) {
   if (enableDrag) {
     return (
@@ -383,6 +400,7 @@ function CompetencyItem({
         isExpanded={isExpanded}
         onToggleExpand={onToggleExpand}
         questionsPerCompetency={questionsPerCompetency}
+        targetDifficulty={targetDifficulty}
       />
     );
   }
@@ -395,6 +413,7 @@ function CompetencyItem({
       isExpanded={isExpanded}
       onToggleExpand={onToggleExpand}
       questionsPerCompetency={questionsPerCompetency}
+      targetDifficulty={targetDifficulty}
     />
   );
 }
@@ -614,6 +633,9 @@ export function LibraryPanel({ onAdd }: LibraryPanelProps) {
                     onToggleExpand={() => handleToggleExpand(row.competency.id)}
                     questionsPerCompetency={
                       state.competencies.find((c) => c.id === row.competency.id)?.questionCount ?? 5
+                    }
+                    targetDifficulty={
+                      state.competencies.find((c) => c.id === row.competency.id)?.difficulty
                     }
                   />
                 </div>
