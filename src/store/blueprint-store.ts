@@ -39,6 +39,8 @@ interface BlueprintStoreState {
   inventoryByCompetency: Record<string, Record<Difficulty, number>>;
   /** Cached indicator-level inventory per competency (lazy-loaded on card expand) */
   indicatorInventories: Record<string, IndicatorInventory>;
+  /** Allowed competency IDs for JOB_FIT restriction (null = unrestricted) */
+  allowedCompetencyIds: string[] | null;
   /** Template identifier */
   templateId: string;
   /** Template display name */
@@ -142,6 +144,18 @@ interface BlueprintStoreActions {
    * Called by the component after fetching via server action.
    */
   setIndicatorInventory: (competencyId: string, data: IndicatorInventory) => void;
+
+  /**
+   * Set allowed competency IDs for JOB_FIT library restriction.
+   * null = unrestricted (OVERVIEW mode).
+   */
+  setAllowedCompetencyIds: (ids: string[] | null) => void;
+
+  /**
+   * Apply O*NET restriction: set allowed IDs AND remove non-matching canvas items.
+   * Returns the number of removed competencies (for toast feedback).
+   */
+  applyOnetRestriction: (allowedIds: string[]) => number;
 }
 
 export type BlueprintStore = BlueprintStoreState & BlueprintStoreActions;
@@ -167,6 +181,7 @@ const defaultState: BlueprintStoreState = {
   indicatorsByCompetency: {},
   inventoryByCompetency: {},
   indicatorInventories: {},
+  allowedCompetencyIds: null,
   templateId: '',
   templateName: '',
   isReadOnly: false,
@@ -564,6 +579,34 @@ export const useBlueprintStore = create<BlueprintStore>()(
           false,
           'setIndicatorInventory'
         );
+      },
+
+      setAllowedCompetencyIds: (ids) => {
+        set({ allowedCompetencyIds: ids }, false, 'setAllowedCompetencyIds');
+      },
+
+      applyOnetRestriction: (allowedIds) => {
+        const allowedSet = new Set(allowedIds);
+        const { state: currentState } = get();
+        const removed = currentState.competencies.filter(
+          (c) => !allowedSet.has(c.id)
+        );
+
+        set(
+          (prev) => ({
+            allowedCompetencyIds: allowedIds,
+            state: {
+              ...prev.state,
+              competencies: prev.state.competencies.filter(
+                (c) => allowedSet.has(c.id)
+              ),
+            },
+          }),
+          false,
+          'applyOnetRestriction'
+        );
+
+        return removed.length;
       },
     })),
     {

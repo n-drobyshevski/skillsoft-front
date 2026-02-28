@@ -427,6 +427,9 @@ export function LibraryPanel({ onAdd }: LibraryPanelProps) {
 
   const selectedIds = state.competencies.map((c) => c.id);
 
+  // O*NET restriction: only show matching competencies in JOB_FIT mode
+  const allowedIds = useBlueprintStore((s) => s.allowedCompetencyIds);
+
   // Accordion expansion state — only one card expanded at a time
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const setIndicatorInventory = useBlueprintStore((s) => s.setIndicatorInventory);
@@ -447,8 +450,12 @@ export function LibraryPanel({ onAdd }: LibraryPanelProps) {
     [expandedId, setIndicatorInventory, indicatorInventories]
   );
 
-  // Filter competencies by search
-  const filteredCompetencies = libraryCompetencies.filter(
+  // Apply O*NET restriction (JOB_FIT mode), then filter by search
+  const restrictedCompetencies = allowedIds
+    ? libraryCompetencies.filter((c) => allowedIds.includes(c.id))
+    : libraryCompetencies;
+
+  const filteredCompetencies = restrictedCompetencies.filter(
     (c) =>
       c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       c.category.toLowerCase().includes(searchQuery.toLowerCase())

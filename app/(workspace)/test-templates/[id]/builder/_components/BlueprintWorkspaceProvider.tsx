@@ -22,6 +22,7 @@ import {
   updateBlueprint,
   simulateTest,
   fetchInventoryHealth,
+  fetchOnetCompetencies,
   SimulationProfile,
 } from '../actions';
 import { ConflictResolutionDialog } from './ConflictResolutionDialog';
@@ -180,6 +181,8 @@ export function BlueprintWorkspaceProvider({
   const storeRollback = useBlueprintStore((s) => s.rollbackToServerState);
   const storeUpdateLibraryHealth = useBlueprintStore((s) => s.updateLibraryHealth);
   const storeSetInventory = useBlueprintStore((s) => s.setInventoryByCompetency);
+  const storeApplyOnetRestriction = useBlueprintStore((s) => s.applyOnetRestriction);
+  const storeSetAllowedCompetencyIds = useBlueprintStore((s) => s.setAllowedCompetencyIds);
 
   // Simulation store state and actions
   const isSimulating = useSimulationStore((s) => s.isSimulating);
@@ -319,6 +322,29 @@ export function BlueprintWorkspaceProvider({
       }
     }
     loadHealth();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // ============================================
+  // O*NET LIBRARY RESTRICTION (JOB_FIT mode)
+  // ============================================
+
+  useEffect(() => {
+    if (initialState.strategy === 'TARGETED_FIT' && initialState.onetSocCode) {
+      fetchOnetCompetencies(initialState.onetSocCode).then((result) => {
+        if (result.success) {
+          const allowedIds = result.data.map((c) => c.id);
+          const removedCount = storeApplyOnetRestriction(allowedIds);
+          if (removedCount > 0) {
+            toast.info(
+              `Removed ${removedCount} competenc${removedCount === 1 ? 'y' : 'ies'} not matching the O*NET profile`
+            );
+          }
+        }
+      });
+    } else {
+      storeSetAllowedCompetencyIds(null);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

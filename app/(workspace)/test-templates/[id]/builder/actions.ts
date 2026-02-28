@@ -51,6 +51,7 @@ export type {
   ActionResponse,
   IndicatorQuestionStats,
   IndicatorInventory,
+  ResolvedOnetCompetency,
 } from '@/types/blueprint';
 
 // Import types needed by server action implementations below
@@ -65,6 +66,7 @@ import type {
   SampleQuestionResponse,
   ActionResponse,
   IndicatorInventory,
+  ResolvedOnetCompetency,
 } from '@/types/blueprint';
 
 // Import strategy mapping utilities (non-server-action exports)
@@ -606,6 +608,46 @@ export async function publishBlueprint(
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Publish failed',
+    };
+  }
+}
+
+/**
+ * Fetch competencies that match an O*NET profile's benchmarks.
+ * Used to restrict the library panel in JOB_FIT (TARGETED_FIT) mode.
+ */
+export async function fetchOnetCompetencies(
+  socCode: string
+): Promise<ActionResponse<ResolvedOnetCompetency[]>> {
+  try {
+    const authHeaders = await getAuthHeaders();
+
+    const response = await fetch(
+      `${getApiBaseUrl()}/v1/onet/${encodeURIComponent(socCode)}/competencies`,
+      {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          ...authHeaders,
+        },
+        cache: 'no-store',
+      }
+    );
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(
+        errorData.message || `O*NET competency fetch failed: ${response.status}`
+      );
+    }
+
+    const data: ResolvedOnetCompetency[] = await response.json();
+    return { success: true, data };
+  } catch (error) {
+    console.error('fetchOnetCompetencies error:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to fetch O*NET competencies',
     };
   }
 }

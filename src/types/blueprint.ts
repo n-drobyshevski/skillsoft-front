@@ -60,6 +60,18 @@ export interface BlueprintState {
   saturationThreshold?: number;
 }
 
+/**
+ * A competency resolved from an O*NET benchmark profile.
+ * Used to restrict the library panel in JOB_FIT mode.
+ */
+export interface ResolvedOnetCompetency {
+  id: string;
+  name: string;
+  category: string;
+  onetBenchmarkName: string;
+  benchmarkScore: number;
+}
+
 export interface LibraryCompetency {
   id: string;
   name: string;
