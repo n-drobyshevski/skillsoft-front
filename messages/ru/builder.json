@@ -85,7 +85,12 @@
     "indicatorWarning": "{count, plural, one {# индикатор имеет} few {# индикатора имеют} other {# индикаторов имеют}} недостаточное покрытие вопросами",
     "loading": "Загрузка данных...",
     "expandCard": "Показать детали индикаторов для {name}",
-    "collapseCard": "Скрыть детали индикаторов для {name}"
+    "collapseCard": "Скрыть детали индикаторов для {name}",
+    "onetFilterActive": "Показано {count} компетенций O*NET.",
+    "onetFilterInactive": "Показаны все {count} компетенций.",
+    "onetShowAll": "Показать все",
+    "onetShowMatched": "Только O*NET",
+    "onetIconTooltip": "Входит в профиль должности O*NET"
   },
   "card": {
     "dragToReorder": "Удерживайте и перетащите для изменения порядка",
@@ -147,7 +152,8 @@
     "importanceAllocationTooltip": "{level}: ~{count} вопросов ({multiplier}x от базы)",
     "importanceAllocationBase": "База: {base}в на индикатор × {indicators} индикаторов = {total}в",
     "difficultyTooltip": "Предпочтительный уровень сложности для выбора вопросов",
-    "inventoryDepthTooltip": "Доступные вопросы: Базовый / Средний / Продвинутый / Экспертный"
+    "inventoryDepthTooltip": "Доступные вопросы: Базовый / Средний / Продвинутый / Экспертный",
+    "onetBadgeTooltip": "Добавлено автоматически из профиля O*NET. Эта компетенция требуется для выбранной должности."
   },
   "saveStatus": {
     "allChangesSaved": "Все изменения сохранены",

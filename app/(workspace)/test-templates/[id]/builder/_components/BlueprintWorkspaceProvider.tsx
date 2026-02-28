@@ -230,7 +230,12 @@ export function BlueprintWorkspaceProvider({
     debounceMs: 2000,
     maxWaitMs: 10000,
     enabled: !isReadOnly,
-    compareKey: (s) => JSON.stringify({ competencies: s.competencies, settings: s }),
+    compareKey: (s) => JSON.stringify({
+      // Strip ephemeral onetRecommended flag — it's a visual-only client field
+      // and must not trigger a save cycle on reload when the O*NET effect re-applies it
+      competencies: s.competencies.map(({ onetRecommended: _, ...rest }) => rest),
+      settings: s,
+    }),
     retry: {
       maxAttempts: 3,
       baseDelayMs: 1000,
@@ -369,10 +374,10 @@ export function BlueprintWorkspaceProvider({
       fetchOnetCompetencies(initialState.onetSocCode).then((result) => {
         if (result.success) {
           const allowedIds = result.data.map((c) => c.id);
-          const removedCount = storeApplyOnetRestriction(allowedIds);
-          if (removedCount > 0) {
+          const addedCount = storeApplyOnetRestriction(allowedIds, result.data);
+          if (addedCount > 0) {
             toast.info(
-              `Removed ${removedCount} competenc${removedCount === 1 ? 'y' : 'ies'} not matching the O*NET profile`
+              `Auto-added ${addedCount} O*NET competenc${addedCount === 1 ? 'y' : 'ies'} to the canvas`
             );
           }
         }

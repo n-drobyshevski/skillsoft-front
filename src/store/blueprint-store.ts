@@ -6,6 +6,7 @@ import type {
   BlueprintState,
   BlueprintCompetency,
   LibraryCompetency,
+  ResolvedOnetCompetency,
   HealthStatus,
   Difficulty,
   IndicatorInventory,
@@ -152,10 +153,11 @@ interface BlueprintStoreActions {
   setAllowedCompetencyIds: (ids: string[] | null) => void;
 
   /**
-   * Apply O*NET restriction: set allowed IDs AND remove non-matching canvas items.
-   * Returns the number of removed competencies (for toast feedback).
+   * Apply O*NET restriction: set allowed IDs AND auto-add resolved O*NET
+   * competencies to the canvas (marking them with onetRecommended).
+   * Returns the number of ADDED competencies (for toast feedback).
    */
-  applyOnetRestriction: (allowedIds: string[]) => number;
+  applyOnetRestriction: (allowedIds: string[], resolvedCompetencies?: ResolvedOnetCompetency[]) => number;
 }
 
 export type BlueprintStore = BlueprintStoreState & BlueprintStoreActions;
@@ -585,28 +587,61 @@ export const useBlueprintStore = create<BlueprintStore>()(
         set({ allowedCompetencyIds: ids }, false, 'setAllowedCompetencyIds');
       },
 
-      applyOnetRestriction: (allowedIds) => {
+      applyOnetRestriction: (allowedIds, resolvedCompetencies) => {
         const allowedSet = new Set(allowedIds);
-        const { state: currentState } = get();
-        const removed = currentState.competencies.filter(
-          (c) => !allowedSet.has(c.id)
+        const { state: currentState, inventoryByCompetency, libraryCompetencies } = get();
+        const existingIds = new Set(currentState.competencies.map((c) => c.id));
+
+        // Build library lookup for indicator counts
+        const libraryLookup = new Map(
+          libraryCompetencies.map((c) => [c.id, c])
         );
+
+        // Determine which O*NET competencies need to be added
+        const newCompetencies: BlueprintCompetency[] = [];
+        if (resolvedCompetencies) {
+          for (const rc of resolvedCompetencies) {
+            if (!existingIds.has(rc.id)) {
+              // Compute questionCount from inventory (same as toBlueprintCompetency)
+              const counts = inventoryByCompetency[rc.id];
+              const questionCount = counts
+                ? Object.values(counts).reduce((sum, n) => sum + n, 0)
+                : 0;
+              const lib = libraryLookup.get(rc.id);
+              newCompetencies.push({
+                id: rc.id,
+                name: rc.name,
+                category: rc.category,
+                questionCount,
+                indicatorCount: lib?.indicatorCount,
+                weight: 1.0,
+                difficulty: 'INTERMEDIATE',
+                onetRecommended: true,
+              });
+            }
+          }
+        }
 
         set(
           (prev) => ({
             allowedCompetencyIds: allowedIds,
             state: {
               ...prev.state,
-              competencies: prev.state.competencies.filter(
-                (c) => allowedSet.has(c.id)
-              ),
+              competencies: [
+                // New O*NET competencies at the START
+                ...newCompetencies,
+                // Existing competencies — mark matching ones with onetRecommended
+                ...prev.state.competencies.map((c) =>
+                  allowedSet.has(c.id) ? { ...c, onetRecommended: true } : c
+                ),
+              ],
             },
           }),
           false,
           'applyOnetRestriction'
         );
 
-        return removed.length;
+        return newCompetencies.length;
       },
     })),
     {

@@ -85,7 +85,12 @@
     "indicatorWarning": "{count, plural, one {# indicator has} other {# indicators have}} insufficient question coverage",
     "loading": "Loading indicator data...",
     "expandCard": "Show indicator details for {name}",
-    "collapseCard": "Hide indicator details for {name}"
+    "collapseCard": "Hide indicator details for {name}",
+    "onetFilterActive": "Showing {count} O*NET-matched competencies.",
+    "onetFilterInactive": "Showing all {count} competencies.",
+    "onetShowAll": "Show all",
+    "onetShowMatched": "O*NET only",
+    "onetIconTooltip": "Part of the O*NET job profile for this position"
   },
   "card": {
     "dragToReorder": "Hold and drag to reorder",
@@ -147,7 +152,8 @@
     "importanceAllocationTooltip": "{level}: ~{count} questions ({multiplier}x base)",
     "importanceAllocationBase": "Base: {base}q per indicator × {indicators} indicators = {total}q",
     "difficultyTooltip": "Preferred difficulty level for question selection",
-    "inventoryDepthTooltip": "Available questions: Foundational / Intermediate / Advanced / Expert"
+    "inventoryDepthTooltip": "Available questions: Foundational / Intermediate / Advanced / Expert",
+    "onetBadgeTooltip": "Auto-added from the O*NET job profile. This competency is required for the selected occupation."
   },
   "saveStatus": {
     "allChangesSaved": "All changes saved",

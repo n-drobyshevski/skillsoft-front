@@ -123,7 +123,8 @@ function HealthIndicator({
 // CATEGORY ICON
 // ============================================
 
-function CategoryIcon({ category }: { category: string }) {
+function CategoryIcon({ category, isOnet }: { category: string; isOnet?: boolean }) {
+  const t = useTranslations('builder.library');
   const iconMap: Record<string, React.ElementType> = {
     COGNITIVE: Brain,
     INTERPERSONAL: Users,
@@ -138,10 +139,31 @@ function CategoryIcon({ category }: { category: string }) {
 
   const Icon = iconMap[category] ?? Brain;
 
-  return (
-    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-muted">
-      <Icon className="h-3.5 w-3.5 text-muted-foreground" />
+  const icon = (
+    <div
+      className={cn(
+        'flex h-7 w-7 shrink-0 items-center justify-center rounded-lg',
+        isOnet ? 'bg-blue-100 dark:bg-blue-900/40' : 'bg-muted'
+      )}
+    >
+      <Icon
+        className={cn(
+          'h-3.5 w-3.5',
+          isOnet ? 'text-blue-600 dark:text-blue-400' : 'text-muted-foreground'
+        )}
+      />
     </div>
+  );
+
+  if (!isOnet) return icon;
+
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>{icon}</TooltipTrigger>
+      <TooltipContent side="top" className="text-xs max-w-[220px]">
+        {t('onetIconTooltip')}
+      </TooltipContent>
+    </Tooltip>
   );
 }
 
@@ -159,6 +181,8 @@ interface CompetencyItemProps {
   onToggleExpand?: () => void;
   questionsPerCompetency?: number;
   targetDifficulty?: import('@/types/blueprint').Difficulty;
+  /** Whether this competency is part of the O*NET job profile */
+  isOnet?: boolean;
 }
 
 /**
@@ -173,6 +197,7 @@ function DraggableCompetencyItem({
   onToggleExpand,
   questionsPerCompetency,
   targetDifficulty,
+  isOnet,
 }: Omit<CompetencyItemProps, 'enableDrag'>) {
   const tLib = useTranslations('builder.library');
   const isCritical = competency.health === 'CRITICAL';
@@ -224,7 +249,7 @@ function DraggableCompetencyItem({
           questionsPerCompetency={questionsPerCompetency ?? 5}
           targetDifficulty={targetDifficulty}
         />
-        <CategoryIcon category={competency.category} />
+        <CategoryIcon category={competency.category} isOnet={isOnet} />
         <div className="flex-1 min-w-0">
           <p className="text-sm font-medium leading-tight truncate">{competency.name}</p>
           <p className="text-[11px] text-muted-foreground truncate">
@@ -295,6 +320,7 @@ function StaticCompetencyItem({
   onToggleExpand,
   questionsPerCompetency,
   targetDifficulty,
+  isOnet,
 }: Omit<CompetencyItemProps, 'enableDrag'>) {
   const tLib = useTranslations('builder.library');
   const isCritical = competency.health === 'CRITICAL';
@@ -320,7 +346,7 @@ function StaticCompetencyItem({
           questionsPerCompetency={questionsPerCompetency ?? 5}
           targetDifficulty={targetDifficulty}
         />
-        <CategoryIcon category={competency.category} />
+        <CategoryIcon category={competency.category} isOnet={isOnet} />
         <div className="flex-1 min-w-0">
           <p className="text-sm font-medium leading-tight truncate">{competency.name}</p>
           <p className="text-[11px] text-muted-foreground truncate">
@@ -390,6 +416,7 @@ function CompetencyItem({
   onToggleExpand,
   questionsPerCompetency,
   targetDifficulty,
+  isOnet,
 }: CompetencyItemProps) {
   if (enableDrag) {
     return (
@@ -401,6 +428,7 @@ function CompetencyItem({
         onToggleExpand={onToggleExpand}
         questionsPerCompetency={questionsPerCompetency}
         targetDifficulty={targetDifficulty}
+        isOnet={isOnet}
       />
     );
   }
@@ -414,6 +442,7 @@ function CompetencyItem({
       onToggleExpand={onToggleExpand}
       questionsPerCompetency={questionsPerCompetency}
       targetDifficulty={targetDifficulty}
+      isOnet={isOnet}
     />
   );
 }
@@ -450,6 +479,10 @@ export function LibraryPanel({ onAdd }: LibraryPanelProps) {
   // O*NET restriction: only show matching competencies in JOB_FIT mode
   const allowedIds = useBlueprintStore((s) => s.allowedCompetencyIds);
 
+  // O*NET filter toggle — when true, restrict to O*NET matches only
+  const [onetFilterActive, setOnetFilterActive] = useState(false);
+  const allowedIdSet = useMemo(() => allowedIds ? new Set(allowedIds) : null, [allowedIds]);
+
   // Accordion expansion state — only one card expanded at a time
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const setIndicatorInventory = useBlueprintStore((s) => s.setIndicatorInventory);
@@ -470,8 +503,8 @@ export function LibraryPanel({ onAdd }: LibraryPanelProps) {
     [expandedId, setIndicatorInventory, indicatorInventories]
   );
 
-  // Apply O*NET restriction (JOB_FIT mode), then filter by search
-  const restrictedCompetencies = allowedIds
+  // Apply O*NET restriction (JOB_FIT mode) when toggle is active, then filter by search
+  const restrictedCompetencies = allowedIds && onetFilterActive
     ? libraryCompetencies.filter((c) => allowedIds.includes(c.id))
     : libraryCompetencies;
 
@@ -567,12 +600,21 @@ export function LibraryPanel({ onAdd }: LibraryPanelProps) {
 
       {/* O*NET restriction info banner */}
       {allowedIds && (
-        <div className="flex items-start gap-2 px-3 py-2.5 border-b bg-blue-50/50 dark:bg-blue-950/20">
-          <Info className="h-3.5 w-3.5 text-blue-500 shrink-0 mt-0.5" />
-          <p className="text-[11px] leading-snug text-blue-700 dark:text-blue-400">
-            Filtered by O*NET job profile — only {allowedIds.length} matching{' '}
-            {allowedIds.length === 1 ? 'competency is' : 'competencies are'} available.
+        <div className="flex items-center gap-2 px-3 py-2 border-b bg-blue-50/50 dark:bg-blue-950/20">
+          <Info className="h-3.5 w-3.5 text-blue-500 shrink-0" />
+          <p className="flex-1 text-[11px] leading-snug text-blue-700 dark:text-blue-400">
+            {onetFilterActive
+              ? t('onetFilterActive', { count: allowedIds.length })
+              : t('onetFilterInactive', { count: libraryCompetencies.length })}
           </p>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-6 px-2 text-[10px] font-medium text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/40 shrink-0"
+            onClick={() => setOnetFilterActive((prev) => !prev)}
+          >
+            {onetFilterActive ? t('onetShowAll') : t('onetShowMatched')}
+          </Button>
         </div>
       )}
 
@@ -637,6 +679,7 @@ export function LibraryPanel({ onAdd }: LibraryPanelProps) {
                     targetDifficulty={
                       state.competencies.find((c) => c.id === row.competency.id)?.difficulty
                     }
+                    isOnet={allowedIdSet?.has(row.competency.id)}
                   />
                 </div>
               );
