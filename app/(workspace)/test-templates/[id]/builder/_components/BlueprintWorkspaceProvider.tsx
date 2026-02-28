@@ -22,6 +22,7 @@ import {
   updateBlueprint,
   simulateTest,
   fetchInventoryHealth,
+  fetchIndicatorInventory,
   fetchOnetCompetencies,
   SimulationProfile,
 } from '../actions';
@@ -183,6 +184,7 @@ export function BlueprintWorkspaceProvider({
   const storeSetInventory = useBlueprintStore((s) => s.setInventoryByCompetency);
   const storeApplyOnetRestriction = useBlueprintStore((s) => s.applyOnetRestriction);
   const storeSetAllowedCompetencyIds = useBlueprintStore((s) => s.setAllowedCompetencyIds);
+  const storeSetIndicatorInventory = useBlueprintStore((s) => s.setIndicatorInventory);
 
   // Simulation store state and actions
   const isSimulating = useSimulationStore((s) => s.isSimulating);
@@ -324,6 +326,39 @@ export function BlueprintWorkspaceProvider({
     loadHealth();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // ============================================
+  // EAGER INDICATOR INVENTORY FETCH
+  // ============================================
+
+  const indicatorFetchedRef = useRef(false);
+
+  useEffect(() => {
+    if (indicatorFetchedRef.current || libraryCompetencies.length === 0) return;
+    indicatorFetchedRef.current = true;
+
+    // Fire all fetches concurrently, throttled to avoid flooding the server
+    const ids = libraryCompetencies.map((c) => c.id);
+    const BATCH_SIZE = 6;
+
+    async function fetchAll() {
+      for (let i = 0; i < ids.length; i += BATCH_SIZE) {
+        const batch = ids.slice(i, i + BATCH_SIZE);
+        const results = await Promise.allSettled(
+          batch.map((id) => fetchIndicatorInventory(id))
+        );
+        for (let j = 0; j < results.length; j++) {
+          const r = results[j];
+          if (r.status === 'fulfilled' && r.value.success) {
+            storeSetIndicatorInventory(batch[j], r.value.data);
+          }
+        }
+      }
+    }
+
+    fetchAll();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [libraryCompetencies]);
 
   // ============================================
   // O*NET LIBRARY RESTRICTION (JOB_FIT mode)
