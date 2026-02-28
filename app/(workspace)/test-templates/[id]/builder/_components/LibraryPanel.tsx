@@ -139,7 +139,7 @@ function DraggableCompetencyItem({
 }: Omit<CompetencyItemProps, 'enableDrag'>) {
   const tLib = useTranslations('builder.library');
   const isCritical = competency.health === 'CRITICAL';
-  const isDisabled = isCritical || isSelected;
+  const isAddDisabled = isCritical || isSelected;
 
   const {
     attributes,
@@ -148,7 +148,7 @@ function DraggableCompetencyItem({
     isDragging,
   } = useDraggable({
     id: `library-${competency.id}`,
-    disabled: isDisabled,
+    disabled: isAddDisabled,
     data: {
       type: 'library-item',
       competency: competency,
@@ -166,20 +166,20 @@ function DraggableCompetencyItem({
         competency.health === 'CRITICAL' && 'border-l-red-500 dark:border-l-red-400',
         competency.health === 'MODERATE' && 'border-l-amber-500 dark:border-l-amber-400',
         competency.health === 'HEALTHY' && 'border-l-emerald-500 dark:border-l-emerald-400',
-        isDisabled
+        isCritical
           ? 'opacity-50 cursor-not-allowed bg-muted/30'
           : 'cursor-pointer hover:bg-muted/50 hover:shadow-sm',
         isSelected && 'ring-1 ring-primary/40 bg-primary/5',
         isDragging && 'opacity-50 ring-2 ring-primary/40'
       )}
-      onClick={() => !isDisabled && onToggleExpand?.()}
+      onClick={() => !isCritical && onToggleExpand?.()}
       aria-label={isExpanded ? tLib('collapseCard', { name: competency.name }) : tLib('expandCard', { name: competency.name })}
     >
       {/* Main row */}
       <div className="flex items-center gap-2 p-2.5">
         {/* Grip handle — only this area initiates drag */}
         <div
-          className={cn('shrink-0 cursor-grab active:cursor-grabbing', isDisabled && 'opacity-0')}
+          className={cn('shrink-0 cursor-grab active:cursor-grabbing', isAddDisabled && 'opacity-0')}
           {...attributes}
           {...listeners}
         >
@@ -199,7 +199,7 @@ function DraggableCompetencyItem({
           )}
         />
         <HealthIndicator health={competency.health} />
-        {!isDisabled && (
+        {!isAddDisabled && (
           <Button
             variant="ghost"
             size="icon"
@@ -250,7 +250,7 @@ function StaticCompetencyItem({
 }: Omit<CompetencyItemProps, 'enableDrag'>) {
   const tLib = useTranslations('builder.library');
   const isCritical = competency.health === 'CRITICAL';
-  const isDisabled = isCritical || isSelected;
+  const isAddDisabled = isCritical || isSelected;
 
   return (
     <div
@@ -260,12 +260,12 @@ function StaticCompetencyItem({
         competency.health === 'CRITICAL' && 'border-l-red-500 dark:border-l-red-400',
         competency.health === 'MODERATE' && 'border-l-amber-500 dark:border-l-amber-400',
         competency.health === 'HEALTHY' && 'border-l-emerald-500 dark:border-l-emerald-400',
-        isDisabled
+        isCritical
           ? 'opacity-50 cursor-not-allowed bg-muted/30'
           : 'cursor-pointer hover:bg-muted/50 hover:shadow-sm',
         isSelected && 'ring-1 ring-primary/40 bg-primary/5'
       )}
-      onClick={() => !isDisabled && onToggleExpand?.()}
+      onClick={() => !isCritical && onToggleExpand?.()}
       aria-label={isExpanded ? tLib('collapseCard', { name: competency.name }) : tLib('expandCard', { name: competency.name })}
     >
       {/* Main row */}
@@ -284,7 +284,7 @@ function StaticCompetencyItem({
           )}
         />
         <HealthIndicator health={competency.health} />
-        {!isDisabled && (
+        {!isAddDisabled && (
           <Button
             variant="ghost"
             size="icon"
