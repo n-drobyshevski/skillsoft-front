@@ -71,7 +71,10 @@
     "risk": {
       "none": "Sufficient questions",
       "low": "May borrow from siblings",
-      "high": "No questions — fully borrows"
+      "high": "No questions — fully borrows",
+      "tooltipNone": "Sufficient questions available for this indicator",
+      "tooltipLow": "May borrow from siblings. Add more questions to this indicator to improve coverage",
+      "tooltipHigh": "No questions available. Add questions to this indicator or reduce the question count"
     },
     "borrowingRisk": "Borrowing risk",
     "riskNone": "None",
@@ -79,6 +82,7 @@
     "riskModerate": "Moderate",
     "riskHigh": "High",
     "indicatorsMayBorrow": "{count, plural, one {# indicator} other {# indicators}} may need to borrow",
+    "indicatorWarning": "{count, plural, one {# indicator has} other {# indicators have}} insufficient question coverage",
     "loading": "Loading indicator data...",
     "expandCard": "Show indicator details for {name}",
     "collapseCard": "Hide indicator details for {name}"

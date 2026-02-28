@@ -991,7 +991,11 @@
           "low": "Низкая",
           "medium": "Средняя",
           "high": "Высокая",
-          "critical": "Критическая"
+          "critical": "Критическая",
+          "lowTooltip": "0.5x вес — меньше вопросов",
+          "mediumTooltip": "1.0x вес — стандартное количество вопросов",
+          "highTooltip": "1.5x вес — больше вопросов",
+          "criticalTooltip": "2.0x вес — максимальное количество вопросов"
         },
         "difficultyOptions": {
           "foundational": "Базовый",

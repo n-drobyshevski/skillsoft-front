@@ -38,3 +38,25 @@ export const importanceLevelColors: Record<ImportanceLevelKey, string> = {
   high: 'text-amber-600 dark:text-amber-400',
   critical: 'text-red-600 dark:text-red-400',
 };
+
+/**
+ * Discrete importance levels for ToggleGroup selection.
+ * Reverse mapping of getImportanceLevelKey — each level maps to a weight value.
+ */
+export const IMPORTANCE_LEVELS = [
+  { value: 0.5, key: 'low' as const },
+  { value: 1.0, key: 'medium' as const },
+  { value: 1.5, key: 'high' as const },
+  { value: 2.0, key: 'critical' as const },
+] as const;
+
+/**
+ * ToggleGroup active-state classes for importance levels.
+ * Applied conditionally by comparing current value — includes hover overrides.
+ */
+export const importanceLevelBgColors: Record<ImportanceLevelKey, string> = {
+  low: 'bg-muted text-muted-foreground hover:bg-muted',
+  medium: 'bg-blue-500 text-white hover:bg-blue-600 hover:text-white',
+  high: 'bg-amber-500 text-white hover:bg-amber-600 hover:text-white',
+  critical: 'bg-red-500 text-white hover:bg-red-600 hover:text-white',
+};

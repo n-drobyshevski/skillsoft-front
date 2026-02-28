@@ -49,6 +49,10 @@
 	--radius-md: calc(var(--radius) - 2px);
 	--radius-lg: var(--radius);
 	--radius-xl: calc(var(--radius) + 4px);
+
+	/* Collapsible animations for library panel expansion */
+	--animate-collapsible-down: collapsible-down 200ms ease-out;
+	--animate-collapsible-up: collapsible-up 150ms ease-in;
 }
 
 /* Shadcn-ui Dashboard Theme - Soft Low Contrast Light Mode */
@@ -2183,6 +2187,32 @@ textarea:focus-visible,
 .status-message[aria-live="assertive"] {
 	background: hsl(var(--destructive) / 0.1);
 	color: hsl(var(--destructive));
+}
+
+/* ===== COLLAPSIBLE ANIMATION (Library Panel) ===== */
+
+@keyframes collapsible-down {
+	from {
+		height: 0;
+		opacity: 0;
+	}
+
+	to {
+		height: var(--radix-collapsible-content-height);
+		opacity: 1;
+	}
+}
+
+@keyframes collapsible-up {
+	from {
+		height: var(--radix-collapsible-content-height);
+		opacity: 1;
+	}
+
+	to {
+		height: 0;
+		opacity: 0;
+	}
 }
 
 /* ===== GLOSSARY PAGE PREMIUM ANIMATIONS ===== */

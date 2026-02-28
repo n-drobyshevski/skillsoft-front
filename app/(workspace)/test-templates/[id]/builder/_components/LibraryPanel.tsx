@@ -5,13 +5,11 @@ import { useDraggable } from '@dnd-kit/core';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 import {
   Search,
   GripVertical,
   Plus,
-  AlertCircle,
-  CheckCircle2,
-  AlertTriangle,
   Brain,
   Users,
   MessageSquare,
@@ -24,10 +22,11 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useTranslations } from 'next-intl';
+import { Collapsible, CollapsibleContent } from '@/components/ui/collapsible';
 import { useBlueprintWorkspace } from './BlueprintWorkspaceProvider';
 import { LibraryCompetency, HealthStatus } from '../actions';
 import type { ActiveDragData } from './BuilderDndProvider';
-import { useBlueprintStore } from '@/store/blueprint-store';
+import { useBlueprintStore, useIndicatorInventory } from '@/store/blueprint-store';
 import { IndicatorExpansion } from './IndicatorExpansion';
 import { fetchIndicatorInventory } from '../actions';
 
@@ -44,43 +43,67 @@ interface LibraryPanelProps {
 // HEALTH INDICATOR
 // ============================================
 
-function HealthIndicator({ health }: { health: HealthStatus }) {
-  const t = useTranslations('builder.library.health');
-  const config = {
-    CRITICAL: {
-      icon: AlertCircle,
-      label: t('noQuestions'),
-      className:
-        'bg-red-50 dark:bg-red-950/50 text-red-600 dark:text-red-400 border-red-200 dark:border-red-800',
-    },
-    MODERATE: {
-      icon: AlertTriangle,
-      label: t('limitedQuestions'),
-      // Fixed: Changed text-amber-600 to text-amber-700 for WCAG AA contrast (5.2:1)
-      className:
-        'bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-800',
-    },
-    HEALTHY: {
-      icon: CheckCircle2,
-      label: t('goodInventory'),
-      className:
-        'bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800',
-    },
-  };
+const HEALTH_DOT_STYLES: Record<HealthStatus, string> = {
+  CRITICAL: 'bg-red-500 animate-pulse',
+  MODERATE: 'bg-amber-500',
+  HEALTHY: 'bg-emerald-500',
+};
 
-  const { icon: Icon, className, label } = config[health];
+function HealthIndicator({
+  health,
+  competencyId,
+  questionsPerCompetency,
+}: {
+  health: HealthStatus;
+  competencyId: string;
+  questionsPerCompetency: number;
+}) {
+  const tHealth = useTranslations('builder.library.health');
+  const tLib = useTranslations('builder.library');
+  const inventory = useIndicatorInventory(competencyId);
+
+  // Check indicator-level risk from cached inventory
+  let atRiskCount = 0;
+  if (inventory) {
+    const activeIndicators = inventory.indicators.filter((ind) => ind.isActive);
+    if (activeIndicators.length > 0) {
+      const expected = Math.ceil(questionsPerCompetency / activeIndicators.length);
+      atRiskCount = activeIndicators.filter(
+        (ind) => ind.totalQuestions < expected
+      ).length;
+    }
+  }
+
+  const hasIndicatorWarning = atRiskCount > 0;
+
+  // Override dot color to amber when indicators are at risk (but health is HEALTHY)
+  const dotStyle = hasIndicatorWarning && health === 'HEALTHY'
+    ? 'bg-amber-500'
+    : HEALTH_DOT_STYLES[health];
+
+  const healthLabel = {
+    CRITICAL: tHealth('noQuestions'),
+    MODERATE: tHealth('limitedQuestions'),
+    HEALTHY: tHealth('goodInventory'),
+  }[health];
+
+  const tooltip = hasIndicatorWarning
+    ? tLib('indicatorWarning', { count: atRiskCount })
+    : healthLabel;
 
   return (
-    <div
-      className={cn(
-        'flex items-center justify-center w-6 h-6 rounded-full border shrink-0',
-        className
-      )}
-      title={label}
-      aria-label={label}
-    >
-      <Icon className="h-3.5 w-3.5" />
-    </div>
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <span
+          className={cn(
+            'inline-block w-2 h-2 rounded-full shrink-0',
+            dotStyle
+          )}
+          aria-label={tooltip}
+        />
+      </TooltipTrigger>
+      <TooltipContent side="top" className="max-w-xs">{tooltip}</TooltipContent>
+    </Tooltip>
   );
 }
 
@@ -162,10 +185,6 @@ function DraggableCompetencyItem({
       ref={setNodeRef}
       className={cn(
         'group flex flex-col rounded-lg border transition-all duration-150',
-        'border-l-[3px]',
-        competency.health === 'CRITICAL' && 'border-l-red-500 dark:border-l-red-400',
-        competency.health === 'MODERATE' && 'border-l-amber-500 dark:border-l-amber-400',
-        competency.health === 'HEALTHY' && 'border-l-emerald-500 dark:border-l-emerald-400',
         isCritical
           ? 'opacity-50 cursor-not-allowed bg-muted/30'
           : 'cursor-pointer hover:bg-muted/50 hover:shadow-sm',
@@ -185,6 +204,11 @@ function DraggableCompetencyItem({
         >
           <GripVertical className="h-4 w-4 text-muted-foreground/40 group-hover:text-muted-foreground/80 transition-opacity" />
         </div>
+        <HealthIndicator
+          health={competency.health}
+          competencyId={competency.id}
+          questionsPerCompetency={questionsPerCompetency ?? 5}
+        />
         <CategoryIcon category={competency.category} />
         <div className="flex-1 min-w-0">
           <p className="text-sm font-medium leading-tight truncate">{competency.name}</p>
@@ -198,7 +222,6 @@ function DraggableCompetencyItem({
             isExpanded && 'rotate-180'
           )}
         />
-        <HealthIndicator health={competency.health} />
         {!isAddDisabled && (
           <Button
             variant="ghost"
@@ -224,14 +247,23 @@ function DraggableCompetencyItem({
       </div>
 
       {/* Expansion panel */}
-      {isExpanded && (
-        <div className="w-full border-t border-border/50 mt-1.5 pt-1">
-          <IndicatorExpansion
-            competencyId={competency.id}
-            questionsPerCompetency={questionsPerCompetency ?? 5}
-          />
-        </div>
-      )}
+      <Collapsible open={isExpanded}>
+        <CollapsibleContent
+          className={cn(
+            'overflow-hidden',
+            'data-[state=open]:animate-collapsible-down',
+            'data-[state=closed]:animate-collapsible-up',
+            'motion-reduce:transition-none'
+          )}
+        >
+          <div className="border-t border-border/50 pt-2">
+            <IndicatorExpansion
+              competencyId={competency.id}
+              questionsPerCompetency={questionsPerCompetency ?? 5}
+            />
+          </div>
+        </CollapsibleContent>
+      </Collapsible>
     </div>
   );
 }
@@ -256,10 +288,6 @@ function StaticCompetencyItem({
     <div
       className={cn(
         'group flex flex-col rounded-lg border transition-all duration-150',
-        'border-l-[3px]',
-        competency.health === 'CRITICAL' && 'border-l-red-500 dark:border-l-red-400',
-        competency.health === 'MODERATE' && 'border-l-amber-500 dark:border-l-amber-400',
-        competency.health === 'HEALTHY' && 'border-l-emerald-500 dark:border-l-emerald-400',
         isCritical
           ? 'opacity-50 cursor-not-allowed bg-muted/30'
           : 'cursor-pointer hover:bg-muted/50 hover:shadow-sm',
@@ -270,6 +298,11 @@ function StaticCompetencyItem({
     >
       {/* Main row */}
       <div className="flex items-center gap-2 p-2.5">
+        <HealthIndicator
+          health={competency.health}
+          competencyId={competency.id}
+          questionsPerCompetency={questionsPerCompetency ?? 5}
+        />
         <CategoryIcon category={competency.category} />
         <div className="flex-1 min-w-0">
           <p className="text-sm font-medium leading-tight truncate">{competency.name}</p>
@@ -283,7 +316,6 @@ function StaticCompetencyItem({
             isExpanded && 'rotate-180'
           )}
         />
-        <HealthIndicator health={competency.health} />
         {!isAddDisabled && (
           <Button
             variant="ghost"
@@ -308,14 +340,23 @@ function StaticCompetencyItem({
       </div>
 
       {/* Expansion panel */}
-      {isExpanded && (
-        <div className="w-full border-t border-border/50 mt-1.5 pt-1">
-          <IndicatorExpansion
-            competencyId={competency.id}
-            questionsPerCompetency={questionsPerCompetency ?? 5}
-          />
-        </div>
-      )}
+      <Collapsible open={isExpanded}>
+        <CollapsibleContent
+          className={cn(
+            'overflow-hidden',
+            'data-[state=open]:animate-collapsible-down',
+            'data-[state=closed]:animate-collapsible-up',
+            'motion-reduce:transition-none'
+          )}
+        >
+          <div className="border-t border-border/50 pt-2">
+            <IndicatorExpansion
+              competencyId={competency.id}
+              questionsPerCompetency={questionsPerCompetency ?? 5}
+            />
+          </div>
+        </CollapsibleContent>
+      </Collapsible>
     </div>
   );
 }
@@ -371,8 +412,8 @@ type VirtualRow =
 
 const ROW_HEIGHT_HEADER = 36;
 const ROW_HEIGHT_ITEM = 64;
-const ROW_HEIGHT_EXPANDED_BASE = 64 + 32 + 32; // card + header + footer
-const ROW_HEIGHT_PER_INDICATOR = 40;
+const ROW_HEIGHT_EXPANDED_BASE = 64 + 36 + 36; // card + header + footer
+const ROW_HEIGHT_PER_INDICATOR = 64; // three-line rows (title + bar/count/risk)
 
 export function LibraryPanel({ onAdd }: LibraryPanelProps) {
   const t = useTranslations('builder.library');

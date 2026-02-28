@@ -991,7 +991,11 @@
           "low": "Low",
           "medium": "Medium",
           "high": "High",
-          "critical": "Critical"
+          "critical": "Critical",
+          "lowTooltip": "0.5x weight — fewer questions allocated",
+          "mediumTooltip": "1.0x weight — standard question allocation",
+          "highTooltip": "1.5x weight — more questions allocated",
+          "criticalTooltip": "2.0x weight — maximum question allocation"
         },
         "difficultyOptions": {
           "foundational": "Foundational",

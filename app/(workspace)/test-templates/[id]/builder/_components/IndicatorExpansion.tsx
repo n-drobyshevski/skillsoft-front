@@ -4,6 +4,7 @@ import React from 'react';
 import { AlertCircle, AlertTriangle, CheckCircle2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useTranslations } from 'next-intl';
+import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 import { useIndicatorInventory } from '@/store/blueprint-store';
 import type { IndicatorQuestionStats, Difficulty } from '@/types/blueprint';
 
@@ -43,42 +44,48 @@ function getOverallRisk(risks: BorrowingRisk[]): string {
 }
 
 // ============================================
-// DIFFICULTY BAR
+// DIFFICULTY SEGMENT BAR
 // ============================================
 
-const DIFFICULTY_COLORS: Record<Difficulty, string> = {
-  FOUNDATIONAL: 'bg-blue-500',
-  INTERMEDIATE: 'bg-emerald-500',
-  ADVANCED: 'bg-amber-500',
+const DOT_COLORS: Record<Difficulty, string> = {
+  FOUNDATIONAL: 'bg-emerald-500',
+  INTERMEDIATE: 'bg-amber-500',
+  ADVANCED: 'bg-orange-500',
   EXPERT: 'bg-red-500',
 };
 
 const DIFFICULTY_KEYS: Difficulty[] = ['FOUNDATIONAL', 'INTERMEDIATE', 'ADVANCED', 'EXPERT'];
 
-function DifficultyBar({ counts }: { counts: Record<Difficulty, number> }) {
+function DifficultyDots({ counts }: { counts: Record<Difficulty, number> }) {
   const t = useTranslations('builder.library.difficultyLabels');
 
+  const tooltipContent = DIFFICULTY_KEYS
+    .map((d) => {
+      const label = t(d.toLowerCase() as 'foundational' | 'intermediate' | 'advanced' | 'expert');
+      return `${label}: ${counts[d] ?? 0}`;
+    })
+    .join(' · ');
+
   return (
-    <div className="flex items-center gap-1">
-      {DIFFICULTY_KEYS.map((diff) => {
-        const count = counts[diff] ?? 0;
-        const label = t(diff.toLowerCase() as 'foundational' | 'intermediate' | 'advanced' | 'expert');
-        return (
-          <div key={diff} className="flex items-center gap-0.5" title={`${label}: ${count}`}>
-            <div
-              className={cn(
-                'h-2 w-1.5 rounded-[1px] transition-opacity',
-                DIFFICULTY_COLORS[diff],
-                count === 0 && 'opacity-15'
-              )}
-            />
-            <span className="text-[9px] text-muted-foreground/70 tabular-nums">
-              {label}:{count}
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <span className="inline-flex items-center gap-1.5 shrink-0 cursor-default">
+          {DIFFICULTY_KEYS.map((diff) => (
+            <span
+              key={diff}
+              className="inline-flex items-center gap-0.5 text-xs font-medium tabular-nums text-muted-foreground/80"
+            >
+              <span
+                className={cn('inline-block h-1.5 w-1.5 rounded-full', DOT_COLORS[diff])}
+                aria-hidden="true"
+              />
+              {counts[diff] ?? 0}
             </span>
-          </div>
-        );
-      })}
-    </div>
+          ))}
+        </span>
+      </TooltipTrigger>
+      <TooltipContent side="bottom">{tooltipContent}</TooltipContent>
+    </Tooltip>
   );
 }
 
@@ -86,32 +93,42 @@ function DifficultyBar({ counts }: { counts: Record<Difficulty, number> }) {
 // RISK BADGE
 // ============================================
 
+const RISK_BADGE_STYLES: Record<BorrowingRisk, string> = {
+  NONE: 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400',
+  LOW: 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400',
+  HIGH: 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400',
+};
+
 function RiskBadge({ risk }: { risk: BorrowingRisk }) {
   const t = useTranslations('builder.library.risk');
   const config = {
-    NONE: {
-      icon: CheckCircle2,
-      label: t('none'),
-      className: 'text-emerald-500 dark:text-emerald-400',
-    },
-    LOW: {
-      icon: AlertTriangle,
-      label: t('low'),
-      className: 'text-amber-500 dark:text-amber-400',
-    },
-    HIGH: {
-      icon: AlertCircle,
-      label: t('high'),
-      className: 'text-red-500 dark:text-red-400',
-    },
+    NONE: { icon: CheckCircle2, label: t('none'), tooltip: t('tooltipNone') },
+    LOW: { icon: AlertTriangle, label: t('low'), tooltip: t('tooltipLow') },
+    HIGH: { icon: AlertCircle, label: t('high'), tooltip: t('tooltipHigh') },
   };
 
-  const { icon: Icon, className, label } = config[risk];
+  const { icon: Icon, label, tooltip } = config[risk];
 
   return (
-    <div className={cn('shrink-0', className)} title={label}>
-      <Icon className="h-3 w-3" />
-    </div>
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <div
+          className={cn(
+            'inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 shrink-0',
+            RISK_BADGE_STYLES[risk]
+          )}
+        >
+          <Icon className="h-3.5 w-3.5 shrink-0" />
+          <span className={cn(
+            'text-xs-safe font-medium',
+            risk === 'NONE' ? 'sr-only' : 'sr-only sm:not-sr-only'
+          )}>
+            {label}
+          </span>
+        </div>
+      </TooltipTrigger>
+      <TooltipContent side="top" className="max-w-xs">{tooltip}</TooltipContent>
+    </Tooltip>
   );
 }
 
@@ -122,13 +139,20 @@ function RiskBadge({ risk }: { risk: BorrowingRisk }) {
 function IndicatorSkeleton() {
   const t = useTranslations('builder.library');
   return (
-    <div className="space-y-2 p-2 animate-pulse" aria-label={t('loading')}>
+    <div className="space-y-1 px-1 pt-2 pb-2.5 animate-pulse" aria-label={t('loading')}>
       {[1, 2, 3].map((i) => (
-        <div key={i} className="flex items-center gap-2 h-8">
-          <div className="h-3 w-24 bg-muted rounded" />
-          <div className="flex-1" />
-          <div className="h-3 w-8 bg-muted rounded" />
-          <div className="h-3 w-3 bg-muted rounded-full" />
+        <div key={i} className="flex flex-col gap-1 px-3 py-2.5 rounded-lg min-h-[44px]">
+          <div className="h-3.5 w-3/4 bg-muted rounded" />
+          <div className="flex items-center gap-1.5">
+            {[1, 2, 3, 4].map((d) => (
+              <span key={d} className="inline-flex items-center gap-0.5">
+                <span className="inline-block h-1.5 w-1.5 bg-muted rounded-full" />
+                <span className="h-3 w-3 bg-muted rounded" />
+              </span>
+            ))}
+            <div className="h-3.5 w-8 bg-muted rounded" />
+            <div className="h-5 w-5 bg-muted rounded-full" />
+          </div>
         </div>
       ))}
     </div>
@@ -149,21 +173,32 @@ function IndicatorRow({
   return (
     <div
       className={cn(
-        'flex items-center gap-2 px-2 py-1.5 rounded-md',
-        'bg-muted/30 dark:bg-muted/20',
-        !indicator.isActive && 'opacity-40'
+        'flex flex-col gap-1 px-3 py-2.5 rounded-lg min-h-[44px]',
+        'transition-colors duration-200',
+        indicator.isActive
+          ? 'bg-muted/20 dark:bg-muted/10 hover:bg-muted/50'
+          : 'opacity-40'
       )}
+      role="listitem"
     >
-      <div className="flex-1 min-w-0">
-        <p className="text-[11px] font-medium leading-tight truncate">
-          {indicator.title}
-        </p>
-        <DifficultyBar counts={indicator.questionsByDifficulty} />
+      {/* Line 1: Title (full width) */}
+      <p
+        className={cn(
+          'text-sm font-medium leading-tight',
+          !indicator.isActive && 'italic text-muted-foreground'
+        )}
+      >
+        {indicator.title}
+      </p>
+
+      {/* Line 2: Difficulty Dots + Count + Risk */}
+      <div className="flex items-center gap-1.5 sm:gap-2">
+        <DifficultyDots counts={indicator.questionsByDifficulty} />
+        <span className="text-xs font-medium tabular-nums text-muted-foreground shrink-0">
+          {indicator.totalQuestions}q
+        </span>
+        <RiskBadge risk={risk} />
       </div>
-      <span className="text-[11px] font-mono text-muted-foreground tabular-nums shrink-0">
-        {indicator.totalQuestions}q
-      </span>
-      <RiskBadge risk={risk} />
     </div>
   );
 }
@@ -191,14 +226,14 @@ export function IndicatorExpansion({
   const borrowingCount = risks.filter((r) => r !== 'NONE').length;
 
   return (
-    <div className="space-y-1.5 px-1 pt-1.5 pb-2">
+    <div className="space-y-1 px-1 pt-2 pb-2.5">
       {/* Header */}
-      <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider px-1">
+      <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground px-3 pb-1">
         {t('indicators', { count: activeIndicators.length })}
       </p>
 
       {/* Indicator rows */}
-      <div className="space-y-1">
+      <div className="space-y-1" role="list">
         {inventory.indicators.map((ind) => (
           <IndicatorRow
             key={ind.indicatorId}
@@ -210,15 +245,25 @@ export function IndicatorExpansion({
 
       {/* Footer: overall risk summary */}
       {borrowingCount > 0 && (
-        <div className="flex items-center gap-1.5 px-1 pt-1">
-          <span className={cn(
-            'text-[10px] font-medium',
-            overallRisk === 'high' && 'text-red-600 dark:text-red-400',
-            overallRisk === 'moderate' && 'text-amber-600 dark:text-amber-400',
-          )}>
+        <div className="flex items-center gap-2 px-3 pt-2 mt-1 border-t border-border/30">
+          <AlertTriangle
+            className={cn(
+              'h-3.5 w-3.5 shrink-0',
+              overallRisk === 'high' && 'text-red-500 dark:text-red-400',
+              overallRisk === 'moderate' && 'text-amber-500 dark:text-amber-400',
+            )}
+            aria-hidden="true"
+          />
+          <span
+            className={cn(
+              'text-xs font-medium',
+              overallRisk === 'high' && 'text-red-600 dark:text-red-400',
+              overallRisk === 'moderate' && 'text-amber-600 dark:text-amber-400',
+            )}
+          >
             {t('borrowingRisk')}: {t(`risk${overallRisk.charAt(0).toUpperCase() + overallRisk.slice(1)}` as 'riskNone' | 'riskLow' | 'riskModerate' | 'riskHigh')}
           </span>
-          <span className="text-[10px] text-muted-foreground">
+          <span className="text-xs text-muted-foreground">
             {t('indicatorsMayBorrow', { count: borrowingCount })}
           </span>
         </div>
