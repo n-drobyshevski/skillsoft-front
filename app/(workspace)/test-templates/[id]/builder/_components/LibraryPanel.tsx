@@ -19,6 +19,7 @@ import {
   Clock,
   Target,
   ChevronDown,
+  Info,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useTranslations } from 'next-intl';
@@ -544,6 +545,17 @@ export function LibraryPanel({ onAdd }: LibraryPanelProps) {
           </span>
         </div>
       </div>
+
+      {/* O*NET restriction info banner */}
+      {allowedIds && (
+        <div className="flex items-start gap-2 px-3 py-2.5 border-b bg-blue-50/50 dark:bg-blue-950/20">
+          <Info className="h-3.5 w-3.5 text-blue-500 shrink-0 mt-0.5" />
+          <p className="text-[11px] leading-snug text-blue-700 dark:text-blue-400">
+            Filtered by O*NET job profile — only {allowedIds.length} matching{' '}
+            {allowedIds.length === 1 ? 'competency is' : 'competencies are'} available.
+          </p>
+        </div>
+      )}
 
       {/* U2: Virtualized Competency List */}
       <div ref={scrollContainerRef} className="flex-1 min-h-0 overflow-auto">
