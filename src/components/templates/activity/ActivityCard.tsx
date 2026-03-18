@@ -1,5 +1,6 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
@@ -32,6 +33,7 @@ export interface ActivityCardProps {
  * - Dark mode support
  */
 export function ActivityCard({ result, isTeamFit, isSelected, onCheckboxChange, className }: ActivityCardProps) {
+  const router = useRouter();
   const t = useTranslations('activity');
   const { latestSession } = result;
   const isCompleted = latestSession.eventType === 'COMPLETED';
@@ -53,10 +55,13 @@ export function ActivityCard({ result, isTeamFit, isSelected, onCheckboxChange, 
         borderColor,
         // Selection highlight
         isTeamFit && isSelected && 'ring-2 ring-primary/30',
+        // Clickable for completed results
+        isCompleted && 'cursor-pointer',
         // Overflow handling
         'overflow-hidden',
         className
       )}
+      onClick={isCompleted ? () => router.push(`/test-templates/results/${latestSession.sessionId}`) : undefined}
     >
       {/* Row 1: Avatar + Name + Badge */}
       <div className="flex items-center gap-2 p-3 pb-2">
@@ -114,7 +119,7 @@ export function ActivityCard({ result, isTeamFit, isSelected, onCheckboxChange, 
             ? 'text-emerald-600 dark:text-emerald-400'
             : 'text-foreground'
         )}>
-          {latestSession.score !== undefined ? `${Math.round(latestSession.score)}%` : '--'}
+          {latestSession.score !== undefined ? `${latestSession.score.toFixed(2)}%` : '--'}
         </span>
 
         {/* Time */}

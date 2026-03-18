@@ -261,7 +261,7 @@ function ActivityItem({
                   completion.passed && 'bg-emerald-600'
                 )}
               >
-                {completion.score}%
+                {completion.score.toFixed(2)}%
               </Badge>
             )}
             <span className="text-[10px] text-muted-foreground">
@@ -292,7 +292,7 @@ function ActivityItem({
                   completion.passed && 'bg-emerald-600'
                 )}
               >
-                {completion.score}%
+                {completion.score.toFixed(2)}%
               </Badge>
             )}
             <span className="text-xs text-muted-foreground whitespace-nowrap">

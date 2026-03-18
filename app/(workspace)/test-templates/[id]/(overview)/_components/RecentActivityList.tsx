@@ -170,8 +170,11 @@ function ActivityCard({
   const hasScore = activity.score !== undefined && activity.eventType === "COMPLETED";
   const hasDuration = activity.timeSpentSeconds !== undefined;
 
-  return (
-    <div className="flex items-center gap-3 rounded-lg border bg-card p-3 transition-colors hover:bg-accent/50">
+  const isCompleted = activity.eventType === 'COMPLETED';
+  const cardClassName = "flex items-center gap-3 rounded-lg border bg-card p-3 transition-colors hover:bg-accent/50";
+
+  const content = (
+    <>
       {/* Avatar */}
       <Avatar className="size-10 shrink-0">
         {activity.userImageUrl ? (
@@ -202,7 +205,7 @@ function ActivityCard({
               <span
                 className={`text-sm font-semibold ${getScoreColor(activity.passed)}`}
               >
-                {activity.score}%
+                {activity.score!.toFixed(2)}%
               </span>
             )}
           </div>
@@ -225,7 +228,7 @@ function ActivityCard({
           <span
             className={`hidden shrink-0 text-sm font-semibold sm:block ${getScoreColor(activity.passed)}`}
           >
-            {activity.score}%
+            {activity.score!.toFixed(2)}%
           </span>
         )}
 
@@ -241,6 +244,16 @@ function ActivityCard({
           {formatRelativeTimeShort(activity.occurredAt)}
         </span>
       </div>
-    </div>
+    </>
   );
+
+  if (isCompleted) {
+    return (
+      <Link href={`/test-templates/results/${activity.sessionId}`} className={cardClassName}>
+        {content}
+      </Link>
+    );
+  }
+
+  return <div className={cardClassName}>{content}</div>;
 }

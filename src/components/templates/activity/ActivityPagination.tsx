@@ -62,7 +62,7 @@ export function ActivityPagination({
         // Padding
         'pt-4 mt-4 border-t',
         // Mobile: sticky at bottom with safe area
-        'md:static',
+        'md:static md:bg-transparent md:backdrop-blur-none',
         'sticky bottom-0 bg-background/95 backdrop-blur-sm',
         'pb-safe px-1',
         className

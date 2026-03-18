@@ -43,7 +43,7 @@ export function ActivityCardList({
     <div className={cn('space-y-2', className)}>
       {data.map((result) => (
         <ActivityCard
-          key={result.clerkUserId}
+          key={result.latestSession.sessionId}
           result={result}
           isTeamFit={isTeamFit}
           isSelected={selectedIds?.has(result.latestSession.sessionId)}

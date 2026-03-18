@@ -1,5 +1,6 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { useTranslations } from 'next-intl';
 import {
@@ -67,7 +68,7 @@ export function ActivityTable({
         <TableBody>
           {data.map((result) => (
             <UserResultRow
-              key={result.clerkUserId}
+              key={result.latestSession.sessionId}
               result={result}
               t={t}
               isTeamFit={isTeamFit}
@@ -93,12 +94,19 @@ interface UserResultRowProps {
 }
 
 function UserResultRow({ result, t, isTeamFit, isSelected, onCheckboxChange }: UserResultRowProps) {
+  const router = useRouter();
   const initials = getInitials(result.userName);
   const { latestSession } = result;
   const isCompleted = latestSession.eventType === 'COMPLETED';
 
   return (
-    <TableRow className={cn(isTeamFit && isSelected && 'bg-primary/5')}>
+    <TableRow
+      className={cn(
+        isTeamFit && isSelected && 'bg-primary/5',
+        isCompleted && 'cursor-pointer',
+      )}
+      onClick={isCompleted ? () => router.push(`/test-templates/results/${latestSession.sessionId}`) : undefined}
+    >
       {/* Checkbox for TEAM_FIT comparison */}
       {isTeamFit && (
         <TableCell className="pl-4 py-2">
@@ -143,7 +151,7 @@ function UserResultRow({ result, t, isTeamFit, isSelected, onCheckboxChange }: U
             ? 'text-emerald-600 dark:text-emerald-400'
             : 'text-foreground'
         )}>
-          {latestSession.score !== undefined ? `${Math.round(latestSession.score)}%` : '-'}
+          {latestSession.score !== undefined ? `${latestSession.score.toFixed(2)}%` : '-'}
         </span>
       </TableCell>
 
