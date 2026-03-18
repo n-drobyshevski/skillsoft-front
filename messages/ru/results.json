@@ -239,7 +239,21 @@
     "shareWithTeam": "Поделиться с командой",
     "managerSummary": "Сводка",
     "resultSaved": "Результат сохранён в профиль",
-    "actionFailed": "Действие не удалось. Попробуйте ещё раз."
+    "actionFailed": "Действие не удалось. Попробуйте ещё раз.",
+    "exportDialog": {
+      "title": "Экспорт PDF",
+      "format": "Формат",
+      "formatManagerSummary": "Краткая сводка (1 стр.)",
+      "formatFullReport": "Полный отчет",
+      "formatCandidateBrief": "Отчет кандидата",
+      "generate": "Создать PDF",
+      "generating": "Создание...",
+      "downloading": "Загрузка...",
+      "complete": "Загрузка завершена!",
+      "error": "Ошибка экспорта",
+      "retry": "Повторить",
+      "cancel": "Отмена"
+    }
   },
   "nextSteps": {
     "interviewGuide": {

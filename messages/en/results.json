@@ -239,7 +239,21 @@
     "shareWithTeam": "Share with Team",
     "managerSummary": "Summary",
     "resultSaved": "Result saved to your profile",
-    "actionFailed": "Action failed. Please try again."
+    "actionFailed": "Action failed. Please try again.",
+    "exportDialog": {
+      "title": "Export PDF",
+      "format": "Format",
+      "formatManagerSummary": "Manager Summary (1 page)",
+      "formatFullReport": "Full Report",
+      "formatCandidateBrief": "Candidate Brief",
+      "generate": "Generate PDF",
+      "generating": "Generating...",
+      "downloading": "Downloading...",
+      "complete": "Download complete!",
+      "error": "Export failed",
+      "retry": "Try Again",
+      "cancel": "Cancel"
+    }
   },
   "nextSteps": {
     "interviewGuide": {

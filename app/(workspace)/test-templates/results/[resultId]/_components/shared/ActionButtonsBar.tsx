@@ -21,6 +21,7 @@ import {
   ClipboardList,
 } from 'lucide-react';
 import { ManagerSummary } from './ManagerSummary';
+import { ExportDialog } from '@/components/results/ExportDialog';
 import { ActionButtonsBarProps, ActionType } from './types';
 
 /**
@@ -97,6 +98,7 @@ export function ActionButtonsBar({ templateId, resultId, actions, result, templa
   const [loadingAction, setLoadingAction] = useState<ActionType | null>(null);
   const [linkCopied, setLinkCopied] = useState(false);
   const [managerSummaryOpen, setManagerSummaryOpen] = useState(false);
+  const [exportDialogOpen, setExportDialogOpen] = useState(false);
 
   /**
    * Copies the result share URL to clipboard.
@@ -222,8 +224,8 @@ export function ActionButtonsBar({ templateId, resultId, actions, result, templa
       <Button
         variant="outline"
         size="sm"
-        className="flex-1 sm:flex-initial h-9 sm:h-10 hidden sm:flex"
-        onClick={downloadAsPrint}
+        className="flex-1 sm:flex-initial h-9 sm:h-10"
+        onClick={() => setExportDialogOpen(true)}
       >
         <Printer className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2 shrink-0" />
         <span className="truncate text-xs sm:text-sm">{t('exportPdf')}</span>
@@ -287,6 +289,13 @@ export function ActionButtonsBar({ templateId, resultId, actions, result, templa
           onOpenChange={setManagerSummaryOpen}
         />
       )}
+
+      {/* Export PDF Dialog */}
+      <ExportDialog
+        open={exportDialogOpen}
+        onOpenChange={setExportDialogOpen}
+        resultId={resultId}
+      />
     </div>
   );
 }
