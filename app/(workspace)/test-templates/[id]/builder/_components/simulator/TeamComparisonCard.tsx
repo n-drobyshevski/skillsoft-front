@@ -271,7 +271,7 @@ export function TeamComparisonCard({
               const direction = getGapDirection(gap);
 
               return (
-                <div key={comp.name} className="space-y-1">
+                <div key={comp.name} className="space-y-1 group relative">
                   <div className="flex items-center justify-between text-xs">
                     <span className="truncate max-w-[60%]">{comp.name}</span>
                     <div className="flex items-center gap-1 shrink-0">
@@ -309,6 +309,45 @@ export function TeamComparisonCard({
                         className="h-full bg-muted-foreground/30 rounded-full transition-all"
                         style={{ width: `${Math.min(comp.teamAvg, 100)}%` }}
                       />
+                    </div>
+                  </div>
+
+                  {/* Hover tooltip */}
+                  <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 z-50 hidden group-hover:block pointer-events-none">
+                    <div
+                      className="bg-popover/95 backdrop-blur-sm border border-border rounded-xl shadow-xl p-3 min-w-[140px] whitespace-nowrap"
+                      style={{ backgroundColor: colors.card }}
+                    >
+                      <p className="font-medium text-xs mb-1.5" style={{ color: colors.foreground }}>
+                        {comp.name}
+                      </p>
+                      <div className="flex items-center justify-between gap-3 text-xs">
+                        <span style={{ color: colors.mutedForeground }}>
+                          {t('teamComparison.legendIndividual')}
+                        </span>
+                        <span className="font-bold tabular-nums" style={{ color: colors.foreground }}>
+                          {comp.individual}%
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between gap-3 text-xs">
+                        <span style={{ color: colors.mutedForeground }}>
+                          {t('teamComparison.legendTeamAvg')}
+                        </span>
+                        <span className="font-bold tabular-nums" style={{ color: colors.foreground }}>
+                          {comp.teamAvg}%
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between gap-3 text-xs mt-1 pt-1 border-t border-border/50">
+                        <span style={{ color: colors.mutedForeground }}>{t('teamComparison.tooltipGap')}</span>
+                        <span
+                          className="font-bold tabular-nums"
+                          style={{
+                            color: GAP_DIRECTION_COLORS[direction], // eslint-disable-line security/detect-object-injection
+                          }}
+                        >
+                          {gap > 0 ? '+' : ''}{Math.round(gap)}%
+                        </span>
+                      </div>
                     </div>
                   </div>
                 </div>
