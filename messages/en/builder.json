@@ -39,6 +39,7 @@
     "noCompetenciesFound": "No competencies found",
     "tryAdjustingSearch": "Try adjusting your search",
     "addToCanvas": "Add {name} to canvas",
+    "removeFromCanvas": "Remove {name} from canvas",
     "health": {
       "noQuestions": "No questions available",
       "limitedQuestions": "Limited questions available",
@@ -419,7 +420,11 @@
       "legendTeamAvg": "Team Avg",
       "legendIndividual": "Individual",
       "notConfigured": "Team Not Configured",
-      "notConfiguredDescription": "Select a team in the template settings to enable team comparison and gap analysis."
+      "notConfiguredDescription": "Select a team in the template settings to enable team comparison and gap analysis.",
+      "viewBars": "Bar chart view",
+      "viewRadar": "Radar chart view",
+      "viewToggle": "Chart view toggle",
+      "tooltipGap": "Gap"
     },
     "simulatedResults": {
       "competencyScores": "Competency Scores",
@@ -443,7 +448,10 @@
       "belowTeamAverage": "Below team average - development opportunity",
       "complementarySkills": "Complementary Skills (Above Team)",
       "developmentFocus": "Development Focus (Below Team)",
-      "moreCompetencies": "+{count} more competencies"
+      "moreCompetencies": "+{count} more competencies",
+      "showLessCompetencies": "Show less",
+      "indicators": "Indicators",
+      "indicatorCorrect": "Correct:"
     },
     "analytics": {
       "noCompetencies": "No competencies selected",
@@ -550,5 +558,15 @@
       "title": "Preview Results",
       "content": "Use the simulator to see how your assessment will perform. Choose different test personas and run simulations to preview candidate scores and question distribution."
     }
+  },
+  "versionPrompt": {
+    "title": "Template is Published",
+    "description": "This template is published and cannot be modified directly. Choose how to proceed:",
+    "createVersion": "Create New Version",
+    "createVersionDescription": "Recommended — creates a draft copy you can edit freely",
+    "or": "or",
+    "overwrite": "Overwrite Current Version",
+    "overwriteWarning": "This will modify the live template. Active share links and sessions may be affected.",
+    "cancel": "Cancel"
   }
 }
