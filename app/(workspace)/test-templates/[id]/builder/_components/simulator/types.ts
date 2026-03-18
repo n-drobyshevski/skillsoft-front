@@ -1,6 +1,6 @@
-import { SimulationResult, SimulationProfile, Difficulty, SelectionReason } from '../../actions';
+import { SimulationResult, SimulationProfile, Difficulty, SelectionReason, QuestionSummary } from '../../actions';
 
-export type { SimulationResult, SimulationProfile, Difficulty, SelectionReason };
+export type { SimulationResult, SimulationProfile, Difficulty, SelectionReason, QuestionSummary };
 
 export const personaConfig: Record<
   SimulationProfile,

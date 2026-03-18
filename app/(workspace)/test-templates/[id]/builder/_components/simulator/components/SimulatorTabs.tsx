@@ -22,6 +22,7 @@ interface SimulatorTabsProps {
   passingScore: number;
   onetSocCode?: string;
   teamId?: string;
+  teamName?: string;
 }
 
 // ============================================
@@ -37,6 +38,7 @@ export const SimulatorTabs = memo(function SimulatorTabs({
   passingScore,
   onetSocCode,
   teamId,
+  teamName,
 }: SimulatorTabsProps) {
   const t = useTranslations('builder.simulator');
   const strategyConfig = STRATEGY_CONFIG[strategy];
@@ -86,6 +88,7 @@ export const SimulatorTabs = memo(function SimulatorTabs({
             passingScore={passingScore}
             onetSocCode={onetSocCode}
             teamId={teamId}
+            teamName={teamName}
           />
         </TabsContent>
       ))}

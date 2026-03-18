@@ -78,11 +78,12 @@ function CompactAlert({ validation, className }: CompactAlertProps) {
 
   return (
     <Collapsible open={isExpanded} onOpenChange={setIsExpanded}>
-      <Alert
-        variant={hasErrors ? 'destructive' : 'default'}
+      <div
         className={cn(
-          'py-2',
-          !hasErrors && 'border-amber-500/50 bg-amber-50/50 dark:bg-amber-950/20',
+          'rounded-lg border px-4 py-2 text-sm',
+          hasErrors
+            ? 'border-destructive/50 text-destructive bg-card'
+            : 'border-amber-500/50 bg-amber-50/50 dark:bg-amber-950/20',
           className
         )}
       >
@@ -94,7 +95,7 @@ function CompactAlert({ validation, className }: CompactAlertProps) {
             <div className="flex items-center gap-2">
               <AlertTriangle
                 className={cn(
-                  'h-4 w-4',
+                  'h-4 w-4 shrink-0',
                   hasErrors ? 'text-destructive' : 'text-amber-600 dark:text-amber-400'
                 )}
               />
@@ -104,7 +105,7 @@ function CompactAlert({ validation, className }: CompactAlertProps) {
             </div>
             <ChevronDown
               className={cn(
-                'h-4 w-4 text-muted-foreground transition-transform',
+                'h-4 w-4 shrink-0 text-muted-foreground transition-transform',
                 isExpanded && 'rotate-180'
               )}
             />
@@ -117,7 +118,7 @@ function CompactAlert({ validation, className }: CompactAlertProps) {
             ))}
           </ul>
         </CollapsibleContent>
-      </Alert>
+      </div>
     </Collapsible>
   );
 }

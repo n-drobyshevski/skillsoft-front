@@ -25,6 +25,8 @@ interface SimulatorResultsProps {
   onetSocCode?: string;
   /** Team ID for gap analysis strategy */
   teamId?: string;
+  /** Team display name */
+  teamName?: string;
   /** Team benchmark score */
   teamBenchmark?: number;
 }
@@ -41,6 +43,7 @@ export const SimulatorResults = memo(function SimulatorResults({
   competencyCount,
   onetSocCode,
   teamId,
+  teamName,
   teamBenchmark = 75,
 }: SimulatorResultsProps) {
   return (
@@ -54,6 +57,7 @@ export const SimulatorResults = memo(function SimulatorResults({
         competencyCount={competencyCount}
         onetSocCode={onetSocCode}
         teamId={teamId}
+        teamName={teamName}
         teamBenchmark={teamBenchmark}
       />
 

@@ -17,7 +17,7 @@
  * 6. Disclaimer        — simulated data notice
  */
 
-import React, { memo, useMemo } from 'react';
+import React, { memo, useCallback, useMemo, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import {
   CheckCircle2,
@@ -32,12 +32,15 @@ import {
   ClipboardList,
   LayoutGrid,
   Brain,
+  ChevronDown,
+  ChevronRight,
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 import { Strategy, STRATEGY_CONFIG, personaConfig } from '../strategy-context';
-import { SimulationResult, SimulationProfile, Difficulty } from '../types';
+import { SimulationResult, SimulationProfile, Difficulty, QuestionSummary } from '../types';
 import {
   generateSimulatedResults,
   SimulatedResultsData,
@@ -471,62 +474,219 @@ function StrengthsGaps({ strengths, gaps, threshold }: StrengthsGapsProps) {
 // (source: SimulatedResultsTab lines 600–667)
 // ============================================
 
+interface IndicatorScore {
+  indicatorTitle: string;
+  total: number;
+  correct: number;
+  percentage: number;
+}
+
 interface CompetencyScoresProps {
   scores: SimulatedCompetencyScore[];
   threshold: number;
   title: string;
   showAll?: boolean;
+  sampleQuestions?: QuestionSummary[];
 }
 
-function CompetencyScores({ scores, threshold, title, showAll = false }: CompetencyScoresProps) {
+function CompetencyScores({ scores, threshold, title, showAll: initialShowAll = false, sampleQuestions }: CompetencyScoresProps) {
   const t = useTranslations('builder.simulator');
-  const displayScores = showAll ? scores : scores.slice(0, 5);
+  const INITIAL_COUNT = 5;
+  const hasMore = !initialShowAll && scores.length > INITIAL_COUNT;
+  const [expanded, setExpanded] = useState(false);
+  const [expandedCompetencies, setExpandedCompetencies] = useState<Set<string>>(new Set());
+  const displayScores = hasMore && !expanded ? scores.slice(0, INITIAL_COUNT) : scores;
+
+  const indicatorsByCompetency = useMemo(() => {
+    if (!sampleQuestions?.length) return new Map<string, IndicatorScore[]>();
+
+    const grouped = new Map<string, Map<string, { total: number; correct: number }>>();
+
+    for (const q of sampleQuestions) {
+      if (!q.competencyId || !q.indicatorTitle) continue;
+
+      let compMap = grouped.get(q.competencyId);
+      if (!compMap) {
+        compMap = new Map();
+        grouped.set(q.competencyId, compMap);
+      }
+
+      let indicator = compMap.get(q.indicatorTitle);
+      if (!indicator) {
+        indicator = { total: 0, correct: 0 };
+        compMap.set(q.indicatorTitle, indicator);
+      }
+
+      indicator.total++;
+      if (q.simulatedCorrect) indicator.correct++;
+    }
+
+    const result = new Map<string, IndicatorScore[]>();
+    for (const [compId, indicators] of grouped) {
+      result.set(
+        compId,
+        Array.from(indicators.entries())
+          .map(([title, { total, correct }]) => ({
+            indicatorTitle: title,
+            total,
+            correct,
+            percentage: Math.round((correct / total) * 100),
+          }))
+          .sort((a, b) => b.percentage - a.percentage)
+      );
+    }
+    return result;
+  }, [sampleQuestions]);
+
+  const toggleCompetency = useCallback((competencyId: string) => {
+    setExpandedCompetencies((prev) => {
+      const next = new Set(prev);
+      if (next.has(competencyId)) {
+        next.delete(competencyId);
+      } else {
+        next.add(competencyId);
+      }
+      return next;
+    });
+  }, []);
 
   return (
     <div className="space-y-2">
       <p className="text-sm font-medium text-muted-foreground">{title}</p>
-      <div className="space-y-2">
-        {displayScores.map((score) => (
-          <div
-            key={score.competencyId}
-            className="flex items-center justify-between py-1.5 px-2 rounded-lg bg-muted/30"
-          >
-            <div className="flex items-center gap-2 flex-1 min-w-0">
-              {score.passed ? (
-                <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0" aria-hidden="true" />
-              ) : (
-                <XCircle className="h-4 w-4 text-red-500 shrink-0" aria-hidden="true" />
+      <div className="space-y-1">
+        {displayScores.map((score) => {
+          const indicators = indicatorsByCompetency.get(score.competencyId);
+          const hasIndicators = indicators && indicators.length > 0;
+          const isExpanded = expandedCompetencies.has(score.competencyId);
+
+          return (
+            <div key={score.competencyId}>
+              <button
+                type="button"
+                className={cn(
+                  'flex items-center justify-between w-full py-1.5 px-2 rounded-lg bg-muted/30 text-left',
+                  hasIndicators && 'cursor-pointer hover:bg-muted/50 transition-colors',
+                  isExpanded && 'rounded-b-none'
+                )}
+                onClick={() => hasIndicators && toggleCompetency(score.competencyId)}
+                disabled={!hasIndicators}
+              >
+                <div className="flex items-center gap-2 flex-1 min-w-0">
+                  {hasIndicators ? (
+                    <ChevronRight
+                      className={cn(
+                        'h-3.5 w-3.5 shrink-0 text-muted-foreground transition-transform duration-200',
+                        isExpanded && 'rotate-90'
+                      )}
+                      aria-hidden="true"
+                    />
+                  ) : (
+                    <div className="w-3.5 shrink-0" />
+                  )}
+                  {score.passed ? (
+                    <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0" aria-hidden="true" />
+                  ) : (
+                    <XCircle className="h-4 w-4 text-red-500 shrink-0" aria-hidden="true" />
+                  )}
+                  <span className="text-sm truncate">{score.competencyName}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span
+                    className={cn(
+                      'text-sm font-medium',
+                      getScoreColorClass(score.simulatedPercentage, threshold)
+                    )}
+                  >
+                    {score.simulatedPercentage}%
+                  </span>
+                  <Badge
+                    variant="outline"
+                    className={cn(
+                      'text-[10px]',
+                      score.confidence === 'high' && 'border-emerald-300',
+                      score.confidence === 'medium' && 'border-amber-300',
+                      score.confidence === 'low' && 'border-muted-foreground'
+                    )}
+                  >
+                    {t('radar.questionsAbbrev', { count: score.questionCount })}
+                  </Badge>
+                </div>
+              </button>
+
+              {/* Indicator sub-rows */}
+              {isExpanded && indicators && (
+                <div className="bg-muted/15 border-x border-b border-border/40 rounded-b-lg px-2 py-1.5 space-y-1">
+                  <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider pl-10 pb-0.5">
+                    {t('simulatedResults.indicators')}
+                  </p>
+                  {indicators.map((ind) => (
+                    <Tooltip key={ind.indicatorTitle}>
+                      <TooltipTrigger asChild>
+                        <div
+                          className="flex items-center justify-between pl-10 pr-1 py-1 rounded-md hover:bg-muted/30 transition-colors cursor-default"
+                        >
+                          <span className="text-xs text-muted-foreground truncate flex-1">
+                            {ind.indicatorTitle}
+                          </span>
+                          <div className="flex items-center gap-2 shrink-0">
+                            <span
+                              className={cn(
+                                'text-xs font-medium',
+                                getScoreColorClass(ind.percentage, threshold)
+                              )}
+                            >
+                              {ind.percentage}%
+                            </span>
+                            <span className="text-[10px] text-muted-foreground tabular-nums">
+                              {ind.correct}/{ind.total}
+                            </span>
+                          </div>
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent side="top" className="max-w-[220px] text-xs space-y-1 p-2">
+                        <p className="font-medium">{ind.indicatorTitle}</p>
+                        <div className="flex justify-between gap-4">
+                          <span className="text-muted-foreground">{t('simulatedResults.tooltipScore')}</span>
+                          <span className={cn('font-medium', getScoreColorClass(ind.percentage, threshold))}>
+                            {ind.percentage}%
+                          </span>
+                        </div>
+                        <div className="flex justify-between gap-4">
+                          <span className="text-muted-foreground">{t('simulatedResults.indicatorCorrect')}</span>
+                          <span className="font-medium tabular-nums">{ind.correct} / {ind.total}</span>
+                        </div>
+                        <p className={cn(
+                          'text-[10px] pt-0.5',
+                          ind.percentage >= threshold ? 'text-emerald-500' : 'text-red-400'
+                        )}>
+                          {ind.percentage >= threshold
+                            ? t('simulatedResults.tooltipPassed')
+                            : t('simulatedResults.tooltipBelowThreshold')}
+                        </p>
+                      </TooltipContent>
+                    </Tooltip>
+                  ))}
+                </div>
               )}
-              <span className="text-sm truncate">{score.competencyName}</span>
             </div>
-            <div className="flex items-center gap-2">
-              <span
-                className={cn(
-                  'text-sm font-medium',
-                  getScoreColorClass(score.simulatedPercentage, threshold)
-                )}
-              >
-                {score.simulatedPercentage}%
-              </span>
-              <Badge
-                variant="outline"
-                className={cn(
-                  'text-[10px]',
-                  score.confidence === 'high' && 'border-emerald-300',
-                  score.confidence === 'medium' && 'border-amber-300',
-                  score.confidence === 'low' && 'border-muted-foreground'
-                )}
-              >
-                {t('radar.questionsAbbrev', { count: score.questionCount })}
-              </Badge>
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
-      {!showAll && scores.length > 5 && (
-        <p className="text-xs text-muted-foreground text-center pt-1">
-          {t('simulatedResults.moreCompetencies', { count: scores.length - 5 })}
-        </p>
+      {hasMore && (
+        <button
+          onClick={() => setExpanded((prev) => !prev)}
+          className="w-full py-2 text-xs font-medium text-primary flex items-center justify-center gap-1 rounded-lg border border-dashed border-primary/30 hover:bg-primary/5 transition-colors"
+        >
+          {expanded
+            ? t('simulatedResults.showLessCompetencies')
+            : t('simulatedResults.moreCompetencies', { count: scores.length - INITIAL_COUNT })}
+          <ChevronDown
+            className={cn(
+              'h-3 w-3 transition-transform duration-200',
+              expanded && 'rotate-180'
+            )}
+          />
+        </button>
       )}
     </div>
   );
@@ -608,6 +768,7 @@ export const ResultsTab = memo(function ResultsTab({
           threshold={passingScore}
           title={t('score.competencyProfile')}
           showAll={simulatedData.competencyScores.length <= 8}
+          sampleQuestions={result.sampleQuestions}
         />
       )}
 

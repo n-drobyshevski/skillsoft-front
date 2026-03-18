@@ -81,7 +81,7 @@ export function SimulatorPanelV4({ variant = 'desktop' }: SimulatorPanelV4Props)
   const [selectedProfile, setSelectedProfile] =
     useState<SimulationProfile>('RANDOM_GUESSER');
   const [strictness, setStrictness] = useState<number>(state.strictnessLevel ?? 50);
-  const [saturation, setSaturation] = useState<number>(state.saturationThreshold ?? 70);
+  const [saturation, setSaturation] = useState<number>(state.saturationThreshold ?? 0.7);
   const [allowBacktracking, setAllowBacktracking] = useState<boolean>(
     state.adaptivity?.allowBacktracking ?? true
   );
@@ -138,7 +138,7 @@ export function SimulatorPanelV4({ variant = 'desktop' }: SimulatorPanelV4Props)
 
   useEffect(() => {
     setStrictness(state.strictnessLevel ?? 50);
-    setSaturation(state.saturationThreshold ?? 70);
+    setSaturation(state.saturationThreshold ?? 0.7);
     setAllowBacktracking(state.adaptivity?.allowBacktracking ?? true);
   }, [state.strictnessLevel, state.saturationThreshold, state.adaptivity]);
 

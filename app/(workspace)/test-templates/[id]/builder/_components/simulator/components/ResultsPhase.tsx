@@ -212,6 +212,7 @@ export const ResultsPhase = memo(function ResultsPhase({
         competencyCount={competencyCount}
         onetSocCode={onetSocCode}
         teamId={teamId}
+        teamName={result.teamName}
         teamBenchmark={75}
       />
 
@@ -225,6 +226,7 @@ export const ResultsPhase = memo(function ResultsPhase({
         passingScore={passingScore}
         onetSocCode={onetSocCode}
         teamId={teamId}
+        teamName={result.teamName}
       />
     </div>
   );

@@ -31,6 +31,7 @@ interface TabContentRendererProps {
   passingScore: number;
   onetSocCode?: string;
   teamId?: string;
+  teamName?: string;
 }
 
 export function TabContentRenderer({
@@ -41,6 +42,7 @@ export function TabContentRenderer({
   passingScore,
   onetSocCode,
   teamId,
+  teamName,
 }: TabContentRendererProps) {
   switch (tabId) {
     case 'results':
@@ -53,6 +55,7 @@ export function TabContentRenderer({
             passingScore={passingScore}
             onetSocCode={onetSocCode}
             teamId={teamId}
+            teamName={teamName}
           />
         </Suspense>
       );
