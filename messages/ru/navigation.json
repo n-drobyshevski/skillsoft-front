@@ -75,12 +75,22 @@
     "description": "Поиск или переход на страницу...",
     "placeholder": "Поиск шаблонов, компетенций или навигация...",
     "noResults": "Результаты не найдены.",
+    "noResultsFor": "Нет результатов для \"{query}\"",
+    "tryDifferentSearch": "Попробуйте другой запрос",
     "searching": "Поиск...",
     "navigation": "Навигация",
     "searchResults": "Результаты поиска",
     "templates": "Шаблоны",
+    "recentItems": "Недавние",
+    "arrowNavigation": "Навигация",
     "createNewTemplate": "Создать новый шаблон",
+    "createCompetency": "Создать компетенцию",
+    "createQuestion": "Создать вопрос",
+    "createIndicator": "Создать индикатор",
+    "createTeam": "Создать команду",
+    "createUser": "Создать пользователя",
     "psychometrics": "Психометрика",
-    "skillMapper": "Карта навыков"
+    "skillMapper": "Карта навыков",
+    "bigFive": "Большая пятёрка"
   }
 }

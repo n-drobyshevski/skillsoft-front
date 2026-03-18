@@ -75,12 +75,22 @@
     "description": "Search or jump to a page...",
     "placeholder": "Search templates, competencies, or navigate...",
     "noResults": "No results found.",
+    "noResultsFor": "No results for \"{query}\"",
+    "tryDifferentSearch": "Try a different search term",
     "searching": "Searching...",
     "navigation": "Navigation",
     "searchResults": "Search Results",
     "templates": "Templates",
+    "recentItems": "Recent",
+    "arrowNavigation": "Navigate",
     "createNewTemplate": "Create New Template",
+    "createCompetency": "Create Competency",
+    "createQuestion": "Create Question",
+    "createIndicator": "Create Indicator",
+    "createTeam": "Create Team",
+    "createUser": "Create User",
     "psychometrics": "Psychometrics",
-    "skillMapper": "Skill Mapper"
+    "skillMapper": "Skill Mapper",
+    "bigFive": "Big Five"
   }
 }
