@@ -71,6 +71,12 @@ function truncateRadarLabel(text: string, maxLength: number): string {
   return `${text.slice(0, maxLength - 1)}…`;
 }
 
+const GAP_DIRECTION_COLORS = {
+  above: '#10b981',
+  below: '#f59e0b',
+  at: '#3b82f6',
+} as const;
+
 // ============================================
 // LOADING SKELETON
 // ============================================
@@ -154,6 +160,18 @@ export function TeamComparisonCard({
     card: ['--card', '#ffffff'],
   });
 
+  // Compute before early returns to avoid Rules of Hooks violation
+  const sortedComparisons = teamId
+    ? [...comparisons].sort(
+        (a, b) => b.individual - b.teamAvg - (a.individual - a.teamAvg)
+      )
+    : [];
+  const topComparisons = sortedComparisons.slice(0, 5);
+  const overallDirection = getGapDirection(overallGap);
+  // Radar needs >= 3 axes to form a meaningful polygon
+  const canShowRadar = topComparisons.length >= 3;
+  const effectiveView = canShowRadar ? view : 'bars';
+
   // Show loading skeleton
   if (isLoading) {
     return <TeamComparisonSkeleton />;
@@ -163,18 +181,6 @@ export function TeamComparisonCard({
   if (!teamId) {
     return <MissingTeamWarning />;
   }
-
-  const sortedComparisons = [...comparisons].sort(
-    (a, b) => b.individual - b.teamAvg - (a.individual - a.teamAvg)
-  );
-  const topComparisons = sortedComparisons.slice(0, 5);
-  const overallDirection = getGapDirection(overallGap);
-
-  const canShowRadar = topComparisons.length >= 3;
-
-  React.useEffect(() => {
-    if (!canShowRadar && view === 'radar') setView('bars');
-  }, [canShowRadar, view]);
 
   return (
     <div
@@ -199,11 +205,11 @@ export function TeamComparisonCard({
               <button
                 type="button"
                 onClick={() => setView('bars')}
-                aria-pressed={view === 'bars'}
+                aria-pressed={effectiveView === 'bars'}
                 aria-label={t('teamComparison.viewBars')}
                 className={cn(
                   'rounded min-h-[44px] min-w-[44px] flex items-center justify-center transition-colors',
-                  view === 'bars'
+                  effectiveView === 'bars'
                     ? cn(config.iconText, config.iconBg)
                     : 'text-muted-foreground hover:text-foreground'
                 )}
@@ -213,11 +219,11 @@ export function TeamComparisonCard({
               <button
                 type="button"
                 onClick={() => setView('radar')}
-                aria-pressed={view === 'radar'}
+                aria-pressed={effectiveView === 'radar'}
                 aria-label={t('teamComparison.viewRadar')}
                 className={cn(
                   'rounded min-h-[44px] min-w-[44px] flex items-center justify-center transition-colors',
-                  view === 'radar'
+                  effectiveView === 'radar'
                     ? cn(config.iconText, config.iconBg)
                     : 'text-muted-foreground hover:text-foreground'
                 )}
@@ -252,7 +258,7 @@ export function TeamComparisonCard({
 
       {/* Chart Area — fixed min-height prevents layout shift when toggling */}
       <div className="min-h-[220px]">
-        {view === 'bars' ? (
+        {effectiveView === 'bars' ? (
           /* === BARS VIEW — existing code, unchanged === */
           <div className="space-y-2">
             <div className="flex items-center gap-2 text-[10px] text-muted-foreground">
@@ -346,18 +352,14 @@ export function TeamComparisonCard({
                       <stop
                         offset="0%"
                         stopColor={
-                          overallDirection === 'above' ? '#10b981'
-                          : overallDirection === 'below' ? '#f59e0b'
-                          : '#3b82f6'
+                          GAP_DIRECTION_COLORS[overallDirection]
                         }
                         stopOpacity={0.5}
                       />
                       <stop
                         offset="100%"
                         stopColor={
-                          overallDirection === 'above' ? '#10b981'
-                          : overallDirection === 'below' ? '#f59e0b'
-                          : '#3b82f6'
+                          GAP_DIRECTION_COLORS[overallDirection]
                         }
                         stopOpacity={0.1}
                       />
@@ -474,9 +476,7 @@ export function TeamComparisonCard({
                             <span
                               className="font-bold tabular-nums"
                               style={{
-                                color: dir === 'above' ? '#10b981'
-                                  : dir === 'below' ? '#f59e0b'
-                                  : '#3b82f6',
+                                color: GAP_DIRECTION_COLORS[dir],
                               }}
                             >
                               {gap > 0 ? '+' : ''}{Math.round(gap)}%
@@ -504,17 +504,25 @@ export function TeamComparisonCard({
         )}
       </div>
 
-      {/* Legend */}
+      {/* Legend — color dots match both bar and radar views */}
       <div className="flex items-center justify-center gap-4 pt-2 border-t text-[10px] text-muted-foreground">
         <div className="flex items-center gap-1">
           <div
-            className="h-2 w-4 rounded bg-blue-200 dark:bg-blue-800/50"
+            className="h-2.5 w-2.5 rounded-full bg-blue-300 dark:bg-blue-700"
             aria-hidden="true"
           />
           <span>{t('teamComparison.legendTeamAvg')}</span>
         </div>
         <div className="flex items-center gap-1">
-          <div className="h-1.5 w-4 rounded bg-blue-500" aria-hidden="true" />
+          <div
+            className={cn(
+              'h-2.5 w-2.5 rounded-full',
+              overallDirection === 'above' && 'bg-emerald-500',
+              overallDirection === 'below' && 'bg-amber-500',
+              overallDirection === 'at' && 'bg-blue-500'
+            )}
+            aria-hidden="true"
+          />
           <span>{t('teamComparison.legendIndividual')}</span>
         </div>
       </div>
