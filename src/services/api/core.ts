@@ -6,6 +6,7 @@ import {
   createApiError,
   createNetworkError,
   getErrorCategory,
+  getErrorCodeMessage,
   getUserFriendlyMessage,
   isBackendErrorResponse,
 } from '@/types/errors';
@@ -83,9 +84,15 @@ async function handleResponse<T>(response: Response, silentStatusCodes: number[]
         const backendError = await parseErrorResponse(response);
         const category = getErrorCategory(response.status);
 
-        // Determine the user-facing message
+        // Determine the user-facing message:
+        // 1. Prefer code-specific Russian message for known error codes
+        // 2. Fall back to backend message (English)
+        // 3. Fall back to category-based Russian message
+        const codeMessage = getErrorCodeMessage(backendError?.code);
         let message: string;
-        if (backendError?.message) {
+        if (codeMessage) {
+            message = codeMessage;
+        } else if (backendError?.message) {
             message = backendError.message;
         } else {
             message = getUserFriendlyMessage(category);

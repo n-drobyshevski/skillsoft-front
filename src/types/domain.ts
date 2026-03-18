@@ -745,8 +745,18 @@ export function hasTripleStandardMapping(competency: Competency): boolean {
 // ============================================
 
 export interface TestTemplateBlueprint {
+  /** O*NET SOC code (camelCase — current convention) */
+  onetSocCode?: string;
+  /** @deprecated Legacy snake_case key — use onetSocCode */
   onet_soc_code?: string;
+  /** Team ID (camelCase — current convention) */
+  teamId?: string;
+  /** @deprecated Legacy snake_case key — use teamId */
   team_id?: string;
+  /** Include Big Five personality assessment */
+  includeBigFive?: boolean;
+  /** @deprecated Legacy snake_case key — use includeBigFive */
+  include_big_five?: boolean;
   [key: string]: unknown;
 }
 

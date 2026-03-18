@@ -61,6 +61,9 @@ export enum ErrorCode {
   // Test session errors
   TEST_NOT_READY = 'TEST_NOT_READY',
 
+  // Template state errors
+  TEMPLATE_NOT_EDITABLE = 'TEMPLATE_NOT_EDITABLE',
+
   // Server errors
   DATABASE_ERROR = 'DATABASE_ERROR',
   INTERNAL_ERROR = 'INTERNAL_ERROR',
@@ -309,6 +312,34 @@ export function getErrorTitle(category: ErrorCategory): string {
     default:
       return 'Произошла ошибка';
   }
+}
+
+// ============================================
+// ERROR CODE → USER-FRIENDLY MESSAGES (RU)
+// ============================================
+
+/**
+ * Maps known backend error codes to user-friendly Russian messages.
+ * Returns undefined for unmapped codes (falls back to category message).
+ */
+const ERROR_CODE_MESSAGES: Partial<Record<string, string>> = {
+  [ErrorCode.TEMPLATE_NOT_EDITABLE]:
+    'Этот шаблон опубликован и не может быть изменён. Создайте новую версию для внесения правок.',
+  [ErrorCode.DUPLICATE_SESSION]:
+    'У вас уже есть незавершённая сессия для этого шаблона.',
+  [ErrorCode.TEST_NOT_READY]:
+    'Тест не готов к запуску: недостаточно вопросов для одной или нескольких компетенций.',
+  CONCURRENT_MODIFICATION:
+    'Ресурс был изменён другим запросом. Обновите страницу и попробуйте снова.',
+};
+
+/**
+ * Returns a user-friendly Russian message for a known error code,
+ * or undefined if no specific mapping exists.
+ */
+export function getErrorCodeMessage(code: string | undefined): string | undefined {
+  if (!code) return undefined;
+  return ERROR_CODE_MESSAGES[code];
 }
 
 // ============================================
