@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { useLocale } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import {
@@ -13,6 +14,7 @@ import {
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { CircularScore, formatDuration, formatDate, VARIANT_STYLES } from './hero-utils';
+import { ExportDialog } from '@/components/results/ExportDialog';
 import type { HeroStripProps } from './types';
 
 export function HeroStrip({
@@ -137,9 +139,7 @@ export function HeroStrip({
 // ============================================================================
 
 function ActionIconGroup({ resultId }: { resultId?: string }) {
-  function handleDownload() {
-    window.print();
-  }
+  const [exportDialogOpen, setExportDialogOpen] = useState(false);
 
   async function handleShare() {
     const shareUrl = resultId
@@ -159,31 +159,40 @@ function ActionIconGroup({ resultId }: { resultId?: string }) {
   }
 
   return (
-    <div className="flex items-center gap-1 shrink-0">
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Button variant="ghost" size="icon" className="h-8 w-8 touch-manipulation" aria-label="Download PDF" onClick={handleDownload}>
-            <Download className="h-4 w-4" />
-          </Button>
-        </TooltipTrigger>
-        <TooltipContent side="bottom">Download</TooltipContent>
-      </Tooltip>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Button variant="ghost" size="icon" className="h-8 w-8 touch-manipulation" aria-label="Share results" onClick={handleShare}>
-            <Share2 className="h-4 w-4" />
-          </Button>
-        </TooltipTrigger>
-        <TooltipContent side="bottom">Share</TooltipContent>
-      </Tooltip>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Button variant="ghost" size="icon" className="h-8 w-8 touch-manipulation" aria-label="Print results" onClick={handleDownload}>
-            <Printer className="h-4 w-4" />
-          </Button>
-        </TooltipTrigger>
-        <TooltipContent side="bottom">Print</TooltipContent>
-      </Tooltip>
-    </div>
+    <>
+      <div className="flex items-center gap-1 shrink-0">
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button variant="ghost" size="icon" className="h-8 w-8 touch-manipulation" aria-label="Download PDF" onClick={() => setExportDialogOpen(true)}>
+              <Download className="h-4 w-4" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent side="bottom">Download</TooltipContent>
+        </Tooltip>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button variant="ghost" size="icon" className="h-8 w-8 touch-manipulation" aria-label="Share results" onClick={handleShare}>
+              <Share2 className="h-4 w-4" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent side="bottom">Share</TooltipContent>
+        </Tooltip>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button variant="ghost" size="icon" className="h-8 w-8 touch-manipulation" aria-label="Print results" onClick={() => window.print()}>
+              <Printer className="h-4 w-4" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent side="bottom">Print</TooltipContent>
+        </Tooltip>
+      </div>
+      {resultId && (
+        <ExportDialog
+          open={exportDialogOpen}
+          onOpenChange={setExportDialogOpen}
+          resultId={resultId}
+        />
+      )}
+    </>
   );
 }
