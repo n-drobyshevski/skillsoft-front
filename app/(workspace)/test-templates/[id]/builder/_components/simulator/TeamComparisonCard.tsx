@@ -71,11 +71,11 @@ function truncateRadarLabel(text: string, maxLength: number): string {
   return `${text.slice(0, maxLength - 1)}…`;
 }
 
-const GAP_DIRECTION_COLORS = {
+const GAP_DIRECTION_COLORS: Record<'above' | 'below' | 'at', string> = {
   above: '#10b981',
   below: '#f59e0b',
   at: '#3b82f6',
-} as const;
+};
 
 // ============================================
 // LOADING SKELETON
@@ -352,14 +352,14 @@ export function TeamComparisonCard({
                       <stop
                         offset="0%"
                         stopColor={
-                          GAP_DIRECTION_COLORS[overallDirection]
+                          GAP_DIRECTION_COLORS[overallDirection] // eslint-disable-line security/detect-object-injection
                         }
                         stopOpacity={0.5}
                       />
                       <stop
                         offset="100%"
                         stopColor={
-                          GAP_DIRECTION_COLORS[overallDirection]
+                          GAP_DIRECTION_COLORS[overallDirection] // eslint-disable-line security/detect-object-injection
                         }
                         stopOpacity={0.1}
                       />
@@ -476,7 +476,7 @@ export function TeamComparisonCard({
                             <span
                               className="font-bold tabular-nums"
                               style={{
-                                color: GAP_DIRECTION_COLORS[dir],
+                                color: GAP_DIRECTION_COLORS[dir], // eslint-disable-line security/detect-object-injection
                               }}
                             >
                               {gap > 0 ? '+' : ''}{Math.round(gap)}%
