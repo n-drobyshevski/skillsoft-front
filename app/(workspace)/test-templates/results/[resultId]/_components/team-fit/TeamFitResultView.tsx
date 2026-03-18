@@ -38,7 +38,7 @@ import { OnboardingRecommendations } from './OnboardingRecommendations';
  */
 export function TeamFitResultView({ result, template }: BaseResultViewProps) {
   const t = useTranslations('results.teamFit');
-  const teamId = template.blueprint?.team_id;
+  const teamId = template.blueprint?.teamId ?? template.blueprint?.team_id;
   const isGoodFit = result.passed ?? false;
   const passingScore = template.passingScore || 70;
   const competencyScores = result.competencyScores ?? [];

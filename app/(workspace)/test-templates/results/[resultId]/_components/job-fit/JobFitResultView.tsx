@@ -54,7 +54,7 @@ const TrendOverview = dynamic(
  */
 export function JobFitResultView({ result, template }: BaseResultViewProps) {
   const t = useTranslations('results.jobFit');
-  const onetSocCode = template.blueprint?.onet_soc_code;
+  const onetSocCode = template.blueprint?.onetSocCode ?? template.blueprint?.onet_soc_code;
   const isPassed = result.passed ?? false;
   const passingScore = template.passingScore || 70;
 
