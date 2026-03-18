@@ -461,6 +461,7 @@
       "existingSessionError": "You already have an unfinished test. Complete it or cancel before starting a new one.",
       "failedToStart": "Failed to start test. Please try later.",
       "failedToStartTestDrive": "Failed to start test-drive. Please try later.",
+      "templateNotReady": "Template is not ready to start",
       "previousSessionCancelled": "Previous session cancelled",
       "failedToStartNewSession": "Failed to start new session"
     }

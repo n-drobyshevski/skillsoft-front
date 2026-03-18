@@ -22,6 +22,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { testSessionsApi } from "@/services/api";
+import { isTestNotReadyError } from "@/services/api.client";
 import { Loader2, AlertTriangle, PlayCircle, Rocket, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 
@@ -103,11 +104,20 @@ export default function StartTestSessionButton({
       } catch (error: unknown) {
         console.error("Failed to start test:", error);
 
-        const errorMessage = error instanceof Error ? error.message : '';
-        if (errorMessage?.includes("already has an in-progress session")) {
-          toast.error(t('take.toasts.existingSessionError'));
+        if (isTestNotReadyError(error)) {
+          const warnings = (error as { context?: { assemblyWarnings?: string[] } }).context?.assemblyWarnings;
+          const description = warnings?.length ? warnings.join('. ') : error.message;
+          toast.error(t('take.toasts.templateNotReady'), {
+            description,
+            duration: 6000,
+          });
         } else {
-          toast.error(t('take.toasts.failedToStart'));
+          const errorMessage = error instanceof Error ? error.message : '';
+          if (errorMessage?.includes("already has an in-progress session")) {
+            toast.error(t('take.toasts.existingSessionError'));
+          } else {
+            toast.error(t('take.toasts.failedToStart'));
+          }
         }
       } finally {
         setIsChecking(false);

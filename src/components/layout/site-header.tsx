@@ -12,7 +12,6 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { Search, Bell } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useBreadcrumbContext } from "@/context/BreadcrumbContext";
 import { SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
@@ -163,16 +162,6 @@ export function SiteHeader({ title = "Dashboard", breadcrumbs }: SiteHeaderProps
               <LanguageToggle />
             </ClientOnly>
 
-            {/* Notifications - 36px touch target */}
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-9 w-9 touch-target focus-mobile"
-            >
-              <Bell className="h-4 w-4" />
-              <span className="sr-only">Notifications</span>
-            </Button>
-
             {/* Authentication for Mobile */}
             <ClientOnly>
               <SignedOut>
@@ -246,18 +235,6 @@ export function SiteHeader({ title = "Dashboard", breadcrumbs }: SiteHeaderProps
 
           {/* Desktop Actions */}
           <div className="ml-auto flex items-center gap-1 @lg/header:gap-2">
-            {/* Search Button */}
-            <Button variant="ghost" size="icon" className="h-8 w-8 focus-mobile">
-              <Search className="h-4 w-4" />
-              <span className="sr-only">Search</span>
-            </Button>
-
-            {/* Notifications */}
-            <Button variant="ghost" size="icon" className="h-8 w-8 focus-mobile">
-              <Bell className="h-4 w-4" />
-              <span className="sr-only">Notifications</span>
-            </Button>
-
             {/* Language Switcher */}
             <ClientOnly>
               <LanguageSwitcher />

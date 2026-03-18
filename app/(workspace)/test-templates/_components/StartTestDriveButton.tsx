@@ -16,6 +16,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { testSessionsApi } from "@/services/api";
+import { isTestNotReadyError } from "@/services/api.client";
 import { Loader2, AlertTriangle, Eye } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -76,6 +77,21 @@ export default function StartTestDriveButton({
         return;
       }
 
+      // Pre-flight readiness check before starting
+      try {
+        const readiness = await testSessionsApi.checkTemplateReadiness(templateId);
+        if (!readiness.ready) {
+          setIsChecking(false);
+          toast.error(t('take.toasts.templateNotReady'), {
+            description: readiness.message,
+            duration: 6000,
+          });
+          return;
+        }
+      } catch {
+        // Readiness check failed — continue and let startSession handle errors
+      }
+
       // No existing session, start new one in test-drive mode
       await startNewTestDriveSession();
     } catch (error) {
@@ -103,11 +119,20 @@ export default function StartTestDriveButton({
         // eslint-disable-next-line no-console
         console.error("Failed to start test-drive:", error);
 
-        const errorMessage = error instanceof Error ? error.message : '';
-        if (errorMessage?.includes("already has an in-progress session")) {
-          toast.error(t('take.toasts.existingSessionError'));
+        if (isTestNotReadyError(error)) {
+          const warnings = (error as { context?: { assemblyWarnings?: string[] } }).context?.assemblyWarnings;
+          const description = warnings?.length ? warnings.join('. ') : error.message;
+          toast.error(t('take.toasts.templateNotReady'), {
+            description,
+            duration: 6000,
+          });
         } else {
-          toast.error(t('take.toasts.failedToStartTestDrive'));
+          const errorMessage = error instanceof Error ? error.message : '';
+          if (errorMessage?.includes("already has an in-progress session")) {
+            toast.error(t('take.toasts.existingSessionError'));
+          } else {
+            toast.error(t('take.toasts.failedToStartTestDrive'));
+          }
         }
       } finally {
         setIsChecking(false);

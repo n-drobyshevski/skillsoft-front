@@ -16,6 +16,8 @@ import { useBlueprintHistory, type HistoryActionType } from "@/hooks/useBlueprin
 import { useTranslations } from "next-intl";
 import { STRATEGY_HELP_CONTENT, type Strategy } from "./simulator/strategy-context";
 import StartTestDriveButton from "../../../_components/StartTestDriveButton";
+import { ReadinessAlertCompact } from "@/components/assessment/ReadinessAlert";
+import { useTemplateReadiness } from "@/hooks/useTemplateReadiness";
 
 interface WeightedCanvasProps {
   onToggleLibrary?: () => void;
@@ -44,6 +46,9 @@ export const WeightedCanvas = React.memo(function WeightedCanvas({
 
   // Get drag state from shared DnD context
   const { insertionTarget, isDragging, activeDragData } = useBuilderDnd();
+
+  // Pre-flight readiness check for the test-drive button
+  const { readiness, isReady: isTemplateReady } = useTemplateReadiness(templateId);
 
   // Zustand-based history with SessionStorage persistence
   const {
@@ -283,6 +288,9 @@ export const WeightedCanvas = React.memo(function WeightedCanvas({
               {t('redoTooltip')} <kbd className="ml-1.5 px-1.5 py-0.5 bg-background/20 rounded text-[10px] font-mono">{t('redoKey')}</kbd>
             </TooltipContent>
           </Tooltip>
+          {readiness && !isTemplateReady && (
+            <ReadinessAlertCompact readiness={readiness} />
+          )}
           <StartTestDriveButton
             templateId={templateId}
             templateName={templateName}
