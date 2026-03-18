@@ -9,6 +9,7 @@ import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip
 import {
   Search,
   GripVertical,
+  Minus,
   Plus,
   Brain,
   Users,
@@ -175,6 +176,7 @@ interface CompetencyItemProps {
   competency: LibraryCompetency;
   isSelected: boolean;
   onAdd: () => void;
+  onRemove: () => void;
   /** Enable drag-and-drop (desktop only, disabled for mobile sheet) */
   enableDrag?: boolean;
   isExpanded?: boolean;
@@ -193,6 +195,7 @@ function DraggableCompetencyItem({
   competency,
   isSelected,
   onAdd,
+  onRemove,
   isExpanded,
   onToggleExpand,
   questionsPerCompetency,
@@ -262,7 +265,28 @@ function DraggableCompetencyItem({
             isExpanded && 'rotate-180'
           )}
         />
-        {!isAddDisabled && (
+        {isSelected ? (
+          <Button
+            variant="ghost"
+            size="icon"
+            className={cn(
+              'min-h-[44px] min-w-[44px] rounded-lg',
+              'md:h-8 md:w-8 md:min-h-0 md:min-w-0',
+              'md:opacity-60 md:group-hover:opacity-100',
+              'active:scale-95 active:bg-destructive/15',
+              'hover:bg-destructive/10 hover:text-destructive',
+              'transition-all duration-150'
+            )}
+            onClick={(e) => {
+              e.stopPropagation();
+              onRemove();
+            }}
+            onPointerDown={(e) => e.stopPropagation()}
+            aria-label={tLib('removeFromCanvas', { name: competency.name })}
+          >
+            <Minus className="h-4 w-4" />
+          </Button>
+        ) : !isCritical && (
           <Button
             variant="ghost"
             size="icon"
@@ -316,6 +340,7 @@ function StaticCompetencyItem({
   competency,
   isSelected,
   onAdd,
+  onRemove,
   isExpanded,
   onToggleExpand,
   questionsPerCompetency,
@@ -359,7 +384,27 @@ function StaticCompetencyItem({
             isExpanded && 'rotate-180'
           )}
         />
-        {!isAddDisabled && (
+        {isSelected ? (
+          <Button
+            variant="ghost"
+            size="icon"
+            className={cn(
+              'min-h-[44px] min-w-[44px] rounded-lg',
+              'md:h-8 md:w-8 md:min-h-0 md:min-w-0',
+              'md:opacity-60 md:group-hover:opacity-100',
+              'active:scale-95 active:bg-destructive/15',
+              'hover:bg-destructive/10 hover:text-destructive',
+              'transition-all duration-150'
+            )}
+            onClick={(e) => {
+              e.stopPropagation();
+              onRemove();
+            }}
+            aria-label={tLib('removeFromCanvas', { name: competency.name })}
+          >
+            <Minus className="h-4 w-4" />
+          </Button>
+        ) : !isCritical && (
           <Button
             variant="ghost"
             size="icon"
@@ -411,6 +456,7 @@ function CompetencyItem({
   competency,
   isSelected,
   onAdd,
+  onRemove,
   enableDrag = false,
   isExpanded,
   onToggleExpand,
@@ -424,6 +470,7 @@ function CompetencyItem({
         competency={competency}
         isSelected={isSelected}
         onAdd={onAdd}
+        onRemove={onRemove}
         isExpanded={isExpanded}
         onToggleExpand={onToggleExpand}
         questionsPerCompetency={questionsPerCompetency}
@@ -438,6 +485,7 @@ function CompetencyItem({
       competency={competency}
       isSelected={isSelected}
       onAdd={onAdd}
+      onRemove={onRemove}
       isExpanded={isExpanded}
       onToggleExpand={onToggleExpand}
       questionsPerCompetency={questionsPerCompetency}
@@ -466,7 +514,7 @@ const ROW_HEIGHT_PER_INDICATOR = 64; // three-line rows (title + bar/count/risk)
 
 export function LibraryPanel({ onAdd }: LibraryPanelProps) {
   const t = useTranslations('builder.library');
-  const { libraryCompetencies, state, addCompetency } = useBlueprintWorkspace();
+  const { libraryCompetencies, state, addCompetency, removeCompetency } = useBlueprintWorkspace();
   const [searchQuery, setSearchQuery] = useState('');
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
@@ -670,6 +718,7 @@ export function LibraryPanel({ onAdd }: LibraryPanelProps) {
                     competency={row.competency}
                     isSelected={selectedIds.includes(row.competency.id)}
                     onAdd={() => handleAdd(row.competency)}
+                    onRemove={() => removeCompetency(row.competency.id)}
                     enableDrag={enableDrag}
                     isExpanded={row.isExpanded}
                     onToggleExpand={() => handleToggleExpand(row.competency.id)}

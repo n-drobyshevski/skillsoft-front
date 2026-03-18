@@ -59,9 +59,9 @@ export default async function BuilderLayout({ children, params }: BuilderLayoutP
     },
     timeLimitMinutes: template.timeLimitMinutes,
     passingScore: template.passingScore,
-    includeBigFive: (template.blueprint?.include_big_five as boolean) || true,
-    onetSocCode: template.blueprint?.onet_soc_code as string | undefined,
-    teamId: template.blueprint?.team_id as string | undefined,
+    includeBigFive: ((template.blueprint?.includeBigFive ?? template.blueprint?.include_big_five) as boolean) || true,
+    onetSocCode: (template.blueprint?.onetSocCode ?? template.blueprint?.onet_soc_code) as string | undefined,
+    teamId: (template.blueprint?.teamId ?? template.blueprint?.team_id) as string | undefined,
   };
 
   return (

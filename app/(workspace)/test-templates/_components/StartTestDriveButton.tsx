@@ -25,6 +25,7 @@ interface StartTestDriveButtonProps {
   templateName: string;
   fullWidth?: boolean;
   className?: string;
+  icon?: React.ReactNode;
 }
 
 /**
@@ -43,6 +44,7 @@ export default function StartTestDriveButton({
   templateName,
   fullWidth = false,
   className,
+  icon,
 }: StartTestDriveButtonProps) {
   const router = useRouter();
   const { userId, isSignedIn } = useAuth();
@@ -161,7 +163,7 @@ export default function StartTestDriveButton({
           </>
         ) : (
           <>
-            <Eye className="h-3.5 w-3.5 sm:mr-1.5 transition-transform group-hover:scale-110 shrink-0" aria-hidden="true" />
+            {icon ?? <Eye className="h-3.5 w-3.5 sm:mr-1.5 transition-transform group-hover:scale-110 shrink-0" aria-hidden="true" />}
             <span className="hidden sm:inline font-medium">{t('testDrive.button')}</span>
             <span className="sm:hidden font-medium">{t('testDrive.buttonShort')}</span>
           </>

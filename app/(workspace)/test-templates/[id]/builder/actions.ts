@@ -97,7 +97,8 @@ const getApiBaseUrl = () => {
  * Supports optimistic updates - errors will trigger rollback
  */
 export async function updateBlueprint(
-  state: BlueprintState
+  state: BlueprintState,
+  options?: { forceOverwrite?: boolean }
 ): Promise<ActionResponse<BlueprintState>> {
   try {
     const authHeaders = await getAuthHeaders();
@@ -127,6 +128,7 @@ export async function updateBlueprint(
       competencyIds: state.competencies.map((c) => c.id),
       timeLimitMinutes: state.timeLimitMinutes,
       passingScore: state.passingScore,
+      ...(options?.forceOverwrite && { forceOverwrite: true }),
     };
 
     const response = await fetch(

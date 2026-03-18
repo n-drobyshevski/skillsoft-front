@@ -36,6 +36,8 @@ interface AutoSaveConfig<T> {
   retry?: RetryConfig;
   /** Show browser warning when leaving with unsaved changes (default: true) */
   warnOnLeave?: boolean;
+  /** Manual mode: track dirty state but don't auto-schedule saves (default: false) */
+  manual?: boolean;
 }
 
 interface AutoSaveReturn {
@@ -71,6 +73,7 @@ export function useAutoSave<T>({
   onError,
   retry = {},
   warnOnLeave = true,
+  manual = false,
 }: AutoSaveConfig<T>): AutoSaveReturn {
   // Destructure retry config with defaults
   const {
@@ -101,6 +104,10 @@ export function useAutoSave<T>({
   onSuccessRef.current = onSuccess;
   onErrorRef.current = onError;
   isOfflineRef.current = isOffline;
+
+  // Manual mode ref for stable access in effects
+  const manualRef = useRef(manual);
+  manualRef.current = manual;
 
   // Refs for stable values across renders
   const lastSavedKeyRef = useRef<string>('');
@@ -339,9 +346,14 @@ export function useAutoSave<T>({
     const currentKey = compareKeyRef.current(data);
 
     if (currentKey !== lastSavedKeyRef.current) {
-      scheduleAutoSaveRef.current();
+      if (manualRef.current) {
+        // Manual mode: track dirty state but don't auto-schedule
+        setHasUnsavedChanges(true);
+        setStatus('pending');
+      } else {
+        scheduleAutoSaveRef.current();
+      }
     }
-   
   }, [data]);
 
   const saveNow = async () => {

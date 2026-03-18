@@ -7,6 +7,7 @@ import React, {
   useCallback,
   useEffect,
   useRef,
+  useState,
   Suspense,
   type ReactNode,
 } from 'react';
@@ -27,6 +28,8 @@ import {
   SimulationProfile,
 } from '../actions';
 import { ConflictResolutionDialog } from './ConflictResolutionDialog';
+import { VersionPromptDialog } from './VersionPromptDialog';
+import { createNewVersion } from '../../actions';
 
 // Zustand stores (STATE-1)
 import { useBlueprintStore } from '@/store/blueprint-store';
@@ -214,7 +217,10 @@ export function BlueprintWorkspaceProvider({
   } = useAutoSave({
     data: localState,
     onSave: async (state) => {
-      const result = await updateBlueprint(state);
+      // Skip auto-save for published templates unless force-overwrite was requested
+      if (isReadOnly && !forceOverwriteRef.current) return false;
+      const opts = forceOverwriteRef.current ? { forceOverwrite: true } : undefined;
+      const result = await updateBlueprint(state, opts);
       if (result.success) {
         storeSetServerState(result.data);
         return true;
@@ -227,8 +233,7 @@ export function BlueprintWorkspaceProvider({
       const message = error instanceof Error ? error.message : 'Failed to save';
       toast.error(`${message} ${t('toasts.changesReverted')}`);
     },
-    debounceMs: 2000,
-    maxWaitMs: 10000,
+    manual: true,
     enabled: !isReadOnly,
     compareKey: (s) => JSON.stringify({
       // Strip ephemeral onetRecommended flag — it's a visual-only client field
@@ -413,13 +418,37 @@ export function BlueprintWorkspaceProvider({
     [storeSetSimulating, storeSetSimulationResult]
   );
 
+  // Version prompt dialog state (shown when user tries to save a published template)
+  const [showVersionPrompt, setShowVersionPrompt] = useState(false);
+  // Ref to signal the next save should use forceOverwrite
+  const forceOverwriteRef = useRef(false);
+
   // Manual save (explicit save button)
   const saveBlueprint = useCallback(async () => {
+    if (isReadOnly) {
+      setShowVersionPrompt(true);
+      return false;
+    }
     const success = await saveNow();
     if (success) {
       toast.success(t('toasts.blueprintSaved'));
     }
     return success;
+  }, [saveNow, isReadOnly]);
+
+  const handleCreateVersion = useCallback(async () => {
+    await createNewVersion(templateId, false);
+    // createNewVersion redirects via server action — dialog auto-closes on navigation
+  }, [templateId]);
+
+  const handleOverwrite = useCallback(async () => {
+    setShowVersionPrompt(false);
+    forceOverwriteRef.current = true;
+    const success = await saveNow();
+    forceOverwriteRef.current = false;
+    if (success) {
+      toast.success(t('toasts.blueprintSaved'));
+    }
   }, [saveNow]);
 
   // Derive isPending from save status
@@ -475,6 +504,13 @@ export function BlueprintWorkspaceProvider({
         conflict={conflictInfo}
         onResolve={handleConflictResolve}
         onDismiss={syncClear}
+      />
+      {/* Version prompt: shown when user tries to save a published template */}
+      <VersionPromptDialog
+        open={showVersionPrompt}
+        onClose={() => setShowVersionPrompt(false)}
+        onCreateVersion={handleCreateVersion}
+        onOverwrite={handleOverwrite}
       />
     </BlueprintWorkspaceContext.Provider>
   );

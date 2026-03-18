@@ -6,16 +6,16 @@ import { useDroppable } from "@dnd-kit/core";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Info, Loader2, PanelLeftClose, PanelLeftOpen, Play, Redo2, Save, Scale, Sparkles, Undo2 } from "lucide-react";
+import { Info, Lock, Loader2, PanelLeftClose, PanelLeftOpen, Play, Redo2, Save, Sparkles, Undo2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useBlueprintWorkspace } from "./BlueprintWorkspaceProvider";
 import { useBuilderDnd } from "./BuilderDndProvider";
 import { CompetencySmartCard } from "./CompetencySmartCard";
-import { SaveStatusIndicator } from "./SaveStatusIndicator";
 import { InsertionIndicator } from "./InsertionIndicator";
 import { useBlueprintHistory, type HistoryActionType } from "@/hooks/useBlueprintHistory";
 import { useTranslations } from "next-intl";
 import { STRATEGY_HELP_CONTENT, type Strategy } from "./simulator/strategy-context";
+import StartTestDriveButton from "../../../_components/StartTestDriveButton";
 
 interface WeightedCanvasProps {
   onToggleLibrary?: () => void;
@@ -32,15 +32,14 @@ export const WeightedCanvas = React.memo(function WeightedCanvas({
     state,
     isPending,
     isSaving,
+    isReadOnly,
     saveBlueprint,
     setCompetencies,
     removeCompetency,
     templateId,
-    // Auto-save state
-    saveStatus,
-    lastSaved,
+    templateName,
+    // Save state
     hasUnsavedChanges,
-    retryAttempt,
   } = useBlueprintWorkspace();
 
   // Get drag state from shared DnD context
@@ -123,26 +122,9 @@ export const WeightedCanvas = React.memo(function WeightedCanvas({
   }, [historyRedo, setCompetencies]);
 
   const handleSave = useCallback(() => {
+    // saveBlueprint guards for isReadOnly — shows version prompt dialog
     void saveBlueprint();
   }, [saveBlueprint]);
-
-  const handleTestDrive = useCallback(() => {
-    window.open(`/test-templates/${templateId}/start?mode=test-drive`, '_blank');
-  }, [templateId]);
-
-  // U4: Balance weights - normalize all weights so average is 1.0x
-  const handleBalanceWeights = useCallback(() => {
-    if (state.competencies.length === 0) return;
-    const totalWeight = state.competencies.reduce((sum, c) => sum + (c.weight ?? 1), 0);
-    const targetTotal = state.competencies.length; // average of 1.0x
-    const factor = targetTotal / totalWeight;
-    const balanced = state.competencies.map((c) => ({
-      ...c,
-      weight: Math.round((c.weight ?? 1) * factor * 10) / 10,
-    }));
-    setCompetencies(balanced);
-    setAriaAnnouncement(t('weightsBalancedAnnouncement'));
-  }, [state.competencies, setCompetencies]);
 
   // U3: Move card up/down via keyboard (Alt+Arrow)
   const handleMoveCard = useCallback((index: number, direction: 'up' | 'down') => {
@@ -248,25 +230,25 @@ export const WeightedCanvas = React.memo(function WeightedCanvas({
           </TooltipProvider>
         </div>
         <div className="flex items-center gap-0.5 sm:gap-1 md:gap-2 shrink-0">
-          {/* Save status - hide text when panel is narrow, icon-only via tooltip */}
-          <div className="hidden @[560px]:block mr-2">
-            <SaveStatusIndicator
-              status={saveStatus}
-              lastSaved={lastSaved}
-              hasUnsavedChanges={hasUnsavedChanges}
-              retryAttempt={retryAttempt}
-              compact={false}
-            />
-          </div>
-          <div className="block @[560px]:hidden mr-1">
-            <SaveStatusIndicator
-              status={saveStatus}
-              lastSaved={lastSaved}
-              hasUnsavedChanges={hasUnsavedChanges}
-              retryAttempt={retryAttempt}
-              compact
-            />
-          </div>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant={hasUnsavedChanges ? "default" : "ghost"}
+                size="icon"
+                className="h-8 w-8 sm:h-10 sm:w-10 md:h-8 md:w-8 active:scale-95"
+                onClick={handleSave}
+                disabled={isSaving || !hasUnsavedChanges}
+                aria-label={t('saveNow')}
+              >
+                {isSaving
+                  ? <Loader2 className="h-4 w-4 animate-spin" />
+                  : <Save className="h-4 w-4" />}
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="bottom" className="text-xs">
+              {t('saveNow')} <kbd className="ml-1.5 px-1.5 py-0.5 bg-background/20 rounded text-[10px] font-mono">Ctrl+S</kbd>
+            </TooltipContent>
+          </Tooltip>
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
@@ -301,55 +283,12 @@ export const WeightedCanvas = React.memo(function WeightedCanvas({
               {t('redoTooltip')} <kbd className="ml-1.5 px-1.5 py-0.5 bg-background/20 rounded text-[10px] font-mono">{t('redoKey')}</kbd>
             </TooltipContent>
           </Tooltip>
-          {/* U4: Balance Weights button */}
-          {state.competencies.length >= 2 && (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8 sm:h-10 sm:w-10 md:h-8 md:w-8 active:scale-95"
-                  onClick={handleBalanceWeights}
-                  disabled={isPending}
-                  aria-label={t('balanceWeightsLabel')}
-                >
-                  <Scale className="h-4 w-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent side="bottom" className="text-xs">
-                {t('balanceWeightsTooltip')}
-              </TooltipContent>
-            </Tooltip>
-          )}
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="secondary"
-                size="sm"
-                className="h-8 sm:h-10 md:h-8 gap-1 sm:gap-1.5 px-2 sm:px-3 active:scale-95"
-                onClick={handleTestDrive}
-                disabled={state.competencies.length === 0}
-              >
-                <Play className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                <span className="hidden @[480px]:inline">{t('testDrive')}</span>
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent side="bottom" className="text-xs @[480px]:hidden">
-              {t('testDrive')}
-            </TooltipContent>
-          </Tooltip>
-          {/* Manual save button - only visible when there are unsaved changes */}
-          {hasUnsavedChanges && (
-            <Button
-              size="sm"
-              className="h-8 sm:h-10 md:h-8 gap-1 sm:gap-1.5 px-2 sm:px-3 active:scale-95"
-              onClick={handleSave}
-              disabled={isSaving || isPending}
-            >
-              {isSaving ? <Loader2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 animate-spin" /> : <Save className="h-3.5 w-3.5 sm:h-4 sm:w-4" />}
-              <span className="hidden sm:inline">{t('saveNow')}</span>
-            </Button>
-          )}
+          <StartTestDriveButton
+            templateId={templateId}
+            templateName={templateName}
+            className="h-8 sm:h-10 md:h-8 px-2 sm:px-3"
+            icon={<Play className="h-3.5 w-3.5 sm:mr-1.5 transition-transform group-hover:scale-110 shrink-0" aria-hidden="true" />}
+          />
         </div>
       </div>
 
