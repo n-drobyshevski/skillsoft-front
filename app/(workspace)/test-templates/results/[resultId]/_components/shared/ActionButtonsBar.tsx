@@ -80,14 +80,6 @@ const ACTION_STYLE: Record<ActionType, {
 };
 
 /**
- * Triggers browser print dialog for PDF export.
- * The result page renders with print-optimized styles.
- */
-function downloadAsPrint() {
-  window.print();
-}
-
-/**
  * Reusable action buttons bar for test results pages.
  * Renders scenario-appropriate action buttons with real handlers.
  * Includes Export PDF and Copy Link actions with i18n support.
@@ -170,7 +162,7 @@ export function ActionButtonsBar({ templateId, resultId, actions, result, templa
       switch (action) {
         case 'download_profile':
         case 'download_report':
-          downloadAsPrint();
+          setExportDialogOpen(true);
           break;
 
         case 'save_to_profile':
@@ -219,17 +211,6 @@ export function ActionButtonsBar({ templateId, resultId, actions, result, templa
           </Link>
         </Button>
       )}
-
-      {/* Export PDF button */}
-      <Button
-        variant="outline"
-        size="sm"
-        className="flex-1 sm:flex-initial h-9 sm:h-10"
-        onClick={() => setExportDialogOpen(true)}
-      >
-        <Printer className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2 shrink-0" />
-        <span className="truncate text-xs sm:text-sm">{t('exportPdf')}</span>
-      </Button>
 
       {/* Copy Link button */}
       <Button
