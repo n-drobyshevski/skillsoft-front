@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
+import { useComputedColors } from '@/hooks/useComputedColors';
 import {
   Radar,
   RadarChart,
@@ -47,78 +48,6 @@ export const BIG_FIVE_COLORS = {
   },
 } as const;
 
-/**
- * Hook to get computed CSS color values from CSS custom properties.
- * This is necessary because SVG elements don't properly resolve CSS variables
- * with oklch() values in some browsers.
- */
-function useComputedColors() {
-  const [colors, setColors] = useState({
-    primary: '#6366f1',       // indigo-500 fallback
-    border: '#e5e7eb',        // gray-200 fallback
-    foreground: '#1f2937',    // gray-800 fallback
-    mutedForeground: '#6b7280', // gray-500 fallback
-    card: '#ffffff',          // white fallback
-  });
-
-  useEffect(() => {
-    const computeColors = () => {
-      if (typeof window === 'undefined') return;
-
-      // Create a temporary element to compute colors
-      const tempEl = document.createElement('div');
-      tempEl.style.display = 'none';
-      document.body.appendChild(tempEl);
-
-      // Helper to get computed color
-      const getColor = (cssVar: string, fallback: string): string => {
-        tempEl.style.color = `var(${cssVar})`;
-        const computed = getComputedStyle(tempEl).color;
-        // If computed is valid (not empty or "inherit"), return it
-        if (computed && computed !== 'inherit' && computed !== '') {
-          return computed;
-        }
-        return fallback;
-      };
-
-      setColors({
-        primary: getColor('--primary', '#6366f1'),
-        border: getColor('--border', '#e5e7eb'),
-        foreground: getColor('--foreground', '#1f2937'),
-        mutedForeground: getColor('--muted-foreground', '#6b7280'),
-        card: getColor('--card', '#ffffff'),
-      });
-
-      document.body.removeChild(tempEl);
-    };
-
-    computeColors();
-
-    // Re-compute on theme change (dark mode toggle)
-    const observer = new MutationObserver((mutations) => {
-      mutations.forEach((mutation) => {
-        if (mutation.attributeName === 'class' || mutation.attributeName === 'data-theme') {
-          computeColors();
-        }
-      });
-    });
-
-    observer.observe(document.documentElement, { attributes: true });
-
-    // Also listen for media query changes (system dark mode)
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    const handleChange = () => computeColors();
-    mediaQuery.addEventListener('change', handleChange);
-
-    return () => {
-      observer.disconnect();
-      mediaQuery.removeEventListener('change', handleChange);
-    };
-  }, []);
-
-  return colors;
-}
-
 interface BigFiveRadarProps {
   profile: BigFiveProfile;
   title?: string;
@@ -151,7 +80,13 @@ export const BigFiveRadar = React.memo<BigFiveRadarProps>(({
   height = 400
 }) => {
   const isMobile = useIsMobile();
-  const colors = useComputedColors();
+  const colors = useComputedColors({
+    primary: ['--primary', '#6366f1'],
+    border: ['--border', '#e5e7eb'],
+    foreground: ['--foreground', '#1f2937'],
+    mutedForeground: ['--muted-foreground', '#6b7280'],
+    card: ['--card', '#ffffff'],
+  });
 
   // Transform profile to array format for Recharts
   const chartData = React.useMemo(() => bigFiveToArray(profile), [profile]);
@@ -288,7 +223,13 @@ export const BigFiveRadarSimple = React.memo<Omit<BigFiveRadarProps, 'title' | '
   height = 300
 }) => {
   const isMobile = useIsMobile();
-  const colors = useComputedColors();
+  const colors = useComputedColors({
+    primary: ['--primary', '#6366f1'],
+    border: ['--border', '#e5e7eb'],
+    foreground: ['--foreground', '#1f2937'],
+    mutedForeground: ['--muted-foreground', '#6b7280'],
+    card: ['--card', '#ffffff'],
+  });
   const chartData = React.useMemo(() => bigFiveToArray(profile), [profile]);
 
   // Responsive sizing

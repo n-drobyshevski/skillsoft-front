@@ -1,6 +1,7 @@
 "use client";
 
-import { memo, useMemo, useState, useEffect } from "react";
+import { memo, useMemo } from "react";
+import { useComputedColors } from "@/hooks/useComputedColors";
 import {
   Radar,
   RadarChart,
@@ -14,75 +15,6 @@ import { useTranslations } from "next-intl";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 
-/**
- * Hook to get computed CSS color values from CSS custom properties.
- * This is necessary because SVG gradients don't properly resolve CSS variables
- * with oklch() values in some browsers.
- */
-function useComputedColors() {
-  const [colors, setColors] = useState({
-    primary: "#3b82f6", // fallback blue
-    border: "#e5e7eb", // fallback gray
-    foreground: "#1f2937", // fallback dark gray
-    mutedForeground: "#6b7280", // fallback muted gray
-  });
-
-  useEffect(() => {
-    const computeColors = () => {
-      if (typeof window === "undefined") return;
-
-      // Create a temporary element to compute colors
-      const tempEl = document.createElement("div");
-      tempEl.style.display = "none";
-      document.body.appendChild(tempEl);
-
-      // Helper to get computed color
-      const getColor = (cssVar: string, fallback: string): string => {
-        tempEl.style.color = `var(${cssVar})`;
-        const computed = getComputedStyle(tempEl).color;
-        // If computed is valid (not empty or "inherit"), return it
-        if (computed && computed !== "inherit" && computed !== "") {
-          return computed;
-        }
-        return fallback;
-      };
-
-      setColors({
-        primary: getColor("--primary", "#3b82f6"),
-        border: getColor("--border", "#e5e7eb"),
-        foreground: getColor("--foreground", "#1f2937"),
-        mutedForeground: getColor("--muted-foreground", "#6b7280"),
-      });
-
-      document.body.removeChild(tempEl);
-    };
-
-    computeColors();
-
-    // Re-compute on theme change (dark mode toggle)
-    const observer = new MutationObserver((mutations) => {
-      mutations.forEach((mutation) => {
-        if (mutation.attributeName === "class" || mutation.attributeName === "data-theme") {
-          computeColors();
-        }
-      });
-    });
-
-    observer.observe(document.documentElement, { attributes: true });
-
-    // Also listen for media query changes (system dark mode)
-    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
-    const handleChange = () => computeColors();
-    mediaQuery.addEventListener("change", handleChange);
-
-    return () => {
-      observer.disconnect();
-      mediaQuery.removeEventListener("change", handleChange);
-    };
-  }, []);
-
-  return colors;
-}
 
 export interface CompetencyRadarDataPoint {
   subject: string;
@@ -164,7 +96,12 @@ function CompetencyRadarChartComponent({
   className
 }: CompetencyRadarChartProps) {
   const isMobile = useIsMobile();
-  const colors = useComputedColors();
+  const colors = useComputedColors({
+    primary: ['--primary', '#3b82f6'],
+    border: ['--border', '#e5e7eb'],
+    foreground: ['--foreground', '#1f2937'],
+    mutedForeground: ['--muted-foreground', '#6b7280'],
+  });
   const t = useTranslations('results.charts');
 
   // Responsive configuration - optimized for mobile readability

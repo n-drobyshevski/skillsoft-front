@@ -1,6 +1,7 @@
 'use client';
 
-import { memo, useState, useEffect } from 'react';
+import { memo } from 'react';
+import { useComputedColors } from '@/hooks/useComputedColors';
 import {
   LineChart,
   Line,
@@ -17,69 +18,6 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
 import type { TrendDataPoint } from '@/types/domain';
 
-/**
- * Hook to get computed CSS color values for SVG elements.
- */
-function useComputedColors() {
-  const [colors, setColors] = useState({
-    primary: '#3b82f6',
-    border: '#e5e7eb',
-    foreground: '#1f2937',
-    mutedForeground: '#6b7280',
-    emerald: '#10b981',
-    amber: '#f59e0b',
-  });
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-
-    const computeColors = () => {
-      const tempEl = document.createElement('div');
-      tempEl.style.display = 'none';
-      document.body.appendChild(tempEl);
-
-      const getColor = (cssVar: string, fallback: string): string => {
-        tempEl.style.color = `var(${cssVar})`;
-        const computed = getComputedStyle(tempEl).color;
-        if (computed && computed !== 'inherit' && computed !== '') return computed;
-        return fallback;
-      };
-
-      setColors({
-        primary: getColor('--primary', '#3b82f6'),
-        border: getColor('--border', '#e5e7eb'),
-        foreground: getColor('--foreground', '#1f2937'),
-        mutedForeground: getColor('--muted-foreground', '#6b7280'),
-        emerald: '#10b981',
-        amber: '#f59e0b',
-      });
-
-      document.body.removeChild(tempEl);
-    };
-
-    computeColors();
-
-    const observer = new MutationObserver((mutations) => {
-      mutations.forEach((mutation) => {
-        if (mutation.attributeName === 'class' || mutation.attributeName === 'data-theme') {
-          computeColors();
-        }
-      });
-    });
-    observer.observe(document.documentElement, { attributes: true });
-
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    const handleChange = () => computeColors();
-    mediaQuery.addEventListener('change', handleChange);
-
-    return () => {
-      observer.disconnect();
-      mediaQuery.removeEventListener('change', handleChange);
-    };
-  }, []);
-
-  return colors;
-}
 
 interface TrendLineChartProps {
   /** Historical trend data points (ordered by date ascending) */
@@ -131,7 +69,13 @@ function TrendLineChartComponent({
   className,
 }: TrendLineChartProps) {
   const isMobile = useIsMobile();
-  const colors = useComputedColors();
+  const themeColors = useComputedColors({
+    primary: ['--primary', '#3b82f6'],
+    border: ['--border', '#e5e7eb'],
+    foreground: ['--foreground', '#1f2937'],
+    mutedForeground: ['--muted-foreground', '#6b7280'],
+  });
+  const colors = { ...themeColors, emerald: '#10b981', amber: '#f59e0b' };
   const t = useTranslations('results.trends');
   const locale = useLocale();
 

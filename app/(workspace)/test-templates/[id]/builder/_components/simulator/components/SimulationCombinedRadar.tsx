@@ -21,6 +21,7 @@ import {
   BIG_FIVE_TRAIT_COLORS,
 } from '../utils/transformSimulationToRadar';
 import { BigFiveProfile } from '@/hooks/useBigFiveProjection';
+import { useComputedColors } from '@/hooks/useComputedColors';
 
 // ============================================
 // TYPES
@@ -45,76 +46,6 @@ interface SimulationCombinedRadarProps {
 // ============================================
 // HOOKS
 // ============================================
-
-/**
- * Hook to get computed CSS color values from CSS custom properties.
- * Necessary because SVG elements don't properly resolve CSS variables
- * with oklch() values in some browsers.
- */
-function useComputedColors() {
-  const [colors, setColors] = useState({
-    primary: '#3b82f6', // blue-500 fallback
-    secondary: '#8b5cf6', // violet-500 fallback
-    border: '#e5e7eb', // gray-200 fallback
-    foreground: '#1f2937', // gray-800 fallback
-    mutedForeground: '#6b7280', // gray-500 fallback
-    card: '#ffffff', // white fallback
-  });
-
-  useEffect(() => {
-    const computeColors = () => {
-      if (typeof window === 'undefined') return;
-
-      const tempEl = document.createElement('div');
-      tempEl.style.display = 'none';
-      document.body.appendChild(tempEl);
-
-      const getColor = (cssVar: string, fallback: string): string => {
-        tempEl.style.color = `var(${cssVar})`;
-        const computed = getComputedStyle(tempEl).color;
-        if (computed && computed !== 'inherit' && computed !== '') {
-          return computed;
-        }
-        return fallback;
-      };
-
-      setColors({
-        primary: getColor('--primary', '#3b82f6'),
-        secondary: getColor('--chart-2', '#8b5cf6'),
-        border: getColor('--border', '#e5e7eb'),
-        foreground: getColor('--foreground', '#1f2937'),
-        mutedForeground: getColor('--muted-foreground', '#6b7280'),
-        card: getColor('--card', '#ffffff'),
-      });
-
-      document.body.removeChild(tempEl);
-    };
-
-    computeColors();
-
-    // Re-compute on theme change
-    const observer = new MutationObserver((mutations) => {
-      mutations.forEach((mutation) => {
-        if (mutation.attributeName === 'class' || mutation.attributeName === 'data-theme') {
-          computeColors();
-        }
-      });
-    });
-
-    observer.observe(document.documentElement, { attributes: true });
-
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    const handleChange = () => computeColors();
-    mediaQuery.addEventListener('change', handleChange);
-
-    return () => {
-      observer.disconnect();
-      mediaQuery.removeEventListener('change', handleChange);
-    };
-  }, []);
-
-  return colors;
-}
 
 // ============================================
 // CONTAINER SIZE HOOK
@@ -237,7 +168,14 @@ export const SimulationCombinedRadar = React.memo<SimulationCombinedRadarProps>(
     const t = useTranslations('builder.simulator');
     const containerRef = useRef<HTMLDivElement>(null);
     const containerWidth = useContainerSize(containerRef);
-    const colors = useComputedColors();
+    const colors = useComputedColors({
+      primary: ['--primary', '#3b82f6'],
+      secondary: ['--chart-2', '#8b5cf6'],
+      border: ['--border', '#e5e7eb'],
+      foreground: ['--foreground', '#1f2937'],
+      mutedForeground: ['--muted-foreground', '#6b7280'],
+      card: ['--card', '#ffffff'],
+    });
 
     // Responsive config derived from actual container width
     const config = useMemo(
