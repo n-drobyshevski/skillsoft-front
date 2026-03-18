@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useLocale } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import {
-  Download, Share2, Printer, Clock, CheckCircle2,
+  Download, Share2, Clock, CheckCircle2,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -176,14 +176,6 @@ function ActionIconGroup({ resultId }: { resultId?: string }) {
             </Button>
           </TooltipTrigger>
           <TooltipContent side="bottom">Share</TooltipContent>
-        </Tooltip>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button variant="ghost" size="icon" className="h-8 w-8 touch-manipulation" aria-label="Print results" onClick={() => window.print()}>
-              <Printer className="h-4 w-4" />
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent side="bottom">Print</TooltipContent>
         </Tooltip>
       </div>
       {resultId && (
