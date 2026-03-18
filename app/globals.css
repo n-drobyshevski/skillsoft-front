@@ -113,6 +113,9 @@
 	--sidebar-accent-foreground: oklch(0.32 0.018 264);
 	--sidebar-border: oklch(0.9 0.006 70);
 	--sidebar-ring: oklch(0.6 0.03 264);
+
+	/* Hero strip height for sticky offset calculations */
+	--hero-strip-height: 4.5rem;
 }
 
 .dark {

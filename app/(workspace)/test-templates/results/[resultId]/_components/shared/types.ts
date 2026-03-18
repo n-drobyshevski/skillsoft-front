@@ -141,3 +141,67 @@ export interface ActionButtonsBarProps {
  * Factory function return type
  */
 export type ResultViewComponent = React.ComponentType<BaseResultViewProps>;
+
+// ============================================================================
+// Direction B "Command Center" Dashboard Types
+// ============================================================================
+
+export type HeroVariant = 'success' | 'warning' | 'info' | 'neutral';
+
+export interface HeroStripProps {
+  goal: 'OVERVIEW' | 'JOB_FIT' | 'TEAM_FIT';
+  templateName: string;
+  completedAt: string;
+  totalTimeSeconds: number;
+  questionsAnswered: number;
+  totalQuestions: number;
+  overallPercentage?: number | null;
+  passed?: boolean | null;
+  percentile?: number | null;
+  /** e.g. "QUALIFIED", "COMPATIBLE", or null for OVERVIEW */
+  statusLabel?: string;
+  statusVariant: HeroVariant;
+  /** Extra metadata pills (e.g. O*NET code, team info) */
+  metadata?: HeroMetadataItem[];
+  /** Action button types to render */
+  actions: ActionType[];
+  result: import('@/types/domain').TestResult;
+  template: import('@/types/domain').TestTemplate;
+}
+
+export interface HeroMetadataItem {
+  icon: React.ElementType;
+  label: string;
+}
+
+export interface ResultTabDefinition {
+  id: string;
+  label: string;
+  icon: React.ElementType;
+}
+
+export interface InsightPill {
+  id: string;
+  icon: React.ElementType;
+  text: string;
+  variant: 'success' | 'warning' | 'info';
+}
+
+export interface DashboardPanelProps {
+  title: string;
+  subtitle?: string;
+  icon?: React.ElementType;
+  iconVariant?: 'default' | 'success' | 'warning' | 'info';
+  children: React.ReactNode;
+  className?: string;
+  id?: string;
+}
+
+export interface MetricCardItem {
+  label: string;
+  value: number | string;
+  icon: React.ElementType;
+  variant: 'success' | 'warning' | 'info' | 'default';
+  /** Optional mini sparkline bars to display within the card */
+  sparklines?: Array<{ name: string; value: number }>;
+}
