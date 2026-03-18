@@ -315,7 +315,7 @@ export function TeamComparisonCard({
                   {/* Hover tooltip */}
                   <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 z-50 hidden group-hover:block pointer-events-none">
                     <div
-                      className="bg-popover/95 backdrop-blur-sm border border-border rounded-xl shadow-xl p-3 min-w-[140px] whitespace-nowrap"
+                      className="bg-popover border border-border rounded-xl shadow-xl p-3 min-w-[140px] whitespace-nowrap"
                       style={{ backgroundColor: colors.card }}
                     >
                       <p className="font-medium text-xs mb-1.5" style={{ color: colors.foreground }}>
@@ -483,7 +483,7 @@ export function TeamComparisonCard({
                       const dir = getGapDirection(gap);
                       return (
                         <div
-                          className="bg-popover/95 backdrop-blur-sm border border-border rounded-xl shadow-xl p-3 min-w-[140px]"
+                          className="bg-popover border border-border rounded-xl shadow-xl p-3 min-w-[140px]"
                           style={{ backgroundColor: colors.card }}
                         >
                           <p className="font-medium text-xs mb-1.5" style={{ color: colors.foreground }}>
