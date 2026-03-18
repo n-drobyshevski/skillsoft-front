@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Results — Design Exploration</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { font-family: 'Inter', system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+    .card-link { transition: transform 200ms ease, box-shadow 200ms ease; }
+    .card-link:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,0,0,0.08); }
+    .badge { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 9999px; font-size: 11px; font-weight: 500; letter-spacing: 0.02em; }
+    .full { background: #dbeafe; color: #1e40af; }
+    .thumb { background: #f1f5f9; color: #64748b; }
+  </style>
+</head>
+<body class="bg-white min-h-screen">
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 py-12 sm:py-16">
+
+    <!-- Header -->
+    <div class="mb-12">
+      <p class="text-xs font-medium uppercase tracking-widest text-slate-400 mb-2">Design Exploration</p>
+      <h1 class="text-3xl sm:text-4xl font-bold text-slate-900 tracking-tight mb-3">Test Results Page Rework</h1>
+      <p class="text-base text-slate-500 max-w-2xl leading-relaxed">
+        Selected design direction for the test-templates/results/[id] page rework.
+        Full interactive previews for all 3 assessment goals matching the SkillSoft design system.
+      </p>
+    </div>
+
+    <!-- Direction B (Selected) -->
+    <section class="mb-14">
+      <div class="flex items-baseline gap-3 mb-1">
+        <h2 class="text-xl font-semibold text-slate-900">The Command Center</h2>
+        <span class="text-xs font-medium uppercase tracking-wider text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">Selected</span>
+      </div>
+      <p class="text-sm text-slate-500 mb-5 max-w-xl">Full-width dashboard with sticky hero strip, horizontal tab navigation, dismissible AI insights, and panel-based grid. Each goal gets a distinct UX.</p>
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <a href="direction-b-jobfit.html" class="card-link block border border-slate-200 rounded-lg p-5 hover:border-slate-300 bg-slate-950">
+          <div class="flex items-center justify-between mb-3">
+            <span class="text-sm font-semibold text-white">JOB_FIT</span>
+            <span class="badge" style="background:#1e293b;color:#94a3b8">Full Preview</span>
+          </div>
+          <p class="text-xs text-slate-400 leading-relaxed">Hiring manager view. Sidebar with score ring, gap analysis chart, radar, competency grid, sortable detail table.</p>
+          <div class="mt-3 flex gap-2">
+            <span class="inline-block w-3 h-3 rounded-full bg-emerald-400"></span>
+            <span class="inline-block w-3 h-3 rounded-full bg-amber-400"></span>
+            <span class="inline-block w-3 h-3 rounded-full bg-blue-400"></span>
+          </div>
+        </a>
+        <a href="direction-b-overview.html" class="card-link block border border-slate-200 rounded-lg p-5 hover:border-slate-300 bg-slate-950">
+          <div class="flex items-center justify-between mb-3">
+            <span class="text-sm font-semibold text-white">OVERVIEW</span>
+            <span class="badge" style="background:#1e293b;color:#94a3b8">Thumbnail</span>
+          </div>
+          <p class="text-xs text-slate-400 leading-relaxed">Candidate view. Big Five radar, competency heatmap, trend sparklines, AI insights. Violet/blue palette, no pass/fail.</p>
+          <div class="mt-3 flex gap-2">
+            <span class="inline-block w-3 h-3 rounded-full bg-violet-400"></span>
+            <span class="inline-block w-3 h-3 rounded-full bg-blue-400"></span>
+            <span class="inline-block w-3 h-3 rounded-full bg-cyan-400"></span>
+          </div>
+        </a>
+        <a href="direction-b-teamfit.html" class="card-link block border border-slate-200 rounded-lg p-5 hover:border-slate-300 bg-slate-950">
+          <div class="flex items-center justify-between mb-3">
+            <span class="text-sm font-semibold text-white">TEAM_FIT</span>
+            <span class="badge" style="background:#1e293b;color:#94a3b8">Thumbnail</span>
+          </div>
+          <p class="text-xs text-slate-400 leading-relaxed">Team lead view. Compatibility gauge, saturation radar, contribution panel, coverage heatmap, onboarding cards.</p>
+          <div class="mt-3 flex gap-2">
+            <span class="inline-block w-3 h-3 rounded-full bg-blue-400"></span>
+            <span class="inline-block w-3 h-3 rounded-full bg-emerald-400"></span>
+            <span class="inline-block w-3 h-3 rounded-full bg-amber-400"></span>
+          </div>
+        </a>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="border-t border-slate-100 pt-6 mt-8">
+      <p class="text-xs text-slate-300">SkillSoft Design Reference · March 2026</p>
+    </footer>
+
+  </div>
+</body>
+</html>

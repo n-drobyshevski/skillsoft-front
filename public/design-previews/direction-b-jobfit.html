@@ -1,0 +1,1766 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5, user-scalable=yes" />
+  <title>Direction B: Command Center — JOB_FIT Results</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;1,14..32,400&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    /* =====================================================
+       DESIGN SYSTEM TOKENS — OKLCH NEUTRAL DARK MODE
+       ===================================================== */
+    :root {
+      --background:          oklch(0.145 0 0);
+      --foreground:          oklch(0.985 0 0);
+      --card:                oklch(0.205 0 0);
+      --card-foreground:     oklch(0.985 0 0);
+      --muted:               oklch(0.269 0 0);
+      --muted-foreground:    oklch(0.708 0 0);
+      --border:              oklch(1 0 0 / 10%);
+      --border-strong:       oklch(1 0 0 / 15%);
+      --input:               oklch(1 0 0 / 15%);
+      --primary:             oklch(0.922 0 0);
+      --primary-foreground:  oklch(0.205 0 0);
+      --accent:              oklch(0.269 0 0);
+      --accent-foreground:   oklch(0.985 0 0);
+      --ring:                oklch(0.556 0 0);
+      --destructive:         oklch(0.704 0.191 22.216);
+      --sidebar:             oklch(0.205 0 0);
+      --sidebar-foreground:  oklch(0.985 0 0);
+      --sidebar-border:      oklch(1 0 0 / 10%);
+      --sidebar-accent:      oklch(0.269 0 0);
+      --chart-1:             oklch(0.488 0.243 264.376);
+      --chart-2:             oklch(0.696 0.17 162.48);
+      --chart-3:             oklch(0.769 0.188 70.08);
+      --chart-4:             oklch(0.627 0.265 303.9);
+      --chart-5:             oklch(0.645 0.246 16.439);
+
+      /* Computed hex approximations for Chart.js (no OKLCH support) */
+      --bg-hex:              #212121;
+      --card-hex:            #303030;
+      --muted-hex:           #3e3e3e;
+      --muted-fg-hex:        #b0b0b0;
+      --foreground-hex:      #fbfbfb;
+      --border-hex:          rgba(255,255,255,0.10);
+      --border-strong-hex:   rgba(255,255,255,0.15);
+
+      --app-sidebar-w:           240px;
+      --app-sidebar-collapsed-w: 56px;
+      --app-header-h:            56px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+
+    html, body {
+      margin: 0; padding: 0;
+      background-color: var(--background);
+      color: var(--foreground);
+      font-family: 'Inter', system-ui, sans-serif;
+      font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+      -webkit-font-smoothing: antialiased;
+      height: 100%;
+    }
+
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: var(--background); }
+    ::-webkit-scrollbar-thumb { background: var(--muted); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--ring); }
+
+    .tabular { font-variant-numeric: tabular-nums; }
+
+    @keyframes ring-draw {
+      from { stroke-dashoffset: 201.1; }
+    }
+    .score-ring-hero {
+      animation: ring-draw 1.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+      transform-origin: center;
+      transform: rotate(-90deg);
+    }
+
+    @keyframes glow-pulse {
+      0%, 100% { filter: drop-shadow(0 0 6px rgba(16, 185, 129, 0.4)); }
+      50%       { filter: drop-shadow(0 0 14px rgba(16, 185, 129, 0.7)); }
+    }
+    .score-glow { animation: glow-pulse 3s ease-in-out infinite; }
+
+    .card-lift {
+      transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    }
+    .card-lift:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.45);
+      border-color: rgba(255,255,255,0.20) !important;
+    }
+    .card-lift:active { transform: scale(0.98); }
+
+    @keyframes bar-in { from { width: 0; } }
+    .bar-animated { animation: bar-in 1s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+
+    @keyframes fade-up {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .fade-up    { animation: fade-up 0.5s cubic-bezier(0.4, 0, 0.2, 1) both; }
+    .fade-up-d1 { animation-delay: 0.05s; }
+    .fade-up-d2 { animation-delay: 0.10s; }
+    .fade-up-d3 { animation-delay: 0.15s; }
+    .fade-up-d4 { animation-delay: 0.20s; }
+
+    .table-row-hover { transition: background-color 0.12s ease; }
+    .table-row-hover:hover { background-color: var(--border); }
+
+    #detail-body {
+      transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
+      overflow: hidden;
+    }
+    #detail-body.collapsed { max-height: 0; opacity: 0; }
+    #detail-body.expanded  { max-height: 2000px; opacity: 1; }
+
+    th.sortable { cursor: pointer; user-select: none; }
+    th.sortable:hover { color: var(--muted-foreground); }
+    th.sort-asc::after  { content: ' \2191'; color: #34d399; }
+    th.sort-desc::after { content: ' \2193'; color: #34d399; }
+
+    .comp-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px;
+      transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    .comp-card:hover {
+      transform: translateY(-1px);
+      border-color: rgba(255,255,255,0.20);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.35);
+    }
+    .comp-card:active { transform: scale(0.98); }
+
+    .panel {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.10);
+    }
+
+    .section-label {
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      color: var(--muted-foreground);
+    }
+
+    /* =====================================================
+       APP SHELL
+       ===================================================== */
+    body { overflow: hidden; }
+
+    #app-shell {
+      display: flex;
+      width: 100vw;
+      height: 100vh;
+      background: var(--background);
+      position: relative;
+    }
+
+    /* ---- App Sidebar ---- */
+    #app-sidebar {
+      position: fixed;
+      top: 0; left: 0; bottom: 0;
+      width: var(--app-sidebar-w);
+      background: var(--sidebar);
+      border-right: 1px solid var(--sidebar-border);
+      display: flex;
+      flex-direction: column;
+      z-index: 60;
+      transition: width 0.2s ease, transform 0.25s ease;
+      overflow: hidden;
+    }
+
+    #app-sidebar.app-collapsed { width: var(--app-sidebar-collapsed-w); }
+
+    .app-sidebar-logo {
+      height: 56px;
+      display: flex; align-items: center; gap: 10px;
+      padding: 0 16px;
+      border-bottom: 1px solid var(--sidebar-border);
+      flex-shrink: 0; white-space: nowrap; overflow: hidden;
+    }
+
+    .app-sidebar-logo-icon {
+      width: 24px; height: 24px; border-radius: 6px;
+      background: #10b981;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .app-sidebar-logo-text {
+      font-size: 14px; font-weight: 600; color: var(--foreground);
+      letter-spacing: -0.01em;
+      transition: opacity 0.15s ease;
+    }
+
+    .app-sidebar-logo-badge {
+      font-size: 10px; font-weight: 500; color: var(--muted-foreground);
+      background: var(--muted); padding: 1px 6px; border-radius: 4px;
+      transition: opacity 0.15s ease;
+    }
+
+    #app-sidebar.app-collapsed .app-sidebar-logo-text,
+    #app-sidebar.app-collapsed .app-sidebar-logo-badge { opacity: 0; pointer-events: none; }
+
+    .app-sidebar-nav {
+      flex: 1; overflow-y: auto; overflow-x: hidden; padding: 12px 8px;
+    }
+
+    .app-sidebar-section-label {
+      font-size: 10px; font-weight: 500; letter-spacing: 0.07em;
+      text-transform: uppercase; color: var(--muted-foreground);
+      padding: 0 8px; margin: 12px 0 4px;
+      white-space: nowrap; overflow: hidden;
+      transition: opacity 0.15s ease;
+      opacity: 0.6;
+    }
+
+    #app-sidebar.app-collapsed .app-sidebar-section-label { opacity: 0; }
+
+    .app-nav-item {
+      display: flex; align-items: center; gap: 8px;
+      height: 36px; padding: 0 12px; border-radius: 6px;
+      font-size: 13px; color: var(--muted-foreground);
+      text-decoration: none; white-space: nowrap; overflow: hidden;
+      transition: background-color 0.15s ease, color 0.15s ease;
+      cursor: pointer;
+    }
+
+    .app-nav-item:hover { background-color: var(--border); color: var(--foreground); }
+    .app-nav-item.app-active {
+      background: var(--sidebar-accent);
+      color: var(--foreground);
+      font-weight: 500;
+    }
+    .app-nav-item svg { flex-shrink: 0; width: 16px; height: 16px; }
+    .app-nav-item-label { transition: opacity 0.15s ease; }
+    #app-sidebar.app-collapsed .app-nav-item-label { opacity: 0; }
+
+    .app-sidebar-footer {
+      border-top: 1px solid var(--sidebar-border); padding: 12px;
+      display: flex; align-items: center; gap: 10px;
+      flex-shrink: 0; overflow: hidden; white-space: nowrap;
+    }
+
+    .app-sidebar-lens {
+      display: flex; align-items: center; gap: 6px;
+      flex: 1; overflow: hidden; min-width: 0;
+      transition: opacity 0.15s ease;
+    }
+
+    #app-sidebar.app-collapsed .app-sidebar-lens { opacity: 0; }
+
+    .app-lens-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: #10b981; flex-shrink: 0;
+    }
+
+    .app-lens-label { font-size: 12px; color: var(--muted-foreground); overflow: hidden; text-overflow: ellipsis; }
+
+    .app-user-avatar {
+      width: 28px; height: 28px; border-radius: 50%;
+      background: var(--muted); border: 1px solid var(--border-strong);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 600; color: var(--muted-foreground); flex-shrink: 0;
+    }
+
+    .app-user-name {
+      font-size: 12px; color: var(--muted-foreground);
+      overflow: hidden; text-overflow: ellipsis;
+      transition: opacity 0.15s ease;
+    }
+
+    #app-sidebar.app-collapsed .app-user-name { opacity: 0; }
+
+    /* ---- App Header ---- */
+    #app-header {
+      position: fixed; top: 0;
+      left: var(--app-sidebar-w); right: 0;
+      height: var(--app-header-h);
+      background: color-mix(in oklch, var(--background) 80%, transparent);
+      backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 20px; z-index: 50;
+      transition: left 0.2s ease;
+    }
+
+    body.app-sidebar-collapsed #app-header { left: var(--app-sidebar-collapsed-w); }
+
+    .app-header-breadcrumb {
+      display: flex; align-items: center; gap: 6px; font-size: 13px;
+    }
+
+    .app-breadcrumb-sep { color: var(--muted); }
+    .app-breadcrumb-item { color: var(--muted-foreground); text-decoration: none; transition: color 0.15s; }
+    .app-breadcrumb-item:hover { color: var(--foreground); }
+    .app-breadcrumb-current { color: var(--foreground); font-weight: 500; }
+
+    .app-header-actions { display: flex; align-items: center; gap: 10px; }
+
+    .app-header-icon-btn {
+      width: 32px; height: 32px; border-radius: 6px;
+      background: transparent; border: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; color: var(--muted-foreground);
+      transition: background-color 0.15s, color 0.15s, border-color 0.15s;
+    }
+
+    .app-header-icon-btn:hover { background: var(--muted); color: var(--foreground); border-color: var(--border-strong); }
+
+    .app-header-avatar {
+      width: 28px; height: 28px; border-radius: 50%;
+      background: var(--muted); border: 1px solid var(--border-strong);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 600; color: var(--muted-foreground); cursor: pointer;
+    }
+
+    #app-sidebar-collapse-btn {
+      position: absolute; right: -13px; top: 66px;
+      width: 26px; height: 26px; border-radius: 50%;
+      background: var(--card); border: 1px solid var(--border-strong);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; z-index: 61; color: var(--muted-foreground);
+      transition: background-color 0.15s, color 0.15s;
+    }
+
+    #app-sidebar-collapse-btn:hover { background: var(--muted); color: var(--foreground); }
+    #app-sidebar-collapse-btn svg { transition: transform 0.2s ease; }
+    #app-sidebar.app-collapsed #app-sidebar-collapse-btn svg { transform: rotate(180deg); }
+
+    /* ---- Shell body ---- */
+    #app-shell-body {
+      margin-left: var(--app-sidebar-w);
+      flex: 1; display: flex; flex-direction: column;
+      min-height: 100vh; transition: margin-left 0.2s ease;
+    }
+
+    body.app-sidebar-collapsed #app-shell-body { margin-left: var(--app-sidebar-collapsed-w); }
+
+    #app-content-area {
+      margin-top: var(--app-header-h);
+      flex: 1; overflow-y: auto;
+      height: calc(100vh - var(--app-header-h));
+      background: var(--background);
+    }
+
+    /* ---- Mobile app sidebar overlay ---- */
+    #app-sidebar-backdrop {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.55); z-index: 55;
+    }
+
+    #app-sidebar-backdrop.app-active { display: block; }
+
+    #app-header-hamburger { display: none; }
+
+    @media (max-width: 767px) {
+      :root { --app-sidebar-w: 240px; --app-header-h: 44px; }
+
+      #app-sidebar { transform: translateX(-100%); width: var(--app-sidebar-w) !important; }
+      #app-sidebar.app-mobile-open { transform: translateX(0); }
+      #app-sidebar-collapse-btn { display: none; }
+      #app-shell-body { margin-left: 0 !important; }
+      #app-header { left: 0 !important; }
+      #app-header-hamburger { display: flex; }
+    }
+
+    /* ---- Mobile bottom nav ---- */
+    #app-bottom-nav {
+      display: none; position: fixed;
+      bottom: 0; left: 0; right: 0; height: 48px;
+      background: color-mix(in oklch, var(--background) 95%, transparent);
+      backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+      border-top: 1px solid var(--border); z-index: 50;
+      align-items: center; justify-content: space-around;
+    }
+
+    @media (max-width: 767px) {
+      #app-bottom-nav { display: flex; }
+      #app-content-area { padding-bottom: 48px; }
+    }
+
+    .app-bottom-nav-item {
+      display: flex; flex-direction: column; align-items: center; gap: 2px;
+      padding: 4px 16px; font-size: 10px; color: var(--muted-foreground);
+      text-decoration: none; cursor: pointer;
+      transition: color 0.15s; position: relative;
+      min-height: 44px; justify-content: center;
+    }
+
+    .app-bottom-nav-item.app-active { color: #10b981; }
+    .app-bottom-nav-item.app-active::before {
+      content: ''; position: absolute; top: 0; left: 50%;
+      transform: translateX(-50%); width: 24px; height: 2px;
+      background: #10b981; border-radius: 0 0 2px 2px;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      #app-sidebar, #app-shell-body, #app-header,
+      .fade-up, .card-lift, .comp-card,
+      .score-ring-hero, .score-glow, .bar-animated { transition: none !important; animation: none !important; }
+    }
+
+    /* =====================================================
+       HERO STRIP
+       ===================================================== */
+    #hero-strip {
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      background: var(--card);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 0 24px;
+      height: 72px;
+      flex-shrink: 0;
+    }
+
+    .hero-score-ring { flex-shrink: 0; }
+
+    .hero-center {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .hero-job-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--foreground);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .hero-meta {
+      font-size: 11px;
+      color: var(--muted-foreground);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .hero-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+
+    .hero-action-btn {
+      display: flex; align-items: center; justify-content: center;
+      width: 32px; height: 32px; border-radius: 6px;
+      background: transparent; border: 1px solid var(--border-strong);
+      color: var(--muted-foreground); cursor: pointer;
+      transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+      position: relative;
+    }
+
+    .hero-action-btn:hover {
+      background: var(--muted);
+      color: var(--foreground); border-color: var(--border-strong);
+    }
+
+    .hero-action-btn:active { transform: scale(0.96); }
+
+    /* Tooltip */
+    .hero-action-btn::after {
+      content: attr(data-tooltip);
+      position: absolute;
+      bottom: calc(100% + 6px);
+      left: 50%; transform: translateX(-50%);
+      background: var(--muted); color: var(--foreground);
+      font-size: 11px; padding: 4px 8px; border-radius: 4px;
+      white-space: nowrap; pointer-events: none;
+      opacity: 0; transition: opacity 0.15s;
+      border: 1px solid var(--border-strong);
+      font-family: 'Inter', sans-serif;
+    }
+
+    .hero-action-btn:hover::after { opacity: 1; }
+
+    @media (max-width: 767px) {
+      #hero-strip {
+        height: auto;
+        flex-wrap: wrap;
+        padding: 12px 16px;
+        gap: 10px;
+      }
+
+      .hero-center { order: 2; flex: 0 0 100%; }
+      .hero-score-ring { order: 1; }
+      .hero-actions { order: 1; margin-left: auto; }
+    }
+
+    /* =====================================================
+       HORIZONTAL TAB NAV
+       ===================================================== */
+    #tab-nav {
+      position: sticky;
+      top: 72px;
+      z-index: 39;
+      background: var(--card);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: stretch;
+      padding: 0 24px;
+      overflow-x: auto;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+      flex-shrink: 0;
+    }
+
+    #tab-nav::-webkit-scrollbar { display: none; }
+
+    .tab-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 0 16px;
+      height: 44px;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--muted-foreground);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      white-space: nowrap;
+      transition: color 0.15s, border-color 0.15s;
+      text-decoration: none;
+      flex-shrink: 0;
+    }
+
+    .tab-item:hover { color: var(--foreground); }
+
+    .tab-item.tab-active {
+      color: #34d399;
+      border-bottom-color: #34d399;
+    }
+
+    .tab-item svg { flex-shrink: 0; }
+
+    @media (max-width: 767px) {
+      #tab-nav { padding: 0 12px; top: auto; }
+      .tab-item { padding: 0 12px; font-size: 11px; height: 44px; }
+    }
+
+    /* =====================================================
+       AI INSIGHTS BAR
+       ===================================================== */
+    #insights-bar {
+      background: var(--card);
+      border-bottom: 1px solid var(--border);
+      padding: 8px 24px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
+      overflow-x: auto;
+      scrollbar-width: none;
+      transition: opacity 0.25s ease, max-height 0.3s ease, padding 0.3s ease;
+      max-height: 80px;
+    }
+
+    #insights-bar::-webkit-scrollbar { display: none; }
+    #insights-bar.dismissed { opacity: 0; max-height: 0; padding: 0; overflow: hidden; }
+
+    .insight-pill {
+      display: flex; align-items: center; gap: 8px;
+      padding: 6px 12px; border-radius: 8px;
+      font-size: 11px; white-space: nowrap;
+      flex-shrink: 0; border: 1px solid;
+      transition: background 0.15s;
+    }
+
+    .insight-pill-emerald {
+      background: rgba(16,185,129,0.08);
+      border-color: rgba(16,185,129,0.25);
+      color: #34d399;
+    }
+
+    .insight-pill-amber {
+      background: rgba(245,158,11,0.08);
+      border-color: rgba(245,158,11,0.25);
+      color: #fbbf24;
+    }
+
+    .insight-pill-blue {
+      background: rgba(59,130,246,0.08);
+      border-color: rgba(59,130,246,0.25);
+      color: #60a5fa;
+    }
+
+    .insight-pill-label {
+      color: var(--muted-foreground);
+      font-weight: 400;
+    }
+
+    #insights-dismiss {
+      display: flex; align-items: center; justify-content: center;
+      width: 24px; height: 24px; border-radius: 4px; margin-left: auto;
+      background: transparent; border: 1px solid var(--border);
+      color: var(--muted-foreground); cursor: pointer;
+      flex-shrink: 0;
+      transition: background 0.15s, color 0.15s;
+    }
+
+    #insights-dismiss:hover { background: var(--muted); color: var(--foreground); }
+
+    @media (max-width: 767px) {
+      #insights-bar { padding: 8px 16px; }
+    }
+  </style>
+</head>
+
+<body>
+
+<!-- APP SHELL -->
+<div id="app-shell">
+
+  <!-- App Sidebar -->
+  <aside id="app-sidebar" role="navigation" aria-label="Main application navigation">
+
+    <button id="app-sidebar-collapse-btn" onclick="appToggleCollapse()" aria-label="Toggle sidebar" title="Toggle sidebar">
+      <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <polyline points="7,2 3,6 7,10"/>
+      </svg>
+    </button>
+
+    <div class="app-sidebar-logo">
+      <div class="app-sidebar-logo-icon">
+        <svg width="13" height="13" viewBox="0 0 13 13" fill="none" aria-hidden="true">
+          <path d="M6.5 1L12 3.75V9.25L6.5 12L1 9.25V3.75L6.5 1Z" stroke="white" stroke-width="1.4" stroke-linejoin="round"/>
+          <path d="M6.5 4.5L9.5 6V9L6.5 10.5L3.5 9V6L6.5 4.5Z" fill="white" fill-opacity="0.45"/>
+        </svg>
+      </div>
+      <span class="app-sidebar-logo-text">SkillSoft</span>
+      <span class="app-sidebar-logo-badge">Enterprise</span>
+    </div>
+
+    <nav class="app-sidebar-nav" aria-label="Primary navigation">
+
+      <div class="app-sidebar-section-label">Personal</div>
+      <a href="#" class="app-nav-item" title="Dashboard">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="1" y="1" width="6" height="6" rx="1"/><rect x="9" y="1" width="6" height="6" rx="1"/><rect x="1" y="9" width="6" height="6" rx="1"/><rect x="9" y="9" width="6" height="6" rx="1"/></svg>
+        <span class="app-nav-item-label">Dashboard</span>
+      </a>
+      <a href="#" class="app-nav-item" title="My Tests">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 2h8a1 1 0 011 1v10a1 1 0 01-1 1H4a1 1 0 01-1-1V3a1 1 0 011-1z"/><path d="M5 6h6M5 9h4"/></svg>
+        <span class="app-nav-item-label">My Tests</span>
+      </a>
+      <a href="#" class="app-nav-item" title="Profile">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="5.5" r="2.5"/><path d="M2.5 13.5c0-3.04 2.46-5.5 5.5-5.5s5.5 2.46 5.5 5.5"/></svg>
+        <span class="app-nav-item-label">Profile</span>
+      </a>
+
+      <div class="app-sidebar-section-label">Testing</div>
+      <a href="#" class="app-nav-item app-active" title="Test Templates">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="8,1 10.5,5 15,5.5 11.5,9 12.5,14 8,11.5 3.5,14 4.5,9 1,5.5 5.5,5"/></svg>
+        <span class="app-nav-item-label">Test Templates</span>
+      </a>
+      <a href="#" class="app-nav-item" title="Candidates">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="5" cy="5" r="2"/><circle cx="11" cy="5" r="2"/><path d="M1 13c0-2.21 1.79-4 4-4"/><path d="M8 13c0-2.21 1.79-4 4-4 2.21 0 4 1.79 4 4"/></svg>
+        <span class="app-nav-item-label">Candidates</span>
+      </a>
+
+      <div class="app-sidebar-section-label">Library</div>
+      <a href="#" class="app-nav-item" title="Competencies">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="8" r="6"/><path d="M8 5v3l2 2"/></svg>
+        <span class="app-nav-item-label">Competencies</span>
+      </a>
+      <a href="#" class="app-nav-item" title="Question Bank">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 3h12v10H2z"/><path d="M6 7.5c0-1.1.9-2 2-2s2 .9 2 2-2 2.5-2 2.5"/><circle cx="8" cy="12" r=".5" fill="currentColor"/></svg>
+        <span class="app-nav-item-label">Question Bank</span>
+      </a>
+
+    </nav>
+
+    <div class="app-sidebar-footer">
+      <div class="app-sidebar-lens">
+        <span class="app-lens-dot"></span>
+        <span class="app-lens-label">User</span>
+      </div>
+      <div class="app-user-avatar" title="Alex Johnson">AJ</div>
+      <span class="app-user-name">Alex Johnson</span>
+    </div>
+
+  </aside>
+
+  <div id="app-sidebar-backdrop" onclick="appCloseMobileSidebar()" aria-hidden="true"></div>
+
+  <!-- Shell body -->
+  <div id="app-shell-body">
+
+    <!-- App Header -->
+    <header id="app-header" role="banner">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <button id="app-header-hamburger" onclick="appOpenMobileSidebar()" aria-label="Open navigation"
+          style="width:36px;height:36px;min-height:44px;border-radius:6px;background:transparent;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--muted-foreground);transition:background 0.15s;touch-action:manipulation;">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true">
+            <line x1="2" y1="4" x2="14" y2="4"/><line x1="2" y1="8" x2="14" y2="8"/><line x1="2" y1="12" x2="14" y2="12"/>
+          </svg>
+        </button>
+        <nav class="app-header-breadcrumb" aria-label="Breadcrumb">
+          <a href="#" class="app-breadcrumb-item">Test Templates</a>
+          <span class="app-breadcrumb-sep" aria-hidden="true">/</span>
+          <a href="#" class="app-breadcrumb-item">Results</a>
+          <span class="app-breadcrumb-sep" aria-hidden="true">/</span>
+          <span class="app-breadcrumb-current">Software Engineer Assessment</span>
+        </nav>
+      </div>
+      <div class="app-header-actions">
+        <button class="app-header-icon-btn" title="Toggle theme" aria-label="Toggle theme">
+          <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="8" cy="8" r="3"/><path d="M8 1v1.5M8 13.5V15M1 8h1.5M13.5 8H15M3.05 3.05l1.06 1.06M11.89 11.89l1.06 1.06M3.05 12.95l1.06-1.06M11.89 4.11l1.06-1.06"/>
+          </svg>
+        </button>
+        <div class="app-header-avatar" title="Alex Johnson" role="img" aria-label="User avatar for Alex Johnson">AJ</div>
+      </div>
+    </header>
+
+    <!-- Content area -->
+    <div id="app-content-area">
+
+      <!-- =====================================================
+           HERO STRIP
+           ===================================================== -->
+      <div id="hero-strip" role="region" aria-label="Assessment summary">
+
+        <!-- Score ring -->
+        <div class="hero-score-ring" aria-hidden="true">
+          <svg width="64" height="64" viewBox="0 0 64 64">
+            <circle cx="32" cy="32" r="28" fill="none" stroke="var(--muted)" stroke-width="5"/>
+            <!-- circumference = 2*pi*28 = 175.9, offset = 175.9*(1-0.756) = 43 -->
+            <circle cx="32" cy="32" r="28" fill="none"
+              stroke="#10b981" stroke-width="5" stroke-linecap="round"
+              stroke-dasharray="175.9" stroke-dashoffset="43"
+              class="score-ring-hero score-glow"/>
+            <text x="32" y="29" text-anchor="middle" dominant-baseline="middle"
+              style="font-family:'Inter',sans-serif;font-size:11px;font-weight:700;fill:var(--foreground);font-variant-numeric:tabular-nums;">75.6%</text>
+            <text x="32" y="41" text-anchor="middle"
+              style="font-family:'Inter',sans-serif;font-size:7px;font-weight:500;fill:var(--muted-foreground);letter-spacing:0.06em;text-transform:uppercase;">Score</text>
+          </svg>
+        </div>
+
+        <!-- Score + verdict -->
+        <div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0;">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span class="tabular" style="font-size:22px;font-weight:700;color:#34d399;letter-spacing:-0.02em;">75.6%</span>
+            <span style="font-size:10px;font-weight:700;letter-spacing:0.08em;padding:3px 8px;border-radius:999px;background:rgba(16,185,129,0.12);color:#34d399;border:1px solid rgba(16,185,129,0.30);">QUALIFIED</span>
+          </div>
+          <span class="tabular" style="font-size:11px;color:var(--muted-foreground);">72nd percentile</span>
+        </div>
+
+        <!-- Divider -->
+        <div style="width:1px;height:36px;background:var(--border);flex-shrink:0;" aria-hidden="true"></div>
+
+        <!-- Job info -->
+        <div class="hero-center">
+          <div class="hero-job-title">Software Developers</div>
+          <div class="hero-meta">O*NET 15-1252.00 &nbsp;&middot;&nbsp; Mar 15, 2026 &nbsp;&middot;&nbsp; 42 min &nbsp;&middot;&nbsp; 78/80 questions</div>
+        </div>
+
+        <!-- Action buttons -->
+        <div class="hero-actions" role="toolbar" aria-label="Report actions">
+          <button class="hero-action-btn" data-tooltip="Download PDF" aria-label="Download PDF">
+            <svg width="15" height="15" viewBox="0 0 15 15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M7.5 1v8M4.5 6.5l3 3 3-3M2 11v1a1 1 0 001 1h9a1 1 0 001-1v-1"/>
+            </svg>
+          </button>
+          <button class="hero-action-btn" data-tooltip="Share link" aria-label="Share link">
+            <svg width="15" height="15" viewBox="0 0 15 15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="11.5" cy="3" r="1.5"/><circle cx="11.5" cy="12" r="1.5"/>
+              <circle cx="3.5" cy="7.5" r="1.5"/>
+              <line x1="4.9" y1="6.7" x2="10.1" y2="3.8"/><line x1="4.9" y1="8.3" x2="10.1" y2="11.2"/>
+            </svg>
+          </button>
+          <button class="hero-action-btn" data-tooltip="Print" aria-label="Print" onclick="window.print()">
+            <svg width="15" height="15" viewBox="0 0 15 15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <rect x="3" y="1" width="9" height="4" rx="0.5"/><rect x="2" y="9.5" width="11" height="4.5" rx="0.5"/>
+              <path d="M3 9.5V6.5h9v3"/><circle cx="11.5" cy="7.5" r="0.75" fill="currentColor"/>
+            </svg>
+          </button>
+        </div>
+
+      </div>
+
+      <!-- =====================================================
+           TAB NAVIGATION
+           ===================================================== -->
+      <nav id="tab-nav" role="tablist" aria-label="Report sections">
+        <a href="#overview" class="tab-item tab-active" role="tab" aria-selected="true" data-section="overview" onclick="activateTab(this,event)">
+          <svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="1" y="1" width="4" height="4" rx="0.8"/><rect x="8" y="1" width="4" height="4" rx="0.8"/><rect x="1" y="8" width="4" height="4" rx="0.8"/><rect x="8" y="8" width="4" height="4" rx="0.8"/></svg>
+          Overview
+        </a>
+        <a href="#gap-analysis" class="tab-item" role="tab" aria-selected="false" data-section="gap-analysis" onclick="activateTab(this,event)">
+          <svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><line x1="1" y1="12" x2="1" y2="7"/><line x1="4" y1="12" x2="4" y2="4"/><line x1="7" y1="12" x2="7" y2="6"/><line x1="10" y1="12" x2="10" y2="2"/><line x1="13" y1="12" x2="13" y2="5"/></svg>
+          Gap Analysis
+        </a>
+        <a href="#competencies" class="tab-item" role="tab" aria-selected="false" data-section="competencies" onclick="activateTab(this,event)">
+          <svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><polygon points="6.5,1 8.5,4.5 12.5,5 9.5,8 10.5,12.5 6.5,10 2.5,12.5 3.5,8 0.5,5 4.5,4.5"/></svg>
+          Competencies
+        </a>
+        <a href="#trend" class="tab-item" role="tab" aria-selected="false" data-section="trend" onclick="activateTab(this,event)">
+          <svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><polyline points="1,10 4,6 7,8 10,3 13,5"/></svg>
+          Trend
+        </a>
+        <a href="#details" class="tab-item" role="tab" aria-selected="false" data-section="details" onclick="activateTab(this,event)">
+          <svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><line x1="1" y1="3" x2="12" y2="3"/><line x1="1" y1="6.5" x2="12" y2="6.5"/><line x1="1" y1="10" x2="12" y2="10"/></svg>
+          Details
+        </a>
+      </nav>
+
+      <!-- =====================================================
+           AI INSIGHTS BAR
+           ===================================================== -->
+      <div id="insights-bar" role="region" aria-label="AI-generated insights">
+        <div class="insight-pill insight-pill-emerald" aria-label="Strongest competency: Collaboration at 92nd percentile">
+          <span aria-hidden="true">&#9889;</span>
+          <span style="font-weight:600;">Strongest:</span>
+          <span class="insight-pill-label">Collaboration &mdash; 92nd percentile</span>
+        </div>
+        <div class="insight-pill insight-pill-amber" aria-label="Largest gap: Problem Solving, minus 22 vs benchmark">
+          <span aria-hidden="true">&#9888;</span>
+          <span style="font-weight:600;">Largest gap:</span>
+          <span class="insight-pill-label">Problem Solving &mdash; &minus;22 vs benchmark</span>
+        </div>
+        <div class="insight-pill insight-pill-blue" aria-label="Consistency index: alpha 0.82, highly reliable">
+          <span aria-hidden="true">&#128202;</span>
+          <span style="font-weight:600;">Consistency:</span>
+          <span class="insight-pill-label">&alpha; = 0.82 &mdash; highly reliable</span>
+        </div>
+        <button id="insights-dismiss" onclick="dismissInsights()" aria-label="Dismiss insights bar" title="Dismiss">
+          <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
+            <line x1="1" y1="1" x2="9" y2="9"/><line x1="9" y1="1" x2="1" y2="9"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- =====================================================
+           MAIN DASHBOARD CONTENT
+           ===================================================== -->
+      <div id="dashboard-content" style="padding:20px 24px 32px;display:flex;flex-direction:column;gap:20px;">
+
+        <!-- ROW 1: Metric cards -->
+        <section id="overview" class="fade-up" role="region" aria-label="Benchmark result summary">
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;">
+
+            <!-- EXCEEDS -->
+            <div class="card-lift panel" style="padding:16px;border-color:rgba(6,78,59,0.6);background:rgba(16,185,129,0.04);" role="article" aria-label="Exceeds benchmark: 3 competencies">
+              <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px;">
+                <div>
+                  <div class="section-label" style="color:#34d399;margin-bottom:4px;">Exceeds</div>
+                  <div class="tabular" style="font-size:32px;font-weight:700;color:#34d399;line-height:1;letter-spacing:-0.02em;">3</div>
+                  <div style="font-size:11px;color:var(--muted-foreground);margin-top:2px;">competencies</div>
+                </div>
+                <div style="width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;background:rgba(16,185,129,0.15);">
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#34d399" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="2,10 6,5 9,8 14,3"/><polyline points="11,3 14,3 14,6"/></svg>
+                </div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:7px;" aria-hidden="true">
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <span style="font-size:10px;color:var(--muted-foreground);width:110px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;">Collaboration</span>
+                  <div style="flex:1;height:4px;background:var(--muted);border-radius:999px;overflow:hidden;"><div class="bar-animated" style="height:100%;border-radius:999px;background:#10b981;width:92%;"></div></div>
+                  <span class="tabular" style="font-size:10px;color:#34d399;width:22px;text-align:right;">92</span>
+                </div>
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <span style="font-size:10px;color:var(--muted-foreground);width:110px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;">Analytical Think.</span>
+                  <div style="flex:1;height:4px;background:var(--muted);border-radius:999px;overflow:hidden;"><div class="bar-animated" style="height:100%;border-radius:999px;background:#10b981;width:88%;"></div></div>
+                  <span class="tabular" style="font-size:10px;color:#34d399;width:22px;text-align:right;">88</span>
+                </div>
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <span style="font-size:10px;color:var(--muted-foreground);width:110px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;">Communication</span>
+                  <div style="flex:1;height:4px;background:var(--muted);border-radius:999px;overflow:hidden;"><div class="bar-animated" style="height:100%;border-radius:999px;background:#10b981;width:85%;"></div></div>
+                  <span class="tabular" style="font-size:10px;color:#34d399;width:22px;text-align:right;">85</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- MEETS -->
+            <div class="card-lift panel" style="padding:16px;border-color:rgba(30,64,175,0.5);background:rgba(59,130,246,0.04);" role="article" aria-label="Meets benchmark: 3 competencies">
+              <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px;">
+                <div>
+                  <div class="section-label" style="color:#60a5fa;margin-bottom:4px;">Meets</div>
+                  <div class="tabular" style="font-size:32px;font-weight:700;color:#60a5fa;line-height:1;letter-spacing:-0.02em;">3</div>
+                  <div style="font-size:11px;color:var(--muted-foreground);margin-top:2px;">competencies</div>
+                </div>
+                <div style="width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;background:rgba(59,130,246,0.15);">
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#60a5fa" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="8" r="6"/><polyline points="5,8 7,10 11,6"/></svg>
+                </div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:7px;" aria-hidden="true">
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <span style="font-size:10px;color:var(--muted-foreground);width:110px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;">Tech. Proficiency</span>
+                  <div style="flex:1;height:4px;background:var(--muted);border-radius:999px;overflow:hidden;"><div class="bar-animated" style="height:100%;border-radius:999px;background:#3b82f6;width:82%;"></div></div>
+                  <span class="tabular" style="font-size:10px;color:#60a5fa;width:22px;text-align:right;">82</span>
+                </div>
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <span style="font-size:10px;color:var(--muted-foreground);width:110px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;">Adaptability</span>
+                  <div style="flex:1;height:4px;background:var(--muted);border-radius:999px;overflow:hidden;"><div class="bar-animated" style="height:100%;border-radius:999px;background:#3b82f6;width:78%;"></div></div>
+                  <span class="tabular" style="font-size:10px;color:#60a5fa;width:22px;text-align:right;">78</span>
+                </div>
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <span style="font-size:10px;color:var(--muted-foreground);width:110px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;">Leadership</span>
+                  <div style="flex:1;height:4px;background:var(--muted);border-radius:999px;overflow:hidden;"><div class="bar-animated" style="height:100%;border-radius:999px;background:#3b82f6;width:72%;"></div></div>
+                  <span class="tabular" style="font-size:10px;color:#60a5fa;width:22px;text-align:right;">72</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- BELOW -->
+            <div class="card-lift panel" style="padding:16px;border-color:rgba(120,53,15,0.6);background:rgba(245,158,11,0.04);" role="article" aria-label="Below benchmark: 2 competencies">
+              <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px;">
+                <div>
+                  <div class="section-label" style="color:#fbbf24;margin-bottom:4px;">Below</div>
+                  <div class="tabular" style="font-size:32px;font-weight:700;color:#fbbf24;line-height:1;letter-spacing:-0.02em;">2</div>
+                  <div style="font-size:11px;color:var(--muted-foreground);margin-top:2px;">competencies</div>
+                </div>
+                <div style="width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;background:rgba(245,158,11,0.15);">
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#fbbf24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="8" r="6"/><line x1="8" y1="5" x2="8" y2="8.5"/><circle cx="8" cy="11" r="0.75" fill="#fbbf24"/></svg>
+                </div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:7px;" aria-hidden="true">
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <span style="font-size:10px;color:var(--muted-foreground);width:110px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;">Strategic Plan.</span>
+                  <div style="flex:1;height:4px;background:var(--muted);border-radius:999px;overflow:hidden;"><div class="bar-animated" style="height:100%;border-radius:999px;background:#f59e0b;width:60%;"></div></div>
+                  <span class="tabular" style="font-size:10px;color:#fbbf24;width:22px;text-align:right;">60</span>
+                </div>
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <span style="font-size:10px;color:var(--muted-foreground);width:110px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;">Problem Solving</span>
+                  <div style="flex:1;height:4px;background:var(--muted);border-radius:999px;overflow:hidden;"><div class="bar-animated" style="height:100%;border-radius:999px;background:#f59e0b;width:48%;"></div></div>
+                  <span class="tabular" style="font-size:10px;color:#fbbf24;width:22px;text-align:right;">48</span>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+        <!-- ROW 2: Gap Analysis Chart — full width -->
+        <section id="gap-analysis" class="fade-up fade-up-d1 panel" style="padding:20px 24px;" role="region" aria-label="Gap analysis chart">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px;gap:12px;flex-wrap:wrap;">
+            <div>
+              <div class="section-label" style="margin-bottom:4px;">Gap Analysis</div>
+              <h2 style="font-size:14px;font-weight:600;color:var(--foreground);margin:0;letter-spacing:-0.01em;">Score vs. Benchmark by Competency</h2>
+            </div>
+            <div style="display:flex;align-items:center;gap:16px;font-size:11px;color:var(--muted-foreground);">
+              <span style="display:flex;align-items:center;gap:6px;">
+                <span style="display:inline-block;width:12px;height:8px;border-radius:3px;background:rgba(255,255,255,0.15);"></span>
+                Benchmark
+              </span>
+              <span style="display:flex;align-items:center;gap:6px;">
+                <span style="display:inline-block;width:12px;height:8px;border-radius:3px;background:#10b981;"></span>
+                Score
+              </span>
+            </div>
+          </div>
+          <div style="position:relative;height:320px;">
+            <canvas id="gapChart" aria-label="Horizontal bar chart comparing scores to benchmarks per competency"></canvas>
+          </div>
+        </section>
+
+        <!-- ROW 3: Competency Grid (60%) + Radar Chart (40%) -->
+        <section id="competencies" class="fade-up fade-up-d2" style="display:grid;grid-template-columns:3fr 2fr;gap:16px;" role="region" aria-label="Competency grid and radar chart">
+
+          <div class="panel" style="padding:20px 24px;">
+            <div class="section-label" style="margin-bottom:14px;">Competency Cards</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;" id="comp-grid" role="list" aria-label="Individual competency scores"></div>
+          </div>
+
+          <div class="panel" style="padding:20px 24px;">
+            <div class="section-label" style="margin-bottom:14px;">Radar &mdash; Candidate vs Benchmark</div>
+            <div style="position:relative;height:340px;">
+              <canvas id="radarChart" aria-label="Radar chart overlaying candidate scores on benchmark polygon"></canvas>
+            </div>
+          </div>
+
+        </section>
+
+        <!-- ROW 4: Trend Chart — full width -->
+        <section id="trend" class="fade-up fade-up-d3 panel" style="padding:20px 24px;" role="region" aria-label="Score trend over time">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px;gap:12px;flex-wrap:wrap;">
+            <div>
+              <div class="section-label" style="margin-bottom:4px;">Trend Analysis</div>
+              <h2 style="font-size:14px;font-weight:600;color:var(--foreground);margin:0;letter-spacing:-0.01em;">Overall Score Progression</h2>
+            </div>
+            <span class="tabular" style="font-size:11px;font-weight:600;padding:4px 10px;border-radius:6px;color:#34d399;background:rgba(16,185,129,0.10);border:1px solid rgba(16,185,129,0.25);">
+              +13.6% since Dec
+            </span>
+          </div>
+          <div style="position:relative;height:200px;margin-bottom:20px;">
+            <canvas id="trendChart" aria-label="Line chart showing overall score across three test sessions"></canvas>
+          </div>
+          <div style="border-top:1px solid var(--border);padding-top:16px;">
+            <div class="section-label" style="margin-bottom:12px;">Per-Competency Sparklines</div>
+            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;" id="sparkline-grid"></div>
+          </div>
+        </section>
+
+        <!-- ROW 5: Detail Table — full width -->
+        <section id="details" class="fade-up fade-up-d4 panel" role="region" aria-label="Detailed competency breakdown table">
+          <button id="detail-toggle"
+            style="width:100%;display:flex;align-items:center;justify-content:space-between;padding:16px 24px;text-align:left;border-radius:12px 12px 0 0;background:transparent;border:none;cursor:pointer;transition:background-color 0.15s ease;min-height:44px;touch-action:manipulation;"
+            onmouseover="this.style.background='var(--border)'"
+            onmouseout="this.style.background=''"
+            onclick="toggleDetails()"
+            aria-expanded="true"
+            aria-controls="detail-body">
+            <div>
+              <div class="section-label" style="margin-bottom:3px;">Detailed Breakdown</div>
+              <div style="font-size:14px;font-weight:600;color:var(--foreground);letter-spacing:-0.01em;">Full Competency Table</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <span style="font-size:11px;color:var(--muted-foreground);">8 rows</span>
+              <svg id="detail-chevron" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="var(--muted-foreground)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="transition:transform 0.3s ease;">
+                <polyline points="4,6 8,10 12,6"/>
+              </svg>
+            </div>
+          </button>
+
+          <div id="detail-body" class="expanded">
+            <div style="overflow-x:auto;">
+              <table style="width:100%;font-size:12px;border-collapse:collapse;" role="table" aria-label="Competency detail data table">
+                <thead>
+                  <tr style="border-top:1px solid var(--border);text-align:left;">
+                    <th class="sortable" style="padding:10px 12px 10px 24px;font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:0.07em;color:var(--muted-foreground);white-space:nowrap;" onclick="sortTable(0)">Competency</th>
+                    <th class="sortable" style="padding:10px 12px;font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:0.07em;color:var(--muted-foreground);white-space:nowrap;" onclick="sortTable(1)">Score</th>
+                    <th class="sortable" style="padding:10px 12px;font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:0.07em;color:var(--muted-foreground);white-space:nowrap;" onclick="sortTable(2)">Benchmark</th>
+                    <th class="sortable" style="padding:10px 12px;font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:0.07em;color:var(--muted-foreground);white-space:nowrap;" onclick="sortTable(3)">Gap</th>
+                    <th style="padding:10px 12px;font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:0.07em;color:var(--muted-foreground);white-space:nowrap;">CI 95%</th>
+                    <th class="sortable" style="padding:10px 12px;font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:0.07em;color:var(--muted-foreground);white-space:nowrap;" onclick="sortTable(5)">Cronbach &#945;</th>
+                    <th class="sortable" style="padding:10px 24px 10px 12px;font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:0.07em;color:var(--muted-foreground);white-space:nowrap;text-align:right;" onclick="sortTable(6)">Percentile</th>
+                  </tr>
+                </thead>
+                <tbody id="detail-table-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <div style="height:16px;"></div>
+      </div>
+
+    </div><!-- /#app-content-area -->
+
+  </div><!-- /#app-shell-body -->
+
+</div><!-- /#app-shell -->
+
+<!-- Mobile bottom nav -->
+<nav id="app-bottom-nav" aria-label="Mobile navigation">
+  <a href="#" class="app-bottom-nav-item app-active" title="Home">
+    <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 7.5L9 2l7 5.5V16H12v-4H6v4H2V7.5z"/></svg>
+    Home
+  </a>
+  <a href="#" class="app-bottom-nav-item" title="My Tests">
+    <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 2h8a1 1 0 011 1v12a1 1 0 01-1 1H5a1 1 0 01-1-1V3a1 1 0 011-1z"/><path d="M6 7h6M6 10h4"/></svg>
+    My Tests
+  </a>
+  <a href="#" class="app-bottom-nav-item" title="Tests">
+    <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="9,2 11.5,6.5 17,7 13,11 14,17 9,14.5 4,17 5,11 1,7 6.5,6.5"/></svg>
+    Tests
+  </a>
+  <a href="#" class="app-bottom-nav-item" title="Profile">
+    <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="6" r="3"/><path d="M3 16c0-3.31 2.69-6 6-6s6 2.69 6 6"/></svg>
+    Profile
+  </a>
+</nav>
+
+<!-- Mobile responsive overrides -->
+<style>
+  @media (max-width: 767px) {
+    #dashboard-content { padding: 12px 16px 80px !important; gap: 14px !important; }
+    #hero-strip { top: 0 !important; }
+    #tab-nav { top: 0 !important; }
+    #overview > div { grid-template-columns: 1fr !important; }
+    #competencies { grid-template-columns: 1fr !important; }
+    #sparkline-grid { grid-template-columns: repeat(2,1fr) !important; }
+  }
+
+  @media (max-width: 1023px) and (min-width: 768px) {
+    #overview > div { grid-template-columns: repeat(2, 1fr) !important; }
+    #competencies { grid-template-columns: 1fr !important; }
+    #sparkline-grid { grid-template-columns: repeat(2,1fr) !important; }
+  }
+</style>
+
+<script>
+// ============================================================
+// DESIGN TOKENS (hex approximations for Chart.js)
+// ============================================================
+var DS = {
+  bg:         '#212121',
+  card:       '#303030',
+  muted:      '#3e3e3e',
+  mutedFg:    '#b0b0b0',
+  fg:         '#fbfbfb',
+  border:     'rgba(255,255,255,0.10)',
+  borderStr:  'rgba(255,255,255,0.15)'
+};
+
+// ============================================================
+// DATA
+// ============================================================
+var COMPETENCIES = [
+  { name: 'Communication',       score: 85, bench: 73, ci: [80, 90], alpha: 0.84, pct: 78, trend: [68, 77, 85] },
+  { name: 'Leadership',          score: 72, bench: 70, ci: [67, 77], alpha: 0.81, pct: 55, trend: [60, 65, 72] },
+  { name: 'Analytical Thinking', score: 88, bench: 80, ci: [83, 93], alpha: 0.87, pct: 82, trend: [70, 80, 88] },
+  { name: 'Problem Solving',     score: 48, bench: 70, ci: [42, 54], alpha: 0.79, pct: 18, trend: [55, 52, 48] },
+  { name: 'Adaptability',        score: 78, bench: 65, ci: [72, 84], alpha: 0.83, pct: 68, trend: [62, 70, 78] },
+  { name: 'Collaboration',       score: 92, bench: 75, ci: [88, 96], alpha: 0.89, pct: 92, trend: [74, 85, 92] },
+  { name: 'Tech. Proficiency',   score: 82, bench: 78, ci: [77, 87], alpha: 0.85, pct: 63, trend: [71, 76, 82] },
+  { name: 'Strategic Planning',  score: 60, bench: 72, ci: [54, 66], alpha: 0.80, pct: 34, trend: [58, 60, 60] }
+];
+
+function getStatus(score, bench) {
+  if (score > bench + 2) return 'exceeds';
+  if (score >= bench - 2) return 'meets';
+  return 'below';
+}
+
+var STATUS_COLORS = {
+  exceeds: { text: '#34d399', bar: '#10b981', badgeBg: 'rgba(16,185,129,0.15)',  border: 'rgba(16,185,129,0.30)', label: 'EXCEEDS' },
+  meets:   { text: '#60a5fa', bar: '#3b82f6', badgeBg: 'rgba(59,130,246,0.15)',  border: 'rgba(59,130,246,0.25)', label: 'MEETS'   },
+  below:   { text: '#fbbf24', bar: '#f59e0b', badgeBg: 'rgba(245,158,11,0.15)',  border: 'rgba(245,158,11,0.25)', label: 'BELOW'   }
+};
+
+// ============================================================
+// CHART.JS DEFAULTS
+// ============================================================
+Chart.defaults.font.family = "'Inter', system-ui, sans-serif";
+Chart.defaults.color = DS.mutedFg;
+
+// ============================================================
+// GAP ANALYSIS BAR CHART
+// ============================================================
+(function buildGapChart() {
+  var ctx = document.getElementById('gapChart').getContext('2d');
+  var bgColors = COMPETENCIES.map(function(c) {
+    return STATUS_COLORS[getStatus(c.score, c.bench)].bar;
+  });
+
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: COMPETENCIES.map(function(c) { return c.name; }),
+      datasets: [
+        {
+          label: 'Benchmark',
+          data: COMPETENCIES.map(function(c) { return c.bench; }),
+          backgroundColor: 'rgba(255,255,255,0.08)',
+          borderColor: 'rgba(255,255,255,0.18)',
+          borderWidth: 1,
+          borderRadius: 4
+        },
+        {
+          label: 'Score',
+          data: COMPETENCIES.map(function(c) { return c.score; }),
+          backgroundColor: bgColors,
+          borderWidth: 0,
+          borderRadius: 4
+        }
+      ]
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: { duration: 1000, easing: 'easeInOutQuart' },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: DS.card,
+          borderColor: DS.borderStr,
+          borderWidth: 1,
+          titleColor: DS.fg,
+          bodyColor: DS.mutedFg,
+          padding: 10,
+          callbacks: {
+            label: function(ctx) {
+              var c = COMPETENCIES[ctx.dataIndex];
+              if (ctx.datasetIndex === 0) return ' Benchmark: ' + ctx.raw;
+              var gap = c.score - c.bench;
+              var gapStr = gap >= 0 ? '+' + gap : String(gap);
+              return ' Score: ' + ctx.raw + ' (Gap: ' + gapStr + ')';
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          min: 0, max: 100,
+          grid: { color: 'rgba(255,255,255,0.04)' },
+          border: { color: 'rgba(255,255,255,0.08)' },
+          ticks: { font: { size: 10 }, color: DS.mutedFg }
+        },
+        y: {
+          grid: { display: false },
+          border: { display: false },
+          ticks: { font: { size: 11 }, color: DS.mutedFg }
+        }
+      }
+    }
+  });
+})();
+
+// ============================================================
+// RADAR CHART
+// ============================================================
+(function buildRadarChart() {
+  var ctx = document.getElementById('radarChart').getContext('2d');
+  new Chart(ctx, {
+    type: 'radar',
+    data: {
+      labels: COMPETENCIES.map(function(c) {
+        return c.name.length > 10 ? c.name.slice(0, 10) + '\u2026' : c.name;
+      }),
+      datasets: [
+        {
+          label: 'Benchmark',
+          data: COMPETENCIES.map(function(c) { return c.bench; }),
+          backgroundColor: 'rgba(255,255,255,0.04)',
+          borderColor: 'rgba(255,255,255,0.25)',
+          borderWidth: 1.5,
+          borderDash: [4, 3],
+          pointRadius: 2,
+          pointBackgroundColor: DS.mutedFg
+        },
+        {
+          label: 'Candidate',
+          data: COMPETENCIES.map(function(c) { return c.score; }),
+          backgroundColor: 'rgba(16,185,129,0.10)',
+          borderColor: '#10b981',
+          borderWidth: 2,
+          pointRadius: 3,
+          pointBackgroundColor: '#34d399',
+          pointBorderColor: DS.bg,
+          pointBorderWidth: 1.5
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: { duration: 1200, easing: 'easeInOutQuart' },
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: { font: { size: 10 }, color: DS.mutedFg, padding: 12, boxWidth: 10, boxHeight: 10 }
+        },
+        tooltip: {
+          backgroundColor: DS.card, borderColor: DS.borderStr, borderWidth: 1,
+          titleColor: DS.fg, bodyColor: DS.mutedFg, padding: 8
+        }
+      },
+      scales: {
+        r: {
+          min: 0, max: 100,
+          ticks: { stepSize: 25, font: { size: 9 }, color: DS.mutedFg, backdropColor: 'transparent' },
+          grid: { color: 'rgba(255,255,255,0.06)' },
+          angleLines: { color: 'rgba(255,255,255,0.06)' },
+          pointLabels: { font: { size: 10 }, color: DS.mutedFg }
+        }
+      }
+    }
+  });
+})();
+
+// ============================================================
+// TREND LINE CHART
+// ============================================================
+(function buildTrendChart() {
+  var ctx = document.getElementById('trendChart').getContext('2d');
+  var gradient = ctx.createLinearGradient(0, 0, 0, 200);
+  gradient.addColorStop(0, 'rgba(16,185,129,0.22)');
+  gradient.addColorStop(1, 'rgba(16,185,129,0.00)');
+  new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: ['Dec 2025', 'Jan 2026', 'Mar 2026'],
+      datasets: [{
+        label: 'Overall Score',
+        data: [62, 70, 75.6],
+        borderColor: '#10b981',
+        borderWidth: 2.5,
+        backgroundColor: gradient,
+        fill: true,
+        tension: 0.4,
+        pointRadius: 5,
+        pointBackgroundColor: '#10b981',
+        pointBorderColor: DS.bg,
+        pointBorderWidth: 2,
+        pointHoverRadius: 7
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: { duration: 1200, easing: 'easeInOutQuart' },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: DS.card, borderColor: DS.borderStr, borderWidth: 1,
+          titleColor: DS.fg, bodyColor: DS.mutedFg, padding: 10,
+          callbacks: { label: function(ctx) { return ' Score: ' + ctx.raw + '%'; } }
+        }
+      },
+      scales: {
+        x: {
+          grid: { display: false }, border: { display: false },
+          ticks: { font: { size: 11 }, color: DS.mutedFg }
+        },
+        y: {
+          min: 50, max: 100,
+          grid: { color: 'rgba(255,255,255,0.04)' }, border: { display: false },
+          ticks: {
+            font: { size: 10 }, color: DS.mutedFg,
+            callback: function(v) { return v + '%'; },
+            stepSize: 10
+          }
+        }
+      }
+    }
+  });
+})();
+
+// ============================================================
+// COMPETENCY GRID (safe DOM construction)
+// ============================================================
+(function buildCompGrid() {
+  var grid = document.getElementById('comp-grid');
+
+  COMPETENCIES.forEach(function(c, i) {
+    var status = getStatus(c.score, c.bench);
+    var col    = STATUS_COLORS[status];
+    var gap    = c.score - c.bench;
+    var gapStr = gap >= 0 ? '+' + gap : String(gap);
+
+    var card = document.createElement('div');
+    card.className = 'comp-card';
+    card.style.borderColor = col.border;
+    card.setAttribute('role', 'listitem');
+    card.setAttribute('aria-label', c.name + ': ' + c.score + '%');
+
+    var headerRow = document.createElement('div');
+    headerRow.style.cssText = 'display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:8px;';
+
+    var nameEl = document.createElement('div');
+    nameEl.style.cssText = 'font-size:10px;color:' + DS.mutedFg + ';line-height:1.3;font-weight:500;max-width:90px;';
+    nameEl.textContent = c.name;
+
+    var badge = document.createElement('span');
+    badge.style.cssText = 'font-size:9px;font-weight:700;letter-spacing:0.06em;padding:2px 6px;border-radius:999px;background:' + col.badgeBg + ';color:' + col.text + ';white-space:nowrap;border:1px solid ' + col.border + ';';
+    badge.textContent = col.label;
+
+    headerRow.appendChild(nameEl);
+    headerRow.appendChild(badge);
+
+    var scoreEl = document.createElement('div');
+    scoreEl.className = 'tabular';
+    scoreEl.style.cssText = 'font-size:20px;font-weight:700;margin-bottom:4px;color:' + col.text + ';letter-spacing:-0.02em;';
+    var scoreNum = document.createTextNode(String(c.score));
+    var scoreSuffix = document.createElement('span');
+    scoreSuffix.style.cssText = 'font-size:12px;font-weight:500;color:' + DS.mutedFg + ';';
+    scoreSuffix.textContent = '%';
+    scoreEl.appendChild(scoreNum);
+    scoreEl.appendChild(scoreSuffix);
+
+    var metaRow = document.createElement('div');
+    metaRow.style.cssText = 'display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;';
+
+    var benchLabel = document.createElement('span');
+    benchLabel.style.cssText = 'font-size:10px;color:' + DS.mutedFg + ';';
+    benchLabel.textContent = 'bench ' + c.bench;
+
+    var gapLabel = document.createElement('span');
+    gapLabel.className = 'tabular';
+    gapLabel.style.cssText = 'font-size:10px;font-weight:500;color:' + col.text + ';';
+    gapLabel.textContent = gapStr;
+
+    metaRow.appendChild(benchLabel);
+    metaRow.appendChild(gapLabel);
+
+    var canvas = document.createElement('canvas');
+    canvas.id = 'sparkline-comp-' + i;
+    canvas.width = 80;
+    canvas.height = 24;
+    canvas.style.cssText = 'display:block;width:100%;height:24px;';
+    canvas.setAttribute('aria-hidden', 'true');
+
+    card.appendChild(headerRow);
+    card.appendChild(scoreEl);
+    card.appendChild(metaRow);
+    card.appendChild(canvas);
+    grid.appendChild(card);
+
+    requestAnimationFrame(function() {
+      var sp = document.getElementById('sparkline-comp-' + i);
+      if (!sp) return;
+      var spCtx = sp.getContext('2d');
+      var spGrad = spCtx.createLinearGradient(0, 0, 0, 24);
+      spGrad.addColorStop(0, col.text + '50');
+      spGrad.addColorStop(1, col.text + '00');
+      new Chart(spCtx, {
+        type: 'line',
+        data: {
+          labels: ['', '', ''],
+          datasets: [{
+            data: c.trend,
+            borderColor: col.text,
+            borderWidth: 1.5,
+            backgroundColor: spGrad,
+            fill: true,
+            tension: 0.4,
+            pointRadius: 0
+          }]
+        },
+        options: {
+          responsive: false,
+          animation: { duration: 800 + i * 100 },
+          plugins: { legend: { display: false }, tooltip: { enabled: false } },
+          scales: {
+            x: { display: false },
+            y: { display: false, min: Math.min.apply(null, c.trend) - 5, max: Math.max.apply(null, c.trend) + 5 }
+          }
+        }
+      });
+    });
+  });
+})();
+
+// ============================================================
+// SPARKLINE GRID (trend panel — safe DOM construction)
+// ============================================================
+(function buildSparklineGrid() {
+  var grid = document.getElementById('sparkline-grid');
+
+  COMPETENCIES.forEach(function(c, i) {
+    var status = getStatus(c.score, c.bench);
+    var col    = STATUS_COLORS[status];
+
+    var wrap = document.createElement('div');
+    wrap.style.cssText = 'background:' + DS.muted + ';border-radius:8px;padding:10px;border:1px solid ' + DS.border + ';';
+
+    var nameEl = document.createElement('div');
+    nameEl.style.cssText = 'font-size:10px;color:' + DS.mutedFg + ';margin-bottom:4px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;';
+    nameEl.textContent = c.name;
+
+    var canvas = document.createElement('canvas');
+    canvas.id = 'sp-grid-' + i;
+    canvas.width = 100;
+    canvas.height = 28;
+    canvas.style.cssText = 'display:block;width:100%;height:28px;';
+    canvas.setAttribute('aria-hidden', 'true');
+
+    var footer = document.createElement('div');
+    footer.style.cssText = 'display:flex;align-items:center;justify-content:space-between;margin-top:4px;';
+
+    var currentVal = document.createElement('span');
+    currentVal.className = 'tabular';
+    currentVal.style.cssText = 'font-size:10px;color:' + col.text + ';';
+    currentVal.textContent = c.trend[2] + '%';
+
+    var rangeVal = document.createElement('span');
+    rangeVal.style.cssText = 'font-size:9px;color:' + DS.mutedFg + ';';
+    rangeVal.textContent = c.trend[0] + '% \u2192 ' + c.trend[2] + '%';
+
+    footer.appendChild(currentVal);
+    footer.appendChild(rangeVal);
+
+    wrap.appendChild(nameEl);
+    wrap.appendChild(canvas);
+    wrap.appendChild(footer);
+    grid.appendChild(wrap);
+
+    requestAnimationFrame(function() {
+      var sp = document.getElementById('sp-grid-' + i);
+      if (!sp) return;
+      var spCtx = sp.getContext('2d');
+      new Chart(spCtx, {
+        type: 'line',
+        data: {
+          labels: ['Dec', 'Jan', 'Mar'],
+          datasets: [{
+            data: c.trend,
+            borderColor: col.text,
+            borderWidth: 1.5,
+            backgroundColor: 'transparent',
+            tension: 0.4,
+            pointRadius: 0
+          }]
+        },
+        options: {
+          responsive: false,
+          animation: { duration: 900 + i * 80 },
+          plugins: { legend: { display: false }, tooltip: { enabled: false } },
+          scales: {
+            x: { display: false },
+            y: { display: false, min: Math.min.apply(null, c.trend) - 8, max: Math.max.apply(null, c.trend) + 8 }
+          }
+        }
+      });
+    });
+  });
+})();
+
+// ============================================================
+// DETAIL TABLE (safe DOM construction)
+// ============================================================
+var sortCol = -1;
+var sortDir = 1;
+
+function renderTable(data) {
+  var tbody = document.getElementById('detail-table-body');
+  while (tbody.firstChild) { tbody.removeChild(tbody.firstChild); }
+
+  data.forEach(function(c) {
+    var status = getStatus(c.score, c.bench);
+    var col    = STATUS_COLORS[status];
+    var gap    = c.score - c.bench;
+    var gapStr = gap >= 0 ? '+' + gap : String(gap);
+
+    var tr = document.createElement('tr');
+    tr.className = 'table-row-hover';
+    tr.style.borderTop = '1px solid ' + DS.border;
+
+    function td(content, extraStyle) {
+      var cell = document.createElement('td');
+      cell.style.cssText = 'padding:10px 12px;white-space:nowrap;' + (extraStyle || '');
+      if (typeof content === 'string') {
+        cell.textContent = content;
+      } else {
+        cell.appendChild(content);
+      }
+      return cell;
+    }
+
+    var nameTd = td(c.name, 'font-weight:500;color:' + DS.fg + ';');
+    nameTd.style.paddingLeft = '24px';
+
+    var scoreTd = td(c.score + '%', 'font-variant-numeric:tabular-nums;font-weight:600;color:' + col.text + ';');
+    var benchTd = td(c.bench + '%', 'font-variant-numeric:tabular-nums;color:' + DS.mutedFg + ';');
+    var gapTd = td(gapStr, 'font-variant-numeric:tabular-nums;font-weight:500;color:' + col.text + ';');
+    var ciTd = td('[' + c.ci[0] + ', ' + c.ci[1] + ']', 'font-variant-numeric:tabular-nums;color:' + DS.mutedFg + ';opacity:0.7;');
+    var alphaTd = td(c.alpha.toFixed(2), 'font-variant-numeric:tabular-nums;color:' + DS.mutedFg + ';');
+
+    var pctCell = document.createElement('td');
+    pctCell.style.cssText = 'padding:10px 24px 10px 12px;white-space:nowrap;text-align:right;';
+
+    var pctWrap = document.createElement('div');
+    pctWrap.style.cssText = 'display:inline-flex;align-items:center;gap:8px;';
+
+    var barWrap = document.createElement('div');
+    barWrap.style.cssText = 'width:64px;height:4px;background:' + DS.muted + ';border-radius:999px;overflow:hidden;';
+
+    var barFill = document.createElement('div');
+    barFill.style.cssText = 'height:100%;border-radius:999px;background:' + col.bar + ';width:' + c.pct + '%;';
+
+    var pctLabel = document.createElement('span');
+    pctLabel.className = 'tabular';
+    pctLabel.style.cssText = 'font-size:12px;color:' + DS.fg + ';';
+    pctLabel.textContent = c.pct + 'th';
+
+    barWrap.appendChild(barFill);
+    pctWrap.appendChild(barWrap);
+    pctWrap.appendChild(pctLabel);
+    pctCell.appendChild(pctWrap);
+
+    tr.appendChild(nameTd);
+    tr.appendChild(scoreTd);
+    tr.appendChild(benchTd);
+    tr.appendChild(gapTd);
+    tr.appendChild(ciTd);
+    tr.appendChild(alphaTd);
+    tr.appendChild(pctCell);
+    tbody.appendChild(tr);
+  });
+}
+
+function sortTable(col) {
+  var ths = document.querySelectorAll('th.sortable');
+  ths.forEach(function(th) { th.classList.remove('sort-asc', 'sort-desc'); });
+
+  if (sortCol === col) {
+    sortDir *= -1;
+  } else {
+    sortCol = col;
+    sortDir = 1;
+  }
+
+  var sorted = COMPETENCIES.slice().sort(function(a, b) {
+    var pairs = [
+      [a.name, b.name],
+      [a.score, b.score],
+      [a.bench, b.bench],
+      [a.score - a.bench, b.score - b.bench],
+      [a.ci[0], b.ci[0]],
+      [a.alpha, b.alpha],
+      [a.pct, b.pct]
+    ];
+    var va = pairs[col][0];
+    var vb = pairs[col][1];
+    if (typeof va === 'string') return sortDir * va.localeCompare(vb);
+    return sortDir * (va - vb);
+  });
+
+  ths[col].classList.add(sortDir === 1 ? 'sort-asc' : 'sort-desc');
+  renderTable(sorted);
+}
+
+renderTable(COMPETENCIES);
+
+// ============================================================
+// DETAIL TABLE EXPAND / COLLAPSE
+// ============================================================
+function toggleDetails() {
+  var body  = document.getElementById('detail-body');
+  var btn   = document.getElementById('detail-toggle');
+  var chev  = document.getElementById('detail-chevron');
+  var open  = body.classList.contains('expanded');
+
+  body.classList.toggle('expanded', !open);
+  body.classList.toggle('collapsed', open);
+  btn.setAttribute('aria-expanded', String(!open));
+  chev.style.transform = open ? 'rotate(-90deg)' : 'rotate(0deg)';
+}
+
+// ============================================================
+// TAB NAVIGATION + SCROLL SPY
+// ============================================================
+function activateTab(el, e) {
+  if (e) e.preventDefault();
+  document.querySelectorAll('.tab-item').forEach(function(t) {
+    t.classList.remove('tab-active');
+    t.setAttribute('aria-selected', 'false');
+  });
+  el.classList.add('tab-active');
+  el.setAttribute('aria-selected', 'true');
+
+  var targetId = el.getAttribute('data-section');
+  var target = document.getElementById(targetId);
+  var contentArea = document.getElementById('app-content-area');
+  if (target && contentArea) {
+    var heroH = document.getElementById('hero-strip').offsetHeight;
+    var tabH  = document.getElementById('tab-nav').offsetHeight;
+    var insightsH = document.getElementById('insights-bar').offsetHeight;
+    var offset = heroH + tabH + insightsH + 20;
+    var targetTop = target.offsetTop - offset;
+    contentArea.scrollTo({ top: targetTop, behavior: 'smooth' });
+  }
+}
+
+(function setupScrollSpy() {
+  var sections = ['overview', 'gap-analysis', 'competencies', 'trend', 'details'];
+  var contentArea = document.getElementById('app-content-area');
+  if (!contentArea) return;
+
+  var ticking = false;
+  contentArea.addEventListener('scroll', function() {
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(function() {
+      ticking = false;
+      var scrollTop  = contentArea.scrollTop;
+      var heroH = document.getElementById('hero-strip').offsetHeight;
+      var tabH  = document.getElementById('tab-nav').offsetHeight;
+      var insightsH = document.getElementById('insights-bar').offsetHeight;
+      var offset = heroH + tabH + insightsH + 40;
+
+      var activeId = sections[0];
+      sections.forEach(function(id) {
+        var el = document.getElementById(id);
+        if (el && el.offsetTop - offset <= scrollTop) activeId = id;
+      });
+
+      document.querySelectorAll('.tab-item').forEach(function(t) {
+        var section = t.getAttribute('data-section');
+        var isActive = section === activeId;
+        t.classList.toggle('tab-active', isActive);
+        t.setAttribute('aria-selected', isActive ? 'true' : 'false');
+      });
+    });
+  });
+})();
+
+// ============================================================
+// AI INSIGHTS DISMISS
+// ============================================================
+function dismissInsights() {
+  var bar = document.getElementById('insights-bar');
+  bar.classList.add('dismissed');
+  try { sessionStorage.setItem('insights-dismissed', '1'); } catch(e) {}
+
+  setTimeout(function() {
+    var tabNav = document.getElementById('tab-nav');
+    tabNav.style.top = document.getElementById('hero-strip').offsetHeight + 'px';
+  }, 350);
+}
+
+(function checkInsightsDismissed() {
+  try {
+    if (sessionStorage.getItem('insights-dismissed') === '1') {
+      document.getElementById('insights-bar').classList.add('dismissed');
+    }
+  } catch(e) {}
+})();
+
+// ============================================================
+// APP SHELL JAVASCRIPT
+// ============================================================
+function appToggleCollapse() {
+  var sidebar   = document.getElementById('app-sidebar');
+  var shellBody = document.getElementById('app-shell-body');
+  var header    = document.getElementById('app-header');
+  var collapsed = sidebar.classList.toggle('app-collapsed');
+
+  if (collapsed) {
+    shellBody.style.marginLeft = 'var(--app-sidebar-collapsed-w)';
+    header.style.left = 'var(--app-sidebar-collapsed-w)';
+  } else {
+    shellBody.style.marginLeft = 'var(--app-sidebar-w)';
+    header.style.left = 'var(--app-sidebar-w)';
+  }
+}
+
+function appOpenMobileSidebar() {
+  document.getElementById('app-sidebar').classList.add('app-mobile-open');
+  document.getElementById('app-sidebar-backdrop').classList.add('app-active');
+}
+
+function appCloseMobileSidebar() {
+  document.getElementById('app-sidebar').classList.remove('app-mobile-open');
+  document.getElementById('app-sidebar-backdrop').classList.remove('app-active');
+}
+</script>
+</body>
+</html>
