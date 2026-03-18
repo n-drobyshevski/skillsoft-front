@@ -13,9 +13,10 @@ import { QuestionNavigation } from './QuestionNavigation';
 import { CompletionDialog } from './CompletionDialog';
 import { AnswerSummaryScreen } from './answer-summary';
 import { NavigationErrorDialog, AbandonDialog, TimeoutDialog, SwipeIndicators, SaveIndicator } from './components';
-import { TestDriveInsights, InsightsToggle } from './insights';
+import { TestDriveInsights, InsightsToggle, AnalyticsPanel } from './insights';
 import { useSwipeNavigation, useReducedMotion } from '@/hooks/use-swipe-navigation';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { cn } from '@/lib/utils';
 
 // Composed hooks
 import { useTimerManagement } from './hooks/useTimerManagement';
@@ -296,6 +297,8 @@ export function ImmersivePlayer({
     testDriveAvailable,
     testDriveMode,
     currentQuestion,
+    questionIndex: state.questionIndex,
+    totalQuestions: state.totalQuestions,
   });
 
   // ========================================================================
@@ -398,64 +401,83 @@ export function ImmersivePlayer({
         onNavigate={handleNavigateToQuestion}
       />
 
-      <main
-        className="flex-1 flex items-center justify-center px-3 sm:px-4 py-4 sm:py-8 overflow-hidden pb-safe swipe-container"
-        {...swipeHandlers}
-      >
-        <div className="w-full max-w-3xl relative will-change-slide">
-          {isMobile && (
-            <SwipeIndicators
-              swipeState={swipeState}
-              canSwipeNext={canSwipeNext}
-              canSwipePrevious={canSwipePrevious}
-            />
-          )}
+      {/* Split-screen grid when test-drive is active on lg+, otherwise single column */}
+      <div className={cn('flex-1 flex flex-col', testDriveAvailable && 'lg:grid lg:grid-cols-[1fr_auto]')}>
+        {/* Left panel — Question + Navigation */}
+        <div className="flex-1 flex flex-col overflow-hidden lg:overflow-y-auto">
+          <main
+            className="flex-1 flex items-center justify-center px-3 sm:px-4 py-4 sm:py-8 overflow-hidden pb-safe swipe-container"
+            {...swipeHandlers}
+          >
+            <div className={cn('w-full relative will-change-slide', testDriveAvailable ? 'max-w-2xl' : 'max-w-3xl')}>
+              {isMobile && (
+                <SwipeIndicators
+                  swipeState={swipeState}
+                  canSwipeNext={canSwipeNext}
+                  canSwipePrevious={canSwipePrevious}
+                />
+              )}
 
-          <AnimatePresence mode="wait" custom={state.direction}>
-            <motion.div
-              key={currentQuestion.id}
-              custom={state.direction}
-              variants={slideVariants}
-              initial="enter"
-              animate="center"
-              exit="exit"
-              transition={transitionSettings}
-              className="gpu-accelerated"
-            >
-              <QuestionCard
-                question={currentQuestion}
-                selectedValue={currentAnswer}
-                onAnswer={handleAnswer}
-                questionNumber={state.questionIndex + 1}
-                validationError={validationError || undefined}
-              />
-            </motion.div>
-          </AnimatePresence>
+              <AnimatePresence mode="wait" custom={state.direction}>
+                <motion.div
+                  key={currentQuestion.id}
+                  custom={state.direction}
+                  variants={slideVariants}
+                  initial="enter"
+                  animate="center"
+                  exit="exit"
+                  transition={transitionSettings}
+                  className="gpu-accelerated"
+                >
+                  <QuestionCard
+                    question={currentQuestion}
+                    selectedValue={currentAnswer}
+                    onAnswer={handleAnswer}
+                    questionNumber={state.questionIndex + 1}
+                    validationError={validationError || undefined}
+                  />
+                </motion.div>
+              </AnimatePresence>
+            </div>
+          </main>
+
+          {/* Save status indicator */}
+          <SaveIndicator status={saveStatus} className="fixed top-20 left-1/2 -translate-x-1/2 z-40 pointer-events-none" />
+
+          {/* Navigation bar — sticky at bottom of left panel */}
+          <QuestionNavigation
+            canGoBack={state.allowBackNavigation && state.questionIndex > 0}
+            canGoForward={isAnswerValid}
+            canSkip={canSkip}
+            isLastQuestion={state.questionIndex + 1 >= state.totalQuestions}
+            isSubmitting={state.isSubmitting}
+            onPrevious={handlePrevious}
+            onNext={handleNext}
+            onSkip={handleSkip}
+            validationError={validationError}
+            hasUnsavedChanges={hasUnsavedChanges}
+            backDisabledReason={
+              !state.allowBackNavigation
+                ? t('player.navigation.backDisabled')
+                : state.questionIndex <= 0
+                  ? t('player.navigation.firstQuestion')
+                  : undefined
+            }
+          />
         </div>
-      </main>
 
-      {/* Save status indicator — floating overlay so it never displaces layout */}
-      <SaveIndicator status={saveStatus} className="fixed bottom-20 left-1/2 -translate-x-1/2 z-40 pointer-events-none" />
-
-      <QuestionNavigation
-        canGoBack={state.allowBackNavigation && state.questionIndex > 0}
-        canGoForward={isAnswerValid}
-        canSkip={canSkip}
-        isLastQuestion={state.questionIndex + 1 >= state.totalQuestions}
-        isSubmitting={state.isSubmitting}
-        onPrevious={handlePrevious}
-        onNext={handleNext}
-        onSkip={handleSkip}
-        validationError={validationError}
-        hasUnsavedChanges={hasUnsavedChanges}
-        backDisabledReason={
-          !state.allowBackNavigation
-            ? t('player.navigation.backDisabled')
-            : state.questionIndex <= 0
-              ? t('player.navigation.firstQuestion')
-              : undefined
-        }
-      />
+        {/* Right panel — Analytics (desktop only, always visible in test-drive mode) */}
+        {testDriveAvailable && (
+          <aside
+            className="hidden lg:flex flex-col px-4 py-4 bg-neutral-900/20 border-l border-neutral-800 overflow-y-auto"
+            aria-label="Панель анализа"
+          >
+            <div className="w-[500px] min-w-[500px] mx-auto my-auto">
+              <AnalyticsPanel />
+            </div>
+          </aside>
+        )}
+      </div>
 
       <CompletionDialog
         open={showCompletion}
@@ -489,8 +511,11 @@ export function ImmersivePlayer({
         hasUnsavedChanges={hasUnsavedChanges}
       />
 
-      <InsightsToggle />
-      <TestDriveInsights />
+      {/* Mobile only: toggle + drawer (hidden on lg+ where analytics panel is inline) */}
+      <div className={cn(testDriveAvailable && 'lg:hidden')}>
+        <InsightsToggle />
+        <TestDriveInsights />
+      </div>
     </div>
   );
 }

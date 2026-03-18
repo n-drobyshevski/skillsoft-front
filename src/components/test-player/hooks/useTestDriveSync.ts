@@ -27,6 +27,10 @@ export interface UseTestDriveSyncProps {
   testDriveMode: boolean;
   /** The current question to sync */
   currentQuestion: SessionQuestion | null;
+  /** 0-based index of the current question */
+  questionIndex: number;
+  /** Total number of questions in the session */
+  totalQuestions: number;
 }
 
 // ============================================================================
@@ -63,6 +67,8 @@ export function useTestDriveSync({
   testDriveAvailable,
   testDriveMode,
   currentQuestion,
+  questionIndex,
+  totalQuestions,
 }: UseTestDriveSyncProps): void {
   // Store actions
   const enableTestDrive = useTestDriveStore((s) => s.enableTestDriveMode);
@@ -94,8 +100,29 @@ export function useTestDriveSync({
     // Set initial data immediately with loading placeholders
     setCurrentQuestionData({
       question: currentQuestion,
-      psychometrics,
-      scoring,
+      psychometrics: {
+        ...psychometrics,
+        reliabilityCoefficient: 0.81,
+        correctRate: 0.68,
+        avgResponseTime: 45,
+        sem: 0.15,
+        timeLimit: currentQuestion.timeLimit,
+      },
+      scoring: {
+        ...scoring,
+        scoringMethod: 'Binary',
+      },
+      coverage: {
+        questionsInIndicator: 3,
+        questionsInCompetency: 8,
+        contributionPct: 12,
+      },
+      usage: {
+        assessmentCount: 12,
+        lastModified: '2 нед. назад',
+        position: questionIndex + 1,
+        totalQuestions,
+      },
     });
 
     // Fetch full competency and behavioral indicator data
@@ -115,8 +142,29 @@ export function useTestDriveSync({
           question: currentQuestion,
           behavioralIndicator: indicator || undefined,
           competency: competency || undefined,
-          psychometrics,
-          scoring,
+          psychometrics: {
+            ...psychometrics,
+            reliabilityCoefficient: 0.81,
+            correctRate: 0.68,
+            avgResponseTime: 45,
+            sem: 0.15,
+            timeLimit: currentQuestion.timeLimit,
+          },
+          scoring: {
+            ...scoring,
+            scoringMethod: 'Binary',
+          },
+          coverage: {
+            questionsInIndicator: 3,
+            questionsInCompetency: 8,
+            contributionPct: 12,
+          },
+          usage: {
+            assessmentCount: 12,
+            lastModified: '2 нед. назад',
+            position: questionIndex + 1,
+            totalQuestions,
+          },
         });
       } catch (error) {
         console.error('Failed to fetch test-drive hierarchy data:', error);
@@ -125,7 +173,7 @@ export function useTestDriveSync({
     };
 
     fetchHierarchyData();
-  }, [testDriveMode, currentQuestion, setCurrentQuestionData]);
+  }, [testDriveMode, currentQuestion, questionIndex, totalQuestions, setCurrentQuestionData]);
 }
 
 export default useTestDriveSync;

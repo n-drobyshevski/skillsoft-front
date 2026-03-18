@@ -28,12 +28,30 @@ export interface TestDriveQuestionData {
     difficultyIndex?: number; // 0-1 scale
     discriminationIndex?: number; // typically 0.3+ is good
     reliabilityCoefficient?: number;
+    correctRate?: number; // percentage of test-takers who answered correctly
+    avgResponseTime?: number; // seconds
+    sem?: number; // standard error of measurement
+    timeLimit?: number; // seconds
   };
   /** Scoring information */
   scoring?: {
     maxScore: number;
     scoringRubric?: string;
     optionScores?: Record<string, number>; // optionId -> score
+    scoringMethod?: string;
+  };
+  /** Coverage context — how this question fits into the competency structure */
+  coverage?: {
+    questionsInIndicator?: number;
+    questionsInCompetency?: number;
+    contributionPct?: number;
+  };
+  /** Usage metadata */
+  usage?: {
+    assessmentCount?: number;
+    lastModified?: string;
+    position?: number;
+    totalQuestions?: number;
   };
 }
 
@@ -42,8 +60,6 @@ interface TestDriveState {
   isTestDriveMode: boolean;
   /** Whether the insights panel is open */
   isPanelOpen: boolean;
-  /** Active tab in the insights panel */
-  activeTab: 'psychometrics' | 'scoring' | 'mapping' | 'metadata';
   /** Current question's extended data for insights */
   currentQuestionData: TestDriveQuestionData | null;
   /** Mapping data for hierarchy view */
@@ -66,8 +82,6 @@ interface TestDriveActions {
   closePanel: () => void;
   /** Toggle the insights panel */
   togglePanel: () => void;
-  /** Set the active tab */
-  setActiveTab: (tab: TestDriveState['activeTab']) => void;
   /** Update current question data for insights display */
   setCurrentQuestionData: (data: TestDriveQuestionData | null) => void;
   /** Set hierarchy data for mapping tab */
@@ -81,7 +95,6 @@ type TestDriveStore = TestDriveState & TestDriveActions;
 const initialState: TestDriveState = {
   isTestDriveMode: false,
   isPanelOpen: false,
-  activeTab: 'psychometrics',
   currentQuestionData: null,
   hierarchyData: null,
 };
@@ -137,10 +150,6 @@ export const useTestDriveStore = create<TestDriveStore>()(
       }
     },
 
-    setActiveTab: (tab) => {
-      set({ activeTab: tab });
-    },
-
     setCurrentQuestionData: (data) => {
       set({ currentQuestionData: data });
     },
@@ -164,9 +173,6 @@ export const useIsTestDriveMode = () =>
 export const useIsPanelOpen = () =>
   useTestDriveStore((state) => state.isPanelOpen);
 
-export const useActiveTab = () =>
-  useTestDriveStore((state) => state.activeTab);
-
 export const useCurrentQuestionData = () =>
   useTestDriveStore((state) => state.currentQuestionData);
 
@@ -180,8 +186,6 @@ export const usePanelState = () =>
   useTestDriveStore(
     useShallow((state) => ({
       isOpen: state.isPanelOpen,
-      activeTab: state.activeTab,
       togglePanel: state.togglePanel,
-      setActiveTab: state.setActiveTab,
     }))
   );

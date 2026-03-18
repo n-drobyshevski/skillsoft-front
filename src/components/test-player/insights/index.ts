@@ -1,3 +1,4 @@
 export { TestDriveInsights } from './TestDriveInsights';
 export { InsightsToggle } from './InsightsToggle';
-export * from './tabs';
+export { AnalyticsPanel } from './AnalyticsPanel';
+export { QualityGrade } from './QualityGrade';
