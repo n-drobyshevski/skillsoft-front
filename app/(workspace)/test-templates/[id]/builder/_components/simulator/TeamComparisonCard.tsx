@@ -290,31 +290,26 @@ export function TeamComparisonCard({
                     </div>
                   </div>
 
-                  {/* Dual progress bar */}
+                  {/* Paired thin bars */}
                   <div
-                    className="relative h-3 bg-muted rounded-full overflow-hidden"
+                    className="space-y-0.5"
                     role="img"
                     aria-label={`${comp.name}: Individual ${comp.individual}%, Team average ${comp.teamAvg}%`}
                   >
-                    {/* Team benchmark (background) */}
-                    <div
-                      className="absolute inset-y-0 left-0 bg-blue-200 dark:bg-blue-800/50 rounded-full"
-                      style={{ width: `${Math.min(comp.teamAvg, 100)}%` }}
-                    />
-                    {/* Individual score (foreground, smaller height) */}
-                    <div
-                      className={cn(
-                        'absolute left-0 rounded-full transition-all',
-                        direction === 'above' && 'bg-emerald-500',
-                        direction === 'below' && 'bg-amber-500',
-                        direction === 'at' && 'bg-blue-500'
-                      )}
-                      style={{
-                        width: `${Math.min(comp.individual, 100)}%`,
-                        height: '60%',
-                        top: '20%',
-                      }}
-                    />
+                    {/* Individual score bar */}
+                    <div className="h-1.5 bg-muted rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-blue-500 rounded-full transition-all"
+                        style={{ width: `${Math.min(comp.individual, 100)}%` }}
+                      />
+                    </div>
+                    {/* Team average bar */}
+                    <div className="h-1.5 bg-muted rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-muted-foreground/30 rounded-full transition-all"
+                        style={{ width: `${Math.min(comp.teamAvg, 100)}%` }}
+                      />
+                    </div>
                   </div>
                 </div>
               );
@@ -504,26 +499,15 @@ export function TeamComparisonCard({
         )}
       </div>
 
-      {/* Legend — color dots match both bar and radar views */}
+      {/* Legend — consistent colors matching both bar and radar views */}
       <div className="flex items-center justify-center gap-4 pt-2 border-t text-[10px] text-muted-foreground">
         <div className="flex items-center gap-1">
-          <div
-            className="h-2.5 w-2.5 rounded-full bg-blue-300 dark:bg-blue-700"
-            aria-hidden="true"
-          />
-          <span>{t('teamComparison.legendTeamAvg')}</span>
+          <div className="h-2.5 w-2.5 rounded-full bg-blue-500" aria-hidden="true" />
+          <span>{t('teamComparison.legendIndividual')}</span>
         </div>
         <div className="flex items-center gap-1">
-          <div
-            className={cn(
-              'h-2.5 w-2.5 rounded-full',
-              overallDirection === 'above' && 'bg-emerald-500',
-              overallDirection === 'below' && 'bg-amber-500',
-              overallDirection === 'at' && 'bg-blue-500'
-            )}
-            aria-hidden="true"
-          />
-          <span>{t('teamComparison.legendIndividual')}</span>
+          <div className="h-2.5 w-2.5 rounded-full bg-muted-foreground/30" aria-hidden="true" />
+          <span>{t('teamComparison.legendTeamAvg')}</span>
         </div>
       </div>
     </div>
