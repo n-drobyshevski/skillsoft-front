@@ -2,24 +2,27 @@
 
 import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
-
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import {
   BarChart3,
   Users,
   UserCheck,
   AlertTriangle,
+  CheckCircle2,
   Lightbulb,
-  Target
+  Target,
+  TrendingUp,
 } from 'lucide-react';
 import { useBigFiveProjection, bigFiveToArray } from '@/hooks/useBigFiveProjection';
 import { ChartErrorBoundary } from '@/components/charts/ChartErrorBoundary';
-import { TeamFitHero } from './TeamFitHero';
 import { TeamFitMultiplierBanner } from './TeamFitMultiplierBanner';
 import { TeamFitMetricsPanel } from './TeamFitMetricsPanel';
 import { CompetencyProfile } from '../shared/CompetencyProfile';
-import { ActionButtonsBar } from '../shared/ActionButtonsBar';
 import { BaseResultViewProps } from '../shared/types';
+import { HeroStrip } from '../shared/HeroStrip';
+import { ResultTabs } from '../shared/ResultTabs';
+import { InsightsBar } from '../shared/InsightsBar';
+import { DashboardPanel } from '../shared/DashboardPanel';
+import { MetricCards } from '../shared/MetricCards';
 import { LazyTeamSaturationRadar as TeamSaturationRadar, LazyIndicatorHeatmap as IndicatorHeatmap } from '@/lib/lazy-charts';
 import { toTeamSaturationData, toTeamSaturationDataSimulated } from '@/lib/result-transformers';
 import { isTeamFitMetrics } from '@/types/domain';
@@ -27,14 +30,10 @@ import { teamsApi } from '@/services/api/teams';
 import { OnboardingRecommendations } from './OnboardingRecommendations';
 
 /**
- * Team Fit Result View for Scenario C (Team Compatibility Analysis).
+ * Team Fit Result View — Direction B "Command Center" Dashboard.
  *
- * Key features:
- * - Compatibility percentage (blue collaborative palette)
- * - Team context hero section
- * - You vs. team comparison (when team data available)
- * - Complementary skills display
- * - Focus on collaboration rather than individual achievement
+ * Seen by team leads evaluating candidate compatibility. Blue accent.
+ * Replaces TeamFitHero + ActionButtonsBar with HeroStrip + ResultTabs + InsightsBar.
  */
 export function TeamFitResultView({ result, template }: BaseResultViewProps) {
   const t = useTranslations('results.teamFit');
@@ -94,49 +93,94 @@ export function TeamFitResultView({ result, template }: BaseResultViewProps) {
   const hasBigFiveData = hasBackendBigFive || Object.values(projectedProfile).some(v => v !== 50);
 
   return (
-    <div className="min-h-screen bg-muted/30 py-3 sm:py-4 md:py-8">
-      <div className="container max-w-7xl mx-auto px-2 sm:px-4 space-y-3 sm:space-y-4">
-        {/* Hero with team context and compatibility score */}
-        <TeamFitHero
-          templateName={result.templateName}
-          completedAt={result.completedAt}
-          overallPercentage={result.overallPercentage ?? 0}
-          passed={isGoodFit}
-          teamId={teamId}
-          teamName={teamName}
-          questionsAnswered={result.questionsAnswered}
-          totalQuestions={result.totalQuestions}
-          timeSpent={result.totalTimeSeconds}
-        />
+    <div className="w-full max-w-[1600px] mx-auto">
+      <HeroStrip
+        goal="TEAM_FIT"
+        templateName={result.templateName}
+        completedAt={result.completedAt}
+        totalTimeSeconds={result.totalTimeSeconds}
+        questionsAnswered={result.questionsAnswered}
+        totalQuestions={result.totalQuestions}
+        overallPercentage={result.overallPercentage}
+        passed={result.passed}
+        statusLabel={isGoodFit ? 'Compatible' : 'Needs Adaptation'}
+        statusVariant={isGoodFit ? 'info' : 'neutral'}
+        metadata={[
+          ...(teamId ? [{ icon: Users, label: `Team: ${teamName || teamId}` }] : []),
+          ...(teamFitMetrics?.teamFitMultiplier && teamFitMetrics.teamFitMultiplier !== 1.0
+            ? [{ icon: TrendingUp, label: `${teamFitMetrics.teamFitMultiplier.toFixed(2)}x synergy` }] : []),
+        ]}
+        actions={['team_dashboard', 'share_with_team', 'manager_summary']}
+        result={result}
+        template={template}
+      />
 
-        {/* Multiplier banner (score boost/penalty explanation) */}
-        {teamFitMetrics && teamFitMetrics.teamFitMultiplier !== 1.0 && (
-          <TeamFitMultiplierBanner
-            teamFitMultiplier={teamFitMetrics.teamFitMultiplier}
-            diversityRatio={teamFitMetrics.diversityRatio}
-            saturationRatio={teamFitMetrics.saturationRatio}
-          />
-        )}
+      <ResultTabs
+        tabs={[
+          { id: 'overview', label: 'Overview', icon: BarChart3 },
+          { id: 'saturation', label: 'Saturation', icon: Users },
+          { id: 'comparison', label: 'Comparison', icon: UserCheck },
+          { id: 'competencies', label: 'Competencies', icon: Target },
+          { id: 'onboarding', label: 'Onboarding', icon: Lightbulb },
+        ]}
+        accentColor="blue"
+      />
 
-        {/* Extended metrics overview panel */}
-        {teamFitMetrics && (
-          <TeamFitMetricsPanel extendedMetrics={teamFitMetrics} />
-        )}
+      <InsightsBar
+        insights={[
+          ...(teamFitMetrics?.gapCount ? [{
+            id: 'gaps',
+            icon: CheckCircle2,
+            text: `Fills ${teamFitMetrics.gapCount} team gaps`,
+            variant: 'success' as const,
+          }] : []),
+          ...(teamFitMetrics?.saturationCount ? [{
+            id: 'redundant',
+            icon: AlertTriangle,
+            text: `${teamFitMetrics.saturationCount} saturated overlap${teamFitMetrics.saturationCount > 1 ? 's' : ''}`,
+            variant: 'warning' as const,
+          }] : []),
+          ...(teamFitMetrics?.diversityRatio !== undefined ? [{
+            id: 'diversity',
+            icon: Users,
+            text: `Diversity ratio: ${teamFitMetrics.diversityRatio.toFixed(2)}`,
+            variant: 'info' as const,
+          }] : []),
+        ]}
+      />
 
-        {/* Main content grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 animate-fadeInUp-2">
-          {/* Team Saturation Radar */}
-          <Card className="h-full">
-            <CardHeader className="pb-2 sm:pb-3 px-3 sm:px-6">
-              <CardTitle className="text-sm sm:text-lg font-semibold flex items-center gap-2">
-                <Users className="h-4 w-4 sm:h-5 sm:w-5 shrink-0" />
-                {t('title')}
-              </CardTitle>
-              <CardDescription className="text-[10px] sm:text-sm">
-                {t('subtitle')}
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="px-3 sm:px-6">
+      <div className="p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6">
+
+        {/* ------------------------------------------------------------------ */}
+        {/* Section: Overview                                                   */}
+        {/* ------------------------------------------------------------------ */}
+        <section id="section-overview" className="space-y-4">
+          {teamFitMetrics && (
+            <MetricCards
+              metrics={[
+                { label: 'Gaps Filled', value: teamFitMetrics.gapCount ?? 0, icon: CheckCircle2, variant: 'success' },
+                { label: 'Saturated', value: teamFitMetrics.saturationCount ?? 0, icon: AlertTriangle, variant: 'warning' },
+                { label: 'Diversity Ratio', value: teamFitMetrics.diversityRatio?.toFixed(2) ?? 'N/A', icon: Users, variant: 'info' },
+              ]}
+            />
+          )}
+          {teamFitMetrics && teamFitMetrics.teamFitMultiplier !== 1.0 && (
+            <TeamFitMultiplierBanner
+              teamFitMultiplier={teamFitMetrics.teamFitMultiplier}
+              diversityRatio={teamFitMetrics.diversityRatio}
+              saturationRatio={teamFitMetrics.saturationRatio}
+            />
+          )}
+          {teamFitMetrics && <TeamFitMetricsPanel extendedMetrics={teamFitMetrics} />}
+        </section>
+
+        {/* ------------------------------------------------------------------ */}
+        {/* Section: Saturation                                                 */}
+        {/* ------------------------------------------------------------------ */}
+        <section id="section-saturation">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+            {/* Team Saturation Radar */}
+            <DashboardPanel title="Team Saturation" icon={Users} iconVariant="info">
               {teamSaturationData.length >= 3 ? (
                 <ChartErrorBoundary>
                   <TeamSaturationRadar
@@ -154,145 +198,72 @@ export function TeamFitResultView({ result, template }: BaseResultViewProps) {
                   </p>
                 </div>
               )}
-            </CardContent>
-          </Card>
+            </DashboardPanel>
 
-          {/* Team Insights - Enhanced Visual Hierarchy */}
-          <Card className="h-full flex flex-col">
-            <CardHeader className="pb-3 sm:pb-4 px-4 sm:px-6">
-              <CardTitle className="text-base sm:text-lg font-semibold flex items-center gap-2.5">
-                <div className="p-1.5 sm:p-2 rounded-lg bg-blue-500/10">
-                  <Users className="h-4 w-4 sm:h-5 sm:w-5 text-blue-500" />
-                </div>
-                {t('insights')}
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="flex-1 space-y-4 sm:space-y-5 px-4 sm:px-6">
-              {/* Team context - Primary context */}
-              {teamId && (
-                <div className="p-3 sm:p-4 bg-blue-500/5 rounded-xl border border-blue-500/15">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-lg bg-blue-500/15 shrink-0">
-                      <Users className="h-4 w-4 sm:h-5 sm:w-5 text-blue-500" />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <span className="text-sm sm:text-base font-medium text-foreground">{t('teamAnalysis')}</span>
-                      <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
-                        Team: <code className="text-blue-600 dark:text-blue-400 font-mono">{teamId}</code>
-                      </p>
+            {/* Your Contribution */}
+            <DashboardPanel title="Your Contribution" icon={UserCheck} iconVariant="success">
+              <div className="space-y-4 sm:space-y-5">
+                {insights.complementary.length > 0 && (
+                  <div className="space-y-3">
+                    <h5 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                      What You Bring
+                    </h5>
+                    <div className="space-y-2 sm:space-y-2.5">
+                      {insights.complementary.map(c => (
+                        <div
+                          key={c.competencyId}
+                          className="flex items-center justify-between bg-blue-500/5 border border-blue-500/15 rounded-xl p-2.5 sm:p-3 gap-3 transition-colors hover:bg-blue-500/10"
+                        >
+                          <span className="text-xs sm:text-sm font-medium text-foreground">
+                            {c.competencyName}
+                          </span>
+                          <span className="text-sm sm:text-base font-bold text-blue-600 dark:text-blue-400 tabular-nums shrink-0">
+                            {Math.round(c.percentage)}%
+                          </span>
+                        </div>
+                      ))}
                     </div>
                   </div>
-                </div>
-              )}
+                )}
 
-              {/* Fit summary - Primary focal point */}
-              {isGoodFit ? (
-                <div className="p-3 sm:p-4 bg-linear-to-br from-blue-500/10 to-blue-500/5 rounded-xl border border-blue-500/20">
-                  <div className="flex items-start gap-3">
-                    <div className="p-2 rounded-lg bg-blue-500/15 shrink-0">
-                      <UserCheck className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600 dark:text-blue-400" />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <h4 className="font-semibold text-sm sm:text-base text-blue-800 dark:text-blue-300 mb-1">
-                        {t('strongFit')}
-                      </h4>
-                      <p className="text-xs sm:text-sm text-blue-700 dark:text-blue-400 leading-relaxed">
-                        {t('strongFitDescription')}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <div className="p-3 sm:p-4 bg-linear-to-br from-slate-500/10 to-slate-500/5 rounded-xl border border-slate-500/20">
-                  <div className="flex items-start gap-3">
-                    <div className="p-2 rounded-lg bg-slate-500/15 shrink-0">
-                      <AlertTriangle className="h-4 w-4 sm:h-5 sm:w-5 text-slate-600 dark:text-slate-400" />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <h4 className="font-semibold text-sm sm:text-base text-slate-800 dark:text-slate-300 mb-1">
-                        {t('alignmentNeeded')}
-                      </h4>
-                      <p className="text-xs sm:text-sm text-slate-700 dark:text-slate-400 leading-relaxed">
-                        {t('alignmentNeededDescription')}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Complementary skills - Secondary importance */}
-              {insights.complementary.length > 0 && (
-                <div className="space-y-3">
-                  <h5 className="text-xs sm:text-sm font-semibold text-foreground uppercase tracking-wider flex items-center gap-2">
-                    <span className="w-1 h-4 bg-blue-500/60 rounded-full" />
-                    {t('youBring')}
-                  </h5>
-                  <div className="space-y-2 sm:space-y-2.5">
-                    {insights.complementary.map(c => (
-                      <div
-                        key={c.competencyId}
-                        className="flex items-center justify-between p-2.5 sm:p-3 bg-blue-500/5 hover:bg-blue-500/10 rounded-xl border border-blue-500/15 gap-3 transition-colors"
-                      >
-                        <span className="text-xs sm:text-sm font-medium text-foreground">
-                          {c.competencyName}
-                        </span>
-                        <span className="text-sm sm:text-base font-bold text-blue-600 dark:text-blue-400 tabular-nums shrink-0">
-                          {Math.round(c.percentage)}%
-                        </span>
+                {insights.gapAreas.length > 0 && (
+                  <>
+                    {insights.complementary.length > 0 && (
+                      <div className="border-t border-border my-3" />
+                    )}
+                    <div className="space-y-3">
+                      <h5 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                        Growth Areas
+                      </h5>
+                      <div className="space-y-2 sm:space-y-2.5">
+                        {insights.gapAreas.map(c => (
+                          <div
+                            key={c.competencyId}
+                            className="flex items-center justify-between bg-muted/40 border border-border/50 rounded-xl p-2.5 sm:p-3 gap-3 transition-colors hover:bg-muted/60"
+                          >
+                            <span className="text-xs sm:text-sm font-medium text-muted-foreground">
+                              {c.competencyName}
+                            </span>
+                            <span className="text-sm sm:text-base font-bold text-muted-foreground tabular-nums shrink-0">
+                              {Math.round(c.percentage)}%
+                            </span>
+                          </div>
+                        ))}
                       </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Development areas - Tertiary */}
-              {insights.gapAreas.length > 0 && (
-                <div className="space-y-3">
-                  <h5 className="text-xs sm:text-sm font-semibold text-foreground uppercase tracking-wider flex items-center gap-2">
-                    <span className="w-1 h-4 bg-slate-400/60 rounded-full" />
-                    {t('growthAreas')}
-                  </h5>
-                  <div className="space-y-2 sm:space-y-2.5">
-                    {insights.gapAreas.map(c => (
-                      <div
-                        key={c.competencyId}
-                        className="flex items-center justify-between p-2.5 sm:p-3 bg-muted/40 hover:bg-muted/60 rounded-xl border border-border/50 gap-3 transition-colors"
-                      >
-                        <span className="text-xs sm:text-sm font-medium text-muted-foreground">
-                          {c.competencyName}
-                        </span>
-                        <span className="text-sm sm:text-base font-bold text-muted-foreground tabular-nums shrink-0">
-                          {Math.round(c.percentage)}%
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Collaboration note - Footer */}
-              <div className="pt-3 sm:pt-4 border-t border-border/50 mt-auto">
-                <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed text-center">
-                  {t('collaborationNote')}
-                </p>
+                    </div>
+                  </>
+                )}
               </div>
-            </CardContent>
-          </Card>
-        </div>
+            </DashboardPanel>
+          </div>
+        </section>
 
-        {/* Personality Fit Section (if Big Five data available) */}
-        {hasBigFiveData && (
-          <Card className="animate-fadeInUp-3">
-            <CardHeader className="pb-2 sm:pb-3 px-3 sm:px-6">
-              <CardTitle className="text-sm sm:text-lg font-semibold flex items-center gap-2">
-                <Target className="h-4 w-4 sm:h-5 sm:w-5 shrink-0" />
-                <span className="truncate">{t('personality')}</span>
-              </CardTitle>
-              <CardDescription className="text-[10px] sm:text-sm">
-                {t('personalityDescription')}
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="px-2 sm:px-6">
+        {/* ------------------------------------------------------------------ */}
+        {/* Section: Comparison — Personality + Indicator Heatmap              */}
+        {/* ------------------------------------------------------------------ */}
+        <section id="section-comparison" className="space-y-4 sm:space-y-6">
+          {hasBigFiveData && (
+            <DashboardPanel title="Personality Fit" icon={Target} iconVariant="info">
               <ChartErrorBoundary>
                 <div className="grid grid-cols-5 gap-1 sm:gap-4">
                   {bigFiveData.map(({ trait, value }) => (
@@ -340,53 +311,41 @@ export function TeamFitResultView({ result, template }: BaseResultViewProps) {
                   ))}
                 </div>
               </ChartErrorBoundary>
-            </CardContent>
-          </Card>
-        )}
+            </DashboardPanel>
+          )}
 
-        {/* Indicator Heatmap - per-indicator score breakdown */}
-        {competencyScores.some(c => c.indicatorScores && c.indicatorScores.length > 0) && (
-          <Card className="animate-fadeInUp-3">
-            <CardHeader className="pb-2 sm:pb-3 px-3 sm:px-6">
-              <CardTitle className="text-sm sm:text-lg font-semibold flex items-center gap-2">
-                <BarChart3 className="h-4 w-4 sm:h-5 sm:w-5 shrink-0" />
-                {t('heatmap.title')}
-              </CardTitle>
-              <CardDescription className="text-[10px] sm:text-sm">
-                {t('heatmap.description')}
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="px-2 sm:px-6">
+          {competencyScores.some(c => c.indicatorScores && c.indicatorScores.length > 0) && (
+            <DashboardPanel title="Indicator Breakdown" icon={BarChart3}>
               <ChartErrorBoundary>
                 <IndicatorHeatmap competencies={competencyScores} />
               </ChartErrorBoundary>
-            </CardContent>
-          </Card>
-        )}
+            </DashboardPanel>
+          )}
+        </section>
 
-        {/* Detailed competency breakdown - Mobile-First */}
-        <CompetencyProfile
-          competencies={competencyScores}
-          resultId={result.id}
-          showPassFail={true}
-          passingScore={passingScore}
-        />
+        {/* ------------------------------------------------------------------ */}
+        {/* Section: Competencies                                               */}
+        {/* ------------------------------------------------------------------ */}
+        <section id="section-competencies">
+          <CompetencyProfile
+            competencies={competencyScores}
+            resultId={result.id}
+            showPassFail={true}
+            passingScore={passingScore}
+          />
+        </section>
 
-        {/* Onboarding Recommendations */}
-        <OnboardingRecommendations
-          competencyScores={competencyScores}
-          bigFiveProfile={bigFiveProfile}
-          teamMetrics={teamFitMetrics}
-        />
+        {/* ------------------------------------------------------------------ */}
+        {/* Section: Onboarding                                                 */}
+        {/* ------------------------------------------------------------------ */}
+        <section id="section-onboarding">
+          <OnboardingRecommendations
+            competencyScores={competencyScores}
+            bigFiveProfile={bigFiveProfile}
+            teamMetrics={teamFitMetrics}
+          />
+        </section>
 
-        {/* Action buttons */}
-        <ActionButtonsBar
-          templateId={result.templateId}
-          resultId={result.id}
-          actions={['team_dashboard', 'retake', 'share_with_team', 'manager_summary']}
-          result={result}
-          template={template}
-        />
       </div>
     </div>
   );
