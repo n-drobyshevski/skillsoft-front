@@ -15,13 +15,13 @@ import {
   BookOpen,
   Pencil,
   Eye,
-  Sparkles,
   MoreVertical,
   Settings,
   ChevronRight,
   Trash2,
   Loader2,
 } from "lucide-react";
+import { Separator } from "@/components/ui/separator";
 import StartTestSessionButton from "./StartTestSessionButton";
 import MobileTemplateActions from "./MobileTemplateActions";
 import {
@@ -76,13 +76,11 @@ function formatDuration(minutes: number, compact = false, t?: ReturnType<typeof 
 function MobileTemplateCard({
   template,
   canEdit,
-  isRecommended,
   goalConfig,
   onMenuOpen,
 }: {
   template: TestTemplateSummary;
   canEdit: boolean;
-  isRecommended: boolean;
   goalConfig: ReturnType<typeof getGoalConfig>;
   onMenuOpen: () => void;
 }) {
@@ -134,9 +132,6 @@ function MobileTemplateCard({
               v{template.version}
             </Badge>
           )}
-          {isRecommended && (
-            <Sparkles className="size-3.5 text-amber-500 shrink-0" aria-label={t('recommended')} />
-          )}
         </div>
 
         {/* Inline Stats Row */}
@@ -185,12 +180,10 @@ function MobileTemplateCard({
 function DesktopTemplateCard({
   template,
   canEdit,
-  isRecommended,
   goalConfig,
 }: {
   template: TestTemplateSummary;
   canEdit: boolean;
-  isRecommended: boolean;
   goalConfig: ReturnType<typeof getGoalConfig>;
 }) {
   const router = useRouter();
@@ -239,46 +232,26 @@ function DesktopTemplateCard({
             {/* Goal Badge */}
             <GoalBadge goal={template.goal || AssessmentGoal.OVERVIEW} />
 
-            {/* Version Badge */}
-            {template.version != null && (
+            {/* DRAFT Status Badge or Version Badge */}
+            {template.status === 'DRAFT' ? (
+              <Badge className="bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300 text-xs font-medium px-2 py-0.5">
+                {t('draft')}
+              </Badge>
+            ) : template.version != null ? (
               <Badge variant="outline" className="text-xs font-medium px-2 py-0.5 text-muted-foreground">
                 v{template.version}
               </Badge>
-            )}
-
-            {/* Recommended Badge */}
-            {isRecommended && (
-              <Badge className="bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300 text-xs font-medium px-2 py-0.5">
-                <Sparkles className="h-3 w-3 mr-1 shrink-0" aria-hidden="true" />
-                {t('recommended')}
-              </Badge>
-            )}
+            ) : null}
           </div>
 
-          {/* Action Buttons */}
-          <div className="flex items-center gap-1 -mr-1 -mt-1">
-            {/* Edit Button - Icon only */}
-            {canEdit && (
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-7 w-7 opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity"
-                aria-label={tCommon('edit')}
-                asChild
-              >
-                <Link href={`/test-templates/${template.id}/builder`}>
-                  <Pencil className="h-4 w-4 shrink-0" aria-hidden="true" />
-                </Link>
-              </Button>
-            )}
-
-            {/* Menu Button */}
+          {/* Overflow Menu — always visible */}
+          <div className="flex items-center -mr-1 -mt-1">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-7 w-7 opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity"
+                  className="h-7 w-7"
                   aria-label={t('actions')}
                 >
                   <MoreVertical className="h-4 w-4 shrink-0" aria-hidden="true" />
@@ -299,12 +272,6 @@ function DesktopTemplateCard({
                       <Link href={`/test-templates/${template.id}/settings`} className="cursor-pointer">
                         <Settings className="mr-2 h-4 w-4" />
                         {t('settings')}
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link href={`/test-templates/${template.id}/builder`} className="cursor-pointer">
-                        <Pencil className="mr-2 h-4 w-4" />
-                        {tCommon('edit')}
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
@@ -343,13 +310,39 @@ function DesktopTemplateCard({
         <TemplateStats template={template} variant="pills" />
       </CardContent>
 
-      <CardFooter className="p-4 pt-2 mt-auto">
-        <StartTestSessionButton
-          templateId={template.id}
-          templateName={template.name}
-          fullWidth
-          variant="hero"
-        />
+      <Separator className="mx-4 w-auto" />
+
+      <CardFooter className="p-4 pt-3 mt-auto">
+        {canEdit ? (
+          <div className="flex gap-2 w-full">
+            <Button
+              variant="outline"
+              className="flex-1 min-w-0 gap-1.5 touch-manipulation active:scale-[0.98] transition-all motion-reduce:transition-none"
+              asChild
+            >
+              <Link href={`/test-templates/${template.id}/builder`}>
+                <Pencil className="h-4 w-4 shrink-0" aria-hidden="true" />
+                {tCommon('edit')}
+              </Link>
+            </Button>
+            <div className="flex-1 min-w-0">
+              <StartTestSessionButton
+                templateId={template.id}
+                templateName={template.name}
+                fullWidth
+                variant="default"
+                size="default"
+              />
+            </div>
+          </div>
+        ) : (
+          <StartTestSessionButton
+            templateId={template.id}
+            templateName={template.name}
+            fullWidth
+            variant="hero"
+          />
+        )}
       </CardFooter>
     </Card>
 
@@ -426,7 +419,6 @@ export default function TestTemplateCard({
         <MobileTemplateCard
           template={template}
           canEdit={canEdit}
-          isRecommended={isRecommended}
           goalConfig={goalConfig}
           onMenuOpen={() => setMobileActionsOpen(true)}
         />
@@ -445,7 +437,6 @@ export default function TestTemplateCard({
     <DesktopTemplateCard
       template={template}
       canEdit={canEdit}
-      isRecommended={isRecommended}
       goalConfig={goalConfig}
     />
   );

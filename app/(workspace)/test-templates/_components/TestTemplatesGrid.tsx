@@ -31,9 +31,6 @@ export default function TestTemplatesGrid({
 
   const t = useTranslations('template');
 
-  // Mark the first active template as recommended
-  const recommendedTemplateId = templates.length > 0 ? templates[0]?.id : null;
-
   // Handle filtered templates change from filter component
   const handleFilteredTemplatesChange = useCallback((filtered: TestTemplateSummary[]) => {
     setFilteredTemplates(filtered);
@@ -175,7 +172,6 @@ export default function TestTemplatesGrid({
               <TestTemplateCard
                 template={template}
                 canEdit={canEdit}
-                isRecommended={template.id === recommendedTemplateId}
               />
             </div>
           ))}
