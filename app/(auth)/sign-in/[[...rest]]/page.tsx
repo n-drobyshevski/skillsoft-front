@@ -10,14 +10,25 @@ export const metadata: Metadata = {
 
 function SignInSkeleton() {
   return (
-    <div className="w-full max-w-md mx-auto animate-pulse">
-      <div className="bg-background border border-border rounded-lg shadow-sm p-6 space-y-4">
-        <div className="h-6 bg-muted rounded w-1/3"></div>
-        <div className="h-4 bg-muted rounded w-2/3"></div>
-        <div className="space-y-3 mt-6">
-          <div className="h-10 bg-muted rounded"></div>
-          <div className="h-10 bg-muted rounded"></div>
-          <div className="h-10 bg-muted rounded"></div>
+    <div className="w-full max-w-md space-y-6 animate-pulse">
+      <div className="text-center space-y-4">
+        <div className="flex justify-center">
+          <div className="h-12 w-12 rounded-lg bg-muted" />
+        </div>
+        <div className="space-y-2">
+          <div className="h-7 bg-muted rounded w-40 mx-auto" />
+          <div className="h-4 bg-muted rounded w-64 mx-auto" />
+        </div>
+      </div>
+      <div className="border border-border rounded-lg shadow-none">
+        <div className="px-4 sm:px-6 py-6 space-y-4">
+          <div className="h-11 bg-muted rounded-md" />
+          <div className="h-px bg-border" />
+          <div className="space-y-2">
+            <div className="h-4 bg-muted rounded w-32" />
+            <div className="h-9 bg-muted rounded-md" />
+          </div>
+          <div className="h-11 bg-muted rounded-md" />
         </div>
       </div>
     </div>
