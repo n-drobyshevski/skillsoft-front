@@ -14,14 +14,14 @@ import {
 } from "@/components/ui/breadcrumb";
 import { usePathname } from "next/navigation";
 import { useBreadcrumbContext } from "@/context/BreadcrumbContext";
-import { SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
+import { SignedOut } from "@clerk/nextjs";
 import { CompactAuthModals, FullAuthModals } from "@/components/auth/auth-modals";
 import { ClientOnly } from "@/components/common/ClientOnly";
 import { motion } from "motion/react";
 import { cn } from "@/lib/utils";
 import { useScrollDirection } from "@/hooks/use-scroll-direction";
 import { timing } from "@/lib/animation-config";
-import { LanguageSwitcher, LanguageToggle } from "@/components/language-switcher";
+import { LanguageToggle } from "@/components/language-switcher";
 
 interface SiteHeaderProps {
   title?: string;
@@ -140,7 +140,7 @@ export function SiteHeader({ title = "Dashboard", breadcrumbs }: SiteHeaderProps
         // Collapsed sidebar state
         "group-has-data-[collapsible=icon]/sidebar-wrapper:h-10 @md/header:group-has-data-[collapsible=icon]/sidebar-wrapper:h-12",
         // Safe area support
-        "header-mobile-safe",
+        "overflow-hidden",
         // GPU acceleration for scroll-based transforms
         "will-change-transform md:will-change-auto"
       )}
@@ -167,23 +167,6 @@ export function SiteHeader({ title = "Dashboard", breadcrumbs }: SiteHeaderProps
               <SignedOut>
                 <CompactAuthModals />
               </SignedOut>
-
-              <SignedIn>
-                {/* Mobile User Menu with Clerk - 36px avatar */}
-                <UserButton
-                  appearance={{
-                    elements: {
-                      avatarBox: "h-8 w-8",
-                      userButtonPopoverCard: "shadow-lg",
-                      userButtonPopoverActionButton:
-                        "hover:bg-accent touch-target",
-                    },
-                  }}
-                  showName={false}
-                  userProfileMode="modal"
-                  afterSignOutUrl="/"
-                />
-              </SignedIn>
             </ClientOnly>
           </div>
         </div>
@@ -237,7 +220,7 @@ export function SiteHeader({ title = "Dashboard", breadcrumbs }: SiteHeaderProps
           <div className="ml-auto flex items-center gap-1 @lg/header:gap-2">
             {/* Language Switcher */}
             <ClientOnly>
-              <LanguageSwitcher />
+              <LanguageToggle />
             </ClientOnly>
 
             {/* Theme Toggle */}
@@ -252,22 +235,6 @@ export function SiteHeader({ title = "Dashboard", breadcrumbs }: SiteHeaderProps
               <SignedOut>
                 <FullAuthModals />
               </SignedOut>
-
-              <SignedIn>
-                {/* Desktop User Menu with Clerk */}
-                <UserButton
-                  appearance={{
-                    elements: {
-                      avatarBox: "h-8 w-8",
-                      userButtonPopoverCard: "shadow-lg",
-                      userButtonPopoverActionButton: "hover:bg-accent",
-                    },
-                  }}
-                  showName={false}
-                  userProfileMode="modal"
-                  afterSignOutUrl="/"
-                />
-              </SignedIn>
             </ClientOnly>
           </div>
         </div>
