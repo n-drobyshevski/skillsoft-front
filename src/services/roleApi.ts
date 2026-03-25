@@ -14,9 +14,11 @@
 'use server';
 
 import { connection } from 'next/server';
+import { cookies } from 'next/headers';
 import { auth } from '@clerk/nextjs/server';
 import { UserRole } from '@/types/user';
 import { signAuthHeaders } from '@/lib/hmac';
+import { LENS_COOKIE_NAME, LENS_TO_ROLE, type LensType } from '@/store/lens-store';
 
 /**
  * Get the role from Clerk organization role string.
@@ -33,6 +35,31 @@ function mapOrgRole(orgRole: string | undefined): UserRole | null {
       return UserRole.USER;
     default:
       return null;
+  }
+}
+
+/** Role hierarchy levels for downgrade validation */
+const ROLE_LEVEL: Record<UserRole, number> = {
+  [UserRole.USER]: 0,
+  [UserRole.EDITOR]: 1,
+  [UserRole.ADMIN]: 2,
+};
+
+/**
+ * Read the active lens from the cookie and resolve the effective role.
+ * Can only downgrade (never escalate) relative to the real Clerk role.
+ */
+async function getEffectiveRole(realRole: UserRole): Promise<UserRole> {
+  try {
+    const cookieStore = await cookies();
+    const lensCookie = cookieStore.get(LENS_COOKIE_NAME)?.value as LensType | undefined;
+    if (!lensCookie || !(lensCookie in LENS_TO_ROLE)) return realRole;
+    const lensRole = LENS_TO_ROLE[lensCookie];
+    // Only allow downgrade, never escalation
+    return ROLE_LEVEL[lensRole] <= ROLE_LEVEL[realRole] ? lensRole : realRole;
+  } catch {
+    // cookies() may fail during prerendering — fall back to real role
+    return realRole;
   }
 }
 
@@ -71,21 +98,26 @@ export async function getAuthHeaders(): Promise<Record<string, string>> {
     const mappedRole = mapOrgRole(orgRole as string | undefined);
     const userRole: UserRole = mappedRole ?? metadataRole ?? UserRole.USER;
 
+    // Resolve effective role from lens cookie (can only downgrade)
+    const effectiveRole = await getEffectiveRole(userRole);
+
     // Debug logging (only in development)
     if (process.env.NODE_ENV === 'development') {
       console.log('[Auth] Headers generated:', {
         userId: userId.substring(0, 8) + '...',
         role: userRole,
+        effectiveRole,
         source: mappedRole ? 'orgRole' : metadataRole ? 'metadata' : 'default'
       });
     }
 
     // Generate HMAC signature headers (no-op if HMAC_SHARED_SECRET is not set)
-    const hmacHeaders = signAuthHeaders(userId, userRole);
+    const hmacHeaders = signAuthHeaders(userId, userRole, effectiveRole);
 
     return {
       'X-User-Id': userId,
       'X-User-Role': userRole,
+      'X-Effective-Role': effectiveRole,
       ...hmacHeaders,
     };
   } catch (error) {
@@ -114,15 +146,17 @@ export async function getCurrentUserRole(): Promise<UserRole> {
     await connection();
     const authResult = await auth();
     const { userId, sessionClaims, orgRole } = authResult;
-    
+
     if (!userId) {
       return UserRole.USER;
     }
-    
+
     const metadataRole = sessionClaims?.metadata?.role as UserRole | undefined;
     const mappedRole = mapOrgRole(orgRole as string | undefined);
-    
-    return mappedRole ?? metadataRole ?? UserRole.USER;
+    const realRole = mappedRole ?? metadataRole ?? UserRole.USER;
+
+    // Return effective (lens-downgraded) role
+    return getEffectiveRole(realRole);
   } catch (error) {
     // Re-throw Next.js internal errors (PPR bailout, prerender signals, redirects)
     if (typeof error === 'object' && error !== null && 'digest' in error) {
@@ -186,11 +220,14 @@ export async function getSignedAuthHeaders(
     return {};
   }
 
-  const hmacHeaders = signAuthHeaders(userId, userRole);
+  // Resolve effective role from lens cookie
+  const effectiveRole = await getEffectiveRole(userRole as UserRole);
+  const hmacHeaders = signAuthHeaders(userId, userRole, effectiveRole);
 
   return {
     'X-User-Id': userId,
     'X-User-Role': userRole,
+    'X-Effective-Role': effectiveRole,
     ...hmacHeaders,
   };
 }

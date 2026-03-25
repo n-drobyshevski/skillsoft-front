@@ -25,9 +25,11 @@
 
 import { cache } from 'react';
 import { connection } from 'next/server';
+import { cookies } from 'next/headers';
 import { auth, currentUser } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
 import { UserRole } from '@/types/user';
+import { LENS_COOKIE_NAME, LENS_TO_ROLE, type LensType } from '@/store/lens-store';
 
 // ============================================================================
 // Types
@@ -35,7 +37,10 @@ import { UserRole } from '@/types/user';
 
 export interface VerifiedSession {
   userId: string;
+  /** Effective role (lens-downgraded). Use this for permission checks. */
   role: UserRole;
+  /** Actual Clerk role before lens downgrade. Use for audit/display only. */
+  actualRole: UserRole;
   email: string | null;
   firstName: string | null;
   lastName: string | null;
@@ -61,6 +66,29 @@ function mapOrgRoleToUserRole(orgRole: string | undefined): UserRole | null {
       return UserRole.USER;
     default:
       return null;
+  }
+}
+
+/** Role hierarchy levels for downgrade validation */
+const ROLE_LEVEL: Record<UserRole, number> = {
+  [UserRole.USER]: 0,
+  [UserRole.EDITOR]: 1,
+  [UserRole.ADMIN]: 2,
+};
+
+/**
+ * Read the active lens cookie and resolve the effective role.
+ * Can only downgrade relative to the real Clerk role.
+ */
+async function resolveEffectiveRole(realRole: UserRole): Promise<UserRole> {
+  try {
+    const cookieStore = await cookies();
+    const lensCookie = cookieStore.get(LENS_COOKIE_NAME)?.value as LensType | undefined;
+    if (!lensCookie || !(lensCookie in LENS_TO_ROLE)) return realRole;
+    const lensRole = LENS_TO_ROLE[lensCookie];
+    return ROLE_LEVEL[lensRole] <= ROLE_LEVEL[realRole] ? lensRole : realRole;
+  } catch {
+    return realRole;
   }
 }
 
@@ -93,14 +121,18 @@ export const verifySession = cache(async (): Promise<VerifiedSession | null> => 
     // Get role from org membership or metadata
     const mappedRole = mapOrgRoleToUserRole(orgRole as string | undefined);
     const metadataRole = sessionClaims?.metadata?.role as UserRole | undefined;
-    const role: UserRole = mappedRole ?? metadataRole ?? UserRole.USER;
-    
+    const actualRole: UserRole = mappedRole ?? metadataRole ?? UserRole.USER;
+
+    // Resolve effective role from lens cookie (can only downgrade)
+    const role = await resolveEffectiveRole(actualRole);
+
     // Get user details (also cached by Clerk)
     const user = await currentUser();
-    
+
     return {
       userId,
       role,
+      actualRole,
       email: user?.emailAddresses?.[0]?.emailAddress ?? null,
       firstName: user?.firstName ?? null,
       lastName: user?.lastName ?? null,

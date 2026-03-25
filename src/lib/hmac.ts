@@ -27,14 +27,20 @@ export interface HmacAuthHeaders {
 /**
  * Generate HMAC-SHA256 signature headers for backend authentication.
  *
- * @param userId   - The Clerk user ID (X-User-Id header value)
- * @param userRole - The user role string (X-User-Role header value)
+ * Supports two message formats:
+ * - With effective role: "userId:userRole:effectiveRole:timestamp"
+ * - Without effective role: "userId:userRole:timestamp" (backward compat)
+ *
+ * @param userId        - The Clerk user ID (X-User-Id header value)
+ * @param userRole      - The user's actual role string (X-User-Role header value)
+ * @param effectiveRole - The lens-downgraded role (X-Effective-Role), omit if same as userRole
  * @returns An object with X-Auth-Timestamp and X-Auth-Signature headers,
  *          or an empty object if HMAC_SHARED_SECRET is not configured.
  */
 export function signAuthHeaders(
   userId: string,
-  userRole: string
+  userRole: string,
+  effectiveRole?: string
 ): HmacAuthHeaders | Record<string, never> {
   const secret = process.env.HMAC_SHARED_SECRET;
 
@@ -44,7 +50,9 @@ export function signAuthHeaders(
   }
 
   const timestamp = Math.floor(Date.now() / 1000).toString();
-  const message = `${userId}:${userRole}:${timestamp}`;
+  const message = effectiveRole && effectiveRole !== userRole
+    ? `${userId}:${userRole}:${effectiveRole}:${timestamp}`
+    : `${userId}:${userRole}:${timestamp}`;
 
   const signature = createHmac('sha256', secret)
     .update(message, 'utf8')

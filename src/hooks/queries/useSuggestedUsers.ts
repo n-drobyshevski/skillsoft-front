@@ -15,6 +15,7 @@ import { useState, useEffect, useMemo, useRef } from 'react';
 import { useAuth } from '@clerk/nextjs';
 import type { User } from '@/types/user';
 import { UserRole } from '@/types/user';
+import { getSignedAuthHeaders } from '@/services/roleApi';
 
 const SUGGESTED_USERS_LIMIT = 3;
 
@@ -81,20 +82,11 @@ export function useSuggestedUsers(
   // Track if already fetched to avoid re-fetching on every render
   const hasFetched = useRef(false);
 
-  // Build auth headers for client-side API calls
-  const authHeaders = useMemo(() => {
-    if (!userId) return null;
-
-    const role = mapOrgRoleToUserRole(orgRole);
-    return {
-      'X-User-Id': userId,
-      'X-User-Role': role,
-    };
-  }, [userId, orgRole]);
-
   // Fetch users once when authenticated
   useEffect(() => {
-    if (!isSignedIn || !authHeaders || hasFetched.current) return;
+    if (!isSignedIn || !userId || hasFetched.current) return;
+
+    const role = mapOrgRoleToUserRole(orgRole);
 
     let cancelled = false;
     hasFetched.current = true;
@@ -102,6 +94,9 @@ export function useSuggestedUsers(
 
     (async () => {
       try {
+        // Use server action for HMAC-signed, lens-aware headers
+        const authHeaders = await getSignedAuthHeaders(userId, role);
+
         const response = await fetch(`${getApiBaseUrl()}/users`, {
           method: 'GET',
           headers: {
@@ -135,7 +130,7 @@ export function useSuggestedUsers(
     return () => {
       cancelled = true;
     };
-  }, [isSignedIn, authHeaders]);
+  }, [isSignedIn, userId, orgRole]);
 
   // Filter and limit users
   const suggestedUsers = useMemo(() => {

@@ -7,6 +7,30 @@ import { UserRole } from "@/types/user";
  */
 export type LensType = "user" | "editor" | "admin";
 
+/** Cookie name for server-side lens detection */
+export const LENS_COOKIE_NAME = "SKILLSOFT_ACTIVE_LENS";
+
+/** Maps lens type to the corresponding UserRole for permission enforcement */
+export const LENS_TO_ROLE: Record<LensType, UserRole> = {
+  user: UserRole.USER,
+  editor: UserRole.EDITOR,
+  admin: UserRole.ADMIN,
+};
+
+/** Sync active lens to a cookie so server components and API calls can read it */
+function syncLensCookie(lens: LensType) {
+  if (typeof document !== "undefined") {
+    document.cookie = `${LENS_COOKIE_NAME}=${lens}; path=/; max-age=31536000; SameSite=Lax`;
+  }
+}
+
+/** Clear the lens cookie (used on reset/sign-out) */
+function clearLensCookie() {
+  if (typeof document !== "undefined") {
+    document.cookie = `${LENS_COOKIE_NAME}=; path=/; max-age=0; SameSite=Lax`;
+  }
+}
+
 /**
  * Lens store state
  */
@@ -139,6 +163,7 @@ export const useLensStore = create<LensStore>()(
           // Only update if lens actually changed
           if (currentLens !== lens) {
             set({ activeLens: lens }, false, "setLens");
+            syncLensCookie(lens);
           }
         },
 
@@ -170,6 +195,7 @@ export const useLensStore = create<LensStore>()(
             false,
             "initializeFromClerk"
           );
+          syncLensCookie(targetLens);
         },
 
         reset: () => {
@@ -183,6 +209,7 @@ export const useLensStore = create<LensStore>()(
             false,
             "reset"
           );
+          clearLensCookie();
         },
 
         setHydrated: () => {
