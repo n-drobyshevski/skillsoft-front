@@ -78,7 +78,7 @@ async function getUserResultsCached(
 
   try {
     const response = await fetch(
-      `${getApiBaseUrl()}/tests/results/user/${clerkUserId}?page=0&size=100`,
+      `${getApiBaseUrl()}/tests/results/user/${clerkUserId}/detailed?page=0&size=100`,
       { headers: { 'Content-Type': 'application/json', ...authHeaders } },
     );
     if (!response.ok) return [];
