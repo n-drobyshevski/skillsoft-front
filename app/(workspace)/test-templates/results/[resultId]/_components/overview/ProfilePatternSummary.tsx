@@ -2,11 +2,11 @@
 
 import { useMemo } from 'react';
 import { useTranslations } from 'next-intl';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Star, AlertTriangle, Layers } from 'lucide-react';
 import type { OverviewExtendedMetrics } from '@/types/domain';
 import { isOverviewMetrics } from '@/types/domain';
+import { DashboardPanel } from '../shared/DashboardPanel';
 
 /**
  * Profile pattern category keys as emitted by the backend.
@@ -104,16 +104,8 @@ export function ProfilePatternSummary({ extendedMetrics }: ProfilePatternSummary
   }
 
   return (
-    <Card>
-      <CardHeader className="pb-2 sm:pb-3 px-4 sm:px-6">
-        <CardTitle className="text-base sm:text-lg font-semibold flex items-center gap-2.5">
-          <div className="p-1.5 sm:p-2 rounded-lg bg-primary/10">
-            <Layers className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
-          </div>
-          {t('profilePattern.title')}
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="px-4 sm:px-6 space-y-4">
+    <DashboardPanel title={t('profilePattern.title')} icon={Layers} tooltip={t('tooltips.profilePattern')}>
+      <div className="space-y-4">
         <p className="text-xs sm:text-sm text-muted-foreground">
           {t('profilePattern.description')}
         </p>
@@ -155,7 +147,7 @@ export function ProfilePatternSummary({ extendedMetrics }: ProfilePatternSummary
             </div>
           );
         })}
-      </CardContent>
-    </Card>
+      </div>
+    </DashboardPanel>
   );
 }

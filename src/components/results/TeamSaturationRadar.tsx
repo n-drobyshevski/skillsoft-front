@@ -161,6 +161,7 @@ export function TeamSaturationRadar({
   showLabels = true,
   onPointClick,
   className,
+  compact = false,
 }: TeamSaturationRadarProps) {
   const t = useTranslations('results.teamFit.radar');
   const isMobile = useIsMobile();
@@ -219,66 +220,68 @@ export function TeamSaturationRadar({
         />
       )}
 
-      {/* Gaps filled section */}
-      <GapFillList gapsFilledCompetencies={analysis.gapsFilledCompetencies} title={t('gapsYouFill')} />
+      {/* Analysis sections — hidden in compact mode */}
+      {!compact && (
+        <>
+          <GapFillList gapsFilledCompetencies={analysis.gapsFilledCompetencies} title={t('gapsYouFill')} />
 
-      {/* Quick stats */}
-      <div className={cn(
-        'grid gap-2 pt-3 border-t',
-        isMobile ? 'grid-cols-2' : 'grid-cols-3'
-      )}>
-        <div className="text-center p-2.5 bg-primary/5 rounded-lg">
-          <div className="text-[10px] uppercase tracking-wide text-muted-foreground mb-0.5">
-            {t('compatibility')}
-          </div>
-          <div className="text-base font-bold tabular-nums text-primary">
-            {analysis.compatibilityScore}%
-          </div>
-        </div>
-        <div className="text-center p-2.5 bg-emerald-500/10 rounded-lg">
-          <div className="text-[10px] uppercase tracking-wide text-muted-foreground mb-0.5">
-            {t('gapsFilled')}
-          </div>
-          <div className="text-base font-bold tabular-nums text-emerald-600 dark:text-emerald-400">
-            {analysis.gapsFilledCompetencies.length}
-          </div>
-        </div>
-        {!isMobile && (
-          <div className="text-center p-2.5 bg-muted/50 rounded-lg">
-            <div className="text-[10px] uppercase tracking-wide text-muted-foreground mb-0.5">
-              {t('strengths')}
+          <div className={cn(
+            'grid gap-2 pt-3 border-t',
+            isMobile ? 'grid-cols-2' : 'grid-cols-3'
+          )}>
+            <div className="text-center p-2.5 bg-primary/5 rounded-lg">
+              <div className="text-[10px] uppercase tracking-wide text-muted-foreground mb-0.5">
+                {t('compatibility')}
+              </div>
+              <div className="text-base font-bold tabular-nums text-primary">
+                {analysis.compatibilityScore}%
+              </div>
             </div>
-            <div className="text-base font-bold tabular-nums text-foreground">
-              {analysis.relativeStrengths.length}
+            <div className="text-center p-2.5 bg-emerald-500/10 rounded-lg">
+              <div className="text-[10px] uppercase tracking-wide text-muted-foreground mb-0.5">
+                {t('gapsFilled')}
+              </div>
+              <div className="text-base font-bold tabular-nums text-emerald-600 dark:text-emerald-400">
+                {analysis.gapsFilledCompetencies.length}
+              </div>
             </div>
+            {!isMobile && (
+              <div className="text-center p-2.5 bg-muted/50 rounded-lg">
+                <div className="text-[10px] uppercase tracking-wide text-muted-foreground mb-0.5">
+                  {t('strengths')}
+                </div>
+                <div className="text-base font-bold tabular-nums text-foreground">
+                  {analysis.relativeStrengths.length}
+                </div>
+              </div>
+            )}
           </div>
-        )}
-      </div>
 
-      {/* Development areas if any */}
-      {analysis.developmentAreas.length > 0 && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.6 }}
-          className="p-3 bg-muted/30 rounded-lg border border-border/50"
-        >
-          <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">
-            <Target className="w-3.5 h-3.5" />
-            {t('growthAreas')}
-          </div>
-          <div className="flex flex-wrap gap-1.5">
-            {analysis.developmentAreas.slice(0, 3).map((area) => (
-              <Badge
-                key={area}
-                variant="outline"
-                className="text-xs bg-background"
-              >
-                {area}
-              </Badge>
-            ))}
-          </div>
-        </motion.div>
+          {analysis.developmentAreas.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.6 }}
+              className="p-3 bg-muted/30 rounded-lg border border-border/50"
+            >
+              <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">
+                <Target className="w-3.5 h-3.5" />
+                {t('growthAreas')}
+              </div>
+              <div className="flex flex-wrap gap-1.5">
+                {analysis.developmentAreas.slice(0, 3).map((area) => (
+                  <Badge
+                    key={area}
+                    variant="outline"
+                    className="text-xs bg-background"
+                  >
+                    {area}
+                  </Badge>
+                ))}
+              </div>
+            </motion.div>
+          )}
+        </>
       )}
     </div>
   );

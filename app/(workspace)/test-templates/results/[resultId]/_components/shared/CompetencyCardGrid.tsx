@@ -89,7 +89,8 @@ interface CompetencyCardGridProps {
   competencies: CompetencyScore[];
   passingScore: number;
   onCardClick?: (competencyId: string) => void;
-  trendData?: number[];
+  /** Real historical scores per competency name — used for sparklines */
+  trendMap?: Record<string, number[]>;
 }
 
 // ============================================================================
@@ -100,6 +101,7 @@ export function CompetencyCardGrid({
   competencies,
   passingScore,
   onCardClick,
+  trendMap,
 }: CompetencyCardGridProps) {
   const cards = useMemo(() => {
     return competencies.map((c) => {
@@ -161,12 +163,29 @@ export function CompetencyCardGrid({
               </span>
             </div>
 
-            {/* SVG sparkline matching design preview */}
-            <MiniSparkline
-              data={[card.percentage * 0.7, card.percentage * 0.85, card.percentage]}
-              color={STATUS_HEX[card.status]}
-              height={24}
-            />
+            {/* SVG sparkline — real historical data when available, simulated fallback */}
+            {(() => {
+              const realPoints = trendMap?.[card.competencyName];
+              const sparkData = realPoints && realPoints.length >= 2
+                ? realPoints
+                : [card.percentage * 0.7, card.percentage * 0.85, card.percentage];
+              const hasRealTrend = realPoints && realPoints.length >= 2;
+              return (
+                <>
+                  <MiniSparkline data={sparkData} color={STATUS_HEX[card.status]} height={24} />
+                  {hasRealTrend && (
+                    <div className="flex items-center justify-between mt-0.5">
+                      <span className="text-[9px] text-muted-foreground tabular-nums">
+                        {realPoints[0]}% → {realPoints[realPoints.length - 1]}%
+                      </span>
+                      <span className={cn('text-[9px] font-medium tabular-nums', styles.text)}>
+                        {realPoints.length} attempts
+                      </span>
+                    </div>
+                  )}
+                </>
+              );
+            })()}
           </button>
         );
       })}

@@ -8,7 +8,7 @@
  * - COMPLETED: Use goal-specific view (Overview/JobFit/TeamFit)
  */
 
-import { TestResult, TestTemplate, CompetencyScore, ResultStatus } from '@/types/domain';
+import { TestResult, TestTemplate, CompetencyScore, ResultStatus, TrendDataPoint } from '@/types/domain';
 
 /**
  * Base props for all result view components.
@@ -24,6 +24,8 @@ import { TestResult, TestTemplate, CompetencyScore, ResultStatus } from '@/types
 export interface BaseResultViewProps {
   result: TestResult;
   template: TestTemplate;
+  /** Server-prefetched trend data — avoids client-side waterfall */
+  trendData?: TrendDataPoint[] | null;
 }
 
 /**
@@ -192,6 +194,8 @@ export interface DashboardPanelProps {
   subtitle?: string;
   icon?: React.ElementType;
   iconVariant?: 'default' | 'success' | 'warning' | 'info';
+  /** Help tooltip text shown next to the title */
+  tooltip?: string;
   children: React.ReactNode;
   className?: string;
   id?: string;
@@ -202,6 +206,10 @@ export interface MetricCardItem {
   value: number | string;
   icon: React.ElementType;
   variant: 'success' | 'warning' | 'info' | 'default';
+  /** Text below the value (default: "competencies") */
+  sublabel?: string;
   /** Optional mini sparkline bars to display within the card */
   sparklines?: Array<{ name: string; value: number }>;
+  /** Help tooltip text shown next to the label */
+  tooltip?: string;
 }

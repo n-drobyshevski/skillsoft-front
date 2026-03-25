@@ -2,7 +2,7 @@
 
 import { useMemo, useState, useCallback, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import {
   Accordion,
@@ -781,7 +781,7 @@ export function CompetencyProfile({
 
   if (competencies.length === 0) {
     return (
-      <Card className={className}>
+      <Card className={cn('rounded-xl shadow-sm hover:shadow-md hover:-translate-y-px transition-all duration-200', className)}>
         <CardContent className="p-6 text-center">
           <Target className="h-12 w-12 mx-auto text-muted-foreground/50 mb-3" />
           <p className="text-sm text-muted-foreground">{t('noCompetencyData')}</p>
@@ -791,13 +791,33 @@ export function CompetencyProfile({
   }
 
   return (
-    <Card className={cn('overflow-hidden', className)}>
-      <CardHeader className="pb-3 px-4 sm:px-6">
+    <Card className={cn('rounded-xl shadow-sm hover:shadow-md hover:-translate-y-px transition-all duration-200 overflow-hidden', className)}>
+      <CardHeader className="pb-2">
         <div className="flex items-center justify-between gap-2 flex-wrap">
-          <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
-            <BarChart3 className="h-4 w-4 sm:h-5 sm:w-5" />
-            {t('competencyProfile')}
-          </CardTitle>
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 bg-muted">
+              <BarChart3 className="w-4 h-4 text-muted-foreground" />
+            </div>
+            <div className="flex items-center gap-1.5">
+              <h3 className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                {t('competencyProfile')}
+              </h3>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    type="button"
+                    className="inline-flex items-center justify-center w-4 h-4 rounded-full text-muted-foreground/50 hover:text-muted-foreground transition-colors touch-manipulation"
+                    aria-label={`Help: ${t('competencyProfile')}`}
+                  >
+                    <HelpCircle className="w-3.5 h-3.5" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent side="top" className="max-w-[280px]">
+                  {t('tooltips.competencyProfile')}
+                </TooltipContent>
+              </Tooltip>
+            </div>
+          </div>
           {insufficientEvidenceCount > 0 && (
             <Badge
               variant="outline"
@@ -810,7 +830,7 @@ export function CompetencyProfile({
         </div>
       </CardHeader>
 
-      <CardContent className="px-4 sm:px-6 space-y-4">
+      <CardContent className="space-y-4">
         {/* Summary Stats */}
         <SummaryStats competencies={competencies} t={t} />
 

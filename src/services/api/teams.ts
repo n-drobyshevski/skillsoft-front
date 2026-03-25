@@ -36,7 +36,7 @@ export const teamsApi = {
       tags: [`team-profile-${teamId}`],
       revalidate: 60, // Cache for 1 minute
       authHeaders,
-      silentStatusCodes: [404], // Team profile may not exist for non-ACTIVE teams
+      silentStatusCodes: [403, 404], // 403: user lacks team access; 404: non-ACTIVE teams
     });
   },
 };

@@ -674,6 +674,9 @@
     "showLess": "Show less",
     "questionLoadError": "Failed to load question details",
     "retry": "Retry",
+    "tooltips": {
+      "competencyProfile": "Detailed view of all assessed competencies with proficiency levels and behavioral indicator breakdowns."
+    },
     "overview": {
       "profileOverview": "Profile Overview",
       "assessmentResults": "Assessment results",
@@ -694,6 +697,68 @@
       "coverage": "Coverage",
       "mapped": "{mapped}/{total} mapped",
       "developmentNote": "Regular reassessment helps track growth.",
+      "metrics": {
+        "assessed": "Assessed",
+        "competencies": "competencies",
+        "strengths": "Expert / Advanced",
+        "toDevelop": "To Develop"
+      },
+      "competencyRadar": "Competency Radar",
+      "tabs": {
+        "personality": "Personality",
+        "strengths": "Strengths",
+        "development": "Development",
+        "allCompetencies": "All Competencies",
+        "trend": "Trend"
+      },
+      "panels": {
+        "personalityCompetencies": "Personality & Competencies",
+        "signatureStrengths": "Strengths & Growth",
+        "areasToDevelop": "Areas to Develop",
+        "indicatorBreakdown": "Indicator Breakdown",
+        "growthTrajectory": "Growth Trajectory"
+      },
+      "innerTabs": {
+        "bigFive": "Big Five",
+        "breakdown": "Breakdown"
+      },
+      "insights": {
+        "topTraits": "Top traits: {traits}",
+        "expertAdvanced": "{count} Expert/Advanced competencies",
+        "confidence": "Confidence: {level} ({percentage}%)",
+        "confidenceHigh": "High",
+        "confidenceModerate": "Moderate"
+      },
+      "radar": {
+        "profile": "Profile",
+        "average": "Average",
+        "score": "Score",
+        "baseline": "Baseline"
+      },
+      "contributingCompetencies": "Contributing competencies",
+      "development": {
+        "suggestion": {
+          "developing": "Focus on building understanding through practice and targeted feedback.",
+          "foundational": "Start with core concepts and seek mentorship to accelerate growth."
+        },
+        "encouragement": "Development areas highlight opportunities for growth. Focus on one area at a time for the best results."
+      },
+      "tooltips": {
+        "assessed": "Total number of competencies evaluated in this assessment.",
+        "strengthCount": "Competencies at Expert or Advanced proficiency level.",
+        "developCount": "Competencies at Developing or Foundational level — your growth opportunities.",
+        "competencyRadar": "Visual overview of all competency scores. Each axis represents one competency.",
+        "bigFiveProfile": "The Big Five (OCEAN) personality model maps your competencies to five core dimensions: Openness, Conscientiousness, Extraversion, Agreeableness, and Emotional Stability.",
+        "traitBreakdown": "Each trait is scored 0–100% based on how your competency results map to Big Five dimensions via O*NET classifications.",
+        "competencyMapping": "Shows which competencies contribute to each Big Five trait. Higher coverage means more reliable personality projection.",
+        "signatureStrengths": "Your top-performing competencies and areas with room for growth. Switch tabs to see strengths or development focus areas.",
+        "areasToDevlop": "Competencies at Developing or Foundational level — focus areas for professional growth.",
+        "competencyProfile": "Detailed view of all assessed competencies with proficiency levels and behavioral indicator breakdowns.",
+        "indicatorBreakdown": "Heatmap showing per-indicator scores within each competency. Darker cells indicate higher performance.",
+        "growthTrajectory": "Your score trend across multiple assessment attempts. Requires at least 2 completed assessments.",
+        "personalityCompetencies": "Radar visualization of your personality traits and competency scores. Switch tabs to compare Big Five projections, competency coverage, or trait-level breakdowns.",
+        "profilePattern": "Your competencies grouped by proficiency tier — from Signature Strengths to Critical Gaps. Helps identify your overall profile shape at a glance."
+      },
       "betterThan": "Better than <bold>{percentage}%</bold> of participants",
       "consistencyGood": "Consistent responses",
       "consistencyWarning": "Possible response inconsistencies",
@@ -704,26 +769,31 @@
       "target": "Target",
       "traits": {
         "openness": {
+          "name": "Openness",
           "high": "You show strong creativity, curiosity, and openness to new experiences and ideas.",
           "medium": "You have a balanced approach to new experiences, combining creativity with practicality.",
           "low": "You prefer established routines and practical, concrete approaches to problems."
         },
         "conscientiousness": {
+          "name": "Conscientiousness",
           "high": "You demonstrate excellent organization, dependability, and goal-oriented behavior.",
           "medium": "You balance structure with flexibility, achieving goals while adapting to changes.",
           "low": "You prefer spontaneity and flexibility over rigid planning and structure."
         },
         "extraversion": {
+          "name": "Extraversion",
           "high": "You thrive in social settings, drawing energy from interactions with others.",
           "medium": "You comfortably navigate both social situations and solo activities.",
           "low": "You prefer thoughtful, one-on-one interactions and value your independent time."
         },
         "agreeableness": {
+          "name": "Agreeableness",
           "high": "You prioritize harmony, cooperation, and concern for others in your interactions.",
           "medium": "You balance empathy with assertiveness, adapting your approach as needed.",
           "low": "You value directness and objectivity, prioritizing results over social harmony."
         },
         "emotionalStability": {
+          "name": "Emotional Stability",
           "high": "You demonstrate excellent resilience, calmness, and stress management.",
           "medium": "You handle most situations calmly while acknowledging emotional responses.",
           "low": "You experience emotions deeply and may be more sensitive to stress."

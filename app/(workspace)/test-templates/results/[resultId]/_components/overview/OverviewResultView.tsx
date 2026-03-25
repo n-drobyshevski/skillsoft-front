@@ -3,38 +3,41 @@
 import { useMemo, useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import {
   Award,
   Brain,
   Target,
-  GitCompareArrows,
   AlertTriangle,
   CheckCircle2,
-  ShieldAlert,
+  ChevronDown,
   TrendingUp,
   Grid3X3,
   History,
   Lightbulb,
 } from 'lucide-react';
 import {
-  LazyBigFiveRadarSimple as BigFiveRadarSimple,
-  LazyCompetencyRadarChart as CompetencyRadarChart,
   LazyIndicatorHeatmap as IndicatorHeatmap,
 } from '@/components/data-display/charts/LazyChartsBundle';
+import { ComparisonRadarChart } from '../shared/ComparisonRadarChart';
+import type { RadarDataPoint } from '../shared/ComparisonRadarChart';
 import dynamic from 'next/dynamic';
-import { BigFiveMappingInsights } from '@/components/charts/BigFiveMappingInsights';
 import { ChartErrorBoundary } from '@/components/charts/ChartErrorBoundary';
 import { useBigFiveProjectionDetailed, getBigFiveLabels } from '@/hooks/useBigFiveProjection';
+import type { BigFiveContributions, CompetencyContribution } from '@/hooks/useBigFiveProjection';
+import { cn } from '@/lib/utils';
 import { getScoreInterpretation, getProficiencyLabel } from '@/lib/scoreInterpretation';
 import { testResultsApi } from '@/services/api/results';
 import type { TrendDataPoint } from '@/types/domain';
-import { ProfilePatternSummary } from './ProfilePatternSummary';
 import { CompetencyProfile } from '../shared/CompetencyProfile';
 import { BaseResultViewProps } from '../shared/types';
 import { HeroStrip } from '../shared/HeroStrip';
 import { ResultTabs } from '../shared/ResultTabs';
 import { InsightsBar } from '../shared/InsightsBar';
 import { DashboardPanel } from '../shared/DashboardPanel';
+import { MetricCards } from '../shared/MetricCards';
+import { useLensStore } from '@/store/lens-store';
+import { selectActiveLens } from '@/store/lens-selectors';
 
 const TrendOverview = dynamic(
   () => import('@/components/results/trends/TrendOverview').then(m => m.TrendOverview),
@@ -63,6 +66,31 @@ const TRAIT_COLORS: Record<string, { bar: string; text: string }> = {
   'Emotional Stability': { bar: 'bg-cyan-500', text: 'text-cyan-600 dark:text-cyan-400' },
 };
 
+// Map trait display labels to BigFiveContributions keys
+const TRAIT_CONTRIBUTION_KEYS: Record<string, keyof BigFiveContributions> = {
+  Openness: 'OPENNESS',
+  Conscientiousness: 'CONSCIENTIOUSNESS',
+  Extraversion: 'EXTRAVERSION',
+  Agreeableness: 'AGREEABLENESS',
+  'Emotional Stability': 'EMOTIONAL_STABILITY',
+};
+
+// Contribution type dot color (replicates BigFiveMappingInsights logic)
+function getContributionDotColor(type: string): string {
+  if (type === 'primary') return 'bg-primary';
+  if (type === 'secondary') return 'bg-muted-foreground/60';
+  return 'bg-muted-foreground/30';
+}
+
+// Subtle background tints per trait for card wrappers
+const TRAIT_BG_TINTS: Record<string, string> = {
+  Openness: 'bg-violet-50/40 dark:bg-violet-950/15',
+  Conscientiousness: 'bg-blue-50/40 dark:bg-blue-950/15',
+  Extraversion: 'bg-amber-50/40 dark:bg-amber-950/15',
+  Agreeableness: 'bg-emerald-50/40 dark:bg-emerald-950/15',
+  'Emotional Stability': 'bg-cyan-50/40 dark:bg-cyan-950/15',
+};
+
 // ============================================================================
 // Get personality trait description based on score, using translations.
 // ============================================================================
@@ -84,13 +112,16 @@ function getTraitDescription(
 // Tab definitions (stable reference — defined outside component)
 // ============================================================================
 
-const OVERVIEW_TABS = [
-  { id: 'personality', label: 'Personality', icon: Brain },
-  { id: 'strengths', label: 'Strengths', icon: Award },
-  { id: 'development', label: 'Development', icon: TrendingUp },
-  { id: 'competencies', label: 'All Competencies', icon: Grid3X3 },
-  { id: 'trend', label: 'Trend', icon: History },
-] as const;
+function getOverviewTabs(t: (key: string) => string, showTrend: boolean) {
+  const tabs = [
+    { id: 'personality', label: t('tabs.personality'), icon: Brain },
+    { id: 'strengths', label: t('tabs.strengths'), icon: Award },
+    { id: 'development', label: t('tabs.development'), icon: TrendingUp },
+    { id: 'competencies', label: t('tabs.allCompetencies'), icon: Grid3X3 },
+  ];
+  if (showTrend) tabs.push({ id: 'trend', label: t('tabs.trend'), icon: History });
+  return tabs;
+}
 
 // ============================================================================
 // OverviewResultView — Competency Passport (Scenario A)
@@ -105,10 +136,14 @@ const OVERVIEW_TABS = [
 // - Percentile ranking when available
 // ============================================================================
 
-export function OverviewResultView({ result, template }: BaseResultViewProps) {
+export function OverviewResultView({ result, template, trendData: prefetchedTrend }: BaseResultViewProps) {
   const t = useTranslations('template.resultsView.overview');
   const tResults = useTranslations('template.resultsView');
   const competencyScores = result.competencyScores ?? [];
+
+  // Lens-based visibility: hide trend panel for personal/user lens
+  const activeLens = useLensStore(selectActiveLens);
+  const isElevated = activeLens !== 'user';
 
   // Extended metrics extraction
   const extendedMetrics = result.extendedMetrics as
@@ -128,10 +163,14 @@ export function OverviewResultView({ result, template }: BaseResultViewProps) {
     ? extendedMetrics.consistencyFlags
     : undefined;
 
-  // Trend
-  const [trendData, setTrendData] = useState<TrendDataPoint[] | null>(null);
+  // Trend — use server-prefetched data, fall back to client fetch if not provided
+  const [trendData, setTrendData] = useState<TrendDataPoint[] | null>(prefetchedTrend ?? null);
+  const [expandedTrait, setExpandedTrait] = useState<string | null>(null);
 
   useEffect(() => {
+    // Skip client fetch if server already provided trend data
+    if (prefetchedTrend !== undefined) return;
+
     let cancelled = false;
 
     async function fetchTrend() {
@@ -144,21 +183,13 @@ export function OverviewResultView({ result, template }: BaseResultViewProps) {
           setTrendData(history);
         }
       } catch {
-        // Silently fail — trend is optional enhancement
-        if (!cancelled) {
-          setTrendData(null);
-        }
+        if (!cancelled) setTrendData(null);
       }
     }
 
-    if (result.clerkUserId && result.templateId) {
-      fetchTrend();
-    }
-
-    return () => {
-      cancelled = true;
-    };
-  }, [result.clerkUserId, result.templateId]);
+    if (result.clerkUserId && result.templateId) fetchTrend();
+    return () => { cancelled = true; };
+  }, [result.clerkUserId, result.templateId, prefetchedTrend]);
 
   // Big Five
   const { profile: bigFiveProfile, contributions, metadata } =
@@ -194,12 +225,21 @@ export function OverviewResultView({ result, template }: BaseResultViewProps) {
 
   const hasMappingData = metadata.mappedCompetencies > 0;
 
-  const competencyRadarData = useMemo(() => {
+  // Big Five as RadarDataPoint[] for ComparisonRadarChart
+  const bigFiveRadarData = useMemo<RadarDataPoint[]>(() => {
+    return Object.entries(bigFiveProfile).map(([key, value]) => ({
+      label: bigFiveLabels[key as keyof typeof bigFiveLabels],
+      primary: value,
+      secondary: 50,
+    }));
+  }, [bigFiveProfile, bigFiveLabels]);
+
+  // Competencies as RadarDataPoint[] for ComparisonRadarChart
+  const competencyRadarData = useMemo<RadarDataPoint[]>(() => {
     return competencyScores.map(score => ({
-      subject: score.competencyName,
-      A: Math.round(score.percentage),
-      fullMark: 100,
-      benchmark: 70,
+      label: score.competencyName,
+      primary: Math.round(score.percentage),
+      secondary: 50,
     }));
   }, [competencyScores]);
 
@@ -232,42 +272,26 @@ export function OverviewResultView({ result, template }: BaseResultViewProps) {
       .slice(0, 3);
   }, [categorizedCompetencies]);
 
+  // Sparkline data for MetricCards
+  const topSparklines = useMemo(() => {
+    return [...competencyScores]
+      .sort((a, b) => b.percentage - a.percentage)
+      .slice(0, 3)
+      .map(c => ({ name: c.competencyName, value: c.percentage }));
+  }, [competencyScores]);
+
+  const developSparklines = useMemo(() => {
+    return [...developingCompetencies]
+      .sort((a, b) => a.percentage - b.percentage)
+      .slice(0, 3)
+      .map(c => ({ name: c.competencyName, value: c.percentage }));
+  }, [developingCompetencies]);
+
   const hasIndicatorData = useMemo(() => {
     return competencyScores.some(
       c => c.indicatorScores && c.indicatorScores.length > 0
     );
   }, [competencyScores]);
-
-  // Proficiency chip shared renderer
-  function ProficiencyChips({
-    items,
-  }: {
-    items: typeof categorizedCompetencies;
-  }) {
-    if (items.length === 0) return null;
-    return (
-      <div className="flex flex-wrap gap-1.5 sm:gap-2">
-        {items.map(c => (
-          <span
-            key={c.competencyId}
-            className={`text-xs sm:text-sm px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full font-medium border ${c.interpretation.bgColor} ${c.interpretation.color} ${c.interpretation.borderColor}`}
-          >
-            {c.competencyName}
-            <Badge
-              variant="secondary"
-              className={`ml-1.5 text-[10px] px-1.5 py-0 ${c.interpretation.bgColor} ${c.interpretation.color}`}
-            >
-              {getProficiencyLabel(
-                c.interpretation.level,
-                (key: string) => tResults(key),
-                c.proficiencyLabel
-              )}
-            </Badge>
-          </span>
-        ))}
-      </div>
-    );
-  }
 
   return (
     <div className="w-full max-w-[1600px] mx-auto">
@@ -288,7 +312,7 @@ export function OverviewResultView({ result, template }: BaseResultViewProps) {
       />
 
       <ResultTabs
-        tabs={[...OVERVIEW_TABS]}
+        tabs={getOverviewTabs(t, isElevated)}
         accentColor="violet"
       />
 
@@ -299,7 +323,7 @@ export function OverviewResultView({ result, template }: BaseResultViewProps) {
                 {
                   id: 'traits',
                   icon: Brain,
-                  text: `Top traits: ${topTraits.map(tr => tr.label).join(' & ')}`,
+                  text: t('insights.topTraits', { traits: topTraits.map(tr => tr.label).join(' & ') }),
                   variant: 'info' as const,
                 },
               ]
@@ -309,7 +333,7 @@ export function OverviewResultView({ result, template }: BaseResultViewProps) {
                 {
                   id: 'expert',
                   icon: Award,
-                  text: `${topCompetencies.length} Expert/Advanced competencies`,
+                  text: t('insights.expertAdvanced', { count: topCompetencies.length }),
                   variant: 'success' as const,
                 },
               ]
@@ -319,7 +343,7 @@ export function OverviewResultView({ result, template }: BaseResultViewProps) {
                 {
                   id: 'consistency',
                   icon: CheckCircle2,
-                  text: `Confidence: ${consistencyScore >= 0.8 ? 'High' : 'Moderate'} (${Math.round(consistencyScore * 100)}%)`,
+                  text: t('insights.confidence', { level: consistencyScore >= 0.8 ? t('insights.confidenceHigh') : t('insights.confidenceModerate'), percentage: Math.round(consistencyScore * 100) }),
                   variant: 'info' as const,
                 },
               ]
@@ -330,148 +354,409 @@ export function OverviewResultView({ result, template }: BaseResultViewProps) {
       <div className="p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6">
 
         {/* ---------------------------------------------------------------- */}
+        {/* Section: Summary Metrics                                         */}
+        {/* ---------------------------------------------------------------- */}
+        <section>
+          <MetricCards
+            metrics={[
+              {
+                label: t('metrics.assessed'),
+                value: competencyScores.length,
+                icon: Grid3X3,
+                variant: 'info',
+                sublabel: t('metrics.competencies'),
+                sparklines: topSparklines,
+                tooltip: t('tooltips.assessed'),
+              },
+              {
+                label: t('metrics.strengths'),
+                value: topCompetencies.length,
+                icon: Award,
+                variant: 'success',
+                sparklines: topCompetencies.slice(0, 3).map(c => ({
+                  name: c.competencyName,
+                  value: c.percentage,
+                })),
+                tooltip: t('tooltips.strengthCount'),
+              },
+              {
+                label: t('metrics.toDevelop'),
+                value: developingCompetencies.length,
+                icon: TrendingUp,
+                variant: 'warning',
+                sparklines: developSparklines,
+                tooltip: t('tooltips.developCount'),
+              },
+            ]}
+          />
+        </section>
+
+        {/* ---------------------------------------------------------------- */}
         {/* Section: Personality                                             */}
         {/* ---------------------------------------------------------------- */}
         <section id="section-personality">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-            {/* Big Five Radar */}
-            <DashboardPanel title="Big Five Profile" icon={Brain} iconVariant="info">
-              {hasBigFiveData ? (
-                <ChartErrorBoundary>
-                  <BigFiveRadarSimple profile={bigFiveProfile} height={280} />
-                </ChartErrorBoundary>
-              ) : (
-                <div className="flex flex-col items-center justify-center min-h-[200px] text-center p-6">
-                  <div className="w-14 h-14 mb-4 rounded-full bg-muted/50 flex items-center justify-center">
-                    <Brain className="w-7 h-7 text-muted-foreground" />
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    {t('requiresOnetMappings')}
-                  </p>
-                </div>
-              )}
-            </DashboardPanel>
+          <DashboardPanel title={t('panels.personalityCompetencies')} icon={Brain} iconVariant="info" tooltip={t('tooltips.personalityCompetencies')}>
+            <Tabs defaultValue="bigfive" className="gap-3">
+              <TabsList className="w-full">
+                <TabsTrigger value="bigfive" className="min-h-[36px]">
+                  <Brain className="h-3.5 w-3.5" />
+                  {t('innerTabs.bigFive')}
+                </TabsTrigger>
+                {hasCompetencyData && (
+                  <TabsTrigger value="competency" className="min-h-[36px]">
+                    <Target className="h-3.5 w-3.5" />
+                    {t('competencyRadar')}
+                  </TabsTrigger>
+                )}
+                <TabsTrigger value="breakdown" className="min-h-[36px]">
+                  <ChevronDown className="h-3.5 w-3.5" />
+                  {t('innerTabs.breakdown')}
+                </TabsTrigger>
+              </TabsList>
 
-            {/* Trait Breakdown — all 5 traits sorted by score descending */}
-            <DashboardPanel title="Trait Breakdown" icon={Brain}>
-              {hasBigFiveData ? (
-                <div className="space-y-4">
-                  {allTraitsSorted.map(trait => {
-                    const colors = TRAIT_COLORS[trait.label] ?? {
-                      bar: 'bg-violet-500',
-                      text: 'text-violet-600 dark:text-violet-400',
-                    };
-                    return (
-                      <div key={trait.key} className="space-y-1.5">
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm text-muted-foreground">
-                            {trait.label}
-                          </span>
-                          <span
-                            className={`text-sm font-bold tabular-nums ${colors.text}`}
-                          >
-                            {trait.value}%
-                          </span>
-                        </div>
-                        {/* Score bar */}
-                        <div className="h-0.5 w-full rounded-full bg-muted">
-                          <div
-                            className={`h-0.5 rounded-full transition-all duration-500 ${colors.bar}`}
-                            style={{ width: `${trait.value}%` }}
-                          />
-                        </div>
-                        <p className="text-xs text-muted-foreground leading-relaxed">
-                          {getTraitDescription(t, trait.label, trait.value)}
-                        </p>
-                      </div>
-                    );
-                  })}
-                </div>
-              ) : (
-                <div className="flex flex-col items-center justify-center min-h-[200px] text-center p-6">
-                  <div className="w-14 h-14 mb-4 rounded-full bg-muted/50 flex items-center justify-center">
-                    <Brain className="w-7 h-7 text-muted-foreground" />
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    {t('requiresOnetMappings')}
-                  </p>
-                </div>
-              )}
-            </DashboardPanel>
-          </div>
-
-          {/* Competency-to-Trait Mapping — shown below the grid when available */}
-          {hasMappingData && (
-            <div className="mt-4 sm:mt-6">
-              <DashboardPanel
-                title="Competency-to-Trait Mapping"
-                icon={GitCompareArrows}
-              >
-                {metadata.mappingConfidence === 'low' && (
-                  <div className="flex items-start gap-2 p-3 mb-3 bg-muted/50 rounded-lg border border-muted-foreground/20">
-                    <AlertTriangle className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
-                    <div className="text-xs text-muted-foreground">
-                      <span className="font-medium">{t('limitedCoverage')}</span>{' '}
-                      {t('onlyMapped', { percentage: metadata.coveragePercentage })}
+              {/* Tab: Big Five Radar */}
+              <TabsContent value="bigfive" className="min-h-[280px]">
+                {hasBigFiveData ? (
+                  <ChartErrorBoundary>
+                    <ComparisonRadarChart
+                      data={bigFiveRadarData}
+                      primary={{
+                        label: t('radar.profile'),
+                        stroke: '#8b5cf6',
+                        fill: 'rgba(139,92,246,0.10)',
+                        dotFill: '#a78bfa',
+                        dotStroke: '#212121',
+                      }}
+                      secondary={{
+                        label: t('radar.average'),
+                      }}
+                      className="max-w-[400px] mx-auto"
+                    />
+                  </ChartErrorBoundary>
+                ) : (
+                  <div className="flex flex-col items-center justify-center min-h-[200px] text-center p-6">
+                    <div className="w-14 h-14 mb-4 rounded-full bg-muted/50 flex items-center justify-center">
+                      <Brain className="w-7 h-7 text-muted-foreground" />
                     </div>
+                    <p className="text-sm text-muted-foreground">
+                      {t('requiresOnetMappings')}
+                    </p>
                   </div>
                 )}
-                <BigFiveMappingInsights
-                  profile={bigFiveProfile}
-                  contributions={contributions}
-                />
+              </TabsContent>
+
+              {/* Tab: Competency Radar */}
+              {hasCompetencyData && (
+                <TabsContent value="competency" className="min-h-[280px]">
+                  <ChartErrorBoundary>
+                    <ComparisonRadarChart
+                      data={competencyRadarData}
+                      primary={{
+                        label: t('radar.score'),
+                        stroke: '#10b981',
+                        fill: 'rgba(16,185,129,0.10)',
+                        dotFill: '#34d399',
+                        dotStroke: '#212121',
+                      }}
+                      secondary={{
+                        label: t('radar.baseline'),
+                      }}
+                      className="max-w-[400px] mx-auto"
+                    />
+                  </ChartErrorBoundary>
+                </TabsContent>
+              )}
+
+              {/* Tab: Trait Breakdown with expandable mapping */}
+              <TabsContent value="breakdown">
+                {hasBigFiveData ? (
+                  <div className="space-y-2.5">
+                    {metadata.mappingConfidence === 'low' && hasMappingData && (
+                      <div className="flex items-start gap-2 p-2.5 bg-muted/50 rounded-lg border border-muted-foreground/20">
+                        <AlertTriangle className="h-3.5 w-3.5 text-muted-foreground shrink-0 mt-0.5" />
+                        <div className="text-[11px] text-muted-foreground">
+                          <span className="font-medium">{t('limitedCoverage')}</span>{' '}
+                          {t('onlyMapped', { percentage: metadata.coveragePercentage })}
+                        </div>
+                      </div>
+                    )}
+                    {allTraitsSorted.map(trait => {
+                      const colors = TRAIT_COLORS[trait.label] ?? {
+                        bar: 'bg-violet-500',
+                        text: 'text-violet-600 dark:text-violet-400',
+                      };
+                      const bgTint = TRAIT_BG_TINTS[trait.label] ?? '';
+                      const contribKey = TRAIT_CONTRIBUTION_KEYS[trait.label];
+                      const traitContributions = contribKey ? contributions[contribKey] : [];
+                      const hasContributions = traitContributions.length > 0;
+                      const isExpanded = expandedTrait === trait.key;
+                      const traitKey = TRAIT_KEYS[trait.label];
+                      const traitName = traitKey ? t(`traits.${traitKey}.name`) : trait.label;
+
+                      return (
+                        <div key={trait.key} className={cn(
+                          'rounded-lg border transition-all',
+                          isExpanded ? 'border-border bg-card shadow-sm' : 'border-transparent',
+                          bgTint,
+                        )}>
+                          <button
+                            type="button"
+                            onClick={() => hasContributions && setExpandedTrait(isExpanded ? null : trait.key)}
+                            className={cn(
+                              'w-full p-3 text-left',
+                              hasContributions && 'cursor-pointer',
+                              !hasContributions && 'cursor-default',
+                            )}
+                            aria-expanded={isExpanded}
+                            aria-label={`${traitName} ${trait.value}%`}
+                          >
+                            <div className="flex items-center justify-between mb-2">
+                              <div className="flex items-center gap-2">
+                                <div className={cn('w-2.5 h-2.5 rounded-full shrink-0', colors.bar)} />
+                                <span className="text-sm font-medium text-foreground">
+                                  {traitName}
+                                </span>
+                                {hasContributions && (
+                                  <span className="text-[10px] text-muted-foreground tabular-nums">
+                                    ({traitContributions.length})
+                                  </span>
+                                )}
+                              </div>
+                              <div className="flex items-center gap-1.5">
+                                <span
+                                  className={cn(
+                                    'text-xs font-bold tabular-nums px-2 py-0.5 rounded-full',
+                                    colors.text, bgTint
+                                  )}
+                                >
+                                  {trait.value}%
+                                </span>
+                                {hasContributions && (
+                                  <ChevronDown className={cn(
+                                    'h-3.5 w-3.5 text-muted-foreground/50 transition-transform duration-200',
+                                    isExpanded && 'rotate-180'
+                                  )} />
+                                )}
+                              </div>
+                            </div>
+                            <div className="h-2 w-full rounded-full bg-muted">
+                              <div
+                                className={cn('h-2 rounded-full transition-all duration-700 ease-out', colors.bar)}
+                                style={{ width: `${trait.value}%` }}
+                              />
+                            </div>
+                            <p className="text-xs text-muted-foreground leading-relaxed mt-2">
+                              {getTraitDescription(t, trait.label, trait.value)}
+                            </p>
+                          </button>
+
+                          {isExpanded && hasContributions && (
+                            <div className="px-3 pb-3">
+                              <div className="border-t border-border/40 pt-2.5">
+                                <div className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider mb-2">
+                                  {t('contributingCompetencies')}
+                                </div>
+                                <div className="space-y-1">
+                                  {[...traitContributions]
+                                    .sort((a, b) => {
+                                      const order: Record<string, number> = { primary: 0, secondary: 1, tertiary: 2 };
+                                      return (order[a.contributionType] ?? 3) - (order[b.contributionType] ?? 3);
+                                    })
+                                    .map((c, i) => {
+                                      const maxWeighted = Math.max(...traitContributions.map(x => x.weightedScore));
+                                      const barWidth = maxWeighted > 0 ? (c.weightedScore / maxWeighted) * 100 : 0;
+                                      return (
+                                        <div key={`${c.competencyId}-${i}`} className="py-1">
+                                          <div className="flex items-center gap-1.5 w-full">
+                                            <div className={cn('w-1.5 h-1.5 rounded-full shrink-0', getContributionDotColor(c.contributionType))} />
+                                            <span className="flex-1 text-xs font-medium truncate min-w-0">
+                                              {c.competencyName}
+                                            </span>
+                                            <span className={cn('text-xs font-bold tabular-nums shrink-0', colors.text)}>
+                                              {Math.round(c.competencyScore)}%
+                                            </span>
+                                          </div>
+                                          <div className="mt-1 ml-3">
+                                            <div className="h-1 w-full bg-muted/40 rounded-full overflow-hidden">
+                                              <div
+                                                className={cn(
+                                                  'h-full rounded-full',
+                                                  c.contributionType === 'primary' ? colors.bar : 'bg-muted-foreground/40'
+                                                )}
+                                                style={{ width: `${Math.min(barWidth, 100)}%` }}
+                                              />
+                                            </div>
+                                          </div>
+                                        </div>
+                                      );
+                                    })}
+                                </div>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center justify-center min-h-[200px] text-center p-6">
+                    <div className="w-14 h-14 mb-4 rounded-full bg-muted/50 flex items-center justify-center">
+                      <Brain className="w-7 h-7 text-muted-foreground" />
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      {t('requiresOnetMappings')}
+                    </p>
+                  </div>
+                )}
+              </TabsContent>
+            </Tabs>
+          </DashboardPanel>
+
+            {/* Strengths & Development — second column, tabbed */}
+            <div id="section-strengths">
+              <DashboardPanel
+                title={t('panels.signatureStrengths')}
+                icon={Award}
+                iconVariant="success"
+                tooltip={t('tooltips.signatureStrengths')}
+              >
+                <Tabs defaultValue="strengths" className="gap-3">
+                  <TabsList className="w-full">
+                    <TabsTrigger value="strengths" className="min-h-[36px]">
+                      <Award className="h-3.5 w-3.5" />
+                      {t('tabs.strengths')}
+                    </TabsTrigger>
+                    <TabsTrigger value="development" className="min-h-[36px]">
+                      <TrendingUp className="h-3.5 w-3.5" />
+                      {t('tabs.development')}
+                    </TabsTrigger>
+                  </TabsList>
+
+                  {/* Tab: Strengths */}
+                  <TabsContent value="strengths">
+                    {topCompetencies.length > 0 ? (
+                      <div className="space-y-2">
+                        {topCompetencies.map(c => (
+                          <div
+                            key={c.competencyId}
+                            className={cn(
+                              'flex items-center gap-3 p-3 rounded-lg border-l-[3px] bg-card',
+                              'border border-border/50',
+                              c.interpretation.borderColor,
+                            )}
+                          >
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center justify-between mb-1">
+                                <span className="text-sm font-medium text-foreground truncate">
+                                  {c.competencyName}
+                                </span>
+                                <Badge
+                                  variant="secondary"
+                                  className={cn('text-[10px] px-1.5 py-0 shrink-0 ml-2',
+                                    c.interpretation.bgColor, c.interpretation.color
+                                  )}
+                                >
+                                  {getProficiencyLabel(
+                                    c.interpretation.level,
+                                    (key: string) => tResults(key),
+                                    c.proficiencyLabel
+                                  )}
+                                </Badge>
+                              </div>
+                              <div className="h-1.5 w-full rounded-full bg-muted">
+                                <div
+                                  className={cn('h-1.5 rounded-full transition-all duration-500', c.interpretation.progressColor)}
+                                  style={{ width: `${c.percentage}%` }}
+                                />
+                              </div>
+                            </div>
+                            <span className={cn('text-lg font-bold tabular-nums shrink-0', c.interpretation.color)}>
+                              {Math.round(c.percentage)}%
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="flex flex-col items-center justify-center min-h-[120px] text-center p-4">
+                        <p className="text-sm text-muted-foreground italic">
+                          {t('keepDevelopingSkills')}
+                        </p>
+                      </div>
+                    )}
+                  </TabsContent>
+
+                  {/* Tab: Development */}
+                  <TabsContent value="development" id="section-development">
+                    {developingCompetencies.length > 0 ? (
+                      <div className="space-y-3">
+                        <div className="space-y-2">
+                          {developingCompetencies.map(c => (
+                            <div
+                              key={c.competencyId}
+                              className={cn(
+                                'p-3 rounded-lg border-l-[3px] bg-card border border-border/50',
+                                c.interpretation.borderColor,
+                              )}
+                            >
+                              <div className="flex items-center justify-between mb-1">
+                                <span className="text-sm font-medium text-foreground truncate">
+                                  {c.competencyName}
+                                </span>
+                                <div className="flex items-center gap-2 shrink-0 ml-2">
+                                  <Badge
+                                    variant="secondary"
+                                    className={cn('text-[10px] px-1.5 py-0',
+                                      c.interpretation.bgColor, c.interpretation.color
+                                    )}
+                                  >
+                                    {getProficiencyLabel(
+                                      c.interpretation.level,
+                                      (key: string) => tResults(key),
+                                      c.proficiencyLabel
+                                    )}
+                                  </Badge>
+                                  <span className={cn('text-lg font-bold tabular-nums', c.interpretation.color)}>
+                                    {Math.round(c.percentage)}%
+                                  </span>
+                                </div>
+                              </div>
+                              <div className="h-1.5 w-full rounded-full bg-muted mb-2">
+                                <div
+                                  className={cn('h-1.5 rounded-full transition-all duration-500', c.interpretation.progressColor)}
+                                  style={{ width: `${c.percentage}%` }}
+                                />
+                              </div>
+                              <p className="text-xs text-muted-foreground italic">
+                                {t(`development.suggestion.${c.interpretation.level === 'foundational' ? 'foundational' : 'developing'}`)}
+                              </p>
+                            </div>
+                          ))}
+                        </div>
+
+                        {/* Motivational footer */}
+                        <div className="flex items-start gap-2.5 p-3 rounded-lg bg-amber-50/30 dark:bg-amber-950/10 border border-amber-500/10">
+                          <Lightbulb className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" />
+                          <p className="text-xs text-muted-foreground leading-relaxed">
+                            {t('development.encouragement')}
+                          </p>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="flex flex-col items-center justify-center min-h-[120px] text-center p-4">
+                        <div className="w-12 h-12 mb-3 rounded-full bg-muted/50 flex items-center justify-center">
+                          <TrendingUp className="w-6 h-6 text-muted-foreground" />
+                        </div>
+                        <p className="text-sm text-muted-foreground">
+                          {t('developmentNote')}
+                        </p>
+                      </div>
+                    )}
+                  </TabsContent>
+                </Tabs>
               </DashboardPanel>
             </div>
-          )}
-        </section>
-
-        {/* ---------------------------------------------------------------- */}
-        {/* Section: Strengths                                               */}
-        {/* ---------------------------------------------------------------- */}
-        <section id="section-strengths">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-            <DashboardPanel
-              title="Signature Strengths"
-              icon={Award}
-              iconVariant="success"
-            >
-              {topCompetencies.length > 0 ? (
-                <ProficiencyChips items={topCompetencies} />
-              ) : (
-                <div className="flex flex-col items-center justify-center min-h-[120px] text-center p-4">
-                  <p className="text-sm text-muted-foreground italic">
-                    {t('keepDevelopingSkills')}
-                  </p>
-                </div>
-              )}
-            </DashboardPanel>
-
-            <ProfilePatternSummary extendedMetrics={extendedMetrics} />
           </div>
-        </section>
-
-        {/* ---------------------------------------------------------------- */}
-        {/* Section: Development                                             */}
-        {/* ---------------------------------------------------------------- */}
-        <section id="section-development">
-          <DashboardPanel
-            title="Areas to Develop"
-            icon={TrendingUp}
-            iconVariant="warning"
-          >
-            {developingCompetencies.length > 0 ? (
-              <ProficiencyChips items={developingCompetencies} />
-            ) : (
-              <div className="flex flex-col items-center justify-center min-h-[120px] text-center p-4">
-                <div className="w-12 h-12 mb-3 rounded-full bg-muted/50 flex items-center justify-center">
-                  <TrendingUp className="w-6 h-6 text-muted-foreground" />
-                </div>
-                <p className="text-sm text-muted-foreground">
-                  {t('developmentNote')}
-                </p>
-              </div>
-            )}
-          </DashboardPanel>
         </section>
 
         {/* ---------------------------------------------------------------- */}
@@ -485,7 +770,7 @@ export function OverviewResultView({ result, template }: BaseResultViewProps) {
           />
 
           {hasIndicatorData && (
-            <DashboardPanel title="Indicator Breakdown" icon={Grid3X3}>
+            <DashboardPanel title={t('panels.indicatorBreakdown')} icon={Grid3X3} tooltip={t('tooltips.indicatorBreakdown')}>
               <ChartErrorBoundary>
                 <IndicatorHeatmap
                   competencies={competencyScores}
@@ -499,12 +784,13 @@ export function OverviewResultView({ result, template }: BaseResultViewProps) {
         {/* ---------------------------------------------------------------- */}
         {/* Section: Trend                                                   */}
         {/* ---------------------------------------------------------------- */}
-        {trendData && trendData.length > 1 && (
+        {isElevated && trendData && trendData.length > 1 && (
           <section id="section-trend">
             <DashboardPanel
-              title="Growth Trajectory"
+              title={t('panels.growthTrajectory')}
               icon={TrendingUp}
               iconVariant="info"
+              tooltip={t('tooltips.growthTrajectory')}
             >
               <ChartErrorBoundary>
                 <TrendOverview data={trendData} passingThreshold={0} />

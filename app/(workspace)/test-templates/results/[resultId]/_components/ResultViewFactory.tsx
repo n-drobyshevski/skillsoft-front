@@ -64,7 +64,7 @@ function isFailedResult(status: ResultStatus | undefined): status is 'FAILED' {
  * <ResultViewWrapper result={result} template={template} />
  * ```
  */
-export function ResultViewWrapper({ result, template }: BaseResultViewProps) {
+export function ResultViewWrapper({ result, template, trendData }: BaseResultViewProps) {
   // Handle PENDING status - show loading UI with polling
   if (isPendingResult(result.status)) {
     return <ScoringPendingView result={result} template={template} />;
@@ -77,7 +77,7 @@ export function ResultViewWrapper({ result, template }: BaseResultViewProps) {
 
   // COMPLETED status - render appropriate goal-based view
   const ViewComponent = getResultViewComponent(template.goal);
-  return <ViewComponent result={result} template={template} />;
+  return <ViewComponent result={result} template={template} trendData={trendData} />;
 }
 
 /**

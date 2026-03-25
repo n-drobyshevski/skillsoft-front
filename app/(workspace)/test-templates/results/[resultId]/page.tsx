@@ -1,10 +1,8 @@
 import { Suspense } from 'react';
 import { notFound } from 'next/navigation';
-import { testResultsApi, testTemplatesApi } from '@/services/api';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { Skeleton } from '@/components/ui/skeleton';
+import { getAuthHeaders } from '@/services/roleApi';
+import { getResult, getTemplate, getTrendData } from './_data/cached-queries';
 import { ResultViewWrapper } from './_components/ResultViewFactory';
-
 
 interface PageProps {
   params: Promise<{
@@ -15,104 +13,56 @@ interface PageProps {
 /**
  * Test Results Page - Entry point for viewing test results.
  *
- * Uses Strategy pattern via ResultViewFactory to render scenario-appropriate views:
- * - OVERVIEW (Scenario A): Competency Passport with Big Five profile
- * - JOB_FIT (Scenario B): Job assessment with O*NET benchmark comparison
- * - TEAM_FIT (Scenario C): Team compatibility analysis
+ * Performance optimizations (Next.js 16):
+ * - React.cache on getResult for render-pass dedup
+ * - 'use cache' + cacheLife('entityData') on getTemplate (semi-static)
+ * - 'use cache' + cacheLife('realtime') on getTrendData (server-prefetched)
+ * - Parallel fetch: template + trend resolve concurrently via Promise.all
+ * - Auth headers resolved once outside cache boundary, passed as cache key
+ * - Trend data prefetched server-side, eliminating client useEffect waterfall
+ * - loading.tsx provides the streaming skeleton
  */
 export default async function TestResultsPage({ params }: PageProps) {
   const { resultId } = await params;
 
   return (
-    <Suspense fallback={<ResultsSkeleton />}>
+    <Suspense>
       <ResultsContent resultId={resultId} />
     </Suspense>
   );
 }
 
 /**
- * Server component that fetches result and template data,
+ * Server component that fetches result and template data in parallel,
  * then delegates rendering to the appropriate view component via factory.
+ *
+ * Auth headers are resolved here (outside 'use cache' boundary) and
+ * passed into cached functions where they become part of the cache key.
  */
 async function ResultsContent({ resultId }: { resultId: string }) {
-  // First try to get by result ID, then by session ID
-  let result = null;
+  // Resolve auth headers once — runtime API, must be outside 'use cache'
+  const authHeaders = await getAuthHeaders();
 
-  try {
-    result = await testResultsApi.getResultById(resultId);
-  } catch {
-    // Continue to try by session ID
-  }
+  // Step 1: Fetch result (deduped via React.cache, uses no-store)
+  const result = await getResult(resultId);
+  if (!result) notFound();
 
-  if (!result) {
-    try {
-      result = await testResultsApi.getResultBySession(resultId);
-    } catch {
-      // Both attempts failed
-    }
-  }
+  // Step 2: Fetch template + trend data in parallel
+  // Both use 'use cache' with authHeaders passed as argument (cache key)
+  const [template, trendData] = await Promise.all([
+    getTemplate(result.templateId, authHeaders),
+    result.clerkUserId && result.templateId
+      ? getTrendData(result.clerkUserId, result.templateId, authHeaders)
+      : null,
+  ]);
 
-  if (!result) {
-    notFound();
-  }
+  if (!template) notFound();
 
-  // Fetch template details to determine visualization strategy
-  const template = await testTemplatesApi.getTemplateById(result.templateId);
-
-  if (!template) {
-    notFound();
-  }
-
-  // Delegate to factory - it selects the correct view based on template.goal
-  return <ResultViewWrapper result={result} template={template} />;
-}
-
-/**
- * Loading skeleton for results page
- */
-function ResultsSkeleton() {
   return (
-    <div className="min-h-screen bg-muted/30 py-8">
-      <div className="container max-w-7xl mx-auto px-4">
-        {/* Hero skeleton */}
-        <Card>
-          <CardContent className="p-6">
-            <div className="grid grid-cols-1 lg:grid-cols-[auto_1fr] gap-6">
-              <div className="flex flex-col items-center gap-3">
-                <Skeleton className="w-16 h-16 rounded-full" />
-                <Skeleton className="h-6 w-32" />
-                <Skeleton className="h-4 w-24" />
-              </div>
-              <div className="flex items-center gap-6">
-                <Skeleton className="w-36 h-36 rounded-full" />
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 flex-1">
-                  {[1, 2, 3, 4].map(i => (
-                    <Skeleton key={i} className="h-24 rounded-lg" />
-                  ))}
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Charts skeleton */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">
-          <Skeleton className="h-[360px] rounded-lg" />
-          <Skeleton className="h-[360px] rounded-lg" />
-        </div>
-
-        {/* Accordion skeleton */}
-        <Card className="mt-4">
-          <CardHeader>
-            <Skeleton className="h-6 w-48" />
-          </CardHeader>
-          <CardContent>
-            {[1, 2, 3].map(i => (
-              <Skeleton key={i} className="h-12 w-full mb-2" />
-            ))}
-          </CardContent>
-        </Card>
-      </div>
-    </div>
+    <ResultViewWrapper
+      result={result}
+      template={template}
+      trendData={trendData}
+    />
   );
 }

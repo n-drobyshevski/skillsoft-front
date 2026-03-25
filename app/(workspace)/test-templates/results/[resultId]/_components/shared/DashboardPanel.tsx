@@ -1,6 +1,8 @@
 'use client';
 
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
+import { HelpCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { DashboardPanelProps } from './types';
 
@@ -31,6 +33,7 @@ export function DashboardPanel({
   subtitle,
   icon: Icon,
   iconVariant = 'default',
+  tooltip,
   children,
   className,
   id,
@@ -59,9 +62,27 @@ export function DashboardPanel({
             </div>
           )}
           <div>
-            <h3 className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-              {title}
-            </h3>
+            <div className="flex items-center gap-1.5">
+              <h3 className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                {title}
+              </h3>
+              {tooltip && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button
+                      type="button"
+                      className="inline-flex items-center justify-center w-4 h-4 rounded-full text-muted-foreground/50 hover:text-muted-foreground transition-colors touch-manipulation"
+                      aria-label={`Help: ${title}`}
+                    >
+                      <HelpCircle className="w-3.5 h-3.5" />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent side="top" className="max-w-[280px]">
+                    {tooltip}
+                  </TooltipContent>
+                </Tooltip>
+              )}
+            </div>
             {subtitle && (
               <p className="text-sm font-semibold text-foreground mt-1 tracking-tight">
                 {subtitle}

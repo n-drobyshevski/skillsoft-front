@@ -70,7 +70,17 @@
     "indicatorBreakdown": "Indicator Breakdown",
     "indicatorHeatmapDescription": "Per-indicator score heatmap",
     "progressOverTime": "Progress Over Time",
-    "improvementAcrossAttempts": "Your improvement across attempts"
+    "improvementAcrossAttempts": "Your improvement across attempts",
+    "tooltips": {
+      "exceeds": "Competencies where your score exceeds the job benchmark — your strongest qualifications for this role.",
+      "meets": "Competencies where your score meets the benchmark but is within 15% above it — solid but could be strengthened.",
+      "below": "Competencies scoring below the job benchmark — gaps that may need development or interview follow-up.",
+      "gapAnalysis": "Compares your competency scores against the job benchmark. Green bars meet or exceed requirements; amber bars fall short.",
+      "competencyCards": "Summary cards for each competency showing your score, benchmark target, and pass/fail status at a glance.",
+      "radarChart": "Overlay of your scores vs. benchmark requirements. Larger area coverage indicates stronger job fit.",
+      "trendAnalysis": "Score progression across multiple attempts for this assessment. Shows improvement or regression over time.",
+      "competencyDetails": "Expandable table with detailed per-competency breakdown including indicator scores and confidence intervals."
+    }
   },
   "teamFit": {
     "title": "Team Fit Profile",
@@ -104,7 +114,16 @@
       "diverseSkills": "Diverse Skills",
       "saturated": "Saturated",
       "gapsFilled": "Gaps Filled",
-      "personality": "Personality"
+      "personality": "Personality",
+      "tooltips": {
+        "diversity": "Percentage of your skills that are unique to the team. Higher diversity means you bring capabilities the team currently lacks.",
+        "saturation": "Percentage of your skills already well-covered by existing team members. High saturation means significant overlap.",
+        "multiplier": "Score adjustment factor based on your skill uniqueness. Above 1.0x means your skills are boosted for filling gaps; below 1.0x means overlap reduces your effective contribution.",
+        "diverseSkills": "Count of competencies where you score above the team's saturation threshold — skills where you add new capability.",
+        "saturated": "Count of competencies already well-represented in the team. These skills overlap with existing members.",
+        "gapsFilled": "Number of team skill gaps your profile helps address. These are areas where the team is currently undersaturated.",
+        "personality": "Big Five personality compatibility score with the team. Higher percentage indicates better interpersonal dynamics and communication fit."
+      }
     },
     "heatmap": {
       "title": "Indicator Breakdown",
@@ -131,7 +150,8 @@
       "collaborator": "Collaborator",
       "collaboratorDescription": "Strong in interpersonal skills",
       "innovator": "Innovator",
-      "innovatorDescription": "High in creativity and openness"
+      "innovatorDescription": "High in creativity and openness",
+      "baseline": "Baseline"
     },
     "statusCompatible": "Compatible",
     "statusNeedsAdaptation": "Needs Adaptation",
@@ -152,9 +172,41 @@
     "whatYouBring": "What You Bring",
     "metricGapsFilled": "Gaps Filled",
     "metricSaturated": "Saturated",
-    "metricDiversityRatio": "Diversity Ratio"
+    "metricDiversityRatio": "Diversity Ratio",
+    "tooltips": {
+      "gapsFilled": "Number of team skill gaps this candidate helps fill. Higher means more unique contribution to the team.",
+      "saturated": "Skills already well-covered by existing team members. High overlap means less incremental value.",
+      "diversityRatio": "Ratio of unique skills vs. overlapping skills. Higher ratio indicates more complementary fit.",
+      "teamSaturation": "Radar comparing your competency scores against existing team coverage. Areas where you exceed the team line represent your unique contributions.",
+      "yourContribution": "Overview of how your skills complement the existing team — gap fills, compatibility score, strengths, and areas for development.",
+      "gapsYouFill": "Skills where the team is undersaturated and your score fills the gap. The +% shows how much you exceed the team's current coverage.",
+      "compatibility": "Overall fit score combining gap coverage, skill overlap, and relative strength. Higher is better.",
+      "statGapsFilled": "Count of team skill gaps your profile addresses — competencies where you score above the team's saturation threshold.",
+      "statStrengths": "Number of competencies where you score 70% or above — your strongest areas relative to the team.",
+      "whatYouBring": "Your top-scoring competencies (70%+) that directly strengthen the team. These are your key contributions.",
+      "growthAreas": "Competencies where both your score and the team's coverage are low. Developing these would benefit you and the team.",
+      "personalityFit": "Big Five personality dimensions visualized as progress rings. Shows how your personality profile complements team dynamics.",
+      "indicatorBreakdown": "Heatmap of per-indicator scores within each competency. Identifies specific behavioral strengths and development areas.",
+      "onboarding": "AI-generated onboarding suggestions based on your personality profile, skill gaps, and team dynamics."
+    }
   },
   "shared": {
+    "hero": {
+      "scoreTooltip": "Overall assessment score based on all competency evaluations.",
+      "percentileTooltip": "Your ranking compared to other participants who took this assessment.",
+      "statusTooltip": "Assessment outcome based on the passing threshold set for this test.",
+      "dateTooltip": "Date and time when this assessment was completed.",
+      "durationTooltip": "Total time spent completing the assessment.",
+      "questionsTooltip": "Number of questions answered out of the total available.",
+      "questionsLabel": "{answered}/{total} questions",
+      "percentile": "{value}th percentile",
+      "linkCopied": "Link copied to clipboard",
+      "linkCopiedShort": "Link copied",
+      "download": "Download",
+      "downloadPdf": "Download PDF",
+      "share": "Share",
+      "shareResults": "Share results"
+    },
     "heatmap": {
       "title": "Indicator Breakdown",
       "description": "Performance across behavioral indicators within each competency",

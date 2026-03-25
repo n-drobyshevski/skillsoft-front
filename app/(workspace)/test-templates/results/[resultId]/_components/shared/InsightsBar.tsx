@@ -25,13 +25,15 @@ const PILL_VARIANT_CLASSES = {
 
 interface InsightsBarProps {
   insights: InsightPill[];
+  /** Show dismiss buttons on pills (default: true) */
+  dismissible?: boolean;
 }
 
 // ============================================================================
 // InsightsBar — dismissible row of insight pills with animated exit
 // ============================================================================
 
-export function InsightsBar({ insights }: InsightsBarProps) {
+export function InsightsBar({ insights, dismissible = true }: InsightsBarProps) {
   const [dismissed, setDismissed] = useState<Set<string>>(new Set());
 
   const visible = insights.filter((pill) => !dismissed.has(pill.id));
@@ -65,14 +67,16 @@ export function InsightsBar({ insights }: InsightsBarProps) {
               >
                 <Icon className="h-3.5 w-3.5 shrink-0" />
                 {pill.text}
-                <button
-                  type="button"
-                  aria-label={`Dismiss: ${pill.text}`}
-                  onClick={() => dismiss(pill.id)}
-                  className="w-6 h-6 rounded border border-border bg-transparent text-muted-foreground hover:bg-muted hover:text-foreground ml-auto shrink-0 flex items-center justify-center cursor-pointer touch-manipulation transition-colors"
-                >
-                  <X className="h-3 w-3" />
-                </button>
+                {dismissible && (
+                  <button
+                    type="button"
+                    aria-label={`Dismiss: ${pill.text}`}
+                    onClick={() => dismiss(pill.id)}
+                    className="w-6 h-6 rounded border border-border bg-transparent text-muted-foreground hover:bg-muted hover:text-foreground ml-auto shrink-0 flex items-center justify-center cursor-pointer touch-manipulation transition-colors"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                )}
               </span>
             </motion.div>
           );

@@ -228,6 +228,8 @@ export interface TeamSaturationRadarProps {
   onPointClick?: (dataPoint: TeamSaturationDataPoint) => void;
   /** Additional CSS classes */
   className?: string;
+  /** When true, hides analysis sections (gaps, stats, growth areas) — render them externally */
+  compact?: boolean;
 }
 
 /**

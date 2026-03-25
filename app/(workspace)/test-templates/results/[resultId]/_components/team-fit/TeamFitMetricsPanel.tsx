@@ -2,6 +2,7 @@
 
 import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 import {
   Sparkles,
   Layers,
@@ -10,6 +11,7 @@ import {
   MinusCircle,
   Target,
   Heart,
+  HelpCircle,
 } from 'lucide-react';
 import type { TeamFitExtendedMetrics } from '@/types/domain';
 
@@ -25,6 +27,7 @@ interface MetricItem {
   color: string;
   bgColor: string;
   borderColor: string;
+  tooltip?: string;
 }
 
 export function TeamFitMetricsPanel({ extendedMetrics }: TeamFitMetricsPanelProps) {
@@ -50,6 +53,7 @@ export function TeamFitMetricsPanel({ extendedMetrics }: TeamFitMetricsPanelProp
       color: 'text-emerald-600 dark:text-emerald-400',
       bgColor: 'bg-emerald-500/10',
       borderColor: 'border-emerald-500/20',
+      tooltip: t('tooltips.diversity'),
     },
     {
       id: 'saturation',
@@ -59,6 +63,7 @@ export function TeamFitMetricsPanel({ extendedMetrics }: TeamFitMetricsPanelProp
       color: 'text-amber-600 dark:text-amber-400',
       bgColor: 'bg-amber-500/10',
       borderColor: 'border-amber-500/20',
+      tooltip: t('tooltips.saturation'),
     },
     {
       id: 'multiplier',
@@ -70,6 +75,7 @@ export function TeamFitMetricsPanel({ extendedMetrics }: TeamFitMetricsPanelProp
         : 'text-amber-600 dark:text-amber-400',
       bgColor: multiplierIsPositive ? 'bg-emerald-500/10' : 'bg-amber-500/10',
       borderColor: multiplierIsPositive ? 'border-emerald-500/20' : 'border-amber-500/20',
+      tooltip: t('tooltips.multiplier'),
     },
     {
       id: 'diverseSkills',
@@ -79,6 +85,7 @@ export function TeamFitMetricsPanel({ extendedMetrics }: TeamFitMetricsPanelProp
       color: 'text-blue-600 dark:text-blue-400',
       bgColor: 'bg-blue-500/10',
       borderColor: 'border-blue-500/20',
+      tooltip: t('tooltips.diverseSkills'),
     },
     {
       id: 'saturated',
@@ -88,6 +95,7 @@ export function TeamFitMetricsPanel({ extendedMetrics }: TeamFitMetricsPanelProp
       color: 'text-slate-600 dark:text-slate-400',
       bgColor: 'bg-slate-500/10',
       borderColor: 'border-slate-500/20',
+      tooltip: t('tooltips.saturated'),
     },
     {
       id: 'gapsFilled',
@@ -97,6 +105,7 @@ export function TeamFitMetricsPanel({ extendedMetrics }: TeamFitMetricsPanelProp
       color: 'text-violet-600 dark:text-violet-400',
       bgColor: 'bg-violet-500/10',
       borderColor: 'border-violet-500/20',
+      tooltip: t('tooltips.gapsFilled'),
     },
   ];
 
@@ -114,6 +123,7 @@ export function TeamFitMetricsPanel({ extendedMetrics }: TeamFitMetricsPanelProp
         : 'text-orange-600 dark:text-orange-400',
       bgColor: isHighCompat ? 'bg-rose-500/10' : 'bg-orange-500/10',
       borderColor: isHighCompat ? 'border-rose-500/20' : 'border-orange-500/20',
+      tooltip: t('tooltips.personality'),
     });
   }
 
@@ -130,8 +140,24 @@ export function TeamFitMetricsPanel({ extendedMetrics }: TeamFitMetricsPanelProp
           {metrics.map((metric) => (
             <div
               key={metric.id}
-              className={`flex flex-col items-center p-2.5 sm:p-3 rounded-xl border ${metric.borderColor} ${metric.bgColor} transition-colors`}
+              className={`relative flex flex-col items-center p-2.5 sm:p-3 rounded-xl border ${metric.borderColor} ${metric.bgColor} transition-colors`}
             >
+              {metric.tooltip && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button
+                      type="button"
+                      className="absolute top-1.5 right-1.5 inline-flex items-center justify-center w-4 h-4 rounded-full text-muted-foreground/40 hover:text-muted-foreground transition-colors touch-manipulation"
+                      aria-label={`Help: ${metric.label}`}
+                    >
+                      <HelpCircle className="w-3 h-3" />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent side="top" className="max-w-[240px]">
+                    {metric.tooltip}
+                  </TooltipContent>
+                </Tooltip>
+              )}
               <div className={`${metric.color} mb-1.5`}>
                 {metric.icon}
               </div>
