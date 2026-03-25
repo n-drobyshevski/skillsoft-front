@@ -51,7 +51,7 @@ export function BigFiveCompactWidget({ snapshot, className }: BigFiveCompactWidg
               <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-muted flex items-center justify-center">
                 <Brain className="w-4 h-4 text-muted-foreground" />
               </div>
-              <CardTitle className="text-base">{t('userDashboard.bigFive')}</CardTitle>
+              <CardTitle className="text-base">{t('userDashboard.bigFive.title')}</CardTitle>
             </div>
             <Button asChild variant="ghost" size="sm" className="text-xs gap-1 min-h-[44px] sm:min-h-0">
               <Link href={`/test-results/${snapshot.resultId}`}>

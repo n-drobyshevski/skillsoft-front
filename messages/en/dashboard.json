@@ -92,26 +92,38 @@
   "noActiveAssessments": "No active assessments",
   "createTemplateToStart": "Create a template to get started",
   "createTemplate": "Create Template",
-  "userDashboard.actionBanner.resume": "Resume",
-  "userDashboard.actionBanner.start": "Start",
-  "userDashboard.actionBanner.moreWaiting": "{count} more assessment(s) waiting",
-  "userDashboard.actionBanner.questionsProgress": "{answered} of {total} questions",
-  "userDashboard.stats.testsTaken": "Tests Taken",
-  "userDashboard.stats.avgScore": "Avg Score",
-  "userDashboard.stats.passRate": "Pass Rate",
-  "userDashboard.recentResults": "Recent Results",
-  "userDashboard.recentResults.viewAll": "View All Results",
-  "userDashboard.recentResults.pass": "PASS",
-  "userDashboard.recentResults.fail": "FAIL",
-  "userDashboard.topCompetencies": "Top Competencies",
-  "userDashboard.bigFive": "Personality Profile",
-  "userDashboard.bigFive.viewDetails": "View Details",
-  "userDashboard.bigFive.openness": "O",
-  "userDashboard.bigFive.conscientiousness": "C",
-  "userDashboard.bigFive.extraversion": "E",
-  "userDashboard.bigFive.agreeableness": "A",
-  "userDashboard.bigFive.emotionalStability": "S",
-  "userDashboard.onboarding.welcome": "Welcome to SkillSoft, {name}!",
-  "userDashboard.onboarding.description": "Discover your professional strengths and growth areas through competency-based assessments.",
-  "userDashboard.onboarding.cta": "Start Your First Assessment"
+  "userDashboard": {
+    "actionBanner": {
+      "resume": "Resume",
+      "start": "Start",
+      "moreWaiting": "{count} more assessment(s) waiting",
+      "questionsProgress": "{answered} of {total} questions"
+    },
+    "stats": {
+      "testsTaken": "Tests Taken",
+      "avgScore": "Avg Score",
+      "passRate": "Pass Rate"
+    },
+    "recentResults": {
+      "title": "Recent Results",
+      "viewAll": "View All Results",
+      "pass": "PASS",
+      "fail": "FAIL"
+    },
+    "topCompetencies": "Top Competencies",
+    "bigFive": {
+      "title": "Personality Profile",
+      "viewDetails": "View Details",
+      "openness": "O",
+      "conscientiousness": "C",
+      "extraversion": "E",
+      "agreeableness": "A",
+      "emotionalStability": "S"
+    },
+    "onboarding": {
+      "welcome": "Welcome to SkillSoft, {name}!",
+      "description": "Discover your professional strengths and growth areas through competency-based assessments.",
+      "cta": "Start Your First Assessment"
+    }
+  }
 }

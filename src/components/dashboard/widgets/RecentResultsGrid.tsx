@@ -58,7 +58,7 @@ export function RecentResultsGrid({ results }: RecentResultsGridProps) {
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <h3 className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-            {t('userDashboard.recentResults')}
+            {t('userDashboard.recentResults.title')}
           </h3>
           <Button asChild variant="ghost" size="sm" className="text-xs gap-1.5 min-h-[44px] sm:min-h-0">
             <Link href="/my-tests?tab=completed">
