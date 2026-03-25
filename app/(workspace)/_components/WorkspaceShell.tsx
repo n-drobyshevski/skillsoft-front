@@ -9,6 +9,7 @@ import { MobileBottomNav } from "@/components/layout/mobile-bottom-nav";
 import { HeaderProvider } from "@/context/HeaderContext";
 import { BreadcrumbProvider } from "@/context/BreadcrumbContext";
 import { LensInitializer } from "@/components/providers/LensInitializer";
+import { LensRouterSync } from "@/components/providers/LensRouterSync";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ViewModeProvider, useViewMode, shouldBeFocused } from "@/context/ViewModeContext";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -158,6 +159,7 @@ export default function WorkspaceShell({ children }: { children: React.ReactNode
     <ViewModeProvider>
       {/* LensInitializer must render BEFORE sidebar to prevent flash of wrong content */}
       <LensInitializer />
+      <LensRouterSync />
       <HeaderProvider>
         <BreadcrumbProvider>
           <CommandPalette />

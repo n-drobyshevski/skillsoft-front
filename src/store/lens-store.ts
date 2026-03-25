@@ -162,8 +162,12 @@ export const useLensStore = create<LensStore>()(
 
           // Only update if lens actually changed
           if (currentLens !== lens) {
-            set({ activeLens: lens }, false, "setLens");
+            // Cookie MUST be set before state update because
+            // subscribeWithSelector fires listeners synchronously on set().
+            // LensRouterSync calls router.refresh() in its listener,
+            // which needs the updated cookie for the server request.
             syncLensCookie(lens);
+            set({ activeLens: lens }, false, "setLens");
           }
         },
 
@@ -186,6 +190,8 @@ export const useLensStore = create<LensStore>()(
             targetLens = getDefaultLens(role);
           }
 
+          // Cookie MUST be set before state update (same reason as setLens)
+          syncLensCookie(targetLens);
           set(
             {
               userRole: role,
@@ -195,10 +201,10 @@ export const useLensStore = create<LensStore>()(
             false,
             "initializeFromClerk"
           );
-          syncLensCookie(targetLens);
         },
 
         reset: () => {
+          clearLensCookie();
           set(
             {
               activeLens: "user",
@@ -209,7 +215,6 @@ export const useLensStore = create<LensStore>()(
             false,
             "reset"
           );
-          clearLensCookie();
         },
 
         setHydrated: () => {
