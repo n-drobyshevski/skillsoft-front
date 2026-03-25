@@ -95,7 +95,7 @@ export function RecentResultsGrid({ results }: RecentResultsGridProps) {
                     </div>
                     {result.overallPercentage != null && (
                       <p className={`text-2xl font-bold tracking-tight tabular-nums ${getScoreColor(result.overallPercentage)}`}>
-                        {result.overallPercentage}%
+                        {result.overallPercentage.toFixed(1)}%
                       </p>
                     )}
                   </CardContent>

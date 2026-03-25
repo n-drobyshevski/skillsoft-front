@@ -98,8 +98,8 @@ function computePersonalStats(results: TestResult[]): PersonalStats | null {
   if (completed.length === 0) return null;
 
   const passCount = completed.filter(r => r.passed === true).length;
-  const avgScore = Math.round(
-    completed.reduce((sum, r) => sum + (r.overallPercentage ?? 0), 0) / completed.length,
+  const avgScore = Number(
+    (completed.reduce((sum, r) => sum + (r.overallPercentage ?? 0), 0) / completed.length).toFixed(1),
   );
 
   return {
@@ -136,7 +136,7 @@ function computeTopCompetencies(results: TestResult[]): AggregatedCompetency[] {
     .map(([name, { total, count, category }]) => ({
       competencyName: name,
       competencyCategory: category,
-      avgPercentage: Math.round(total / count),
+      avgPercentage: Number((total / count).toFixed(1)),
       resultCount: count,
     }))
     .sort((a, b) => b.avgPercentage - a.avgPercentage)
