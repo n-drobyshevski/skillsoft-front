@@ -1,5 +1,5 @@
-import { useMemo } from "react";
-import { useLensStore } from "@/store/lens-store";
+import { useEffect, useMemo } from "react";
+import { useLensStore, type LensType } from "@/store/lens-store";
 import { useShallow } from "zustand/react/shallow";
 import {
   selectActiveLens,
@@ -110,4 +110,35 @@ export function useUserRole() {
  */
 export function useLensReady() {
   return useLensStore(selectIsReady);
+}
+
+/** Alt+1/2/3 → lens keyboard mapping */
+const KEY_TO_LENS: Record<string, LensType> = {
+  "1": "user",
+  "2": "editor",
+  "3": "admin",
+};
+
+/**
+ * Hook that binds Alt+1/2/3 to lens switching.
+ * Only switches to lenses available for the user's role
+ * (validated inside setLens).
+ */
+export function useLensKeyboardShortcuts() {
+  const setLens = useLensStore(selectSetLens);
+
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if (!e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) return;
+
+      const lens = KEY_TO_LENS[e.key];
+      if (lens) {
+        e.preventDefault();
+        setLens(lens);
+      }
+    }
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [setLens]);
 }

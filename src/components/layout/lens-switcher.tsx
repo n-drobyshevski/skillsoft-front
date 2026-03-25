@@ -10,7 +10,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { SidebarMenuButton } from "@/components/ui/sidebar";
-import { useLens, useLensConfig, useAvailableLenses } from "@/hooks/useLens";
+import { useLens, useLensConfig, useAvailableLenses, useLensKeyboardShortcuts } from "@/hooks/useLens";
 import { getLensConfig } from "@/config/lens-configs";
 import { type LensType } from "@/store/lens-store";
 import { cn } from "@/lib/utils";
@@ -54,6 +54,9 @@ function LensIcon({ type, className }: { type: string; className?: string }) {
 export function LensSwitcher() {
   // i18n translations for lens names and descriptions
   const t = useTranslations("lens");
+
+  // Alt+1/2/3 keyboard shortcuts for lens switching
+  useLensKeyboardShortcuts();
 
   // Subscribe only to what we need (selective subscriptions)
   const { activeLens, setLens } = useLens();
