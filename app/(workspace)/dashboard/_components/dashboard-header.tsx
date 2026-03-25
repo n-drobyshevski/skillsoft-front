@@ -12,6 +12,8 @@ interface DashboardHeaderProps {
     firstName?: string;
     role: 'ADMIN' | 'EDITOR' | 'USER';
   };
+  /** Server-resolved lens state — overrides client hydration to prevent flash */
+  isUserLensServer?: boolean;
 }
 
 /**
@@ -20,9 +22,11 @@ interface DashboardHeaderProps {
  * Extracted from DashboardContent to allow immediate rendering in the
  * streaming shell (no data dependencies beyond currentUser).
  */
-export default function DashboardHeader({ currentUser }: DashboardHeaderProps) {
+export default function DashboardHeader({ currentUser, isUserLensServer }: DashboardHeaderProps) {
   const activeLens = useActiveLens();
-  const isUserLens = activeLens === 'user';
+  // Use server-resolved lens if provided (prevents hydration flash),
+  // fall back to client-side lens store
+  const isUserLens = isUserLensServer ?? (activeLens === 'user');
   const prefersReducedMotion = useReducedMotion();
   const t = useTranslations('dashboard');
 

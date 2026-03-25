@@ -171,6 +171,7 @@ export default async function DashboardPage() {
     <div className="flex flex-1 flex-col gap-6 sm:gap-8 p-4 sm:p-6 lg:p-8 max-w-[1600px] mx-auto w-full">
       <DashboardHeader
         currentUser={userInfo ? { firstName: userInfo.firstName, role: userInfo.role } : undefined}
+        isUserLensServer={showUserDashboard}
       />
 
       {showUserDashboard && userInfo ? (
