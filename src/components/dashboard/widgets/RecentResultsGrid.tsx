@@ -69,7 +69,7 @@ export function RecentResultsGrid({ results }: RecentResultsGridProps) {
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           {recent.map((result) => (
             <motion.div key={result.id} variants={fadeInUp}>
-              <Link href={`/test-results/${result.id}`} className="block group">
+              <Link href={`/test-templates/results/${result.id}`} className="block group">
                 <div className="p-3 rounded-lg border bg-card hover:shadow-md hover:border-primary/30 hover:-translate-y-px transition-all duration-200 motion-reduce:transition-none h-full">
                   <div className="flex justify-between items-start gap-2 mb-1">
                     <p className="text-sm font-semibold truncate group-hover:text-primary transition-colors min-w-0">

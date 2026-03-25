@@ -140,14 +140,6 @@ export const MY_TESTS_NAMESPACES = [
   'myTests',
 ] as const;
 
-/**
- * Test Results section namespaces.
- * Used by: app/(workspace)/test-results/**
- */
-export const TEST_RESULTS_NAMESPACES = [
-  ...SHARED_NAMESPACES,
-  'results',
-] as const;
 
 /**
  * Shared Templates section namespaces.

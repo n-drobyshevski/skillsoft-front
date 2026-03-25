@@ -79,7 +79,7 @@ export function BigFiveCompactWidget({ snapshot, className }: BigFiveCompactWidg
               </CardTitle>
             </div>
             <Button asChild variant="ghost" size="sm" className="text-xs gap-1 min-h-[44px] sm:min-h-0">
-              <Link href={`/test-results/${snapshot.resultId}`}>
+              <Link href={`/test-templates/results/${snapshot.resultId}`}>
                 {t('userDashboard.bigFive.viewDetails')}
                 <ArrowRight className="w-3 h-3" />
               </Link>

@@ -3,7 +3,7 @@ import { BasePage } from './base.page';
 
 /**
  * Test Results Page Object
- * Handles interactions with /test-templates/results/[resultId] and /test-results/[resultId]
+ * Handles interactions with /test-templates/results/[resultId]
  */
 export class TestResultsPage extends BasePage {
   // ==========================================
@@ -122,9 +122,6 @@ export class TestResultsPage extends BasePage {
     await this.navigateTo(`/test-templates/results/${resultId}`);
   }
 
-  async gotoAlternate(resultId: string): Promise<void> {
-    await this.navigateTo(`/test-results/${resultId}`);
-  }
 
   // ==========================================
   // Score Methods
