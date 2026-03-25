@@ -172,7 +172,7 @@ export function ComparisonRadarChart({
       <svg
         width="100%"
         viewBox={`${-pad} ${-pad} ${viewSize} ${viewSize + 20}`}
-        className="max-w-full"
+        className="max-w-full max-h-[400px]"
         role="img"
         aria-label={`Radar chart comparing ${pri.label} to ${sec.label}`}
       >

@@ -154,10 +154,10 @@ export function JobFitResultView({ result, template, trendData: prefetchedTrend 
         overallPercentage={result.overallPercentage}
         passed={result.passed}
         percentile={result.percentile}
-        statusLabel={isPassed ? 'Qualified' : 'Below Requirements'}
+        statusLabel={isPassed ? t('statusQualified') : t('statusBelowRequirements')}
         statusVariant={isPassed ? 'success' : 'warning'}
         metadata={[
-          ...(onetSocCode ? [{ icon: Briefcase, label: `O*NET: ${onetSocCode}` }] : []),
+          ...(onetSocCode ? [{ icon: Briefcase, label: t('onetLabel', { code: onetSocCode }) }] : []),
         ]}
         actions={isElevated ? ['download_report', 'share', 'manager_summary'] : ['share']}
         result={result}
@@ -167,10 +167,10 @@ export function JobFitResultView({ result, template, trendData: prefetchedTrend 
       {/* Tab Navigation */}
       <ResultTabs
         tabs={[
-          { id: 'overview', label: 'Overview', icon: BarChart3 },
-          { id: 'gap-analysis', label: 'Gap Analysis', icon: Target },
-          { id: 'competencies', label: 'Competencies', icon: Grid3x3 },
-          { id: 'details', label: 'Details', icon: Award },
+          { id: 'overview', label: t('tabOverview'), icon: BarChart3 },
+          { id: 'gap-analysis', label: t('tabGapAnalysis'), icon: Target },
+          { id: 'competencies', label: t('tabCompetencies'), icon: Grid3x3 },
+          { id: 'details', label: t('tabDetails'), icon: Award },
         ]}
         accentColor="emerald"
       />
@@ -181,19 +181,19 @@ export function JobFitResultView({ result, template, trendData: prefetchedTrend 
           ...(insights.strengths.length > 0 ? [{
             id: 'strongest',
             icon: CheckCircle2,
-            text: `Strongest: ${insights.strengths[0]?.competencyName} (${Math.round(insights.strengths[0]?.percentage ?? 0)}%)`,
+            text: t('insightStrongest', { name: insights.strengths[0]?.competencyName, score: Math.round(insights.strengths[0]?.percentage ?? 0) }),
             variant: 'success' as const,
           }] : []),
           ...(insights.gaps.length > 0 ? [{
             id: 'gap',
             icon: AlertTriangle,
-            text: `Largest gap: ${insights.gaps[insights.gaps.length - 1]?.competencyName} (${Math.round(insights.gaps[insights.gaps.length - 1]?.percentage ?? 0)}%)`,
+            text: t('insightLargestGap', { name: insights.gaps[insights.gaps.length - 1]?.competencyName, score: Math.round(insights.gaps[insights.gaps.length - 1]?.percentage ?? 0) }),
             variant: 'warning' as const,
           }] : []),
           ...(consistencyScore !== undefined ? [{
             id: 'consistency',
             icon: BarChart3,
-            text: `Consistency: ${consistencyScore.toFixed(2)} (${consistencyScore >= 0.8 ? 'reliable' : 'moderate'})`,
+            text: t('insightConsistency', { value: consistencyScore.toFixed(2), level: consistencyScore >= 0.8 ? t('consistencyReliable') : t('consistencyModerate') }),
             variant: 'info' as const,
           }] : []),
         ]}
@@ -206,33 +206,33 @@ export function JobFitResultView({ result, template, trendData: prefetchedTrend 
         <section id="section-overview">
           <MetricCards
             metrics={[
-              { label: 'Exceeds', value: insights.strengths.length, icon: CheckCircle2, variant: 'success', sparklines: exceedsSparklines, tooltip: t('tooltips.exceeds') },
-              { label: 'Meets', value: competencyScores.filter(c => c.percentage >= passingScore && c.percentage < passingScore + 15).length, icon: Target, variant: 'info', sparklines: meetsSparklines, tooltip: t('tooltips.meets') },
-              { label: 'Below', value: insights.gaps.length, icon: AlertTriangle, variant: 'warning', sparklines: belowSparklines, tooltip: t('tooltips.below') },
+              { label: t('metricExceeds'), value: insights.strengths.length, icon: CheckCircle2, variant: 'success', sparklines: exceedsSparklines, tooltip: t('tooltips.exceeds') },
+              { label: t('metricMeets'), value: competencyScores.filter(c => c.percentage >= passingScore && c.percentage < passingScore + 15).length, icon: Target, variant: 'info', sparklines: meetsSparklines, tooltip: t('tooltips.meets') },
+              { label: t('metricBelow'), value: insights.gaps.length, icon: AlertTriangle, variant: 'warning', sparklines: belowSparklines, tooltip: t('tooltips.below') },
             ]}
           />
         </section>
 
         {/* Section: Gap Analysis */}
         <section id="section-gap-analysis">
-          <DashboardPanel title="Gap Analysis" subtitle="Score vs. Benchmark by Competency" icon={BarChart3} iconVariant="warning" tooltip={t('tooltips.gapAnalysis')}>
+          <DashboardPanel title={t('panelGapAnalysis')} subtitle={t('panelGapAnalysisSubtitle')} icon={BarChart3} iconVariant="warning" tooltip={t('tooltips.gapAnalysis')}>
             {/* Legend — shows benchmark ghost + 3 status colors */}
             <div className="flex flex-wrap items-center justify-end gap-x-4 gap-y-1 mb-3 text-[11px] text-muted-foreground">
               <span className="flex items-center gap-1.5">
                 <span className="inline-block w-3 h-2 rounded bg-white/15 border border-white/20" />
-                Benchmark
+                {t('legendBenchmark')}
               </span>
               <span className="flex items-center gap-1.5">
                 <span className="inline-block w-3 h-2 rounded-sm bg-emerald-500" />
-                Exceeds
+                {t('legendExceeds')}
               </span>
               <span className="flex items-center gap-1.5">
                 <span className="inline-block w-3 h-2 rounded-sm bg-blue-500" />
-                Meets
+                {t('legendMeets')}
               </span>
               <span className="flex items-center gap-1.5">
                 <span className="inline-block w-3 h-2 rounded-sm bg-amber-500" />
-                Below
+                {t('legendBelow')}
               </span>
             </div>
             <ChartErrorBoundary>
@@ -248,7 +248,7 @@ export function JobFitResultView({ result, template, trendData: prefetchedTrend 
         <section id="section-competencies" className="space-y-4 sm:space-y-6">
           <div className="grid grid-cols-1 lg:grid-cols-[3fr_2fr] gap-4 sm:gap-6">
             {/* Competency Card Grid — with real trend sparklines when available */}
-            <DashboardPanel title="Competency Cards" icon={Grid3x3} tooltip={t('tooltips.competencyCards')}>
+            <DashboardPanel title={t('panelCompetencyCards')} icon={Grid3x3} tooltip={t('tooltips.competencyCards')}>
               <CompetencyCardGrid
                 competencies={competencyScores}
                 passingScore={passingScore}
@@ -262,7 +262,7 @@ export function JobFitResultView({ result, template, trendData: prefetchedTrend 
 
             {/* Radar Chart */}
             {radarData.length >= 3 && (
-              <DashboardPanel title="Radar — Candidate vs Benchmark" icon={BarChart3} tooltip={t('tooltips.radarChart')}>
+              <DashboardPanel title={t('panelRadarChart')} icon={BarChart3} tooltip={t('tooltips.radarChart')}>
                 <ChartErrorBoundary>
                   <ComparisonRadarChart data={radarData} />
                 </ChartErrorBoundary>

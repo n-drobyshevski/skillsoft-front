@@ -1,9 +1,13 @@
 'use client';
 
 import { forwardRef, useMemo, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Card } from '@/components/ui/card';
+import {
+  Tooltip, TooltipContent, TooltipProvider, TooltipTrigger,
+} from '@/components/ui/tooltip';
 import type { CompetencyScore } from '@/types/domain';
 
 // ============================================================================
@@ -54,6 +58,7 @@ interface CompetencyDetailTableProps {
 
 export const CompetencyDetailTable = forwardRef<HTMLDivElement, CompetencyDetailTableProps>(
   function CompetencyDetailTable({ competencies, passingScore, onRowClick }, ref) {
+    const t = useTranslations('results.shared.detailTable');
     const [expanded, setExpanded] = useState(true);
     const [sort, setSort] = useState<SortState>({ key: 'score', dir: 'desc' });
 
@@ -103,6 +108,7 @@ export const CompetencyDetailTable = forwardRef<HTMLDivElement, CompetencyDetail
     const thClass = 'px-3 py-2.5 text-[10px] font-medium uppercase tracking-wider text-muted-foreground whitespace-nowrap cursor-pointer select-none hover:text-foreground transition-colors';
 
     return (
+      <TooltipProvider>
       <Card className="rounded-xl shadow-sm overflow-hidden" ref={ref}>
         {/* Collapsible header */}
         <button
@@ -114,14 +120,14 @@ export const CompetencyDetailTable = forwardRef<HTMLDivElement, CompetencyDetail
         >
           <div>
             <div className="text-xs font-medium uppercase tracking-wider text-muted-foreground mb-0.5">
-              Detailed Breakdown
+              {t('title')}
             </div>
             <div className="text-sm font-semibold text-foreground tracking-tight">
-              Full Competency Table
+              {t('subtitle')}
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-[11px] text-muted-foreground">{rows.length} rows</span>
+            <span className="text-[11px] text-muted-foreground">{t('rowCount', { count: rows.length })}</span>
             <ChevronDown
               className={cn(
                 'h-4 w-4 text-muted-foreground transition-transform duration-300',
@@ -144,25 +150,46 @@ export const CompetencyDetailTable = forwardRef<HTMLDivElement, CompetencyDetail
               <thead>
                 <tr className="border-t border-border text-left">
                   <th className={cn(thClass, 'pl-6')} onClick={() => toggleSort('name')}>
-                    Competency{sortIndicator('name')}
+                    <Tooltip>
+                      <TooltipTrigger asChild><span>{t('colCompetency')}{sortIndicator('name')}</span></TooltipTrigger>
+                      <TooltipContent side="bottom" className="max-w-[240px]">{t('tipCompetency')}</TooltipContent>
+                    </Tooltip>
                   </th>
                   <th className={thClass} onClick={() => toggleSort('score')}>
-                    Score{sortIndicator('score')}
+                    <Tooltip>
+                      <TooltipTrigger asChild><span>{t('colScore')}{sortIndicator('score')}</span></TooltipTrigger>
+                      <TooltipContent side="bottom" className="max-w-[240px]">{t('tipScore')}</TooltipContent>
+                    </Tooltip>
                   </th>
                   <th className={thClass} onClick={() => toggleSort('benchmark')}>
-                    Benchmark{sortIndicator('benchmark')}
+                    <Tooltip>
+                      <TooltipTrigger asChild><span>{t('colBenchmark')}{sortIndicator('benchmark')}</span></TooltipTrigger>
+                      <TooltipContent side="bottom" className="max-w-[240px]">{t('tipBenchmark')}</TooltipContent>
+                    </Tooltip>
                   </th>
                   <th className={thClass} onClick={() => toggleSort('gap')}>
-                    Gap{sortIndicator('gap')}
+                    <Tooltip>
+                      <TooltipTrigger asChild><span>{t('colGap')}{sortIndicator('gap')}</span></TooltipTrigger>
+                      <TooltipContent side="bottom" className="max-w-[240px]">{t('tipGap')}</TooltipContent>
+                    </Tooltip>
                   </th>
                   <th className={cn(thClass, 'cursor-default hover:text-muted-foreground')}>
-                    CI 95%
+                    <Tooltip>
+                      <TooltipTrigger asChild><span>{t('colCI')}</span></TooltipTrigger>
+                      <TooltipContent side="bottom" className="max-w-[240px]">{t('tipCI')}</TooltipContent>
+                    </Tooltip>
                   </th>
                   <th className={thClass} onClick={() => toggleSort('alpha')}>
-                    Cronbach α{sortIndicator('alpha')}
+                    <Tooltip>
+                      <TooltipTrigger asChild><span>{t('colAlpha')}{sortIndicator('alpha')}</span></TooltipTrigger>
+                      <TooltipContent side="bottom" className="max-w-[240px]">{t('tipAlpha')}</TooltipContent>
+                    </Tooltip>
                   </th>
                   <th className={cn(thClass, 'pr-6 text-right')} onClick={() => toggleSort('percentile')}>
-                    Percentile{sortIndicator('percentile')}
+                    <Tooltip>
+                      <TooltipTrigger asChild><span>{t('colPercentile')}{sortIndicator('percentile')}</span></TooltipTrigger>
+                      <TooltipContent side="bottom" className="max-w-[240px]">{t('tipPercentile')}</TooltipContent>
+                    </Tooltip>
                   </th>
                 </tr>
               </thead>
@@ -215,7 +242,7 @@ export const CompetencyDetailTable = forwardRef<HTMLDivElement, CompetencyDetail
                                 style={{ width: `${pct}%` }}
                               />
                             </span>
-                            <span className="tabular-nums text-xs">{pct}th</span>
+                            <span className="tabular-nums text-xs">{t('percentileSuffix', { value: pct })}</span>
                           </span>
                         ) : (
                           <span className="text-muted-foreground/50">—</span>
@@ -229,6 +256,7 @@ export const CompetencyDetailTable = forwardRef<HTMLDivElement, CompetencyDetail
           </div>
         </div>
       </Card>
+      </TooltipProvider>
     );
   }
 );

@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 import { HelpCircle } from 'lucide-react';
@@ -78,11 +79,12 @@ interface MetricCardsProps {
 }
 
 export function MetricCards({ metrics }: MetricCardsProps) {
+  const t = useTranslations('results.shared.metricCards');
   return (
     <div
       className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4"
       role="list"
-      aria-label="Key metrics"
+      aria-label={t('ariaLabel')}
     >
       {metrics.map((metric, i) => {
         const Icon = metric.icon;
@@ -93,7 +95,7 @@ export function MetricCards({ metrics }: MetricCardsProps) {
           <Card
             key={i}
             role="listitem"
-            aria-label={`${metric.label}: ${metric.value} ${metric.sublabel ?? 'competencies'}`}
+            aria-label={`${metric.label}: ${metric.value} ${metric.sublabel ?? t('defaultSublabel')}`}
             className={cn(
               'rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200',
               'border-l-[3px]',
@@ -131,7 +133,7 @@ export function MetricCards({ metrics }: MetricCardsProps) {
                   </div>
                   {/* Sublabel */}
                   <div className="text-[11px] text-muted-foreground mt-1">
-                    {metric.sublabel ?? 'competencies'}
+                    {metric.sublabel ?? t('defaultSublabel')}
                   </div>
                 </div>
                 <div className={cn('w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ml-2', ICON_BG_CLASSES[v])}>

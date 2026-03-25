@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo } from 'react';
+import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 import type { CompetencyScore } from '@/types/domain';
 
@@ -24,7 +25,7 @@ const STATUS_STYLES = {
     badgeText: 'text-emerald-600 dark:text-emerald-400',
     border: 'border-emerald-500/30 dark:border-emerald-500/25',
     bar: 'bg-emerald-500',
-    label: 'EXCEEDS',
+    labelKey: 'statusExceeds' as const,
   },
   meets: {
     text: 'text-blue-600 dark:text-blue-400',
@@ -32,7 +33,7 @@ const STATUS_STYLES = {
     badgeText: 'text-blue-600 dark:text-blue-400',
     border: 'border-blue-500/30 dark:border-blue-500/25',
     bar: 'bg-blue-500',
-    label: 'MEETS',
+    labelKey: 'statusMeets' as const,
   },
   below: {
     text: 'text-amber-600 dark:text-amber-400',
@@ -40,7 +41,7 @@ const STATUS_STYLES = {
     badgeText: 'text-amber-600 dark:text-amber-400',
     border: 'border-amber-500/30 dark:border-amber-500/25',
     bar: 'bg-amber-500',
-    label: 'BELOW',
+    labelKey: 'statusBelow' as const,
   },
 } as const;
 
@@ -103,6 +104,7 @@ export function CompetencyCardGrid({
   onCardClick,
   trendMap,
 }: CompetencyCardGridProps) {
+  const t = useTranslations('results.shared.competencyCards');
   const cards = useMemo(() => {
     return competencies.map((c) => {
       const status = getCompStatus(c.percentage, c.benchmarkScore, passingScore);
@@ -114,7 +116,7 @@ export function CompetencyCardGrid({
   }, [competencies, passingScore]);
 
   return (
-    <div className="grid grid-cols-2 gap-2.5" role="list" aria-label="Competency scores">
+    <div className="grid grid-cols-2 gap-2.5" role="list" aria-label={t('ariaLabel')}>
       {cards.map((card) => {
         const styles = STATUS_STYLES[card.status];
         return (
@@ -143,7 +145,7 @@ export function CompetencyCardGrid({
                   styles.badgeText,
                 )}
               >
-                {styles.label}
+                {t(styles.labelKey)}
               </span>
             </div>
 
@@ -156,7 +158,7 @@ export function CompetencyCardGrid({
             {/* Meta: benchmark + gap */}
             <div className="flex items-center justify-between mb-2">
               <span className="text-[10px] text-muted-foreground">
-                bench {card.benchmark}
+                {t('benchLabel', { value: card.benchmark })}
               </span>
               <span className={cn('text-[10px] font-medium tabular-nums', styles.text)}>
                 {card.gapStr}
@@ -179,7 +181,7 @@ export function CompetencyCardGrid({
                         {realPoints[0]}% → {realPoints[realPoints.length - 1]}%
                       </span>
                       <span className={cn('text-[9px] font-medium tabular-nums', styles.text)}>
-                        {realPoints.length} attempts
+                        {t('attemptCount', { count: realPoints.length })}
                       </span>
                     </div>
                   )}
