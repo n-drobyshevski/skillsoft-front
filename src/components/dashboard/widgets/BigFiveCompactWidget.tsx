@@ -6,6 +6,14 @@ import { Button } from '@/components/ui/button';
 import { Brain, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
+import { HelpTooltip } from '@/components/ui/help-tooltip';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
+import { useHelpTranslation, useHelpText } from '@/hooks/useHelpTranslation';
 import type { BigFiveSnapshot } from '@/types/user-dashboard';
 
 interface BigFiveCompactWidgetProps {
@@ -43,6 +51,14 @@ function getTraitValue(profile: Record<string, number>, traitKey: string): numbe
 export function BigFiveCompactWidget({ snapshot, className }: BigFiveCompactWidgetProps) {
   const prefersReducedMotion = useReducedMotion();
   const t = useTranslations('dashboard');
+  const { getHelp } = useHelpTranslation('dashboard');
+  const helpT = useHelpText();
+
+  function getScoreLabel(score: number): string {
+    const levelKey = score <= 33 ? 'low' : score <= 66 ? 'moderate' : 'high';
+    const level = helpT(`dashboard.bigFiveLevel.${levelKey}` as Parameters<typeof helpT>[0]);
+    return helpT('dashboard.bigFiveScore' as Parameters<typeof helpT>[0], { value: score, level });
+  }
 
   const motionProps = prefersReducedMotion
     ? {}
@@ -57,7 +73,10 @@ export function BigFiveCompactWidget({ snapshot, className }: BigFiveCompactWidg
               <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-muted flex items-center justify-center">
                 <Brain className="w-4 h-4 text-muted-foreground" />
               </div>
-              <CardTitle className="text-base">{t('userDashboard.bigFive.title')}</CardTitle>
+              <CardTitle className="text-base">
+                {t('userDashboard.bigFive.title')}
+                <HelpTooltip content={getHelp('bigFiveTitle')} variant="info" size="sm" side="right" />
+              </CardTitle>
             </div>
             <Button asChild variant="ghost" size="sm" className="text-xs gap-1 min-h-[44px] sm:min-h-0">
               <Link href={`/test-results/${snapshot.resultId}`}>
@@ -71,21 +90,32 @@ export function BigFiveCompactWidget({ snapshot, className }: BigFiveCompactWidg
           {TRAITS.map((trait) => {
             const value = getTraitValue(snapshot.profile, trait.key);
             const labelKey = `userDashboard.bigFive.${trait.key}` as const;
+            const helpKey = `bigFive.${trait.key}` as const;
             return (
-              <div key={trait.key} className="flex items-center gap-3">
-                <span className={`text-xs font-semibold w-4 text-center ${trait.textColor}`}>
-                  {t(labelKey)}
-                </span>
-                <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
-                  <div
-                    className={`h-full rounded-full transition-all duration-500 motion-reduce:transition-none ${trait.barColor}`}
-                    style={{ width: `${value}%` }}
-                  />
-                </div>
-                <span className={`text-xs font-semibold tabular-nums w-7 text-right ${trait.textColor}`}>
-                  {value}
-                </span>
-              </div>
+              <TooltipProvider key={trait.key} delayDuration={300}>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div className="flex items-center gap-3 cursor-default">
+                      <span className={`text-xs font-semibold w-4 text-center ${trait.textColor}`}>
+                        {t(labelKey)}
+                      </span>
+                      <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
+                        <div
+                          className={`h-full rounded-full transition-all duration-500 motion-reduce:transition-none ${trait.barColor}`}
+                          style={{ width: `${value}%` }}
+                        />
+                      </div>
+                      <span className={`text-xs font-semibold tabular-nums w-7 text-right ${trait.textColor}`}>
+                        {value}
+                      </span>
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom" className="text-xs leading-relaxed max-w-[240px]">
+                    <p className="font-medium">{getScoreLabel(value)}</p>
+                    <p className="text-muted-foreground">{getHelp(helpKey)}</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
             );
           })}
         </CardContent>

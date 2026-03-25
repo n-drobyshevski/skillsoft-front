@@ -1,7 +1,6 @@
 'use client';
 
 import { motion, useReducedMotion, type Variants } from 'motion/react';
-import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, Clock } from 'lucide-react';
 import Link from 'next/link';
@@ -67,39 +66,37 @@ export function RecentResultsGrid({ results }: RecentResultsGridProps) {
             </Link>
           </Button>
         </div>
-        <div className="grid sm:grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           {recent.map((result) => (
             <motion.div key={result.id} variants={fadeInUp}>
               <Link href={`/test-results/${result.id}`} className="block group">
-                <Card className="hover:shadow-md hover:border-primary/30 hover:-translate-y-px transition-all duration-200 motion-reduce:transition-none h-full">
-                  <CardContent className="p-4">
-                    <div className="flex justify-between items-start gap-2 mb-3">
-                      <div className="min-w-0">
-                        <p className="text-sm font-semibold truncate group-hover:text-primary transition-colors">
-                          {result.templateName}
-                        </p>
-                        <div className="flex items-center gap-1.5 mt-1">
-                          <Clock className="w-3 h-3 text-muted-foreground shrink-0" />
-                          <span className="text-xs text-muted-foreground">
-                            {formatDate(result.completedAt)}
-                          </span>
-                        </div>
-                      </div>
-                      {result.passed != null && (
-                        <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full shrink-0 ${getPassBadgeClasses(result.passed)}`}>
-                          {result.passed
-                            ? t('userDashboard.recentResults.pass')
-                            : t('userDashboard.recentResults.fail')}
-                        </span>
-                      )}
-                    </div>
+                <div className="p-3 rounded-lg border bg-card hover:shadow-md hover:border-primary/30 hover:-translate-y-px transition-all duration-200 motion-reduce:transition-none h-full">
+                  <div className="flex justify-between items-start gap-2 mb-1">
+                    <p className="text-sm font-semibold truncate group-hover:text-primary transition-colors min-w-0">
+                      {result.templateName}
+                    </p>
+                    {result.passed != null && (
+                      <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-full shrink-0 ${getPassBadgeClasses(result.passed)}`}>
+                        {result.passed
+                          ? t('userDashboard.recentResults.pass')
+                          : t('userDashboard.recentResults.fail')}
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex items-baseline justify-between gap-2">
                     {result.overallPercentage != null && (
-                      <p className={`text-2xl font-bold tracking-tight tabular-nums ${getScoreColor(result.overallPercentage)}`}>
+                      <p className={`text-lg font-bold tracking-tight tabular-nums ${getScoreColor(result.overallPercentage)}`}>
                         {result.overallPercentage.toFixed(1)}%
                       </p>
                     )}
-                  </CardContent>
-                </Card>
+                    <div className="flex items-center gap-1 shrink-0">
+                      <Clock className="w-3 h-3 text-muted-foreground" />
+                      <span className="text-[11px] text-muted-foreground">
+                        {formatDate(result.completedAt)}
+                      </span>
+                    </div>
+                  </div>
+                </div>
               </Link>
             </motion.div>
           ))}

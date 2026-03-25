@@ -96,6 +96,7 @@ export const DASHBOARD_NAMESPACES = [
   'activity',
   'competency',
   'indicator',
+  'help',
 ] as const;
 
 /**

@@ -3,6 +3,8 @@
 import { motion, useReducedMotion } from 'motion/react';
 import { ClipboardCheck, TrendingUp, Award } from 'lucide-react';
 import { useTranslations } from 'next-intl';
+import { HelpTooltip } from '@/components/ui/help-tooltip';
+import { useHelpTranslation } from '@/hooks/useHelpTranslation';
 import type { PersonalStats } from '@/types/user-dashboard';
 
 interface UserStatsRowProps {
@@ -18,6 +20,7 @@ function getScoreColor(score: number): string {
 export function UserStatsRow({ stats }: UserStatsRowProps) {
   const prefersReducedMotion = useReducedMotion();
   const t = useTranslations('dashboard');
+  const { getHelp } = useHelpTranslation('dashboard');
 
   const motionProps = prefersReducedMotion
     ? {}
@@ -29,18 +32,21 @@ export function UserStatsRow({ stats }: UserStatsRowProps) {
       value: String(stats.testsTaken),
       icon: ClipboardCheck,
       valueClass: 'text-foreground',
+      help: undefined as string | undefined,
     },
     {
       label: t('userDashboard.stats.avgScore'),
       value: `${stats.avgScore}%`,
       icon: TrendingUp,
       valueClass: getScoreColor(stats.avgScore),
+      help: getHelp('avgScore'),
     },
     {
       label: t('userDashboard.stats.passRate'),
       value: stats.passRate,
       icon: Award,
       valueClass: 'text-foreground',
+      help: getHelp('passRate'),
     },
   ];
 
@@ -59,7 +65,10 @@ export function UserStatsRow({ stats }: UserStatsRowProps) {
               <p className={`text-lg sm:text-xl font-bold tracking-tight tabular-nums ${card.valueClass}`}>
                 {card.value}
               </p>
-              <p className="text-xs text-muted-foreground truncate">{card.label}</p>
+              <p className="text-xs text-muted-foreground truncate">
+                {card.label}
+                {card.help && <HelpTooltip content={card.help} size="sm" side="bottom" />}
+              </p>
             </div>
           </div>
         ))}

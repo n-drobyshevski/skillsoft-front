@@ -87,5 +87,26 @@
         "critical": "Critical gap: Significantly below threshold, high priority for new hire skill requirements."
       }
     }
+  },
+  "dashboard": {
+    "avgScore": "Your average percentage across all completed assessments.",
+    "passRate": "The share of assessments where your score met or exceeded the passing threshold.",
+    "bigFiveTitle": "The Big Five (OCEAN) model measures five core personality dimensions derived from your assessment responses.",
+    "bigFive": {
+      "openness": "Openness: Curiosity, creativity, and willingness to try new things.",
+      "conscientiousness": "Conscientiousness: Organization, dependability, and self-discipline.",
+      "extraversion": "Extraversion: Sociability, assertiveness, and positive energy.",
+      "agreeableness": "Agreeableness: Cooperation, empathy, and trust in others.",
+      "emotionalStability": "Stability: Calmness under pressure and emotional resilience."
+    },
+    "bigFiveScore": "{value}/100 — {level}",
+    "bigFiveLevel": {
+      "low": "Low expression",
+      "moderate": "Moderate expression",
+      "high": "High expression"
+    },
+    "topCompetencies": "Your strongest competencies ranked by average score across all completed assessments.",
+    "competencyScore": "Average percentage score for this competency across your assessments.",
+    "competencyBar": "Average across {count, plural, one {# assessment} other {# assessments}}"
   }
 }

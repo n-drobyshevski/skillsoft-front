@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { SignedIn, SignedOut } from '@clerk/nextjs';
 import { Button } from '@/components/ui/button';
-import { LanguageSwitcher, LanguageToggle } from '@/components/language-switcher';
+import { LanguageToggle } from '@/components/language-switcher';
 import { cn } from '@/lib/utils';
 import { ArrowRight, LayoutDashboard, Sparkles, Menu, X } from 'lucide-react';
 
@@ -66,7 +66,7 @@ export function LandingHeader() {
 
           {/* Desktop CTA Buttons */}
           <div className="hidden md:flex items-center gap-3">
-            <LanguageSwitcher />
+            <LanguageToggle />
             <SignedOut>
               <Link href="/sign-in">
                 <Button variant="ghost" size="sm" className="text-sm">

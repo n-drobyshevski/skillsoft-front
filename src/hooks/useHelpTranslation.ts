@@ -3,11 +3,21 @@
 import { useTranslations } from 'next-intl';
 import { useMemo } from 'react';
 
-type HelpCategory = 'competency' | 'indicator' | 'question' | 'scenario';
+type HelpCategory = 'competency' | 'indicator' | 'question' | 'scenario' | 'dashboard';
 
 type CompetencyHelpKey = 'name' | 'description' | 'category' | 'level' | 'isActive' | 'approvalStatus';
 type IndicatorHelpKey = 'title' | 'description' | 'weight' | 'observabilityLevel' | 'measurementType' | 'examples' | 'counterExamples';
 type QuestionHelpKey = 'questionText' | 'questionType' | 'answerOptions' | 'difficultyLevel' | 'scoringRubric' | 'timeLimit' | 'contextTags';
+
+// Dashboard help keys for user dashboard tooltips
+type DashboardHelpKey =
+  | 'avgScore'
+  | 'passRate'
+  | 'bigFiveTitle'
+  | `bigFive.${'openness' | 'conscientiousness' | 'extraversion' | 'agreeableness' | 'emotionalStability'}`
+  | 'topCompetencies'
+  | 'competencyScore'
+  | 'competencyBar';
 
 // Scenario help keys for config panels
 type ScenarioHelpKey =
@@ -38,6 +48,7 @@ type HelpKeyMap = {
   indicator: IndicatorHelpKey;
   question: QuestionHelpKey;
   scenario: ScenarioHelpKey;
+  dashboard: DashboardHelpKey;
 };
 
 /**
