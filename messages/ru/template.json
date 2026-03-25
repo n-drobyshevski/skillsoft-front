@@ -145,6 +145,14 @@
   "goalConfigDesc": "Настройки, специфичные для выбранной цели оценки",
   "deselectCategory": "Снять выбор",
   "selectCategory": "Выбрать все",
+  "settingsPageTitle": "Настройки",
+  "settingsPageDesc": "Настройка всех параметров и поведения шаблона",
+  "validation": {
+    "minChars": "Минимум {min} символов",
+    "maxChars": "Максимум {max} символов",
+    "invalidOnetFormat": "Неверный формат кода O*NET SOC (ожидается XX-XXXX.XX)",
+    "invalidTeamId": "Неверный идентификатор команды"
+  },
   "hub": {
     "tabs": {
       "overview": "Обзор",

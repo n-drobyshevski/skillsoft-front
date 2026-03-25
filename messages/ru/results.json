@@ -115,6 +115,8 @@
     },
     "radar": {
       "title": "Анализ командной совместимости",
+      "you": "Вы",
+      "team": "Команда",
       "gapsYouFill": "Пробелы, которые вы закрываете",
       "compatibility": "Совместимость",
       "gapsFilled": "Закрытые пробелы",
@@ -130,7 +132,27 @@
       "collaboratorDescription": "Сильные межличностные навыки",
       "innovator": "Инноватор",
       "innovatorDescription": "Высокий уровень креативности и открытости"
-    }
+    },
+    "statusCompatible": "Совместим",
+    "statusNeedsAdaptation": "Требуется адаптация",
+    "teamLabel": "Команда: {name}",
+    "synergyLabel": "{value}x синергия",
+    "tabOverview": "Обзор",
+    "tabSaturation": "Насыщенность",
+    "tabComparison": "Сравнение",
+    "tabCompetencies": "Компетенции",
+    "tabOnboarding": "Адаптация",
+    "insightGapsFilled": "Закрывает {count} командных пробелов",
+    "insightSaturatedOverlap": "{count} насыщенных пересечений",
+    "insightDiversityRatio": "Коэффициент разнообразия: {value}",
+    "sectionTeamSaturation": "Насыщенность команды",
+    "sectionYourContribution": "Ваш вклад",
+    "sectionPersonalityFit": "Совместимость личности",
+    "sectionIndicatorBreakdown": "Разбивка по индикаторам",
+    "whatYouBring": "Что вы привносите",
+    "metricGapsFilled": "Закрытые пробелы",
+    "metricSaturated": "Насыщенные",
+    "metricDiversityRatio": "Коэффициент разнообразия"
   },
   "shared": {
     "heatmap": {

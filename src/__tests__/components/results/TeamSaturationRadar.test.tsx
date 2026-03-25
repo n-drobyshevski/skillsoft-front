@@ -18,8 +18,7 @@
  */
 import React from 'react';
 import { describe, it, expect, vi, beforeEach, beforeAll } from 'vitest';
-import { render, screen, fireEvent, within } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { render, screen, within } from '@testing-library/react';
 import { renderWithIntl } from '../../utils/test-providers';
 import {
   TeamSaturationRadar,
@@ -49,57 +48,27 @@ vi.mock('motion/react', () => ({
       <div {...props}>{children}</div>
     ),
   },
-  AnimatePresence: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
 
-// Mock Recharts components
-vi.mock('recharts', () => ({
-  ResponsiveContainer: ({ children, width, height }: { children: React.ReactNode; width?: string | number; height?: string | number }) => (
-    <div data-testid="responsive-container" style={{ width, height }}>
-      {children}
-    </div>
-  ),
-  RadarChart: ({ children, data }: { children: React.ReactNode; data?: unknown[] }) => (
-    <div data-testid="radar-chart" data-points={data?.length}>
-      {children}
-    </div>
-  ),
-  PolarGrid: ({ stroke, strokeDasharray }: { stroke?: string; strokeDasharray?: string }) => (
-    <div data-testid="polar-grid" data-stroke={stroke} data-dash={strokeDasharray} />
-  ),
-  PolarAngleAxis: ({ dataKey, tick }: { dataKey?: string; tick?: { fill?: string; fontSize?: number } }) => (
-    <div data-testid="polar-angle-axis" data-key={dataKey} data-font-size={tick?.fontSize} />
-  ),
-  PolarRadiusAxis: ({ angle, domain, tick, tickCount }: { angle?: number; domain?: number[]; tick?: unknown; tickCount?: number }) => (
-    <div data-testid="polar-radius-axis" data-angle={angle} data-domain={domain?.join(',')} data-tick-count={tickCount} />
-  ),
-  Radar: ({ name, dataKey, stroke, fill, fillOpacity, strokeWidth, strokeDasharray, dot, activeDot }: {
-    name?: string;
-    dataKey?: string;
-    stroke?: string;
-    fill?: string;
-    fillOpacity?: number;
-    strokeWidth?: number;
-    strokeDasharray?: string;
-    dot?: boolean | object;
-    activeDot?: object;
+// Mock ComparisonRadarChart (replaces former Recharts mock)
+vi.mock('@/components/charts/ComparisonRadarChart', () => ({
+  ComparisonRadarChart: ({ data, primary, secondary, className }: {
+    data: Array<{ label: string; primary: number; secondary: number }>;
+    primary?: { label?: string };
+    secondary?: { label?: string };
+    className?: string;
   }) => (
     <div
-      data-testid={`radar-${dataKey}`}
-      data-name={name}
-      data-stroke={stroke}
-      data-fill={fill}
-      data-fill-opacity={fillOpacity}
-      data-stroke-width={strokeWidth}
-      data-stroke-dasharray={strokeDasharray}
-      data-has-dot={dot ? 'true' : 'false'}
-    />
-  ),
-  Legend: ({ wrapperStyle, iconSize }: { wrapperStyle?: { fontSize?: number }; iconSize?: number }) => (
-    <div data-testid="legend" data-font-size={wrapperStyle?.fontSize} data-icon-size={iconSize} />
-  ),
-  Tooltip: ({ content }: { content?: React.ReactNode }) => (
-    <div data-testid="tooltip">{content}</div>
+      data-testid="comparison-radar-chart"
+      data-points={data.length}
+      data-primary-label={primary?.label}
+      data-secondary-label={secondary?.label}
+      className={className}
+    >
+      {data.map((d, i) => (
+        <div key={i} data-testid={`radar-point-${i}`} data-label={d.label} data-primary={d.primary} data-secondary={d.secondary} />
+      ))}
+    </div>
   ),
 }));
 
@@ -525,7 +494,7 @@ describe('TeamSaturationRadar', () => {
       renderWithIntl(<TeamSaturationRadar data={mockSaturationData} />);
 
       expect(screen.getByText('Team Fit Analysis')).toBeInTheDocument();
-      expect(screen.getByTestId('radar-chart')).toBeInTheDocument();
+      expect(screen.getByTestId('comparison-radar-chart')).toBeInTheDocument();
     });
 
     it('should render header with Users icon', () => {
@@ -542,35 +511,28 @@ describe('TeamSaturationRadar', () => {
       expect(container.firstChild).toHaveClass('custom-radar');
     });
 
-    it('should render ResponsiveContainer with chart', () => {
+    it('should render ComparisonRadarChart with correct data points', () => {
       renderWithIntl(<TeamSaturationRadar data={mockSaturationData} />);
 
-      expect(screen.getByTestId('responsive-container')).toBeInTheDocument();
+      const chart = screen.getByTestId('comparison-radar-chart');
+      expect(chart).toHaveAttribute('data-points', '5');
     });
 
-    it('should render polar grid', () => {
+    it('should pass "You" as primary label and "Team" as secondary label', () => {
       renderWithIntl(<TeamSaturationRadar data={mockSaturationData} />);
 
-      expect(screen.getByTestId('polar-grid')).toBeInTheDocument();
+      const chart = screen.getByTestId('comparison-radar-chart');
+      expect(chart).toHaveAttribute('data-primary-label', 'You');
+      expect(chart).toHaveAttribute('data-secondary-label', 'Team');
     });
 
-    it('should render polar axes', () => {
+    it('should transform data correctly for ComparisonRadarChart', () => {
       renderWithIntl(<TeamSaturationRadar data={mockSaturationData} />);
 
-      expect(screen.getByTestId('polar-angle-axis')).toBeInTheDocument();
-      expect(screen.getByTestId('polar-radius-axis')).toBeInTheDocument();
-    });
-
-    it('should render legend', () => {
-      renderWithIntl(<TeamSaturationRadar data={mockSaturationData} />);
-
-      expect(screen.getByTestId('legend')).toBeInTheDocument();
-    });
-
-    it('should render tooltip', () => {
-      renderWithIntl(<TeamSaturationRadar data={mockSaturationData} />);
-
-      expect(screen.getByTestId('tooltip')).toBeInTheDocument();
+      const firstPoint = screen.getByTestId('radar-point-0');
+      expect(firstPoint).toHaveAttribute('data-label', 'Communication');
+      expect(firstPoint).toHaveAttribute('data-primary', '85');
+      expect(firstPoint).toHaveAttribute('data-secondary', '45');
     });
   });
 
@@ -582,7 +544,8 @@ describe('TeamSaturationRadar', () => {
       renderWithIntl(<TeamSaturationRadar data={[]} />);
 
       expect(screen.getByText('Team Fit Analysis')).toBeInTheDocument();
-      expect(screen.getByTestId('radar-chart')).toBeInTheDocument();
+      // ComparisonRadarChart requires >= 3 data points, so it won't render
+      expect(screen.queryByTestId('comparison-radar-chart')).not.toBeInTheDocument();
     });
 
     it('should display zero gaps filled with empty data', () => {
@@ -593,144 +556,6 @@ describe('TeamSaturationRadar', () => {
     });
   });
 
-  // ==========================================
-  // Radar Visibility Toggle Tests
-  // ==========================================
-  describe('Radar Visibility Toggles', () => {
-    it('should show candidate radar by default', () => {
-      renderWithIntl(<TeamSaturationRadar data={mockSaturationData} />);
-
-      expect(screen.getByTestId('radar-candidate')).toBeInTheDocument();
-    });
-
-    it('should hide candidate radar when showCandidate is false', () => {
-      renderWithIntl(<TeamSaturationRadar data={mockSaturationData} showCandidate={false} />);
-
-      expect(screen.queryByTestId('radar-candidate')).not.toBeInTheDocument();
-    });
-
-    it('should show team radar by default', () => {
-      renderWithIntl(<TeamSaturationRadar data={mockSaturationData} />);
-
-      expect(screen.getByTestId('radar-team')).toBeInTheDocument();
-    });
-
-    it('should hide team radar when showTeam is false', () => {
-      renderWithIntl(<TeamSaturationRadar data={mockSaturationData} showTeam={false} />);
-
-      expect(screen.queryByTestId('radar-team')).not.toBeInTheDocument();
-    });
-
-    it('should hide target radar by default', () => {
-      renderWithIntl(<TeamSaturationRadar data={mockSaturationData} />);
-
-      expect(screen.queryByTestId('radar-target')).not.toBeInTheDocument();
-    });
-
-    it('should show target radar when showTarget is true', () => {
-      renderWithIntl(<TeamSaturationRadar data={mockSaturationData} showTarget={true} />);
-
-      expect(screen.getByTestId('radar-target')).toBeInTheDocument();
-    });
-
-    it('should show all radars when all toggles are true', () => {
-      renderWithIntl(
-        <TeamSaturationRadar
-          data={mockSaturationData}
-          showCandidate={true}
-          showTeam={true}
-          showTarget={true}
-        />
-      );
-
-      expect(screen.getByTestId('radar-candidate')).toBeInTheDocument();
-      expect(screen.getByTestId('radar-team')).toBeInTheDocument();
-      expect(screen.getByTestId('radar-target')).toBeInTheDocument();
-    });
-
-    it('should hide all radars when all toggles are false', () => {
-      renderWithIntl(
-        <TeamSaturationRadar
-          data={mockSaturationData}
-          showCandidate={false}
-          showTeam={false}
-          showTarget={false}
-        />
-      );
-
-      expect(screen.queryByTestId('radar-candidate')).not.toBeInTheDocument();
-      expect(screen.queryByTestId('radar-team')).not.toBeInTheDocument();
-      expect(screen.queryByTestId('radar-target')).not.toBeInTheDocument();
-    });
-  });
-
-  // ==========================================
-  // Custom Color Scheme Tests
-  // ==========================================
-  describe('Custom ColorScheme', () => {
-    it('should apply custom candidate color', () => {
-      renderWithIntl(
-        <TeamSaturationRadar
-          data={mockSaturationData}
-          colorScheme={{
-            candidate: '#ff0000',
-            team: '#00ff00',
-          }}
-        />
-      );
-
-      const candidateRadar = screen.getByTestId('radar-candidate');
-      expect(candidateRadar).toHaveAttribute('data-stroke', '#ff0000');
-    });
-
-    it('should apply custom team color', () => {
-      renderWithIntl(
-        <TeamSaturationRadar
-          data={mockSaturationData}
-          colorScheme={{
-            candidate: '#ff0000',
-            team: '#00ff00',
-          }}
-        />
-      );
-
-      const teamRadar = screen.getByTestId('radar-team');
-      expect(teamRadar).toHaveAttribute('data-stroke', '#00ff00');
-    });
-
-    it('should apply custom target color', () => {
-      renderWithIntl(
-        <TeamSaturationRadar
-          data={mockSaturationData}
-          showTarget={true}
-          colorScheme={{
-            candidate: '#ff0000',
-            team: '#00ff00',
-            target: '#0000ff',
-          }}
-        />
-      );
-
-      const targetRadar = screen.getByTestId('radar-target');
-      expect(targetRadar).toHaveAttribute('data-stroke', '#0000ff');
-    });
-
-    it('should apply custom fill color', () => {
-      renderWithIntl(
-        <TeamSaturationRadar
-          data={mockSaturationData}
-          colorScheme={{
-            candidate: '#ff0000',
-            team: '#00ff00',
-            fill: 'rgba(255,0,0,0.3)',
-          }}
-        />
-      );
-
-      const candidateRadar = screen.getByTestId('radar-candidate');
-      expect(candidateRadar).toHaveAttribute('data-fill', 'rgba(255,0,0,0.3)');
-    });
-  });
 
   // ==========================================
   // Gap Fill List Tests
@@ -948,91 +773,6 @@ describe('TeamSaturationRadar', () => {
     });
   });
 
-  // ==========================================
-  // Mobile Responsive Behavior Tests
-  // ==========================================
-  describe('Mobile Responsive Behavior', () => {
-    it('should use mobile chart height', () => {
-      mockUseIsMobile.mockReturnValue(true);
-      const { container } = renderWithIntl(<TeamSaturationRadar data={mockSaturationData} />);
-
-      // Check that the motion.div wrapper has appropriate height
-      expect(container.querySelector('[style*="height"]')).toBeInTheDocument();
-    });
-
-    it('should use smaller font size on mobile for axis labels', () => {
-      mockUseIsMobile.mockReturnValue(true);
-      renderWithIntl(<TeamSaturationRadar data={mockSaturationData} />);
-
-      const angleAxis = screen.getByTestId('polar-angle-axis');
-      expect(angleAxis).toHaveAttribute('data-font-size', '9');
-    });
-
-    it('should use larger font size on desktop for axis labels', () => {
-      mockUseIsMobile.mockReturnValue(false);
-      renderWithIntl(<TeamSaturationRadar data={mockSaturationData} />);
-
-      const angleAxis = screen.getByTestId('polar-angle-axis');
-      expect(angleAxis).toHaveAttribute('data-font-size', '11');
-    });
-
-    it('should use smaller legend font on mobile', () => {
-      mockUseIsMobile.mockReturnValue(true);
-      renderWithIntl(<TeamSaturationRadar data={mockSaturationData} />);
-
-      const legend = screen.getByTestId('legend');
-      expect(legend).toHaveAttribute('data-font-size', '10');
-    });
-
-    it('should use larger legend font on desktop', () => {
-      mockUseIsMobile.mockReturnValue(false);
-      renderWithIntl(<TeamSaturationRadar data={mockSaturationData} />);
-
-      const legend = screen.getByTestId('legend');
-      expect(legend).toHaveAttribute('data-font-size', '12');
-    });
-  });
-
-  // ==========================================
-  // Name Truncation Tests
-  // ==========================================
-  describe('Name Truncation on Mobile', () => {
-    it('should truncate long names on mobile (12 chars)', () => {
-      mockUseIsMobile.mockReturnValue(true);
-      const longNameData: TeamSaturationDataPoint[] = [
-        createMockDataPoint({ competencyName: 'VeryLongCompetencyName' }),
-      ];
-
-      // The truncation happens in chartData transformation
-      // We test by checking the radar chart receives transformed data
-      renderWithIntl(<TeamSaturationRadar data={longNameData} />);
-
-      const radarChart = screen.getByTestId('radar-chart');
-      expect(radarChart).toBeInTheDocument();
-    });
-
-    it('should not truncate short names on mobile', () => {
-      mockUseIsMobile.mockReturnValue(true);
-      const shortNameData: TeamSaturationDataPoint[] = [
-        createMockDataPoint({ competencyName: 'Short' }),
-      ];
-
-      renderWithIntl(<TeamSaturationRadar data={shortNameData} />);
-
-      expect(screen.getByTestId('radar-chart')).toBeInTheDocument();
-    });
-
-    it('should not truncate names on desktop regardless of length', () => {
-      mockUseIsMobile.mockReturnValue(false);
-      const longNameData: TeamSaturationDataPoint[] = [
-        createMockDataPoint({ competencyName: 'VeryLongCompetencyNameThatShouldNotBeTruncated' }),
-      ];
-
-      renderWithIntl(<TeamSaturationRadar data={longNameData} />);
-
-      expect(screen.getByTestId('radar-chart')).toBeInTheDocument();
-    });
-  });
 
   // ==========================================
   // Bilingual Support Tests
@@ -1041,154 +781,14 @@ describe('TeamSaturationRadar', () => {
     it('should render Cyrillic competency names', () => {
       renderWithIntl(<TeamSaturationRadar data={mockBilingualData} />);
 
-      // Component should render without errors with Cyrillic text
       expect(screen.getByText('Team Fit Analysis')).toBeInTheDocument();
+      expect(screen.getByTestId('comparison-radar-chart')).toBeInTheDocument();
     });
 
     it('should display Cyrillic names in gap fill badges', () => {
       renderWithIntl(<TeamSaturationRadar data={mockBilingualData} />);
 
-      // Should see Cyrillic competency names that fill gaps
       expect(screen.getByText('Gaps You Fill')).toBeInTheDocument();
-    });
-
-    it('should handle mixed English and Russian names', () => {
-      const mixedData: TeamSaturationDataPoint[] = [
-        createMockDataPoint({ competencyName: 'Communication' }),
-        createMockDataPoint({ competencyId: '2', competencyName: 'Лидерство' }),
-      ];
-
-      renderWithIntl(<TeamSaturationRadar data={mixedData} />);
-
-      expect(screen.getByText('Team Fit Analysis')).toBeInTheDocument();
-    });
-  });
-
-  // ==========================================
-  // Animation Tests
-  // ==========================================
-  describe('Animation Behavior', () => {
-    it('should render with animation enabled by default', () => {
-      renderWithIntl(<TeamSaturationRadar data={mockSaturationData} />);
-
-      expect(screen.getByTestId('radar-chart')).toBeInTheDocument();
-    });
-
-    it('should render with animation disabled', () => {
-      renderWithIntl(<TeamSaturationRadar data={mockSaturationData} animate={false} />);
-
-      expect(screen.getByTestId('radar-chart')).toBeInTheDocument();
-    });
-  });
-
-  // ==========================================
-  // Size Prop Tests
-  // ==========================================
-  describe('Size Prop', () => {
-    it('should use responsive size by default', () => {
-      renderWithIntl(<TeamSaturationRadar data={mockSaturationData} />);
-
-      const container = screen.getByTestId('responsive-container');
-      expect(container).toBeInTheDocument();
-    });
-
-    it('should accept numeric size', () => {
-      renderWithIntl(<TeamSaturationRadar data={mockSaturationData} size={400} />);
-
-      expect(screen.getByTestId('responsive-container')).toBeInTheDocument();
-    });
-  });
-
-  // ==========================================
-  // onPointClick Callback Tests
-  // ==========================================
-  describe('onPointClick Callback', () => {
-    it('should accept onPointClick prop', () => {
-      const handleClick = vi.fn();
-      renderWithIntl(
-        <TeamSaturationRadar
-          data={mockSaturationData}
-          onPointClick={handleClick}
-        />
-      );
-
-      expect(screen.getByTestId('radar-chart')).toBeInTheDocument();
-    });
-  });
-
-  // ==========================================
-  // Radar Chart Structure Tests
-  // ==========================================
-  describe('SVG Radar Chart Structure', () => {
-    it('should render correct number of data points', () => {
-      renderWithIntl(<TeamSaturationRadar data={mockSaturationData} />);
-
-      const radarChart = screen.getByTestId('radar-chart');
-      expect(radarChart).toHaveAttribute('data-points', '5');
-    });
-
-    it('should configure polar radius axis with domain 0-100', () => {
-      renderWithIntl(<TeamSaturationRadar data={mockSaturationData} />);
-
-      const radiusAxis = screen.getByTestId('polar-radius-axis');
-      expect(radiusAxis).toHaveAttribute('data-domain', '0,100');
-    });
-
-    it('should configure polar radius axis with 5 ticks', () => {
-      renderWithIntl(<TeamSaturationRadar data={mockSaturationData} />);
-
-      const radiusAxis = screen.getByTestId('polar-radius-axis');
-      expect(radiusAxis).toHaveAttribute('data-tick-count', '5');
-    });
-
-    it('should render candidate radar with dots', () => {
-      renderWithIntl(<TeamSaturationRadar data={mockSaturationData} />);
-
-      const candidateRadar = screen.getByTestId('radar-candidate');
-      expect(candidateRadar).toHaveAttribute('data-has-dot', 'true');
-    });
-
-    it('should render team radar without dots', () => {
-      renderWithIntl(<TeamSaturationRadar data={mockSaturationData} />);
-
-      const teamRadar = screen.getByTestId('radar-team');
-      expect(teamRadar).toHaveAttribute('data-has-dot', 'false');
-    });
-
-    it('should render target radar with dashed line', () => {
-      renderWithIntl(<TeamSaturationRadar data={mockSaturationData} showTarget={true} />);
-
-      const targetRadar = screen.getByTestId('radar-target');
-      expect(targetRadar).toHaveAttribute('data-stroke-dasharray', '4 4');
-    });
-  });
-
-  // ==========================================
-  // Data Transformation Tests
-  // ==========================================
-  describe('Data Transformation', () => {
-    it('should use default targetSaturation of 70 when not provided', () => {
-      const dataWithoutTarget: TeamSaturationDataPoint[] = [
-        {
-          competencyId: '1',
-          competencyName: 'Test',
-          candidateScore: 60,
-          teamSaturation: 50,
-          fillsGap: false,
-        },
-      ];
-
-      renderWithIntl(<TeamSaturationRadar data={dataWithoutTarget} showTarget={true} />);
-
-      expect(screen.getByTestId('radar-target')).toBeInTheDocument();
-    });
-
-    it('should transform data correctly for chart consumption', () => {
-      renderWithIntl(<TeamSaturationRadar data={mockSaturationData} />);
-
-      // Chart should render with transformed data
-      const radarChart = screen.getByTestId('radar-chart');
-      expect(radarChart).toBeInTheDocument();
     });
   });
 
@@ -1196,7 +796,7 @@ describe('TeamSaturationRadar', () => {
   // Edge Cases Tests
   // ==========================================
   describe('Edge Cases', () => {
-    it('should handle single data point', () => {
+    it('should handle single data point (chart not rendered, < 3 points)', () => {
       const singlePoint: TeamSaturationDataPoint[] = [
         createMockDataPoint(),
       ];
@@ -1204,26 +804,19 @@ describe('TeamSaturationRadar', () => {
       renderWithIntl(<TeamSaturationRadar data={singlePoint} />);
 
       expect(screen.getByText('Team Fit Analysis')).toBeInTheDocument();
+      expect(screen.queryByTestId('comparison-radar-chart')).not.toBeInTheDocument();
     });
 
-    it('should handle data with zero scores', () => {
-      const zeroData: TeamSaturationDataPoint[] = [
-        createMockDataPoint({ candidateScore: 0, teamSaturation: 0 }),
+    it('should render chart with 3+ data points', () => {
+      const threePoints: TeamSaturationDataPoint[] = [
+        createMockDataPoint({ competencyId: '1', competencyName: 'A' }),
+        createMockDataPoint({ competencyId: '2', competencyName: 'B' }),
+        createMockDataPoint({ competencyId: '3', competencyName: 'C' }),
       ];
 
-      renderWithIntl(<TeamSaturationRadar data={zeroData} />);
+      renderWithIntl(<TeamSaturationRadar data={threePoints} />);
 
-      expect(screen.getByTestId('radar-chart')).toBeInTheDocument();
-    });
-
-    it('should handle data with 100% scores', () => {
-      const perfectData: TeamSaturationDataPoint[] = [
-        createMockDataPoint({ candidateScore: 100, teamSaturation: 100 }),
-      ];
-
-      renderWithIntl(<TeamSaturationRadar data={perfectData} />);
-
-      expect(screen.getByTestId('radar-chart')).toBeInTheDocument();
+      expect(screen.getByTestId('comparison-radar-chart')).toBeInTheDocument();
     });
 
     it('should handle many data points', () => {
@@ -1233,136 +826,21 @@ describe('TeamSaturationRadar', () => {
 
       renderWithIntl(<TeamSaturationRadar data={manyPoints} />);
 
-      const radarChart = screen.getByTestId('radar-chart');
-      expect(radarChart).toHaveAttribute('data-points', '20');
+      const chart = screen.getByTestId('comparison-radar-chart');
+      expect(chart).toHaveAttribute('data-points', '20');
     });
 
     it('should handle data without optional fields', () => {
       const minimalData: TeamSaturationDataPoint[] = [
-        {
-          competencyId: 'min-1',
-          competencyName: 'Minimal',
-          candidateScore: 50,
-          teamSaturation: 50,
-          fillsGap: false,
-        },
+        { competencyId: 'min-1', competencyName: 'A', candidateScore: 50, teamSaturation: 50, fillsGap: false },
+        { competencyId: 'min-2', competencyName: 'B', candidateScore: 60, teamSaturation: 40, fillsGap: false },
+        { competencyId: 'min-3', competencyName: 'C', candidateScore: 70, teamSaturation: 30, fillsGap: false },
       ];
 
       renderWithIntl(<TeamSaturationRadar data={minimalData} />);
 
       expect(screen.getByText('Team Fit Analysis')).toBeInTheDocument();
-    });
-  });
-
-  // ==========================================
-  // Default Props Tests
-  // ==========================================
-  describe('Default Props', () => {
-    it('should use default showCandidate=true', () => {
-      renderWithIntl(<TeamSaturationRadar data={mockSaturationData} />);
-
-      expect(screen.getByTestId('radar-candidate')).toBeInTheDocument();
-    });
-
-    it('should use default showTeam=true', () => {
-      renderWithIntl(<TeamSaturationRadar data={mockSaturationData} />);
-
-      expect(screen.getByTestId('radar-team')).toBeInTheDocument();
-    });
-
-    it('should use default showTarget=false', () => {
-      renderWithIntl(<TeamSaturationRadar data={mockSaturationData} />);
-
-      expect(screen.queryByTestId('radar-target')).not.toBeInTheDocument();
-    });
-
-    it('should use default animate=true', () => {
-      renderWithIntl(<TeamSaturationRadar data={mockSaturationData} />);
-
-      expect(screen.getByTestId('radar-chart')).toBeInTheDocument();
-    });
-
-    it('should use default size=responsive', () => {
-      renderWithIntl(<TeamSaturationRadar data={mockSaturationData} />);
-
-      expect(screen.getByTestId('responsive-container')).toBeInTheDocument();
-    });
-
-    it('should use default showLabels=true', () => {
-      renderWithIntl(<TeamSaturationRadar data={mockSaturationData} />);
-
-      expect(screen.getByTestId('polar-angle-axis')).toBeInTheDocument();
-    });
-  });
-
-  // ==========================================
-  // Radar Names and Labels Tests
-  // ==========================================
-  describe('Radar Names and Labels', () => {
-    it('should label candidate radar as "You"', () => {
-      renderWithIntl(<TeamSaturationRadar data={mockSaturationData} />);
-
-      const candidateRadar = screen.getByTestId('radar-candidate');
-      expect(candidateRadar).toHaveAttribute('data-name', 'You');
-    });
-
-    it('should label team radar as "Team"', () => {
-      renderWithIntl(<TeamSaturationRadar data={mockSaturationData} />);
-
-      const teamRadar = screen.getByTestId('radar-team');
-      expect(teamRadar).toHaveAttribute('data-name', 'Team');
-    });
-
-    it('should label target radar as "Target"', () => {
-      renderWithIntl(<TeamSaturationRadar data={mockSaturationData} showTarget={true} />);
-
-      const targetRadar = screen.getByTestId('radar-target');
-      expect(targetRadar).toHaveAttribute('data-name', 'Target');
-    });
-  });
-
-  // ==========================================
-  // Radar Fill Opacity Tests
-  // ==========================================
-  describe('Radar Fill Opacity', () => {
-    it('should apply correct fill opacity for candidate radar', () => {
-      renderWithIntl(<TeamSaturationRadar data={mockSaturationData} />);
-
-      const candidateRadar = screen.getByTestId('radar-candidate');
-      expect(candidateRadar).toHaveAttribute('data-fill-opacity', '0.4');
-    });
-
-    it('should apply correct fill opacity for team radar', () => {
-      renderWithIntl(<TeamSaturationRadar data={mockSaturationData} />);
-
-      const teamRadar = screen.getByTestId('radar-team');
-      expect(teamRadar).toHaveAttribute('data-fill-opacity', '0.15');
-    });
-  });
-
-  // ==========================================
-  // Radar Stroke Width Tests
-  // ==========================================
-  describe('Radar Stroke Width', () => {
-    it('should use stroke width 2 for candidate radar', () => {
-      renderWithIntl(<TeamSaturationRadar data={mockSaturationData} />);
-
-      const candidateRadar = screen.getByTestId('radar-candidate');
-      expect(candidateRadar).toHaveAttribute('data-stroke-width', '2');
-    });
-
-    it('should use stroke width 1.5 for team radar', () => {
-      renderWithIntl(<TeamSaturationRadar data={mockSaturationData} />);
-
-      const teamRadar = screen.getByTestId('radar-team');
-      expect(teamRadar).toHaveAttribute('data-stroke-width', '1.5');
-    });
-
-    it('should use stroke width 1 for target radar', () => {
-      renderWithIntl(<TeamSaturationRadar data={mockSaturationData} showTarget={true} />);
-
-      const targetRadar = screen.getByTestId('radar-target');
-      expect(targetRadar).toHaveAttribute('data-stroke-width', '1');
+      expect(screen.getByTestId('comparison-radar-chart')).toBeInTheDocument();
     });
   });
 });

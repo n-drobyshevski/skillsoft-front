@@ -80,13 +80,14 @@ async function SettingsData({ id }: { id: string }) {
  */
 export default async function SettingsPage({ params }: SettingsPageProps) {
   const { id } = await params;
+  const t = await getTranslations('template');
 
   return (
     <div className="mx-auto w-full max-w-7xl px-4 py-6 lg:px-8">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold">Settings</h1>
+        <h1 className="text-2xl font-bold">{t('settingsPageTitle')}</h1>
         <p className="text-muted-foreground">
-          Configure all template settings and behavior options
+          {t('settingsPageDesc')}
         </p>
       </div>
 

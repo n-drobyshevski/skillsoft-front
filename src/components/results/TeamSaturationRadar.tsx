@@ -1,22 +1,13 @@
 'use client';
 
-import React, { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { useTranslations } from 'next-intl';
-import {
-  ResponsiveContainer,
-  RadarChart,
-  PolarGrid,
-  PolarAngleAxis,
-  PolarRadiusAxis,
-  Radar,
-  Legend,
-  Tooltip,
-} from 'recharts';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion } from 'motion/react';
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Badge } from '@/components/ui/badge';
-import { Users, User, Target, ArrowUp, ArrowDown, Sparkles } from 'lucide-react';
+import { Users, Target, ArrowUp, Sparkles } from 'lucide-react';
+import { ComparisonRadarChart } from '@/components/charts/ComparisonRadarChart';
 import type {
   TeamSaturationRadarProps,
   TeamSaturationDataPoint,
@@ -108,43 +99,6 @@ const CONTRIBUTION_COLORS: Record<TeamContributionType, string> = {
 };
 
 // ============================================================================
-// Custom Tooltip
-// ============================================================================
-
-interface CustomTooltipProps {
-  active?: boolean;
-  payload?: Array<{
-    name: string;
-    value: number;
-    dataKey: string;
-    color: string;
-  }>;
-  label?: string;
-}
-
-function CustomTooltip({ active, payload, label }: CustomTooltipProps) {
-  if (!active || !payload || payload.length === 0) return null;
-
-  return (
-    <div className="bg-background border rounded-lg shadow-lg p-3 text-sm">
-      <p className="font-semibold mb-1.5">{label}</p>
-      <div className="space-y-1">
-        {payload.map((entry) => (
-          <div key={entry.dataKey} className="flex items-center gap-2">
-            <div
-              className="w-2 h-2 rounded-full"
-              style={{ backgroundColor: entry.color }}
-            />
-            <span className="text-muted-foreground">{entry.name}:</span>
-            <span className="font-bold tabular-nums">{Math.round(entry.value)}%</span>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-// ============================================================================
 // Gap Fill Indicator
 // ============================================================================
 
@@ -210,7 +164,6 @@ export function TeamSaturationRadar({
 }: TeamSaturationRadarProps) {
   const t = useTranslations('results.teamFit.radar');
   const isMobile = useIsMobile();
-  const [hoveredPoint, setHoveredPoint] = useState<string | null>(null);
 
   // Calculate team fit analysis
   const analysis = useMemo(() => analyzeTeamFit(data), [data]);
@@ -224,24 +177,12 @@ export function TeamSaturationRadar({
     innovator: { label: t('innovator'), description: t('innovatorDescription') },
   };
 
-  // Transform data for Recharts
-  const chartData = useMemo(() => {
-    return data.map((d) => ({
-      subject: isMobile && d.competencyName.length > 12
-        ? `${d.competencyName.slice(0, 12)}...`
-        : d.competencyName,
-      fullName: d.competencyName,
-      candidate: d.candidateScore,
-      team: d.teamSaturation,
-      target: d.targetSaturation ?? 70,
-      fillsGap: d.fillsGap,
-      competencyId: d.competencyId,
-    }));
-  }, [data, isMobile]);
-
-  // Determine chart size
-  const chartSize = size === 'responsive' ? '100%' : size;
-  const chartHeight = isMobile ? 260 : 340;
+  // Transform data for ComparisonRadarChart
+  const radarData = useMemo(() => data.map((d) => ({
+    label: d.competencyName,
+    primary: Math.round(d.candidateScore),
+    secondary: Math.round(d.teamSaturation),
+  })), [data]);
 
   // Contribution badge config
   const contribColor = CONTRIBUTION_COLORS[analysis.contributionType];
@@ -261,92 +202,22 @@ export function TeamSaturationRadar({
       </div>
 
       {/* Radar Chart */}
-      <motion.div
-        initial={animate ? { opacity: 0, scale: 0.95 } : false}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.5 }}
-        style={{ height: chartHeight }}
-      >
-        <ResponsiveContainer width={chartSize} height="100%">
-          <RadarChart data={chartData} margin={{ top: 20, right: 30, bottom: 20, left: 30 }}>
-            <PolarGrid
-              stroke="hsl(var(--border))"
-              strokeDasharray="3 3"
-            />
-            <PolarAngleAxis
-              dataKey="subject"
-              tick={{
-                fill: 'hsl(var(--foreground))',
-                fontSize: isMobile ? 9 : 11,
-              }}
-              tickLine={false}
-            />
-            <PolarRadiusAxis
-              angle={30}
-              domain={[0, 100]}
-              tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }}
-              tickCount={5}
-            />
-
-            {/* Team saturation area */}
-            {showTeam && (
-              <Radar
-                name="Team"
-                dataKey="team"
-                stroke={colorScheme.team}
-                fill={colorScheme.team}
-                fillOpacity={0.15}
-                strokeWidth={1.5}
-                dot={false}
-              />
-            )}
-
-            {/* Target line */}
-            {showTarget && (
-              <Radar
-                name="Target"
-                dataKey="target"
-                stroke={colorScheme.target}
-                fill="transparent"
-                strokeWidth={1}
-                strokeDasharray="4 4"
-                dot={false}
-              />
-            )}
-
-            {/* Candidate area */}
-            {showCandidate && (
-              <Radar
-                name="You"
-                dataKey="candidate"
-                stroke={colorScheme.candidate}
-                fill={colorScheme.fill}
-                fillOpacity={0.4}
-                strokeWidth={2}
-                dot={{
-                  r: isMobile ? 3 : 4,
-                  fill: colorScheme.candidate,
-                  stroke: 'hsl(var(--background))',
-                  strokeWidth: 2,
-                }}
-                activeDot={{
-                  r: isMobile ? 5 : 6,
-                  fill: colorScheme.candidate,
-                  stroke: 'hsl(var(--background))',
-                  strokeWidth: 2,
-                }}
-              />
-            )}
-
-            <Tooltip content={<CustomTooltip />} />
-
-            <Legend
-              wrapperStyle={{ fontSize: isMobile ? 10 : 12 }}
-              iconSize={isMobile ? 8 : 10}
-            />
-          </RadarChart>
-        </ResponsiveContainer>
-      </motion.div>
+      {radarData.length >= 3 && (
+        <ComparisonRadarChart
+          data={radarData}
+          className="max-w-[400px] mx-auto"
+          primary={{
+            label: t('you'),
+            stroke: '#3b82f6',
+            fill: 'rgba(59,130,246,0.10)',
+            dotFill: '#60a5fa',
+            dotStroke: '#212121',
+          }}
+          secondary={{
+            label: t('team'),
+          }}
+        />
+      )}
 
       {/* Gaps filled section */}
       <GapFillList gapsFilledCompetencies={analysis.gapsFilledCompetencies} title={t('gapsYouFill')} />

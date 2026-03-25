@@ -145,6 +145,14 @@
   "goalConfigDesc": "Configure settings specific to your selected assessment goal",
   "deselectCategory": "Deselect",
   "selectCategory": "Select all",
+  "settingsPageTitle": "Settings",
+  "settingsPageDesc": "Configure all template settings and behavior options",
+  "validation": {
+    "minChars": "Minimum {min} characters",
+    "maxChars": "Maximum {max} characters",
+    "invalidOnetFormat": "Invalid O*NET SOC code format (expected XX-XXXX.XX)",
+    "invalidTeamId": "Invalid team ID"
+  },
   "hub": {
     "tabs": {
       "overview": "Overview",

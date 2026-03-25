@@ -1,6 +1,6 @@
 'use client';
 
-import { useTransition } from 'react';
+import { useMemo, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -70,58 +70,61 @@ import { updateTemplateSettings, archiveTemplate, deleteTemplate, createNewVersi
 import { useTranslations } from 'next-intl';
 import { GoalConfigSection } from './GoalConfigSection';
 
-// Validation schema for all settings
-const settingsSchema = z.object({
-  name: z.string().min(3, 'Minimum 3 characters').max(100, 'Maximum 100 characters'),
-  description: z.string().max(500, 'Maximum 500 characters').optional(),
-  goal: z.nativeEnum(AssessmentGoal),
-  questionsPerIndicator: z.number().min(1).max(10),
-  timeLimitMinutes: z.number().min(5).max(180),
-  passingScore: z.number().min(10).max(100),
-  isActive: z.boolean(),
-  shuffleQuestions: z.boolean(),
-  shuffleOptions: z.boolean(),
-  allowSkip: z.boolean(),
-  allowBackNavigation: z.boolean(),
-  showResultsImmediately: z.boolean(),
-  // Blueprint fields for OVERVIEW goal
-  includeBigFive: z.boolean().optional(),
-  preferredDifficulty: z.enum(['BASIC', 'INTERMEDIATE', 'ADVANCED']).optional(),
-  // Blueprint fields for JOB_FIT goal
-  onetSocCode: z.string().optional(),
-  strictnessLevel: z.number().min(0).max(100).optional(),
-  enableDeltaTesting: z.boolean().optional(),
-  candidateClerkUserId: z.string().optional(),
-  // Blueprint fields for TEAM_FIT goal
-  teamId: z.string().optional(),
-  saturationThreshold: z.number().min(0.3).max(0.9).optional(),
-}).refine(
-  (data) => {
-    // For JOB_FIT, onetSocCode must be valid format if provided
-    if (data.goal === AssessmentGoal.JOB_FIT && data.onetSocCode) {
-      return /^\d{2}-\d{4}\.\d{2}$/.test(data.onetSocCode);
+// Validation schema factory — accepts translation function for i18n error messages
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function createSettingsSchema(t: (key: string, values?: any) => string) {
+  return z.object({
+    name: z.string()
+      .min(3, t('validation.minChars', { min: 3 }))
+      .max(100, t('validation.maxChars', { max: 100 })),
+    description: z.string().max(500, t('validation.maxChars', { max: 500 })).optional(),
+    goal: z.nativeEnum(AssessmentGoal),
+    questionsPerIndicator: z.number().min(1).max(10),
+    timeLimitMinutes: z.number().min(5).max(180),
+    passingScore: z.number().min(10).max(100),
+    isActive: z.boolean(),
+    shuffleQuestions: z.boolean(),
+    shuffleOptions: z.boolean(),
+    allowSkip: z.boolean(),
+    allowBackNavigation: z.boolean(),
+    showResultsImmediately: z.boolean(),
+    // Blueprint fields for OVERVIEW goal
+    includeBigFive: z.boolean().optional(),
+    preferredDifficulty: z.enum(['BASIC', 'INTERMEDIATE', 'ADVANCED']).optional(),
+    // Blueprint fields for JOB_FIT goal
+    onetSocCode: z.string().optional(),
+    strictnessLevel: z.number().min(0).max(100).optional(),
+    enableDeltaTesting: z.boolean().optional(),
+    candidateClerkUserId: z.string().optional(),
+    // Blueprint fields for TEAM_FIT goal
+    teamId: z.string().optional(),
+    saturationThreshold: z.number().min(0.3).max(0.9).optional(),
+  }).refine(
+    (data) => {
+      if (data.goal === AssessmentGoal.JOB_FIT && data.onetSocCode) {
+        return /^\d{2}-\d{4}\.\d{2}$/.test(data.onetSocCode);
+      }
+      return true;
+    },
+    {
+      message: t('validation.invalidOnetFormat'),
+      path: ['onetSocCode'],
     }
-    return true;
-  },
-  {
-    message: 'Invalid O*NET SOC code format (expected XX-XXXX.XX)',
-    path: ['onetSocCode'],
-  }
-).refine(
-  (data) => {
-    // For TEAM_FIT, teamId must be a valid UUID if provided
-    if (data.goal === AssessmentGoal.TEAM_FIT && data.teamId) {
-      return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(data.teamId);
+  ).refine(
+    (data) => {
+      if (data.goal === AssessmentGoal.TEAM_FIT && data.teamId) {
+        return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(data.teamId);
+      }
+      return true;
+    },
+    {
+      message: t('validation.invalidTeamId'),
+      path: ['teamId'],
     }
-    return true;
-  },
-  {
-    message: 'Invalid team ID',
-    path: ['teamId'],
-  }
-);
+  );
+}
 
-type SettingsFormValues = z.infer<typeof settingsSchema>;
+type SettingsFormValues = z.infer<ReturnType<typeof createSettingsSchema>>;
 
 interface SettingsFormProps {
   template: TestTemplate;
@@ -155,6 +158,7 @@ export function SettingsForm({ template }: SettingsFormProps) {
   // Extract blueprint values with sensible defaults
   const blueprint = template.blueprint || {};
 
+  const settingsSchema = useMemo(() => createSettingsSchema(t as (key: string, values?: any) => string), [t]);
   const form = useForm<SettingsFormValues>({
     resolver: zodResolver(settingsSchema),
     defaultValues: {

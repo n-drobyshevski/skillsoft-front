@@ -115,6 +115,8 @@
     },
     "radar": {
       "title": "Team Fit Analysis",
+      "you": "You",
+      "team": "Team",
       "gapsYouFill": "Gaps You Fill",
       "compatibility": "Compatibility",
       "gapsFilled": "Gaps Filled",
@@ -130,7 +132,27 @@
       "collaboratorDescription": "Strong in interpersonal skills",
       "innovator": "Innovator",
       "innovatorDescription": "High in creativity and openness"
-    }
+    },
+    "statusCompatible": "Compatible",
+    "statusNeedsAdaptation": "Needs Adaptation",
+    "teamLabel": "Team: {name}",
+    "synergyLabel": "{value}x synergy",
+    "tabOverview": "Overview",
+    "tabSaturation": "Saturation",
+    "tabComparison": "Comparison",
+    "tabCompetencies": "Competencies",
+    "tabOnboarding": "Onboarding",
+    "insightGapsFilled": "Fills {count} team gaps",
+    "insightSaturatedOverlap": "{count} saturated {count, plural, one {overlap} other {overlaps}}",
+    "insightDiversityRatio": "Diversity ratio: {value}",
+    "sectionTeamSaturation": "Team Saturation",
+    "sectionYourContribution": "Your Contribution",
+    "sectionPersonalityFit": "Personality Fit",
+    "sectionIndicatorBreakdown": "Indicator Breakdown",
+    "whatYouBring": "What You Bring",
+    "metricGapsFilled": "Gaps Filled",
+    "metricSaturated": "Saturated",
+    "metricDiversityRatio": "Diversity Ratio"
   },
   "shared": {
     "heatmap": {

@@ -103,12 +103,12 @@ export function TeamFitResultView({ result, template }: BaseResultViewProps) {
         totalQuestions={result.totalQuestions}
         overallPercentage={result.overallPercentage}
         passed={result.passed}
-        statusLabel={isGoodFit ? 'Compatible' : 'Needs Adaptation'}
+        statusLabel={isGoodFit ? t('statusCompatible') : t('statusNeedsAdaptation')}
         statusVariant={isGoodFit ? 'info' : 'neutral'}
         metadata={[
-          ...(teamId ? [{ icon: Users, label: `Team: ${teamName || teamId}` }] : []),
+          ...(teamId ? [{ icon: Users, label: t('teamLabel', { name: teamName || teamId }) }] : []),
           ...(teamFitMetrics?.teamFitMultiplier && teamFitMetrics.teamFitMultiplier !== 1.0
-            ? [{ icon: TrendingUp, label: `${teamFitMetrics.teamFitMultiplier.toFixed(2)}x synergy` }] : []),
+            ? [{ icon: TrendingUp, label: t('synergyLabel', { value: teamFitMetrics.teamFitMultiplier.toFixed(2) }) }] : []),
         ]}
         actions={['team_dashboard', 'share_with_team', 'manager_summary']}
         result={result}
@@ -117,11 +117,11 @@ export function TeamFitResultView({ result, template }: BaseResultViewProps) {
 
       <ResultTabs
         tabs={[
-          { id: 'overview', label: 'Overview', icon: BarChart3 },
-          { id: 'saturation', label: 'Saturation', icon: Users },
-          { id: 'comparison', label: 'Comparison', icon: UserCheck },
-          { id: 'competencies', label: 'Competencies', icon: Target },
-          { id: 'onboarding', label: 'Onboarding', icon: Lightbulb },
+          { id: 'overview', label: t('tabOverview'), icon: BarChart3 },
+          { id: 'saturation', label: t('tabSaturation'), icon: Users },
+          { id: 'comparison', label: t('tabComparison'), icon: UserCheck },
+          { id: 'competencies', label: t('tabCompetencies'), icon: Target },
+          { id: 'onboarding', label: t('tabOnboarding'), icon: Lightbulb },
         ]}
         accentColor="blue"
       />
@@ -131,19 +131,19 @@ export function TeamFitResultView({ result, template }: BaseResultViewProps) {
           ...(teamFitMetrics?.gapCount ? [{
             id: 'gaps',
             icon: CheckCircle2,
-            text: `Fills ${teamFitMetrics.gapCount} team gaps`,
+            text: t('insightGapsFilled', { count: teamFitMetrics.gapCount }),
             variant: 'success' as const,
           }] : []),
           ...(teamFitMetrics?.saturationCount ? [{
             id: 'redundant',
             icon: AlertTriangle,
-            text: `${teamFitMetrics.saturationCount} saturated overlap${teamFitMetrics.saturationCount > 1 ? 's' : ''}`,
+            text: t('insightSaturatedOverlap', { count: teamFitMetrics.saturationCount }),
             variant: 'warning' as const,
           }] : []),
           ...(teamFitMetrics?.diversityRatio !== undefined ? [{
             id: 'diversity',
             icon: Users,
-            text: `Diversity ratio: ${teamFitMetrics.diversityRatio.toFixed(2)}`,
+            text: t('insightDiversityRatio', { value: teamFitMetrics.diversityRatio.toFixed(2) }),
             variant: 'info' as const,
           }] : []),
         ]}
@@ -158,9 +158,9 @@ export function TeamFitResultView({ result, template }: BaseResultViewProps) {
           {teamFitMetrics && (
             <MetricCards
               metrics={[
-                { label: 'Gaps Filled', value: teamFitMetrics.gapCount ?? 0, icon: CheckCircle2, variant: 'success' },
-                { label: 'Saturated', value: teamFitMetrics.saturationCount ?? 0, icon: AlertTriangle, variant: 'warning' },
-                { label: 'Diversity Ratio', value: teamFitMetrics.diversityRatio?.toFixed(2) ?? 'N/A', icon: Users, variant: 'info' },
+                { label: t('metricGapsFilled'), value: teamFitMetrics.gapCount ?? 0, icon: CheckCircle2, variant: 'success' },
+                { label: t('metricSaturated'), value: teamFitMetrics.saturationCount ?? 0, icon: AlertTriangle, variant: 'warning' },
+                { label: t('metricDiversityRatio'), value: teamFitMetrics.diversityRatio?.toFixed(2) ?? 'N/A', icon: Users, variant: 'info' },
               ]}
             />
           )}
@@ -180,7 +180,7 @@ export function TeamFitResultView({ result, template }: BaseResultViewProps) {
         <section id="section-saturation">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
             {/* Team Saturation Radar */}
-            <DashboardPanel title="Team Saturation" icon={Users} iconVariant="info">
+            <DashboardPanel title={t('sectionTeamSaturation')} icon={Users} iconVariant="info">
               {teamSaturationData.length >= 3 ? (
                 <ChartErrorBoundary>
                   <TeamSaturationRadar
@@ -201,12 +201,12 @@ export function TeamFitResultView({ result, template }: BaseResultViewProps) {
             </DashboardPanel>
 
             {/* Your Contribution */}
-            <DashboardPanel title="Your Contribution" icon={UserCheck} iconVariant="success">
+            <DashboardPanel title={t('sectionYourContribution')} icon={UserCheck} iconVariant="success">
               <div className="space-y-4 sm:space-y-5">
                 {insights.complementary.length > 0 && (
                   <div className="space-y-3">
                     <h5 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                      What You Bring
+                      {t('whatYouBring')}
                     </h5>
                     <div className="space-y-2 sm:space-y-2.5">
                       {insights.complementary.map(c => (
@@ -233,7 +233,7 @@ export function TeamFitResultView({ result, template }: BaseResultViewProps) {
                     )}
                     <div className="space-y-3">
                       <h5 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                        Growth Areas
+                        {t('growthAreas')}
                       </h5>
                       <div className="space-y-2 sm:space-y-2.5">
                         {insights.gapAreas.map(c => (
@@ -263,7 +263,7 @@ export function TeamFitResultView({ result, template }: BaseResultViewProps) {
         {/* ------------------------------------------------------------------ */}
         <section id="section-comparison" className="space-y-4 sm:space-y-6">
           {hasBigFiveData && (
-            <DashboardPanel title="Personality Fit" icon={Target} iconVariant="info">
+            <DashboardPanel title={t('sectionPersonalityFit')} icon={Target} iconVariant="info">
               <ChartErrorBoundary>
                 <div className="grid grid-cols-5 gap-1 sm:gap-4">
                   {bigFiveData.map(({ trait, value }) => (
@@ -315,7 +315,7 @@ export function TeamFitResultView({ result, template }: BaseResultViewProps) {
           )}
 
           {competencyScores.some(c => c.indicatorScores && c.indicatorScores.length > 0) && (
-            <DashboardPanel title="Indicator Breakdown" icon={BarChart3}>
+            <DashboardPanel title={t('sectionIndicatorBreakdown')} icon={BarChart3}>
               <ChartErrorBoundary>
                 <IndicatorHeatmap competencies={competencyScores} />
               </ChartErrorBoundary>
