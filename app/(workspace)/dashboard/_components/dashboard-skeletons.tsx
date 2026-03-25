@@ -218,3 +218,61 @@ export function SideColumnSkeleton() {
     </div>
   );
 }
+
+/**
+ * UserSectionSkeleton - Loading skeleton for the user dashboard sections.
+ */
+export function UserSectionSkeleton() {
+  return (
+    <div className="space-y-6 w-full">
+      <Card className="animate-pulse border-blue-500/10">
+        <CardContent className="p-5">
+          <div className="flex items-center gap-4">
+            <Skeleton className="w-10 h-10 rounded-lg shrink-0" />
+            <div className="flex-1 space-y-2">
+              <Skeleton className="w-40 h-4" />
+              <Skeleton className="w-24 h-3" />
+              <Skeleton className="w-full h-1.5 rounded-full" />
+            </div>
+            <Skeleton className="w-20 h-8 rounded" />
+          </div>
+        </CardContent>
+      </Card>
+
+      <div className="grid grid-cols-3 gap-3">
+        {Array.from({ length: 3 }).map((_, i) => (
+          <div
+            key={i}
+            className="flex items-center gap-3 px-3 py-3 rounded-lg border bg-card animate-pulse"
+          >
+            <Skeleton className="w-8 h-8 rounded-lg shrink-0" />
+            <div className="space-y-1">
+              <Skeleton className="h-5 w-12" />
+              <Skeleton className="h-3 w-16" />
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="space-y-3">
+        <Skeleton className="w-28 h-3" />
+        <div className="grid sm:grid-cols-2 gap-3">
+          {Array.from({ length: 2 }).map((_, i) => (
+            <Card key={i} className="animate-pulse">
+              <CardContent className="p-4 space-y-3">
+                <div className="flex justify-between">
+                  <div className="space-y-1">
+                    <Skeleton className="w-32 h-4" />
+                    <Skeleton className="w-16 h-3" />
+                  </div>
+                  <Skeleton className="w-12 h-4 rounded-full" />
+                </div>
+                <Skeleton className="w-16 h-7" />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
