@@ -34,6 +34,14 @@ export type { RecentActivityWidgetProps } from './RecentActivityWidget';
 export { TestTemplatesWidget } from './TestTemplatesWidget';
 export type { TestTemplatesWidgetProps } from './TestTemplatesWidget';
 
+// User dashboard widgets
+export { UserOnboardingCard } from './UserOnboardingCard';
+export { UserActionBanner } from './UserActionBanner';
+export { UserStatsRow } from './UserStatsRow';
+export { RecentResultsGrid } from './RecentResultsGrid';
+export { TopCompetenciesWidget } from './TopCompetenciesWidget';
+export { BigFiveCompactWidget } from './BigFiveCompactWidget';
+
 // Registry
 export { WIDGET_REGISTRY, getWidgetIdsForLens, getWidgetConfig, MOBILE_WIDGET_ORDER } from './widget-registry';
 export type { WidgetConfig } from './widget-registry';

@@ -60,6 +60,16 @@ export type {
   WidgetConfig,
 } from './widgets';
 
+// User dashboard widgets (re-export)
+export {
+  UserOnboardingCard,
+  UserActionBanner,
+  UserStatsRow,
+  RecentResultsGrid,
+  TopCompetenciesWidget,
+  BigFiveCompactWidget,
+} from './widgets';
+
 // Legacy exports (for backward compatibility)
 export { default as DashboardStatsCards } from './DasboardStatsCards';
 export { DashboardAccessButtons } from './dashboard-access-buttons';
