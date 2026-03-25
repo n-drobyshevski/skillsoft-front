@@ -1,4 +1,5 @@
 import { Suspense } from 'react';
+import { cookies } from 'next/headers';
 import { Metadata } from 'next';
 import ErrorCard from '@/components/feedback/ErrorCard';
 import { currentUser } from '@clerk/nextjs/server';
@@ -9,14 +10,17 @@ import {
   getSideColumnDataCached,
 } from '@/services/api.cache.dashboard';
 import { DashboardGrid, CompactStatsRow } from '@/components/dashboard';
+import { LENS_COOKIE_NAME } from '@/store/lens-store';
 
 import DashboardHeader from './_components/dashboard-header';
 import DashboardMainColumn from './_components/dashboard-main-column';
 import DashboardSideColumn from './_components/dashboard-side-column';
+import { UserActionSection, UserInsightsSection } from './_components/dashboard-user-sections';
 import {
   StatsRowSkeleton,
   MainColumnSkeleton,
   SideColumnSkeleton,
+  UserSectionSkeleton,
 } from './_components/dashboard-skeletons';
 
 export const metadata: Metadata = {
@@ -42,6 +46,17 @@ async function getCurrentUserInfo() {
     };
   } catch {
     return null;
+  }
+}
+
+async function isUserLensActive(role: 'ADMIN' | 'EDITOR' | 'USER'): Promise<boolean> {
+  if (role === 'USER') return true;
+  try {
+    const cookieStore = await cookies();
+    const lensCookie = cookieStore.get(LENS_COOKIE_NAME)?.value;
+    return lensCookie === 'user';
+  } catch {
+    return false;
   }
 }
 
@@ -147,31 +162,44 @@ async function DashboardSideSection({
  * - Side Column: fast for non-admin, medium for admin (user stats)
  */
 export default async function DashboardPage() {
-  // Single await: resolve user identity for role-based rendering
   const userInfo = await getCurrentUserInfo();
+  const showUserDashboard = userInfo
+    ? await isUserLensActive(userInfo.role)
+    : false;
 
   return (
     <div className="flex flex-1 flex-col gap-6 sm:gap-8 p-4 sm:p-6 lg:p-8 max-w-[1600px] mx-auto w-full">
-      {/* Header renders immediately with greeting */}
       <DashboardHeader
         currentUser={userInfo ? { firstName: userInfo.firstName, role: userInfo.role } : undefined}
       />
 
-      {/* Stats row streams independently */}
-      <Suspense fallback={<StatsRowSkeleton />}>
-        <DashboardStatsSection />
-      </Suspense>
+      {showUserDashboard && userInfo ? (
+        <>
+          <Suspense fallback={<UserSectionSkeleton />}>
+            <UserActionSection userInfo={userInfo} />
+          </Suspense>
 
-      {/* Main grid with independent Suspense boundaries per column */}
-      <DashboardGrid>
-        <Suspense fallback={<MainColumnSkeleton />}>
-          <DashboardMainSection userInfo={userInfo} />
-        </Suspense>
+          <Suspense fallback={<UserSectionSkeleton />}>
+            <UserInsightsSection userInfo={userInfo} />
+          </Suspense>
+        </>
+      ) : (
+        <>
+          <Suspense fallback={<StatsRowSkeleton />}>
+            <DashboardStatsSection />
+          </Suspense>
 
-        <Suspense fallback={<SideColumnSkeleton />}>
-          <DashboardSideSection userInfo={userInfo} />
-        </Suspense>
-      </DashboardGrid>
+          <DashboardGrid>
+            <Suspense fallback={<MainColumnSkeleton />}>
+              <DashboardMainSection userInfo={userInfo} />
+            </Suspense>
+
+            <Suspense fallback={<SideColumnSkeleton />}>
+              <DashboardSideSection userInfo={userInfo} />
+            </Suspense>
+          </DashboardGrid>
+        </>
+      )}
     </div>
   );
 }
