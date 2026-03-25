@@ -22,6 +22,8 @@ import { toGapData } from '@/lib/result-transformers';
 import type { GapDataPoint } from '@/types/results';
 import type { TrendDataPoint } from '@/types/domain';
 import { testResultsApi } from '@/services/api/results';
+import { useLensStore } from '@/store/lens-store';
+import { selectActiveLens } from '@/store/lens-selectors';
 
 /**
  * Job Fit Result View — Direction B "Command Center" Dashboard.
@@ -38,6 +40,10 @@ export function JobFitResultView({ result, template }: BaseResultViewProps) {
   const isPassed = result.passed ?? false;
   const passingScore = template.passingScore || 70;
   const competencyScores = result.competencyScores ?? [];
+
+  // Lens-based visibility: hide manager-only panels/actions for user lens
+  const activeLens = useLensStore(selectActiveLens);
+  const isElevated = activeLens !== 'user';
 
   // 2. Gap bar click → competency expand
   const [focusedCompetencyId, setFocusedCompetencyId] = useState<string | null>(null);
@@ -137,7 +143,7 @@ export function JobFitResultView({ result, template }: BaseResultViewProps) {
         metadata={[
           ...(onetSocCode ? [{ icon: Briefcase, label: `O*NET: ${onetSocCode}` }] : []),
         ]}
-        actions={['download_report', 'share', 'manager_summary']}
+        actions={isElevated ? ['download_report', 'share', 'manager_summary'] : ['share']}
         result={result}
         template={template}
       />

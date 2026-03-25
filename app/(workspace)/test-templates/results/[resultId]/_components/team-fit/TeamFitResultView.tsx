@@ -28,6 +28,8 @@ import { toTeamSaturationData, toTeamSaturationDataSimulated } from '@/lib/resul
 import { isTeamFitMetrics } from '@/types/domain';
 import { teamsApi } from '@/services/api/teams';
 import { OnboardingRecommendations } from './OnboardingRecommendations';
+import { useLensStore } from '@/store/lens-store';
+import { selectActiveLens } from '@/store/lens-selectors';
 
 /**
  * Team Fit Result View — Direction B "Command Center" Dashboard.
@@ -41,6 +43,10 @@ export function TeamFitResultView({ result, template }: BaseResultViewProps) {
   const isGoodFit = result.passed ?? false;
   const passingScore = template.passingScore || 70;
   const competencyScores = result.competencyScores ?? [];
+
+  // Lens-based visibility: hide manager-only panels/actions for user lens
+  const activeLens = useLensStore(selectActiveLens);
+  const isElevated = activeLens !== 'user';
 
   // Resolve team name for display (falls back to UUID)
   const [teamName, setTeamName] = useState<string | undefined>();
@@ -110,7 +116,7 @@ export function TeamFitResultView({ result, template }: BaseResultViewProps) {
           ...(teamFitMetrics?.teamFitMultiplier && teamFitMetrics.teamFitMultiplier !== 1.0
             ? [{ icon: TrendingUp, label: t('synergyLabel', { value: teamFitMetrics.teamFitMultiplier.toFixed(2) }) }] : []),
         ]}
-        actions={['team_dashboard', 'share_with_team', 'manager_summary']}
+        actions={isElevated ? ['team_dashboard', 'share_with_team', 'manager_summary'] : ['team_dashboard']}
         result={result}
         template={template}
       />
@@ -121,7 +127,7 @@ export function TeamFitResultView({ result, template }: BaseResultViewProps) {
           { id: 'saturation', label: t('tabSaturation'), icon: Users },
           { id: 'comparison', label: t('tabComparison'), icon: UserCheck },
           { id: 'competencies', label: t('tabCompetencies'), icon: Target },
-          { id: 'onboarding', label: t('tabOnboarding'), icon: Lightbulb },
+          ...(isElevated ? [{ id: 'onboarding', label: t('tabOnboarding'), icon: Lightbulb }] : []),
         ]}
         accentColor="blue"
       />
@@ -155,7 +161,7 @@ export function TeamFitResultView({ result, template }: BaseResultViewProps) {
         {/* Section: Overview                                                   */}
         {/* ------------------------------------------------------------------ */}
         <section id="section-overview" className="space-y-4">
-          {teamFitMetrics && (
+          {isElevated && teamFitMetrics && (
             <MetricCards
               metrics={[
                 { label: t('metricGapsFilled'), value: teamFitMetrics.gapCount ?? 0, icon: CheckCircle2, variant: 'success' },
@@ -164,14 +170,14 @@ export function TeamFitResultView({ result, template }: BaseResultViewProps) {
               ]}
             />
           )}
-          {teamFitMetrics && teamFitMetrics.teamFitMultiplier !== 1.0 && (
+          {isElevated && teamFitMetrics && teamFitMetrics.teamFitMultiplier !== 1.0 && (
             <TeamFitMultiplierBanner
               teamFitMultiplier={teamFitMetrics.teamFitMultiplier}
               diversityRatio={teamFitMetrics.diversityRatio}
               saturationRatio={teamFitMetrics.saturationRatio}
             />
           )}
-          {teamFitMetrics && <TeamFitMetricsPanel extendedMetrics={teamFitMetrics} />}
+          {isElevated && teamFitMetrics && <TeamFitMetricsPanel extendedMetrics={teamFitMetrics} />}
         </section>
 
         {/* ------------------------------------------------------------------ */}
@@ -338,13 +344,15 @@ export function TeamFitResultView({ result, template }: BaseResultViewProps) {
         {/* ------------------------------------------------------------------ */}
         {/* Section: Onboarding                                                 */}
         {/* ------------------------------------------------------------------ */}
-        <section id="section-onboarding">
-          <OnboardingRecommendations
-            competencyScores={competencyScores}
-            bigFiveProfile={bigFiveProfile}
-            teamMetrics={teamFitMetrics}
-          />
-        </section>
+        {isElevated && (
+          <section id="section-onboarding">
+            <OnboardingRecommendations
+              competencyScores={competencyScores}
+              bigFiveProfile={bigFiveProfile}
+              teamMetrics={teamFitMetrics}
+            />
+          </section>
+        )}
 
       </div>
     </div>
