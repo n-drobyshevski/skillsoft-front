@@ -22,11 +22,17 @@ const TRAITS = [
 ] as const;
 
 function getTraitValue(profile: Record<string, number>, traitKey: string): number {
+  // Backend uses BIG_FIVE_OPENNESS, BIG_FIVE_AGREEABLENESS, etc.
+  const snakeUpper = traitKey.replace(/([A-Z])/g, '_$1').toUpperCase();
   const variants = [
-    traitKey,
-    traitKey.toLowerCase(),
-    traitKey.replace(/([A-Z])/g, '_$1').toLowerCase(),
-    ...(traitKey === 'emotionalStability' ? ['neuroticism', 'emotional_stability'] : []),
+    `BIG_FIVE_${snakeUpper}`,             // BIG_FIVE_OPENNESS
+    `BIG_FIVE${snakeUpper}`,              // BIG_FIVEOPENNESS (edge case)
+    traitKey,                              // openness
+    traitKey.toLowerCase(),                // openness
+    traitKey.replace(/([A-Z])/g, '_$1').toLowerCase(), // emotional_stability
+    ...(traitKey === 'emotionalStability'
+      ? ['neuroticism', 'emotional_stability', 'BIG_FIVE_NEUROTICISM', 'BIG_FIVE_EMOTIONAL_STABILITY']
+      : []),
   ];
   for (const v of variants) {
     if (v in profile) return Math.round(profile[v]);
