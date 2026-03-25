@@ -36,7 +36,6 @@ export function LensInitializer() {
   const isStoreInitialized = useLensStore(selectIsInitialized);
   const isStoreHydrated = useLensStore(selectIsHydrated);
   const initializeFromClerk = useLensStore((state) => state.initializeFromClerk);
-  const activeLens = useLensStore((state) => state.activeLens);
 
   // Extract stable values for dependencies
   const clerkUserId = clerkUser?.id;
@@ -84,10 +83,11 @@ export function LensInitializer() {
         break;
     }
 
-    // Check if user has a stored lens preference
-    // Read activeLens at hydration time (not from dependency)
-    const currentLens = activeLens;
-    const hasStoredLens = currentLens !== "user";
+    // Check if user has a stored lens preference via localStorage key
+    // (not by comparing activeLens value — "user" is a valid stored choice)
+    const hasStoredLens =
+      typeof window !== "undefined" &&
+      localStorage.getItem("skillsoft-lens-store") !== null;
 
     // Initialize the store
     initializeFromClerk(userRole, hasStoredLens);
@@ -99,8 +99,6 @@ export function LensInitializer() {
     clerkUserId,
     clerkUserRole,
     initializeFromClerk,
-    // NOTE: activeLens intentionally excluded to prevent infinite loop
-    // We read it once during initialization, not as a reactive dependency
   ]);
 
   // This component doesn't render anything - it's just for initialization
