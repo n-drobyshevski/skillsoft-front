@@ -47,32 +47,42 @@ export default function DashboardHeader({ currentUser, isUserLensServer }: Dashb
       transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.4 }}
       className="flex flex-col gap-4"
     >
-      <div className="space-y-1">
-        <h1 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight">
-          {greeting()}{currentUser?.firstName ? `, ${currentUser.firstName}` : ''}
-        </h1>
-        <p className="text-sm sm:text-base text-muted-foreground">
-          {isUserLens
-            ? t('userSubtitle')
-            : t('overviewSubtitle')}
-        </p>
-      </div>
-      {/* Action buttons - stack on mobile, row on larger screens */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
-        {isEditor && !isUserLens && (
-          <Button asChild variant="outline" size="default" className="w-full sm:w-auto gap-2 min-h-11 justify-center">
-            <Link href="/hr/competencies/new">
-              <Plus className="w-4 h-4" />
-              <span>{t('addCompetency')}</span>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div className="space-y-1">
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight">
+            {greeting()}{currentUser?.firstName ? `, ${currentUser.firstName}` : ''}
+          </h1>
+          <p className="text-sm sm:text-base text-muted-foreground">
+            {isUserLens
+              ? t('userSubtitle')
+              : t('overviewSubtitle')}
+          </p>
+        </div>
+        {isUserLens ? (
+          <Button asChild size="default" className="w-full sm:w-auto gap-2 min-h-11 justify-center shrink-0">
+            <Link href="/test-templates">
+              <Play className="w-4 h-4" />
+              <span>{t('browseAssessments')}</span>
             </Link>
           </Button>
+        ) : (
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 shrink-0">
+            {isEditor && (
+              <Button asChild variant="outline" size="default" className="w-full sm:w-auto gap-2 min-h-11 justify-center">
+                <Link href="/hr/competencies/new">
+                  <Plus className="w-4 h-4" />
+                  <span>{t('addCompetency')}</span>
+                </Link>
+              </Button>
+            )}
+            <Button asChild size="default" className="w-full sm:w-auto gap-2 min-h-11 justify-center">
+              <Link href="/test-templates">
+                <Play className="w-4 h-4" />
+                <span>{t('takeAssessment')}</span>
+              </Link>
+            </Button>
+          </div>
         )}
-        <Button asChild size="default" className="w-full sm:w-auto gap-2 min-h-11 justify-center">
-          <Link href="/test-templates">
-            <Play className="w-4 h-4" />
-            <span>{isUserLens ? t('browseAssessments') : t('takeAssessment')}</span>
-          </Link>
-        </Button>
       </div>
     </motion.header>
   );
