@@ -81,5 +81,22 @@
     "seconds": "{count} seconds",
     "minutes": "{count} minutes",
     "hours": "{count} hours"
+  },
+  "sessionDelete": {
+    "deleteSession": "Delete Session",
+    "deleteSessionTitle": "Delete Test Session?",
+    "deleteSessionDescription": "This will permanently delete this test session, including the result and all answers.",
+    "bulkDeleteTitle": "Delete {count} Sessions?",
+    "bulkDeleteDescription": "This will permanently delete {count} test sessions, including all results and answers.",
+    "deleting": "Deleting...",
+    "sessionDeleted": "Session deleted",
+    "sessionDeletedDescription": "The test session was successfully deleted.",
+    "sessionsDeleted": "{count} sessions deleted",
+    "sessionsDeletedDescription": "{deleted} sessions deleted successfully.",
+    "deleteError": "Delete error",
+    "deleteErrorDescription": "Failed to delete session. Please try again.",
+    "bulkDeleteErrorDescription": "Failed to delete sessions. Please try again.",
+    "deleteSelected": "Delete selected ({count})",
+    "selected": "{count} selected"
   }
 }
