@@ -101,7 +101,7 @@ export function TemplateActivityTable({
   const t = useTranslations('activity');
   const tTable = useTranslations('activity.table');
   const tCompare = useTranslations('results.comparison');
-  const tDelete = useTranslations('template');
+  const tDelete = useTranslations('activity');
   const isMobile = useIsMobile();
   const router = useRouter();
 
