@@ -7,9 +7,9 @@ import { testSessionsApi } from '@/services/api';
  * Revalidate caches after session deletion.
  */
 async function revalidateSessionCache(templateId: string) {
-  revalidatePath(`/test-templates/${templateId}/results`);
-  revalidatePath(`/test-templates/${templateId}`);
-  revalidatePath('/dashboard');
+  revalidatePath(`/test-templates/${templateId}/results`, 'page');
+  revalidatePath(`/test-templates/${templateId}`, 'page');
+  revalidatePath('/dashboard', 'page');
   revalidateTag('test-templates-stats');
 }
 

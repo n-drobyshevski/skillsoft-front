@@ -15,6 +15,10 @@ export interface ActivityCardListProps {
   selectedIds?: Set<string>;
   /** Callback when a checkbox is toggled */
   onCheckboxChange?: (sessionId: string, checked: boolean) => void;
+  /** Whether the current user is admin */
+  isAdmin?: boolean;
+  /** Callback for single delete */
+  onDeleteSingle?: (sessionId: string, userName: string) => void;
   /** Optional className */
   className?: string;
 }
@@ -33,6 +37,8 @@ export function ActivityCardList({
   isTeamFit,
   selectedIds,
   onCheckboxChange,
+  isAdmin,
+  onDeleteSingle,
   className,
 }: ActivityCardListProps) {
   if (data.length === 0) {
@@ -48,6 +54,8 @@ export function ActivityCardList({
           isTeamFit={isTeamFit}
           isSelected={selectedIds?.has(result.latestSession.sessionId)}
           onCheckboxChange={onCheckboxChange}
+          isAdmin={isAdmin}
+          onDeleteSingle={onDeleteSingle}
         />
       ))}
     </div>

@@ -2,10 +2,12 @@ import { Suspense } from 'react';
 import { notFound } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 import { testTemplatesApi, activityApi } from '@/services/api';
+import { getCurrentUserRole } from '@/services/roleApi';
 import { TemplateActivityTable } from '@/components/templates/TemplateActivityTable';
 import { ActivityStatsCard } from '@/components/templates/activity';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { UserRole } from '@/types/user';
 
 interface TemplateActivityPageProps {
   params: Promise<{ id: string }>;
@@ -27,15 +29,18 @@ export default async function TemplateActivityPage({ params }: TemplateActivityP
   const { id: templateId } = await params;
   const t = await getTranslations('activity');
 
-  // Fetch template and initial stats in parallel
-  const [template, stats] = await Promise.all([
+  // Fetch template, initial stats, and current user role in parallel
+  const [template, stats, role] = await Promise.all([
     testTemplatesApi.getTemplateById(templateId),
     activityApi.getTemplateActivityStats(templateId),
+    getCurrentUserRole(),
   ]);
 
   if (!template) {
     notFound();
   }
+
+  const isAdmin = role === UserRole.ADMIN;
 
   return (
     <div className="mx-auto w-full max-w-7xl px-4 py-6 lg:px-8">
@@ -61,6 +66,7 @@ export default async function TemplateActivityPage({ params }: TemplateActivityP
             templateId={templateId}
             templateGoal={template.goal}
             className="lg:col-span-2"
+            isAdmin={isAdmin}
           />
         </Suspense>
       </div>

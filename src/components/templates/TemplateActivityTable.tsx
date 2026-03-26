@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -9,7 +9,7 @@ import { cn } from '@/lib/utils';
 import { useTranslations } from 'next-intl';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { toast } from 'sonner';
-import { Users, RefreshCw, GitCompareArrows } from 'lucide-react';
+import { Users, RefreshCw, GitCompareArrows, Trash2 } from 'lucide-react';
 import { activityApi } from '@/services/api';
 import {
   ActivityTable,
@@ -19,6 +19,11 @@ import {
   useActivityFilters,
   getDateRangeBounds,
 } from './activity';
+import { DeleteConfirmationDialog } from '@/components/feedback/DeleteConfirmationDialog';
+import {
+  deleteTestSession,
+  bulkDeleteTestSessions,
+} from '@/actions/session-delete';
 import type { ActivityPage, ActivityFilterParams, TestActivity, UserResultSummary } from '@/types/activity';
 import type { AssessmentGoal } from '@/types/domain';
 import { createLogger } from '@/lib/logger';
@@ -72,6 +77,8 @@ export interface TemplateActivityTableProps {
   templateId: string;
   templateGoal?: AssessmentGoal;
   className?: string;
+  /** Whether the current user is admin */
+  isAdmin?: boolean;
 }
 
 /**
@@ -83,15 +90,18 @@ export interface TemplateActivityTableProps {
  * - Mobile: Card list view with horizontal scroll filters
  * - URL-synced filters (status, passed, dateRange)
  * - Pagination with sticky mobile support
+ * - Admin: bulk delete with confirmation dialog
  */
 export function TemplateActivityTable({
   templateId,
   templateGoal,
   className,
+  isAdmin,
 }: TemplateActivityTableProps) {
   const t = useTranslations('activity');
   const tTable = useTranslations('activity.table');
   const tCompare = useTranslations('results.comparison');
+  const tDelete = useTranslations('template.sessionDelete');
   const isMobile = useIsMobile();
   const router = useRouter();
 
@@ -116,6 +126,16 @@ export function TemplateActivityTable({
   // Compare selection state (TEAM_FIT only)
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
+  // Admin delete state (separate from TEAM_FIT comparison)
+  const [adminSelectedIds, setAdminSelectedIds] = useState<Set<string>>(new Set());
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<
+    | { type: 'single'; sessionId: string; entityName: string }
+    | { type: 'bulk' }
+    | null
+  >(null);
+  const [isDeleting, startDeleteTransition] = useTransition();
+
   const handleCheckboxChange = (sessionId: string, checked: boolean) => {
     setSelectedIds((prev) => {
       const next = new Set(prev);
@@ -135,6 +155,82 @@ export function TemplateActivityTable({
   const handleCompare = () => {
     const ids = Array.from(selectedIds).join(',');
     router.push(`/test-templates/compare?templateId=${templateId}&sessionIds=${ids}`);
+  };
+
+  const handleAdminCheckboxChange = (sessionId: string, checked: boolean) => {
+    setAdminSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (checked) next.add(sessionId);
+      else next.delete(sessionId);
+      return next;
+    });
+  };
+
+  const handleAdminSelectAll = () => {
+    if (!data) return;
+    const grouped = groupByLatestUserAttempt(data.content);
+    const allIds = grouped.map((r) => r.latestSession.sessionId);
+    if (adminSelectedIds.size === allIds.length) {
+      setAdminSelectedIds(new Set());
+    } else {
+      setAdminSelectedIds(new Set(allIds));
+    }
+  };
+
+  const handleDeleteSingle = (sessionId: string, userName: string) => {
+    setDeleteTarget({ type: 'single', sessionId, entityName: userName });
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteBulk = () => {
+    setDeleteTarget({ type: 'bulk' });
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = () => {
+    if (!deleteTarget) return;
+
+    startDeleteTransition(async () => {
+      if (deleteTarget.type === 'single') {
+        const result = await deleteTestSession(deleteTarget.sessionId, templateId);
+        if (result.success) {
+          toast.success(tDelete('sessionDeleted'), {
+            description: tDelete('sessionDeletedDescription'),
+          });
+          setAdminSelectedIds((prev) => {
+            const next = new Set(prev);
+            next.delete(deleteTarget.sessionId);
+            return next;
+          });
+          fetchData();
+        } else {
+          toast.error(tDelete('deleteError'), {
+            description: tDelete('deleteErrorDescription'),
+          });
+        }
+      } else {
+        const ids = Array.from(adminSelectedIds);
+        const result = await bulkDeleteTestSessions(ids, templateId);
+        if (result.success) {
+          toast.success(
+            tDelete('sessionsDeleted', { count: result.deleted ?? ids.length }),
+            {
+              description: tDelete('sessionsDeletedDescription', {
+                deleted: result.deleted ?? ids.length,
+              }),
+            }
+          );
+          setAdminSelectedIds(new Set());
+          fetchData();
+        } else {
+          toast.error(tDelete('deleteError'), {
+            description: tDelete('bulkDeleteErrorDescription'),
+          });
+        }
+      }
+      setDeleteDialogOpen(false);
+      setDeleteTarget(null);
+    });
   };
 
   const pageSize = 10;
@@ -176,7 +272,7 @@ export function TemplateActivityTable({
   };
 
   // Fetch on mount and filter changes
-   
+
   useEffect(() => {
     fetchData();
   }, [templateId, filters]);
@@ -208,6 +304,24 @@ export function TemplateActivityTable({
         />
       </CardHeader>
 
+      {/* Admin Bulk Delete Toolbar */}
+      {isAdmin && adminSelectedIds.size > 0 && (
+        <div className="flex items-center gap-3 px-4 py-2 bg-muted/30 border-t">
+          <span className="text-sm text-muted-foreground">
+            {tDelete('selected', { count: adminSelectedIds.size })}
+          </span>
+          <Button
+            variant="destructive"
+            size="sm"
+            className="h-8"
+            onClick={handleDeleteBulk}
+          >
+            <Trash2 className="h-4 w-4 mr-1.5" />
+            {tDelete('deleteSelected', { count: adminSelectedIds.size })}
+          </Button>
+        </div>
+      )}
+
       <CardContent className="pt-0">
         {loading ? (
           <ActivityTableSkeleton isMobile={isMobile} />
@@ -224,6 +338,11 @@ export function TemplateActivityTable({
             isTeamFit={isTeamFit}
             selectedIds={selectedIds}
             onCheckboxChange={handleCheckboxChange}
+            isAdmin={isAdmin}
+            adminSelectedIds={adminSelectedIds}
+            onAdminCheckboxChange={handleAdminCheckboxChange}
+            onAdminSelectAll={handleAdminSelectAll}
+            onDeleteSingle={handleDeleteSingle}
           />
         )}
       </CardContent>
@@ -250,6 +369,32 @@ export function TemplateActivityTable({
           </div>
         </div>
       )}
+
+      {/* Delete Confirmation Dialog */}
+      {isAdmin && (
+        <DeleteConfirmationDialog
+          open={deleteDialogOpen}
+          onOpenChange={setDeleteDialogOpen}
+          onConfirm={confirmDelete}
+          title={
+            deleteTarget?.type === 'single'
+              ? tDelete('deleteSessionTitle')
+              : tDelete('bulkDeleteTitle', { count: adminSelectedIds.size })
+          }
+          description={
+            deleteTarget?.type === 'single'
+              ? tDelete('deleteSessionDescription')
+              : tDelete('bulkDeleteDescription', { count: adminSelectedIds.size })
+          }
+          entityName={
+            deleteTarget?.type === 'single'
+              ? deleteTarget.entityName
+              : `${adminSelectedIds.size} sessions`
+          }
+          isDeleting={isDeleting}
+          confirmButtonText={tDelete('deleteSession')}
+        />
+      )}
     </Card>
   );
 }
@@ -265,6 +410,11 @@ function GroupedActivityView({
   isTeamFit,
   selectedIds,
   onCheckboxChange,
+  isAdmin,
+  adminSelectedIds,
+  onAdminCheckboxChange,
+  onAdminSelectAll,
+  onDeleteSingle,
 }: {
   data: ActivityPage;
   filters: { page: number };
@@ -273,6 +423,11 @@ function GroupedActivityView({
   isTeamFit: boolean;
   selectedIds: Set<string>;
   onCheckboxChange: (sessionId: string, checked: boolean) => void;
+  isAdmin?: boolean;
+  adminSelectedIds?: Set<string>;
+  onAdminCheckboxChange?: (sessionId: string, checked: boolean) => void;
+  onAdminSelectAll?: () => void;
+  onDeleteSingle?: (sessionId: string, userName: string) => void;
 }) {
   // Group activities by user, keeping only latest attempt per user
   const groupedData = groupByLatestUserAttempt(data.content);
@@ -286,6 +441,11 @@ function GroupedActivityView({
           isTeamFit={isTeamFit}
           selectedIds={selectedIds}
           onCheckboxChange={onCheckboxChange}
+          isAdmin={isAdmin}
+          adminSelectedIds={adminSelectedIds}
+          onAdminCheckboxChange={onAdminCheckboxChange}
+          onAdminSelectAll={onAdminSelectAll}
+          onDeleteSingle={onDeleteSingle}
         />
       </div>
 
@@ -296,6 +456,8 @@ function GroupedActivityView({
           isTeamFit={isTeamFit}
           selectedIds={selectedIds}
           onCheckboxChange={onCheckboxChange}
+          isAdmin={isAdmin}
+          onDeleteSingle={onDeleteSingle}
         />
       </div>
 

@@ -6,7 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useTranslations } from 'next-intl';
-import { Timer } from 'lucide-react';
+import { Timer, Trash2 } from 'lucide-react';
 import type { UserResultSummary } from '@/types/activity';
 
 export interface ActivityCardProps {
@@ -18,6 +18,10 @@ export interface ActivityCardProps {
   isSelected?: boolean;
   /** Callback when checkbox is toggled */
   onCheckboxChange?: (sessionId: string, checked: boolean) => void;
+  /** Whether the current user is admin */
+  isAdmin?: boolean;
+  /** Callback for single delete */
+  onDeleteSingle?: (sessionId: string, userName: string) => void;
   /** Optional className */
   className?: string;
 }
@@ -31,8 +35,17 @@ export interface ActivityCardProps {
  * - Prominent score display with color coding
  * - 44px minimum touch targets
  * - Dark mode support
+ * - Admin: delete button at bottom (no checkbox on mobile per spec)
  */
-export function ActivityCard({ result, isTeamFit, isSelected, onCheckboxChange, className }: ActivityCardProps) {
+export function ActivityCard({
+  result,
+  isTeamFit,
+  isSelected,
+  onCheckboxChange,
+  isAdmin,
+  onDeleteSingle,
+  className,
+}: ActivityCardProps) {
   const router = useRouter();
   const t = useTranslations('activity');
   const { latestSession } = result;
@@ -133,6 +146,23 @@ export function ActivityCard({ result, isTeamFit, isSelected, onCheckboxChange, 
           {formatDate(latestSession.occurredAt)}
         </span>
       </div>
+
+      {/* Admin delete button — no checkbox on mobile per spec */}
+      {isAdmin && (
+        <div className="px-3 pb-3 pt-1 border-t border-border/50">
+          <button
+            type="button"
+            className="flex items-center gap-1.5 text-xs text-destructive hover:text-destructive/80 min-h-[44px] w-full justify-center"
+            onClick={(e) => {
+              e.stopPropagation();
+              onDeleteSingle?.(latestSession.sessionId, result.userName);
+            }}
+          >
+            <Trash2 className="h-3.5 w-3.5" />
+            Delete Session
+          </button>
+        </div>
+      )}
     </div>
   );
 }

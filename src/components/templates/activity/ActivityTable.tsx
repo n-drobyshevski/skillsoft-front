@@ -13,7 +13,16 @@ import {
 } from '@/components/ui/table';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { ExternalLink, MoreHorizontal, Trash2 } from 'lucide-react';
 import type { UserResultSummary } from '@/types/activity';
 
 export interface ActivityTableProps {
@@ -25,6 +34,16 @@ export interface ActivityTableProps {
   selectedIds?: Set<string>;
   /** Callback when a checkbox is toggled */
   onCheckboxChange?: (sessionId: string, checked: boolean) => void;
+  /** Whether the current user is admin */
+  isAdmin?: boolean;
+  /** Admin-selected session IDs for bulk delete */
+  adminSelectedIds?: Set<string>;
+  /** Callback when admin checkbox toggled */
+  onAdminCheckboxChange?: (sessionId: string, checked: boolean) => void;
+  /** Toggle all admin checkboxes */
+  onAdminSelectAll?: () => void;
+  /** Callback for single delete action */
+  onDeleteSingle?: (sessionId: string, userName: string) => void;
   /** Optional className */
   className?: string;
 }
@@ -37,22 +56,44 @@ export interface ActivityTableProps {
  * - User avatar + name with attempt count
  * - Score with color coding (emerald for pass)
  * - Pass/Fail badge, Time, Date columns
+ * - Admin: separate checkbox column + actions dropdown
  */
 export function ActivityTable({
   data,
   isTeamFit,
   selectedIds,
   onCheckboxChange,
+  isAdmin,
+  adminSelectedIds,
+  onAdminCheckboxChange,
+  onAdminSelectAll,
+  onDeleteSingle,
   className,
 }: ActivityTableProps) {
   const t = useTranslations('activity');
   const tTable = useTranslations('activity.table');
+
+  const allAdminSelected =
+    data.length > 0 && adminSelectedIds?.size === data.length;
+  const someAdminSelected =
+    (adminSelectedIds?.size ?? 0) > 0 && !allAdminSelected;
 
   return (
     <div className={cn('overflow-x-auto', className)}>
       <Table>
         <TableHeader>
           <TableRow>
+            {/* Admin bulk-delete checkbox column */}
+            {isAdmin && (
+              <TableHead className="w-[40px] pl-4">
+                <Checkbox
+                  checked={allAdminSelected}
+                  data-state={someAdminSelected ? 'indeterminate' : undefined}
+                  onCheckedChange={onAdminSelectAll}
+                  aria-label="Select all"
+                />
+              </TableHead>
+            )}
             {isTeamFit && (
               <TableHead className="w-[40px] pl-4">
                 <span className="sr-only">Select</span>
@@ -63,6 +104,11 @@ export function ActivityTable({
             <TableHead className="w-[80px]">{tTable('result')}</TableHead>
             <TableHead className="w-[100px]">{tTable('timeSpent')}</TableHead>
             <TableHead className="w-[120px]">{tTable('date')}</TableHead>
+            {isAdmin && (
+              <TableHead className="w-[60px] text-right pr-4">
+                <span className="sr-only">Actions</span>
+              </TableHead>
+            )}
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -74,6 +120,10 @@ export function ActivityTable({
               isTeamFit={isTeamFit}
               isSelected={selectedIds?.has(result.latestSession.sessionId)}
               onCheckboxChange={onCheckboxChange}
+              isAdmin={isAdmin}
+              isAdminSelected={adminSelectedIds?.has(result.latestSession.sessionId)}
+              onAdminCheckboxChange={onAdminCheckboxChange}
+              onDeleteSingle={onDeleteSingle}
             />
           ))}
         </TableBody>
@@ -91,9 +141,23 @@ interface UserResultRowProps {
   isTeamFit?: boolean;
   isSelected?: boolean;
   onCheckboxChange?: (sessionId: string, checked: boolean) => void;
+  isAdmin?: boolean;
+  isAdminSelected?: boolean;
+  onAdminCheckboxChange?: (sessionId: string, checked: boolean) => void;
+  onDeleteSingle?: (sessionId: string, userName: string) => void;
 }
 
-function UserResultRow({ result, t, isTeamFit, isSelected, onCheckboxChange }: UserResultRowProps) {
+function UserResultRow({
+  result,
+  t,
+  isTeamFit,
+  isSelected,
+  onCheckboxChange,
+  isAdmin,
+  isAdminSelected,
+  onAdminCheckboxChange,
+  onDeleteSingle,
+}: UserResultRowProps) {
   const router = useRouter();
   const initials = getInitials(result.userName);
   const { latestSession } = result;
@@ -103,10 +167,24 @@ function UserResultRow({ result, t, isTeamFit, isSelected, onCheckboxChange }: U
     <TableRow
       className={cn(
         isTeamFit && isSelected && 'bg-primary/5',
+        isAdmin && isAdminSelected && 'bg-destructive/5',
         isCompleted && 'cursor-pointer',
       )}
       onClick={isCompleted ? () => router.push(`/test-templates/results/${latestSession.sessionId}`) : undefined}
     >
+      {/* Admin checkbox — separate from TEAM_FIT comparison */}
+      {isAdmin && (
+        <TableCell className="pl-4 py-2">
+          <Checkbox
+            checked={!!isAdminSelected}
+            onCheckedChange={(checked) =>
+              onAdminCheckboxChange?.(latestSession.sessionId, !!checked)
+            }
+            onClick={(e) => e.stopPropagation()}
+            aria-label={`Admin select ${result.userName}`}
+          />
+        </TableCell>
+      )}
       {/* Checkbox for TEAM_FIT comparison */}
       {isTeamFit && (
         <TableCell className="pl-4 py-2">
@@ -116,6 +194,7 @@ function UserResultRow({ result, t, isTeamFit, isSelected, onCheckboxChange }: U
               onCheckedChange={(checked) =>
                 onCheckboxChange?.(latestSession.sessionId, !!checked)
               }
+              onClick={(e) => e.stopPropagation()}
               aria-label={`Select ${result.userName}`}
             />
           )}
@@ -181,6 +260,50 @@ function UserResultRow({ result, t, isTeamFit, isSelected, onCheckboxChange }: U
       <TableCell className="text-xs text-muted-foreground">
         {formatDate(latestSession.occurredAt)}
       </TableCell>
+
+      {/* Admin Actions dropdown */}
+      {isAdmin && (
+        <TableCell className="pr-4 py-2 text-right">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                className="h-8 w-8 p-0"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <MoreHorizontal className="h-4 w-4" />
+                <span className="sr-only">Actions</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              {isCompleted && (
+                <>
+                  <DropdownMenuItem
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      router.push(`/test-templates/results/${latestSession.sessionId}`);
+                    }}
+                  >
+                    <ExternalLink className="h-4 w-4 mr-2" />
+                    View Results
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                </>
+              )}
+              <DropdownMenuItem
+                className="text-destructive focus:text-destructive"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDeleteSingle?.(latestSession.sessionId, result.userName);
+                }}
+              >
+                <Trash2 className="h-4 w-4 mr-2" />
+                Delete Session
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </TableCell>
+      )}
     </TableRow>
   );
 }
