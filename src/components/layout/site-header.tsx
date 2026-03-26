@@ -22,6 +22,8 @@ import { cn } from "@/lib/utils";
 import { useScrollDirection } from "@/hooks/use-scroll-direction";
 import { timing } from "@/lib/animation-config";
 import { LanguageToggle } from "@/components/language-switcher";
+import { useGlobalShortcuts } from "@/hooks/useGlobalShortcuts";
+import { KeyboardShortcutsModal, GLOBAL_SHORTCUTS } from "@/components/common/KeyboardShortcutsModal";
 
 interface SiteHeaderProps {
   title?: string;
@@ -47,6 +49,9 @@ export function SiteHeader({ title = "Dashboard", breadcrumbs }: SiteHeaderProps
   const pathname = usePathname();
   const { customBreadcrumbs } = useBreadcrumbContext();
   const { isAtTop, shouldShowNav } = useScrollDirection();
+
+  // Global keyboard shortcuts (Shift+D: theme, Shift+L: language)
+  useGlobalShortcuts();
 
   // Generate breadcrumbs based on pathname if not provided
   const defaultBreadcrumbs =
@@ -239,6 +244,13 @@ export function SiteHeader({ title = "Dashboard", breadcrumbs }: SiteHeaderProps
           </div>
         </div>
       </div>
+
+      {/* Global keyboard shortcuts help — press ? to open */}
+      <KeyboardShortcutsModal
+        shortcuts={GLOBAL_SHORTCUTS}
+        context="Global"
+        enableKeyboardTrigger
+      />
     </motion.header>
   );
 }

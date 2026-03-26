@@ -27,6 +27,7 @@ export {
   TEST_PLAYER_SHORTCUTS,
   FLAGGED_ITEMS_SHORTCUTS,
   INSIGHTS_PANEL_SHORTCUTS,
+  GLOBAL_SHORTCUTS,
 } from './KeyboardShortcutsModal';
 export type { ShortcutDefinition, KeyboardShortcutsModalProps } from './KeyboardShortcutsModal';
 
