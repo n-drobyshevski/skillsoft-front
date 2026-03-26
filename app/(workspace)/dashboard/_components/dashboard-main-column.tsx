@@ -151,12 +151,12 @@ export default function DashboardMainColumn({
 
         {/* Category Distribution Chart */}
         <motion.div variants={fadeInUp}>
-          <Card className="hover:shadow-md hover:border-primary/30 hover:-translate-y-px transition-all duration-200 motion-reduce:transition-none">
-            <CardHeader className="pb-2">
+          <Card className="hover:shadow-md hover:border-primary/30 hover:-translate-y-px transition-all duration-200 motion-reduce:transition-none overflow-hidden">
+            <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-muted flex items-center justify-center">
-                    <BarChart3 className="w-4 h-4 text-muted-foreground" />
+                  <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-primary/10 flex items-center justify-center">
+                    <BarChart3 className="w-4 h-4 text-primary" />
                   </div>
                   <div>
                     <CardTitle className="text-base">{t('competencyDistribution')}</CardTitle>
@@ -170,14 +170,61 @@ export default function DashboardMainColumn({
                   </Link>
                 </Button>
               </div>
-            </CardHeader>
-            <CardContent className="pt-2">
-              <ClientOnly fallback={
-                <div className="h-[260px] flex items-center justify-center text-muted-foreground">
-                  <div className="flex items-center gap-2">
-                    <LineChart className="w-4 h-4 animate-pulse" />
-                    <span className="text-sm">{t('loadingChart')}</span>
+
+              {/* Summary stats row */}
+              {(() => {
+                const categories = Object.entries(stats.competenciesByCategory);
+                const totalComp = categories.reduce((s, [, v]) => s + v, 0);
+                const topCategory = categories.length
+                  ? categories.reduce((a, b) => (b[1] > a[1] ? b : a))
+                  : null;
+                return (
+                  <div className="flex items-center gap-4 mt-3 pt-3 border-t border-border/50">
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[11px] text-muted-foreground">Total</p>
+                      <p className="text-lg font-semibold tabular-nums leading-tight">{totalComp}</p>
+                    </div>
+                    <div className="w-px h-8 bg-border/50" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[11px] text-muted-foreground">Categories</p>
+                      <p className="text-lg font-semibold tabular-nums leading-tight">{categories.length}</p>
+                    </div>
+                    {topCategory && (
+                      <>
+                        <div className="w-px h-8 bg-border/50" />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-[11px] text-muted-foreground">Largest</p>
+                          <p className="text-sm font-medium leading-tight truncate" title={topCategory[0].replace(/_/g, ' ')}>
+                            {topCategory[0].replace(/_/g, ' ').split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ')}
+                          </p>
+                        </div>
+                      </>
+                    )}
                   </div>
+                );
+              })()}
+            </CardHeader>
+            <CardContent className="pt-0 pb-4">
+              <ClientOnly fallback={
+                <div className="h-[250px] md:h-[300px] flex flex-col items-center justify-center text-muted-foreground gap-3">
+                  <div className="w-full max-w-[280px] space-y-3 px-4">
+                    <div className="flex items-end justify-between gap-2 h-[140px]">
+                      {[60, 85, 45, 70, 30].map((h, i) => (
+                        <div
+                          key={i}
+                          className="flex-1 rounded-t-md bg-muted animate-pulse"
+                          style={{ height: `${h}%`, animationDelay: `${i * 100}ms` }}
+                        />
+                      ))}
+                    </div>
+                    <div className="h-px bg-border/50" />
+                    <div className="flex justify-between gap-2">
+                      {[1, 2, 3, 4, 5].map((i) => (
+                        <div key={i} className="flex-1 h-2.5 rounded bg-muted animate-pulse" style={{ animationDelay: `${i * 80}ms` }} />
+                      ))}
+                    </div>
+                  </div>
+                  <span className="text-xs">{t('loadingChart')}</span>
                 </div>
               }>
                 <CompetencyByCategoryBarChart
