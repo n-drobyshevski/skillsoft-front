@@ -46,6 +46,8 @@ interface SortState {
 // Props
 // ============================================================================
 
+const ROW_VISIBLE_LIMIT = 7;
+
 interface CompetencyDetailTableProps {
   competencies: CompetencyScore[];
   passingScore: number;
@@ -60,6 +62,7 @@ export const CompetencyDetailTable = forwardRef<HTMLDivElement, CompetencyDetail
   function CompetencyDetailTable({ competencies, passingScore, onRowClick }, ref) {
     const t = useTranslations('results.shared.detailTable');
     const [expanded, setExpanded] = useState(true);
+    const [rowsExpanded, setRowsExpanded] = useState(false);
     const [sort, setSort] = useState<SortState>({ key: 'score', dir: 'desc' });
 
     const rows = useMemo(() => {
@@ -88,6 +91,11 @@ export const CompetencyDetailTable = forwardRef<HTMLDivElement, CompetencyDetail
       });
     }, [competencies, passingScore, sort]);
 
+    const hasRowOverflow = rows.length > ROW_VISIBLE_LIMIT;
+    const visibleRows = hasRowOverflow ? rows.slice(0, ROW_VISIBLE_LIMIT) : rows;
+    const hiddenRows = hasRowOverflow ? rows.slice(ROW_VISIBLE_LIMIT) : [];
+    const hiddenRowCount = hiddenRows.length;
+
     function toggleSort(key: SortKey) {
       setSort((prev) =>
         prev.key === key
@@ -102,6 +110,57 @@ export const CompetencyDetailTable = forwardRef<HTMLDivElement, CompetencyDetail
         <span className="text-emerald-400 ml-0.5">
           {sort.dir === 'asc' ? '↑' : '↓'}
         </span>
+      );
+    }
+
+    function renderRow(row: (typeof rows)[number]) {
+      const colors = getStatusColor(Math.round(row.percentage), row.benchmark);
+      const gapStr = row.gap >= 0 ? `+${row.gap}` : String(row.gap);
+      const ciLower = row.ciLower != null ? Math.round(row.ciLower) : null;
+      const ciUpper = row.ciUpper != null ? Math.round(row.ciUpper) : null;
+      const alpha = row.cronbachAlpha != null ? row.cronbachAlpha.toFixed(2) : '—';
+      const pct = row.percentile ?? null;
+
+      return (
+        <tr
+          key={row.competencyId}
+          className="border-t border-border hover:bg-muted/50 transition-colors cursor-pointer"
+          onClick={() => onRowClick?.(row.competencyId)}
+        >
+          <td className="px-3 py-2.5 pl-6 font-medium text-foreground whitespace-nowrap">
+            {row.competencyName}
+          </td>
+          <td className={cn('px-3 py-2.5 tabular-nums font-semibold', colors.text)}>
+            {Math.round(row.percentage)}%
+          </td>
+          <td className="px-3 py-2.5 tabular-nums text-muted-foreground">
+            {row.benchmark}%
+          </td>
+          <td className={cn('px-3 py-2.5 tabular-nums font-medium', colors.text)}>
+            {gapStr}
+          </td>
+          <td className="px-3 py-2.5 tabular-nums text-muted-foreground/70">
+            {ciLower != null && ciUpper != null ? `${ciLower}–${ciUpper}` : '—'}
+          </td>
+          <td className="px-3 py-2.5 tabular-nums text-muted-foreground">
+            {alpha}
+          </td>
+          <td className="px-3 py-2.5 pr-6 text-right">
+            {pct != null ? (
+              <span className="inline-flex items-center gap-2">
+                <span className="w-16 h-1 bg-muted rounded-full overflow-hidden inline-block">
+                  <span
+                    className={cn('block h-full rounded-full', getPercentileColor(pct))}
+                    style={{ width: `${pct}%` }}
+                  />
+                </span>
+                <span className="tabular-nums text-xs">{t('percentileSuffix', { value: pct })}</span>
+              </span>
+            ) : (
+              <span className="text-muted-foreground/50">—</span>
+            )}
+          </td>
+        </tr>
       );
     }
 
@@ -142,7 +201,7 @@ export const CompetencyDetailTable = forwardRef<HTMLDivElement, CompetencyDetail
           id="detail-table-body"
           className={cn(
             'overflow-hidden transition-all duration-400',
-            expanded ? 'max-h-[2000px] opacity-100' : 'max-h-0 opacity-0'
+            expanded ? 'max-h-[4000px] opacity-100' : 'max-h-0 opacity-0'
           )}
         >
           <div className="overflow-x-auto">
@@ -193,67 +252,45 @@ export const CompetencyDetailTable = forwardRef<HTMLDivElement, CompetencyDetail
                   </th>
                 </tr>
               </thead>
-              <tbody>
-                {rows.map((row) => {
-                  const colors = getStatusColor(Math.round(row.percentage), row.benchmark);
-                  const gapStr = row.gap >= 0 ? `+${row.gap}` : String(row.gap);
-                  const ciLower = row.ciLower != null ? Math.round(row.ciLower) : null;
-                  const ciUpper = row.ciUpper != null ? Math.round(row.ciUpper) : null;
-                  const alpha = row.cronbachAlpha != null ? row.cronbachAlpha.toFixed(2) : '—';
-                  const pct = row.percentile ?? null;
 
-                  return (
-                    <tr
-                      key={row.competencyId}
-                      className="border-t border-border hover:bg-muted/50 transition-colors cursor-pointer"
-                      onClick={() => onRowClick?.(row.competencyId)}
-                    >
-                      {/* Competency name */}
-                      <td className="px-3 py-2.5 pl-6 font-medium text-foreground whitespace-nowrap">
-                        {row.competencyName}
-                      </td>
-                      {/* Score */}
-                      <td className={cn('px-3 py-2.5 tabular-nums font-semibold', colors.text)}>
-                        {Math.round(row.percentage)}%
-                      </td>
-                      {/* Benchmark */}
-                      <td className="px-3 py-2.5 tabular-nums text-muted-foreground">
-                        {row.benchmark}%
-                      </td>
-                      {/* Gap */}
-                      <td className={cn('px-3 py-2.5 tabular-nums font-medium', colors.text)}>
-                        {gapStr}
-                      </td>
-                      {/* CI 95% */}
-                      <td className="px-3 py-2.5 tabular-nums text-muted-foreground/70">
-                        {ciLower != null && ciUpper != null ? `${ciLower}–${ciUpper}` : '—'}
-                      </td>
-                      {/* Cronbach α */}
-                      <td className="px-3 py-2.5 tabular-nums text-muted-foreground">
-                        {alpha}
-                      </td>
-                      {/* Percentile with mini bar */}
-                      <td className="px-3 py-2.5 pr-6 text-right">
-                        {pct != null ? (
-                          <span className="inline-flex items-center gap-2">
-                            <span className="w-16 h-1 bg-muted rounded-full overflow-hidden inline-block">
-                              <span
-                                className={cn('block h-full rounded-full', getPercentileColor(pct))}
-                                style={{ width: `${pct}%` }}
-                              />
-                            </span>
-                            <span className="tabular-nums text-xs">{t('percentileSuffix', { value: pct })}</span>
-                          </span>
-                        ) : (
-                          <span className="text-muted-foreground/50">—</span>
-                        )}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
+              {/* Always-visible rows */}
+              <tbody>{visibleRows.map(renderRow)}</tbody>
+
+              {/* Overflow rows — conditionally rendered */}
+              {hasRowOverflow && rowsExpanded && (
+                <tbody className="animate-in fade-in duration-200">
+                  {hiddenRows.map(renderRow)}
+                </tbody>
+              )}
             </table>
           </div>
+
+          {/* Row toggle button */}
+          {hasRowOverflow && (
+            <button
+              type="button"
+              onClick={() => setRowsExpanded((prev) => !prev)}
+              className={cn(
+                'w-full flex items-center justify-center gap-1.5 py-2.5 border-t border-border',
+                'text-xs font-medium text-muted-foreground',
+                'hover:bg-muted/60 hover:text-foreground',
+                'transition-colors duration-200 touch-manipulation',
+              )}
+              aria-expanded={rowsExpanded}
+            >
+              <span>
+                {rowsExpanded
+                  ? t('showLessRows')
+                  : t('showMoreRows', { count: hiddenRowCount })}
+              </span>
+              <ChevronDown
+                className={cn(
+                  'size-3.5 transition-transform duration-300',
+                  rowsExpanded && 'rotate-180',
+                )}
+              />
+            </button>
+          )}
         </div>
       </Card>
       </TooltipProvider>

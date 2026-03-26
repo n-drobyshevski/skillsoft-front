@@ -255,7 +255,9 @@
       "tipGap": "Difference between your score and the benchmark. Positive means you exceed it; negative means a gap.",
       "tipCI": "95% confidence interval — the range within which your true score likely falls.",
       "tipAlpha": "Cronbach's alpha measures internal consistency. Values ≥ 0.70 indicate reliable measurement.",
-      "tipPercentile": "Your ranking compared to other candidates. 75th means you scored higher than 75% of participants."
+      "tipPercentile": "Your ranking compared to other candidates. 75th means you scored higher than 75% of participants.",
+      "showMoreRows": "Show {count} more rows",
+      "showLessRows": "Show less"
     },
     "metricCards": {
       "ariaLabel": "Key metrics",
@@ -267,7 +269,27 @@
       "statusMeets": "MEETS",
       "statusBelow": "BELOW",
       "benchLabel": "bench {value}",
-      "attemptCount": "{count} attempts"
+      "attemptCount": "{count} attempts",
+      "showMore": "Show {count} more",
+      "showLess": "Show less",
+      "tipScore": "Your percentage score for this competency",
+      "tipGap": "Difference between your score and the benchmark",
+      "tipBench": "Target score set by the job profile or O*NET benchmark",
+      "tipBar": "Score {score}% vs benchmark {bench}%",
+      "tipTrend": "Score progression across previous attempts",
+      "tipStatus": {
+        "exceeds": "Your score exceeds the benchmark — strong qualification",
+        "meets": "Your score meets the benchmark — within acceptable range",
+        "below": "Your score is below the benchmark — may need development"
+      },
+      "filterAriaLabel": "Filter by status",
+      "filterClear": "Clear",
+      "countTotal": "{count} competencies",
+      "countFiltered": "{shown} of {total}"
+    },
+    "gapChart": {
+      "showMore": "Show {count} more",
+      "showLess": "Show less"
     }
   },
   "comparison": {
