@@ -104,7 +104,7 @@ function WorkspaceLayoutContent({ children }: { children: React.ReactNode }) {
           // Immersive: full viewport, no sidebar
           // Focused: constrained height for scroll containment (builder, etc.)
           // Default: min-height allows natural document flow
-          isImmersive ? "ml-0 p-0 h-dvh" : isFocused ? "h-dvh overflow-y-auto" : "min-h-screen",
+          isImmersive ? "ml-0 p-0 h-dvh" : isFocused ? "h-dvh overflow-hidden" : "min-h-screen",
           isTransitioning && "will-change-transform"
         )}
       >
@@ -122,7 +122,7 @@ function WorkspaceLayoutContent({ children }: { children: React.ReactNode }) {
         <main
           id="main-content"
           className={cn(
-            "flex flex-1 flex-col focus:outline-none overflow-y-auto mobile-container min-h-0",
+            "flex flex-1 flex-col focus:outline-none overflow-hidden mobile-container min-h-0",
             "transition-all duration-300 ease-in-out",
             (isImmersive || isFocused) && "max-w-full h-full"
           )}
