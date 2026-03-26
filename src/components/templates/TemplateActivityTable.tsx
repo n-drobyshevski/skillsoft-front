@@ -101,7 +101,7 @@ export function TemplateActivityTable({
   const t = useTranslations('activity');
   const tTable = useTranslations('activity.table');
   const tCompare = useTranslations('results.comparison');
-  const tDelete = useTranslations('template.sessionDelete');
+  const tDelete = useTranslations('template');
   const isMobile = useIsMobile();
   const router = useRouter();
 
@@ -194,8 +194,8 @@ export function TemplateActivityTable({
       if (deleteTarget.type === 'single') {
         const result = await deleteTestSession(deleteTarget.sessionId, templateId);
         if (result.success) {
-          toast.success(tDelete('sessionDeleted'), {
-            description: tDelete('sessionDeletedDescription'),
+          toast.success(tDelete('sessionDelete.sessionDeleted'), {
+            description: tDelete('sessionDelete.sessionDeletedDescription'),
           });
           setAdminSelectedIds((prev) => {
             const next = new Set(prev);
@@ -204,8 +204,8 @@ export function TemplateActivityTable({
           });
           fetchData();
         } else {
-          toast.error(tDelete('deleteError'), {
-            description: tDelete('deleteErrorDescription'),
+          toast.error(tDelete('sessionDelete.deleteError'), {
+            description: tDelete('sessionDelete.deleteErrorDescription'),
           });
         }
       } else {
@@ -213,9 +213,9 @@ export function TemplateActivityTable({
         const result = await bulkDeleteTestSessions(ids, templateId);
         if (result.success) {
           toast.success(
-            tDelete('sessionsDeleted', { count: result.deleted ?? ids.length }),
+            tDelete('sessionDelete.sessionsDeleted', { count: result.deleted ?? ids.length }),
             {
-              description: tDelete('sessionsDeletedDescription', {
+              description: tDelete('sessionDelete.sessionsDeletedDescription', {
                 deleted: result.deleted ?? ids.length,
               }),
             }
@@ -223,8 +223,8 @@ export function TemplateActivityTable({
           setAdminSelectedIds(new Set());
           fetchData();
         } else {
-          toast.error(tDelete('deleteError'), {
-            description: tDelete('bulkDeleteErrorDescription'),
+          toast.error(tDelete('sessionDelete.deleteError'), {
+            description: tDelete('sessionDelete.bulkDeleteErrorDescription'),
           });
         }
       }
@@ -308,7 +308,7 @@ export function TemplateActivityTable({
       {isAdmin && adminSelectedIds.size > 0 && (
         <div className="flex items-center gap-3 px-4 py-2 bg-muted/30 border-t">
           <span className="text-sm text-muted-foreground">
-            {tDelete('selected', { count: adminSelectedIds.size })}
+            {tDelete('sessionDelete.selected', { count: adminSelectedIds.size })}
           </span>
           <Button
             variant="destructive"
@@ -317,7 +317,7 @@ export function TemplateActivityTable({
             onClick={handleDeleteBulk}
           >
             <Trash2 className="h-4 w-4 mr-1.5" />
-            {tDelete('deleteSelected', { count: adminSelectedIds.size })}
+            {tDelete('sessionDelete.deleteSelected', { count: adminSelectedIds.size })}
           </Button>
         </div>
       )}
@@ -378,13 +378,13 @@ export function TemplateActivityTable({
           onConfirm={confirmDelete}
           title={
             deleteTarget?.type === 'single'
-              ? tDelete('deleteSessionTitle')
-              : tDelete('bulkDeleteTitle', { count: adminSelectedIds.size })
+              ? tDelete('sessionDelete.deleteSessionTitle')
+              : tDelete('sessionDelete.bulkDeleteTitle', { count: adminSelectedIds.size })
           }
           description={
             deleteTarget?.type === 'single'
-              ? tDelete('deleteSessionDescription')
-              : tDelete('bulkDeleteDescription', { count: adminSelectedIds.size })
+              ? tDelete('sessionDelete.deleteSessionDescription')
+              : tDelete('sessionDelete.bulkDeleteDescription', { count: adminSelectedIds.size })
           }
           entityName={
             deleteTarget?.type === 'single'
@@ -392,7 +392,7 @@ export function TemplateActivityTable({
               : `${adminSelectedIds.size} sessions`
           }
           isDeleting={isDeleting}
-          confirmButtonText={tDelete('deleteSession')}
+          confirmButtonText={tDelete('sessionDelete.deleteSession')}
         />
       )}
     </Card>
