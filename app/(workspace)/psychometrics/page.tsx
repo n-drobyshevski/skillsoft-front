@@ -231,7 +231,7 @@ async function PsychometricsData() {
           href="/psychometrics/competencies"
           icon="Shield"
           title={t('competencies')}
-          count={report?.reliableCompetencies}
+          count={report?.totalCompetencies}
           iconColor="bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400"
         />
         <QuickNavCard
@@ -245,7 +245,7 @@ async function PsychometricsData() {
           href="/psychometrics/big-five"
           icon="Brain"
           title={t('bigFive')}
-          count={report?.bigFiveReliabilitySummary?.reliableTraits}
+          count={report?.bigFiveReliabilitySummary?.totalTraits}
           iconColor="bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400"
         />
       </div>

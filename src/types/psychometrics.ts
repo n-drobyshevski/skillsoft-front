@@ -9,6 +9,7 @@
 
 export enum ItemValidityStatus {
   ACTIVE = 'ACTIVE',
+  PRELIMINARY = 'PRELIMINARY',
   PROBATION = 'PROBATION',
   FLAGGED_FOR_REVIEW = 'FLAGGED_FOR_REVIEW',
   RETIRED = 'RETIRED'
@@ -31,6 +32,7 @@ export enum ReliabilityStatus {
   RELIABLE = 'RELIABLE',
   ACCEPTABLE = 'ACCEPTABLE',
   UNRELIABLE = 'UNRELIABLE',
+  PRELIMINARY = 'PRELIMINARY',
   INSUFFICIENT_DATA = 'INSUFFICIENT_DATA'
 }
 
@@ -151,6 +153,7 @@ export interface FlaggedItemSummary {
 export interface BigFiveReliabilitySummary {
   totalTraits: number;
   reliableTraits: number;
+  preliminaryTraits: number;
   unreliableTraits: number;
   insufficientDataTraits: number;
   acceptableTraits?: number;
@@ -163,12 +166,14 @@ export interface PsychometricHealthReport {
   totalItems: number;
   activeItems: number;
   probationItems: number;
+  preliminaryItems: number;
   flaggedItems: number;
   retiredItems: number;
   totalCompetencies: number;
   reliableCompetencies: number;
   acceptableCompetencies: number;
   unreliableCompetencies: number;
+  preliminaryCompetencies: number;
   insufficientDataCompetencies: number;
   averageAlpha: number | null;
   averageDiscrimination: number | null;
@@ -240,6 +245,11 @@ export const ItemValidityStatusDisplay: Record<ItemValidityStatus, { label: stri
     description: 'Validated item with good psychometric properties',
     color: 'emerald'
   },
+  [ItemValidityStatus.PRELIMINARY]: {
+    label: 'Предварительный',
+    description: 'Preliminary metrics from 10-49 responses',
+    color: 'blue'
+  },
   [ItemValidityStatus.PROBATION]: {
     label: 'Пробационный',
     description: 'New item gathering data (< 50 responses)',
@@ -306,6 +316,11 @@ export const ReliabilityStatusDisplay: Record<ReliabilityStatus, { label: string
     label: 'Ненадежный',
     description: "Cronbach's Alpha < 0.6",
     color: 'red'
+  },
+  [ReliabilityStatus.PRELIMINARY]: {
+    label: 'Предварительный',
+    description: 'Exploratory alpha from 20-49 sessions',
+    color: 'blue'
   },
   [ReliabilityStatus.INSUFFICIENT_DATA]: {
     label: 'Недостаточно данных',

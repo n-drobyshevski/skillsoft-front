@@ -248,6 +248,13 @@ const reliabilityStatusConfig: Record<ReliabilityStatus, BadgeConfig> = {
     colorClasses: 'bg-red-100 text-red-800 border-red-200 dark:bg-red-900/30 dark:text-red-400 dark:border-red-800',
     iconColorClasses: 'text-red-600 dark:text-red-400',
   },
+  [ReliabilityStatus.PRELIMINARY]: {
+    label: 'Предварительный',
+    description: 'Preliminary reliability estimate (20-49 sessions) - exploratory data',
+    icon: HelpCircle,
+    colorClasses: 'bg-blue-50 dark:bg-blue-900/30 border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-300',
+    iconColorClasses: 'text-blue-600 dark:text-blue-400',
+  },
   [ReliabilityStatus.INSUFFICIENT_DATA]: {
     label: 'Мало данных',
     description: 'Insufficient data to calculate reliability - need more responses',

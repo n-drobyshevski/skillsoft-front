@@ -43,6 +43,7 @@ interface ItemQualityScatterProps {
 // Color mapping for validity status
 const statusColorMap: Record<ItemValidityStatus, string> = {
   [ItemValidityStatus.ACTIVE]: '#10b981', // emerald-500
+  [ItemValidityStatus.PRELIMINARY]: '#3b82f6', // blue-500
   [ItemValidityStatus.PROBATION]: '#f59e0b', // amber-500
   [ItemValidityStatus.FLAGGED_FOR_REVIEW]: '#f97316', // orange-500
   [ItemValidityStatus.RETIRED]: '#ef4444', // red-500

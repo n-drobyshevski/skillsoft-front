@@ -20,6 +20,7 @@ const statusColorMap: Record<ReliabilityStatus, string> = {
   [ReliabilityStatus.RELIABLE]: 'bg-emerald-100 text-emerald-800 border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-400 dark:border-emerald-800',
   [ReliabilityStatus.ACCEPTABLE]: 'bg-amber-100 text-amber-800 border-amber-200 dark:bg-amber-900/30 dark:text-amber-400 dark:border-amber-800',
   [ReliabilityStatus.UNRELIABLE]: 'bg-red-100 text-red-800 border-red-200 dark:bg-red-900/30 dark:text-red-400 dark:border-red-800',
+  [ReliabilityStatus.PRELIMINARY]: 'bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-800',
   [ReliabilityStatus.INSUFFICIENT_DATA]: 'bg-gray-100 text-gray-800 border-gray-200 dark:bg-gray-900/30 dark:text-gray-400 dark:border-gray-800',
 };
 
@@ -28,6 +29,7 @@ const statusIconMap: Record<ReliabilityStatus, LucideIcon> = {
   [ReliabilityStatus.RELIABLE]: CheckCircle2,
   [ReliabilityStatus.ACCEPTABLE]: AlertTriangle,
   [ReliabilityStatus.UNRELIABLE]: XCircle,
+  [ReliabilityStatus.PRELIMINARY]: HelpCircle,
   [ReliabilityStatus.INSUFFICIENT_DATA]: HelpCircle,
 };
 

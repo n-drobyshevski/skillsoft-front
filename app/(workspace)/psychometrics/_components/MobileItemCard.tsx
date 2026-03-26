@@ -32,6 +32,11 @@ const STATUS_CONFIG: Record<ItemValidityStatus, {
     icon: 'text-emerald-600 dark:text-emerald-400',
     Icon: CheckCircle2,
   },
+  [ItemValidityStatus.PRELIMINARY]: {
+    border: 'border-l-blue-500',
+    icon: 'text-blue-600 dark:text-blue-400',
+    Icon: Clock,
+  },
   [ItemValidityStatus.PROBATION]: {
     border: 'border-l-amber-500',
     icon: 'text-amber-600 dark:text-amber-400',
