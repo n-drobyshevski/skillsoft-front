@@ -32,6 +32,7 @@ import { MetricCards } from '../shared/MetricCards';
 import { LazyTeamSaturationRadar as TeamSaturationRadar, LazyIndicatorHeatmap as IndicatorHeatmap } from '@/lib/lazy-charts';
 import { ComparisonRadarChart } from '../shared/ComparisonRadarChart';
 import { toTeamSaturationData, toTeamSaturationDataSimulated } from '@/lib/result-transformers';
+import type { TeamSaturationDataPoint } from '@/types/results';
 import { analyzeTeamFit } from '@/components/results/TeamSaturationRadar';
 import { isTeamFitMetrics } from '@/types/domain';
 import { teamsApi } from '@/services/api/teams';
@@ -400,7 +401,7 @@ export function TeamFitResultView({ result, template }: BaseResultViewProps) {
 type RadarTab = 'skills' | 'personality';
 
 interface SaturationCardProps {
-  teamSaturationData: Array<{ competencyName: string; candidateScore: number; teamSaturation: number; fillsGap?: boolean; gapMagnitude?: number; competencyId?: string }>;
+  teamSaturationData: TeamSaturationDataPoint[];
   hasBigFiveData: boolean;
   bigFiveProfile: { OPENNESS: number; CONSCIENTIOUSNESS: number; EXTRAVERSION: number; AGREEABLENESS: number; EMOTIONAL_STABILITY: number };
   t: ReturnType<typeof useTranslations>;
