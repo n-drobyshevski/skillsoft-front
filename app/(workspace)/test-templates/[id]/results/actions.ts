@@ -10,7 +10,7 @@ async function revalidateSessionCache(templateId: string) {
   revalidatePath(`/test-templates/${templateId}/results`, 'page');
   revalidatePath(`/test-templates/${templateId}`, 'page');
   revalidatePath('/dashboard', 'page');
-  revalidateTag('test-templates-stats');
+  revalidateTag('test-templates-stats', 'max');
 }
 
 /**
