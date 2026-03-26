@@ -190,7 +190,7 @@ function NavItem({
             : undefined
         }
       >
-        <SidebarMenuButton asChild isActive={isActive}>
+        <SidebarMenuButton asChild isActive={isActive} tooltip={t(item.labelKey)}>
           <PrefetchLink href={item.path} onPrefetchData={getPrefetchHandler(item.path)}>
             <IconComponent />
             <span>{t(item.labelKey)}</span>
@@ -226,7 +226,7 @@ function NavItem({
         }
       >
         <CollapsibleTrigger asChild>
-          <SidebarMenuButton isActive={isActive || hasActiveChild}>
+          <SidebarMenuButton isActive={isActive || hasActiveChild} tooltip={t(item.labelKey)}>
             <IconComponent />
             <span>{t(item.labelKey)}</span>
             {item.badge && <NavigationBadge config={item.badge} />}
@@ -389,7 +389,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton size="lg" asChild>
+            <SidebarMenuButton size="lg" asChild tooltip={baseData.teams[0].name}>
               <Link href="/dashboard">
                 <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
                   <TeamLogo className="size-4" />
@@ -446,6 +446,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 <SidebarMenuButton
                   asChild
                   isActive={pathname === "/profile"}
+                  tooltip={t("myProfile")}
                 >
                   <PrefetchLink href="/profile" onPrefetchData={getPrefetchHandler("/profile")}>
                     <UserCircle />
@@ -457,61 +458,59 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           </SidebarGroup>
         )}
 
-        {/* Footer Navigation Items - Always visible in all lenses */}
-        {isReady && footer.length > 0 && (
-          <>
-            <div className="mt-auto" />
-            <SidebarSeparator />
-            <SidebarGroup>
-              <SidebarMenu>
-                {footer.map((item) => {
-                  const IconComponent = ICON_MAP[item.icon] ?? HelpCircle;
-                  const isActive = isNavigationItemActive(item.path, pathname);
-
-                  if (item.isExternal) {
-                    return (
-                      <SidebarMenuItem key={item.id}>
-                        <SidebarMenuButton asChild isActive={isActive}>
-                          <a
-                            href={item.path}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                          >
-                            <IconComponent />
-                            <span>{t(item.labelKey)}</span>
-                            <ExternalLink className="ml-auto h-3 w-3 opacity-50" />
-                          </a>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
-                    );
-                  }
-
-                  return (
-                    <SidebarMenuItem key={item.id}>
-                      <SidebarMenuButton asChild isActive={isActive}>
-                        <PrefetchLink href={item.path} onPrefetchData={getPrefetchHandler(item.path)}>
-                          <IconComponent />
-                          <span>{t(item.labelKey)}</span>
-                        </PrefetchLink>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  );
-                })}
-              </SidebarMenu>
-            </SidebarGroup>
-          </>
-        )}
+        {/* Lens Switcher - Role-based view selector */}
+        <div className="mt-auto" />
+        <SidebarSeparator />
+        <SidebarGroup>
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <ClientOnly fallback={null}>
+                <LensSwitcher />
+              </ClientOnly>
+            </SidebarMenuItem>
+          </SidebarMenu>
+        </SidebarGroup>
       </SidebarContent>
 
       <SidebarFooter>
-        {/* Lens Switcher - Role-based view selector */}
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <ClientOnly fallback={null}>
-              <LensSwitcher />
-            </ClientOnly>
-          </SidebarMenuItem>
-        </SidebarMenu>
+        {/* Footer Navigation Items - Always visible in all lenses */}
+        {isReady && footer.length > 0 && (
+          <SidebarMenu>
+            {footer.map((item) => {
+              const IconComponent = ICON_MAP[item.icon] ?? HelpCircle;
+              const isActive = isNavigationItemActive(item.path, pathname);
+
+              if (item.isExternal) {
+                return (
+                  <SidebarMenuItem key={item.id}>
+                    <SidebarMenuButton asChild isActive={isActive} tooltip={t(item.labelKey)}>
+                      <a
+                        href={item.path}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <IconComponent />
+                        <span>{t(item.labelKey)}</span>
+                        <ExternalLink className="ml-auto h-3 w-3 opacity-50" />
+                      </a>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              }
+
+              return (
+                <SidebarMenuItem key={item.id}>
+                  <SidebarMenuButton asChild isActive={isActive} tooltip={t(item.labelKey)}>
+                    <PrefetchLink href={item.path} onPrefetchData={getPrefetchHandler(item.path)}>
+                      <IconComponent />
+                      <span>{t(item.labelKey)}</span>
+                    </PrefetchLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              );
+            })}
+          </SidebarMenu>
+        )}
       </SidebarFooter>
 
       <SidebarRail />
