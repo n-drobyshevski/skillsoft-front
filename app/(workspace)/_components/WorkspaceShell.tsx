@@ -122,9 +122,9 @@ function WorkspaceLayoutContent({ children }: { children: React.ReactNode }) {
         <main
           id="main-content"
           className={cn(
-            "flex flex-1 flex-col focus:outline-none overflow-hidden mobile-container min-h-0",
+            "flex flex-1 flex-col focus:outline-none mobile-container",
             "transition-all duration-300 ease-in-out",
-            (isImmersive || isFocused) && "max-w-full h-full"
+            (isImmersive || isFocused) && "overflow-hidden min-h-0 max-w-full h-full"
           )}
           tabIndex={-1}
           role="main"

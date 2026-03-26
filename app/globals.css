@@ -295,8 +295,11 @@
 	}
 
 	html {
-		/* Prevent horizontal scrolling at root level */
-		overflow-x: hidden;
+		/* Prevent horizontal scrolling at root level
+		   Use clip (not hidden) to avoid creating a scroll container —
+		   hidden makes overflow-y compute to auto per CSS spec,
+		   which traps vertical scroll in Chrome */
+		overflow-x: clip;
 		max-width: 100vw;
 	}
 
@@ -310,8 +313,8 @@
 		line-height: 1.6;
 		-webkit-font-smoothing: antialiased;
 		-moz-osx-font-smoothing: grayscale;
-		/* Prevent horizontal scrolling on mobile */
-		overflow-x: hidden;
+		/* Prevent horizontal scrolling on mobile — clip, not hidden (see html comment) */
+		overflow-x: clip;
 		max-width: 100vw;
 		overscroll-behavior: none;
 	}
@@ -484,10 +487,10 @@
 		max-width: 100vw;
 	}
 
-	/* Mobile container max-width prevention */
+	/* Mobile container max-width prevention — clip, not hidden (see html comment) */
 	.mobile-container {
 		max-width: 100vw;
-		overflow-x: hidden;
+		overflow-x: clip;
 	}
 
 	/* Header overflow prevention */
