@@ -14,9 +14,10 @@ import {
 } from "@/components/ui/breadcrumb";
 import { usePathname } from "next/navigation";
 import { useBreadcrumbContext } from "@/context/BreadcrumbContext";
-import { SignedOut } from "@clerk/nextjs";
+import { SignedIn, SignedOut } from "@clerk/nextjs";
 import { CompactAuthModals, FullAuthModals } from "@/components/auth/auth-modals";
 import { ClientOnly } from "@/components/common/ClientOnly";
+import { HeaderUserMenu } from "@/components/layout/header-user-menu";
 import { motion } from "motion/react";
 import { cn } from "@/lib/utils";
 import { useScrollDirection } from "@/hooks/use-scroll-direction";
@@ -172,6 +173,9 @@ export function SiteHeader({ title = "Dashboard", breadcrumbs }: SiteHeaderProps
               <SignedOut>
                 <CompactAuthModals />
               </SignedOut>
+              <SignedIn>
+                <HeaderUserMenu />
+              </SignedIn>
             </ClientOnly>
           </div>
         </div>
@@ -240,6 +244,9 @@ export function SiteHeader({ title = "Dashboard", breadcrumbs }: SiteHeaderProps
               <SignedOut>
                 <FullAuthModals />
               </SignedOut>
+              <SignedIn>
+                <HeaderUserMenu />
+              </SignedIn>
             </ClientOnly>
           </div>
         </div>

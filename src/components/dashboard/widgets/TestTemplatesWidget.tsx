@@ -7,47 +7,29 @@ import { Skeleton } from '@/components/ui/skeleton';
 import {
   GraduationCap,
   ChevronRight,
-  ArrowRight,
-  Clock,
-  Users,
+  Plus,
 } from 'lucide-react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
-import type { TestTemplateSummary, AssessmentGoal } from '@/types/domain';
-import { AssessmentGoalInfo } from '@/types/domain';
+import type { TestTemplateSummary } from '@/types/domain';
 import { useTranslations } from 'next-intl';
 
-/**
- * Props for TestTemplatesWidget
- */
 export interface TestTemplatesWidgetProps {
-  /** Templates data */
   templates?: TestTemplateSummary[];
-  /** Loading state */
   loading?: boolean;
-  /** Additional CSS classes */
   className?: string;
-  /** Maximum items to display */
   maxItems?: number;
-  /** Title override */
   title?: string;
-  /** Whether to show as compact (for sidebar) */
-  compact?: boolean;
 }
 
 /**
- * TestTemplatesWidget - Displays active test templates.
+ * TestTemplatesWidget - Displays active test templates with accent-left cards.
  *
  * Features:
- * - Template cards with goal badges
- * - Competency count
- * - Time limit display
- * - Click-through to template detail
- *
- * @example
- * ```tsx
- * <TestTemplatesWidget templates={activeTemplates} maxItems={6} />
- * ```
+ * - Color-coded left border per assessment goal type
+ * - Hybrid grid: 1 col mobile/tablet, 2 col on lg+
+ * - Passing score visible on desktop only
+ * - Dashed ghost-card empty state
  */
 export function TestTemplatesWidget({
   templates = [],
@@ -55,16 +37,15 @@ export function TestTemplatesWidget({
   className,
   maxItems = 6,
   title,
-  compact = false,
 }: TestTemplatesWidgetProps) {
   const t = useTranslations('dashboard');
+  const tEnums = useTranslations('enums');
   const displayTitle = title ?? t('activeAssessments');
 
   if (loading) {
     return (
       <TestTemplatesWidgetSkeleton
         className={className}
-        compact={compact}
         count={Math.min(maxItems, 4)}
       />
     );
@@ -95,32 +76,11 @@ export function TestTemplatesWidget({
       </CardHeader>
       <CardContent className="pt-2">
         {activeTemplates.length === 0 ? (
-          <div className="text-center py-6 text-muted-foreground">
-            <p className="text-sm">{t('noActiveAssessments')}</p>
-            <p className="text-xs mt-1">{t('createTemplateToStart')}</p>
-            <Button asChild variant="outline" size="sm" className="mt-3">
-              <Link href="/test-templates/new">
-                {t('createTemplate')}
-              </Link>
-            </Button>
-          </div>
+          <EmptyState t={t} />
         ) : (
-          <div
-            className={cn(
-              'grid gap-2.5 sm:gap-3',
-              compact
-                ? 'grid-cols-1'
-                : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'
-            )}
-          >
-            {activeTemplates.map((template, index) => (
-              // Hide items beyond 3 on mobile for cleaner layout
-              <div key={template.id} className={index >= 3 ? 'hidden sm:block' : undefined}>
-                <TemplatePreviewCard
-                  template={template}
-                  compact={compact}
-                />
-              </div>
+          <div className="grid gap-2.5 sm:gap-3 grid-cols-1 lg:grid-cols-2">
+            {activeTemplates.map((template) => (
+              <TemplatePreviewCard key={template.id} template={template} t={t} tEnums={tEnums} />
             ))}
           </div>
         )}
@@ -129,113 +89,144 @@ export function TestTemplatesWidget({
   );
 }
 
-/**
- * Template preview card component - fills available width, compact on mobile
- */
+// ============================================
+// CONSTANTS
+// ============================================
+
+const GOAL_ACCENT_COLORS: Record<string, { border: string; badge: string }> = {
+  OVERVIEW: {
+    border: 'border-l-purple-500',
+    badge: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400',
+  },
+  JOB_FIT: {
+    border: 'border-l-emerald-600',
+    badge: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400',
+  },
+  TEAM_FIT: {
+    border: 'border-l-blue-600',
+    badge: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+  },
+};
+
+// ============================================
+// TEMPLATE PREVIEW CARD
+// ============================================
+
 function TemplatePreviewCard({
   template,
-  compact,
   className,
+  t,
+  tEnums,
 }: {
   template: TestTemplateSummary;
-  compact?: boolean;
   className?: string;
+  t: ReturnType<typeof useTranslations<'dashboard'>>;
+  tEnums: ReturnType<typeof useTranslations<'enums'>>;
 }) {
-  const goalInfo = AssessmentGoalInfo[template.goal as AssessmentGoal] || {
-    displayName: template.goal,
-    description: 'Assessment',
-  };
+  const goalKey = `assessmentGoal.${template.goal}` as Parameters<typeof tEnums>[0];
+  const goalLabel = tEnums.has(goalKey) ? tEnums(goalKey) : template.goal;
 
-  const goalColors: Record<string, string> = {
-    OVERVIEW: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400',
-    JOB_FIT: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400',
-    TEAM_FIT: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+  const colors = GOAL_ACCENT_COLORS[template.goal] || {
+    border: 'border-l-muted-foreground',
+    badge: 'bg-muted text-muted-foreground',
   };
 
   return (
     <Link href={`/test-templates/${template.id}`} className={cn('block w-full', className)}>
       <div
         className={cn(
-          // Base styles - fill width, rounded corners, border
-          'w-full p-3 rounded-xl border border-border/60 bg-card',
-          // Hover states
-          'hover:border-border hover:shadow-sm cursor-pointer group',
-          // Hover/tap animations (replaces framer-motion whileHover/whileTap)
-          'hover:-translate-y-px active:scale-[0.99]',
+          'w-full rounded-xl border border-border/60 bg-card',
+          'border-l-[3px]',
+          colors.border,
+          'flex items-center gap-3 p-3 pl-3.5',
+          'hover:border-border hover:shadow-sm cursor-pointer',
+          'active:scale-[0.99]',
           'transition-all duration-200 motion-reduce:transition-none',
-          // Touch-friendly
-          'touch-manipulation',
-          // Compact mode layout
-          compact && 'flex items-center gap-3'
+          'touch-manipulation min-h-[44px]',
         )}
       >
-        {compact ? (
-          // Compact layout (single row)
-          <>
-            <div className="min-w-0 flex-1">
-              <p className="text-sm font-medium truncate">{template.name}</p>
-              <p className="text-xs text-muted-foreground truncate">
-                {goalInfo.displayName}
-              </p>
-            </div>
-            <Badge variant="outline" className="text-xs shrink-0">
-              {template.competencyCount}
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-medium truncate">{template.name}</p>
+          <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
+            <Badge
+              className={cn(
+                'text-[10px] px-1.5 py-0 h-[18px] shrink-0 border-0',
+                colors.badge,
+              )}
+            >
+              {goalLabel}
             </Badge>
-          </>
-        ) : (
-          // Full card layout - optimized for mobile
-          <>
-            {/* Title row with arrow */}
-            <div className="flex items-start justify-between gap-2">
-              <p className="text-sm font-medium line-clamp-2 flex-1 min-w-0">{template.name}</p>
-              <ArrowRight className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity shrink-0 mt-0.5" />
-            </div>
-
-            {/* Badge + metadata row */}
-            <div className="flex items-center gap-2 mt-1.5">
-              <Badge
-                className={cn(
-                  'text-[10px] px-1.5 py-0.5 shrink-0',
-                  goalColors[template.goal] || 'bg-muted text-muted-foreground'
-                )}
-              >
-                {goalInfo.displayName}
-              </Badge>
-              <span className="text-muted-foreground/50">•</span>
-              <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                <div className="flex items-center gap-1">
-                  <Users className="w-3 h-3" />
-                  <span>{template.competencyCount}</span>
-                </div>
-                {template.timeLimitMinutes > 0 && (
-                  <div className="flex items-center gap-1">
-                    <Clock className="w-3 h-3" />
-                    <span>{template.timeLimitMinutes}m</span>
-                  </div>
-                )}
-              </div>
-            </div>
-          </>
-        )}
+            <span className="text-muted-foreground/40 text-xs">·</span>
+            <span className="text-xs text-muted-foreground tabular-nums">
+              {t('competencyCountShort', { count: template.competencyCount })}
+            </span>
+            {template.timeLimitMinutes > 0 && (
+              <>
+                <span className="text-muted-foreground/40 text-xs">·</span>
+                <span className="text-xs text-muted-foreground tabular-nums">
+                  {t('timeLimitShort', { minutes: template.timeLimitMinutes })}
+                </span>
+              </>
+            )}
+            {template.passingScore > 0 && (
+              <>
+                <span className="text-muted-foreground/30 text-xs hidden sm:inline">·</span>
+                <span className="text-xs text-muted-foreground/50 tabular-nums hidden sm:inline">
+                  {t('passingScoreShort', { score: template.passingScore })}
+                </span>
+              </>
+            )}
+          </div>
+        </div>
+        <div className="w-8 h-8 rounded-lg bg-muted/50 flex items-center justify-center shrink-0">
+          <ChevronRight className="w-4 h-4 text-muted-foreground/40" />
+        </div>
       </div>
     </Link>
   );
 }
 
-/**
- * Loading skeleton for TestTemplatesWidget
- */
+// ============================================
+// EMPTY STATE
+// ============================================
+
+function EmptyState({ t }: { t: ReturnType<typeof useTranslations<'dashboard'>> }) {
+  return (
+    <div className="border-2 border-dashed border-border/60 rounded-xl p-8 text-center bg-muted/20">
+      <div className="flex justify-center gap-2 mb-3.5">
+        <div className="w-8 h-10 rounded-md bg-muted/60 opacity-60" />
+        <div className="w-8 h-10 rounded-md bg-muted/60 opacity-40" />
+        <div className="w-8 h-10 rounded-md bg-muted/60 opacity-20" />
+      </div>
+      <p className="text-sm font-medium text-muted-foreground">
+        {t('noActiveAssessments')}
+      </p>
+      <p className="text-xs text-muted-foreground/70 mt-1 max-w-[280px] mx-auto">
+        {t('createTemplateToStart')}
+      </p>
+      <Button asChild variant="outline" size="sm" className="mt-4 gap-1.5">
+        <Link href="/test-templates/new">
+          <Plus className="w-3.5 h-3.5" />
+          {t('createTemplate')}
+        </Link>
+      </Button>
+    </div>
+  );
+}
+
+// ============================================
+// SKELETON
+// ============================================
+
 function TestTemplatesWidgetSkeleton({
   className,
-  compact,
   count = 4,
 }: {
   className?: string;
-  compact?: boolean;
   count?: number;
 }) {
   return (
-    <Card className={cn('h-full animate-pulse', className)}>
+    <Card className={cn('h-full', className)}>
       <CardHeader className="flex flex-row items-center justify-between pb-2">
         <div className="flex items-center gap-3">
           <Skeleton className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg" />
@@ -247,16 +238,9 @@ function TestTemplatesWidgetSkeleton({
         <Skeleton className="w-8 h-7 rounded" />
       </CardHeader>
       <CardContent className="pt-2">
-        <div
-          className={cn(
-            'grid gap-2.5 sm:gap-3',
-            compact
-              ? 'grid-cols-1'
-              : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'
-          )}
-        >
+        <div className="grid gap-2.5 sm:gap-3 grid-cols-1 lg:grid-cols-2">
           {Array.from({ length: count }).map((_, i) => (
-            <Skeleton key={i} className="h-[72px] w-full rounded-xl" />
+            <Skeleton key={i} className="h-[62px] w-full rounded-xl" />
           ))}
         </div>
       </CardContent>

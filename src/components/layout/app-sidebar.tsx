@@ -1,14 +1,11 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { useUser } from "@clerk/nextjs";
 import { useTranslations } from "next-intl";
 import { useEffect, useState, useRef, useMemo } from "react";
 import {
-  ChevronDown,
   ChevronRight,
   User,
-  LogOut,
   UserCircle,
   // Icons used in navigation config - imported for dynamic lookup
   LayoutDashboard,
@@ -47,21 +44,12 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
-import { SignOutButton } from "@clerk/nextjs";
 import { ClientOnly } from "@/components/common/ClientOnly";
 import { PrefetchLink } from "@/components/common/PrefetchLink";
 import { LensSwitcher } from "@/components/layout/lens-switcher";
@@ -121,10 +109,6 @@ const baseData = {
       plan: "Enterprise",
     },
   ],
-  user: {
-    name: "Admin User",
-    email: "admin@skillsoft.com",
-  },
 };
 
 /**
@@ -333,14 +317,12 @@ function NavGroup({
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname();
-  const { user: clerkUser } = useUser();
   const { groups, footer, activeLens, isReady } = useNavigation();
   const { setOpenMobile } = useSidebar();
   const isImmersive = useIsImmersive();
   const { getPrefetchHandler } = useRoutePrefetch();
   const TeamLogo = baseData.teams[0].logo;
   const t = useTranslations("navigation");
-  const tAuth = useTranslations("auth");
 
   // Track lens changes for temporary flash highlight
   const [showFlash, setShowFlash] = useState(false);
@@ -356,19 +338,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       setOpenMobile(false);
     }
   }, [isImmersive, setOpenMobile]);
-
-  // Get user display info
-  const userName =
-    clerkUser?.fullName || clerkUser?.username || baseData.user.name;
-  const userEmail =
-    clerkUser?.primaryEmailAddress?.emailAddress || baseData.user.email;
-  const userImage = clerkUser?.imageUrl;
-  const userInitials = userName
-    .split(" ")
-    .map((n) => n[0])
-    .join("")
-    .toUpperCase()
-    .slice(0, 2);
 
   // Trigger flash animation on lens change (skip initial render)
   // This effect intentionally sets state to trigger visual feedback animation
@@ -540,85 +509,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <SidebarMenuItem>
             <ClientOnly fallback={null}>
               <LensSwitcher />
-            </ClientOnly>
-          </SidebarMenuItem>
-        </SidebarMenu>
-
-        <SidebarSeparator className="mx-0" />
-
-        {/* User Profile Menu */}
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <ClientOnly
-              fallback={
-                <SidebarMenuButton
-                  size="lg"
-                  className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground opacity-75"
-                >
-                  <Avatar className="h-8 w-8 rounded-lg">
-                    <AvatarFallback className="rounded-lg">
-                      {userInitials}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="grid flex-1 text-left text-sm leading-tight">
-                    <span className="truncate font-semibold">{userName}</span>
-                    <span className="truncate text-xs">{userEmail}</span>
-                  </div>
-                </SidebarMenuButton>
-              }
-            >
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <SidebarMenuButton
-                    size="lg"
-                    className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
-                  >
-                    <Avatar className="h-8 w-8 rounded-lg">
-                      <AvatarImage src={userImage} alt={userName} />
-                      <AvatarFallback className="rounded-lg">
-                        {userInitials}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="grid flex-1 text-left text-sm leading-tight">
-                      <span className="truncate font-semibold">{userName}</span>
-                      <span className="truncate text-xs">{userEmail}</span>
-                    </div>
-                    <ChevronDown className="ml-auto size-4" />
-                  </SidebarMenuButton>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent
-                  className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg"
-                  side="bottom"
-                  align="end"
-                  sideOffset={4}
-                >
-                  <DropdownMenuItem asChild>
-                    <Link
-                      href={
-                        clerkUser
-                          ? `/admin/users/${clerkUser.id}`
-                          : "/dashboard"
-                      }
-                    >
-                      <User className="mr-2 h-4 w-4" />
-                      {t("profile")}
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link href="/settings">
-                      <Settings className="mr-2 h-4 w-4" />
-                      {t("settings")}
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <SignOutButton>
-                    <DropdownMenuItem>
-                      <LogOut className="mr-2 h-4 w-4" />
-                      {tAuth("signOut")}
-                    </DropdownMenuItem>
-                  </SignOutButton>
-                </DropdownMenuContent>
-              </DropdownMenu>
             </ClientOnly>
           </SidebarMenuItem>
         </SidebarMenu>

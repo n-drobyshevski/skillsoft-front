@@ -92,6 +92,9 @@
   "noActiveAssessments": "No active assessments",
   "createTemplateToStart": "Create a template to get started",
   "createTemplate": "Create Template",
+  "competencyCountShort": "{count} comp",
+  "timeLimitShort": "{minutes}m",
+  "passingScoreShort": "{score}% pass",
   "userDashboard": {
     "actionBanner": {
       "resume": "Resume",

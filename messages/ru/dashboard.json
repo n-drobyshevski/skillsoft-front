@@ -92,6 +92,9 @@
   "noActiveAssessments": "Нет активных оценок",
   "createTemplateToStart": "Создайте шаблон для начала",
   "createTemplate": "Создать шаблон",
+  "competencyCountShort": "{count} комп.",
+  "timeLimitShort": "{minutes} мин",
+  "passingScoreShort": "{score}% порог",
   "userDashboard": {
     "actionBanner": {
       "resume": "Продолжить",
