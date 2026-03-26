@@ -130,8 +130,10 @@
   "itemValidityStatus": {
     "ACTIVE": "Active",
     "ACTIVE_DESC": "Validated item with good psychometric properties",
+    "PRELIMINARY": "Preliminary",
+    "PRELIMINARY_DESC": "Item with 10-49 responses, preliminary metrics calculated",
     "PROBATION": "Probation",
-    "PROBATION_DESC": "New item gathering data (< 50 responses)",
+    "PROBATION_DESC": "New item gathering data (< 10 responses)",
     "FLAGGED_FOR_REVIEW": "Flagged for Review",
     "FLAGGED_FOR_REVIEW_DESC": "Requires manual review due to extreme metrics",
     "RETIRED": "Retired",
@@ -162,6 +164,8 @@
     "ACCEPTABLE_DESC": "Cronbach's Alpha 0.6 - 0.7",
     "UNRELIABLE": "Unreliable",
     "UNRELIABLE_DESC": "Cronbach's Alpha < 0.6",
+    "PRELIMINARY": "Preliminary",
+    "PRELIMINARY_DESC": "Exploratory alpha from 20-49 sessions",
     "INSUFFICIENT_DATA": "Insufficient Data",
     "INSUFFICIENT_DATA_DESC": "Not enough responses for calculation"
   },
