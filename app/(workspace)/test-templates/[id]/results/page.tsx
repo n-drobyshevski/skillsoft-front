@@ -2,6 +2,7 @@ import React, { Suspense } from 'react';
 import { notFound } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 import { testTemplatesApi } from '@/services/api';
+import { getCurrentUserRole } from '@/services/roleApi';
 import { activityApi } from '@/services/api/activity';
 import { TestSession, SessionStatus } from '@/types/domain';
 import type { TestActivity } from '@/types/activity';
@@ -187,7 +188,11 @@ async function getResultsData(id: string, filters: { status?: string; search?: s
  * Wrapped in Suspense to enable PPR static shell.
  */
 async function ResultsData({ id, filters }: { id: string; filters: { status?: string; search?: string } }) {
-  const { template, sessions, stats, error } = await getResultsData(id, filters);
+  const [{ template, sessions, stats, error }, role] = await Promise.all([
+    getResultsData(id, filters),
+    getCurrentUserRole(),
+  ]);
+  const isAdmin = role === 'ADMIN';
 
   if (!template || error) {
     notFound();
@@ -285,6 +290,7 @@ async function ResultsData({ id, filters }: { id: string; filters: { status?: st
             templateId={id}
             templateGoal={template.goal}
             passingScore={template.passingScore}
+            isAdmin={isAdmin}
           />
         </CardContent>
       </Card>
