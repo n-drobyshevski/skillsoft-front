@@ -342,7 +342,7 @@ export function SessionsTable({
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="w-full h-8 text-xs text-destructive hover:text-destructive hover:bg-destructive/5"
+                    className="w-full min-h-[44px] text-xs text-destructive hover:text-destructive hover:bg-destructive/5"
                     onClick={(e) => {
                       e.stopPropagation();
                       handleDeleteSingle(session);
