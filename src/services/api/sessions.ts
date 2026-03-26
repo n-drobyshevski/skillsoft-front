@@ -174,4 +174,31 @@ export const testSessionsApi = {
       authHeaders,
     });
   },
+
+  /**
+   * Delete a test session (admin only).
+   * Cascade deletes associated result and answers.
+   */
+  deleteSession: async (sessionId: string): Promise<void> => {
+    const authHeaders = await getAuthHeaders();
+    await fetchApi(`${TEST_SESSIONS_BASE}/${sessionId}`, {
+      method: 'DELETE',
+      cache: 'no-store',
+      authHeaders,
+    });
+  },
+
+  /**
+   * Bulk delete test sessions (admin only, max 50).
+   * Returns counts of deleted and failed.
+   */
+  bulkDeleteSessions: async (sessionIds: string[]): Promise<{ deleted: number; failed: number }> => {
+    const authHeaders = await getAuthHeaders();
+    return fetchApi(`${TEST_SESSIONS_BASE}/bulk`, {
+      method: 'DELETE',
+      body: JSON.stringify({ sessionIds }),
+      cache: 'no-store',
+      authHeaders,
+    });
+  },
 };
