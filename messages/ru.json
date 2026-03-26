@@ -1527,6 +1527,23 @@
         "linkRevokeFailed": "Не удалось отозвать ссылку",
         "visibilityFailed": "Не удалось изменить видимость"
       }
+    },
+    "sessionDelete": {
+      "deleteSession": "Удалить сессию",
+      "deleteSessionTitle": "Удалить тестовую сессию?",
+      "deleteSessionDescription": "Тестовая сессия будет безвозвратно удалена вместе с результатом и всеми ответами.",
+      "bulkDeleteTitle": "Удалить {count} сессий?",
+      "bulkDeleteDescription": "Будет безвозвратно удалено {count} тестовых сессий, включая все результаты и ответы.",
+      "deleting": "Удаление...",
+      "sessionDeleted": "Сессия удалена",
+      "sessionDeletedDescription": "Тестовая сессия успешно удалена.",
+      "sessionsDeleted": "Удалено сессий: {count}",
+      "sessionsDeletedDescription": "Успешно удалено сессий: {deleted}.",
+      "deleteError": "Ошибка удаления",
+      "deleteErrorDescription": "Не удалось удалить сессию. Попробуйте ещё раз.",
+      "bulkDeleteErrorDescription": "Не удалось удалить сессии. Попробуйте ещё раз.",
+      "deleteSelected": "Удалить выбранные ({count})",
+      "selected": "Выбрано: {count}"
     }
   },
   "candidate": {
