@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Table,
   TableBody,
@@ -20,6 +21,13 @@ import {
   SheetDescription,
 } from "@/components/ui/sheet";
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
+import {
   Users,
   ExternalLink,
   CheckCircle2,
@@ -27,10 +35,16 @@ import {
   XCircle,
   AlertCircle,
   Hourglass,
+  MoreHorizontal,
+  Trash2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { CandidateResultDetails } from "./CandidateResultDetails";
 import { AssessmentGoal, SessionStatus, TestSession } from "@/types/domain";
+import { DeleteConfirmationDialog } from "@/components/feedback/DeleteConfirmationDialog";
+import { deleteTestSession, bulkDeleteTestSessions } from "../actions";
+import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 
 // Extended session type with additional fields
 type ExtendedSession = TestSession & {
@@ -45,6 +59,7 @@ interface SessionsTableProps {
   templateId: string;
   templateGoal?: AssessmentGoal;
   passingScore?: number;
+  isAdmin?: boolean;
 }
 
 function StatusBadge({ status }: { status: SessionStatus }) {
@@ -102,11 +117,98 @@ export function SessionsTable({
   templateId,
   templateGoal,
   passingScore = 70,
+  isAdmin = false,
 }: SessionsTableProps) {
   const [selectedSessionId, setSelectedSessionId] = useState<string | null>(
     null
   );
   const [sheetOpen, setSheetOpen] = useState(false);
+
+  // Delete state
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<
+    | { type: "single"; sessionId: string; entityName: string }
+    | { type: "bulk" }
+    | null
+  >(null);
+  const [isPending, startTransition] = useTransition();
+  const t = useTranslations("template.sessionDelete");
+
+  const toggleSelect = (id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedIds.size === sessions.length) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(sessions.map((s) => s.id)));
+    }
+  };
+
+  const handleDeleteSingle = (session: ExtendedSession) => {
+    setDeleteTarget({
+      type: "single",
+      sessionId: session.id,
+      entityName: session.candidateName || session.candidateEmail || "Anonymous",
+    });
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteBulk = () => {
+    setDeleteTarget({ type: "bulk" });
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteTarget) return;
+
+    startTransition(async () => {
+      if (deleteTarget.type === "single") {
+        const result = await deleteTestSession(deleteTarget.sessionId, templateId);
+        if (result.success) {
+          toast.success(t("sessionDeleted"), {
+            description: t("sessionDeletedDescription"),
+          });
+          setSelectedIds((prev) => {
+            const next = new Set(prev);
+            next.delete(deleteTarget.sessionId);
+            return next;
+          });
+        } else {
+          toast.error(t("deleteError"), {
+            description: t("deleteErrorDescription"),
+          });
+        }
+      } else {
+        const ids = Array.from(selectedIds);
+        const result = await bulkDeleteTestSessions(ids, templateId);
+        if (result.success) {
+          toast.success(
+            t("sessionsDeleted", { count: result.deleted ?? ids.length }),
+            {
+              description: t("sessionsDeletedDescription", {
+                deleted: result.deleted ?? ids.length,
+              }),
+            }
+          );
+          setSelectedIds(new Set());
+        } else {
+          toast.error(t("deleteError"), {
+            description: t("bulkDeleteErrorDescription"),
+          });
+        }
+      }
+      setDeleteDialogOpen(false);
+      setDeleteTarget(null);
+    });
+  };
 
   const handleRowClick = (session: ExtendedSession) => {
     if (session.status === SessionStatus.COMPLETED) {
@@ -131,6 +233,24 @@ export function SessionsTable({
 
   return (
     <>
+      {/* Bulk Actions Toolbar (Admin only) */}
+      {isAdmin && selectedIds.size > 0 && (
+        <div className="flex items-center gap-3 px-4 py-2 bg-muted/30 border rounded-t-lg">
+          <span className="text-sm text-muted-foreground">
+            {t("selected", { count: selectedIds.size })}
+          </span>
+          <Button
+            variant="destructive"
+            size="sm"
+            className="h-8 min-h-[44px] sm:min-h-0"
+            onClick={handleDeleteBulk}
+          >
+            <Trash2 className="h-4 w-4 mr-1.5" />
+            {t("deleteSelected", { count: selectedIds.size })}
+          </Button>
+        </div>
+      )}
+
       {/* Mobile Card View */}
       <div className="flex flex-col gap-2 md:hidden">
         {sessions.map((session) => {
@@ -216,6 +336,23 @@ export function SessionsTable({
                   </Button>
                 </div>
               )}
+
+              {isAdmin && (
+                <div className="mt-2 pt-2 border-t">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="w-full h-8 text-xs text-destructive hover:text-destructive hover:bg-destructive/5"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDeleteSingle(session);
+                    }}
+                  >
+                    <Trash2 className="h-3.5 w-3.5 mr-1.5" />
+                    {t("deleteSession")}
+                  </Button>
+                </div>
+              )}
             </div>
           );
         })}
@@ -226,6 +363,15 @@ export function SessionsTable({
         <Table>
           <TableHeader>
             <TableRow className="bg-muted/5 hover:bg-muted/5">
+              {isAdmin && (
+                <TableHead className="w-[40px] pl-4">
+                  <Checkbox
+                    checked={sessions.length > 0 && selectedIds.size === sessions.length}
+                    onCheckedChange={toggleSelectAll}
+                    aria-label="Select all"
+                  />
+                </TableHead>
+              )}
               <TableHead className="w-[40%] min-w-[140px] pl-4">
                 Candidate
               </TableHead>
@@ -256,6 +402,18 @@ export function SessionsTable({
                   )}
                   onClick={() => handleRowClick(session)}
                 >
+                  {isAdmin && (
+                    <TableCell
+                      className="pl-4 py-3"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <Checkbox
+                        checked={selectedIds.has(session.id)}
+                        onCheckedChange={() => toggleSelect(session.id)}
+                        aria-label={`Select ${session.candidateName || "session"}`}
+                      />
+                    </TableCell>
+                  )}
                   <TableCell className="pl-4 py-3">
                     <div className="flex flex-col gap-0.5">
                       <p className="font-medium text-sm truncate max-w-xs">
@@ -301,21 +459,57 @@ export function SessionsTable({
                     className="text-right pr-4 py-3"
                     onClick={(e) => e.stopPropagation()}
                   >
-                    {isCompleted && (
-                      <Button
-                        asChild
-                        variant="ghost"
-                        size="sm"
-                        className="h-8 px-2 text-primary hover:text-primary hover:bg-primary/5"
-                      >
-                        <Link
-                          href={`/test-templates/results/${session.id}`}
+                    <div className="flex items-center justify-end gap-1">
+                      {isCompleted && (
+                        <Button
+                          asChild
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 px-2 text-primary hover:text-primary hover:bg-primary/5"
                         >
-                          <span className="mr-1">Full</span>
-                          <ExternalLink className="h-4 w-4" />
-                        </Link>
-                      </Button>
-                    )}
+                          <Link href={`/test-templates/results/${session.id}`}>
+                            <span className="mr-1">Full</span>
+                            <ExternalLink className="h-4 w-4" />
+                          </Link>
+                        </Button>
+                      )}
+                      {isAdmin && (
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              className="h-8 w-8 p-0"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <MoreHorizontal className="h-4 w-4" />
+                              <span className="sr-only">Actions</span>
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            {isCompleted && (
+                              <>
+                                <DropdownMenuItem asChild>
+                                  <Link
+                                    href={`/test-templates/results/${session.id}`}
+                                  >
+                                    <ExternalLink className="h-4 w-4 mr-2" />
+                                    View Full Results
+                                  </Link>
+                                </DropdownMenuItem>
+                                <DropdownMenuSeparator />
+                              </>
+                            )}
+                            <DropdownMenuItem
+                              className="text-destructive focus:text-destructive"
+                              onClick={() => handleDeleteSingle(session)}
+                            >
+                              <Trash2 className="h-4 w-4 mr-2" />
+                              {t("deleteSession")}
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      )}
+                    </div>
                   </TableCell>
                 </TableRow>
               );
@@ -346,6 +540,30 @@ export function SessionsTable({
           </div>
         </SheetContent>
       </Sheet>
+
+      {/* Delete Confirmation Dialog */}
+      <DeleteConfirmationDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        onConfirm={confirmDelete}
+        title={
+          deleteTarget?.type === "single"
+            ? t("deleteSessionTitle")
+            : t("bulkDeleteTitle", { count: selectedIds.size })
+        }
+        description={
+          deleteTarget?.type === "single"
+            ? t("deleteSessionDescription")
+            : t("bulkDeleteDescription", { count: selectedIds.size })
+        }
+        entityName={
+          deleteTarget?.type === "single"
+            ? deleteTarget.entityName
+            : `${selectedIds.size} sessions`
+        }
+        isDeleting={isPending}
+        confirmButtonText={t("deleteSession")}
+      />
     </>
   );
 }
