@@ -104,6 +104,23 @@
   "competencyCountShort": "{count} комп.",
   "timeLimitShort": "{minutes} мин",
   "passingScoreShort": "{score}% порог",
+  "statsCards": {
+    "competencies": "Компетенции",
+    "competenciesMobile": "Компетенции",
+    "competenciesDescCategories": "{count} категорий",
+    "competenciesDescDefault": "Активные",
+    "indicators": "Поведенческие индикаторы",
+    "indicatorsMobile": "Индикаторы",
+    "indicatorsDescAvg": "~{value} на компетенцию",
+    "indicatorsDescDefault": "Всего",
+    "questions": "Вопросы оценки",
+    "questionsMobile": "Вопросы",
+    "questionsDesc": "Всего вопросов",
+    "templates": "Шаблоны тестов",
+    "templatesMobile": "Шаблоны",
+    "templatesDescActive": "{count} активных",
+    "templatesDescDefault": "Доступно"
+  },
   "userDashboard": {
     "actionBanner": {
       "resume": "Продолжить",

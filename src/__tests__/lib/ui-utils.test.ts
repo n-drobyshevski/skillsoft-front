@@ -165,17 +165,17 @@ describe('approvalStatusToColor', () => {
 });
 
 describe('biLevelToColor', () => {
-  it('should return appropriate colors for each level', () => {
-    expect(biLevelToColor('NOVICE')).toContain('red');
-    expect(biLevelToColor('DEVELOPING')).toContain('amber');
-    expect(biLevelToColor('PROFICIENT')).toContain('emerald');
-    expect(biLevelToColor('ADVANCED')).toContain('blue');
-    expect(biLevelToColor('EXPERT')).toContain('violet');
+  it('should return appropriate colors for each observability level', () => {
+    expect(biLevelToColor('DIRECTLY_OBSERVABLE')).toContain('green');
+    expect(biLevelToColor('PARTIALLY_OBSERVABLE')).toContain('blue');
+    expect(biLevelToColor('INFERRED')).toContain('purple');
+    expect(biLevelToColor('SELF_REPORTED')).toContain('amber');
+    expect(biLevelToColor('REQUIRES_DOCUMENTATION')).toContain('gray');
   });
 
-  it('should return novice color for unknown level', () => {
+  it('should return gray color for unknown level', () => {
     const color = biLevelToColor('UNKNOWN');
-    expect(color).toContain('red');
+    expect(color).toContain('gray');
   });
 });
 

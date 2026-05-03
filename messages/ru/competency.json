@@ -104,5 +104,19 @@
   "connectionIssueDescription": "Не удаётся подключиться к серверу. Возможно, это временная проблема с API.",
   "networkErrorDescription": "Не удаётся связаться с сервером. Проверьте интернет-соединение.",
   "errorLoadingDescription": "Произошла ошибка при загрузке данных компетенции.",
-  "backToCompetencies": "К списку компетенций"
+  "backToCompetencies": "К списку компетенций",
+  "statsCards": {
+    "total": "Всего компетенций",
+    "totalMobile": "Всего",
+    "totalDesc": "Активные компетенции",
+    "withIndicators": "С индикаторами",
+    "withIndicatorsMobile": "Связанные",
+    "withIndicatorsDesc": "Имеют индикаторы",
+    "avgWeight": "Ср. вес индикаторов",
+    "avgWeightMobile": "Ср. вес",
+    "avgWeightDesc": "Средний вес",
+    "advanced": "Продвинутый уровень",
+    "advancedMobile": "Продвинутые",
+    "advancedDesc": "Высокая квалификация"
+  }
 }

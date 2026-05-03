@@ -104,6 +104,23 @@
   "competencyCountShort": "{count} comp",
   "timeLimitShort": "{minutes}m",
   "passingScoreShort": "{score}% pass",
+  "statsCards": {
+    "competencies": "Competencies",
+    "competenciesMobile": "Competencies",
+    "competenciesDescCategories": "{count} categories",
+    "competenciesDescDefault": "Active",
+    "indicators": "Behavioral Indicators",
+    "indicatorsMobile": "Indicators",
+    "indicatorsDescAvg": "~{value} per competency",
+    "indicatorsDescDefault": "Total",
+    "questions": "Assessment Questions",
+    "questionsMobile": "Questions",
+    "questionsDesc": "Total questions",
+    "templates": "Test Templates",
+    "templatesMobile": "Templates",
+    "templatesDescActive": "{count} active",
+    "templatesDescDefault": "Available"
+  },
   "userDashboard": {
     "actionBanner": {
       "resume": "Resume",

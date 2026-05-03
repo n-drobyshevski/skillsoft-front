@@ -15,7 +15,7 @@
 
 import { connection } from 'next/server';
 import { cookies } from 'next/headers';
-import { auth } from '@clerk/nextjs/server';
+import { auth, currentUser as getClerkUser } from '@clerk/nextjs/server';
 import { UserRole } from '@/types/user';
 import { signAuthHeaders } from '@/lib/hmac';
 import { LENS_COOKIE_NAME, LENS_TO_ROLE, type LensType } from '@/store/lens-store';
@@ -94,9 +94,23 @@ export async function getAuthHeaders(): Promise<Record<string, string>> {
     // orgRole is directly on auth result, NOT in sessionClaims
     const metadataRole = sessionClaims?.metadata?.role as UserRole | undefined;
 
-    // Priority: Organization role > metadata role > default USER
+    // Priority: Organization role > session claims metadata > publicMetadata > default USER
     const mappedRole = mapOrgRole(orgRole as string | undefined);
-    const userRole: UserRole = mappedRole ?? metadataRole ?? UserRole.USER;
+    let userRole: UserRole = mappedRole ?? metadataRole ?? UserRole.USER;
+
+    // Fallback: when session token doesn't include publicMetadata and org role is absent,
+    // fetch the full user object to read publicMetadata.role directly.
+    if (!mappedRole && !metadataRole) {
+      try {
+        const user = await getClerkUser();
+        const pubRole = user?.publicMetadata?.role as UserRole | undefined;
+        if (pubRole) {
+          userRole = pubRole;
+        }
+      } catch {
+        // currentUser() may fail during prerendering — keep default
+      }
+    }
 
     // Resolve effective role from lens cookie (can only downgrade)
     const effectiveRole = await getEffectiveRole(userRole);
@@ -153,7 +167,19 @@ export async function getCurrentUserRole(): Promise<UserRole> {
 
     const metadataRole = sessionClaims?.metadata?.role as UserRole | undefined;
     const mappedRole = mapOrgRole(orgRole as string | undefined);
-    const realRole = mappedRole ?? metadataRole ?? UserRole.USER;
+    let realRole = mappedRole ?? metadataRole ?? UserRole.USER;
+
+    if (!mappedRole && !metadataRole) {
+      try {
+        const user = await getClerkUser();
+        const pubRole = user?.publicMetadata?.role as UserRole | undefined;
+        if (pubRole) {
+          realRole = pubRole;
+        }
+      } catch {
+        // currentUser() may fail during prerendering — keep default
+      }
+    }
 
     // Return effective (lens-downgraded) role
     return getEffectiveRole(realRole);

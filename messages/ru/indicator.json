@@ -10,5 +10,37 @@
   "counterExamples": "Контрпримеры",
   "observability": "Уровень наблюдаемости",
   "measurementType": "Тип измерения",
-  "backToIndicators": "К списку индикаторов"
+  "backToIndicators": "К списку индикаторов",
+  "columns": {
+    "title": "Название",
+    "competency": "Компетенция",
+    "questions": "Вопросы",
+    "level": "Уровень",
+    "weight": "Вес",
+    "status": "Статус",
+    "active": "Активен",
+    "inactive": "Неактивен",
+    "actions": "Действия"
+  },
+  "actions": {
+    "label": "Действия",
+    "quickView": "Быстрый просмотр",
+    "viewDetails": "Подробнее",
+    "edit": "Редактировать",
+    "copyId": "Копировать ID"
+  },
+  "statsCards": {
+    "total": "Всего индикаторов",
+    "totalMobile": "Всего",
+    "totalDesc": "Определённые индикаторы",
+    "withQuestions": "С вопросами",
+    "withQuestionsMobile": "С вопросами",
+    "withQuestionsDesc": "Имеют вопросы",
+    "measurable": "Измеримые",
+    "measurableMobile": "Измеримые",
+    "measurableDesc": "Количественные",
+    "complexity": "Ср. сложность",
+    "complexityMobile": "Сложность",
+    "complexityDesc": "Средняя сложность"
+  }
 }

@@ -20,8 +20,14 @@ import {
 } from "@/components/ui/sheet";
 import { biLevelToColor } from "@/lib/ui-utils";
 import { useState, useEffect } from "react";
+import { useTranslations } from "next-intl";
 import { AssessmentQuestion, BehavioralIndicator } from "@/types/domain";
 import { assessmentQuestionsApi } from "@/services/api";
+import {
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+} from "@/components/ui/tooltip";
 import QuestionCard from "./QuestionCard";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { CompetencyHoverCard } from "../[indicatorId]/_components/CompetencyHoverCard";
@@ -40,6 +46,8 @@ export default function IndicatorDrawer({
   indicator: BehavioralIndicator;
 }) {
   const router = useRouter();
+  const t = useTranslations("indicator");
+  const tEnum = useTranslations("enums.observabilityLevel");
   const [questions, setQuestions] = useState<AssessmentQuestion[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -130,18 +138,25 @@ export default function IndicatorDrawer({
           
           {/* Status Badges */}
           <div className="flex items-center gap-1.5 flex-wrap mt-3">
-            <Badge 
-              variant={indicator.isActive ? "default" : "secondary"} 
+            <Badge
+              variant={indicator.isActive ? "default" : "secondary"}
               className="h-5 text-[11px] px-1.5 font-medium"
             >
-              {indicator.isActive ? "Active" : "Inactive"}
+              {indicator.isActive ? t("columns.active") : t("columns.inactive")}
             </Badge>
-            <Badge
-              variant="outline"
-              className={`${biLevelToColor(indicator.observabilityLevel)} h-5 text-[11px] px-1.5 font-medium`}
-            >
-              {indicator.observabilityLevel}
-            </Badge>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Badge
+                  variant="outline"
+                  className={`${biLevelToColor(indicator.observabilityLevel)} h-5 text-[11px] px-1.5 font-medium`}
+                >
+                  {tEnum(indicator.observabilityLevel)}
+                </Badge>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" className="max-w-xs">
+                {tEnum(`${indicator.observabilityLevel}_DESC`)}
+              </TooltipContent>
+            </Tooltip>
             <Badge 
               variant="outline" 
               className="h-5 text-[11px] px-1.5 font-medium text-muted-foreground"

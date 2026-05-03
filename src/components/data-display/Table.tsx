@@ -215,7 +215,7 @@ export default function EntitiesTable<TData, TValue>({
                           column.toggleVisibility(!!value)
                         }
                       >
-                        {column.id}
+                        {(column.columnDef.meta as Record<string, string> | undefined)?.label ?? column.id}
                       </DropdownMenuCheckboxItem>
                     );
                   })}
@@ -376,9 +376,10 @@ export default function EntitiesTable<TData, TValue>({
                         {primaryCells.slice(1).map((cell) => (
                           <div key={cell.id} className="space-y-0.5">
                             <div className="text-muted-foreground font-medium uppercase tracking-wide text-[10px]">
-                              {typeof cell.column.columnDef.header === 'string'
-                                ? cell.column.columnDef.header
-                                : cell.column.id.replace(/([A-Z])/g, ' $1').trim()}
+                              {(cell.column.columnDef.meta as Record<string, string> | undefined)?.label
+                                ?? (typeof cell.column.columnDef.header === 'string'
+                                  ? cell.column.columnDef.header
+                                  : cell.column.id)}
                             </div>
                             <div className="text-foreground">
                               {flexRender(

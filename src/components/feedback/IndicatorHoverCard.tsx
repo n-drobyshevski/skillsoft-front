@@ -19,6 +19,7 @@ import {
   AlertCircle
 } from 'lucide-react';
 import { biLevelToColor, approvalStatusToColor } from '@/lib/ui-utils';
+import { useTranslations } from 'next-intl';
 import type { BehavioralIndicator } from '@/types/domain';
 
 interface IndicatorHoverCardProps {
@@ -27,6 +28,8 @@ interface IndicatorHoverCardProps {
 }
 
 export function IndicatorHoverCard({ indicatorId, children }: IndicatorHoverCardProps) {
+  const t = useTranslations('indicator');
+  const tEnum = useTranslations('enums.observabilityLevel');
   const [indicator, setIndicator] = useState<BehavioralIndicator | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -73,11 +76,11 @@ export function IndicatorHoverCard({ indicatorId, children }: IndicatorHoverCard
                     {indicator.title}
                   </h4>
                   <div className="flex flex-wrap gap-2">
-                    <Badge variant="outline" className={biLevelToColor(indicator.observabilityLevel)}>
-                      {indicator.observabilityLevel}
+                    <Badge variant="outline" className={biLevelToColor(indicator.observabilityLevel)} title={tEnum(`${indicator.observabilityLevel}_DESC`)}>
+                      {tEnum(indicator.observabilityLevel)}
                     </Badge>
                     <Badge variant={indicator.isActive ? "default" : "secondary"}>
-                      {indicator.isActive ? "Active" : "Inactive"}
+                      {indicator.isActive ? t("columns.active") : t("columns.inactive")}
                     </Badge>
                     <Badge variant="outline" className={approvalStatusToColor(indicator.approvalStatus)}>
                       {indicator.approvalStatus.replace("_", " ")}

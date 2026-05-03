@@ -19,6 +19,20 @@
     "contentEditors": "Редакторы контента",
     "bannedLocked": "{banned} заблокировано, {locked} заморожено"
   },
+  "statsCards": {
+    "total": "Всего пользователей",
+    "totalMobile": "Всего",
+    "totalDesc": "Все пользователи",
+    "active": "Активные",
+    "activeMobile": "Активные",
+    "activeDesc": "Сейчас активны",
+    "admins": "Администраторы",
+    "adminsMobile": "Админы",
+    "adminsDesc": "Администраторы",
+    "recentlyActive": "Недавно активные",
+    "recentlyActiveMobile": "Недавние",
+    "recentlyActiveDesc": "За 30 дней"
+  },
   "table": {
     "columns": {
       "user": "Пользователь",

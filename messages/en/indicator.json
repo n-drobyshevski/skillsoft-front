@@ -10,5 +10,37 @@
   "counterExamples": "Counter Examples",
   "observability": "Observability Level",
   "measurementType": "Measurement Type",
-  "backToIndicators": "Back to Indicators"
+  "backToIndicators": "Back to Indicators",
+  "columns": {
+    "title": "Title",
+    "competency": "Competency",
+    "questions": "Questions",
+    "level": "Level",
+    "weight": "Weight",
+    "status": "Status",
+    "active": "Active",
+    "inactive": "Inactive",
+    "actions": "Actions"
+  },
+  "actions": {
+    "label": "Actions",
+    "quickView": "Quick View",
+    "viewDetails": "View Details",
+    "edit": "Edit",
+    "copyId": "Copy ID"
+  },
+  "statsCards": {
+    "total": "Total Indicators",
+    "totalMobile": "Total",
+    "totalDesc": "Defined indicators",
+    "withQuestions": "With Questions",
+    "withQuestionsMobile": "Assessed",
+    "withQuestionsDesc": "Have questions",
+    "measurable": "Measurable",
+    "measurableMobile": "Measurable",
+    "measurableDesc": "Quantifiable",
+    "complexity": "Avg Complexity",
+    "complexityMobile": "Complexity",
+    "complexityDesc": "Mean complexity"
+  }
 }

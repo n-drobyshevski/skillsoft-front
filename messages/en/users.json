@@ -19,6 +19,20 @@
     "contentEditors": "Content editors",
     "bannedLocked": "{banned} banned, {locked} locked"
   },
+  "statsCards": {
+    "total": "Total Users",
+    "totalMobile": "Total",
+    "totalDesc": "All users",
+    "active": "Active Users",
+    "activeMobile": "Active",
+    "activeDesc": "Currently active",
+    "admins": "Administrators",
+    "adminsMobile": "Admins",
+    "adminsDesc": "Admin users",
+    "recentlyActive": "Recently Active",
+    "recentlyActiveMobile": "Recent",
+    "recentlyActiveDesc": "Last 30 days"
+  },
   "table": {
     "columns": {
       "user": "User",

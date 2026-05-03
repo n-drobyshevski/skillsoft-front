@@ -104,5 +104,19 @@
   "connectionIssueDescription": "Unable to connect to the server. This may be a temporary issue with the API.",
   "networkErrorDescription": "Unable to reach the server. Please check your internet connection.",
   "errorLoadingDescription": "An error occurred while loading the competency details.",
-  "backToCompetencies": "Back to Competencies"
+  "backToCompetencies": "Back to Competencies",
+  "statsCards": {
+    "total": "Total Competencies",
+    "totalMobile": "Total",
+    "totalDesc": "Active competencies",
+    "withIndicators": "With Indicators",
+    "withIndicatorsMobile": "Linked",
+    "withIndicatorsDesc": "Have indicators",
+    "avgWeight": "Avg Indicator Weight",
+    "avgWeightMobile": "Avg Weight",
+    "avgWeightDesc": "Mean weight",
+    "advanced": "Advanced Level",
+    "advancedMobile": "Advanced",
+    "advancedDesc": "High proficiency"
+  }
 }

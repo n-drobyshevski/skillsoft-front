@@ -123,18 +123,18 @@ export function approvalStatusToColor(status: string): string {
 
 export function biLevelToColor(level: string): string {
   switch (level) {
-    case 'NOVICE':
-      return COMMON_COLORS.NOVICE;
-    case 'DEVELOPING':
-      return COMMON_COLORS.DEVELOPING;
-    case 'PROFICIENT':
-      return COMMON_COLORS.PROFICIENT;
-    case 'ADVANCED':
-      return COMMON_COLORS.ADVANCED;
-    case 'EXPERT':
-      return COMMON_COLORS.EXPERT;
+    case 'DIRECTLY_OBSERVABLE':
+      return 'border-green-500/20 text-green-700 bg-green-50/90 dark:bg-green-950/90 dark:text-green-200 dark:border-green-400/30';
+    case 'PARTIALLY_OBSERVABLE':
+      return 'border-blue-500/20 text-blue-700 bg-blue-50/90 dark:bg-blue-950/90 dark:text-blue-200 dark:border-blue-400/30';
+    case 'INFERRED':
+      return 'border-purple-500/20 text-purple-700 bg-purple-50/90 dark:bg-purple-950/90 dark:text-purple-200 dark:border-purple-400/30';
+    case 'SELF_REPORTED':
+      return 'border-amber-500/20 text-amber-700 bg-amber-50/90 dark:bg-amber-950/90 dark:text-amber-200 dark:border-amber-400/30';
+    case 'REQUIRES_DOCUMENTATION':
+      return 'border-gray-500/20 text-gray-700 bg-gray-50/90 dark:bg-gray-950/90 dark:text-gray-200 dark:border-gray-400/30';
     default:
-      return COMMON_COLORS.NOVICE;
+      return 'border-gray-500/20 text-gray-700 bg-gray-50/90 dark:bg-gray-950/90 dark:text-gray-200 dark:border-gray-400/30';
   }
 }
 

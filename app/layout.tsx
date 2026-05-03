@@ -30,7 +30,6 @@ export const metadata: Metadata = {
 		statusBarStyle: 'default',
 		title: 'SkillSoft',
 	},
-	// Prevent Dark Reader extension from modifying the DOM (causes hydration mismatches)
 	other: {
 		'darkreader-lock': '',
 	},

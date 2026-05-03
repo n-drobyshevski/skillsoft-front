@@ -1,11 +1,12 @@
 "use client";
 
 import React from "react";
+import { useTranslations } from "next-intl";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { 
-  Activity, 
+import {
+  Activity,
   TrendingUp,
   Users,
   UsersRound,
@@ -25,6 +26,14 @@ import {
   LucideProps
 } from "lucide-react";
 import MobileStatsCard from "./MobileStatsCard";
+
+const TYPE_TO_NAMESPACE: Record<string, string> = {
+  "dashboard": "dashboard",
+  "competencies": "competency",
+  "behavioral-indicators": "indicator",
+  "assessment-questions": "question",
+  "users": "users",
+};
 
 // Base stats interface that all entity stats extend
 interface BaseEntityStats {
@@ -115,10 +124,7 @@ interface FlexibleStatsCardsProps {
 
 export default function FlexibleStatsCards({ data, loading = false, onCardClick }: FlexibleStatsCardsProps) {
   const isMobile = useIsMobile();
-
-  // Constants for repeated strings
-  const FROM_LAST_MONTH = "from last month";
-  const SINCE_LAST_HOUR = "since last hour";
+  const t = useTranslations(`${TYPE_TO_NAMESPACE[data.type]}.statsCards`);
 
   if (loading) {
     if (isMobile) {
@@ -164,49 +170,49 @@ export default function FlexibleStatsCards({ data, loading = false, onCardClick 
         return [
           {
             key: "competencies",
-            title: "Competencies",
-            mobileTitle: "Competencies",
+            title: t("competencies"),
+            mobileTitle: t("competenciesMobile"),
             value: data.stats.totalCompetencies,
             icon: Target,
             href: "/hr/competencies",
             trend: undefined,
-            description: data.stats.competenciesByCategory 
-              ? `${Object.keys(data.stats.competenciesByCategory).length} categories` 
-              : "Active"
+            description: data.stats.competenciesByCategory
+              ? t("competenciesDescCategories", { count: Object.keys(data.stats.competenciesByCategory).length })
+              : t("competenciesDescDefault")
           },
           {
             key: "indicators",
-            title: "Behavioral Indicators",
-            mobileTitle: "Indicators",
+            title: t("indicators"),
+            mobileTitle: t("indicatorsMobile"),
             value: data.stats.totalBehavioralIndicators,
             icon: Layers,
             href: "/hr/behavioral-indicators",
             trend: undefined,
-            description: data.stats.averageIndicatorsPerCompetency 
-              ? `~${data.stats.averageIndicatorsPerCompetency.toFixed(1)} per competency`
-              : "Total"
+            description: data.stats.averageIndicatorsPerCompetency
+              ? t("indicatorsDescAvg", { value: data.stats.averageIndicatorsPerCompetency.toFixed(1) })
+              : t("indicatorsDescDefault")
           },
           {
             key: "questions",
-            title: "Assessment Questions",
-            mobileTitle: "Questions",
+            title: t("questions"),
+            mobileTitle: t("questionsMobile"),
             value: data.stats.totalAssessmentQuestions,
             icon: ClipboardList,
             href: "/hr/assessment-questions",
             trend: undefined,
-            description: "Total questions"
+            description: t("questionsDesc")
           },
           {
             key: "templates",
-            title: "Test Templates",
-            mobileTitle: "Templates",
+            title: t("templates"),
+            mobileTitle: t("templatesMobile"),
             value: data.stats.totalTestTemplates ?? 0,
             icon: Activity,
             href: "/test-templates",
             trend: undefined,
-            description: data.stats.activeTestTemplates !== undefined 
-              ? `${data.stats.activeTestTemplates} active`
-              : "Available"
+            description: data.stats.activeTestTemplates !== undefined
+              ? t("templatesDescActive", { count: data.stats.activeTestTemplates })
+              : t("templatesDescDefault")
           }
         ];
 
@@ -214,36 +220,36 @@ export default function FlexibleStatsCards({ data, loading = false, onCardClick 
         return [
           {
             key: "total",
-            title: "Total Competencies",
-            mobileTitle: "Total",
+            title: t("total"),
+            mobileTitle: t("totalMobile"),
             value: data.stats.total,
             icon: Layers,
             trend: data.stats.trend,
-            description: "Active competencies"
+            description: t("totalDesc")
           },
           {
             key: "with-assessments",
-            title: "With Indicators",
-            mobileTitle: "Linked",
+            title: t("withIndicators"),
+            mobileTitle: t("withIndicatorsMobile"),
             value: data.stats.withAssessments || 0,
             icon: CheckCircle2,
-            description: "Have indicators"
+            description: t("withIndicatorsDesc")
           },
           {
             key: "average-weight",
-            title: "Avg Indicator Weight",
-            mobileTitle: "Avg Weight",
-            value: data.stats.averageWeight ? `${data.stats.averageWeight.toFixed(1)}` : "N/A",
+            title: t("avgWeight"),
+            mobileTitle: t("avgWeightMobile"),
+            value: data.stats.averageWeight != null && data.stats.averageWeight > 0 ? data.stats.averageWeight.toFixed(1) : "—",
             icon: BarChart3,
-            description: "Mean weight"
+            description: t("avgWeightDesc")
           },
           {
             key: "advanced",
-            title: "Advanced Level",
-            mobileTitle: "Advanced",
+            title: t("advanced"),
+            mobileTitle: t("advancedMobile"),
             value: (data.stats.byLevel?.advanced || 0) + (data.stats.byLevel?.expert || 0),
             icon: TrendingUp,
-            description: "High proficiency"
+            description: t("advancedDesc")
           }
         ];
 
@@ -251,36 +257,36 @@ export default function FlexibleStatsCards({ data, loading = false, onCardClick 
         return [
           {
             key: "total",
-            title: "Total Indicators",
-            mobileTitle: "Total",
+            title: t("total"),
+            mobileTitle: t("totalMobile"),
             value: data.stats.total,
             icon: Target,
             trend: data.stats.trend,
-            description: "Defined indicators"
+            description: t("totalDesc")
           },
           {
             key: "with-questions",
-            title: "With Questions",
-            mobileTitle: "Assessed",
+            title: t("withQuestions"),
+            mobileTitle: t("withQuestionsMobile"),
             value: data.stats.withQuestions || 0,
             icon: HelpCircle,
-            description: "Have questions"
+            description: t("withQuestionsDesc")
           },
           {
             key: "measurable",
-            title: "Measurable",
-            mobileTitle: "Measurable",
+            title: t("measurable"),
+            mobileTitle: t("measurableMobile"),
             value: data.stats.measurable || 0,
             icon: Star,
-            description: "Quantifiable"
+            description: t("measurableDesc")
           },
           {
             key: "complexity",
-            title: "Avg Complexity",
-            mobileTitle: "Complexity",
-            value: data.stats.averageComplexity ? data.stats.averageComplexity.toFixed(1) : "N/A",
+            title: t("complexity"),
+            mobileTitle: t("complexityMobile"),
+            value: data.stats.averageComplexity != null && data.stats.averageComplexity > 0 ? data.stats.averageComplexity.toFixed(1) : "—",
             icon: Activity,
-            description: "Mean complexity"
+            description: t("complexityDesc")
           }
         ];
 
@@ -288,36 +294,36 @@ export default function FlexibleStatsCards({ data, loading = false, onCardClick 
         return [
           {
             key: "total",
-            title: "Total Questions",
-            mobileTitle: "Total",
+            title: t("total"),
+            mobileTitle: t("totalMobile"),
             value: data.stats.total,
             icon: HelpCircle,
             trend: data.stats.trend,
-            description: "All questions"
+            description: t("totalDesc")
           },
           {
             key: "with-indicators",
-            title: "With Indicators",
-            mobileTitle: "Linked",
+            title: t("withIndicators"),
+            mobileTitle: t("withIndicatorsMobile"),
             value: data.stats.withIndicators || 0,
             icon: Target,
-            description: "Indicator-linked"
+            description: t("withIndicatorsDesc")
           },
           {
             key: "avg-time-limit",
-            title: "Avg Time Limit",
-            mobileTitle: "Avg Time",
-            value: data.stats.averageTimeLimitSeconds ? `${data.stats.averageTimeLimitSeconds.toFixed(1)}s` : "N/A",
+            title: t("avgTimeLimit"),
+            mobileTitle: t("avgTimeLimitMobile"),
+            value: data.stats.averageTimeLimitSeconds != null && data.stats.averageTimeLimitSeconds > 0 ? `${data.stats.averageTimeLimitSeconds.toFixed(1)}s` : "—",
             icon: Clock,
-            description: "Per question"
+            description: t("avgTimeLimitDesc")
           },
           {
             key: "hard-questions",
-            title: "Hard Questions",
-            mobileTitle: "Hard",
+            title: t("hardQuestions"),
+            mobileTitle: t("hardQuestionsMobile"),
             value: data.stats.hardQuestions || 0,
             icon: Zap,
-            description: "High difficulty"
+            description: t("hardQuestionsDesc")
           }
         ];
 
@@ -325,39 +331,36 @@ export default function FlexibleStatsCards({ data, loading = false, onCardClick 
         return [
           {
             key: "total",
-            title: "Total Users",
-            mobileTitle: "Total",
+            title: t("total"),
+            mobileTitle: t("totalMobile"),
             value: data.stats.total,
             icon: UsersRound,
             trend: data.stats.trend,
-            description: "All users"
+            description: t("totalDesc")
           },
           {
             key: "active",
-            title: "Active Users",
-            mobileTitle: "Active",
+            title: t("active"),
+            mobileTitle: t("activeMobile"),
             value: data.stats.active || 0,
             icon: UserCheck,
-            trend: { value: "+8%", label: FROM_LAST_MONTH, isPositive: true },
-            description: "Currently active"
+            description: t("activeDesc")
           },
           {
             key: "admins",
-            title: "Administrators",
-            mobileTitle: "Admins",
+            title: t("admins"),
+            mobileTitle: t("adminsMobile"),
             value: data.stats.byRole?.admin || 0,
             icon: Shield,
-            trend: { value: "0", label: "stable", isPositive: true },
-            description: "Admin users"
+            description: t("adminsDesc")
           },
           {
             key: "recently-active",
-            title: "Recently Active",
-            mobileTitle: "Recent",
+            title: t("recentlyActive"),
+            mobileTitle: t("recentlyActiveMobile"),
             value: data.stats.recentlyActive || 0,
             icon: Clock,
-            trend: { value: "+12%", label: FROM_LAST_MONTH, isPositive: true },
-            description: "Last 30 days"
+            description: t("recentlyActiveDesc")
           }
         ];
 
@@ -429,7 +432,7 @@ export default function FlexibleStatsCards({ data, loading = false, onCardClick 
                 </Badge>
                 <span className="hidden sm:inline">{config.trend.label}</span>
                 <span className="sm:hidden">
-                  {config.trend.label.includes('hour') ? 'last hour' : 'last month'}
+                  {config.trend.label}
                 </span>
               </div>
             )}

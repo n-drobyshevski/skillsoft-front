@@ -6,6 +6,7 @@ import PageHeader from "@/components/common/PageHeader";
 import FlexibleStatsCards from "@/components/data-display/FlexibleStatsCards";
 import { Plus } from "lucide-react";
 import { getTranslations } from "next-intl/server";
+import { ObservabilityLevel } from "@/types/domain";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("metadata.indicators");
@@ -33,6 +34,22 @@ import TableSkeleton from "@/components/data-display/TableSkeleton";
 interface EnrichedIndicator extends BehavioralIndicator {
   competencyName: string;
   questionCount: number;
+}
+
+const OBSERVABILITY_COMPLEXITY: Record<string, number> = {
+  [ObservabilityLevel.DIRECTLY_OBSERVABLE]: 1,
+  [ObservabilityLevel.PARTIALLY_OBSERVABLE]: 2,
+  [ObservabilityLevel.INFERRED]: 3,
+  [ObservabilityLevel.SELF_REPORTED]: 4,
+  [ObservabilityLevel.REQUIRES_DOCUMENTATION]: 5,
+};
+
+function computeAvgComplexity(indicators: BehavioralIndicator[]): number {
+  const scores = indicators
+    .map((i) => OBSERVABILITY_COMPLEXITY[i.observabilityLevel])
+    .filter((v): v is number => v != null);
+  if (scores.length === 0) return 0;
+  return Math.round((scores.reduce((a, b) => a + b, 0) / scores.length) * 10) / 10;
 }
 
 async function getIndicatorsData(): Promise<{
@@ -105,7 +122,7 @@ export default async function BehavioralIndicatorsPage() {
             total: entityStats?.indicators.total ?? indicators.length,
             withQuestions: entityStats?.indicators.withQuestions ?? indicators.filter((i) => i.questionCount > 0).length,
             measurable: entityStats?.indicators.measurable ?? 0,
-            averageComplexity: entityStats?.indicators.averageComplexity ?? 0,
+            averageComplexity: entityStats?.indicators.averageComplexity || computeAvgComplexity(indicators),
           },
         }}
         loading={!indicators}

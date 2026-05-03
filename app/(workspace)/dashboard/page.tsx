@@ -3,7 +3,7 @@ import { cookies } from 'next/headers';
 import { Metadata } from 'next';
 import ErrorCard from '@/components/feedback/ErrorCard';
 import { currentUser } from '@clerk/nextjs/server';
-import { getAuthHeaders } from '@/services/roleApi';
+import { getAuthHeaders, getCurrentUserRole } from '@/services/roleApi';
 import {
   getDashboardStatsCached,
   getMainColumnDataCached,
@@ -30,19 +30,21 @@ export const metadata: Metadata = {
 
 /**
  * Resolve current user info from Clerk.
- * This is a lightweight call (auth check only, no data fetching).
+ * Returns the effective (lens-aware) role so data-fetching decisions
+ * match the permissions the backend will actually enforce.
  */
 async function getCurrentUserInfo() {
   try {
-    const user = await currentUser();
+    const [user, effectiveRole] = await Promise.all([
+      currentUser(),
+      getCurrentUserRole(),
+    ]);
     if (!user) return null;
-
-    const role = (user.publicMetadata?.role as 'ADMIN' | 'EDITOR' | 'USER') || 'USER';
 
     return {
       id: user.id,
       firstName: user.firstName || undefined,
-      role,
+      role: effectiveRole as 'ADMIN' | 'EDITOR' | 'USER',
     };
   } catch {
     return null;

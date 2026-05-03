@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import type { ColumnDef } from "@tanstack/react-table";
+import { useTranslations } from "next-intl";
 
 import {
   DropdownMenu,
@@ -15,6 +16,11 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import {
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+} from "@/components/ui/tooltip";
 import EntityTable from "@/components/data-display/Table";
 import {
   ArrowUpDown,
@@ -40,6 +46,8 @@ interface IndicatorsTableProps {
 
 export default function IndicatorsTable({ indicators }: IndicatorsTableProps) {
   const router = useRouter();
+  const t = useTranslations("indicator");
+  const tEnum = useTranslations("enums.observabilityLevel");
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [selectedIndicator, setSelectedIndicator] =
     useState<BehavioralIndicator | null>(null);
@@ -52,6 +60,7 @@ export default function IndicatorsTable({ indicators }: IndicatorsTableProps) {
   const columns: ColumnDef<EnrichedIndicator>[] = [
     {
       accessorKey: "title",
+      meta: { label: t("columns.title") },
       header: ({ column }) => {
         return (
           <div className="text-left">
@@ -61,7 +70,7 @@ export default function IndicatorsTable({ indicators }: IndicatorsTableProps) {
               size="sm"
               className="-ml-4 text-muted-foreground"
             >
-              Title
+              {t("columns.title")}
               <ArrowUpDown className="ml-2 h-4 w-4" />
             </Button>
           </div>
@@ -78,12 +87,13 @@ export default function IndicatorsTable({ indicators }: IndicatorsTableProps) {
     },
     {
       accessorKey: "competencyName",
+      meta: { label: t("columns.competency") },
       header: ({ column }) => (
         <Button
           variant="link"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
-          Competency
+          {t("columns.competency")}
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       ),
@@ -104,12 +114,13 @@ export default function IndicatorsTable({ indicators }: IndicatorsTableProps) {
     },
     {
       accessorKey: "questionCount",
+      meta: { label: t("columns.questions") },
       header: ({ column }) => (
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
-          Questions
+          {t("columns.questions")}
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       ),
@@ -119,32 +130,41 @@ export default function IndicatorsTable({ indicators }: IndicatorsTableProps) {
     },
     {
       accessorKey: "observabilityLevel",
+      meta: { label: t("columns.level") },
       header: ({ column }) => (
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
-          Level
+          {t("columns.level")}
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       ),
       cell: ({ row }) => {
         const level = row.getValue("observabilityLevel") as string;
         return (
-          <Badge variant="outline" className={biLevelToColor(level)}>
-            {level}
-          </Badge>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Badge variant="outline" className={biLevelToColor(level)}>
+                {tEnum(level)}
+              </Badge>
+            </TooltipTrigger>
+            <TooltipContent side="top" className="max-w-xs">
+              {tEnum(`${level}_DESC`)}
+            </TooltipContent>
+          </Tooltip>
         );
       },
     },
     {
       accessorKey: "weight",
+      meta: { label: t("columns.weight") },
       header: ({ column }) => (
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
-          Weight
+          {t("columns.weight")}
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       ),
@@ -155,12 +175,13 @@ export default function IndicatorsTable({ indicators }: IndicatorsTableProps) {
     },
     {
       accessorKey: "isActive",
-      header: "Status",
+      meta: { label: t("columns.status") },
+      header: t("columns.status"),
       cell: ({ row }) => {
         const isActive = row.getValue("isActive") as boolean;
         return (
           <Badge variant={isActive ? "default" : "secondary"}>
-            {isActive ? "Active" : "Inactive"}
+            {isActive ? t("columns.active") : t("columns.inactive")}
           </Badge>
         );
       },
@@ -168,6 +189,7 @@ export default function IndicatorsTable({ indicators }: IndicatorsTableProps) {
     // Action column - uses group-hover to show/hide the menu button
     {
       id: "actions",
+      meta: { label: t("columns.actions") },
       cell: ({ row }) => {
         const indicator = row.original;
         return (
@@ -184,28 +206,28 @@ export default function IndicatorsTable({ indicators }: IndicatorsTableProps) {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48">
-              <DropdownMenuLabel className="text-xs text-muted-foreground font-normal">Actions</DropdownMenuLabel>
+              <DropdownMenuLabel className="text-xs text-muted-foreground font-normal">{t("actions.label")}</DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={(e) => {
                 e.stopPropagation();
                 handleViewDetails(indicator);
               }}>
                 <Layers className="mr-2 h-4 w-4 text-muted-foreground" />
-                Quick View
+                {t("actions.quickView")}
               </DropdownMenuItem>
               <DropdownMenuItem onClick={(e) => {
                 e.stopPropagation();
                 router.push(`/hr/behavioral-indicators/${indicator.id}`);
               }}>
                 <ExternalLink className="mr-2 h-4 w-4 text-muted-foreground" />
-                View Details
+                {t("actions.viewDetails")}
               </DropdownMenuItem>
               <DropdownMenuItem onClick={(e) => {
                 e.stopPropagation();
                 router.push(`/hr/behavioral-indicators/${indicator.id}/edit`);
               }}>
                 <Settings2 className="mr-2 h-4 w-4 text-muted-foreground" />
-                Edit
+                {t("actions.edit")}
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem
@@ -216,7 +238,7 @@ export default function IndicatorsTable({ indicators }: IndicatorsTableProps) {
                 className="text-muted-foreground"
               >
                 <Copy className="mr-2 h-4 w-4" />
-                Copy ID
+                {t("actions.copyId")}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
