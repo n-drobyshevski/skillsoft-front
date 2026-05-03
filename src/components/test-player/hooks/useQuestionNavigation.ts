@@ -54,6 +54,8 @@ export interface UseQuestionNavigationReturn {
   handleComplete: () => Promise<void>;
   handleExit: () => void;
   handleAbandonTest: () => Promise<void>;
+  handleDiscardTest: () => Promise<void>;
+  isDiscarding: boolean;
   handleRetryNavigation: () => Promise<void>;
   handleDismissNavigationError: () => void;
   handleContinueWithoutSaving: () => Promise<void>;
@@ -685,6 +687,32 @@ export function useQuestionNavigation({
     }
   };
 
+  const [isDiscarding, setIsDiscarding] = useState(false);
+
+  const handleDiscardTest = async () => {
+    setIsDiscarding(true);
+    try {
+      if (adapter) {
+        await adapter.discardSession(session.id);
+      } else {
+        await testSessionsClientApi.discardSession(session.id, effectiveAuthHeaders);
+      }
+      toast.success(t('player.toast.sessionDiscarded'));
+      if (onAbandon) {
+        onAbandon();
+      } else {
+        router.push('/test-templates');
+      }
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error('Failed to discard test:', error);
+      toast.error(t('player.toast.failedToDiscardTest'));
+    } finally {
+      setIsDiscarding(false);
+      setShowAbandonDialog(false);
+    }
+  };
+
   // ========================================================================
   // Public: Navigation error recovery
   // ========================================================================
@@ -812,6 +840,8 @@ export function useQuestionNavigation({
     handleComplete,
     handleExit,
     handleAbandonTest,
+    handleDiscardTest,
+    isDiscarding,
     handleRetryNavigation,
     handleDismissNavigationError,
     handleContinueWithoutSaving,

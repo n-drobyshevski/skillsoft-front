@@ -239,6 +239,8 @@ export function ImmersivePlayer({
     handleComplete,
     handleExit,
     handleAbandonTest,
+    handleDiscardTest,
+    isDiscarding,
     handleRetryNavigation,
     handleDismissNavigationError,
     handleContinueWithoutSaving,
@@ -492,7 +494,9 @@ export function ImmersivePlayer({
       <AbandonDialog
         open={showAbandonDialog}
         onOpenChange={setShowAbandonDialog}
-        onConfirm={handleAbandonTest}
+        onAbandon={handleAbandonTest}
+        onDiscard={handleDiscardTest}
+        isDiscarding={isDiscarding}
       />
 
       <TimeoutDialog

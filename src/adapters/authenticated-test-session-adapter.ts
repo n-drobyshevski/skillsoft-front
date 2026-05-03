@@ -159,6 +159,11 @@ export class AuthenticatedTestSessionAdapter implements TestSessionAdapter {
     await testSessionsClientApi.abandonSession(sessionId, headers);
   }
 
+  async discardSession(sessionId: string): Promise<void> {
+    const headers = await this.getHeaders();
+    await testSessionsClientApi.discardSession(sessionId, headers);
+  }
+
   // ============================================
   // Time Management
   // ============================================

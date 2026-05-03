@@ -198,6 +198,13 @@ export interface TestSessionAdapter {
    */
   abandonSession(sessionId: string): Promise<void>;
 
+  /**
+   * Discard the test session completely (exit without saving).
+   * Session and all answers are permanently deleted from the database.
+   * @param sessionId - The session ID
+   */
+  discardSession(sessionId: string): Promise<void>;
+
   // ============================================
   // Time Management
   // ============================================

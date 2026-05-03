@@ -306,6 +306,13 @@ export class AnonymousTestSessionAdapter implements TestSessionAdapter {
     anonymousTestApi.clearCredentials();
   }
 
+  async discardSession(sessionId: string): Promise<void> {
+    // Anonymous API doesn't have a discard endpoint
+    // The session will be cleaned up automatically after expiry
+    void sessionId;
+    anonymousTestApi.clearCredentials();
+  }
+
   // ============================================
   // Time Management
   // ============================================

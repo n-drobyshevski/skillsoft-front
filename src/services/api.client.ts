@@ -336,6 +336,19 @@ export const testSessionsClientApi = {
   },
 
   /**
+   * Discard a session (exit without saving).
+   * Permanently deletes session and all answers.
+   */
+  discardSession: async (
+    sessionId: string,
+    authHeaders: Record<string, string>
+  ): Promise<void> => {
+    await clientFetch(`${TEST_SESSIONS_BASE}/${sessionId}/discard`, authHeaders, {
+      method: 'POST',
+    });
+  },
+
+  /**
    * Get all answers for a session (for answer summary review)
    */
   getSessionAnswers: async (

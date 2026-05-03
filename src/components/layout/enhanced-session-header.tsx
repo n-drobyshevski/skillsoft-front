@@ -5,17 +5,6 @@ import { X, Eye } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from '@/components/ui/alert-dialog';
-import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
@@ -187,34 +176,15 @@ export function EnhancedSessionHeader({
         {/* Desktop: Single row with all elements */}
         <div className="hidden md:flex items-center gap-3 lg:gap-4">
           {/* Exit Button */}
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="shrink-0 h-8 w-8 text-neutral-400 hover:text-white hover:bg-neutral-800/50 transition-colors"
-              >
-                <X className="h-4 w-4" />
-                <span className="sr-only">Выйти из теста</span>
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent className="bg-neutral-900 border-neutral-800">
-              <AlertDialogHeader>
-                <AlertDialogTitle>Выйти из теста?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  Ваш прогресс будет сохранён. Вы сможете продолжить этот тест позже.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel className="bg-neutral-800 border-neutral-700 hover:bg-neutral-700">
-                  Продолжить тест
-                </AlertDialogCancel>
-                <AlertDialogAction onClick={onExit} className="bg-neutral-700 hover:bg-neutral-600">
-                  Сохранить и выйти
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onExit}
+            className="shrink-0 h-8 w-8 text-neutral-400 hover:text-white hover:bg-neutral-800/50 transition-colors"
+          >
+            <X className="h-4 w-4" />
+            <span className="sr-only">Exit test</span>
+          </Button>
 
           {/* Test Name */}
           <h1 className="text-sm lg:text-base font-semibold text-white truncate max-w-xs lg:max-w-md xl:max-w-lg" title={testName}>
@@ -280,34 +250,15 @@ export function EnhancedSessionHeader({
           {/* Row 1: Exit + Name + Badge + Timer */}
           <div className="flex items-center gap-1.5 min-w-0">
             {/* Exit */}
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="shrink-0 h-8 w-8 text-neutral-400 hover:text-white hover:bg-neutral-800/50 -ml-1"
-                >
-                  <X className="h-4 w-4" />
-                  <span className="sr-only">Выйти из теста</span>
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent className="bg-neutral-900 border-neutral-800">
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Выйти из теста?</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    Ваш прогресс будет сохранён. Вы сможете продолжить этот тест позже.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel className="bg-neutral-800 border-neutral-700 hover:bg-neutral-700">
-                    Продолжить тест
-                  </AlertDialogCancel>
-                  <AlertDialogAction onClick={onExit} className="bg-neutral-700 hover:bg-neutral-600">
-                    Сохранить и выйти
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={onExit}
+              className="shrink-0 h-8 w-8 text-neutral-400 hover:text-white hover:bg-neutral-800/50 -ml-1"
+            >
+              <X className="h-4 w-4" />
+              <span className="sr-only">Exit test</span>
+            </Button>
 
             {/* Test Name */}
             <h1 className="flex-1 min-w-0 text-sm font-semibold text-white truncate" title={testName}>
