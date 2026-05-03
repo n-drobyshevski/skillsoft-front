@@ -12,5 +12,35 @@
   "explanation": "Explanation",
   "addOption": "Add Option",
   "removeOption": "Remove Option",
-  "backToQuestions": "Back to Questions"
+  "backToQuestions": "Back to Questions",
+  "columns": {
+    "question": "Question",
+    "type": "Type",
+    "difficulty": "Difficulty",
+    "actions": "Actions",
+    "viewIndicator": "View Indicator",
+    "noIndicator": "No indicator assigned"
+  },
+  "actions": {
+    "label": "Actions",
+    "quickView": "Quick View",
+    "viewDetails": "View Details",
+    "edit": "Edit",
+    "copyId": "Copy ID",
+    "openMenu": "Open menu"
+  },
+  "statsCards": {
+    "total": "Total Questions",
+    "totalMobile": "Total",
+    "totalDesc": "All questions",
+    "withIndicators": "With Indicators",
+    "withIndicatorsMobile": "Linked",
+    "withIndicatorsDesc": "Indicator-linked",
+    "avgTimeLimit": "Avg Time Limit",
+    "avgTimeLimitMobile": "Avg Time",
+    "avgTimeLimitDesc": "Per question",
+    "hardQuestions": "Hard Questions",
+    "hardQuestionsMobile": "Hard",
+    "hardQuestionsDesc": "High difficulty"
+  }
 }

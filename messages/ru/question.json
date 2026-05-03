@@ -12,5 +12,35 @@
   "explanation": "Пояснение",
   "addOption": "Добавить вариант",
   "removeOption": "Удалить вариант",
-  "backToQuestions": "К списку вопросов"
+  "backToQuestions": "К списку вопросов",
+  "columns": {
+    "question": "Вопрос",
+    "type": "Тип",
+    "difficulty": "Сложность",
+    "actions": "Действия",
+    "viewIndicator": "Просмотр индикатора",
+    "noIndicator": "Индикатор не назначен"
+  },
+  "actions": {
+    "label": "Действия",
+    "quickView": "Быстрый просмотр",
+    "viewDetails": "Подробнее",
+    "edit": "Редактировать",
+    "copyId": "Копировать ID",
+    "openMenu": "Открыть меню"
+  },
+  "statsCards": {
+    "total": "Всего вопросов",
+    "totalMobile": "Всего",
+    "totalDesc": "Все вопросы",
+    "withIndicators": "С индикаторами",
+    "withIndicatorsMobile": "Связанные",
+    "withIndicatorsDesc": "Привязаны к индикаторам",
+    "avgTimeLimit": "Ср. время",
+    "avgTimeLimitMobile": "Ср. время",
+    "avgTimeLimitDesc": "На вопрос",
+    "hardQuestions": "Сложные вопросы",
+    "hardQuestionsMobile": "Сложные",
+    "hardQuestionsDesc": "Высокая сложность"
+  }
 }
