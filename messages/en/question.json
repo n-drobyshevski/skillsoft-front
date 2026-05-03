@@ -33,14 +33,18 @@
     "total": "Total Questions",
     "totalMobile": "Total",
     "totalDesc": "All questions",
+    "totalTooltip": "The total number of assessment questions in the system, including all difficulty levels and question types.",
     "withIndicators": "With Indicators",
     "withIndicatorsMobile": "Linked",
     "withIndicatorsDesc": "Indicator-linked",
+    "withIndicatorsTooltip": "Questions linked to at least one behavioral indicator. Linked questions contribute to competency scoring during assessments.",
     "avgTimeLimit": "Avg Time Limit",
     "avgTimeLimitMobile": "Avg Time",
     "avgTimeLimitDesc": "Per question",
+    "avgTimeLimitTooltip": "The average time limit across all timed questions. Questions without a time limit are excluded from this calculation.",
     "hardQuestions": "Hard Questions",
     "hardQuestionsMobile": "Hard",
-    "hardQuestionsDesc": "High difficulty"
+    "hardQuestionsDesc": "High difficulty",
+    "hardQuestionsTooltip": "Questions marked as Advanced or Specialized difficulty. These are used to differentiate high-performing candidates in assessments."
   }
 }

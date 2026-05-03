@@ -33,14 +33,18 @@
     "total": "Total Indicators",
     "totalMobile": "Total",
     "totalDesc": "Defined indicators",
+    "totalTooltip": "The total number of behavioral indicators defined across all competencies in the system.",
     "withQuestions": "With Questions",
     "withQuestionsMobile": "Assessed",
     "withQuestionsDesc": "Have questions",
+    "withQuestionsTooltip": "Indicators that have at least one assessment question linked. These indicators can be measured during test sessions.",
     "measurable": "Measurable",
     "measurableMobile": "Measurable",
     "measurableDesc": "Quantifiable",
+    "measurableTooltip": "Indicators with a quantitative measurement type, allowing objective scoring rather than subjective evaluation.",
     "complexity": "Avg Complexity",
     "complexityMobile": "Complexity",
-    "complexityDesc": "Mean complexity"
+    "complexityDesc": "Mean complexity",
+    "complexityTooltip": "The average complexity rating across all indicators. Higher complexity indicates more nuanced behavioral patterns to assess."
   }
 }

@@ -109,14 +109,18 @@
     "total": "Total Competencies",
     "totalMobile": "Total",
     "totalDesc": "Active competencies",
+    "totalTooltip": "The total number of competencies defined in the system across all categories and proficiency levels.",
     "withIndicators": "With Indicators",
     "withIndicatorsMobile": "Linked",
     "withIndicatorsDesc": "Have indicators",
+    "withIndicatorsTooltip": "Competencies that have at least one behavioral indicator linked. Indicators define observable behaviors used to measure each competency.",
     "avgWeight": "Avg Indicator Weight",
     "avgWeightMobile": "Avg Weight",
     "avgWeightDesc": "Mean weight",
+    "avgWeightTooltip": "The average weight assigned to behavioral indicators across all competencies. Weights determine how much each indicator contributes to the overall competency score.",
     "advanced": "Advanced Level",
     "advancedMobile": "Advanced",
-    "advancedDesc": "High proficiency"
+    "advancedDesc": "High proficiency",
+    "advancedTooltip": "Competencies classified as Advanced or Expert proficiency level. These represent higher-order skills expected of senior professionals."
   }
 }

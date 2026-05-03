@@ -26,6 +26,7 @@ import {
   LucideProps
 } from "lucide-react";
 import MobileStatsCard from "./MobileStatsCard";
+import { HelpTooltip } from "@/components/ui/help-tooltip";
 
 const TYPE_TO_NAMESPACE: Record<string, string> = {
   "dashboard": "dashboard",
@@ -114,6 +115,7 @@ interface CardConfig {
     isPositive: boolean;
   };
   description: string;
+  tooltip?: string;
 }
 
 interface FlexibleStatsCardsProps {
@@ -225,7 +227,8 @@ export default function FlexibleStatsCards({ data, loading = false, onCardClick 
             value: data.stats.total,
             icon: Layers,
             trend: data.stats.trend,
-            description: t("totalDesc")
+            description: t("totalDesc"),
+            tooltip: t("totalTooltip")
           },
           {
             key: "with-assessments",
@@ -233,7 +236,8 @@ export default function FlexibleStatsCards({ data, loading = false, onCardClick 
             mobileTitle: t("withIndicatorsMobile"),
             value: data.stats.withAssessments || 0,
             icon: CheckCircle2,
-            description: t("withIndicatorsDesc")
+            description: t("withIndicatorsDesc"),
+            tooltip: t("withIndicatorsTooltip")
           },
           {
             key: "average-weight",
@@ -241,7 +245,8 @@ export default function FlexibleStatsCards({ data, loading = false, onCardClick 
             mobileTitle: t("avgWeightMobile"),
             value: data.stats.averageWeight != null && data.stats.averageWeight > 0 ? data.stats.averageWeight.toFixed(1) : "—",
             icon: BarChart3,
-            description: t("avgWeightDesc")
+            description: t("avgWeightDesc"),
+            tooltip: t("avgWeightTooltip")
           },
           {
             key: "advanced",
@@ -249,7 +254,8 @@ export default function FlexibleStatsCards({ data, loading = false, onCardClick 
             mobileTitle: t("advancedMobile"),
             value: (data.stats.byLevel?.advanced || 0) + (data.stats.byLevel?.expert || 0),
             icon: TrendingUp,
-            description: t("advancedDesc")
+            description: t("advancedDesc"),
+            tooltip: t("advancedTooltip")
           }
         ];
 
@@ -262,7 +268,8 @@ export default function FlexibleStatsCards({ data, loading = false, onCardClick 
             value: data.stats.total,
             icon: Target,
             trend: data.stats.trend,
-            description: t("totalDesc")
+            description: t("totalDesc"),
+            tooltip: t("totalTooltip")
           },
           {
             key: "with-questions",
@@ -270,7 +277,8 @@ export default function FlexibleStatsCards({ data, loading = false, onCardClick 
             mobileTitle: t("withQuestionsMobile"),
             value: data.stats.withQuestions || 0,
             icon: HelpCircle,
-            description: t("withQuestionsDesc")
+            description: t("withQuestionsDesc"),
+            tooltip: t("withQuestionsTooltip")
           },
           {
             key: "measurable",
@@ -278,7 +286,8 @@ export default function FlexibleStatsCards({ data, loading = false, onCardClick 
             mobileTitle: t("measurableMobile"),
             value: data.stats.measurable || 0,
             icon: Star,
-            description: t("measurableDesc")
+            description: t("measurableDesc"),
+            tooltip: t("measurableTooltip")
           },
           {
             key: "complexity",
@@ -286,7 +295,8 @@ export default function FlexibleStatsCards({ data, loading = false, onCardClick 
             mobileTitle: t("complexityMobile"),
             value: data.stats.averageComplexity != null && data.stats.averageComplexity > 0 ? data.stats.averageComplexity.toFixed(1) : "—",
             icon: Activity,
-            description: t("complexityDesc")
+            description: t("complexityDesc"),
+            tooltip: t("complexityTooltip")
           }
         ];
 
@@ -299,7 +309,8 @@ export default function FlexibleStatsCards({ data, loading = false, onCardClick 
             value: data.stats.total,
             icon: HelpCircle,
             trend: data.stats.trend,
-            description: t("totalDesc")
+            description: t("totalDesc"),
+            tooltip: t("totalTooltip")
           },
           {
             key: "with-indicators",
@@ -307,7 +318,8 @@ export default function FlexibleStatsCards({ data, loading = false, onCardClick 
             mobileTitle: t("withIndicatorsMobile"),
             value: data.stats.withIndicators || 0,
             icon: Target,
-            description: t("withIndicatorsDesc")
+            description: t("withIndicatorsDesc"),
+            tooltip: t("withIndicatorsTooltip")
           },
           {
             key: "avg-time-limit",
@@ -315,7 +327,8 @@ export default function FlexibleStatsCards({ data, loading = false, onCardClick 
             mobileTitle: t("avgTimeLimitMobile"),
             value: data.stats.averageTimeLimitSeconds != null && data.stats.averageTimeLimitSeconds > 0 ? `${data.stats.averageTimeLimitSeconds.toFixed(1)}s` : "—",
             icon: Clock,
-            description: t("avgTimeLimitDesc")
+            description: t("avgTimeLimitDesc"),
+            tooltip: t("avgTimeLimitTooltip")
           },
           {
             key: "hard-questions",
@@ -323,7 +336,8 @@ export default function FlexibleStatsCards({ data, loading = false, onCardClick 
             mobileTitle: t("hardQuestionsMobile"),
             value: data.stats.hardQuestions || 0,
             icon: Zap,
-            description: t("hardQuestionsDesc")
+            description: t("hardQuestionsDesc"),
+            tooltip: t("hardQuestionsTooltip")
           }
         ];
 
@@ -406,8 +420,17 @@ export default function FlexibleStatsCards({ data, loading = false, onCardClick 
           onClick={onCardClick ? () => onCardClick(config.key) : undefined}
         >
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardDescription className="text-xs sm:text-sm font-medium">
+            <CardDescription className="text-xs sm:text-sm font-medium inline-flex items-center">
               {config.title}
+              {config.tooltip && (
+                <HelpTooltip
+                  content={config.tooltip}
+                  variant="info"
+                  size="sm"
+                  side="top"
+                  maxWidth={260}
+                />
+              )}
             </CardDescription>
             <config.icon className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
           </CardHeader>
