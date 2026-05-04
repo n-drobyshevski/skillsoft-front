@@ -118,28 +118,28 @@ function CompetencyGroupSection({
         <CollapsibleTrigger asChild>
           <button className="w-full flex items-center justify-between py-2 px-1 group">
             <div className="flex items-center gap-2">
-              <h3 className="text-sm font-medium text-neutral-300 group-hover:text-white transition-colors">
+              <h3 className="text-sm font-medium text-[var(--zen-text-secondary)] group-hover:text-[var(--zen-text)] transition-colors">
                 {group.competencyName}
               </h3>
-              <span className="text-xs text-neutral-500">
+              <span className="text-xs text-[var(--zen-text-muted)]">
                 ({group.items.length})
               </span>
             </div>
             <div className="flex items-center gap-3">
               {/* Group stats */}
               <div className="flex items-center gap-2 text-xs">
-                <span className="text-emerald-400 tabular-nums">
+                <span className="text-[var(--zen-success)] tabular-nums">
                   {t('answerCard.answeredShort', { count: group.answeredCount })}
                 </span>
                 {group.skippedCount > 0 && (
-                  <span className="text-amber-400 tabular-nums">
+                  <span className="text-[var(--zen-warning)] tabular-nums">
                     {t('answerCard.skippedShort', { count: group.skippedCount })}
                   </span>
                 )}
               </div>
               <ChevronDown
                 className={cn(
-                  "w-4 h-4 text-neutral-500 transition-transform duration-200",
+                  "w-4 h-4 text-[var(--zen-text-muted)] transition-transform duration-200",
                   isGroupExpanded && "rotate-180"
                 )}
               />

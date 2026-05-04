@@ -14,18 +14,18 @@ interface CompactAnswerRowProps {
 
 /** Status icon mapping for the compact row */
 const STATUS_ICONS: Record<QuestionStatus, React.ReactNode> = {
-  answered: <CheckCircle className="w-3.5 h-3.5 text-emerald-400" />,
-  skipped: <SkipForward className="w-3.5 h-3.5 text-amber-400" />,
-  flagged: <Flag className="w-3.5 h-3.5 text-blue-400" />,
+  answered: <CheckCircle className="w-3.5 h-3.5 text-[var(--zen-success)]" />,
+  skipped: <SkipForward className="w-3.5 h-3.5 text-[var(--zen-warning)]" />,
+  flagged: <Flag className="w-3.5 h-3.5 text-[var(--zen-info)]" />,
   pending: null,
 };
 
 /** Status badge color for the question number circle */
 const STATUS_BADGE_STYLES: Record<QuestionStatus, string> = {
-  answered: 'bg-emerald-500/20 text-emerald-400',
-  skipped: 'bg-amber-500/20 text-amber-400',
-  flagged: 'bg-blue-500/20 text-blue-400',
-  pending: 'bg-neutral-700/50 text-neutral-500',
+  answered: 'bg-emerald-500/20 text-[var(--zen-success)]',
+  skipped: 'bg-amber-500/20 text-[var(--zen-warning)]',
+  flagged: 'bg-blue-500/20 text-[var(--zen-info)]',
+  pending: 'bg-[var(--zen-muted)] text-[var(--zen-text-muted)]',
 };
 
 /** Maps question type enum values to translation keys (same as AnswerCard) */
@@ -68,8 +68,8 @@ export function CompactAnswerRow({ item, questionNumber }: CompactAnswerRowProps
     <div
       className={cn(
         'flex items-center gap-3 px-3 py-2 rounded-lg',
-        'bg-neutral-900/30 border border-neutral-800/50',
-        'transition-colors hover:border-neutral-700/50'
+        'bg-[var(--zen-card)] border border-[var(--zen-border)]',
+        'transition-colors hover:border-[var(--zen-muted)]'
       )}
     >
       {/* Question number badge */}
@@ -89,7 +89,7 @@ export function CompactAnswerRow({ item, questionNumber }: CompactAnswerRowProps
       </div>
 
       {/* Question type badge */}
-      <span className="shrink-0 text-[10px] font-medium uppercase tracking-wide px-2 py-0.5 rounded bg-neutral-800 text-neutral-500">
+      <span className="shrink-0 text-[10px] font-medium uppercase tracking-wide px-2 py-0.5 rounded bg-[var(--zen-track)] text-[var(--zen-text-muted)]">
         {questionTypeLabel}
       </span>
 
@@ -98,7 +98,7 @@ export function CompactAnswerRow({ item, questionNumber }: CompactAnswerRowProps
 
       {/* Score display */}
       {scoreDisplay && (
-        <span className="shrink-0 text-xs font-medium tabular-nums text-neutral-400">
+        <span className="shrink-0 text-xs font-medium tabular-nums text-[var(--zen-text-secondary)]">
           {scoreDisplay}
         </span>
       )}

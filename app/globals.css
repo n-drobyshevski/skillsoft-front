@@ -783,6 +783,55 @@
 	}
 }
 
+/* ===== Zen Mode (Test Player) Theme Tokens ===== */
+.zen-dark {
+  --zen-bg: oklch(0.07 0 0);
+  --zen-surface: oklch(0.07 0 0 / 0.95);
+  --zen-card: oklch(0.13 0 0 / 0.5);
+  --zen-border: oklch(0.27 0 0);
+  --zen-track: oklch(0.27 0 0);
+  --zen-muted: oklch(0.37 0 0);
+  --zen-text-muted: oklch(0.55 0 0);
+  --zen-text-secondary: oklch(0.64 0 0);
+  --zen-text: oklch(0.99 0 0);
+  --zen-ghost-hover: oklch(0.27 0 0 / 0.5);
+  --zen-ring-offset: oklch(0.07 0 0);
+  --zen-success: oklch(0.765 0.177 163.22);
+  --zen-warning: oklch(0.828 0.189 84.43);
+  --zen-danger: oklch(0.704 0.191 22.22);
+  --zen-info: oklch(0.707 0.165 254.62);
+  --zen-success-subtle: oklch(0.28 0.06 155 / 0.4);
+  --zen-success-border: oklch(0.45 0.08 155 / 0.3);
+  --zen-danger-subtle: oklch(0.28 0.06 25 / 0.5);
+  --zen-danger-border: oklch(0.45 0.10 25 / 0.4);
+  --zen-info-subtle: oklch(0.20 0.05 260 / 0.3);
+  --zen-info-border: oklch(0.45 0.08 260 / 0.4);
+}
+
+.zen-light {
+  --zen-bg: oklch(0.97 0.003 85);
+  --zen-surface: oklch(0.97 0.003 85 / 0.95);
+  --zen-card: oklch(0.99 0.002 80 / 0.65);
+  --zen-border: oklch(0.85 0.008 75);
+  --zen-track: oklch(0.85 0.008 70);
+  --zen-muted: oklch(0.75 0.01 70);
+  --zen-text-muted: oklch(0.44 0.015 264);
+  --zen-text-secondary: oklch(0.37 0.015 260);
+  --zen-text: oklch(0.18 0.01 264);
+  --zen-ghost-hover: oklch(0.91 0.005 75 / 0.6);
+  --zen-ring-offset: oklch(0.97 0.003 85);
+  --zen-success: oklch(0.508 0.118 165.61);
+  --zen-warning: oklch(0.473 0.137 46.20);
+  --zen-danger: oklch(0.505 0.213 27.33);
+  --zen-info: oklch(0.488 0.243 264.38);
+  --zen-success-subtle: oklch(0.92 0.04 155 / 0.5);
+  --zen-success-border: oklch(0.60 0.08 155 / 0.4);
+  --zen-danger-subtle: oklch(0.93 0.04 25 / 0.5);
+  --zen-danger-border: oklch(0.60 0.10 25 / 0.4);
+  --zen-info-subtle: oklch(0.94 0.03 260 / 0.5);
+  --zen-info-border: oklch(0.60 0.08 260 / 0.4);
+}
+
 /* ===== MODERN MINIMALISTIC DESIGN ENHANCEMENTS ===== */
 
 /* Smooth scrolling for modern feel */

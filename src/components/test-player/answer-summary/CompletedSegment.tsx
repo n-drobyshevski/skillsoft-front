@@ -32,20 +32,20 @@ export function CompletedSegment({ items, isExpanded, onToggle }: CompletedSegme
           <button
             className={cn(
               'w-full flex items-center justify-between py-3 px-3 rounded-lg',
-              'bg-neutral-900/30 border border-neutral-800/50',
-              'hover:border-neutral-700/50 transition-colors',
+              'bg-[var(--zen-card)] border border-[var(--zen-border)]',
+              'hover:border-[var(--zen-muted)] transition-colors',
               'min-h-[44px] cursor-pointer',
             )}
           >
             <div className="flex items-center gap-2.5">
-              <CheckCircle className="w-4 h-4 text-emerald-500/70" />
-              <span className="text-sm font-medium text-neutral-400">
+              <CheckCircle className="w-4 h-4 text-[var(--zen-success)]" />
+              <span className="text-sm font-medium text-[var(--zen-text-secondary)]">
                 {t('answerSummary.completedCount', { count: items.length })}
               </span>
             </div>
             <ChevronDown
               className={cn(
-                'w-4 h-4 text-neutral-500 transition-transform duration-200',
+                'w-4 h-4 text-[var(--zen-text-muted)] transition-transform duration-200',
                 isExpanded && 'rotate-180',
               )}
             />

@@ -68,10 +68,10 @@ export function QuestionProgressIndicator({
       case 'skipped':
         return cn(baseClasses, "bg-amber-500");
       case 'current':
-        return cn(baseClasses, "bg-blue-500 ring-2 ring-blue-500/50 ring-offset-1 ring-offset-neutral-950");
+        return cn(baseClasses, "bg-blue-500 ring-2 ring-blue-500/50 ring-offset-1 ring-offset-[var(--zen-ring-offset)]");
       case 'pending':
       default:
-        return cn(baseClasses, "bg-neutral-700");
+        return cn(baseClasses, "bg-[var(--zen-muted)]");
     }
   };
 
@@ -102,7 +102,7 @@ export function QuestionProgressIndicator({
     const pending = questionStates.filter(s => s === 'pending').length;
 
     return (
-      <div className="flex items-center justify-center gap-4 py-2 px-4 text-xs text-neutral-500">
+      <div className="flex items-center justify-center gap-4 py-2 px-4 text-xs text-[var(--zen-text-muted)]">
         <span className="flex items-center gap-1.5">
           <span className="w-2 h-2 rounded-full bg-emerald-500" />
           {answered}
@@ -114,11 +114,11 @@ export function QuestionProgressIndicator({
           </span>
         )}
         <span className="flex items-center gap-1.5">
-          <span className="w-2 h-2 rounded-full bg-neutral-700" />
+          <span className="w-2 h-2 rounded-full bg-[var(--zen-muted)]" />
           {pending}
         </span>
-        <span className="text-neutral-600">|</span>
-        <span className="text-neutral-400">
+        <span className="text-[var(--zen-text-muted)]">|</span>
+        <span className="text-[var(--zen-text-secondary)]">
           {currentIndex + 1} / {questionStates.length}
         </span>
       </div>
@@ -152,7 +152,7 @@ export function QuestionProgressIndicator({
             </TooltipTrigger>
             <TooltipContent
               side="top"
-              className="bg-neutral-800 border-neutral-700 text-xs"
+              className="bg-[var(--zen-track)] border-[var(--zen-muted)] text-xs"
             >
               {getStatusLabel(state, index)}
             </TooltipContent>

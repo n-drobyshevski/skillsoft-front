@@ -34,10 +34,10 @@ export function SummaryHero({
   const isComplete = answeredCount >= totalQuestions;
 
   return (
-    <div className="bg-neutral-900/50 border border-neutral-800 rounded-xl p-5 sm:p-6 mb-6">
+    <div className="bg-[var(--zen-card)] border border-[var(--zen-border)] rounded-xl p-5 sm:p-6 mb-6">
       {/* Template name */}
       {templateName && (
-        <h2 className="text-neutral-400 text-sm font-medium mb-4 truncate">
+        <h2 className="text-[var(--zen-text-secondary)] text-sm font-medium mb-4 truncate">
           {templateName}
         </h2>
       )}
@@ -45,17 +45,17 @@ export function SummaryHero({
       {/* Progress bar */}
       <div className="mb-4">
         <div className="flex items-baseline justify-between mb-2">
-          <span className="text-2xl font-bold text-white tabular-nums">
+          <span className="text-2xl font-bold text-[var(--zen-text)] tabular-nums">
             {completionPercentage}%
           </span>
-          <span className="text-xs text-neutral-500">
+          <span className="text-xs text-[var(--zen-text-muted)]">
             {t('questionsAnswered', { answered: answeredCount, total: totalQuestions })}
           </span>
         </div>
         <Progress
           value={completionPercentage}
           className={cn(
-            'h-2.5 bg-neutral-800',
+            'h-2.5 bg-[var(--zen-track)]',
             '[&>[data-slot=progress-indicator]]:transition-all [&>[data-slot=progress-indicator]]:duration-700',
             isComplete
               ? '[&>[data-slot=progress-indicator]]:bg-emerald-500'
@@ -68,16 +68,16 @@ export function SummaryHero({
 
       {/* Stats Row */}
       <div className="flex items-center gap-4 text-sm">
-        <span className="text-emerald-400 tabular-nums">
+        <span className="text-[var(--zen-success)] tabular-nums">
           {answeredCount} {t('answered').toLowerCase()}
         </span>
         {skippedCount > 0 && (
-          <span className="text-amber-400 tabular-nums">
+          <span className="text-[var(--zen-warning)] tabular-nums">
             {skippedCount} {t('skipped').toLowerCase()}
           </span>
         )}
         {flaggedCount > 0 && (
-          <span className="text-blue-400 tabular-nums">
+          <span className="text-[var(--zen-info)] tabular-nums">
             {flaggedCount} {t('flagged').toLowerCase()}
           </span>
         )}

@@ -86,30 +86,30 @@ export function NavigationErrorDialog({
 
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent className="bg-neutral-900 border-neutral-800 max-w-md">
+      <AlertDialogContent className="bg-[var(--zen-surface)] border-[var(--zen-border)] text-[var(--zen-text)] backdrop-blur-xl max-w-md">
         <AlertDialogHeader>
           {/* Error Icon */}
           <div className="flex justify-center mb-4">
             <div className="p-3 rounded-full bg-red-500/20">
-              <XCircle className="w-8 h-8 text-red-400" />
+              <XCircle className="w-8 h-8 text-[var(--zen-danger)]" />
             </div>
           </div>
 
-          <AlertDialogTitle className="text-center text-xl">
+          <AlertDialogTitle className="text-center text-xl text-[var(--zen-text)]">
             {t('navigationError.title')}
           </AlertDialogTitle>
 
-          <AlertDialogDescription className="text-center space-y-4" asChild>
+          <AlertDialogDescription className="text-center space-y-4 text-[var(--zen-text-secondary)]" asChild>
             <div>
               {/* Error message */}
-              <p className="text-neutral-300">
+              <p className="text-[var(--zen-text-secondary)]">
                 {error?.message || t('navigationError.defaultMessage')}
               </p>
 
               {/* Unsaved changes warning */}
               {hasUnsavedChanges && (
                 <div className="mt-3 p-3 bg-amber-500/10 border border-amber-500/20 rounded-lg">
-                  <p className="text-sm text-amber-400 flex items-center justify-center gap-2">
+                  <p className="text-sm text-[var(--zen-warning)] flex items-center justify-center gap-2">
                     <AlertTriangle className="w-4 h-4" />
                     {t('navigationError.unsavedChangesWarning')}
                   </p>
@@ -119,10 +119,10 @@ export function NavigationErrorDialog({
               {/* Technical details (development only) */}
               {process.env.NODE_ENV === 'development' && error?.originalError !== undefined && (
                 <details className="mt-3 text-left">
-                  <summary className="text-xs text-neutral-500 cursor-pointer hover:text-neutral-400">
+                  <summary className="text-xs text-[var(--zen-text-muted)] cursor-pointer hover:text-[var(--zen-text-secondary)]">
                     Technical Details
                   </summary>
-                  <pre className="mt-2 p-2 bg-neutral-800 rounded text-xs text-neutral-400 overflow-auto max-h-32">
+                  <pre className="mt-2 p-2 bg-[var(--zen-track)] rounded text-xs text-[var(--zen-text-secondary)] overflow-auto max-h-32">
                     {String(typeof error.originalError === 'object'
                       ? JSON.stringify(error.originalError, null, 2)
                       : error.originalError)}
@@ -137,7 +137,7 @@ export function NavigationErrorDialog({
           {/* Dismiss button - stay on current question */}
           <AlertDialogCancel
             onClick={handleDismiss}
-            className="bg-neutral-800 border-neutral-700 hover:bg-neutral-700"
+            className="bg-[var(--zen-track)] border-[var(--zen-muted)] text-[var(--zen-text)] hover:bg-[var(--zen-muted)] hover:text-[var(--zen-text)]"
             disabled={isRetrying}
           >
             {t('navigationError.stayOnQuestion')}
@@ -149,7 +149,7 @@ export function NavigationErrorDialog({
               variant="outline"
               onClick={handleContinueWithoutSaving}
               disabled={isRetrying}
-              className="border-amber-500/30 text-amber-400 hover:bg-amber-500/10 hover:text-amber-300"
+              className="border-amber-500/30 text-[var(--zen-warning)] hover:bg-amber-500/10 hover:text-[var(--zen-warning)]"
             >
               {t('navigationError.continueWithoutSaving')}
             </Button>

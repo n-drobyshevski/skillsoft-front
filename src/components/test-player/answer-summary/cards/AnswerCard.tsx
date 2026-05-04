@@ -30,26 +30,26 @@ const STATUS_STYLE_CONFIG: Record<QuestionStatus, {
 }> = {
   answered: {
     bgColor: 'bg-emerald-500/20',
-    textColor: 'text-emerald-400',
+    textColor: 'text-[var(--zen-success)]',
     borderColor: 'border-emerald-500/30',
     icon: <CheckCircle className="w-3.5 h-3.5" />,
   },
   skipped: {
     bgColor: 'bg-amber-500/20',
-    textColor: 'text-amber-400',
+    textColor: 'text-[var(--zen-warning)]',
     borderColor: 'border-amber-500/30',
     icon: <SkipForward className="w-3.5 h-3.5" />,
   },
   flagged: {
     bgColor: 'bg-blue-500/20',
-    textColor: 'text-blue-400',
+    textColor: 'text-[var(--zen-info)]',
     borderColor: 'border-blue-500/30',
     icon: <Flag className="w-3.5 h-3.5" />,
   },
   pending: {
-    bgColor: 'bg-neutral-700/50',
-    textColor: 'text-neutral-500',
-    borderColor: 'border-neutral-700',
+    bgColor: 'bg-[var(--zen-muted)]',
+    textColor: 'text-[var(--zen-text-muted)]',
+    borderColor: 'border-[var(--zen-muted)]',
     icon: null,
   },
 };
@@ -106,9 +106,9 @@ export function AnswerCard({
     <Collapsible open={isExpanded} onOpenChange={onToggle}>
       <div
         className={cn(
-          "relative bg-neutral-900/50 border rounded-lg transition-all duration-200",
-          isExpanded ? "border-neutral-700 bg-neutral-900/70" : "border-neutral-800",
-          "hover:border-neutral-700",
+          "relative bg-[var(--zen-card)] border rounded-lg transition-all duration-200",
+          isExpanded ? "border-[var(--zen-muted)] bg-[var(--zen-card)]" : "border-[var(--zen-border)]",
+          "hover:border-[var(--zen-muted)]",
           "focus-within:ring-2 focus-within:ring-emerald-500/30"
         )}
       >
@@ -141,13 +141,13 @@ export function AnswerCard({
             </div>
 
             {/* Question type badge */}
-            <span className="shrink-0 text-[10px] font-medium uppercase tracking-wide px-2 py-0.5 rounded bg-neutral-800 text-neutral-500">
+            <span className="shrink-0 text-[10px] font-medium uppercase tracking-wide px-2 py-0.5 rounded bg-[var(--zen-track)] text-[var(--zen-text-muted)]">
               {questionTypeLabel}
             </span>
 
             {/* Question text preview */}
             <div className="flex-1 min-w-0">
-              <p className="text-sm text-neutral-300 line-clamp-1">
+              <p className="text-sm text-[var(--zen-text-secondary)] line-clamp-1">
                 {item.questionText}
               </p>
             </div>
@@ -175,7 +175,7 @@ export function AnswerCard({
             {/* Expand/collapse chevron */}
             <ChevronDown
               className={cn(
-                "shrink-0 w-4 h-4 text-neutral-500 transition-transform duration-200",
+                "shrink-0 w-4 h-4 text-[var(--zen-text-muted)] transition-transform duration-200",
                 isExpanded && "rotate-180"
               )}
             />
@@ -192,16 +192,16 @@ export function AnswerCard({
                 exit={{ height: 0, opacity: 0 }}
                 transition={{ duration: 0.2, ease: 'easeOut' }}
               >
-                <div className="px-4 pb-4 pt-0 border-t border-neutral-800/50">
+                <div className="px-4 pb-4 pt-0 border-t border-[var(--zen-border)]">
                   {/* Full question text */}
                   <div className="pt-4 pb-3">
-                    <p className="text-sm text-neutral-300 leading-relaxed">
+                    <p className="text-sm text-[var(--zen-text-secondary)] leading-relaxed">
                       {item.questionText}
                     </p>
                   </div>
 
                   {/* Answer details - type specific */}
-                  <div className="py-3 border-t border-neutral-800/50">
+                  <div className="py-3 border-t border-[var(--zen-border)]">
                     {isLikert ? (
                       <LikertAnswerExpanded answer={item.answer} />
                     ) : isSJT ? (
@@ -212,8 +212,8 @@ export function AnswerCard({
                   </div>
 
                   {/* Footer with metadata and edit button */}
-                  <div className="flex items-center justify-between pt-3 border-t border-neutral-800/50">
-                    <div className="flex items-center gap-3 text-xs text-neutral-500">
+                  <div className="flex items-center justify-between pt-3 border-t border-[var(--zen-border)]">
+                    <div className="flex items-center gap-3 text-xs text-[var(--zen-text-muted)]">
                       {item.competencyName && (
                         <span className="truncate max-w-[150px]" title={item.competencyName}>
                           {item.competencyName}
@@ -232,7 +232,7 @@ export function AnswerCard({
                         e.stopPropagation();
                         onEdit();
                       }}
-                      className="text-xs h-8 px-3 border-neutral-700 hover:bg-neutral-800 hover:text-white"
+                      className="text-xs h-8 px-3 border-[var(--zen-muted)] hover:bg-[var(--zen-ghost-hover)] hover:text-[var(--zen-text)]"
                     >
                       <Pencil className="w-3 h-3 mr-1.5" />
                       {t('answerCard.editButton')}

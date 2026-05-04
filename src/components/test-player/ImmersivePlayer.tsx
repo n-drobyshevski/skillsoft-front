@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { motion, AnimatePresence } from 'motion/react';
 import { TestSession, SessionQuestion, CurrentQuestionResponse, TestAnswer } from '@/types/domain';
@@ -17,6 +17,9 @@ import { TestDriveInsights, InsightsToggle, AnalyticsPanel } from './insights';
 import { useSwipeNavigation, useReducedMotion } from '@/hooks/use-swipe-navigation';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
+import { useZenTheme } from '@/store/zen-theme-store';
+import { usePlayerPersistStore } from '@/store/player-persist-store';
+import { ZenSettingsPopover } from './ZenSettingsPopover';
 
 // Composed hooks
 import { useTimerManagement } from './hooks/useTimerManagement';
@@ -304,6 +307,18 @@ export function ImmersivePlayer({
   });
 
   // ========================================================================
+  // Zen Theme & Language Restore
+  // ========================================================================
+
+  const zenTheme = useZenTheme();
+  const zenClass = zenTheme === 'dark' ? 'zen-dark' : 'zen-light';
+
+  useEffect(() => {
+    document.body.classList.add(zenClass);
+    return () => document.body.classList.remove(zenClass);
+  }, [zenClass]);
+
+  // ========================================================================
   // Responsive & Swipe Navigation
   // ========================================================================
 
@@ -356,8 +371,8 @@ export function ImmersivePlayer({
 
   if (!currentQuestion) {
     return (
-      <div className="min-h-screen bg-neutral-950 flex items-center justify-center">
-        <p className="text-neutral-400">No questions available</p>
+      <div className={cn('min-h-screen flex items-center justify-center bg-[var(--zen-bg)]', zenClass)}>
+        <p className="text-[var(--zen-text-secondary)]">No questions available</p>
       </div>
     );
   }
@@ -386,7 +401,7 @@ export function ImmersivePlayer({
   // ========================================================================
 
   return (
-    <div className="min-h-screen min-h-[100dvh] bg-neutral-950 flex flex-col safe-area-inset-all">
+    <div className={cn('min-h-screen min-h-[100dvh] bg-[var(--zen-bg)] flex flex-col safe-area-inset-all', zenClass)}>
       <EnhancedSessionHeader
         testName={session.templateName}
         currentQuestion={state.questionIndex + 1}
@@ -401,6 +416,12 @@ export function ImmersivePlayer({
         allowSkip={state.allowSkip}
         onExit={handleExit}
         onNavigate={handleNavigateToQuestion}
+        settingsSlot={
+          <ZenSettingsPopover
+            questionIndex={state.questionIndex}
+            currentAnswer={currentAnswer}
+          />
+        }
       />
 
       {/* Split-screen grid when test-drive is active on lg+, otherwise single column */}
@@ -471,8 +492,8 @@ export function ImmersivePlayer({
         {/* Right panel — Analytics (desktop only, always visible in test-drive mode) */}
         {testDriveAvailable && (
           <aside
-            className="hidden lg:flex flex-col px-4 py-4 bg-neutral-900/20 border-l border-neutral-800 overflow-y-auto"
-            aria-label="Панель анализа"
+            className="hidden lg:flex flex-col px-4 py-4 bg-[var(--zen-card)] border-l border-[var(--zen-border)] overflow-y-auto"
+            aria-label={t('insights.analysisPanel')}
           >
             <div className="w-[500px] min-w-[500px] mx-auto my-auto">
               <AnalyticsPanel />

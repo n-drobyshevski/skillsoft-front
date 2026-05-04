@@ -8,6 +8,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
 import { StarResponseInput, STAR_MIN_CHARS } from '@/components/test-player/StarResponseInput';
+import { useZenTheme } from '@/store/zen-theme-store';
 
 interface QuestionCardProps {
   question: SessionQuestion;
@@ -47,6 +48,7 @@ export function QuestionCard({
   validationError,
 }: QuestionCardProps) {
   const t = useTranslations('assessment');
+  const zenTheme = useZenTheme();
   const groupId = useId();
 
   // Local state for text input types
@@ -134,7 +136,7 @@ export function QuestionCard({
             placeholder={placeholder}
             className={cn(
               // Reduced min-height on mobile for better fit
-              "min-h-[120px] sm:min-h-[160px] bg-neutral-800/30 border-neutral-700 text-white placeholder:text-neutral-500",
+              "min-h-[120px] sm:min-h-[160px] bg-[var(--zen-ghost-hover)] border-[var(--zen-muted)] text-[var(--zen-text)] placeholder:text-[var(--zen-text-muted)]",
               "focus:ring-emerald-500/20 resize-none text-sm sm:text-base leading-relaxed",
               validationError
                 ? "border-red-500/50 focus:border-red-500"
@@ -150,8 +152,8 @@ export function QuestionCard({
           <div className={cn(
             "absolute bottom-3 right-3 text-xs font-mono px-2 py-1 rounded",
             isValid
-              ? "text-emerald-400 bg-emerald-500/10"
-              : "text-neutral-500 bg-neutral-800/50"
+              ? "text-[var(--zen-success)] bg-[var(--zen-success-subtle)]"
+              : "text-[var(--zen-text-muted)] bg-[var(--zen-ghost-hover)]"
           )}>
             {charCount} / {minChars}
           </div>
@@ -159,15 +161,15 @@ export function QuestionCard({
 
         {/* Validation error or hint */}
         {validationError ? (
-          <p id="answer-error" className="text-xs text-red-400 text-center bg-red-500/10 py-2 px-3 rounded border border-red-500/30">
+          <p id="answer-error" className="text-xs text-[var(--zen-danger)] text-center bg-[var(--zen-danger-subtle)] py-2 px-3 rounded border border-[var(--zen-danger-border)]">
             {validationError}
           </p>
         ) : !isValid ? (
-          <p id="answer-hint" className="text-xs text-neutral-500 text-center">
+          <p id="answer-hint" className="text-xs text-[var(--zen-text-muted)] text-center">
             {hint} ({t('moreChars', { count: charsRemaining })})
           </p>
         ) : (
-          <p id="answer-hint" className="text-xs text-emerald-400 text-center flex items-center justify-center gap-1">
+          <p id="answer-hint" className="text-xs text-[var(--zen-success)] text-center flex items-center justify-center gap-1">
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
             </svg>
@@ -229,11 +231,11 @@ export function QuestionCard({
                   "flex flex-col items-center justify-center",
                   "min-h-[64px] sm:min-h-[80px] md:min-h-[88px]",
                   "p-2 sm:p-3 rounded-lg border-2 transition-all duration-200 cursor-pointer",
-                  "hover:border-neutral-600 hover:bg-neutral-800/50 active:scale-95",
+                  "hover:border-[var(--zen-text-muted)] hover:bg-[var(--zen-ghost-hover)] active:scale-95",
                   "has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-emerald-500/50 has-[:focus-visible]:border-emerald-500",
                   isSelected
-                    ? "border-emerald-500 bg-emerald-500/10 text-emerald-400 shadow-lg shadow-emerald-500/20"
-                    : "border-neutral-700 bg-neutral-800/30 text-neutral-400"
+                    ? "border-emerald-500 bg-[var(--zen-success-subtle)] text-[var(--zen-success)] shadow-lg shadow-emerald-500/20"
+                    : "border-[var(--zen-muted)] bg-[var(--zen-ghost-hover)] text-[var(--zen-text-secondary)]"
                 )}
               >
                 <input
@@ -272,7 +274,7 @@ export function QuestionCard({
                       // Ensure proper text wrapping for Cyrillic
                       "break-words hyphens-auto",
                       // Good contrast - no opacity reduction
-                      isSelected ? "text-emerald-300" : "text-neutral-300"
+                      isSelected ? "text-[var(--zen-success)]" : "text-[var(--zen-text-secondary)]"
                     )}
                     aria-hidden="true"
                   >
@@ -335,11 +337,11 @@ export function QuestionCard({
                 htmlFor={inputId}
                 className={cn(
                   "w-full flex items-start text-left min-h-[56px] p-4 rounded-lg border-2 transition-all duration-200 cursor-pointer",
-                  "hover:border-neutral-600 hover:bg-neutral-800/50 active:scale-[0.99]",
+                  "hover:border-[var(--zen-text-muted)] hover:bg-[var(--zen-ghost-hover)] active:scale-[0.99]",
                   accentFocus,
                   isSelected
                     ? accentSelected
-                    : "border-neutral-700 bg-neutral-800/30"
+                    : "border-[var(--zen-muted)] bg-[var(--zen-ghost-hover)]"
                 )}
               >
                 <input
@@ -360,7 +362,7 @@ export function QuestionCard({
                       "shrink-0 w-7 h-7 rounded-full border-2 flex items-center justify-center text-xs font-bold transition-all",
                       isSelected
                         ? accentIndicator
-                        : "border-neutral-600 text-neutral-500"
+                        : "border-[var(--zen-text-muted)] text-[var(--zen-text-muted)]"
                     )}
                     aria-hidden="true"
                   >
@@ -372,7 +374,7 @@ export function QuestionCard({
                     id={`${inputId}-text`}
                     className={cn(
                       "text-sm sm:text-base leading-relaxed flex-1",
-                      isSelected ? "text-white font-medium" : "text-neutral-300"
+                      isSelected ? "text-[var(--zen-text)] font-medium" : "text-[var(--zen-text-secondary)]"
                     )}
                   >
                     {optionText}
@@ -405,7 +407,8 @@ export function QuestionCard({
 
   return (
     <Card className={cn(
-      "bg-neutral-900/50 border-neutral-800 shadow-2xl",
+      "bg-[var(--zen-card)] border-[var(--zen-border)]",
+      zenTheme === 'light' ? 'shadow-md' : 'shadow-2xl',
       isSJT && "border-l-4 border-l-blue-500",
       isLikertType && "border-l-4 border-l-emerald-500"
     )}>
@@ -425,7 +428,7 @@ export function QuestionCard({
           {/* Question number + badge row (stacks on mobile, inline on desktop) */}
           <div className="flex items-center sm:items-start gap-3 sm:gap-4">
             <span
-              className="shrink-0 w-9 h-9 rounded-full bg-neutral-800 text-neutral-400 text-sm font-bold flex items-center justify-center"
+              className="shrink-0 w-9 h-9 rounded-full bg-[var(--zen-track)] text-[var(--zen-text-secondary)] text-sm font-bold flex items-center justify-center"
               aria-label={`Question ${questionNumber}`}
             >
               {questionNumber}
@@ -433,24 +436,24 @@ export function QuestionCard({
 
             <div className="flex-1 space-y-3 min-w-0">
               {/* Mobile: question label text shown inline beside number */}
-              <span className="text-sm font-medium text-neutral-500 sm:hidden">
+              <span className="text-sm font-medium text-[var(--zen-text-muted)] sm:hidden">
                 {t('question')} {questionNumber}
               </span>
 
               {/* Enhanced scenario block (for SJT questions) */}
               {isSJT && question.scenario && (
                 <div
-                  className="bg-blue-50 dark:bg-blue-950/30 rounded-lg p-4 border border-blue-200 dark:border-blue-800"
+                  className="bg-[var(--zen-info-subtle)] rounded-lg p-4 border border-[var(--zen-info-border)]"
                   role="note"
                   aria-label={t('sjt.scenarioLabel')}
                 >
                   <div className="flex items-center gap-2 mb-2">
-                    <BookOpen className="w-4 h-4 text-blue-500 dark:text-blue-400 shrink-0" aria-hidden="true" />
-                    <span className="text-xs font-semibold uppercase tracking-wide text-blue-600 dark:text-blue-400">
+                    <BookOpen className="w-4 h-4 text-[var(--zen-info)] shrink-0" aria-hidden="true" />
+                    <span className="text-xs font-semibold uppercase tracking-wide text-[var(--zen-info)]">
                       {t('sjt.scenarioLabel')}
                     </span>
                   </div>
-                  <p className="text-sm leading-relaxed text-blue-900 dark:text-blue-100/80">
+                  <p className="text-sm leading-relaxed text-[var(--zen-text)]">
                     {question.scenario}
                   </p>
                 </div>
@@ -459,7 +462,7 @@ export function QuestionCard({
               {/* Non-SJT scenario fallback (other question types with scenario) */}
               {!isSJT && question.scenario && (
                 <div
-                  className="text-neutral-400 text-sm leading-relaxed italic border-l-2 border-neutral-700 pl-3 sm:pl-4 py-2 bg-neutral-800/20 rounded-r"
+                  className="text-[var(--zen-text-secondary)] text-sm leading-relaxed italic border-l-2 border-[var(--zen-muted)] pl-3 sm:pl-4 py-2 bg-[var(--zen-card)] rounded-r"
                   role="note"
                   aria-label="Scenario context"
                 >
@@ -468,7 +471,7 @@ export function QuestionCard({
               )}
 
               {/* Question text - single instance, responsive sizing */}
-              <h2 className="text-base sm:text-xl text-white font-medium leading-relaxed">
+              <h2 className="text-base sm:text-xl text-[var(--zen-text)] font-medium leading-relaxed">
                 {question.questionText}
               </h2>
 
@@ -477,10 +480,10 @@ export function QuestionCard({
                 className={cn(
                   "inline-block text-[10px] sm:text-xs px-2 py-1 rounded whitespace-nowrap",
                   isSJT
-                    ? "text-blue-300 bg-blue-500/20 font-medium"
+                    ? "text-[var(--zen-info)] bg-[var(--zen-info-subtle)] font-medium"
                     : isLikertType
-                      ? "text-emerald-300 bg-emerald-500/20 font-medium"
-                      : "text-neutral-500 bg-neutral-800/50"
+                      ? "text-[var(--zen-success)] bg-[var(--zen-success-subtle)] font-medium"
+                      : "text-[var(--zen-text-muted)] bg-[var(--zen-ghost-hover)]"
                 )}
                 aria-hidden="true"
               >
@@ -497,8 +500,8 @@ export function QuestionCard({
         {/* Vertical connector line + response prompt for SJT */}
         {isSJT && question.scenario && (
           <div className="mb-4">
-            <div className="border-l-2 border-blue-300 dark:border-blue-700 ml-4 h-4" aria-hidden="true" />
-            <p className="text-sm text-blue-400 dark:text-blue-300 font-medium ml-4 pl-3">
+            <div className="border-l-2 border-[var(--zen-info-border)] ml-4 h-4" aria-hidden="true" />
+            <p className="text-sm text-[var(--zen-info)] font-medium ml-4 pl-3">
               {t('sjt.responsePrompt')}
             </p>
           </div>
@@ -511,12 +514,12 @@ export function QuestionCard({
 
         {/* Question type hint */}
         {isSJT && (
-          <p className="mt-6 text-xs text-blue-400/70 text-center bg-blue-500/5 py-3 rounded border border-blue-500/20">
+          <p className="mt-6 text-xs text-[var(--zen-info)] text-center bg-[var(--zen-info-subtle)] py-3 rounded border border-[var(--zen-info-border)]">
             {t('selectBestOption')}
           </p>
         )}
         {isLikertType && (
-          <p className="mt-6 text-xs text-emerald-400/70 text-center bg-emerald-500/5 py-3 rounded border border-emerald-500/20">
+          <p className="mt-6 text-xs text-[var(--zen-success)] text-center bg-[var(--zen-success-subtle)] py-3 rounded border border-[var(--zen-success-border)]">
             {t('selectScaleHint')}
           </p>
         )}

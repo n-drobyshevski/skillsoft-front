@@ -55,7 +55,7 @@ export function TimerProgressBar({
     <div className="w-full">
       {/* Progress bar — always visible */}
       <div
-        className="w-full h-1 bg-neutral-800 overflow-hidden"
+        className="w-full h-1 bg-[var(--zen-track)] overflow-hidden"
         role="progressbar"
         aria-valuenow={Math.round(percentage)}
         aria-valuemin={0}
@@ -88,8 +88,8 @@ export function TimerProgressBar({
                 isCritical
                   ? 'text-destructive animate-pulse'
                   : isWarning
-                    ? 'text-amber-400'
-                    : 'text-neutral-400'
+                    ? 'text-[var(--zen-warning)]'
+                    : 'text-[var(--zen-text-secondary)]'
               )}
               role="timer"
               aria-live={isCritical ? 'assertive' : 'polite'}

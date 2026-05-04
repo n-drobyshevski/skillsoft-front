@@ -36,7 +36,7 @@ export function SubmissionProgress({
 
   return (
     <div
-      className="fixed inset-0 bg-neutral-950/95 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in-0 duration-200 motion-reduce:animate-none"
+      className="fixed inset-0 bg-[var(--zen-surface)] backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in-0 duration-200 motion-reduce:animate-none"
     >
       <div
         className="max-w-sm w-full animate-in fade-in-0 zoom-in-95 duration-200 delay-100 motion-reduce:animate-none"
@@ -45,16 +45,16 @@ export function SubmissionProgress({
           // Loading state
           <div className="text-center">
             <div className="mb-6">
-              <Loader2 className="w-16 h-16 text-emerald-500 animate-spin mx-auto" />
+              <Loader2 className="w-16 h-16 text-[var(--zen-success)] animate-spin mx-auto" />
             </div>
-            <h3 className="text-xl font-semibold text-white mb-2">
+            <h3 className="text-xl font-semibold text-[var(--zen-text)] mb-2">
               {t('submission.submittingResults')}
             </h3>
-            <p className="text-sm text-neutral-400">
+            <p className="text-sm text-[var(--zen-text-secondary)]">
               {t('submission.pleaseWait')}
             </p>
             {attempts > 1 && (
-              <p className="text-xs text-neutral-500 mt-3">
+              <p className="text-xs text-[var(--zen-text-muted)] mt-3">
                 {t('submission.attemptOf', { current: attempts, max: 3 })}
               </p>
             )}
@@ -64,13 +64,13 @@ export function SubmissionProgress({
           <div className="text-center">
             <div className="mb-6">
               <div className="w-16 h-16 rounded-full bg-red-500/20 flex items-center justify-center mx-auto">
-                <AlertTriangle className="w-8 h-8 text-red-400" />
+                <AlertTriangle className="w-8 h-8 text-[var(--zen-danger)]" />
               </div>
             </div>
-            <h3 className="text-xl font-semibold text-white mb-2">
+            <h3 className="text-xl font-semibold text-[var(--zen-text)] mb-2">
               {t('submission.submissionError')}
             </h3>
-            <p className="text-sm text-neutral-400 mb-6">
+            <p className="text-sm text-[var(--zen-text-secondary)] mb-6">
               {error.message}
             </p>
 
@@ -87,7 +87,7 @@ export function SubmissionProgress({
               <Button
                 variant="outline"
                 onClick={onCancel}
-                className="w-full border-neutral-700 hover:bg-neutral-800"
+                className="w-full border-[var(--zen-muted)] hover:bg-[var(--zen-ghost-hover)]"
               >
                 <X className="w-4 h-4 mr-2" />
                 {t('submission.backToReview')}
@@ -95,7 +95,7 @@ export function SubmissionProgress({
             </div>
 
             {attempts >= 3 && (
-              <p className="text-xs text-neutral-500 mt-4">
+              <p className="text-xs text-[var(--zen-text-muted)] mt-4">
                 {t('submission.maxAttemptsExceeded')}
               </p>
             )}

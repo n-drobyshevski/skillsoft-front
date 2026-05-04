@@ -80,7 +80,7 @@ export function QuestionNavigation({
   const showTooltip = !canGoForward && !isSubmitting && validationError;
 
   return (
-    <footer className="sticky bottom-0 bg-neutral-950/95 backdrop-blur-sm border-t border-neutral-800 pb-safe" role="navigation" aria-label="Question navigation">
+    <footer className="sticky bottom-0 bg-[var(--zen-surface)] backdrop-blur-sm border-t border-[var(--zen-border)] pb-safe" role="navigation" aria-label="Question navigation">
       {/* Screen reader announcement for validation errors */}
       {validationError && (
         <div className="sr-only" role="alert" aria-live="assertive">
@@ -97,7 +97,7 @@ export function QuestionNavigation({
                 onClick={onPrevious}
                 disabled={isBackDisabled}
                 className={cn(
-                  "text-neutral-400 hover:text-white hover:bg-neutral-800 transition-all duration-200",
+                  "text-[var(--zen-text-secondary)] hover:text-[var(--zen-text)] hover:bg-[var(--zen-ghost-hover)] transition-all duration-200",
                   !canGoBack && "opacity-0 pointer-events-none",
                   isSavingBack && "opacity-70"
                 )}
@@ -117,7 +117,7 @@ export function QuestionNavigation({
               </Button>
             </TooltipTrigger>
             {showBackTooltip && (
-              <TooltipContent id="back-disabled-tooltip" side="right" className="bg-neutral-800 border-neutral-700 text-neutral-300">
+              <TooltipContent id="back-disabled-tooltip" side="right" className="bg-[var(--zen-track)] border-[var(--zen-muted)] text-[var(--zen-text-secondary)]">
                 <p>{backDisabledReason}</p>
               </TooltipContent>
             )}
@@ -127,10 +127,10 @@ export function QuestionNavigation({
         {/* Center section with keyboard hints and skip button */}
         <div className="flex items-center gap-2 sm:gap-4">
           {/* Keyboard hint - desktop only */}
-          <div className="hidden md:flex items-center gap-2 text-xs text-neutral-600">
-            <kbd className="px-2 py-1 bg-neutral-800 rounded font-mono">Enter ↵</kbd>
+          <div className="hidden md:flex items-center gap-2 text-xs text-[var(--zen-text-muted)]">
+            <kbd className="px-2 py-1 bg-[var(--zen-track)] rounded font-mono">Enter ↵</kbd>
             {canSkip && !isLastQuestion && (
-              <kbd className="px-2 py-1 bg-neutral-800 rounded font-mono">S</kbd>
+              <kbd className="px-2 py-1 bg-[var(--zen-track)] rounded font-mono">S</kbd>
             )}
           </div>
 
@@ -140,7 +140,7 @@ export function QuestionNavigation({
               variant="ghost"
               onClick={onSkip}
               disabled={isSubmitting}
-              className="text-neutral-400 hover:text-neutral-200 hover:bg-neutral-800"
+              className="text-[var(--zen-text-secondary)] hover:text-[var(--zen-text-secondary)] hover:bg-[var(--zen-ghost-hover)]"
               aria-label="Skip this question"
             >
               <SkipForward className="w-4 h-4 sm:mr-1" aria-hidden="true" />
@@ -164,18 +164,18 @@ export function QuestionNavigation({
                   "min-w-[140px] font-semibold transition-all duration-200",
                   // Disabled state - clearly grayed out
                   (!canGoForward || isSubmitting)
-                    ? "bg-neutral-800 text-neutral-500 cursor-not-allowed opacity-60 hover:bg-neutral-800"
+                    ? "bg-[var(--zen-track)] text-[var(--zen-text-muted)] cursor-not-allowed opacity-60 hover:bg-[var(--zen-track)]"
                     // Enabled state - bright and clear
                     : isLastQuestion
-                      ? "bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white shadow-lg shadow-emerald-500/25"
-                      : "bg-emerald-600 hover:bg-emerald-500 text-white shadow-md hover:shadow-lg"
+                      ? "bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-[var(--zen-text)] shadow-lg shadow-emerald-500/25"
+                      : "bg-emerald-600 hover:bg-emerald-500 text-[var(--zen-text)] shadow-md hover:shadow-lg"
                 )}
               >
                 {nextButtonContent}
               </Button>
             </TooltipTrigger>
             {showTooltip && (
-              <TooltipContent id="validation-error-tooltip" side="top" className="bg-amber-500/10 border-amber-500/20 text-amber-400">
+              <TooltipContent id="validation-error-tooltip" side="top" className="bg-amber-500/10 border-amber-500/20 text-[var(--zen-warning)]">
                 <p>{validationError}</p>
               </TooltipContent>
             )}

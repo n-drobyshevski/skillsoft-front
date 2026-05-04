@@ -25,6 +25,7 @@
 /playwright/.cache/
 /playwright/.auth/
 .last-run.json
+.playwright-mcp/
 # Note: e2e/specs/visual/*-snapshots/ are committed for CI visual regression baseline
 
 # Next.js

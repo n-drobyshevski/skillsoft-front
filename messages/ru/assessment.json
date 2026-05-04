@@ -237,5 +237,29 @@
     "expired": "Время истекло",
     "remaining": "{minutes}:{seconds} осталось",
     "warning": "Осталось менее 3 минут"
+  },
+  "settings": {
+    "title": "Настройки",
+    "language": "Язык",
+    "theme": "Оформление",
+    "dark": "Темная",
+    "light": "Светлая",
+    "shortcutHint": "Alt+S"
+  },
+  "progressTooltip": {
+    "answered": "Отвечено: {count}",
+    "skipped": "Пропущено: {count}",
+    "remaining": "Осталось: {count}",
+    "questionNavigation": "Навигация по вопросам",
+    "questionAnswered": "Вопрос {number}: Отвечен",
+    "questionSkipped": "Вопрос {number}: Пропущен",
+    "questionCurrent": "Вопрос {number}: Текущий",
+    "questionPending": "Вопрос {number}: Ожидает"
+  },
+  "insights": {
+    "hidePanel": "Скрыть панель анализа",
+    "openPanel": "Открыть панель анализа",
+    "shortcutHint": "Сочетание клавиш: Alt+I",
+    "analysisPanel": "Панель анализа"
   }
 }

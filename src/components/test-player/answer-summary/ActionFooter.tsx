@@ -41,7 +41,7 @@ export function ActionFooter({
   };
 
   return (
-    <footer className="sticky bottom-0 bg-neutral-950/95 backdrop-blur-sm border-t border-neutral-800 pb-safe">
+    <footer className="sticky bottom-0 bg-[var(--zen-surface)] backdrop-blur-sm border-t border-[var(--zen-border)] pb-safe">
       <div className="max-w-3xl mx-auto px-3 sm:px-4 py-3 sm:py-4">
         {/* Mobile: stacked layout with full-width submit */}
         <div className="flex flex-col-reverse gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
@@ -50,7 +50,7 @@ export function ActionFooter({
             variant="ghost"
             onClick={onGoBack}
             disabled={isSubmitting}
-            className="text-neutral-400 hover:text-white hover:bg-neutral-800 min-h-[44px]"
+            className="text-[var(--zen-text-secondary)] hover:text-[var(--zen-text)] hover:bg-[var(--zen-ghost-hover)] min-h-[44px]"
           >
             <ChevronLeft className="w-4 h-4 mr-1" />
             <span className="hidden sm:inline">{t('backToTest')}</span>

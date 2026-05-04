@@ -58,9 +58,9 @@ export function SaveIndicator({ status, className }: SaveIndicatorProps) {
           transition={{ duration: 0.15 }}
           className={cn(
             'flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full backdrop-blur-sm',
-            status === 'saving' && 'text-neutral-300 bg-neutral-800/60',
-            status === 'saved' && 'text-emerald-300 bg-emerald-950/50',
-            status === 'error' && 'text-red-300 bg-red-950/50',
+            status === 'saving' && 'text-[var(--zen-text-secondary)] bg-[var(--zen-track)]',
+            status === 'saved' && 'text-[var(--zen-success)] bg-[var(--zen-success-subtle)]',
+            status === 'error' && 'text-[var(--zen-danger)] bg-[var(--zen-danger-subtle)]',
             className,
           )}
           role="status"

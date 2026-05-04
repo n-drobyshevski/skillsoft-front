@@ -18,14 +18,14 @@ export function AllCompleteState() {
         {/* Glow ring */}
         <div className="absolute inset-0 rounded-full bg-emerald-500/20 blur-xl scale-150" />
         <div className="relative p-4 rounded-full bg-emerald-500/15 border border-emerald-500/30">
-          <CheckCircle2 className="w-10 h-10 text-emerald-400" />
+          <CheckCircle2 className="w-10 h-10 text-[var(--zen-success)]" />
         </div>
       </div>
 
-      <h3 className="text-lg font-semibold text-white mb-1.5">
+      <h3 className="text-lg font-semibold text-[var(--zen-text)] mb-1.5">
         {t('answerSummary.allCompleteTitle')}
       </h3>
-      <p className="text-sm text-neutral-400 max-w-xs">
+      <p className="text-sm text-[var(--zen-text-secondary)] max-w-xs">
         {t('answerSummary.allCompleteDescription')}
       </p>
     </div>

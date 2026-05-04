@@ -202,7 +202,7 @@ export function StarResponseInput({ value, onChange, disabled }: StarResponseInp
             <div className="flex items-center gap-2">
               <span
                 className={cn(
-                  'inline-flex h-6 w-6 items-center justify-center rounded-md text-xs font-bold text-white',
+                  'inline-flex h-6 w-6 items-center justify-center rounded-md text-xs font-bold text-[var(--zen-text)]',
                   section.badgeColor,
                 )}
                 aria-hidden="true"
@@ -211,14 +211,14 @@ export function StarResponseInput({ value, onChange, disabled }: StarResponseInp
               </span>
               <label
                 htmlFor={inputId}
-                className="text-sm font-medium text-neutral-200"
+                className="text-sm font-medium text-[var(--zen-text-secondary)]"
               >
                 {t(`star.${section.key}.label` as Parameters<typeof t>[0])}
               </label>
             </div>
 
             {/* Hint text */}
-            <p className="text-xs text-neutral-500 pl-8">
+            <p className="text-xs text-[var(--zen-text-muted)] pl-8">
               {t(`star.${section.key}.hint` as Parameters<typeof t>[0])}
             </p>
 
@@ -231,7 +231,7 @@ export function StarResponseInput({ value, onChange, disabled }: StarResponseInp
                 disabled={disabled}
                 rows={section.rows}
                 className={cn(
-                  'bg-neutral-800/30 border-neutral-700 text-white placeholder:text-neutral-500',
+                  'bg-[var(--zen-ghost-hover)] border-[var(--zen-muted)] text-[var(--zen-text)] placeholder:text-[var(--zen-text-muted)]',
                   'focus:ring-emerald-500/20 focus:border-emerald-500 resize-none text-sm leading-relaxed',
                 )}
                 aria-label={t(`star.${section.key}.label` as Parameters<typeof t>[0])}
@@ -244,7 +244,7 @@ export function StarResponseInput({ value, onChange, disabled }: StarResponseInp
       {/* Character count indicator */}
       <div className="flex items-center justify-center pt-1">
         {meetsMinimum ? (
-          <p className="text-xs text-emerald-500 flex items-center gap-1">
+          <p className="text-xs text-[var(--zen-success)] flex items-center gap-1">
             <svg
               className="h-4 w-4"
               fill="none"
@@ -261,7 +261,7 @@ export function StarResponseInput({ value, onChange, disabled }: StarResponseInp
             {t('star.charactersMet')}
           </p>
         ) : (
-          <p className="text-xs text-amber-500">
+          <p className="text-xs text-[var(--zen-warning)]">
             {t('star.characterCount', {
               current: totalChars,
               minimum: STAR_MIN_CHARS,

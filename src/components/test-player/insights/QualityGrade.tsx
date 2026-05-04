@@ -66,7 +66,7 @@ export function QualityGrade({
         height={wh}
         viewBox={`0 0 ${wh} ${wh}`}
         role="img"
-        aria-label={`Оценка качества ${grade} — ${label}`}
+        aria-label={`Quality grade ${grade} — ${label}`}
         className="block"
       >
         <circle
@@ -76,7 +76,7 @@ export function QualityGrade({
           fill="none"
           stroke="currentColor"
           strokeWidth={strokeWidth}
-          className="text-neutral-800"
+          className="text-[var(--zen-track)]"
         />
         <circle
           cx={center}
@@ -104,7 +104,7 @@ export function QualityGrade({
           {grade}
         </text>
       </svg>
-      <span className={cn('font-medium text-neutral-400', labelClass, color)}>
+      <span className={cn('font-medium text-[var(--zen-text-secondary)]', labelClass, color)}>
         {label}
       </span>
     </div>

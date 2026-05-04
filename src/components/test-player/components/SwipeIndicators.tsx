@@ -43,8 +43,8 @@ export function SwipeIndicators({
           className="absolute left-4 top-1/2 -translate-y-1/2 z-10 transition-opacity"
           style={{ opacity }}
         >
-          <div className="flex items-center justify-center w-10 h-10 rounded-full bg-neutral-800/80 backdrop-blur-sm">
-            <ChevronLeft className="w-6 h-6 text-neutral-300" />
+          <div className="flex items-center justify-center w-10 h-10 rounded-full bg-[var(--zen-ghost-hover)] backdrop-blur-sm">
+            <ChevronLeft className="w-6 h-6 text-[var(--zen-text-secondary)]" />
           </div>
         </div>
       )}
@@ -56,7 +56,7 @@ export function SwipeIndicators({
           style={{ opacity }}
         >
           <div className="flex items-center justify-center w-10 h-10 rounded-full bg-emerald-600/80 backdrop-blur-sm">
-            <ChevronRight className="w-6 h-6 text-white" />
+            <ChevronRight className="w-6 h-6 text-[var(--zen-text)]" />
           </div>
         </div>
       )}
@@ -79,7 +79,7 @@ export function SwipeHint({ visible, onDismiss }: SwipeHintProps) {
 
   return (
     <div
-      className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 px-4 py-2 bg-neutral-800/90 backdrop-blur-sm rounded-full text-sm text-neutral-300 flex items-center gap-2 animate-pulse"
+      className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 px-4 py-2 bg-[var(--zen-ghost-hover)] backdrop-blur-sm rounded-full text-sm text-[var(--zen-text-secondary)] flex items-center gap-2 animate-pulse"
       onClick={onDismiss}
     >
       <ChevronLeft className="w-4 h-4" />

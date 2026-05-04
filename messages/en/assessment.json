@@ -237,5 +237,29 @@
     "expired": "Time expired",
     "remaining": "{minutes}:{seconds} remaining",
     "warning": "Less than 3 minutes remaining"
+  },
+  "settings": {
+    "title": "Settings",
+    "language": "Language",
+    "theme": "Appearance",
+    "dark": "Dark",
+    "light": "Light",
+    "shortcutHint": "Alt+S"
+  },
+  "progressTooltip": {
+    "answered": "Answered: {count}",
+    "skipped": "Skipped: {count}",
+    "remaining": "Remaining: {count}",
+    "questionNavigation": "Question navigation",
+    "questionAnswered": "Question {number}: Answered",
+    "questionSkipped": "Question {number}: Skipped",
+    "questionCurrent": "Question {number}: Current",
+    "questionPending": "Question {number}: Pending"
+  },
+  "insights": {
+    "hidePanel": "Hide analysis panel",
+    "openPanel": "Open analysis panel",
+    "shortcutHint": "Shortcut: Alt+I",
+    "analysisPanel": "Analysis panel"
   }
 }

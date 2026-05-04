@@ -36,7 +36,7 @@ export function LikertAnswerPreview({ answer }: LikertAnswerPreviewProps) {
 
   if (isSkipped || selectedValue === undefined) {
     return (
-      <span className="text-xs text-amber-400">{t('skipped')}</span>
+      <span className="text-xs text-[var(--zen-warning)]">{t('skipped')}</span>
     );
   }
 
@@ -49,11 +49,11 @@ export function LikertAnswerPreview({ answer }: LikertAnswerPreviewProps) {
             "w-2 h-2 rounded-full transition-all",
             selectedValue === value
               ? "bg-emerald-500 scale-125"
-              : "bg-neutral-700"
+              : "bg-[var(--zen-muted)]"
           )}
         />
       ))}
-      <span className="ml-1.5 text-xs text-neutral-400 tabular-nums">
+      <span className="ml-1.5 text-xs text-[var(--zen-text-secondary)] tabular-nums">
         {selectedValue}/5
       </span>
     </div>
@@ -72,7 +72,7 @@ export function LikertAnswerExpanded({ answer }: LikertAnswerExpandedProps) {
   if (isSkipped || selectedValue === undefined) {
     return (
       <div className="text-center py-4">
-        <span className="text-sm text-amber-400">{t('questionWasSkipped')}</span>
+        <span className="text-sm text-[var(--zen-warning)]">{t('questionWasSkipped')}</span>
       </div>
     );
   }
@@ -89,15 +89,15 @@ export function LikertAnswerExpanded({ answer }: LikertAnswerExpandedProps) {
               key={value}
               className={cn(
                 "flex flex-col items-center gap-2 flex-1",
-                isSelected ? "text-emerald-400" : "text-neutral-500"
+                isSelected ? "text-[var(--zen-success)]" : "text-[var(--zen-text-muted)]"
               )}
             >
               <div
                 className={cn(
                   "w-10 h-10 sm:w-12 sm:h-12 rounded-lg flex items-center justify-center font-bold text-lg",
                   isSelected
-                    ? "bg-emerald-500/20 border-2 border-emerald-500 text-emerald-400"
-                    : "bg-neutral-800 border border-neutral-700 text-neutral-500"
+                    ? "bg-emerald-500/20 border-2 border-emerald-500 text-[var(--zen-success)]"
+                    : "bg-[var(--zen-track)] border border-[var(--zen-muted)] text-[var(--zen-text-muted)]"
                 )}
               >
                 {value}
@@ -112,7 +112,7 @@ export function LikertAnswerExpanded({ answer }: LikertAnswerExpandedProps) {
 
       {/* Selected value label - mobile */}
       <div className="sm:hidden mt-3 text-center">
-        <span className="text-sm text-emerald-400">
+        <span className="text-sm text-[var(--zen-success)]">
           {likertLabels[selectedValue - 1]}
         </span>
       </div>

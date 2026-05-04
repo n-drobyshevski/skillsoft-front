@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useCallback } from 'react';
+import { useTranslations } from 'next-intl';
 import { Eye } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -22,6 +23,7 @@ import { cn } from '@/lib/utils';
  * - Accessible with proper ARIA attributes
  */
 export function InsightsToggle() {
+  const t = useTranslations('assessment');
   const isTestDriveMode = useTestDriveStore((state) => state.isTestDriveMode);
   const isPanelOpen = useTestDriveStore((state) => state.isPanelOpen);
   const togglePanel = useTestDriveStore((state) => state.togglePanel);
@@ -68,13 +70,13 @@ export function InsightsToggle() {
               'rounded-full shadow-lg transition-all duration-300',
               // Smaller on mobile, larger on desktop
               'h-12 w-12 sm:h-14 sm:w-14',
-              'bg-amber-500 hover:bg-amber-600 text-white',
+              'bg-amber-500 hover:bg-amber-600 text-[var(--zen-text)]',
               'border-2 border-amber-400/50',
               // Glow effect
               'shadow-[0_0_20px_rgba(245,158,11,0.4)]',
               'hover:shadow-[0_0_30px_rgba(245,158,11,0.6)]',
               // Active state when panel is open
-              isPanelOpen && 'ring-2 ring-amber-300 ring-offset-2 ring-offset-neutral-950',
+              isPanelOpen && 'ring-2 ring-amber-300 ring-offset-2 ring-offset-[var(--zen-ring-offset)]',
               // Pulse animation when panel is closed
               !isPanelOpen && 'animate-pulse'
             )}
@@ -90,14 +92,14 @@ export function InsightsToggle() {
         </TooltipTrigger>
         <TooltipContent
           side="left"
-          className="bg-neutral-900 border-amber-500/50 text-white hidden sm:block"
+          className="bg-[var(--zen-card)] border-amber-500/50 text-[var(--zen-text)] hidden sm:block"
         >
           <div className="flex flex-col gap-1">
             <span className="font-medium">
-              {isPanelOpen ? 'Скрыть панель анализа' : 'Открыть панель анализа'}
+              {isPanelOpen ? t('insights.hidePanel') : t('insights.openPanel')}
             </span>
-            <span className="text-xs text-neutral-400">
-              Сочетание клавиш: Alt+I
+            <span className="text-xs text-[var(--zen-text-secondary)]">
+              {t('insights.shortcutHint')}
             </span>
           </div>
         </TooltipContent>

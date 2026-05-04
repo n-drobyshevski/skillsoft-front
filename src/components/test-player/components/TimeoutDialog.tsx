@@ -30,18 +30,22 @@ export function TimeoutDialog({ open, onComplete, isSubmitting }: TimeoutDialogP
 
   return (
     <AlertDialog open={open}>
-      <AlertDialogContent>
+      <AlertDialogContent className="bg-[var(--zen-surface)] border-[var(--zen-border)] text-[var(--zen-text)] backdrop-blur-xl">
         <AlertDialogHeader>
-          <AlertDialogTitle className="flex items-center gap-2">
-            <Clock className="h-5 w-5 text-amber-500" />
+          <AlertDialogTitle className="flex items-center gap-2 text-[var(--zen-text)]">
+            <Clock className="h-5 w-5 text-[var(--zen-warning)]" />
             {t('timeExpired')}
           </AlertDialogTitle>
-          <AlertDialogDescription>
+          <AlertDialogDescription className="text-[var(--zen-text-secondary)]">
             {t('timeExpiredDescription')}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogAction onClick={onComplete} disabled={isSubmitting}>
+          <AlertDialogAction
+            onClick={onComplete}
+            disabled={isSubmitting}
+            className="bg-[var(--zen-text)] text-[var(--zen-bg)] hover:bg-[var(--zen-text-secondary)] hover:text-[var(--zen-bg)]"
+          >
             {isSubmitting ? t('saving') : t('viewResults')}
           </AlertDialogAction>
         </AlertDialogFooter>

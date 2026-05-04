@@ -45,13 +45,13 @@ interface MetricRowProps {
 function MetricRow({ label, value, sub, color, tooltip }: MetricRowProps) {
   const content = (
     <div className="flex flex-col gap-0.5 min-w-0">
-      <span className="text-[10px] uppercase tracking-wide text-neutral-400 leading-none truncate">
+      <span className="text-[10px] uppercase tracking-wide text-[var(--zen-text-secondary)] leading-none truncate">
         {label}
       </span>
-      <span className={cn('text-sm font-bold leading-none', color ?? 'text-neutral-100')}>
+      <span className={cn('text-sm font-bold leading-none', color ?? 'text-[var(--zen-text)]')}>
         {value}
       </span>
-      <span className="text-[10px] text-neutral-400 leading-none truncate">{sub}</span>
+      <span className="text-[10px] text-[var(--zen-text-secondary)] leading-none truncate">{sub}</span>
     </div>
   );
 
@@ -64,7 +64,7 @@ function MetricRow({ label, value, sub, color, tooltip }: MetricRowProps) {
       </TooltipTrigger>
       <TooltipContent
         side="top"
-        className="max-w-[240px] bg-neutral-900 border-neutral-700 text-neutral-200 text-xs leading-relaxed"
+        className="max-w-[240px] bg-[var(--zen-card)] border-[var(--zen-muted)] text-[var(--zen-text)] text-xs leading-relaxed"
       >
         {tooltip}
       </TooltipContent>
@@ -80,8 +80,8 @@ interface InlineStatProps {
 
 function InlineStat({ icon, label, tooltip }: InlineStatProps) {
   const content = (
-    <span className="flex items-center gap-1 text-[10px] text-neutral-400">
-      <span className="shrink-0 text-neutral-500">{icon}</span>
+    <span className="flex items-center gap-1 text-[10px] text-[var(--zen-text-secondary)]">
+      <span className="shrink-0 text-[var(--zen-text-muted)]">{icon}</span>
       {label}
     </span>
   );
@@ -91,14 +91,14 @@ function InlineStat({ icon, label, tooltip }: InlineStatProps) {
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <span className="flex items-center gap-1 text-[10px] text-neutral-400 cursor-help">
-          <span className="shrink-0 text-neutral-500">{icon}</span>
+        <span className="flex items-center gap-1 text-[10px] text-[var(--zen-text-secondary)] cursor-help">
+          <span className="shrink-0 text-[var(--zen-text-muted)]">{icon}</span>
           {label}
         </span>
       </TooltipTrigger>
       <TooltipContent
         side="top"
-        className="max-w-[220px] bg-neutral-900 border-neutral-700 text-neutral-200 text-xs leading-relaxed"
+        className="max-w-[220px] bg-[var(--zen-card)] border-[var(--zen-muted)] text-[var(--zen-text)] text-xs leading-relaxed"
       >
         {tooltip}
       </TooltipContent>
@@ -114,7 +114,7 @@ function NavLink({ href, label }: { href: string; label: string }) {
         <Link
           href={href}
           target="_blank"
-          className="inline-flex items-center gap-0.5 text-amber-400/70 hover:text-amber-400 transition-colors"
+          className="inline-flex items-center gap-0.5 text-[var(--zen-warning)] opacity-70 hover:opacity-100 transition-colors"
           onClick={(e) => e.stopPropagation()}
         >
           <ExternalLink className="size-2.5" />
@@ -122,7 +122,7 @@ function NavLink({ href, label }: { href: string; label: string }) {
       </TooltipTrigger>
       <TooltipContent
         side="top"
-        className="bg-neutral-900 border-neutral-700 text-neutral-200 text-xs"
+        className="bg-[var(--zen-card)] border-[var(--zen-muted)] text-[var(--zen-text)] text-xs"
       >
         {label}
       </TooltipContent>
@@ -196,12 +196,12 @@ export function AnalyticsPanel({ className }: { className?: string }) {
     return (
       <div
         className={cn(
-          'flex flex-col items-center justify-center gap-3 rounded-xl bg-neutral-950 py-10',
+          'flex flex-col items-center justify-center gap-3 rounded-xl bg-[var(--zen-bg)] py-10',
           className,
         )}
       >
-        <Brain className="size-8 text-neutral-700" />
-        <span className="text-xs text-neutral-500">Загрузка данных анализа...</span>
+        <Brain className="size-8 text-[var(--zen-muted)]" />
+        <span className="text-xs text-[var(--zen-text-muted)]">Загрузка данных анализа...</span>
       </div>
     );
   }
@@ -252,7 +252,7 @@ export function AnalyticsPanel({ className }: { className?: string }) {
   return (
     <div
       className={cn(
-        'rounded-xl bg-neutral-950 border border-neutral-800 divide-y divide-neutral-800 overflow-hidden',
+        'rounded-xl bg-[var(--zen-bg)] border border-[var(--zen-border)] divide-y divide-[var(--zen-border)] overflow-hidden',
         className,
       )}
     >
@@ -272,7 +272,7 @@ export function AnalyticsPanel({ className }: { className?: string }) {
             </TooltipTrigger>
             <TooltipContent
               side="right"
-              className="max-w-[260px] bg-neutral-900 border-neutral-700 text-neutral-200 text-xs leading-relaxed"
+              className="max-w-[260px] bg-[var(--zen-card)] border-[var(--zen-muted)] text-[var(--zen-text)] text-xs leading-relaxed"
             >
               <p className="font-semibold mb-1">Составная оценка качества</p>
               <p>Рассчитывается как взвешенное среднее: надёжность α × 60% + дискриминативность × 40%. Оценка {score}/100 соответствует грейду {gradeResult.grade}.</p>
@@ -284,9 +284,9 @@ export function AnalyticsPanel({ className }: { className?: string }) {
               <span className={cn('text-2xl font-black leading-none', gradeResult.color)}>
                 {score}
               </span>
-              <span className="text-[10px] text-neutral-400 leading-none">/ 100</span>
+              <span className="text-[10px] text-[var(--zen-text-secondary)] leading-none">/ 100</span>
             </div>
-            <span className="text-[10px] text-neutral-500 leading-none">Составная оценка</span>
+            <span className="text-[10px] text-[var(--zen-text-muted)] leading-none">Составная оценка</span>
           </div>
 
           {/* Question type + position + links */}
@@ -296,14 +296,14 @@ export function AnalyticsPanel({ className }: { className?: string }) {
                 <TooltipTrigger asChild>
                   <Badge
                     variant="outline"
-                    className="h-4 px-1.5 text-[10px] border-neutral-700 text-neutral-400 bg-neutral-900 cursor-help"
+                    className="h-4 px-1.5 text-[10px] border-[var(--zen-muted)] text-[var(--zen-text-secondary)] bg-[var(--zen-card)] cursor-help"
                   >
                     {QUESTION_TYPE_LABELS[question.questionType] ?? question.questionType}
                   </Badge>
                 </TooltipTrigger>
                 <TooltipContent
                   side="left"
-                  className="max-w-[240px] bg-neutral-900 border-neutral-700 text-neutral-200 text-xs leading-relaxed"
+                  className="max-w-[240px] bg-[var(--zen-card)] border-[var(--zen-muted)] text-[var(--zen-text)] text-xs leading-relaxed"
                 >
                   {QUESTION_TYPE_TOOLTIPS[question.questionType] ?? 'Тип вопроса определяет формат ответа и метод скоринга.'}
                 </TooltipContent>
@@ -313,7 +313,7 @@ export function AnalyticsPanel({ className }: { className?: string }) {
               )}
             </div>
             {usage?.position !== undefined && usage?.totalQuestions !== undefined && (
-              <span className="text-[10px] text-neutral-500">
+              <span className="text-[10px] text-[var(--zen-text-muted)]">
                 {usage.position}&nbsp;/&nbsp;{usage.totalQuestions}
               </span>
             )}
@@ -324,9 +324,9 @@ export function AnalyticsPanel({ className }: { className?: string }) {
         {hasRedFlag ? (
           <Tooltip>
             <TooltipTrigger asChild>
-              <div className="flex items-center gap-1.5 rounded-md bg-red-950/50 border border-red-800/40 px-2 py-1 cursor-help">
-                <AlertTriangle className="size-3 shrink-0 text-red-400" />
-                <span className="text-[10px] text-red-400 leading-snug">
+              <div className="flex items-center gap-1.5 rounded-md bg-[var(--zen-danger-subtle)] border border-[var(--zen-danger-border)] px-2 py-1 cursor-help">
+                <AlertTriangle className="size-3 shrink-0 text-[var(--zen-danger)]" />
+                <span className="text-[10px] text-[var(--zen-danger)] leading-snug">
                   {psychometrics?.discriminationIndex !== undefined &&
                   psychometrics.discriminationIndex < 0.3
                     ? 'Низкая дискриминативность — вопрос не различает уровни знания'
@@ -336,9 +336,9 @@ export function AnalyticsPanel({ className }: { className?: string }) {
             </TooltipTrigger>
             <TooltipContent
               side="bottom"
-              className="max-w-[280px] bg-neutral-900 border-neutral-700 text-neutral-200 text-xs leading-relaxed"
+              className="max-w-[280px] bg-[var(--zen-card)] border-[var(--zen-muted)] text-[var(--zen-text)] text-xs leading-relaxed"
             >
-              <p className="font-semibold text-red-400 mb-1">Требуется проверка</p>
+              <p className="font-semibold text-[var(--zen-danger)] mb-1">Требуется проверка</p>
               {psychometrics?.discriminationIndex !== undefined && psychometrics.discriminationIndex < 0.3 && (
                 <p>Индекс дискриминативности {psychometrics.discriminationIndex.toFixed(2)} ниже минимального порога 0.30. Вопрос одинаково сложен для сильных и слабых кандидатов. Рекомендуется переформулировать или заменить.</p>
               )}
@@ -348,9 +348,9 @@ export function AnalyticsPanel({ className }: { className?: string }) {
             </TooltipContent>
           </Tooltip>
         ) : (
-          <div className="flex items-center gap-1.5 rounded-md bg-emerald-950/40 border border-emerald-800/30 px-2 py-1">
-            <CheckCircle2 className="size-3 shrink-0 text-emerald-500" />
-            <span className="text-[10px] text-emerald-500 leading-snug">
+          <div className="flex items-center gap-1.5 rounded-md bg-[var(--zen-success-subtle)] border border-[var(--zen-success-border)] px-2 py-1">
+            <CheckCircle2 className="size-3 shrink-0 text-[var(--zen-success)]" />
+            <span className="text-[10px] text-[var(--zen-success)] leading-snug">
               Психометрические параметры в норме
             </span>
           </div>
@@ -360,8 +360,8 @@ export function AnalyticsPanel({ className }: { className?: string }) {
       {/* ── Section 2: Measurement ────────────────────────────────────────── */}
       <div className="px-3 py-2.5 flex flex-col gap-2">
         <div className="flex items-center gap-1.5">
-          <Gauge className="size-3 text-neutral-500" />
-          <span className="text-[10px] uppercase tracking-widest text-neutral-500 font-semibold">
+          <Gauge className="size-3 text-[var(--zen-text-muted)]" />
+          <span className="text-[10px] uppercase tracking-widest text-[var(--zen-text-muted)] font-semibold">
             Измерение
           </span>
           {psychoCompetencyHref && (
@@ -380,14 +380,14 @@ export function AnalyticsPanel({ className }: { className?: string }) {
             sub={discInterpretation.label}
             color={
               discInterpretation.status === 'excellent'
-                ? 'text-emerald-400'
+                ? 'text-[var(--zen-success)]'
                 : discInterpretation.status === 'good'
-                  ? 'text-blue-400'
+                  ? 'text-[var(--zen-info)]'
                   : discInterpretation.status === 'acceptable'
-                    ? 'text-amber-400'
+                    ? 'text-[var(--zen-warning)]'
                     : discInterpretation.status === 'poor'
-                      ? 'text-red-400'
-                      : 'text-neutral-400'
+                      ? 'text-[var(--zen-danger)]'
+                      : 'text-[var(--zen-text-secondary)]'
             }
             tooltip="Корреляция ответа на вопрос с общим баллом. Показывает, насколько хорошо вопрос различает сильных и слабых кандидатов. ≥0.40 — отлично, ≥0.30 — хорошо, ≥0.20 — приемлемо, <0.20 — требует пересмотра."
           />
@@ -409,12 +409,12 @@ export function AnalyticsPanel({ className }: { className?: string }) {
             }
             color={
               psychometrics?.reliabilityCoefficient === undefined
-                ? 'text-neutral-400'
+                ? 'text-[var(--zen-text-secondary)]'
                 : psychometrics.reliabilityCoefficient >= 0.9
-                  ? 'text-emerald-400'
+                  ? 'text-[var(--zen-success)]'
                   : psychometrics.reliabilityCoefficient >= 0.7
-                    ? 'text-blue-400'
-                    : 'text-red-400'
+                    ? 'text-[var(--zen-info)]'
+                    : 'text-[var(--zen-danger)]'
             }
             tooltip="Коэффициент Кронбаха α — мера внутренней согласованности шкалы. ≥0.90 — отлично для индивидуальных решений, ≥0.70 — приемлемо для групповых сравнений, <0.70 — шкала нестабильна."
           />
@@ -436,10 +436,10 @@ export function AnalyticsPanel({ className }: { className?: string }) {
             }
             color={
               psychometrics?.correctRate === undefined
-                ? 'text-neutral-400'
+                ? 'text-[var(--zen-text-secondary)]'
                 : psychometrics.correctRate >= 80 || psychometrics.correctRate < 20
-                  ? 'text-amber-400'
-                  : 'text-blue-400'
+                  ? 'text-[var(--zen-warning)]'
+                  : 'text-[var(--zen-info)]'
             }
             tooltip="Процент респондентов, выбравших верный ответ. Оптимальный диапазон 40–80%. Ниже 20% — вопрос слишком сложен, выше 80% — слишком прост и не даёт полезной информации."
           />
@@ -461,14 +461,14 @@ export function AnalyticsPanel({ className }: { className?: string }) {
       <div className="px-3 py-2.5 flex flex-col gap-2">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-1.5">
-            <BarChart3 className="size-3 text-neutral-500" />
-            <span className="text-[10px] uppercase tracking-widest text-neutral-500 font-semibold">
+            <BarChart3 className="size-3 text-[var(--zen-text-muted)]" />
+            <span className="text-[10px] uppercase tracking-widest text-[var(--zen-text-muted)] font-semibold">
               Скоринг
             </span>
           </div>
-          <span className="text-[10px] text-neutral-500">
+          <span className="text-[10px] text-[var(--zen-text-muted)]">
             Макс.&nbsp;
-            <span className="text-neutral-300 font-semibold">{maxScore}</span>&nbsp;балл.
+            <span className="text-[var(--zen-text-secondary)] font-semibold">{maxScore}</span>&nbsp;балл.
           </span>
         </div>
 
@@ -501,10 +501,10 @@ export function AnalyticsPanel({ className }: { className?: string }) {
                         >
                           {optionLetter(i)}
                         </span>
-                        <span className="text-[10px] font-semibold text-neutral-300 leading-none">
+                        <span className="text-[10px] font-semibold text-[var(--zen-text-secondary)] leading-none">
                           {optScore}
                         </span>
-                        <div className="w-full h-1 rounded-full bg-neutral-800 overflow-hidden">
+                        <div className="w-full h-1 rounded-full bg-[var(--zen-track)] overflow-hidden">
                           <div
                             className={cn('h-full rounded-full', colorClasses.split(' ')[1])}
                             style={{ width: `${heightPct}%` }}
@@ -514,10 +514,10 @@ export function AnalyticsPanel({ className }: { className?: string }) {
                     </TooltipTrigger>
                     <TooltipContent
                       side="top"
-                      className="max-w-[260px] bg-neutral-900 border-neutral-700 text-neutral-200 text-xs leading-relaxed"
+                      className="max-w-[260px] bg-[var(--zen-card)] border-[var(--zen-muted)] text-[var(--zen-text)] text-xs leading-relaxed"
                     >
                       <p className="font-semibold mb-0.5">{optionLetter(i)}: {optScore} из {maxScore} балл.</p>
-                      <p className="text-neutral-400">{optText}</p>
+                      <p className="text-[var(--zen-text-secondary)]">{optText}</p>
                     </TooltipContent>
                   </Tooltip>
                 );
@@ -526,7 +526,7 @@ export function AnalyticsPanel({ className }: { className?: string }) {
 
             <Tooltip>
               <TooltipTrigger asChild>
-                <span className="text-[10px] text-neutral-500 leading-snug cursor-help">
+                <span className="text-[10px] text-[var(--zen-text-muted)] leading-snug cursor-help">
                   {scoring?.scoringMethod === 'PARTIAL' || partialCount > 0
                     ? `Градуированный · ${answerOptions.length} дистрактор${answerOptions.length !== 1 ? 'ов' : ''}, ${partialCount} дают частичный балл`
                     : `Дихотомический · ${answerOptions.length} вариант${answerOptions.length !== 1 ? 'ов' : ''} ответа`}
@@ -534,7 +534,7 @@ export function AnalyticsPanel({ className }: { className?: string }) {
               </TooltipTrigger>
               <TooltipContent
                 side="bottom"
-                className="max-w-[260px] bg-neutral-900 border-neutral-700 text-neutral-200 text-xs leading-relaxed"
+                className="max-w-[260px] bg-[var(--zen-card)] border-[var(--zen-muted)] text-[var(--zen-text)] text-xs leading-relaxed"
               >
                 {partialCount > 0
                   ? 'Градуированный скоринг: неправильные ответы могут давать частичные баллы, что повышает чувствительность оценки.'
@@ -543,15 +543,15 @@ export function AnalyticsPanel({ className }: { className?: string }) {
             </Tooltip>
           </>
         ) : (
-          <span className="text-[10px] text-neutral-700">Варианты ответов не заданы</span>
+          <span className="text-[10px] text-[var(--zen-muted)]">Варианты ответов не заданы</span>
         )}
       </div>
 
       {/* ── Section 4: Competency ─────────────────────────────────────────── */}
       <div className="px-3 py-2.5 flex flex-col gap-1.5">
         <div className="flex items-center gap-1.5">
-          <Target className="size-3 text-neutral-500" />
-          <span className="text-[10px] uppercase tracking-widest text-neutral-500 font-semibold">
+          <Target className="size-3 text-[var(--zen-text-muted)]" />
+          <span className="text-[10px] uppercase tracking-widest text-[var(--zen-text-muted)] font-semibold">
             Компетенция
           </span>
           {competencyHref && (
@@ -561,7 +561,7 @@ export function AnalyticsPanel({ className }: { className?: string }) {
 
         {/* Competency name + Big Five badge */}
         <div className="flex items-start justify-between gap-2">
-          <span className="text-sm font-semibold text-neutral-200 leading-snug">
+          <span className="text-sm font-semibold text-[var(--zen-text)] leading-snug">
             {competency?.name ?? '—'}
           </span>
           {bigFiveTrait && (
@@ -576,7 +576,7 @@ export function AnalyticsPanel({ className }: { className?: string }) {
               </TooltipTrigger>
               <TooltipContent
                 side="left"
-                className="max-w-[220px] bg-neutral-900 border-neutral-700 text-neutral-200 text-xs leading-relaxed"
+                className="max-w-[220px] bg-[var(--zen-card)] border-[var(--zen-muted)] text-[var(--zen-text)] text-xs leading-relaxed"
               >
                 Фактор Большой Пятёрки: {bigFiveLabel(bigFiveTrait)}. Определяет, к какой личностной характеристике относится данная компетенция.
               </TooltipContent>
@@ -586,7 +586,7 @@ export function AnalyticsPanel({ className }: { className?: string }) {
 
         {/* Behavioral indicator title */}
         {behavioralIndicator?.title && (
-          <span className="text-[10px] text-neutral-500 leading-snug italic flex items-center gap-1">
+          <span className="text-[10px] text-[var(--zen-text-muted)] leading-snug italic flex items-center gap-1">
             {behavioralIndicator.title}
             {indicatorHref && (
               <NavLink href={indicatorHref} label="Открыть индикатор поведения" />
@@ -600,12 +600,12 @@ export function AnalyticsPanel({ className }: { className?: string }) {
             coverage?.questionsInCompetency !== undefined && (
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <span className="text-[10px] text-neutral-500 cursor-help">
-                    <span className="text-neutral-400 font-semibold">
+                  <span className="text-[10px] text-[var(--zen-text-muted)] cursor-help">
+                    <span className="text-[var(--zen-text-secondary)] font-semibold">
                       {coverage.questionsInIndicator}
                     </span>
                     &nbsp;из&nbsp;
-                    <span className="text-neutral-400 font-semibold">
+                    <span className="text-[var(--zen-text-secondary)] font-semibold">
                       {coverage.questionsInCompetency}
                     </span>
                     &nbsp;вопросов
@@ -613,7 +613,7 @@ export function AnalyticsPanel({ className }: { className?: string }) {
                 </TooltipTrigger>
                 <TooltipContent
                   side="top"
-                  className="max-w-[240px] bg-neutral-900 border-neutral-700 text-neutral-200 text-xs leading-relaxed"
+                  className="max-w-[240px] bg-[var(--zen-card)] border-[var(--zen-muted)] text-[var(--zen-text)] text-xs leading-relaxed"
                 >
                   Этот вопрос — один из {coverage.questionsInIndicator} вопросов для данного индикатора. Всего в компетенции {coverage.questionsInCompetency} вопросов. Удаление может снизить надёжность измерения.
                 </TooltipContent>
@@ -622,40 +622,40 @@ export function AnalyticsPanel({ className }: { className?: string }) {
           {coverage?.contributionPct !== undefined && (
             <Tooltip>
               <TooltipTrigger asChild>
-                <span className="text-[10px] text-neutral-500 cursor-help">
+                <span className="text-[10px] text-[var(--zen-text-muted)] cursor-help">
                   Вклад&nbsp;
-                  <span className="text-amber-400 font-semibold">
+                  <span className="text-[var(--zen-warning)] font-semibold">
                     {Math.round(coverage.contributionPct)}%
                   </span>
                 </span>
               </TooltipTrigger>
               <TooltipContent
                 side="top"
-                className="max-w-[220px] bg-neutral-900 border-neutral-700 text-neutral-200 text-xs leading-relaxed"
+                className="max-w-[220px] bg-[var(--zen-card)] border-[var(--zen-muted)] text-[var(--zen-text)] text-xs leading-relaxed"
               >
                 Этот вопрос вносит {Math.round(coverage.contributionPct)}% в итоговую оценку компетенции. Вес зависит от количества вопросов и настроек индикатора.
               </TooltipContent>
             </Tooltip>
           )}
           {onetCode && (
-            <span className="text-[10px] text-neutral-500">
+            <span className="text-[10px] text-[var(--zen-text-muted)]">
               O*NET&nbsp;
-              <span className="text-neutral-400 font-mono">{onetCode}</span>
+              <span className="text-[var(--zen-text-secondary)] font-mono">{onetCode}</span>
             </span>
           )}
           {behavioralIndicator?.weight !== undefined && (
             <Tooltip>
               <TooltipTrigger asChild>
-                <span className="text-[10px] text-neutral-500 cursor-help">
+                <span className="text-[10px] text-[var(--zen-text-muted)] cursor-help">
                   Вес&nbsp;
-                  <span className="text-neutral-400 font-semibold">
+                  <span className="text-[var(--zen-text-secondary)] font-semibold">
                     {behavioralIndicator.weight.toFixed(2)}
                   </span>
                 </span>
               </TooltipTrigger>
               <TooltipContent
                 side="top"
-                className="max-w-[220px] bg-neutral-900 border-neutral-700 text-neutral-200 text-xs leading-relaxed"
+                className="max-w-[220px] bg-[var(--zen-card)] border-[var(--zen-muted)] text-[var(--zen-text)] text-xs leading-relaxed"
               >
                 Вес индикатора в расчёте итоговой оценки компетенции. Чем выше вес, тем больше влияние этого индикатора на результат.
               </TooltipContent>
@@ -702,7 +702,7 @@ export function AnalyticsPanel({ className }: { className?: string }) {
             {tags.map((tag) => (
               <span
                 key={tag}
-                className="flex items-center gap-0.5 text-[10px] text-neutral-400 bg-neutral-900 border border-neutral-800 rounded px-1.5 py-0.5 leading-none"
+                className="flex items-center gap-0.5 text-[10px] text-[var(--zen-text-secondary)] bg-[var(--zen-card)] border border-[var(--zen-border)] rounded px-1.5 py-0.5 leading-none"
               >
                 <Hash className="size-2 shrink-0" />
                 {tag}

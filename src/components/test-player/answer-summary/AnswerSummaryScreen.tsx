@@ -132,7 +132,7 @@ export function AnswerSummaryScreen({
   };
 
   return (
-    <div className="min-h-screen min-h-[100dvh] bg-neutral-950 flex flex-col">
+    <div className="min-h-screen min-h-[100dvh] bg-[var(--zen-bg)] flex flex-col">
       {/* Scrollable content area */}
       <div
         ref={scrollRef}

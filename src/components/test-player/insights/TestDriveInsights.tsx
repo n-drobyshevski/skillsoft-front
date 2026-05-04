@@ -25,7 +25,7 @@ export function TestDriveInsights() {
 
   return (
     <Drawer open={isPanelOpen} onOpenChange={(open) => !open && closePanel()}>
-      <DrawerContent className="max-h-[85vh] bg-neutral-900/95 border-t border-amber-500/30 backdrop-blur-xl flex flex-col">
+      <DrawerContent className="max-h-[85vh] bg-[var(--zen-surface)] border-t border-amber-500/30 backdrop-blur-xl flex flex-col">
         <DrawerTitle className="sr-only">Панель анализа Test-Drive</DrawerTitle>
         <DrawerDescription className="sr-only">
           Детальная информация о текущем вопросе
@@ -33,14 +33,14 @@ export function TestDriveInsights() {
         <DrawerHeader className="px-3 py-3 border-b border-amber-500/20 bg-amber-500/5 shrink-0">
           <div className="flex items-center gap-3">
             <div className="flex items-center justify-center rounded-full bg-amber-500/20 border border-amber-500/30 w-8 h-8">
-              <Eye className="h-4 w-4 text-amber-400" />
+              <Eye className="h-4 w-4 text-[var(--zen-warning)]" />
             </div>
             <div className="flex-1">
-              <div className="text-white flex items-center gap-2 font-semibold">
+              <div className="text-[var(--zen-text)] flex items-center gap-2 font-semibold">
                 Панель анализа
                 <Badge
                   variant="outline"
-                  className="bg-amber-500/10 border-amber-500/30 text-amber-400 text-[10px]"
+                  className="bg-amber-500/10 border-amber-500/30 text-[var(--zen-warning)] text-[10px]"
                 >
                   Test-Drive
                 </Badge>
@@ -51,8 +51,8 @@ export function TestDriveInsights() {
         <div className="flex-1 overflow-y-auto p-3">
           <AnalyticsPanel />
         </div>
-        <div className="border-t border-neutral-800 bg-neutral-900/50 px-3 py-2 pb-safe shrink-0">
-          <p className="text-xs text-neutral-500 text-center">Свайпните вниз для закрытия</p>
+        <div className="border-t border-[var(--zen-border)] bg-[var(--zen-card)] px-3 py-2 pb-safe shrink-0">
+          <p className="text-xs text-[var(--zen-text-muted)] text-center">Свайпните вниз для закрытия</p>
         </div>
       </DrawerContent>
     </Drawer>

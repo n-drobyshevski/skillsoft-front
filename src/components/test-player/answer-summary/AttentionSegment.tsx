@@ -18,13 +18,13 @@ const ATTENTION_STYLES: Record<
 > = {
   skipped: {
     icon: SkipForward,
-    color: 'text-amber-400',
+    color: 'text-[var(--zen-warning)]',
     bgColor: 'bg-amber-500/10',
     borderColor: 'border-amber-500/20',
   },
   flagged: {
     icon: Flag,
-    color: 'text-blue-400',
+    color: 'text-[var(--zen-info)]',
     bgColor: 'bg-blue-500/10',
     borderColor: 'border-blue-500/20',
   },
@@ -49,13 +49,13 @@ export function AttentionSegment({ items, onEditAnswer }: AttentionSegmentProps)
       {/* Section header */}
       <div className="flex items-center gap-2.5 mb-3">
         <div className="p-1.5 rounded-md bg-amber-500/15">
-          <AlertTriangle className="w-4 h-4 text-amber-400" />
+          <AlertTriangle className="w-4 h-4 text-[var(--zen-warning)]" />
         </div>
         <div>
-          <h3 className="text-sm font-semibold text-white">
+          <h3 className="text-sm font-semibold text-[var(--zen-text)]">
             {t('answerSummary.needsAttention')}
           </h3>
-          <p className="text-xs text-neutral-500">
+          <p className="text-xs text-[var(--zen-text-muted)]">
             {skippedCount > 0 && t('answerSummary.skippedStat', { count: skippedCount })}
             {skippedCount > 0 && flaggedCount > 0 && ' · '}
             {flaggedCount > 0 && t('answerSummary.flaggedStat', { count: flaggedCount })}
@@ -114,11 +114,11 @@ function AttentionCard({ item, onEdit }: AttentionCardProps) {
         {/* Content */}
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1">
-            <span className="text-xs font-medium text-neutral-500">
+            <span className="text-xs font-medium text-[var(--zen-text-muted)]">
               {t('answerSummary.questionLabel', { number: item.questionIndex + 1 })}
             </span>
           </div>
-          <p className="text-sm text-neutral-300 line-clamp-2 mb-3">
+          <p className="text-sm text-[var(--zen-text-secondary)] line-clamp-2 mb-3">
             {item.questionText}
           </p>
 
@@ -129,7 +129,7 @@ function AttentionCard({ item, onEdit }: AttentionCardProps) {
             onClick={onEdit}
             className={cn(
               'min-h-[44px] px-4 text-sm font-medium w-full sm:w-auto',
-              'border-neutral-700 hover:bg-neutral-800 hover:text-white',
+              'border-[var(--zen-muted)] hover:bg-[var(--zen-ghost-hover)] hover:text-[var(--zen-text)]',
             )}
           >
             {ctaLabel}

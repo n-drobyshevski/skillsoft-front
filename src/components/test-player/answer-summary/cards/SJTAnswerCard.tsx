@@ -28,7 +28,7 @@ export function SJTAnswerPreview({ answer, answerDisplayText }: SJTAnswerPreview
 
   if (isSkipped || !hasAnswer) {
     return (
-      <span className="text-xs text-amber-400">{t('answerCard.skippedPreview')}</span>
+      <span className="text-xs text-[var(--zen-warning)]">{t('answerCard.skippedPreview')}</span>
     );
   }
 
@@ -39,7 +39,7 @@ export function SJTAnswerPreview({ answer, answerDisplayText }: SJTAnswerPreview
     // Fallback: generic display when no option data available
     return (
       <div className="flex items-center gap-2">
-        <span className="text-xs text-neutral-400 truncate max-w-[120px]">
+        <span className="text-xs text-[var(--zen-text-secondary)] truncate max-w-[120px]">
           {answerDisplayText}
         </span>
       </div>
@@ -51,10 +51,10 @@ export function SJTAnswerPreview({ answer, answerDisplayText }: SJTAnswerPreview
 
   return (
     <div className="flex items-center gap-2">
-      <div className="w-6 h-6 rounded-full flex items-center justify-center bg-blue-500/20 text-blue-400 text-sm font-bold">
+      <div className="w-6 h-6 rounded-full flex items-center justify-center bg-blue-500/20 text-[var(--zen-info)] text-sm font-bold">
         {optionLetter}
       </div>
-      <span className="text-xs text-neutral-400 truncate max-w-[120px]">
+      <span className="text-xs text-[var(--zen-text-secondary)] truncate max-w-[120px]">
         {answerDisplayText.substring(3)} {/* Remove "A: " prefix */}
       </span>
     </div>
@@ -73,7 +73,7 @@ export function SJTAnswerExpanded({ answer, answerDisplayText, scenario }: SJTAn
   if (isSkipped || !hasAnswer) {
     return (
       <div className="text-center py-4">
-        <span className="text-sm text-amber-400">{t('answerCard.questionWasSkipped')}</span>
+        <span className="text-sm text-[var(--zen-warning)]">{t('answerCard.questionWasSkipped')}</span>
       </div>
     );
   }
@@ -89,15 +89,15 @@ export function SJTAnswerExpanded({ answer, answerDisplayText, scenario }: SJTAn
     <div className="py-2 space-y-3">
       {/* Truncated scenario context */}
       {scenario && (
-        <div className="flex items-start gap-2 p-2.5 rounded-md bg-blue-950/20 border border-blue-800/30">
-          <BookOpen className="w-3.5 h-3.5 text-blue-400 shrink-0 mt-0.5" aria-hidden="true" />
-          <p className="text-xs text-blue-300/70 leading-relaxed line-clamp-2">
+        <div className="flex items-start gap-2 p-2.5 rounded-md bg-[var(--zen-info-subtle)] border border-[var(--zen-info-border)]">
+          <BookOpen className="w-3.5 h-3.5 text-[var(--zen-info)] shrink-0 mt-0.5" aria-hidden="true" />
+          <p className="text-xs text-[var(--zen-text-secondary)] leading-relaxed line-clamp-2">
             {scenario}
           </p>
         </div>
       )}
 
-      <p className="text-xs text-neutral-500">{t('answerCard.selectedAnswer')}</p>
+      <p className="text-xs text-[var(--zen-text-muted)]">{t('answerCard.selectedAnswer')}</p>
       <div
         className={cn(
           "flex items-start gap-3 p-3 rounded-lg",
@@ -107,7 +107,7 @@ export function SJTAnswerExpanded({ answer, answerDisplayText, scenario }: SJTAn
         <span className="w-7 h-7 rounded-full flex items-center justify-center shrink-0 bg-blue-500 text-white text-sm font-bold">
           {optionLetter}
         </span>
-        <span className="text-sm text-white leading-relaxed">
+        <span className="text-sm text-[var(--zen-text)] leading-relaxed">
           {optionText}
         </span>
       </div>

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useMemo } from 'react';
+import { useTranslations } from 'next-intl';
 import { X, Eye } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -32,6 +33,7 @@ interface EnhancedSessionHeaderProps {
   allowSkip?: boolean;
   onExit: () => void;
   onNavigate?: (index: number) => void;
+  settingsSlot?: React.ReactNode;
 }
 
 interface SegmentCounts {
@@ -76,8 +78,10 @@ export function EnhancedSessionHeader({
   allowSkip = false,
   onExit,
   onNavigate,
+  settingsSlot,
 }: EnhancedSessionHeaderProps) {
   const isTestDriveMode = useIsTestDriveMode();
+  const t = useTranslations('assessment');
 
   // Calculate segment widths based on question states
   const segments = useMemo<ProgressSegments>(() => {
@@ -109,22 +113,21 @@ export function EnhancedSessionHeader({
     ((segments.counts.answered + segments.counts.skipped) / totalQuestions) * 100
   );
 
-  // Tooltip content in Russian
   const tooltipContent = (
     <div className="flex flex-col gap-1 text-xs">
       <div className="flex items-center gap-2">
         <span className="w-2 h-2 rounded-full bg-emerald-500" />
-        <span>Отвечено: {segments.counts.answered}</span>
+        <span>{t('progressTooltip.answered', { count: segments.counts.answered })}</span>
       </div>
       {segments.counts.skipped > 0 && (
         <div className="flex items-center gap-2">
           <span className="w-2 h-2 rounded-full bg-amber-500" />
-          <span>Пропущено: {segments.counts.skipped}</span>
+          <span>{t('progressTooltip.skipped', { count: segments.counts.skipped })}</span>
         </div>
       )}
       <div className="flex items-center gap-2">
-        <span className="w-2 h-2 rounded-full bg-neutral-600" />
-        <span>Осталось: {segments.counts.pending + segments.counts.current}</span>
+        <span className="w-2 h-2 rounded-full bg-[var(--zen-text-muted)]" />
+        <span>{t('progressTooltip.remaining', { count: segments.counts.pending + segments.counts.current })}</span>
       </div>
     </div>
   );
@@ -146,7 +149,7 @@ export function EnhancedSessionHeader({
       // Touch-friendly hover scale
       isNavigable && 'cursor-pointer hover:scale-[2] sm:hover:scale-150',
       // Focus states for accessibility
-      'focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-neutral-950'
+      'focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[var(--zen-ring-offset)]'
     );
 
     switch (state) {
@@ -158,7 +161,7 @@ export function EnhancedSessionHeader({
         return cn(baseClasses, 'bg-blue-500 ring-1 ring-blue-500/50 focus:ring-blue-500/50');
       case 'pending':
       default:
-        return cn(baseClasses, 'bg-neutral-700 focus:ring-neutral-500/50');
+        return cn(baseClasses, 'bg-[var(--zen-muted)] focus:ring-[var(--zen-text-muted)]');
     }
   };
 
@@ -166,9 +169,9 @@ export function EnhancedSessionHeader({
     <header
       className={cn(
         'sticky top-0 z-50 pt-safe',
-        'bg-neutral-950/95 backdrop-blur-sm',
+        'bg-[var(--zen-surface)] backdrop-blur-sm',
         'border-b',
-        isTestDriveMode ? 'border-amber-500/30' : 'border-neutral-800'
+        isTestDriveMode ? 'border-amber-500/30' : 'border-[var(--zen-border)]'
       )}
     >
       {/* Full-width container with minimal padding */}
@@ -180,14 +183,14 @@ export function EnhancedSessionHeader({
             variant="ghost"
             size="icon"
             onClick={onExit}
-            className="shrink-0 h-8 w-8 text-neutral-400 hover:text-white hover:bg-neutral-800/50 transition-colors"
+            className="shrink-0 h-8 w-8 text-[var(--zen-text-secondary)] hover:text-[var(--zen-text)] hover:bg-[var(--zen-ghost-hover)] transition-colors"
           >
             <X className="h-4 w-4" />
             <span className="sr-only">Exit test</span>
           </Button>
 
           {/* Test Name */}
-          <h1 className="text-sm lg:text-base font-semibold text-white truncate max-w-xs lg:max-w-md xl:max-w-lg" title={testName}>
+          <h1 className="text-sm lg:text-base font-semibold text-[var(--zen-text)] truncate max-w-xs lg:max-w-md xl:max-w-lg" title={testName}>
             {testName}
           </h1>
 
@@ -202,22 +205,25 @@ export function EnhancedSessionHeader({
           {/* Spacer */}
           <div className="flex-1" />
 
+          {/* Settings */}
+          {settingsSlot}
+
           {/* Question Counter */}
-          <span className="text-sm text-neutral-400 whitespace-nowrap">
-            <span className="text-white font-medium">{currentQuestion || 0}</span>
-            <span className="mx-1 text-neutral-600">/</span>
+          <span className="text-sm text-[var(--zen-text-secondary)] whitespace-nowrap">
+            <span className="text-[var(--zen-text)] font-medium">{currentQuestion || 0}</span>
+            <span className="mx-1 text-[var(--zen-text-muted)]">/</span>
             <span>{totalQuestions || 0}</span>
           </span>
 
           {/* Divider */}
-          <div className="w-px h-4 bg-neutral-700" />
+          <div className="w-px h-4 bg-[var(--zen-muted)]" />
 
           {/* Progress Bar (inline) */}
           <Tooltip>
             <TooltipTrigger asChild>
               <div className="flex items-center gap-2 cursor-help">
                 <div
-                  className="relative w-24 lg:w-32 xl:w-40 h-1.5 bg-neutral-800 rounded-full overflow-hidden"
+                  className="relative w-24 lg:w-32 xl:w-40 h-1.5 bg-[var(--zen-track)] rounded-full overflow-hidden"
                   role="progressbar"
                   aria-valuenow={progressPercentage}
                   aria-valuemin={0}
@@ -236,10 +242,10 @@ export function EnhancedSessionHeader({
                     style={{ left: `${segments.answered + segments.skipped}%`, width: `${segments.current}%` }}
                   />
                 </div>
-                <span className="text-xs text-neutral-500 tabular-nums w-8 text-right">{progressPercentage}%</span>
+                <span className="text-xs text-[var(--zen-text-muted)] tabular-nums w-8 text-right">{progressPercentage}%</span>
               </div>
             </TooltipTrigger>
-            <TooltipContent side="bottom" className="bg-neutral-800 border-neutral-700">
+            <TooltipContent side="bottom" className="bg-[var(--zen-track)] border-[var(--zen-muted)]">
               {tooltipContent}
             </TooltipContent>
           </Tooltip>
@@ -254,14 +260,14 @@ export function EnhancedSessionHeader({
               variant="ghost"
               size="icon"
               onClick={onExit}
-              className="shrink-0 h-8 w-8 text-neutral-400 hover:text-white hover:bg-neutral-800/50 -ml-1"
+              className="shrink-0 h-8 w-8 text-[var(--zen-text-secondary)] hover:text-[var(--zen-text)] hover:bg-[var(--zen-ghost-hover)] -ml-1"
             >
               <X className="h-4 w-4" />
               <span className="sr-only">Exit test</span>
             </Button>
 
             {/* Test Name */}
-            <h1 className="flex-1 min-w-0 text-sm font-semibold text-white truncate" title={testName}>
+            <h1 className="flex-1 min-w-0 text-sm font-semibold text-[var(--zen-text)] truncate" title={testName}>
               {testName}
             </h1>
 
@@ -273,14 +279,17 @@ export function EnhancedSessionHeader({
               </Badge>
             )}
 
+            {/* Settings */}
+            {settingsSlot}
+
           </div>
 
           {/* Row 2: Counter + Progress Bar + Percentage */}
           <div className="flex items-center gap-2 min-w-0">
             {/* Counter */}
-            <span className="text-xs text-neutral-400 whitespace-nowrap">
-              <span className="text-white font-medium">{currentQuestion || 0}</span>
-              <span className="text-neutral-600">/</span>
+            <span className="text-xs text-[var(--zen-text-secondary)] whitespace-nowrap">
+              <span className="text-[var(--zen-text)] font-medium">{currentQuestion || 0}</span>
+              <span className="text-[var(--zen-text-muted)]">/</span>
               <span>{totalQuestions || 0}</span>
             </span>
 
@@ -288,7 +297,7 @@ export function EnhancedSessionHeader({
             <Tooltip>
               <TooltipTrigger asChild>
                 <div
-                  className="flex-1 relative h-1.5 bg-neutral-800 rounded-full overflow-hidden cursor-help"
+                  className="flex-1 relative h-1.5 bg-[var(--zen-track)] rounded-full overflow-hidden cursor-help"
                   role="progressbar"
                   aria-valuenow={progressPercentage}
                   aria-valuemin={0}
@@ -308,13 +317,13 @@ export function EnhancedSessionHeader({
                   />
                 </div>
               </TooltipTrigger>
-              <TooltipContent side="bottom" className="bg-neutral-800 border-neutral-700">
+              <TooltipContent side="bottom" className="bg-[var(--zen-track)] border-[var(--zen-muted)]">
                 {tooltipContent}
               </TooltipContent>
             </Tooltip>
 
             {/* Percentage */}
-            <span className="text-xs text-neutral-500 tabular-nums w-8 text-right">{progressPercentage}%</span>
+            <span className="text-xs text-[var(--zen-text-muted)] tabular-nums w-8 text-right">{progressPercentage}%</span>
           </div>
         </div>
 
@@ -323,10 +332,11 @@ export function EnhancedSessionHeader({
           <div
             className="flex items-center justify-center gap-1 mt-2 overflow-x-auto pb-1"
             role="navigation"
-            aria-label="Навигация по вопросам"
+            aria-label={t('progressTooltip.questionNavigation')}
           >
             {questionStates.map((state, index) => {
               const isNavigable = allowNavigation && state !== 'pending' && index !== currentQuestion - 1;
+              const stateKey = state === 'answered' ? 'questionAnswered' : state === 'skipped' ? 'questionSkipped' : state === 'current' ? 'questionCurrent' : 'questionPending';
               return (
                 <button
                   key={index}
@@ -338,9 +348,7 @@ export function EnhancedSessionHeader({
                     'min-w-[24px] min-h-[24px] md:min-w-0 md:min-h-0',
                     getDotClasses(state, index)
                   )}
-                  aria-label={`Вопрос ${index + 1}: ${
-                    state === 'answered' ? 'Отвечен' : state === 'skipped' ? 'Пропущен' : state === 'current' ? 'Текущий' : 'Ожидает'
-                  }`}
+                  aria-label={t(`progressTooltip.${stateKey}`, { number: index + 1 })}
                   aria-current={index === currentQuestion - 1 ? 'step' : undefined}
                 />
               );
