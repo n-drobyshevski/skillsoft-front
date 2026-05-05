@@ -86,10 +86,7 @@ export async function revalidateDocsTags(slug?: string): Promise<{ success: bool
         : 'Successfully revalidated all docs pages'
     };
   } catch (error) {
-    // Log error but don't throw to prevent cascading failures
-    // Логируем ошибку, но не выбрасываем исключение, чтобы предотвратить каскадные сбои
     const errorMessage = error instanceof Error ? error.message : UNKNOWN_ERROR_MESSAGE;
-    console.error('[revalidateDocsTags] Error:', errorMessage);
     return { success: false, message: `Revalidation failed: ${errorMessage}` };
   }
 }
@@ -155,7 +152,6 @@ export type ActionResult<T = undefined> = ActionSuccessResult<T> | ActionErrorRe
  */
 export async function createCompetencyAction(data: CompetencyFormData): Promise<ActionResult<Competency>> {
   try {
-    console.log('[createCompetencyAction] Received data:', JSON.stringify(data, null, 2));
     const authHeaders = await getAuthHeaders();
     const newCompetency = await fetchApi<Competency>('/competencies', {
       method: 'POST',
@@ -172,7 +168,6 @@ export async function createCompetencyAction(data: CompetencyFormData): Promise<
       data: newCompetency 
     };
   } catch (error) {
-    console.error('[createCompetencyAction] Error:', error);
     const errorMessage = error instanceof Error ? error.message : UNKNOWN_ERROR_MESSAGE;
     return { success: false, message: `Failed to create competency: ${errorMessage}` };
   }
@@ -183,7 +178,6 @@ export async function createCompetencyAction(data: CompetencyFormData): Promise<
  */
 export async function updateCompetencyAction(competencyId: string, data: CompetencyFormData): Promise<ActionResult<Competency>> {
   try {
-    console.log('[updateCompetencyAction] Received data:', JSON.stringify(data, null, 2));
     const authHeaders = await getAuthHeaders();
     const updatedCompetency = await fetchApi<Competency>(`/competencies/${competencyId}`, {
       method: 'PUT',
@@ -200,7 +194,6 @@ export async function updateCompetencyAction(competencyId: string, data: Compete
       data: updatedCompetency 
     };
   } catch (error) {
-    console.error('[updateCompetencyAction] Error:', error);
     const errorMessage = error instanceof Error ? error.message : UNKNOWN_ERROR_MESSAGE;
     return { success: false, message: `Failed to update competency: ${errorMessage}` };
   }

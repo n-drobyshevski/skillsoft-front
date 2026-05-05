@@ -574,13 +574,6 @@ export function StandardsSearchCombobox({
   const onetCode = value?.onetRef?.code || null;
   const bigFiveMapping = useBigFiveMapper(onetCode);
 
-  // Debug: Log mapping results
-  console.log('[StandardsSearchCombobox] BigFive mapping:', {
-    onetCode,
-    mappingResult: bigFiveMapping,
-    currentBigFiveRef: value?.bigFiveRef,
-  });
-
   // Track previous O*NET selection for ripple effect
   const prevOnetRef = React.useRef<string | null>(null);
   
@@ -596,7 +589,6 @@ export function StandardsSearchCombobox({
     // Only apply if: O*NET exists, no bigFiveRef yet, and mapping exists
     // This handles edit mode where onetRef was saved but bigFiveRef wasn't
     if (currentOnetCode && !hasBigFiveRef && bigFiveMapping.hasMapping && bigFiveMapping.bigFive) {
-      console.log('[StandardsSearchCombobox] useEffect: Auto-applying BigFive for pre-existing onetRef');
       const newValue: StandardCodesDto = { ...value };
       newValue.bigFiveRef = {
         trait: bigFiveMapping.bigFive,
@@ -621,7 +613,6 @@ export function StandardsSearchCombobox({
     } else {
       delete newValue.bigFiveRef;
     }
-    console.log('[StandardsSearchCombobox] handleBigFiveChange:', { bigFive, newValue });
     onChange(newValue);
   };
 
@@ -639,8 +630,6 @@ export function StandardsSearchCombobox({
         title: BigFiveInfo[mapping.bigFive]?.displayName,
         facet: mapping.dimension || undefined,
       };
-      console.log('[StandardsSearchCombobox] Auto-applied BigFive in handleOnetSelect:', newValue.bigFiveRef);
-
       // Show toast notification
       toast.success(
         <div className="flex items-center gap-2">
@@ -658,7 +647,6 @@ export function StandardsSearchCombobox({
       );
     }
 
-    console.log('[StandardsSearchCombobox] handleOnetSelect final value:', newValue);
     onChange(newValue);
   };
 

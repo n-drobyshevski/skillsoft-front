@@ -200,19 +200,6 @@ export function useAnswerManagement({
 
   const validation = validateAnswer(currentAnswer);
 
-  // Debug logging in development
-  if (process.env.NODE_ENV === 'development') {
-    // eslint-disable-next-line no-console
-    console.log('[useAnswerManagement] Validation check:', {
-      currentAnswer,
-      answerType: typeof currentAnswer,
-      isArray: Array.isArray(currentAnswer),
-      valid: validation.valid,
-      error: validation.error,
-      questionType: currentQuestion?.questionType,
-    });
-  }
-
   const isAnswerValid = validation.valid;
 
   // ========================================================================
@@ -255,18 +242,6 @@ export function useAnswerManagement({
 
   const handleAnswer = (value: string | number | string[]) => {
     if (!currentQuestion) return;
-
-    // Debug logging in development
-    if (process.env.NODE_ENV === 'development') {
-      // eslint-disable-next-line no-console
-      console.log('[useAnswerManagement] Answer changed:', {
-        questionType: currentQuestion.questionType,
-        questionId: currentQuestion.id,
-        newValue: value,
-        valueType: typeof value,
-        isArray: Array.isArray(value),
-      });
-    }
 
     // Clear validation error when user changes answer
     setValidationError(null);

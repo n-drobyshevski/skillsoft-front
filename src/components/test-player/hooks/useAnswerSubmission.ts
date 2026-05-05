@@ -195,19 +195,6 @@ export function useAnswerSubmission({
    */
   const isAnswerValid = (() => {
     const validation = validateAnswer(currentAnswer);
-
-    // Debug logging in development
-    if (process.env.NODE_ENV === 'development') {
-      console.log('[useAnswerSubmission] Validation check:', {
-        currentAnswer,
-        answerType: typeof currentAnswer,
-        isArray: Array.isArray(currentAnswer),
-        valid: validation.valid,
-        error: validation.error,
-        questionType: currentQuestion?.questionType,
-      });
-    }
-
     return validation.valid;
   })();
 
@@ -271,7 +258,6 @@ export function useAnswerSubmission({
 
       return true;
     } catch (error) {
-      console.error('Failed to submit answer:', error);
       const apiError = error as ApiError;
 
       // Handle session state errors
@@ -331,7 +317,6 @@ export function useAnswerSubmission({
 
       return true;
     } catch (error) {
-      console.error('Failed to skip question:', error);
       const apiError = error as ApiError;
 
       if (apiError.status === 400 || apiError.status === 403) {
@@ -357,17 +342,6 @@ export function useAnswerSubmission({
    */
   const handleAnswer = (value: string | number | string[]) => {
     if (!currentQuestion) return;
-
-    // Debug logging in development
-    if (process.env.NODE_ENV === 'development') {
-      console.log('[useAnswerSubmission] Answer changed:', {
-        questionType: currentQuestion.questionType,
-        questionId: currentQuestion.id,
-        newValue: value,
-        valueType: typeof value,
-        isArray: Array.isArray(value),
-      });
-    }
 
     // Clear validation error when user changes answer
     setValidationError(null);

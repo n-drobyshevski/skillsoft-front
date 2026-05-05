@@ -139,8 +139,6 @@ export function useQuestionNavigation({
           initialDelayMs: 1000,
           shouldRetry: isRetryableError,
           onRetry: (_error, attempt) => {
-            // eslint-disable-next-line no-console
-            console.log(`Retrying getCurrentQuestion (attempt ${attempt}/3)...`);
             toast.info(t('player.toast.retryAttempt', { attempt, maxRetries: 3 }), { duration: 2000 });
           },
         }
@@ -209,8 +207,6 @@ export function useQuestionNavigation({
         }
       }
     } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error('Failed to load question:', error);
       const apiError = error as ApiError;
 
       if (apiError.status === 400 || apiError.status === 403) {
@@ -248,8 +244,6 @@ export function useQuestionNavigation({
 
     const validation = validateAnswer(currentAnswer);
     if (!validation.valid) {
-      // eslint-disable-next-line no-console
-      console.log('[useQuestionNavigation] Skipping auto-save: answer invalid', validation.error);
       return true;
     }
 
@@ -381,8 +375,6 @@ export function useQuestionNavigation({
       }
       await loadQuestion('forward');
     } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error('Failed to submit answer:', error);
       setSaveStatus('error');
       const apiError = error as ApiError;
 
@@ -429,8 +421,6 @@ export function useQuestionNavigation({
       }
       await loadQuestion('backward');
     } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error('Failed to navigate back:', error);
       const apiError = error as ApiError;
 
       if (handleSessionStateError(apiError)) return;
@@ -475,8 +465,6 @@ export function useQuestionNavigation({
       }
       await loadQuestion(direction);
     } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error('Failed to navigate to question:', error);
       const apiError = error as ApiError;
 
       if (handleSessionStateError(apiError)) return;
@@ -552,8 +540,6 @@ export function useQuestionNavigation({
       setCurrentAnswer(undefined);
       setValidationError(null);
     } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error('Failed to skip question:', error);
       setSaveStatus('error');
       const apiError = error as ApiError;
 
@@ -609,8 +595,6 @@ export function useQuestionNavigation({
         router.push(`/test-templates/results/${completionResult.resultId}`);
       }
     } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error('Failed to complete session:', error);
       const apiError = error as ApiError;
       const errorMessage = apiError.message?.toLowerCase() || '';
 
@@ -679,8 +663,6 @@ export function useQuestionNavigation({
         router.push('/test-templates');
       }
     } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error('Failed to abandon test:', error);
       toast.error(t('player.toast.failedToCancelTest'));
     } finally {
       setShowAbandonDialog(false);
@@ -704,8 +686,6 @@ export function useQuestionNavigation({
         router.push('/test-templates');
       }
     } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error('Failed to discard test:', error);
       toast.error(t('player.toast.failedToDiscardTest'));
     } finally {
       setIsDiscarding(false);
@@ -779,8 +759,6 @@ export function useQuestionNavigation({
       setPendingNavigation(null);
       toast.success(t('player.toast.answerSaved'));
     } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error('Retry failed:', error);
       const apiError = error as ApiError;
 
       const navError = createNavigationError(apiError, {
@@ -826,8 +804,6 @@ export function useQuestionNavigation({
       setPendingNavigation(null);
       toast.info(t('player.toast.changesNotSaved'));
     } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error('Continue without saving failed:', error);
       toast.error(t('player.toast.failedToNavigate'));
     }
   };

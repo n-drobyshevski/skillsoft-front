@@ -82,8 +82,6 @@ function DocsSidebarContent({
           type="button"
           className="docs-search-trigger"
           onClick={() => {
-            // TODO: Open search modal
-            console.log("Open search");
           }}
         >
           <Search className="docs-search-icon" />
