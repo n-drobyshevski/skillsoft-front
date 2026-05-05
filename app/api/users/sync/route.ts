@@ -103,16 +103,12 @@ export async function POST() {
     
     if (!organizationId) {
       try {
-        // Fetch the first organization (we only have one)
         const orgs = await client.organizations.getOrganizationList({ limit: 1 });
         if (orgs.data.length > 0) {
           organizationId = orgs.data[0].id;
-          // eslint-disable-next-line no-console
-          console.log(`[Sync] Found organization: ${orgs.data[0].name} (${organizationId})`);
         }
-      } catch (error) {
-        // eslint-disable-next-line no-console
-        console.warn('[Sync] Could not fetch organizations:', error);
+      } catch {
+        // Organization fetch failed — roles will fall back to publicMetadata
       }
     }
     
@@ -155,11 +151,8 @@ export async function POST() {
             memberOffset += 100;
           }
         }
-        // eslint-disable-next-line no-console
-        console.log(`[Sync] Fetched ${userRolesMap.size} organization memberships`);
-      } catch (error) {
-        // eslint-disable-next-line no-console
-        console.warn('[Sync] Could not fetch organization memberships, falling back to publicMetadata:', error);
+      } catch {
+        // Membership fetch failed — roles will fall back to publicMetadata
       }
     }
 
@@ -184,10 +177,6 @@ export async function POST() {
         if (!['ADMIN', 'EDITOR', 'USER'].includes(role)) {
           role = 'USER';
         }
-        
-        // Log role resolution for debugging
-        // eslint-disable-next-line no-console
-        console.log(`[Sync] User ${user.id} (${user.username || user.emailAddresses[0]?.emailAddress}): orgRole=${orgMembershipRole}, metadataRole=${publicMetadataRole}, finalRole=${role}`);
         
         return {
           clerkId: user.id,
@@ -226,14 +215,7 @@ export async function POST() {
       });
     }
 
-    // Log what we're sending to backend for debugging
-    // eslint-disable-next-line no-console
-    console.log(`[Sync] Sending ${allUsers.length} users to backend:`, JSON.stringify(allUsers, null, 2));
-
-    // Send users to backend for sync
     const backendUrl = `${getBackendUrl()}/users/clerk/sync-all`;
-    // eslint-disable-next-line no-console
-    console.log(`[Sync] Backend URL: ${backendUrl}`);
     
     const backendResponse = await fetch(backendUrl, {
       method: 'POST',
@@ -247,9 +229,6 @@ export async function POST() {
 
     if (!backendResponse.ok) {
       const errorText = await backendResponse.text();
-      // Log error for server-side debugging
-      // eslint-disable-next-line no-console
-      console.error('Backend sync failed:', errorText);
       return NextResponse.json(
         { 
           success: false, 
@@ -261,10 +240,6 @@ export async function POST() {
     }
 
     const result = await backendResponse.json() as BackendSyncResult;
-
-    // Log backend response for debugging
-    // eslint-disable-next-line no-console
-    console.log(`[Sync] Backend response:`, JSON.stringify(result, null, 2));
 
     // Revalidate the users cache so the UI updates
     revalidatePath('/users');
@@ -283,17 +258,13 @@ export async function POST() {
     });
 
   } catch (error) {
-    // Log error for server-side debugging
-    // eslint-disable-next-line no-console
-    console.error('Error syncing users from Clerk:', error);
-    
     const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
-    
+
     return NextResponse.json(
-      { 
-        success: false, 
+      {
+        success: false,
         error: 'Failed to sync users from Clerk',
-        details: errorMessage 
+        details: errorMessage
       },
       { status: 500 }
     );
@@ -323,10 +294,7 @@ export async function GET() {
       method: 'POST',
     });
 
-  } catch (error) {
-    // Log error for server-side debugging
-    // eslint-disable-next-line no-console
-    console.error('Error in sync endpoint:', error);
+  } catch {
     return NextResponse.json(
       { success: false, error: 'Internal server error' },
       { status: 500 }

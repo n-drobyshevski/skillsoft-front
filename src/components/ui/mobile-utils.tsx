@@ -4,25 +4,18 @@ import * as React from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "./button";
 
-// Mobile-friendly touch target component
 interface TouchTargetProps extends React.ComponentProps<typeof Button> {
   children: React.ReactNode;
   className?: string;
 }
 
-export const TouchTarget = React.forwardRef<
-  React.ElementRef<typeof Button>,
-  TouchTargetProps
->(({ children, className, ...props }, ref) => {
+export function TouchTarget({ children, className, ref, ...props }: TouchTargetProps) {
   return (
     <Button
       ref={ref}
       className={cn(
-        // Minimum 44x44px touch target
         "min-h-11 min-w-11 touch-manipulation",
-        // Enhanced focus styles for mobile
         "focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-        // Better mobile tap styles
         "active:scale-95 transition-transform duration-100",
         className
       )}
@@ -31,9 +24,7 @@ export const TouchTarget = React.forwardRef<
       {children}
     </Button>
   );
-});
-
-TouchTarget.displayName = "TouchTarget";
+}
 
 // Mobile-friendly container with safe areas
 interface MobileContainerProps {
