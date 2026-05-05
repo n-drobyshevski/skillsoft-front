@@ -51,11 +51,10 @@ export function MermaidDiagram({
         // Dynamic import to avoid SSR issues
         const mermaid = (await import("mermaid")).default;
 
-        // Initialize mermaid with dark theme settings
         mermaid.initialize({
           startOnLoad: false,
           theme: "dark",
-          securityLevel: "loose",
+          securityLevel: "strict",
           fontFamily: "ui-sans-serif, system-ui, sans-serif",
           flowchart: {
             htmlLabels: true,
