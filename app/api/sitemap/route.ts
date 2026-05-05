@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getAllPages } from '@/lib/docs/navigation';
 
 export async function GET(request: NextRequest) {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://skillsoft.com';
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://skillsoft.app';
   const today = new Date().toISOString().split('T')[0];
 
   // Get all documentation pages from navigation
