@@ -108,6 +108,9 @@ function loadDraftFromStorage(
   fullStorageKey: string,
   defaultValues: ProfileEditFormData
 ): { draft: ProfileEditFormData | null; hasDraft: boolean } {
+  if (typeof window === 'undefined') {
+    return { draft: null, hasDraft: false };
+  }
   try {
     const storedDraft = localStorage.getItem(fullStorageKey);
     if (storedDraft) {

@@ -235,6 +235,8 @@
     "sharedOn": "Shared {time}"
   },
   "edit": {
+    "title": "Edit Profile",
+    "subtitle": "Update your personal information and settings",
     "pageTitle": "Edit Profile",
     "pageDescription": "Update your personal information and settings",
     "metaTitle": "Edit Profile | SkillSoft",
