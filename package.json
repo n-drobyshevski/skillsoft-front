@@ -2,8 +2,10 @@
   "name": "frontend-app",
   "version": "0.1.0",
   "private": true,
+  "sideEffects": false,
   "scripts": {
     "dev": "next dev",
+    "prebuild": "node scripts/preprocess-standards-data.mjs",
     "build": "next build",
     "build:analyze": "cross-env ANALYZE=true next build",
     "postinstall": "patch-package",

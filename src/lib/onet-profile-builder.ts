@@ -1,15 +1,15 @@
 /**
- * O*NET Profile Builder
+ * O*NET Profile Builder (Server-Only)
  *
  * Builds O*NET occupation profiles from local element data files.
  * Transforms Abilities, Knowledge, and WorkStyles data into
  * competency benchmarks for job fit assessments.
  *
- * Data Sources:
- * - Abilities.json: Cognitive abilities (e.g., Oral Comprehension, Problem Sensitivity)
- * - Knowledge.json: Knowledge areas (e.g., Engineering, Mathematics)
- * - WorkStyles.json: Work styles (e.g., Attention to Detail, Integrity)
+ * This module imports ~75 MB of raw JSON and must only run server-side.
+ * Use via the getONetProfileAction server action from client components.
  */
+
+import 'server-only';
 
 import type { ONetProfile, ONetBenchmark } from '@/types/domain';
 import { getOccupationBySocCode } from './occupation-data-loader';

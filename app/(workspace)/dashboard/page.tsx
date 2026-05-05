@@ -12,6 +12,7 @@ import {
 import { DashboardGrid, CompactStatsRow } from '@/components/dashboard';
 import { LENS_COOKIE_NAME } from '@/store/lens-store';
 
+import { ChartPreloader } from '@/components/common';
 import DashboardHeader from './_components/dashboard-header';
 import DashboardMainColumn from './_components/dashboard-main-column';
 import DashboardSideColumn from './_components/dashboard-side-column';
@@ -171,6 +172,7 @@ export default async function DashboardPage() {
 
   return (
     <div className="flex flex-1 flex-col gap-6 sm:gap-8 p-4 sm:p-6 lg:p-8 max-w-[1600px] mx-auto w-full">
+      <ChartPreloader />
       <DashboardHeader
         currentUser={userInfo ? { firstName: userInfo.firstName, role: userInfo.role } : undefined}
         isUserLensServer={showUserDashboard}

@@ -1,140 +1,122 @@
 /**
  * Skill Data Loader
- * 
- * Loads and processes ESCO and O*NET JSON data into a unified format
- * for the client-side fuzzy search engine.
- * 
- * This module provides both static imports for build-time optimization
- * and dynamic loading functions for flexibility.
+ *
+ * Loads pre-processed skill data from public assets for the
+ * client-side fuzzy search engine. Data is fetched on-demand
+ * rather than statically bundled to minimize initial JS payload.
  */
 
-import { buildSearchIndex, type SearchIndexData } from '@/lib/search-index-builder';
-import type {
-  ESCOSkillRaw,
-  ONetAbilityRaw,
-  ONetWorkStyleRaw,
-  ONetKnowledgeRaw,
-  UnifiedSkill,
-} from '@/types/skills';
+import type { UnifiedSkill } from '@/types/skills';
 
 // =============================================================================
-// Static Imports (for build-time optimization)
+// Data Fetching
 // =============================================================================
 
-// ESCO Data
-import escoSkillsData from '@/data/standards/esco/skills_en.json';
-
-// O*NET Data
-import onetAbilitiesData from '@/data/standards/onet/Abilities.json';
-import onetWorkStylesData from '@/data/standards/onet/WorkStyles.json';
-import onetKnowledgeData from '@/data/standards/onet/Knowledge.json';
-
-// =============================================================================
-// Data Caching
-// =============================================================================
-
-let cachedIndex: SearchIndexData | null = null;
+let cachedSkills: UnifiedSkill[] | null = null;
+let loadPromise: Promise<UnifiedSkill[]> | null = null;
 
 /**
- * Get or build the search index (singleton pattern for performance)
+ * Load all unified skills from the pre-processed public asset.
+ * Returns cached data on subsequent calls.
  */
-export function getSearchIndex(): SearchIndexData {
-  if (cachedIndex) {
-    return cachedIndex;
+export async function loadAllSkills(): Promise<UnifiedSkill[]> {
+  if (cachedSkills) {
+    return cachedSkills;
   }
-  
-  cachedIndex = buildSearchIndex(
-    escoSkillsData as ESCOSkillRaw[],
-    onetAbilitiesData as ONetAbilityRaw[],
-    onetWorkStylesData as ONetWorkStyleRaw[],
-    onetKnowledgeData as ONetKnowledgeRaw[]
-  );
-  
-  return cachedIndex;
+
+  if (loadPromise) {
+    return loadPromise;
+  }
+
+  loadPromise = fetch('/data/standards/unified-skills.json')
+    .then((res) => {
+      if (!res.ok) {
+        throw new Error(`Failed to load skills data: ${res.status}`);
+      }
+      return res.json() as Promise<UnifiedSkill[]>;
+    })
+    .then((skills) => {
+      cachedSkills = skills;
+      loadPromise = null;
+      return skills;
+    })
+    .catch((err) => {
+      loadPromise = null;
+      throw err;
+    });
+
+  return loadPromise;
 }
 
 /**
- * Get all unified skills from the index
+ * Get cached skills synchronously (returns empty if not yet loaded).
+ * Use loadAllSkills() to ensure data is available.
  */
-export function getAllSkills(): UnifiedSkill[] {
-  return getSearchIndex().skills;
+export function getCachedSkills(): UnifiedSkill[] {
+  return cachedSkills ?? [];
 }
 
 /**
- * Get ESCO skills only
+ * Get ESCO skills only (requires data to be loaded first)
  */
-export function getESCOSkills(): UnifiedSkill[] {
-  return getSearchIndex().bySource.esco;
+export function getESCOSkills(skills: UnifiedSkill[]): UnifiedSkill[] {
+  return skills.filter((s) => s.source === 'esco');
 }
 
 /**
- * Get O*NET skills only
+ * Get O*NET skills only (requires data to be loaded first)
  */
-export function getONetSkills(): UnifiedSkill[] {
-  return getSearchIndex().bySource.onet;
+export function getONetSkills(skills: UnifiedSkill[]): UnifiedSkill[] {
+  return skills.filter((s) => s.source === 'onet');
 }
 
 /**
  * Get skills by category
  */
-export function getSkillsByCategory(category: string): UnifiedSkill[] {
-  return getSearchIndex().byCategory.get(category) || [];
+export function getSkillsByCategory(
+  skills: UnifiedSkill[],
+  category: string
+): UnifiedSkill[] {
+  return skills.filter((s) => s.category === category);
 }
 
 /**
  * Get all available categories
  */
-export function getCategories(): string[] {
-  return Array.from(getSearchIndex().byCategory.keys()).sort();
+export function getCategories(skills: UnifiedSkill[]): string[] {
+  const cats = new Set<string>();
+  for (const skill of skills) {
+    cats.add(skill.category);
+  }
+  return Array.from(cats).sort();
 }
 
 /**
- * Get index statistics
+ * Get skill statistics
  */
-export function getSkillStats(): {
+export function getSkillStats(skills: UnifiedSkill[]): {
   total: number;
   esco: number;
   onet: number;
   categories: number;
-  buildTimeMs: number;
 } {
-  const index = getSearchIndex();
-  return {
-    total: index.totalCount,
-    esco: index.bySource.esco.length,
-    onet: index.bySource.onet.length,
-    categories: index.byCategory.size,
-    buildTimeMs: Math.round(index.buildTime),
-  };
-}
+  let esco = 0;
+  let onet = 0;
+  const categories = new Set<string>();
 
-// =============================================================================
-// Lazy Loading (alternative for code splitting)
-// =============================================================================
+  for (const skill of skills) {
+    if (skill.source === 'esco') esco++;
+    else onet++;
+    categories.add(skill.category);
+  }
 
-/**
- * Lazy load only ESCO data (smaller bundle for ESCO-only use cases)
- */
-export async function loadESCODataLazy(): Promise<UnifiedSkill[]> {
-  const { processESCOSkills } = await import('@/lib/search-index-builder');
-  const escoData = await import('@/data/standards/esco/skills_en.json');
-  return processESCOSkills(escoData.default as ESCOSkillRaw[]);
+  return { total: skills.length, esco, onet, categories: categories.size };
 }
 
 /**
- * Lazy load only O*NET abilities
- */
-export async function loadONetAbilitiesLazy(): Promise<UnifiedSkill[]> {
-  const { processONetAbilities } = await import('@/lib/search-index-builder');
-  const abilitiesData = await import('@/data/standards/onet/Abilities.json');
-  return processONetAbilities(abilitiesData.default as ONetAbilityRaw[]);
-}
-
-/**
- * Clear the cached index (useful for testing or memory management)
+ * Clear the cached data (useful for testing or memory management)
  */
 export function clearCache(): void {
-  cachedIndex = null;
+  cachedSkills = null;
+  loadPromise = null;
 }
-
-export default getAllSkills;

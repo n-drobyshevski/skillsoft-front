@@ -52,7 +52,7 @@ import { CompetencyDistribution } from '../utils/transformSimulationToRadar';
 import { SimulationCombinedRadar } from '../components/SimulationCombinedRadar';
 import { JobFitAlignmentCard } from '../JobFitAlignmentCard';
 import { TeamComparisonCard } from '../TeamComparisonCard';
-import { buildONetProfile } from '@/lib/onet-profile-builder';
+import { getOccupationBySocCode } from '@/lib/occupation-data-loader';
 
 // ============================================
 // PROPS
@@ -289,7 +289,7 @@ function TargetedFitInsights({ result, onetSocCode }: TargetedFitInsightsProps) 
 
   const jobTitle = useMemo(() => {
     if (!onetSocCode) return undefined;
-    return buildONetProfile(onetSocCode).occupationTitle;
+    return getOccupationBySocCode(onetSocCode)?.title;
   }, [onetSocCode]);
 
   // Generate mock gap data based on simulation results.

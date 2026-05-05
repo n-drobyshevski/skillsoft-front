@@ -4,7 +4,6 @@ import { ClerkProvider } from "@clerk/nextjs";
 import { redirect } from "next/navigation";
 import { Skeleton } from "@/components/ui/skeleton";
 import WorkspaceShell from "./_components/WorkspaceShell";
-import { ChartPreloader } from "@/components/common";
 
 /**
  * Sidebar skeleton shown as part of the PPR static shell
@@ -117,7 +116,6 @@ export default function WorkspaceLayout({
     <Suspense fallback={<WorkspaceSkeleton />}>
       <AuthGate>
         <ClerkProvider dynamic>
-          <ChartPreloader />
           <WorkspaceShell>
             {children}
           </WorkspaceShell>

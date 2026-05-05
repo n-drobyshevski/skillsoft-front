@@ -32,7 +32,7 @@ import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { StandardsSearchCombobox } from '@/components/common/standards-search-combobox';
-import { getAllSkills } from '@/lib/skill-data-loader';
+import { loadAllSkills } from '@/lib/skill-data-loader';
 import type { UnifiedSkill } from '@/types/skills';
 import { Globe2, Layers, FileText, Tag, Settings, Loader2 } from 'lucide-react';
 
@@ -50,7 +50,7 @@ export function EditCompetencyForm({ competency }: { competency: Competency }) {
     const loadSkills = async () => {
       setIsLoadingSkills(true);
       try {
-        const allSkills = getAllSkills();
+        const allSkills = await loadAllSkills();
         setSkills(allSkills);
       } catch {
         // Silently handle - combobox will show "no skills" state

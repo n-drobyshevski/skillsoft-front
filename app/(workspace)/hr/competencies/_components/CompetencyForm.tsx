@@ -33,7 +33,7 @@ import { FileText, Tag, CheckCircle2, Loader2, X, Save, RefreshCw, Check, AlertC
 import { HelpTooltip } from '@/components/ui/help-tooltip';
 import { cn } from '@/lib/utils';
 import { StandardsSearchCombobox } from '@/components/common/standards-search-combobox';
-import { getAllSkills } from '@/lib/skill-data-loader';
+import { loadAllSkills } from '@/lib/skill-data-loader';
 import type { UnifiedSkill } from '@/types/skills';
 import { useTranslations } from 'next-intl';
 import { useEnumTranslation } from '@/hooks/useEnumTranslation';
@@ -69,7 +69,7 @@ export function CompetencyForm({
     const loadSkills = async () => {
       setIsLoadingSkills(true);
       try {
-        const allSkills = getAllSkills();
+        const allSkills = await loadAllSkills();
         setSkills(allSkills);
       } catch {
         // Silently handle - combobox will show "no skills" state

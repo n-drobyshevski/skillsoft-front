@@ -1,8 +1,8 @@
 /**
  * Fuzzy Search Module Exports
- * 
+ *
  * Client-side fuzzy search engine for skill mapping.
- * Zero-latency, no network calls.
+ * Data is loaded on-demand from pre-processed public assets.
  */
 
 // Core search hook
@@ -25,26 +25,15 @@ export {
 
 // Data loading utilities
 export {
-  getAllSkills,
+  loadAllSkills,
+  getCachedSkills,
   getESCOSkills,
   getONetSkills,
   getSkillsByCategory,
   getCategories,
   getSkillStats,
-  getSearchIndex,
   clearCache,
 } from '@/lib/skill-data-loader';
-
-// Search index builder
-export {
-  buildSearchIndex,
-  processESCOSkills,
-  processONetAbilities,
-  processONetWorkStyles,
-  processONetKnowledge,
-  getIndexStats,
-  type SearchIndexData,
-} from '@/lib/search-index-builder';
 
 // Types
 export type {

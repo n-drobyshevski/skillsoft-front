@@ -1,15 +1,15 @@
 import { searchOccupations, getPopularOccupations } from '@/lib/occupation-data-loader';
-import { buildONetProfile } from '@/lib/onet-profile-builder';
+import { getONetProfileAction } from '@/app/actions/onet-actions';
 
 import type { ONetJobTitle, ONetProfile } from '@/types/domain';
 
 // ============================================
-// O*NET API (Frontend-Only, Local Data)
+// O*NET API (Hybrid: Local Data + Server Action)
 // ============================================
 //
-// Uses local JSON data files instead of backend API calls.
-// Data sources: OccupationData.json, Abilities.json, Knowledge.json, WorkStyles.json
-// This follows the same pattern as ESCO/O*NET standards integration for competencies.
+// Job title search uses local JSON (0.33 MB OccupationData.json).
+// Profile building delegates to a server action to avoid bundling
+// ~75 MB of raw O*NET element data client-side.
 
 export const onetApi = {
   /**
@@ -20,17 +20,15 @@ export const onetApi = {
     if (!query.trim()) {
       return [];
     }
-    // Use local data loader with fuzzy search
     return searchOccupations(query, limit);
   },
 
   /**
    * Get detailed O*NET profile for an occupation.
-   * Builds profile from local element data (Abilities, Knowledge, WorkStyles).
+   * Delegates to server action (data stays server-side).
    */
   getProfile: async (socCode: string): Promise<ONetProfile> => {
-    // Build profile from local JSON data
-    return buildONetProfile(socCode);
+    return getONetProfileAction(socCode);
   },
 
   /**
@@ -38,7 +36,6 @@ export const onetApi = {
    * Returns curated list of high-demand occupations.
    */
   getPopularJobTitles: async (): Promise<ONetJobTitle[]> => {
-    // Return popular occupations from local data
     return getPopularOccupations(10);
   },
 };

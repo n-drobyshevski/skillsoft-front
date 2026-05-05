@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
+import { useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import { useTranslations } from 'next-intl';
-import { getAllSkills, getSkillStats } from '@/lib/skill-data-loader';
+import { loadAllSkills, getSkillStats } from '@/lib/skill-data-loader';
 import type { UnifiedSkill } from '@/types/skills';
 import { Badge } from '@/components/ui/badge';
 import { Loader2, Database, Zap, Search, Layers } from 'lucide-react';
@@ -28,29 +28,21 @@ export default function SkillMapperPage() {
     esco: number;
     onet: number;
     categories: number;
-    buildTimeMs: number;
   } | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const loadData = async () => {
-      setIsLoading(true);
-      try {
-        await new Promise(resolve => setTimeout(resolve, 100));
-
-        const allSkills = getAllSkills();
-        const skillStats = getSkillStats();
-
+    loadAllSkills()
+      .then((allSkills) => {
         setSkills(allSkills);
-        setStats(skillStats);
-      } catch {
+        setStats(getSkillStats(allSkills));
+      })
+      .catch(() => {
         // Silently handle error - skills will be empty
-      } finally {
+      })
+      .finally(() => {
         setIsLoading(false);
-      }
-    };
-
-    loadData();
+      });
   }, []);
 
   if (isLoading) {
@@ -97,10 +89,6 @@ export default function SkillMapperPage() {
               <Badge variant="outline" className="gap-1 py-1 px-2 sm:gap-1.5 sm:py-1.5 sm:px-3 text-xs justify-center">
                 <Layers className="h-3 w-3 sm:h-3.5 sm:w-3.5 shrink-0" />
                 <span className="truncate">{t('stats.categories', { categories: stats.categories })}</span>
-              </Badge>
-              <Badge variant="outline" className="col-span-2 gap-1 py-1 px-2 sm:gap-1.5 sm:py-1.5 sm:px-3 text-xs justify-center">
-                <Zap className="h-3 w-3 sm:h-3.5 sm:w-3.5 shrink-0" />
-                <span className="truncate">{t('stats.buildTime', { buildTimeMs: stats.buildTimeMs })}</span>
               </Badge>
             </div>
           )}
