@@ -97,22 +97,6 @@ export enum SessionStatus {
 
 export type AnswerValue = string | number | string[];
 
-/** @deprecated Use TestSession interface below - kept for backwards compatibility */
-export interface LegacyTestSession {
-  id: string;
-  templateId: string;
-  status: 'IN_PROGRESS' | 'COMPLETED' | 'ABANDONED' | 'EXPIRED';
-  currentQuestionIndex: number;
-  startTime: string;
-  endTime?: string;
-  questions: SessionQuestion[];
-  answers?: Array<{
-    questionId: string;
-    value: AnswerValue;
-    timeSpentMs?: number;
-  }>;
-}
-
 /**
  * Assessment goal types for TestTemplate.
  * Per ROADMAP.md Section 1.C and 1.2 - defines the scoring strategy and test assembly mechanics.

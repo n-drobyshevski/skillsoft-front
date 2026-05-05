@@ -302,43 +302,6 @@ export function useTriggerAudit() {
 }
 
 // ============================================================================
-// Prefetching Utilities
-// ============================================================================
-
-/**
- * Prefetch dashboard data using Next.js router.
- * These are no-ops after React Query removal since server-side caching
- * via 'use cache' handles data prefetching at the route level.
- *
- * Kept as stubs for API compatibility during migration.
- */
-export function prefetchPsychometricsDashboard(_unused?: unknown) {
-  // No-op: Server-side 'use cache' functions handle caching.
-  // Route-level prefetching is handled by Next.js router.prefetch().
-}
-
-export function prefetchPsychometricsItems(
-  _unused?: unknown,
-  _params?: ItemStatisticsFilterParams,
-) {
-  // No-op: see prefetchPsychometricsDashboard
-}
-
-export function prefetchPsychometricsItemDetail(
-  _unused?: unknown,
-  _questionId?: string,
-) {
-  // No-op: see prefetchPsychometricsDashboard
-}
-
-export function prefetchPsychometricsCompetencyDetail(
-  _unused?: unknown,
-  _competencyId?: string,
-) {
-  // No-op: see prefetchPsychometricsDashboard
-}
-
-// ============================================================================
 // Batch Update Hook
 // ============================================================================
 

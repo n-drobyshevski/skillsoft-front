@@ -27,11 +27,6 @@ export {
   usePsychometricsBigFive,
   // Audit
   useTriggerAudit,
-  // Prefetching (no-ops after React Query removal)
-  prefetchPsychometricsDashboard,
-  prefetchPsychometricsItems,
-  prefetchPsychometricsItemDetail,
-  prefetchPsychometricsCompetencyDetail,
 } from './usePsychometricsQuery';
 
 // Suggested Users hook

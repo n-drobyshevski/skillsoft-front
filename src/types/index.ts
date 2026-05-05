@@ -116,7 +116,6 @@ export type {
   SharedTemplatesResponse,
   AnswerValue,
   // Legacy types (backwards compat)
-  LegacyTestSession,
   OnetReference,
   EscoReference,
   BigFiveCategory,

@@ -29,10 +29,6 @@ export interface NavigationChildItem {
   path: string;
   /** Translation key for the label (i18n) */
   labelKey: string;
-  /** @deprecated Use labelKey instead - kept for migration */
-  label?: string;
-  /** @deprecated Use labelKey instead - kept for migration */
-  labelEn?: string;
   icon?: string;
   badge?: BadgeConfig;
   lenses?: LensType[];
@@ -48,10 +44,6 @@ export interface NavigationItem {
   path: string;
   /** Translation key for the label (i18n) */
   labelKey: string;
-  /** @deprecated Use labelKey instead - kept for migration */
-  label?: string;
-  /** @deprecated Use labelKey instead - kept for migration */
-  labelEn?: string;
   /** Lucide icon name */
   icon: string;
   /** Optional badge */
@@ -76,10 +68,6 @@ export interface NavigationGroup {
   id: string;
   /** Translation key for the label (i18n) */
   labelKey: string;
-  /** @deprecated Use labelKey instead - kept for migration */
-  label?: string;
-  /** @deprecated Use labelKey instead - kept for migration */
-  labelEn?: string;
   /** Optional icon for collapsed state */
   icon?: string;
   /** Which lenses see this group */
