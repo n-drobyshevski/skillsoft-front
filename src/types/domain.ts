@@ -496,54 +496,6 @@ export interface AssemblyProgress {
   inProgress: boolean;
 }
 
-// Legacy interfaces for backwards compatibility
-/** @deprecated Use OnetRefDto instead */
-export interface OnetReference {
-  code: string;
-  name: string;
-  similarity?: number;
-}
-
-/** @deprecated Use EscoRefDto instead */
-export interface EscoReference {
-  uri: string;
-  label: string;
-}
-
-/** @deprecated Use GlobalCategoryDto.domain with "big_five" prefix */
-export type BigFiveCategory = 
-  | 'BIG_FIVE_OPENNESS'
-  | 'BIG_FIVE_CONSCIENTIOUSNESS'
-  | 'BIG_FIVE_EXTRAVERSION'
-  | 'BIG_FIVE_AGREEABLENESS'
-  | 'BIG_FIVE_NEUROTICISM'
-  | 'BIG_FIVE_EMOTIONAL_STABILITY';
-
-/** @deprecated Use StandardCodesDto instead */
-export interface StandardCodeMapping {
-  code: string;
-  name: string;
-  confidence: "LOW" | "MODERATE" | "HIGH" | "VERIFIED";
-}
-
-/** @deprecated Use StandardCodesDto instead */
-export interface TripleStandardCodes {
-  bigFiveRef?: BigFiveRefDto | BigFiveCategory;
-  onetRef?: OnetRefDto | OnetReference;
-  escoRef?: EscoRefDto | EscoReference;
-  ESCO?: StandardCodeMapping;
-  ONET?: StandardCodeMapping;
-  BIG_FIVE?: StandardCodeMapping;
-  [key: string]: StandardCodeMapping | OnetRefDto | OnetReference | EscoRefDto | EscoReference | BigFiveRefDto | BigFiveCategory | undefined;
-}
-
-/** @deprecated Use StandardCodesDto instead */
-export interface StandardCodes {
-  ESCO?: StandardCodeMapping;
-  ONET?: StandardCodeMapping;
-  BIG_FIVE?: StandardCodeMapping;
-  [key: string]: StandardCodeMapping | undefined;
-}
 
 // ============================================
 // CORE DOMAIN INTERFACES

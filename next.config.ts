@@ -99,7 +99,7 @@ const nextConfig: NextConfig = {
 	// Disable development indicator for cleaner UI
 	devIndicators: false,
 	// Enable static optimization
-	output: undefined, // Allow both static and server rendering
+	output: 'standalone',
 	// Disable source maps in production to reduce bundle size
 	productionBrowserSourceMaps: false,
 	// Enable compression for better performance
@@ -135,7 +135,7 @@ const nextConfig: NextConfig = {
 			{
 				source: "/api/:path*",
 				headers: [
-					{ key: "Access-Control-Allow-Origin", value: "*" },
+					{ key: "Access-Control-Allow-Origin", value: process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000" },
 					{ key: "Access-Control-Allow-Methods", value: "GET, POST, PUT, DELETE, OPTIONS" },
 					{ key: "Access-Control-Allow-Headers", value: "Content-Type, Authorization" },
 				],

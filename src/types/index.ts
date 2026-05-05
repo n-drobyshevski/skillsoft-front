@@ -115,13 +115,6 @@ export type {
   SharedTemplateItem,
   SharedTemplatesResponse,
   AnswerValue,
-  // Legacy types (backwards compat)
-  OnetReference,
-  EscoReference,
-  BigFiveCategory,
-  StandardCodeMapping,
-  TripleStandardCodes,
-  StandardCodes,
 } from './domain';
 
 // ============================================
