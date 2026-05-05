@@ -1,0 +1,60 @@
+{
+  "title": "Карта навыков",
+  "description": "Поиск по базам данных ESCO и O*NET на стороне клиента",
+  "loadingTitle": "Загрузка базы навыков",
+  "loadingDescription": "Обработка данных ESCO и O*NET...",
+  "searchPlaceholder": "Поиск навыков, компетенций, способностей... (напр., «лидерство», «анализ данных», «коммуникация»)",
+  "searchPlaceholderShort": "Поиск навыков, компетенций, способностей...",
+  "stats": {
+    "totalSkills": "{total} навыков",
+    "esco": "ESCO: {esco}",
+    "onet": "O*NET: {onet}",
+    "categories": "{categories} кат.",
+    "buildTime": "Собрано за {buildTimeMs}мс"
+  },
+  "tips": {
+    "desktop": "Совет: Используйте фильтры для сужения результатов • Нажмите на навык для подробностей",
+    "mobile": "Фильтры для сужения • Нажмите на навык для подробностей"
+  },
+  "footer": {
+    "zeroLatency": "Без задержек",
+    "noNetwork": "Без сети"
+  },
+  "search": {
+    "clearSearch": "Очистить поиск",
+    "filters": "Фильтры",
+    "clear": "Сбросить",
+    "dataSource": "Источник данных",
+    "categories": "Категории",
+    "buildingIndex": "Построение индекса...",
+    "resultsCount": "{count} результатов",
+    "skillsIndexed": "{count} навыков проиндексировано",
+    "preparingIndex": "Подготовка поискового индекса...",
+    "backgroundThread": "Построение в фоновом потоке",
+    "searching": "Поиск...",
+    "noResults": "Навыки по запросу «{query}» не найдены",
+    "noResultsHint": "Попробуйте другие ключевые слова или измените фильтры",
+    "emptyState": "Начните вводить для поиска навыков",
+    "emptyStateHint": "Поиск среди {count} навыков из ESCO и O*NET",
+    "worker": "Worker",
+    "noDescription": "Описание отсутствует"
+  },
+  "details": {
+    "noSelection": "Навык не выбран",
+    "noSelectionHint": "Найдите навыки слева и нажмите на результат для просмотра подробностей.",
+    "closeDetails": "Закрыть подробности",
+    "description": "Описание",
+    "noDescription": "Описание отсутствует.",
+    "altNames": "Альтернативные названия",
+    "moreAltNames": "+{count} ещё",
+    "identifiers": "Идентификаторы",
+    "id": "ID:",
+    "code": "Код:",
+    "uri": "URI:",
+    "view": "Открыть",
+    "relatedOccupations": "Связанные профессии ({count})",
+    "importance": "{value} важн.",
+    "rawMetadata": "Метаданные",
+    "skillDetails": "Подробности навыка"
+  }
+}

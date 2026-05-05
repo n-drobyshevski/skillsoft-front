@@ -1,17 +1,10 @@
-/**
- * Loading UI for Skill Mapper Route
- *
- * Content-aware skeleton that mirrors the real page layout:
- * - Header with title and stat badges
- * - Split-view: search panel (left) with input, filter button, and result list;
- *   details panel (right, desktop only) with placeholder.
- * - Footer info bar
- */
-
 import { Search } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
+import { getTranslations } from 'next-intl/server';
 
-export default function SkillMapperLoading() {
+export default async function SkillMapperLoading() {
+  const t = await getTranslations('skillMapper');
+
   return (
     <div className="flex flex-col h-[calc(100vh-4rem)] animate-fade-in-up">
       {/* Header Skeleton */}
@@ -20,10 +13,10 @@ export default function SkillMapperLoading() {
           <div>
             <h1 className="text-xl sm:text-2xl font-bold flex items-center gap-2">
               <Search className="h-5 w-5 sm:h-6 sm:w-6" />
-              Skill Mapper
+              {t('title')}
             </h1>
             <p className="text-muted-foreground text-xs sm:text-sm mt-1">
-              Client-side fuzzy search across ESCO and O*NET databases
+              {t('description')}
             </p>
           </div>
 

@@ -47,6 +47,7 @@ import anonymousTest from './anonymousTest.json';
 import landing from './landing.json';
 import accessibility from './accessibility.json';
 import builder from './builder.json';
+import skillMapper from './skillMapper.json';
 
 const messages = {
   common,
@@ -91,6 +92,7 @@ const messages = {
   landing,
   accessibility,
   builder,
+  skillMapper,
 } as const;
 
 export default messages;

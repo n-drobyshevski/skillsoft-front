@@ -142,6 +142,15 @@ export const MY_TESTS_NAMESPACES = [
 
 
 /**
+ * Skill Mapper section namespaces.
+ * Used by: app/(workspace)/skill-mapper/**
+ */
+export const SKILL_MAPPER_NAMESPACES = [
+  ...SHARED_NAMESPACES,
+  'skillMapper',
+] as const;
+
+/**
  * Shared Templates section namespaces.
  * Used by: app/(workspace)/shared/**
  */

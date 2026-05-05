@@ -1,3 +1,6 @@
+import { NextIntlClientProvider } from 'next-intl';
+import { getMessages } from 'next-intl/server';
+import { SKILL_MAPPER_NAMESPACES, pickMessages } from '@/i18n/namespaces';
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -9,10 +12,20 @@ export const metadata: Metadata = {
   },
 };
 
-export default function SkillMapperLayout({
+export default async function SkillMapperLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  return <>{children}</>;
+  const messages = await getMessages();
+  const scopedMessages = pickMessages(
+    messages as Record<string, unknown>,
+    SKILL_MAPPER_NAMESPACES,
+  );
+
+  return (
+    <NextIntlClientProvider messages={scopedMessages}>
+      {children}
+    </NextIntlClientProvider>
+  );
 }

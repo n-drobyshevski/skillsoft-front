@@ -1,0 +1,60 @@
+{
+  "title": "Skill Mapper",
+  "description": "Client-side fuzzy search across ESCO and O*NET databases",
+  "loadingTitle": "Loading Skill Database",
+  "loadingDescription": "Processing ESCO and O*NET data...",
+  "searchPlaceholder": "Search for skills, competencies, abilities... (e.g., 'leadership', 'data analysis', 'communication')",
+  "searchPlaceholderShort": "Search skills, competencies, abilities...",
+  "stats": {
+    "totalSkills": "{total} skills",
+    "esco": "ESCO: {esco}",
+    "onet": "O*NET: {onet}",
+    "categories": "{categories} cats",
+    "buildTime": "Built in {buildTimeMs}ms"
+  },
+  "tips": {
+    "desktop": "Tips: Use filters to narrow results • Click a skill for details",
+    "mobile": "Tap filters to narrow • Tap skill for details"
+  },
+  "footer": {
+    "zeroLatency": "Zero-latency",
+    "noNetwork": "No network"
+  },
+  "search": {
+    "clearSearch": "Clear search",
+    "filters": "Filters",
+    "clear": "Clear",
+    "dataSource": "Data Source",
+    "categories": "Categories",
+    "buildingIndex": "Building index...",
+    "resultsCount": "{count} results",
+    "skillsIndexed": "{count} skills indexed",
+    "preparingIndex": "Preparing search index...",
+    "backgroundThread": "Building in background thread",
+    "searching": "Searching...",
+    "noResults": "No skills found for \"{query}\"",
+    "noResultsHint": "Try different keywords or adjust filters",
+    "emptyState": "Start typing to search skills",
+    "emptyStateHint": "Search across {count} skills from ESCO and O*NET",
+    "worker": "Worker",
+    "noDescription": "No description available"
+  },
+  "details": {
+    "noSelection": "No Skill Selected",
+    "noSelectionHint": "Search for skills on the left and click on a result to view details.",
+    "closeDetails": "Close skill details",
+    "description": "Description",
+    "noDescription": "No description available.",
+    "altNames": "Alternative Names",
+    "moreAltNames": "+{count} more",
+    "identifiers": "Identifiers",
+    "id": "ID:",
+    "code": "Code:",
+    "uri": "URI:",
+    "view": "View",
+    "relatedOccupations": "Related Occupations ({count})",
+    "importance": "{value} imp.",
+    "rawMetadata": "Raw Metadata",
+    "skillDetails": "Skill Details"
+  }
+}
