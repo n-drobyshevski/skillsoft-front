@@ -138,3 +138,49 @@ public/data/standards/
 
 # clerk configuration (can include secrets)
 /.clerk/
+
+# ====================
+# AI Tooling
+# ====================
+.claude/
+.agents/
+.superpowers/
+.playwright-mcp/
+skills-lock.json
+.cursor/
+.cursorignore
+.cursorindexingignore
+.copilot/
+.continue/
+.aider/
+aider.conf.yml
+.aider.tags.cache.v3/
+.windsurf/
+.codeium/
+.tabnine/
+.roo/
+.roomodes
+.clinerules
+.cline/
+.gemini/
+.codex/
+# AI-generated artifact files
+MEMORY.md
+memory/
+PLAN_*.md
+AUDIT-*.md
+*_SUMMARY.md
+*_SPEC.md
+*_GUIDE.md
+*_FIX.md
+*_IMPROVEMENTS.md
+*_ROADMAP.md
+*_INTEGRATION.md
+*_ARCHITECTURE.md
+*_ANALYSIS.md
+*_STRATEGY.md
+*_PLAN.md
+IMPLEMENTATION_*.md
+MIGRATION_*.md
+OPTIMIZATION_*.md
+ROUTING_FIX*.md
