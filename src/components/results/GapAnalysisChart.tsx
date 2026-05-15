@@ -18,9 +18,7 @@ import type {
   GapSummary,
 } from '@/types/results';
 
-// ============================================================================
 // Helper Functions
-// ============================================================================
 
 /**
  * Determine gap status based on actual vs target scores
@@ -107,9 +105,7 @@ export function calculateGapSummary(
   };
 }
 
-// ============================================================================
 // Status Colors & Icons
-// ============================================================================
 
 const STATUS_CONFIG: Record<
   GapStatus,
@@ -137,9 +133,7 @@ const STATUS_CONFIG: Record<
   },
 };
 
-// ============================================================================
 // Gap Bar Component
-// ============================================================================
 
 interface GapBarProps {
   dataPoint: GapDataPoint;
@@ -290,9 +284,7 @@ export function GapBar({
   );
 }
 
-// ============================================================================
 // Gap Legend Component
-// ============================================================================
 
 interface GapLegendProps {
   className?: string;
@@ -325,9 +317,7 @@ export function GapLegend({ className }: GapLegendProps) {
   );
 }
 
-// ============================================================================
 // Main Component
-// ============================================================================
 
 export function GapAnalysisChart({
   data,

@@ -3,9 +3,7 @@ import { subscribeWithSelector, devtools } from 'zustand/middleware';
 import { useShallow } from 'zustand/react/shallow';
 import type { SimulationResult } from '@/types/blueprint';
 
-// ============================================
 // TYPES
-// ============================================
 
 /**
  * Simulation store state - manages test simulation execution and results.
@@ -42,18 +40,14 @@ interface SimulationStoreActions {
 
 export type SimulationStore = SimulationStoreState & SimulationStoreActions;
 
-// ============================================
 // DEFAULT STATE
-// ============================================
 
 const defaultState: SimulationStoreState = {
   simulationResult: null,
   isSimulating: false,
 };
 
-// ============================================
 // STORE
-// ============================================
 
 /**
  * Simulation Store
@@ -73,9 +67,7 @@ export const useSimulationStore = create<SimulationStore>()(
       // Initial state
       ...defaultState,
 
-      // ============================================
       // ACTIONS
-      // ============================================
 
       setSimulating: (isSimulating) => {
         set({ isSimulating }, false, 'setSimulating');
@@ -100,9 +92,7 @@ export const useSimulationStore = create<SimulationStore>()(
   )
 );
 
-// ============================================
 // SELECTOR HOOKS
-// ============================================
 
 /**
  * Select the simulation result.

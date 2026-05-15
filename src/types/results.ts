@@ -8,9 +8,7 @@
 
 import type { BigFiveDimension, CompetencyScore } from './domain';
 
-// ============================================================================
 // Score Circle Types
-// ============================================================================
 
 /**
  * Animation variants for score circles
@@ -68,9 +66,7 @@ export interface ScoreCircleSizeConfig {
   radius: number;
 }
 
-// ============================================================================
 // Gap Analysis Types (JOB_FIT)
-// ============================================================================
 
 /**
  * Single data point for gap analysis visualization
@@ -163,9 +159,7 @@ export interface GapSummary {
   weightedAverageScore?: number;
 }
 
-// ============================================================================
 // Team Saturation Types (TEAM_FIT)
-// ============================================================================
 
 /**
  * Single data point for team saturation radar
@@ -250,9 +244,7 @@ export interface TeamFitAnalysis {
   relativeStrengths: string[];
 }
 
-// ============================================================================
 // Development Recommendations Types
-// ============================================================================
 
 /**
  * Priority level for development recommendations
@@ -346,9 +338,7 @@ export interface DevelopmentRecommendationsProps {
   className?: string;
 }
 
-// ============================================================================
 // Big Five Visualization Types
-// ============================================================================
 
 /**
  * Big Five trait display data
@@ -388,9 +378,7 @@ export interface BigFiveProfileProps {
   className?: string;
 }
 
-// ============================================================================
 // Result Transformer Types
-// ============================================================================
 
 /**
  * Options for transforming competency scores to gap data
@@ -432,9 +420,7 @@ export interface RecommendationGeneratorOptions {
   sortByPriority?: boolean;
 }
 
-// ============================================================================
 // Animation & Interaction Types
-// ============================================================================
 
 /**
  * Animation state for chart components

@@ -24,9 +24,7 @@ const COMPETENCIES_ENDPOINT = '/competencies';
 const QUESTIONS_ENDPOINT = '/questions';
 const INDICATORS_ENDPOINT = '/behavioral-indicators';
 
-// ============================================================================
 // Competencies
-// ============================================================================
 
 /**
  * Cached competencies list fetcher
@@ -70,9 +68,7 @@ export async function getCompetencyCached(id: string): Promise<Competency | null
     }
 }
 
-// ============================================================================
 // Behavioral Indicators
-// ============================================================================
 
 /**
  * Cached behavioral indicators list fetcher
@@ -114,9 +110,7 @@ export async function getIndicatorCached(id: string): Promise<BehavioralIndicato
     }
 }
 
-// ============================================================================
 // Assessment Questions
-// ============================================================================
 
 /**
  * Cached questions list fetcher

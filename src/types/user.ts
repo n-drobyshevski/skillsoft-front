@@ -64,9 +64,7 @@ export interface UserUpdateInput {
   preferences?: string;
 }
 
-// ============================================
 // USER HELPER FUNCTIONS
-// ============================================
 
 export function getUserFullName(user: User): string {
   if (user.firstName && user.lastName) {

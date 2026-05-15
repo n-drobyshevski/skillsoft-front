@@ -15,9 +15,7 @@ import type {
   TeamContributionType,
 } from '@/types/results';
 
-// ============================================================================
 // Helper Functions
-// ============================================================================
 
 /**
  * Analyze team fit based on saturation data
@@ -86,9 +84,7 @@ export function analyzeTeamFit(
   };
 }
 
-// ============================================================================
 // Contribution Type Badges
-// ============================================================================
 
 const CONTRIBUTION_COLORS: Record<TeamContributionType, string> = {
   leader: 'bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20',
@@ -98,9 +94,7 @@ const CONTRIBUTION_COLORS: Record<TeamContributionType, string> = {
   innovator: 'bg-pink-500/10 text-pink-600 dark:text-pink-400 border-pink-500/20',
 };
 
-// ============================================================================
 // Gap Fill Indicator
-// ============================================================================
 
 interface GapFillListProps {
   gapsFilledCompetencies: TeamSaturationDataPoint[];
@@ -141,9 +135,7 @@ function GapFillList({ gapsFilledCompetencies, title, className }: GapFillListPr
   );
 }
 
-// ============================================================================
 // Main Component
-// ============================================================================
 
 export function TeamSaturationRadar({
   data,

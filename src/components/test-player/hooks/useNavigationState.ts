@@ -18,9 +18,7 @@ import { subscribeWithSelector } from 'zustand/middleware';
  * ```
  */
 
-// ============================================================================
 // Types & Interfaces
-// ============================================================================
 
 /** Navigation phases in the state machine */
 export type NavigationPhase =
@@ -60,9 +58,7 @@ export interface PendingNavigation {
   questionId: string;
 }
 
-// ============================================================================
 // Store State & Actions
-// ============================================================================
 
 export interface NavigationState {
   // Current phase
@@ -179,9 +175,7 @@ export interface NavigationActions {
 // Combined store type
 export type NavigationStore = NavigationState & NavigationActions;
 
-// ============================================================================
 // Initial State
-// ============================================================================
 
 const initialState: NavigationState = {
   phase: 'IDLE',
@@ -191,18 +185,14 @@ const initialState: NavigationState = {
   originalAnswers: new Map(),
 };
 
-// ============================================================================
 // Store Implementation
-// ============================================================================
 
 export const useNavigationState = create<NavigationStore>()(
   subscribeWithSelector((set, get) => ({
     // Initial state
     ...initialState,
 
-    // ========================================================================
     // Phase Transitions
-    // ========================================================================
 
     startSaving: (navigation) => {
       const { phase } = get();
@@ -302,9 +292,7 @@ export const useNavigationState = create<NavigationStore>()(
       return pendingNavigation;
     },
 
-    // ========================================================================
     // Dirty Tracking
-    // ========================================================================
 
     markDirty: (questionId) => {
       set((state) => {
@@ -334,9 +322,7 @@ export const useNavigationState = create<NavigationStore>()(
       set({ dirtyQuestions: new Set() });
     },
 
-    // ========================================================================
     // Original Answer Tracking
-    // ========================================================================
 
     setOriginalAnswer: (questionId, value) => {
       set((state) => {
@@ -364,9 +350,7 @@ export const useNavigationState = create<NavigationStore>()(
   }))
 );
 
-// ============================================================================
 // Selector Hooks (for optimized re-renders)
-// ============================================================================
 
 /**
  * Get current navigation phase
@@ -414,9 +398,7 @@ export const usePendingNavigation = () =>
 export const useNavigationDirection = () =>
   useNavigationState((state) => state.pendingNavigation?.direction ?? null);
 
-// ============================================================================
 // Utility Functions
-// ============================================================================
 
 /**
  * Compare two answer values for equality

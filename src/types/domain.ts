@@ -3,9 +3,7 @@
  * Consolidated from app/enums/domain_enums.ts and app/interfaces/domain-interfaces.ts
  */
 
-// ============================================
 // ENUMS
-// ============================================
 
 export enum CompetencyCategory {
   COGNITIVE = 'COGNITIVE',
@@ -139,9 +137,7 @@ export const AssessmentGoalInfo: Record<AssessmentGoal, { displayName: string; d
   }
 };
 
-// ============================================
 // ENUM HELPER FUNCTIONS
-// ============================================
 
 /**
  * Helper to check if a question type is a primary Smart Assessment type.
@@ -157,9 +153,7 @@ export function supportsVectorWeights(type: QuestionType): boolean {
   return type === QuestionType.SJT || type === QuestionType.SITUATIONAL_JUDGMENT;
 }
 
-// ============================================
 // STANDARD CODE INTERFACES
-// ============================================
 
 /**
  * Big Five Personality Dimensions (OCEAN Model)
@@ -288,9 +282,7 @@ export interface StandardCodesDto {
   escoRef?: EscoRefDto;
 }
 
-// ============================================
 // O*NET OCCUPATION TYPES (Goal-Aware Blueprint)
-// ============================================
 
 /**
  * O*NET Job Title for occupation search/selection.
@@ -337,9 +329,7 @@ export interface ONetProfile {
   skills: string[];
 }
 
-// ============================================
 // TEAM TYPES (Goal-Aware Blueprint)
-// ============================================
 
 /**
  * Team summary for selection dropdown.
@@ -376,9 +366,7 @@ export interface TeamProfile {
   memberSkills: TeamMemberSkill[];
 }
 
-// ============================================
 // PASSPORT TYPES (Delta Testing)
-// ============================================
 
 /**
  * Big Five personality profile scores.
@@ -411,9 +399,7 @@ export interface CompetencyPassport {
   expiresAt?: string;
 }
 
-// ============================================
 // GOAL-SPECIFIC BLUEPRINT CONFIG TYPES
-// ============================================
 
 /**
  * OVERVIEW goal blueprint configuration.
@@ -464,9 +450,7 @@ export type GoalSpecificConfig =
   | { goal: 'JOB_FIT'; config: JobFitBlueprintConfig }
   | { goal: 'TEAM_FIT'; config: TeamFitBlueprintConfig };
 
-// ============================================
 // ASSEMBLY PROGRESS TYPES
-// ============================================
 
 /**
  * Assembly phase during test preparation.
@@ -497,9 +481,7 @@ export interface AssemblyProgress {
 }
 
 
-// ============================================
 // CORE DOMAIN INTERFACES
-// ============================================
 
 export interface BehavioralIndicator {
   id: string;
@@ -626,9 +608,7 @@ export interface DashboardStats {
   averageIndicatorsPerCompetency: number;
 }
 
-// ============================================
 // QUESTION HELPER FUNCTIONS
-// ============================================
 
 export function getQuestionTags(question: AssessmentQuestion): string[] {
   return question.metadata?.tags ?? [];
@@ -646,9 +626,7 @@ export function isContextNeutral(question: AssessmentQuestion): boolean {
   return !narrowTags.some(t => questionHasTag(question, t));
 }
 
-// ============================================
 // COMPETENCY HELPER FUNCTIONS
-// ============================================
 
 export function getBigFiveRef(competency: Competency): BigFiveRefDto | undefined {
   return competency.standardCodes?.bigFiveRef;
@@ -676,9 +654,7 @@ export function hasTripleStandardMapping(competency: Competency): boolean {
   return !!(codes.bigFiveRef && codes.onetRef && codes.escoRef);
 }
 
-// ============================================
 // TEST TEMPLATE INTERFACES
-// ============================================
 
 export interface TestTemplateBlueprint {
   /** O*NET SOC code (camelCase — current convention) */
@@ -788,9 +764,7 @@ export interface UpdateTestTemplateRequest {
   showResultsImmediately?: boolean;
 }
 
-// ============================================
 // TEST SESSION INTERFACES
-// ============================================
 
 export interface TestSession {
   id: string;
@@ -857,9 +831,7 @@ export interface CurrentQuestionResponse {
   timeRemainingSeconds?: number;
 }
 
-// ============================================
 // TEST ANSWER INTERFACES
-// ============================================
 
 export interface TestAnswer {
   id?: string;
@@ -885,9 +857,7 @@ export interface SubmitAnswerRequest {
   skip?: boolean;
 }
 
-// ============================================
 // TEST RESULT INTERFACES
-// ============================================
 
 /**
  * Result status enum for test scoring workflow.
@@ -1096,9 +1066,7 @@ export interface QuestionScore {
   timeSpentSeconds: number;
 }
 
-// ============================================
 // TREND TRACKING TYPES
-// ============================================
 
 /**
  * Lightweight competency score for trend tracking.
@@ -1144,9 +1112,7 @@ export interface TemplateStatistics {
   averageTimeSeconds: number;
 }
 
-// ============================================
 // CANDIDATE COMPARISON TYPES
-// ============================================
 
 /** Top-level comparison response for side-by-side candidate analysis. */
 export interface CandidateComparison {
@@ -1213,9 +1179,7 @@ export interface CandidatePairComplementarity {
   totalTeamGaps: number;
 }
 
-// ============================================
 // TEMPLATE READINESS TYPES
-// ============================================
 
 /**
  * Health status for competency question inventory.
@@ -1261,9 +1225,7 @@ export interface CompetencyIssue {
   issues: string[];
 }
 
-// ============================================
 // TEMPLATE VISIBILITY & SHARING TYPES
-// ============================================
 
 /**
  * Template visibility levels.
@@ -1509,9 +1471,7 @@ export interface SharedTemplatesResponse {
   total: number;
 }
 
-// ============================================
 // VISIBILITY HELPER FUNCTIONS
-// ============================================
 
 /**
  * Check if a permission level includes another.

@@ -9,9 +9,7 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 
-// ============================================================================
 // Types
-// ============================================================================
 
 export type QuestionType = 'LIKERT' | 'SJT' | 'MCQ' | 'OPEN_ENDED' | 'RANKING' | 'GENERAL';
 export type ValidationSeverity = 'error' | 'warning' | 'info' | 'success';
@@ -33,9 +31,7 @@ interface ValidationFeedbackProps {
   compact?: boolean;
 }
 
-// ============================================================================
 // Guidance Generation
-// ============================================================================
 
 /**
  * Generate contextual guidance key based on question type and error
@@ -126,9 +122,7 @@ function getSeverityConfig(severity: ValidationSeverity) {
   }
 }
 
-// ============================================================================
 // Component
-// ============================================================================
 
 /**
  * ValidationFeedback - Inline validation with contextual guidance

@@ -34,9 +34,7 @@ import type {
   ResourceType,
 } from '@/types/results';
 
-// ============================================================================
 // Priority Configuration
-// ============================================================================
 
 const PRIORITY_CONFIG: Record<
   RecommendationPriority,
@@ -68,9 +66,7 @@ const PRIORITY_CONFIG: Record<
   },
 };
 
-// ============================================================================
 // Resource Type Icons
-// ============================================================================
 
 const RESOURCE_ICONS: Record<ResourceType, React.ComponentType<{ className?: string }>> = {
   course: GraduationCap,
@@ -83,9 +79,7 @@ const RESOURCE_ICONS: Record<ResourceType, React.ComponentType<{ className?: str
   assessment: Target,
 };
 
-// ============================================================================
 // Recommendation Card Component
-// ============================================================================
 
 interface RecommendationCardProps {
   recommendation: DevelopmentRecommendation;
@@ -309,9 +303,7 @@ export function RecommendationCard({
   );
 }
 
-// ============================================================================
 // Main Component
-// ============================================================================
 
 export function DevelopmentRecommendations({
   recommendations,

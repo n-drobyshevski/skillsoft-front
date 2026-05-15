@@ -5,9 +5,7 @@ import { useTranslations } from 'next-intl';
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
 
-// ============================================
 // STAR Marker Constants
-// ============================================
 
 const STAR_MARKERS = {
   SITUATION: '[SITUATION]',
@@ -28,9 +26,7 @@ interface StarFields {
 /** Minimum combined character count across all 4 sections */
 export const STAR_MIN_CHARS = 100;
 
-// ============================================
 // STAR Section Configuration
-// ============================================
 
 interface StarSectionConfig {
   key: StarSection;
@@ -46,9 +42,7 @@ const STAR_SECTIONS: StarSectionConfig[] = [
   { key: 'result', letter: 'R', badgeColor: 'bg-purple-500', rows: 3 },
 ];
 
-// ============================================
 // Serialization Helpers
-// ============================================
 
 /**
  * Serialize 4 STAR fields into a single string with section markers.
@@ -126,9 +120,7 @@ function parseStarFields(text: string): StarFields {
   return result;
 }
 
-// ============================================
 // Component Props
-// ============================================
 
 interface StarResponseInputProps {
   value: string;
@@ -136,9 +128,7 @@ interface StarResponseInputProps {
   disabled?: boolean;
 }
 
-// ============================================
 // StarResponseInput Component
-// ============================================
 
 /**
  * STAR-format structured input for BEHAVIORAL_EXAMPLE questions.

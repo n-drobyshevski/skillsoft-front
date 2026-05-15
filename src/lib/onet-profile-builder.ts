@@ -19,9 +19,7 @@ import abilitiesDataRaw from '@/data/standards/onet/Abilities.json';
 import knowledgeDataRaw from '@/data/standards/onet/Knowledge.json';
 import workStylesDataRaw from '@/data/standards/onet/WorkStyles.json';
 
-// =============================================================================
 // Types
-// =============================================================================
 
 interface ONetElementRaw {
   'O*NET-SOC Code': string;
@@ -41,9 +39,7 @@ interface ONetElementRaw {
   'Domain Source'?: string;
 }
 
-// =============================================================================
 // Data Processing
-// =============================================================================
 
 const abilitiesData = abilitiesDataRaw as ONetElementRaw[];
 const knowledgeData = knowledgeDataRaw as ONetElementRaw[];
@@ -132,15 +128,11 @@ function elementToBenchmark(
   };
 }
 
-// =============================================================================
 // Profile Cache
-// =============================================================================
 
 const profileCache = new Map<string, ONetProfile>();
 
-// =============================================================================
 // Public API
-// =============================================================================
 
 /**
  * Build O*NET profile for a given SOC code from local element data.

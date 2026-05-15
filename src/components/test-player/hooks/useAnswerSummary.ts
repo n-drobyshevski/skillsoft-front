@@ -25,9 +25,7 @@ import type { PlayerState } from './usePlayerState';
  * through questions, so the summary screen can display real question text.
  */
 
-// ============================================================================
 // Types
-// ============================================================================
 
 /** Cached question data for answer summary display */
 interface CachedQuestionData {
@@ -68,9 +66,7 @@ export interface UseAnswerSummaryReturn {
   cacheQuestion: (question: SessionQuestion) => void;
 }
 
-// ============================================================================
 // Utility Functions
-// ============================================================================
 
 function groupAnswersByCompetency(items: AnswerSummaryItem[], otherLabel: string): CompetencyGroup[] {
   const groups = new Map<string, CompetencyGroup>();
@@ -106,9 +102,7 @@ function groupAnswersByCompetency(items: AnswerSummaryItem[], otherLabel: string
   });
 }
 
-// ============================================================================
 // Hook Implementation
-// ============================================================================
 
 export function useAnswerSummary({
   session,
@@ -161,9 +155,7 @@ export function useAnswerSummary({
   const failSubmission = useReviewStore((s) => s.failSubmission);
   const resetReviewStore = useReviewStore((s) => s.reset);
 
-  // ========================================================================
   // Public: Cache a question (called from navigation hook)
-  // ========================================================================
 
   const cacheQuestion = (question: SessionQuestion) => {
     questionsCache.current.set(question.id, {
@@ -177,9 +169,7 @@ export function useAnswerSummary({
     });
   };
 
-  // ========================================================================
   // Internal: Format answer for display
-  // ========================================================================
 
   const formatAnswerForSummary = (
     answer: TestAnswer | null,
@@ -250,9 +240,7 @@ export function useAnswerSummary({
     return t('player.summary.answerGiven');
   };
 
-  // ========================================================================
   // Internal: Load question (for editing from summary)
-  // ========================================================================
 
   const loadQuestionForEdit = async (direction: 'forward' | 'backward') => {
     try {
@@ -310,9 +298,7 @@ export function useAnswerSummary({
     questionStartTime.current = Date.now();
   };
 
-  // ========================================================================
   // Public: Enter answer summary
-  // ========================================================================
 
   const handleEnterSummary = async () => {
     setState(prev => ({ ...prev, isSubmitting: true }));
@@ -360,18 +346,14 @@ export function useAnswerSummary({
     setState(prev => ({ ...prev, isSubmitting: false }));
   };
 
-  // ========================================================================
   // Public: Go back from summary
-  // ========================================================================
 
   const handleGoBackFromSummary = () => {
     setShowSummary(false);
     resetReviewStore();
   };
 
-  // ========================================================================
   // Public: Edit an answer from summary
-  // ========================================================================
 
   const handleEditFromSummary = async (questionId: string, questionIndex: number) => {
     setShowSummary(false);
@@ -393,9 +375,7 @@ export function useAnswerSummary({
     setState(prev => ({ ...prev, isSubmitting: false }));
   };
 
-  // ========================================================================
   // Public: Submit from summary
-  // ========================================================================
 
   const handleSubmitFromSummary = async () => {
     if (isSummarySubmitting) return;

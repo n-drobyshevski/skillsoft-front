@@ -40,9 +40,7 @@ const getApiBaseUrl = () => {
 const TEST_SESSIONS_BASE = '/tests/sessions';
 const TEST_RESULTS_BASE = '/tests/results';
 
-// ============================================================================
 // User Sessions
-// ============================================================================
 
 interface PaginatedResponse<T> {
   content: T[];
@@ -89,9 +87,7 @@ export async function getUserSessionsCached(
   }
 }
 
-// ============================================================================
 // User Results
-// ============================================================================
 
 /**
  * Cached user results fetcher.
@@ -127,9 +123,7 @@ export async function getUserResultsCached(
   }
 }
 
-// ============================================================================
 // Combined Fetch (Optimized for My Tests Page)
-// ============================================================================
 
 export interface MyTestsData {
   sessions: TestSessionSummary[];

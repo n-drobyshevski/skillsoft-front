@@ -8,9 +8,7 @@
  * help bundlers eliminate unused runtime code.
  */
 
-// ============================================
 // Domain types - enums, interfaces, helpers
-// ============================================
 export {
   // Enums (runtime values)
   CompetencyCategory,
@@ -117,9 +115,7 @@ export type {
   AnswerValue,
 } from './domain';
 
-// ============================================
 // User types - authentication, roles
-// ============================================
 export {
   UserRole,
   getUserFullName,
@@ -139,9 +135,7 @@ export type {
   UserUpdateInput,
 } from './user';
 
-// ============================================
 // Team types - team management
-// ============================================
 export {
   TeamStatus,
   TeamMemberRole,
@@ -173,9 +167,7 @@ export type {
   PageResponse,
 } from './team';
 
-// ============================================
 // Skills types - ESCO, O*NET, search
-// ============================================
 export type {
   ESCOSkillRaw,
   ESCOSkill,
@@ -198,9 +190,7 @@ export type {
   SkillMapperState,
 } from './skills';
 
-// ============================================
 // Error types - API errors, validation
-// ============================================
 export {
   ErrorCategory,
   ErrorCode,
@@ -221,9 +211,7 @@ export type {
   ApiError,
 } from './errors';
 
-// ============================================
 // Result visualization types
-// ============================================
 export type {
   ScoreCircleVariant,
   ScoreCircleSize,
@@ -252,7 +240,5 @@ export type {
   ChartInteractionCallbacks,
 } from './results';
 
-// ============================================
 // Global types - Clerk session, RBAC
-// ============================================
 export { ROLE_HIERARCHY, ROUTE_PERMISSIONS } from './globals.d';

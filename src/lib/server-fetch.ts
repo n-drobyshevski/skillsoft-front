@@ -20,9 +20,7 @@ import {
   ErrorAction,
 } from '@/types/errors';
 
-// ============================================
 // TYPES
-// ============================================
 
 /**
  * Simplified error structure for Server Components.
@@ -72,9 +70,7 @@ export interface ServerFetchOptions<T> {
   onRetry?: (error: unknown, attempt: number) => void;
 }
 
-// ============================================
 // ERROR CONVERSION
-// ============================================
 
 /**
  * Get a user-friendly message based on HTTP status code.
@@ -195,9 +191,7 @@ function toServerFetchError(error: unknown): ServerFetchError {
   };
 }
 
-// ============================================
 // RETRY CONDITION
-// ============================================
 
 /**
  * Default retry condition: retry on 5xx errors and network errors.
@@ -228,9 +222,7 @@ function defaultShouldRetry(error: unknown): boolean {
   return false;
 }
 
-// ============================================
 // MAIN UTILITY
-// ============================================
 
 /**
  * Fetches data with automatic retry and error handling for Server Components.

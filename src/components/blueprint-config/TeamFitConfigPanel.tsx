@@ -42,17 +42,13 @@ import {
 import { teamsApi } from '@/services/api';
 import type { Team, TeamProfile } from '@/types/domain';
 
-// ============================================================================
 // Types
-// ============================================================================
 
 interface TeamFitConfigPanelProps {
   className?: string;
 }
 
-// ============================================================================
 // Saturation Status
-// ============================================================================
 
 type SaturationStatus = 'full' | 'adequate' | 'gap' | 'critical';
 
@@ -91,9 +87,7 @@ function getSaturationBadgeVariant(
   }
 }
 
-// ============================================================================
 // Component
-// ============================================================================
 
 export function TeamFitConfigPanel({ className }: TeamFitConfigPanelProps) {
   const form = useFormContext();

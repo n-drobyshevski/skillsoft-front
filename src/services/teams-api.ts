@@ -51,9 +51,7 @@ const getApiBaseUrl = () => {
 
 const TEAMS_ENDPOINT = '/teams';
 
-// ============================================
 // ERROR HANDLING
-// ============================================
 
 async function parseErrorResponse(response: Response): Promise<BackendErrorResponse | null> {
   try {
@@ -167,9 +165,7 @@ async function fetchTeamsApi<T>(
   }
 }
 
-// ============================================
 // TEAMS API
-// ============================================
 
 export interface TeamsListParams {
   status?: TeamStatus;

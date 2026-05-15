@@ -13,9 +13,7 @@
 import Fuse, { type IFuseOptions, type FuseResult } from 'fuse.js';
 import type { UnifiedSkill, SkillSearchResult } from '@/types/skills';
 
-// =============================================================================
 // Types
-// =============================================================================
 
 export interface WorkerMessage {
   type: 'build-index' | 'search' | 'update-options' | 'recommend';
@@ -72,16 +70,12 @@ export interface ErrorPayload {
   code: string;
 }
 
-// =============================================================================
 // Worker State
-// =============================================================================
 
 let fuseInstance: Fuse<UnifiedSkill> | null = null;
 let currentOptions: IFuseOptions<UnifiedSkill> = {};
 
-// =============================================================================
 // Default Fuse Options
-// =============================================================================
 
 const DEFAULT_FUSE_OPTIONS: IFuseOptions<UnifiedSkill> = {
   threshold: 0.4,
@@ -99,9 +93,7 @@ const DEFAULT_FUSE_OPTIONS: IFuseOptions<UnifiedSkill> = {
   includeMatches: true,
 };
 
-// =============================================================================
 // Transform Results
-// =============================================================================
 
 function transformResults(fuseResults: FuseResult<UnifiedSkill>[]): SkillSearchResult[] {
   return fuseResults.map(result => ({
@@ -116,9 +108,7 @@ function transformResults(fuseResults: FuseResult<UnifiedSkill>[]): SkillSearchR
   }));
 }
 
-// =============================================================================
 // Message Handlers
-// =============================================================================
 
 function handleBuildIndex(payload: BuildIndexPayload, id: string): void {
   const startTime = performance.now();
@@ -310,9 +300,7 @@ function handleRecommend(payload: RecommendPayload, id: string): void {
   }
 }
 
-// =============================================================================
 // Worker Entry Point
-// =============================================================================
 
 self.onmessage = (event: MessageEvent<WorkerMessage>) => {
   const { type, payload, id } = event.data;

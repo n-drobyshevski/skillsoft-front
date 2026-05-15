@@ -12,9 +12,7 @@ import { useDebounce } from './use-debounce';
  * - Comparison mode for A/B testing blueprints
  */
 
-// ============================================
 // TYPES
-// ============================================
 
 export interface SimulationRequest<TState, TProfile, TResult> {
   id: string;
@@ -64,9 +62,7 @@ interface UseSimulationWorkflowReturn<TState, TProfile, TResult> {
   triggerAutoSimulate: (state: TState, profile: TProfile) => void;
 }
 
-// ============================================
 // HOOK
-// ============================================
 
 export function useSimulationWorkflow<TState, TProfile, TResult>({
   onSimulate,
@@ -220,9 +216,7 @@ export function useSimulationWorkflow<TState, TProfile, TResult>({
   };
 }
 
-// ============================================
 // HELPERS
-// ============================================
 
 function calculateDiff<TResult>(
   baseline: TResult | null,

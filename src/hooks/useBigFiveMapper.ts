@@ -15,9 +15,7 @@ import { useMemo } from 'react';
 import type { BigFiveDimension } from '@/types/domain';
 import onetToBigFiveMap from '@/data/standards/onet_to_bigfive_map.json';
 
-// =============================================================================
 // Types
-// =============================================================================
 
 interface OnetBigFiveMapping {
   elementId: string;
@@ -52,17 +50,13 @@ interface BigFiveMappingResult {
   hasMapping: boolean;
 }
 
-// =============================================================================
 // Type-safe access to mapping data
-// =============================================================================
 
 type MappingsRecord = Record<string, OnetBigFiveMapping>;
 
 const mappings = (onetToBigFiveMap as { mappings: MappingsRecord }).mappings;
 
-// =============================================================================
 // Hook Implementation
-// =============================================================================
 
 /**
  * Hook to get Big Five personality mapping for an O*NET code.
@@ -115,9 +109,7 @@ export function useBigFiveMapper(onetCode: string | null | undefined): BigFiveMa
   }, [onetCode]);
 }
 
-// =============================================================================
 // Utility Functions
-// =============================================================================
 
 /**
  * Get Big Five mapping for an O*NET code (non-hook version for server components)

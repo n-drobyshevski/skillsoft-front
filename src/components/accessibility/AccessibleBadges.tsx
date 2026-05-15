@@ -34,9 +34,7 @@ import {
  * - Consistent sizing with touch-friendly targets
  */
 
-// ============================================
 // SHARED TYPES AND UTILITIES
-// ============================================
 
 interface BadgeConfig {
   label: string;
@@ -71,9 +69,7 @@ const sizeConfig = {
   },
 };
 
-// ============================================
 // DISCRIMINATION FLAG BADGE
-// ============================================
 
 const discriminationFlagConfig: Record<DiscriminationFlag, BadgeConfig> = {
   [DiscriminationFlag.NONE]: {
@@ -150,9 +146,7 @@ export function DiscriminationFlagBadge({
   );
 }
 
-// ============================================
 // DIFFICULTY FLAG BADGE
-// ============================================
 
 const difficultyFlagConfig: Record<DifficultyFlag, BadgeConfig> = {
   [DifficultyFlag.NONE]: {
@@ -222,9 +216,7 @@ export function DifficultyFlagBadge({
   );
 }
 
-// ============================================
 // RELIABILITY STATUS BADGE
-// ============================================
 
 const reliabilityStatusConfig: Record<ReliabilityStatus, BadgeConfig> = {
   [ReliabilityStatus.RELIABLE]: {
@@ -304,9 +296,7 @@ export function ReliabilityStatusBadge({
   );
 }
 
-// ============================================
 // SEVERITY BADGE (Generic)
-// ============================================
 
 export type SeverityLevel = 'success' | 'info' | 'warning' | 'error' | 'neutral';
 
@@ -394,9 +384,7 @@ export function SeverityBadge({
   );
 }
 
-// ============================================
 // COUNT BADGE (for notifications/indicators)
-// ============================================
 
 interface CountBadgeProps {
   count: number;

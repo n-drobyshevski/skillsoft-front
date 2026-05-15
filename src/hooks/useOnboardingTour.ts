@@ -12,9 +12,7 @@ import { useState, createContext, useContext } from 'react';
  * - Skip/dismiss functionality
  */
 
-// ============================================
 // TYPES
-// ============================================
 
 export interface TourStep {
   /** Unique step ID */
@@ -75,9 +73,7 @@ interface UseTourReturn {
   resetTourProgress: (tourId: string) => void;
 }
 
-// ============================================
 // STORAGE HELPERS
-// ============================================
 
 const STORAGE_KEY = 'skillsoft-tours-completed';
 
@@ -113,9 +109,7 @@ function resetTourCompletion(tourId: string): void {
   }
 }
 
-// ============================================
 // HOOK
-// ============================================
 
 export function useOnboardingTour(): UseTourReturn {
   const [state, setState] = useState<TourState>({
@@ -229,9 +223,7 @@ export function useOnboardingTour(): UseTourReturn {
   };
 }
 
-// ============================================
 // CONTEXT (for app-wide tour state)
-// ============================================
 
 type TourContextValue = UseTourReturn;
 

@@ -10,9 +10,7 @@
  * That file re-exports these types for backward compatibility.
  */
 
-// ============================================
 // ENUMS / UNION TYPES
-// ============================================
 
 export type HealthStatus = 'CRITICAL' | 'MODERATE' | 'HEALTHY';
 export type SimulationProfile = 'PERFECT_CANDIDATE' | 'RANDOM_GUESSER' | 'FAILING_CANDIDATE';
@@ -26,9 +24,7 @@ export type SelectionReason =
   | 'BACKSTOP';
 export type AdaptivityMode = 'LINEAR' | 'ADAPTIVE_STANDARD' | 'RUTHLESS';
 
-// ============================================
 // DATA INTERFACES
-// ============================================
 
 export interface BlueprintCompetency {
   id: string;
@@ -177,9 +173,7 @@ export type ActionResponse<T> =
   | { success: true; data: T }
   | { success: false; error: string };
 
-// ============================================
 // INDICATOR INVENTORY (Library Panel Expansion)
-// ============================================
 
 export interface IndicatorQuestionStats {
   indicatorId: string;

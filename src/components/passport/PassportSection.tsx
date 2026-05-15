@@ -10,9 +10,7 @@ import { PassportPreview } from './PassportPreview';
 import { DeltaTestingToggle } from './DeltaTestingToggle';
 import type { CompetencyPassport } from '@/types/domain';
 
-// ============================================================================
 // Types
-// ============================================================================
 
 export interface DeltaConfig {
   /** Whether delta testing is enabled */
@@ -38,9 +36,7 @@ export interface PassportSectionProps {
   className?: string;
 }
 
-// ============================================================================
 // Component
-// ============================================================================
 
 export function PassportSection({
   clerkUserId,

@@ -16,9 +16,7 @@ import { useTestDriveStore } from '@/store/test-drive-store';
  * The insights panel reads directly from the test-drive store.
  */
 
-// ============================================================================
 // Types
-// ============================================================================
 
 export interface UseTestDriveSyncProps {
   /** Whether test-drive mode is available (prop + adapter support) */
@@ -33,9 +31,7 @@ export interface UseTestDriveSyncProps {
   totalQuestions: number;
 }
 
-// ============================================================================
 // Internal: Compute psychometrics from difficulty level
-// ============================================================================
 
 function computeDifficultyIndex(difficultyLevel?: string): number {
   switch (difficultyLevel) {
@@ -59,9 +55,7 @@ function computeScoring(question: SessionQuestion) {
   };
 }
 
-// ============================================================================
 // Hook Implementation
-// ============================================================================
 
 export function useTestDriveSync({
   testDriveAvailable,

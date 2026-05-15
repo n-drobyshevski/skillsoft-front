@@ -96,9 +96,7 @@ export function clearSessionCredentials(): void {
   }
 }
 
-// ============================================
 // TYPE DEFINITIONS
-// ============================================
 
 /**
  * Response from creating an anonymous session.
@@ -237,9 +235,7 @@ export interface AnonymousResultDetail {
   }>;
 }
 
-// ============================================
 // API HELPER FUNCTIONS
-// ============================================
 
 /**
  * Make an authenticated request using the session access token.
@@ -315,9 +311,7 @@ async function handleErrorResponse(response: Response): Promise<never> {
   );
 }
 
-// ============================================
 // API FUNCTIONS
-// ============================================
 
 /**
  * CAPTCHA configuration from the backend.

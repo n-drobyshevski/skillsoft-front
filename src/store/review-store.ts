@@ -12,9 +12,7 @@ import { TestAnswer, SessionQuestion, QuestionType } from '@/types/domain';
  * editing answers, submission with retry, and error recovery.
  */
 
-// ============================================
 // STATE MACHINE TYPES
-// ============================================
 
 /**
  * Review flow phases following a state machine pattern.
@@ -89,9 +87,7 @@ export interface SubmissionError {
   timestamp: number;
 }
 
-// ============================================
 // STORE STATE & ACTIONS
-// ============================================
 
 interface ReviewState {
   /** Current phase in the review flow state machine */
@@ -375,9 +371,7 @@ export const useReviewStore = create<ReviewStore>()(
   }))
 );
 
-// ============================================
 // HELPER FUNCTIONS
-// ============================================
 
 /**
  * Group answers by competency for organized display.
@@ -417,9 +411,7 @@ function groupByCompetency(answers: AnswerSummaryItem[]): CompetencyGroup[] {
   });
 }
 
-// ============================================
 // SELECTOR HOOKS
-// ============================================
 
 /** Get current review phase */
 export const useReviewPhase = () =>
@@ -501,9 +493,7 @@ export const useIsAllComplete = () =>
 export const useIsCompletedExpanded = () =>
   useReviewStore(state => state.isCompletedExpanded);
 
-// ============================================
 // UTILITY FUNCTIONS
-// ============================================
 
 /**
  * Format an answer for human-readable display.

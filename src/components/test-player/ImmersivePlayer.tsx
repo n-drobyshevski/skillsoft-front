@@ -31,9 +31,7 @@ import { useImmersiveMode } from './hooks/useImmersiveMode';
 import { useKeyboardNavigation } from './hooks/useKeyboardNavigation';
 import { extractAnswerValue } from './hooks/useAnswerManagement';
 
-// ============================================================================
 // Types
-// ============================================================================
 
 interface ImmersivePlayerProps {
   session: TestSession;
@@ -80,9 +78,7 @@ interface PlayerState {
   questionStates: QuestionState[];
 }
 
-// ============================================================================
 // Component
-// ============================================================================
 
 /**
  * ImmersivePlayer - Main test-taking experience
@@ -107,9 +103,7 @@ export function ImmersivePlayer({
 }: ImmersivePlayerProps) {
   const t = useTranslations('assessment');
 
-  // ========================================================================
   // Adapter Resolution (new pattern vs legacy authHeaders)
-  // ========================================================================
 
   let adapter: ReturnType<typeof useTestSessionAdapter> | null = null;
   let sessionFeatures = { supportsTestDrive: true, supportsAnswerReview: true, requiresTakerInfo: false };
@@ -123,9 +117,7 @@ export function ImmersivePlayer({
   const effectiveAuthHeaders = authHeaders || { 'X-User-Id': '' };
   const testDriveAvailable = testDriveMode && sessionFeatures.supportsTestDrive;
 
-  // ========================================================================
   // Player State (core state kept in component for shared access)
-  // ========================================================================
 
   const [state, setState] = useState<PlayerState>(() => {
     const questionStates: QuestionState[] = Array.from(
@@ -156,18 +148,14 @@ export function ImmersivePlayer({
 
   const currentQuestion = state.currentQuestion;
 
-  // ========================================================================
   // Hook: Immersive Mode (UI store + dirty tracking lifecycle)
-  // ========================================================================
 
   useImmersiveMode({
     initialQuestionId: initialQuestion.question?.id,
     initialAnswerValue: extractAnswerValue(initialQuestion.previousAnswer),
   });
 
-  // ========================================================================
   // Hook: Answer Management
-  // ========================================================================
 
   const {
     currentAnswer,
@@ -185,9 +173,7 @@ export function ImmersivePlayer({
     initialQuestion,
   });
 
-  // ========================================================================
   // Hook: Timer Management
-  // ========================================================================
 
   const {
     timeRemaining,
@@ -201,9 +187,7 @@ export function ImmersivePlayer({
     initialSeconds: initialQuestion.timeRemainingSeconds ?? null,
   });
 
-  // ========================================================================
   // Hook: Answer Summary
-  // ========================================================================
 
   const {
     showSummary,
@@ -230,9 +214,7 @@ export function ImmersivePlayer({
     onError,
   });
 
-  // ========================================================================
   // Hook: Question Navigation
-  // ========================================================================
 
   const {
     handleNext,
@@ -280,9 +262,7 @@ export function ImmersivePlayer({
     onError,
   });
 
-  // ========================================================================
   // Hook: Keyboard Navigation
-  // ========================================================================
 
   useKeyboardNavigation({
     canGoNext: isAnswerValid,
@@ -294,9 +274,7 @@ export function ImmersivePlayer({
     onSkip: handleSkip,
   });
 
-  // ========================================================================
   // Hook: Test-Drive Sync
-  // ========================================================================
 
   useTestDriveSync({
     testDriveAvailable,
@@ -306,9 +284,7 @@ export function ImmersivePlayer({
     totalQuestions: state.totalQuestions,
   });
 
-  // ========================================================================
   // Zen Theme & Language Restore
-  // ========================================================================
 
   const zenTheme = useZenTheme();
   const zenClass = zenTheme === 'dark' ? 'zen-dark' : 'zen-light';
@@ -318,9 +294,7 @@ export function ImmersivePlayer({
     return () => document.body.classList.remove(zenClass);
   }, [zenClass]);
 
-  // ========================================================================
   // Responsive & Swipe Navigation
-  // ========================================================================
 
   const isMobile = useIsMobile();
   const prefersReducedMotion = useReducedMotion();
@@ -337,9 +311,7 @@ export function ImmersivePlayer({
     onSwipeRight: canSwipePrevious ? handlePrevious : undefined,
   });
 
-  // ========================================================================
   // Animation Variants
-  // ========================================================================
 
   const slideVariants = prefersReducedMotion
     ? {
@@ -365,9 +337,7 @@ export function ImmersivePlayer({
       ? { x: { type: 'spring' as const, stiffness: 400, damping: 35 }, opacity: { duration: 0.15 } }
       : { x: { type: 'spring' as const, stiffness: 300, damping: 30 }, opacity: { duration: 0.2 } };
 
-  // ========================================================================
   // Render: Empty State
-  // ========================================================================
 
   if (!currentQuestion) {
     return (
@@ -377,9 +347,7 @@ export function ImmersivePlayer({
     );
   }
 
-  // ========================================================================
   // Render: Answer Summary Screen
-  // ========================================================================
 
   if (showSummary) {
     return (
@@ -396,9 +364,7 @@ export function ImmersivePlayer({
     );
   }
 
-  // ========================================================================
   // Render: Main Player
-  // ========================================================================
 
   return (
     <div className={cn('min-h-screen min-h-[100dvh] bg-[var(--zen-bg)] flex flex-col safe-area-inset-all', zenClass)}>

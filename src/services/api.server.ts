@@ -31,9 +31,7 @@ function getApiBaseUrl(): string {
 
 const TEST_SESSIONS_BASE = '/tests/sessions';
 
-// ============================================================================
 // Error Types
-// ============================================================================
 
 export interface ServerApiError {
   message: string;
@@ -41,9 +39,7 @@ export interface ServerApiError {
   code?: string;
 }
 
-// ============================================================================
 // Server-Side Result Type
-// ============================================================================
 
 /**
  * Result type for server-side API calls.
@@ -54,9 +50,7 @@ export type ServerResult<T> =
   | { ok: true; data: T }
   | { ok: false; error: ServerApiError };
 
-// ============================================================================
 // Internal Helpers
-// ============================================================================
 
 async function serverFetch<T>(endpoint: string): Promise<ServerResult<T>> {
   const authHeaders = await getAuthHeaders();
@@ -125,9 +119,7 @@ async function serverFetch<T>(endpoint: string): Promise<ServerResult<T>> {
   }
 }
 
-// ============================================================================
 // Public API: Test Sessions
-// ============================================================================
 
 /**
  * Fetch a test session by ID (server-side).

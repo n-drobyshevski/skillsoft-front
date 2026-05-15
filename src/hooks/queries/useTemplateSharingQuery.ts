@@ -30,9 +30,7 @@ import type {
   SharePermission,
 } from '@/types/domain';
 
-// ============================================================================
 // Generic hook for data fetching (replaces useQuery)
-// ============================================================================
 
 interface FetchState<T> {
   data: T | undefined;
@@ -109,9 +107,7 @@ function useFetch<T>(
   };
 }
 
-// ============================================================================
 // Generic hook for mutations (replaces useMutation)
-// ============================================================================
 
 interface MutationState<TData, TVariables> {
   mutateAsync: (variables: TVariables) => Promise<TData>;
@@ -164,9 +160,7 @@ function useMutationFn<TData, TVariables>(
   return { mutateAsync, isPending, isSuccess, isError, error, data };
 }
 
-// ============================================================================
 // Query Keys - Kept for test compatibility (key structure only)
-// ============================================================================
 
 export const templateSharingKeys = {
   all: ['templateSharing'] as const,
@@ -198,9 +192,7 @@ export const templateSharingKeys = {
     [...templateSharingKeys.all, 'validate', token] as const,
 };
 
-// ============================================================================
 // Visibility Hooks
-// ============================================================================
 
 /**
  * Hook to fetch template visibility information
@@ -222,9 +214,7 @@ export function useChangeVisibility() {
   );
 }
 
-// ============================================================================
 // Shares Hooks
-// ============================================================================
 
 /**
  * Hook to fetch template shares (users and teams)
@@ -293,9 +283,7 @@ export function useBulkShare() {
   );
 }
 
-// ============================================================================
 // Links Hooks
-// ============================================================================
 
 /**
  * Hook to fetch all share links for a template
@@ -371,9 +359,7 @@ export function useRevokeAllLinks() {
   );
 }
 
-// ============================================================================
 // Link Validation Hooks (Public - No Auth Required)
-// ============================================================================
 
 /**
  * Hook to validate a share link token
@@ -386,9 +372,7 @@ export function useValidateShareLink(token: string | null) {
   );
 }
 
-// ============================================================================
 // Shared With Me Hooks
-// ============================================================================
 
 /**
  * Hook to fetch templates shared with the current user

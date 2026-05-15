@@ -192,9 +192,7 @@ export function UndoToast({
   );
 }
 
-// ============================================
 // Hook for managing undo toast state
-// ============================================
 
 export interface UseUndoToastConfig<TAction> {
   /** Duration of undo window in milliseconds */

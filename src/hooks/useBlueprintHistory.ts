@@ -15,9 +15,7 @@ import type { BlueprintCompetency } from '../../app/(workspace)/test-templates/[
  * - Debounced state tracking to avoid excessive snapshots
  */
 
-// ============================================
 // TYPES
-// ============================================
 
 export type HistoryActionType =
   | 'ADD_COMPETENCY'
@@ -53,9 +51,7 @@ interface HistoryState {
   clear: () => void;
 }
 
-// ============================================
 // ZUSTAND STORE
-// ============================================
 
 const useHistoryStore = create<HistoryState>()(
   persist(
@@ -187,9 +183,7 @@ const useHistoryStore = create<HistoryState>()(
   )
 );
 
-// ============================================
 // REACT HOOK
-// ============================================
 
 interface UseBlueprintHistoryOptions {
   templateId: string;

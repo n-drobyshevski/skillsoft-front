@@ -35,9 +35,7 @@ async function loadFuse(): Promise<typeof Fuse> {
   return FuseConstructor;
 }
 
-// =============================================================================
 // Types
-// =============================================================================
 
 export interface UseFuzzySearchOptions {
   /** Search threshold (0.0 = exact match, 1.0 = match anything). Default: 0.4 */
@@ -65,9 +63,7 @@ export interface FuzzySearchActions {
   clearFilters: () => void;
 }
 
-// =============================================================================
 // Fuse.js Configuration
-// =============================================================================
 
 /**
  * Default Fuse.js options optimized for skill search
@@ -96,9 +92,7 @@ const DEFAULT_FUSE_OPTIONS: IFuseOptions<UnifiedSkill> = {
   // useExtendedSearch: true,  // Enable with =exact, 'include, !exclude, ^prefix, $suffix
 };
 
-// =============================================================================
 // Utility Functions
-// =============================================================================
 
 /**
  * Debounce function for search queries
@@ -157,9 +151,7 @@ function applyFilters(
   return filtered;
 }
 
-// =============================================================================
 // Main Hook
-// =============================================================================
 
 /**
  * Client-side fuzzy search hook for skill mapping
@@ -298,9 +290,7 @@ export function useFuzzySearch(
   };
 }
 
-// =============================================================================
 // Extended Search Hook (with pattern matching)
-// =============================================================================
 
 /**
  * Extended search hook with unix-like pattern matching
@@ -428,9 +418,7 @@ export function useExtendedFuzzySearch(
   };
 }
 
-// =============================================================================
 // Highlight Utility
-// =============================================================================
 
 /**
  * Highlight matched text segments

@@ -10,9 +10,7 @@ import {
 import { motion, AnimatePresence } from 'motion/react';
 import { ArrowDown, Loader2 } from 'lucide-react';
 
-// ============================================
 // TYPES
-// ============================================
 
 export interface PullToRefreshProps {
   /** Async callback invoked when pull-to-refresh is triggered */
@@ -27,17 +25,13 @@ export interface PullToRefreshProps {
 
 type PullState = 'idle' | 'pulling' | 'threshold' | 'refreshing';
 
-// ============================================
 // CONSTANTS
-// ============================================
 
 const DEFAULT_THRESHOLD = 80;
 const MAX_PULL = 120;
 const RESISTANCE = 0.45;
 
-// ============================================
 // COMPONENT
-// ============================================
 
 /**
  * PullToRefresh wraps its children and provides a mobile pull-to-refresh gesture.

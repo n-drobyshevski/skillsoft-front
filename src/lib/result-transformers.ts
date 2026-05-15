@@ -16,9 +16,7 @@ import type {
   RecommendationPriority,
 } from '@/types/results';
 
-// ============================================================================
 // Gap Analysis Transformers
-// ============================================================================
 
 /**
  * Transform competency scores into gap data points for JOB_FIT visualization
@@ -106,9 +104,7 @@ export function toGapDataWithBenchmarks(
     });
 }
 
-// ============================================================================
 // Team Saturation Transformers
-// ============================================================================
 
 /**
  * Transform competency scores into team saturation data for TEAM_FIT visualization
@@ -167,9 +163,7 @@ export function toTeamSaturationDataSimulated(
   });
 }
 
-// ============================================================================
 // Development Recommendations Generators
-// ============================================================================
 
 /**
  * Determine recommendation priority based on gap size and importance
@@ -340,9 +334,7 @@ export function generateRecommendationsFromGaps(
   return recommendations.slice(0, maxRecommendations);
 }
 
-// ============================================================================
 // Utility Functions
-// ============================================================================
 
 /**
  * Calculate average score from competency scores

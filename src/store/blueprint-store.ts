@@ -12,9 +12,7 @@ import type {
   IndicatorInventory,
 } from '@/types/blueprint';
 
-// ============================================
 // TYPES
-// ============================================
 
 /**
  * Blueprint store state - manages the core blueprint data
@@ -162,9 +160,7 @@ interface BlueprintStoreActions {
 
 export type BlueprintStore = BlueprintStoreState & BlueprintStoreActions;
 
-// ============================================
 // DEFAULT STATE
-// ============================================
 
 const defaultBlueprintState: BlueprintState = {
   templateId: '',
@@ -190,9 +186,7 @@ const defaultState: BlueprintStoreState = {
   _initialized: false,
 };
 
-// ============================================
 // HELPERS
-// ============================================
 
 /**
  * Create a BlueprintCompetency from a LibraryCompetency with default values.
@@ -235,9 +229,7 @@ function validateAdd(
   return null;
 }
 
-// ============================================
 // STORE
-// ============================================
 
 /**
  * Blueprint Store
@@ -257,9 +249,7 @@ export const useBlueprintStore = create<BlueprintStore>()(
       // Initial state
       ...defaultState,
 
-      // ============================================
       // ACTIONS
-      // ============================================
 
       initialize: ({
         initialState,
@@ -651,9 +641,7 @@ export const useBlueprintStore = create<BlueprintStore>()(
   )
 );
 
-// ============================================
 // SELECTOR HOOKS
-// ============================================
 
 /**
  * Select the current blueprint state (competencies + settings).

@@ -16,9 +16,7 @@ import type {
   SessionMode,
 } from '@/adapters/test-session-adapter';
 
-// ============================================
 // CONTEXT TYPES
-// ============================================
 
 /**
  * Context value provided to consumers.
@@ -36,15 +34,11 @@ interface TestSessionContextValue {
   requiresTakerInfo: boolean;
 }
 
-// ============================================
 // CONTEXT
-// ============================================
 
 const TestSessionContext = createContext<TestSessionContextValue | null>(null);
 
-// ============================================
 // PROVIDER
-// ============================================
 
 interface TestSessionProviderProps {
   /** The adapter to use for this session */
@@ -83,9 +77,7 @@ export function TestSessionProvider({ adapter, children }: TestSessionProviderPr
   );
 }
 
-// ============================================
 // HOOKS
-// ============================================
 
 /**
  * Hook to access the full test session context.

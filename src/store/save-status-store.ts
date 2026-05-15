@@ -3,9 +3,7 @@ import { subscribeWithSelector, devtools } from 'zustand/middleware';
 import { useShallow } from 'zustand/react/shallow';
 import type { SaveStatus } from '@/hooks/useAutoSave';
 
-// ============================================
 // TYPES
-// ============================================
 
 /**
  * Save status store state - manages auto-save and persistence status.
@@ -73,9 +71,7 @@ interface SaveStatusStoreActions {
 
 export type SaveStatusStore = SaveStatusStoreState & SaveStatusStoreActions;
 
-// ============================================
 // DEFAULT STATE
-// ============================================
 
 const defaultState: SaveStatusStoreState = {
   saveStatus: 'idle',
@@ -87,9 +83,7 @@ const defaultState: SaveStatusStoreState = {
   isPending: false,
 };
 
-// ============================================
 // STORE
-// ============================================
 
 /**
  * Save Status Store
@@ -110,9 +104,7 @@ export const useSaveStatusStore = create<SaveStatusStore>()(
       // Initial state
       ...defaultState,
 
-      // ============================================
       // ACTIONS
-      // ============================================
 
       syncFromAutoSave: ({ status, lastSaved, hasUnsavedChanges, isSaving, retryAttempt, isOffline }) => {
         set(
@@ -176,9 +168,7 @@ export const useSaveStatusStore = create<SaveStatusStore>()(
   )
 );
 
-// ============================================
 // SELECTOR HOOKS
-// ============================================
 
 /**
  * Select the current save status string.

@@ -12,9 +12,7 @@ import { NavigationConfig } from "./navigation-config";
 export const NAVIGATION_CONFIG: NavigationConfig = {
   version: "1.0.0",
   groups: [
-    // ============================================
     // PERSONAL GROUP - User Lens Only
-    // ============================================
     {
       id: "personal",
       labelKey: "groups.personal",
@@ -54,9 +52,7 @@ export const NAVIGATION_CONFIG: NavigationConfig = {
       hasSeparator: false,
     },
 
-    // ============================================
     // TESTING GROUP - Editor/Admin Lenses
-    // ============================================
     {
       id: "testing",
       labelKey: "groups.testing",
@@ -80,9 +76,7 @@ export const NAVIGATION_CONFIG: NavigationConfig = {
       hasSeparator: true,
     },
 
-    // ============================================
     // LIBRARY GROUP - Editor/Admin Lenses
-    // ============================================
     {
       id: "library",
       labelKey: "groups.library",
@@ -124,9 +118,7 @@ export const NAVIGATION_CONFIG: NavigationConfig = {
       hasSeparator: true,
     },
 
-    // ============================================
     // ANALYTICS GROUP - Admin Only
-    // ============================================
     {
       id: "analytics",
       labelKey: "groups.analytics",
@@ -150,9 +142,7 @@ export const NAVIGATION_CONFIG: NavigationConfig = {
       hasSeparator: true,
     },
 
-    // ============================================
     // SYSTEM GROUP - Admin Only
-    // ============================================
     {
       id: "system",
       labelKey: "groups.system",

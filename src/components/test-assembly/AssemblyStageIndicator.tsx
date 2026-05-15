@@ -9,9 +9,7 @@ import {
   ChevronRight,
 } from 'lucide-react';
 
-// ============================================================================
 // Types
-// ============================================================================
 
 export type StageStatus = 'pending' | 'active' | 'complete' | 'failed';
 
@@ -33,9 +31,7 @@ interface AssemblyStageIndicatorProps {
   className?: string;
 }
 
-// ============================================================================
 // Status Configuration
-// ============================================================================
 
 const STATUS_CONFIG = {
   pending: {
@@ -64,9 +60,7 @@ const STATUS_CONFIG = {
   },
 } as const;
 
-// ============================================================================
 // Component
-// ============================================================================
 
 export function AssemblyStageIndicator({
   title,

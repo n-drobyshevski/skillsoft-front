@@ -17,9 +17,7 @@ import { useNavigationState, areAnswersEqual } from './useNavigationState';
  * 6. Answer change handling (optimistic update)
  */
 
-// ============================================================================
 // Types
-// ============================================================================
 
 export interface ValidationResult {
   valid: boolean;
@@ -53,9 +51,7 @@ export interface UseAnswerManagementReturn {
   questionStartTime: React.MutableRefObject<number>;
 }
 
-// ============================================================================
 // Utility: Extract answer value from TestAnswer
-// ============================================================================
 
 export function extractAnswerValue(answer: TestAnswer | undefined): string | number | string[] | undefined {
   if (!answer) return undefined;
@@ -74,9 +70,7 @@ export function extractAnswerValue(answer: TestAnswer | undefined): string | num
   return undefined;
 }
 
-// ============================================================================
 // Hook Implementation
-// ============================================================================
 
 export function useAnswerManagement({
   sessionId,
@@ -96,9 +90,7 @@ export function useAnswerManagement({
   // Track answer timing
   const questionStartTime = useRef(Date.now());
 
-  // ========================================================================
   // Dirty Tracking: Monitor answer changes
-  // ========================================================================
 
   useEffect(() => {
     const questionId = currentQuestion?.id;
@@ -115,9 +107,7 @@ export function useAnswerManagement({
     }
   }, [currentAnswer, currentQuestion?.id]);
 
-  // ========================================================================
   // Validation
-  // ========================================================================
 
   const validateAnswer = (value: string | number | string[] | undefined): ValidationResult => {
     if (!currentQuestion) {
@@ -194,17 +184,13 @@ export function useAnswerManagement({
     return { valid: true };
   };
 
-  // ========================================================================
   // Computed: is answer valid
-  // ========================================================================
 
   const validation = validateAnswer(currentAnswer);
 
   const isAnswerValid = validation.valid;
 
-  // ========================================================================
   // Build SubmitAnswerRequest
-  // ========================================================================
 
   const buildAnswerRequest = (value: string | number | string[]): SubmitAnswerRequest => {
     const timeSpentSeconds = Math.floor((Date.now() - questionStartTime.current) / 1000);
@@ -236,9 +222,7 @@ export function useAnswerManagement({
     return request;
   };
 
-  // ========================================================================
   // Handle answer change (for QuestionCard)
-  // ========================================================================
 
   const handleAnswer = (value: string | number | string[]) => {
     if (!currentQuestion) return;

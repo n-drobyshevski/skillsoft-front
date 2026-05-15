@@ -28,9 +28,7 @@ import { AssemblyStats } from './AssemblyStats';
 import { DeltaSkippedInfo, type SkippedCompetency } from '@/components/passport';
 import type { AssemblyProgress, AssemblyPhase } from '@/types/domain';
 
-// ============================================================================
 // Types
-// ============================================================================
 
 export interface DeltaInfo {
   /** Whether delta testing is enabled */
@@ -74,9 +72,7 @@ interface AssemblyProgressModalProps {
   onCancel: () => void;
 }
 
-// ============================================================================
 // Stage Configuration
-// ============================================================================
 
 const STAGES: Array<{
   phase: AssemblyPhase;
@@ -120,9 +116,7 @@ const STAGES: Array<{
   },
 ];
 
-// ============================================================================
 // Component
-// ============================================================================
 
 export function AssemblyProgressModal({
   open,

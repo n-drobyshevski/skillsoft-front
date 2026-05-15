@@ -38,9 +38,7 @@ const getApiBaseUrl = () => {
 
 const TEAMS_ENDPOINT = '/teams';
 
-// ============================================================================
 // Teams List
-// ============================================================================
 
 /**
  * Cached teams list fetcher.
@@ -72,9 +70,7 @@ export async function getTeamsCached(
   }
 }
 
-// ============================================================================
 // Team Stats
-// ============================================================================
 
 /**
  * Cached team statistics fetcher.
@@ -104,9 +100,7 @@ export async function getTeamStatsCached(
   }
 }
 
-// ============================================================================
 // Team Detail
-// ============================================================================
 
 /**
  * Cached single team fetcher.
@@ -137,9 +131,7 @@ export async function getTeamByIdCached(
   }
 }
 
-// ============================================================================
 // Team Profile
-// ============================================================================
 
 /**
  * Cached team competency profile fetcher.
@@ -170,9 +162,7 @@ export async function getTeamProfileCached(
   }
 }
 
-// ============================================================================
 // Combined Fetch (for Teams Admin Page)
-// ============================================================================
 
 export interface TeamsPageData {
   teams: ManagedTeamSummary[];

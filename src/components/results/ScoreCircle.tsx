@@ -10,9 +10,7 @@ import type {
   ScoreCircleSizeConfig,
 } from '@/types/results';
 
-// ============================================================================
 // Size Configuration (Mobile-First)
-// ============================================================================
 
 const SIZE_CONFIG: Record<ScoreCircleSize, ScoreCircleSizeConfig> = {
   xs: {
@@ -52,9 +50,7 @@ const SIZE_CONFIG: Record<ScoreCircleSize, ScoreCircleSizeConfig> = {
   },
 };
 
-// ============================================================================
 // Variant Colors
-// ============================================================================
 
 const VARIANT_COLORS: Record<ScoreCircleVariant, { stroke: string; text: string; bg: string }> = {
   default: {
@@ -84,9 +80,7 @@ const VARIANT_COLORS: Record<ScoreCircleVariant, { stroke: string; text: string;
   },
 };
 
-// ============================================================================
 // Helper Functions
-// ============================================================================
 
 /**
  * Get variant based on score value
@@ -108,9 +102,7 @@ function formatScore(value: number, showPercent: boolean): string {
   return showPercent ? `${rounded}%` : `${rounded}`;
 }
 
-// ============================================================================
 // Component
-// ============================================================================
 
 export function ScoreCircle({
   value,
@@ -276,9 +268,7 @@ export function ScoreCircle({
   );
 }
 
-// ============================================================================
 // Mini Score Circle (Inline variant)
-// ============================================================================
 
 interface MiniScoreCircleProps {
   value: number;
@@ -331,9 +321,7 @@ export function MiniScoreCircle({
   );
 }
 
-// ============================================================================
 // Score Ring (No center text, just ring)
-// ============================================================================
 
 interface ScoreRingProps {
   value: number;

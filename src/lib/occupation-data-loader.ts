@@ -13,9 +13,7 @@ import type { ONetJobTitle } from '@/types/domain';
 // Static import for build-time optimization
 import occupationDataRaw from '@/data/standards/onet/OccupationData.json';
 
-// =============================================================================
 // Types
-// =============================================================================
 
 interface OccupationRaw {
   'O*NET-SOC Code': string;
@@ -23,9 +21,7 @@ interface OccupationRaw {
   Description: string;
 }
 
-// =============================================================================
 // Data Transformation
-// =============================================================================
 
 const occupationData = occupationDataRaw as OccupationRaw[];
 
@@ -43,9 +39,7 @@ function transformOccupation(raw: OccupationRaw): ONetJobTitle {
 // Pre-transform all data for faster access
 const allOccupations: ONetJobTitle[] = occupationData.map(transformOccupation);
 
-// =============================================================================
 // Search Index (Fuse.js)
-// =============================================================================
 
 let fuseIndex: Fuse<ONetJobTitle> | null = null;
 
@@ -71,9 +65,7 @@ function getSearchIndex(): Fuse<ONetJobTitle> {
   return fuseIndex;
 }
 
-// =============================================================================
 // Public API
-// =============================================================================
 
 /**
  * Search occupations by title, description, or SOC code.

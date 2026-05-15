@@ -34,25 +34,19 @@ import type {
  * Supports all features including test-drive mode and answer review.
  */
 export class AuthenticatedTestSessionAdapter implements TestSessionAdapter {
-  // ============================================
   // Mode Information
-  // ============================================
 
   readonly mode: SessionMode = 'authenticated';
   readonly supportsTestDrive = true;
   readonly supportsAnswerReview = true;
   readonly requiresTakerInfo = false;
 
-  // ============================================
   // Private State
-  // ============================================
 
   private readonly userId: string;
   private readonly userRole: string;
 
-  // ============================================
   // Constructor
-  // ============================================
 
   /**
    * Create an authenticated adapter.
@@ -71,9 +65,7 @@ export class AuthenticatedTestSessionAdapter implements TestSessionAdapter {
     this.userRole = userRole;
   }
 
-  // ============================================
   // Internal: Fresh signed headers per request
-  // ============================================
 
   /**
    * Get fresh HMAC-signed auth headers for a request.
@@ -83,9 +75,7 @@ export class AuthenticatedTestSessionAdapter implements TestSessionAdapter {
     return getSignedAuthHeaders(this.userId, this.userRole);
   }
 
-  // ============================================
   // Session Operations
-  // ============================================
 
   async getSession(sessionId: string): Promise<SessionData> {
     const headers = await this.getHeaders();
@@ -110,9 +100,7 @@ export class AuthenticatedTestSessionAdapter implements TestSessionAdapter {
     return question;
   }
 
-  // ============================================
   // Answer Operations
-  // ============================================
 
   async submitAnswer(
     sessionId: string,
@@ -135,9 +123,7 @@ export class AuthenticatedTestSessionAdapter implements TestSessionAdapter {
     return testSessionsClientApi.getSessionAnswers(sessionId, headers);
   }
 
-  // ============================================
   // Session Lifecycle
-  // ============================================
 
   async completeSession(
     sessionId: string,
@@ -164,9 +150,7 @@ export class AuthenticatedTestSessionAdapter implements TestSessionAdapter {
     await testSessionsClientApi.discardSession(sessionId, headers);
   }
 
-  // ============================================
   // Time Management
-  // ============================================
 
   async syncTimeRemaining(
     sessionId: string,

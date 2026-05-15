@@ -8,9 +8,7 @@
 
 import type { UnifiedSkill } from '@/types/skills';
 
-// =============================================================================
 // Data Fetching
-// =============================================================================
 
 let cachedSkills: UnifiedSkill[] | null = null;
 let loadPromise: Promise<UnifiedSkill[]> | null = null;

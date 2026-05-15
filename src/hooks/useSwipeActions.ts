@@ -9,38 +9,6 @@ import {
   type MotionValue,
 } from 'motion/react';
 
-/**
- * useSwipeActions Hook
- *
- * Provides swipe gesture handling for mobile interfaces with:
- * - Left/right swipe to reveal action buttons
- * - Configurable thresholds and velocities
- * - Haptic feedback support
- * - Long press detection for selection mode
- *
- * @example
- * ```tsx
- * const { handlers, x, state, reset } = useSwipeActions({
- *   onSwipeLeft: () => console.log('Swiped left'),
- *   onSwipeRight: () => console.log('Swiped right'),
- *   onLongPress: () => console.log('Long pressed'),
- *   leftThreshold: 80,
- *   rightThreshold: 80,
- * });
- *
- * return (
- *   <motion.div
- *     style={{ x }}
- *     drag="x"
- *     dragConstraints={{ left: -100, right: 100 }}
- *     {...handlers}
- *   >
- *     Content
- *   </motion.div>
- * );
- * ```
- */
-
 export type SwipeState = 'idle' | 'swiping' | 'left-open' | 'right-open' | 'long-pressing';
 
 export interface SwipeActionConfig {

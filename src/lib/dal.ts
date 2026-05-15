@@ -31,9 +31,7 @@ import { redirect } from 'next/navigation';
 import { UserRole } from '@/types/user';
 import { LENS_COOKIE_NAME, LENS_TO_ROLE, type LensType } from '@/store/lens-store';
 
-// ============================================================================
 // Types
-// ============================================================================
 
 export interface VerifiedSession {
   userId: string;
@@ -49,9 +47,7 @@ export interface VerifiedSession {
   hasContentAccess: boolean;
 }
 
-// ============================================================================
 // Helper Functions
-// ============================================================================
 
 /**
  * Map Clerk organization role to our internal UserRole type
@@ -92,9 +88,7 @@ async function resolveEffectiveRole(realRole: UserRole): Promise<UserRole> {
   }
 }
 
-// ============================================================================
 // Cached Session Verification
-// ============================================================================
 
 /**
  * Verify the current session and get user data.
@@ -159,9 +153,7 @@ export const getUserRole = cache(async (): Promise<UserRole> => {
   return session?.role ?? UserRole.USER;
 });
 
-// ============================================================================
 // Authorization Guards
-// ============================================================================
 
 /**
  * Require authentication - redirects to sign-in if not authenticated.
@@ -220,9 +212,7 @@ export async function requireEditor(): Promise<VerifiedSession> {
  */
 export const requireContentAccess = requireEditor;
 
-// ============================================================================
 // Permission Checks (non-throwing)
-// ============================================================================
 
 /**
  * Check if current user is authenticated (non-throwing).

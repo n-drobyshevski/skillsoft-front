@@ -106,11 +106,9 @@ export const LazyResponsiveContainer = dynamic(
   }
 );
 
-// ============================================================================
 // Composite Chart Components (lazy-loaded)
 // These are higher-level chart components that internally use recharts.
 // Lazy-loading them avoids pulling ~45KB gzipped recharts into the main bundle.
-// ============================================================================
 
 export const LazyBigFiveRadar = dynamic(
   () => import('@/components/charts/BigFiveRadar').then((mod) => ({ default: mod.BigFiveRadar })),
@@ -162,10 +160,8 @@ export const LazyAverageIndicatorsGauge = dynamic(
   { loading: () => <CompactChartSkeleton />, ssr: false }
 );
 
-// ============================================================================
 // Page-level Chart Components (lazy-loaded from app/ directory)
 // These are full-featured chart components used in workspace pages.
-// ============================================================================
 
 export const LazyBigFiveChart = dynamic(
   () => import('../../app/(workspace)/profile/_components/BigFiveChart'),

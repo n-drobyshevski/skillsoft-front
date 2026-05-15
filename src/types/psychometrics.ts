@@ -3,9 +3,7 @@
  * Corresponds to backend DTOs in domain/dto/psychometrics/
  */
 
-// ============================================
 // ENUMS
-// ============================================
 
 export enum ItemValidityStatus {
   ACTIVE = 'ACTIVE',
@@ -44,9 +42,7 @@ export enum BigFiveTrait {
   EMOTIONAL_STABILITY = 'EMOTIONAL_STABILITY'
 }
 
-// ============================================
 // ITEM STATISTICS DTOs
-// ============================================
 
 export interface ItemStatistics {
   id: string;
@@ -77,9 +73,7 @@ export interface ItemStatisticsDetail extends ItemStatistics {
   recommendations: string[];
 }
 
-// ============================================
 // COMPETENCY RELIABILITY DTOs
-// ============================================
 
 export interface CompetencyReliability {
   id: string;
@@ -112,9 +106,7 @@ export interface CompetencyReliabilityDetail extends CompetencyReliability {
   itemsLoweringAlpha: ItemLoweringAlpha[];
 }
 
-// ============================================
 // BIG FIVE RELIABILITY DTOs
-// ============================================
 
 export interface BigFiveReliability {
   id: string;
@@ -128,9 +120,7 @@ export interface BigFiveReliability {
   lastCalculatedAt: string | null;
 }
 
-// ============================================
 // FLAGGED ITEM DTOs
-// ============================================
 
 export interface FlaggedItemSummary {
   questionId: string;
@@ -146,9 +136,7 @@ export interface FlaggedItemSummary {
   lastCalculatedAt: string | null;
 }
 
-// ============================================
 // HEALTH REPORT DTOs
-// ============================================
 
 export interface BigFiveReliabilitySummary {
   totalTraits: number;
@@ -183,9 +171,7 @@ export interface PsychometricHealthReport {
   itemsAnalyzedSinceLastAudit: number;
 }
 
-// ============================================
 // REQUEST/RESPONSE DTOs
-// ============================================
 
 export interface UpdateItemStatusRequest {
   newStatus: ItemValidityStatus;
@@ -200,9 +186,7 @@ export interface AuditResult {
   message: string;
 }
 
-// ============================================
 // PAGINATION
-// ============================================
 
 export interface Page<T> {
   content: T[];
@@ -214,9 +198,7 @@ export interface Page<T> {
   last: boolean;
 }
 
-// ============================================
 // FILTER PARAMS
-// ============================================
 
 export interface ItemStatisticsFilterParams {
   status?: ItemValidityStatus;
@@ -235,9 +217,7 @@ export interface CompetencyReliabilityFilterParams {
   sort?: string;
 }
 
-// ============================================
 // DISPLAY HELPERS
-// ============================================
 
 export const ItemValidityStatusDisplay: Record<ItemValidityStatus, { label: string; description: string; color: string }> = {
   [ItemValidityStatus.ACTIVE]: {

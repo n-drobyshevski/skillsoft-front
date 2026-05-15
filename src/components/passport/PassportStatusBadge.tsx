@@ -11,9 +11,7 @@ import { CheckCircle2, Clock, FileX } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useFormattedDates } from '@/hooks/useFormattedDates';
 
-// ============================================================================
 // Types
-// ============================================================================
 
 export type PassportStatus = 'valid' | 'expired' | 'none';
 
@@ -34,9 +32,7 @@ export interface PassportStatusBadgeProps {
   className?: string;
 }
 
-// ============================================================================
 // Status Configuration
-// ============================================================================
 
 const STATUS_CONFIG = {
   valid: {
@@ -82,9 +78,7 @@ const SIZE_CONFIG = {
   },
 } as const;
 
-// ============================================================================
 // Component
-// ============================================================================
 
 export function PassportStatusBadge({
   status,
@@ -156,9 +150,7 @@ export function PassportStatusBadge({
   );
 }
 
-// ============================================================================
 // Helper to derive status from passport data
-// ============================================================================
 
 export function getPassportStatus(
   passport: { isValid?: boolean; expiresAt?: string | null } | null

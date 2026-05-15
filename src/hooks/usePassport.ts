@@ -10,27 +10,16 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { passportApi } from '@/services/api';
 import type { CompetencyPassport } from '@/types/domain';
 
-// ============================================================================
-// Types
-// ============================================================================
-
 export interface UsePassportOptions {
-  /** Whether to enable the query */
   enabled?: boolean;
 }
 
 export interface UsePassportReturn {
-  /** The passport data */
   passport: CompetencyPassport | null;
-  /** Whether the passport is currently loading */
   isLoading: boolean;
-  /** Whether there was an error fetching */
   isError: boolean;
-  /** Error message if any */
   error: Error | null;
-  /** Refetch the passport data */
   refetch: () => void;
-  /** Whether the passport is valid */
   isValid: boolean;
   /** Number of measured competencies */
   competencyCount: number;
@@ -51,24 +40,9 @@ export interface DeltaAnalysis {
   estimatedQuestionsSaved: number;
 }
 
-// ============================================================================
-// Constants
-// ============================================================================
-
 const AVG_QUESTIONS_PER_COMPETENCY = 5;
 const AVG_TIME_PER_QUESTION = 1.5; // minutes
 
-// ============================================================================
-// Hook: usePassport
-// ============================================================================
-
-/**
- * Hook to fetch and manage a user's Competency Passport.
- *
- * @param clerkUserId - The Clerk user ID to fetch passport for
- * @param options - Query options
- * @returns Passport data and status
- */
 export function usePassport(
   clerkUserId: string | undefined | null,
   options: UsePassportOptions = {}
@@ -134,9 +108,7 @@ export function usePassport(
   };
 }
 
-// ============================================================================
 // Hook: usePassportValidity
-// ============================================================================
 
 /**
  * Lightweight hook to check if a user has a valid passport.
@@ -182,9 +154,7 @@ export function usePassportValidity(
   return { isValid, isLoading };
 }
 
-// ============================================================================
 // Utility: calculateDeltaAnalysis
-// ============================================================================
 
 /**
  * Calculate which competencies can be skipped based on passport data.
@@ -231,9 +201,7 @@ export function calculateDeltaAnalysis(
   };
 }
 
-// ============================================================================
 // Utility: formatTimeSaved
-// ============================================================================
 
 /**
  * Format time saved in a human-readable format.

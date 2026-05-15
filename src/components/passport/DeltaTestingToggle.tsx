@@ -13,9 +13,7 @@ import { Zap, Info, Lock, CheckCircle2, Clock } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { DeltaAnalysis } from '@/hooks/usePassport';
 
-// ============================================================================
 // Types
-// ============================================================================
 
 export interface DeltaTestingToggleProps {
   /** Whether delta testing is enabled */
@@ -34,9 +32,7 @@ export interface DeltaTestingToggleProps {
   className?: string;
 }
 
-// ============================================================================
 // Component
-// ============================================================================
 
 export function DeltaTestingToggle({
   enabled,

@@ -230,9 +230,7 @@ export async function getDashboardStatsCached(
   }
 }
 
-// ============================================================================
 // Section-level fetchers for Suspense streaming
-// ============================================================================
 
 /**
  * Data shape returned by the main column fetcher.

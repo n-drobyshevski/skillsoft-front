@@ -115,16 +115,6 @@ export async function getAuthHeaders(): Promise<Record<string, string>> {
     // Resolve effective role from lens cookie (can only downgrade)
     const effectiveRole = await getEffectiveRole(userRole);
 
-    // Debug logging (only in development)
-    if (process.env.NODE_ENV === 'development') {
-      console.log('[Auth] Headers generated:', {
-        userId: userId.substring(0, 8) + '...',
-        role: userRole,
-        effectiveRole,
-        source: mappedRole ? 'orgRole' : metadataRole ? 'metadata' : 'default'
-      });
-    }
-
     // Generate HMAC signature headers (no-op if HMAC_SHARED_SECRET is not set)
     const hmacHeaders = signAuthHeaders(userId, userRole, effectiveRole);
 

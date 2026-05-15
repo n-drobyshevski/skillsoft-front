@@ -22,9 +22,7 @@ import { useDebounce } from '@/hooks/use-debounce';
 import { onetApi } from '@/services/api';
 import type { ONetJobTitle, ONetProfile } from '@/types/domain';
 
-// ============================================================================
 // Types
-// ============================================================================
 
 interface ONetSearchComboboxProps {
   /** Currently selected O*NET SOC code */
@@ -39,9 +37,7 @@ interface ONetSearchComboboxProps {
   className?: string;
 }
 
-// ============================================================================
 // Component
-// ============================================================================
 
 export function ONetSearchCombobox({
   value,
@@ -325,9 +321,7 @@ export function ONetSearchCombobox({
   );
 }
 
-// ============================================================================
 // Job Title Item Subcomponent
-// ============================================================================
 
 interface JobTitleItemProps {
   jobTitle: ONetJobTitle;

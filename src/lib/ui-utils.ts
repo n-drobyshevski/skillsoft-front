@@ -23,9 +23,7 @@ import {
 } from "lucide-react";
 import { DifficultyLevel } from "@/types/domain";
 
-// ============================================
 // COLOR CONSTANTS
-// ============================================
 
 const COMMON_COLORS = {
   NOVICE: "border-red-500/20 text-red-700 bg-red-50/90 dark:bg-red-950/90 dark:text-red-200 dark:border-red-400/30",
@@ -43,9 +41,7 @@ const LEVEL_COLORS_DARK = {
   EXPERT: "border-violet-600/30 text-violet-700 bg-violet-50/90 dark:bg-violet-950/90 dark:text-violet-200 dark:border-violet-400/30",
 } as const;
 
-// ============================================
 // COMPETENCY HELPERS
-// ============================================
 
 export function competencyCategoryToIcon(category: string) {
   const iconMap = new Map([
@@ -94,9 +90,7 @@ export function levelToColor(level: string): string {
   }
 }
 
-// ============================================
 // APPROVAL STATUS HELPERS
-// ============================================
 
 export function approvalStatusToColor(status: string): string {
   switch (status) {
@@ -117,9 +111,7 @@ export function approvalStatusToColor(status: string): string {
   }
 }
 
-// ============================================
 // BEHAVIORAL INDICATOR HELPERS
-// ============================================
 
 export function biLevelToColor(level: string): string {
   switch (level) {
@@ -138,9 +130,7 @@ export function biLevelToColor(level: string): string {
   }
 }
 
-// ============================================
 // QUESTION HELPERS
-// ============================================
 
 export function questionTypeToIcon(category: string) {
   const iconMap = new Map([

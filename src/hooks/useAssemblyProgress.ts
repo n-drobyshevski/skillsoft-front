@@ -4,9 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import { testSessionsApi, assemblyApi } from '@/services/api';
 import type { AssemblyProgress, AssemblyPhase, TestSession } from '@/types/domain';
 
-// ============================================================================
 // Configuration
-// ============================================================================
 
 const POLLING_CONFIG = {
   /** Initial polling interval (ms) during active assembly */
@@ -21,9 +19,7 @@ const POLLING_CONFIG = {
   RETRY_DELAYS: [1000, 2000, 4000],
 } as const;
 
-// ============================================================================
 // Types
-// ============================================================================
 
 interface UseAssemblyProgressState {
   /** Current phase in the assembly process */
@@ -60,9 +56,7 @@ export interface UseAssemblyProgressReturn extends UseAssemblyProgressState {
   reset: () => void;
 }
 
-// ============================================================================
 // Initial State
-// ============================================================================
 
 const initialState: UseAssemblyProgressState = {
   phase: 'INITIALIZING',
@@ -75,9 +69,7 @@ const initialState: UseAssemblyProgressState = {
   sessionId: null,
 };
 
-// ============================================================================
 // Hook Implementation
-// ============================================================================
 
 export function useAssemblyProgress(
   options: UseAssemblyProgressOptions = {}

@@ -19,9 +19,7 @@ import type { AnswerSaveStatus } from '../components/SaveIndicator';
  * and "continue without saving" fallback.
  */
 
-// ============================================================================
 // Types
-// ============================================================================
 
 export interface UseQuestionNavigationProps {
   session: TestSession;
@@ -73,9 +71,7 @@ export interface UseQuestionNavigationReturn {
   saveStatus: AnswerSaveStatus;
 }
 
-// ============================================================================
 // Hook Implementation
-// ============================================================================
 
 export function useQuestionNavigation({
   session,
@@ -124,9 +120,7 @@ export function useQuestionNavigation({
 
   const canSkip = state.allowSkip && state.questionIndex + 1 < state.totalQuestions;
 
-  // ========================================================================
   // Internal: Load Question
-  // ========================================================================
 
   const loadQuestion = async (direction: 'forward' | 'backward') => {
     try {
@@ -229,9 +223,7 @@ export function useQuestionNavigation({
     questionStartTime.current = Date.now();
   };
 
-  // ========================================================================
   // Internal: Auto-save helper
-  // ========================================================================
 
   const autoSaveIfDirty = async (): Promise<boolean> => {
     const questionId = currentQuestion?.id;
@@ -293,9 +285,7 @@ export function useQuestionNavigation({
     return true;
   };
 
-  // ========================================================================
   // Internal: Session error handler
-  // ========================================================================
 
   const handleSessionStateError = (apiError: ApiError): boolean => {
     if (apiError.status === 400 || apiError.status === 403) {
@@ -317,9 +307,7 @@ export function useQuestionNavigation({
     return false;
   };
 
-  // ========================================================================
   // Public: Navigate to next question
-  // ========================================================================
 
   const handleNext = async () => {
     if (state.isSubmitting) return;
@@ -400,9 +388,7 @@ export function useQuestionNavigation({
     setState(prev => ({ ...prev, isSubmitting: false }));
   };
 
-  // ========================================================================
   // Public: Navigate to previous question with auto-save
-  // ========================================================================
 
   const handlePrevious = async () => {
     if (!state.allowBackNavigation || state.isSubmitting) return;
@@ -439,9 +425,7 @@ export function useQuestionNavigation({
     setState(prev => ({ ...prev, isSubmitting: false }));
   };
 
-  // ========================================================================
   // Public: Navigate to a specific question by index (dot navigation)
-  // ========================================================================
 
   const handleNavigateToQuestion = async (targetIndex: number) => {
     if (!state.allowBackNavigation || state.isSubmitting) return;
@@ -483,9 +467,7 @@ export function useQuestionNavigation({
     setState(prev => ({ ...prev, isSubmitting: false }));
   };
 
-  // ========================================================================
   // Public: Skip current question
-  // ========================================================================
 
   const handleSkip = async () => {
     if (!state.allowSkip || state.isSubmitting) return;
@@ -562,9 +544,7 @@ export function useQuestionNavigation({
     setState(prev => ({ ...prev, isSubmitting: false }));
   };
 
-  // ========================================================================
   // Public: Handle test completion
-  // ========================================================================
 
   const handleComplete = async () => {
     if (state.isSubmitting) return;
@@ -642,9 +622,7 @@ export function useQuestionNavigation({
     }
   };
 
-  // ========================================================================
   // Public: Handle exit/abandon
-  // ========================================================================
 
   const handleExit = () => {
     setShowAbandonDialog(true);
@@ -693,9 +671,7 @@ export function useQuestionNavigation({
     }
   };
 
-  // ========================================================================
   // Public: Navigation error recovery
-  // ========================================================================
 
   const handleRetryNavigation = async () => {
     if (!pendingNavigation) return;

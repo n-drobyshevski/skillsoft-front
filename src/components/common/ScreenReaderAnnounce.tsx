@@ -3,9 +3,7 @@
 import * as React from 'react';
 import { createContext, useContext, useState, useRef, useEffect } from 'react';
 
-// ============================================================================
 // Types
-// ============================================================================
 
 export type AnnouncePoliteNess = 'polite' | 'assertive';
 
@@ -23,9 +21,7 @@ interface ScreenReaderContextValue {
   clear: () => void;
 }
 
-// ============================================================================
 // Context
-// ============================================================================
 
 const ScreenReaderContext = createContext<ScreenReaderContextValue | null>(null);
 
@@ -60,9 +56,7 @@ export function useScreenReader() {
   return context;
 }
 
-// ============================================================================
 // Provider Component
-// ============================================================================
 
 interface ScreenReaderProviderProps {
   children: React.ReactNode;
@@ -162,9 +156,7 @@ export function ScreenReaderProvider({
   );
 }
 
-// ============================================================================
 // Direct Announcement Component
-// ============================================================================
 
 interface ScreenReaderOnlyProps {
   children: React.ReactNode;
@@ -215,9 +207,7 @@ export function ScreenReaderOnly({
   );
 }
 
-// ============================================================================
 // Announcement Hooks
-// ============================================================================
 
 /**
  * Hook to announce navigation changes
@@ -285,9 +275,7 @@ export function useLoadingAnnounce() {
   };
 }
 
-// ============================================================================
 // Question Progress Announcer
-// ============================================================================
 
 interface QuestionProgressAnnouncerProps {
   currentIndex: number;
@@ -327,9 +315,7 @@ export function QuestionProgressAnnouncer({
   );
 }
 
-// ============================================================================
 // Selection Announcer
-// ============================================================================
 
 interface SelectionAnnouncerProps {
   selectedCount: number;

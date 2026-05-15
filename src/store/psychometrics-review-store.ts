@@ -21,9 +21,7 @@ import { psychometricsApi } from '@/services/api';
  * - Persistence of reviewed items progress
  */
 
-// ============================================
 // STATE MACHINE TYPES
-// ============================================
 
 /**
  * Review workflow phases following a state machine pattern.
@@ -97,9 +95,7 @@ export interface BatchSagaState {
   status: 'pending' | 'executing' | 'completed' | 'partial_failure' | 'failed';
 }
 
-// ============================================
 // STORE STATE & ACTIONS
-// ============================================
 
 interface PsychometricsReviewState {
   /** Current phase in the review workflow state machine */
@@ -259,9 +255,7 @@ const initialState: PsychometricsReviewState = {
   loadingItemId: null,
 };
 
-// ============================================
 // SUGGESTION ALGORITHM
-// ============================================
 
 /**
  * Generate smart review suggestion based on item metrics
@@ -335,15 +329,11 @@ function generateSuggestionForItem(item: FlaggedItemSummary): ReviewSuggestion {
   };
 }
 
-// ============================================
 // UNDO EXPIRY INTERVAL
-// ============================================
 
 const UNDO_WINDOW_MS = 30_000; // 30 seconds
 
-// ============================================
 // STORE IMPLEMENTATION
-// ============================================
 
 export const usePsychometricsReviewStore = create<PsychometricsReviewStore>()(
   subscribeWithSelector(
@@ -352,9 +342,7 @@ export const usePsychometricsReviewStore = create<PsychometricsReviewStore>()(
         // Initial state
         ...initialState,
 
-        // ============================================
         // PHASE TRANSITIONS
-        // ============================================
 
         enterSelectMode: () => {
           set({ phase: 'SELECT' });
@@ -396,9 +384,7 @@ export const usePsychometricsReviewStore = create<PsychometricsReviewStore>()(
           });
         },
 
-        // ============================================
         // ITEM MANAGEMENT
-        // ============================================
 
         setItems: (items) => {
           set({ items });
@@ -424,9 +410,7 @@ export const usePsychometricsReviewStore = create<PsychometricsReviewStore>()(
           }));
         },
 
-        // ============================================
         // SELECTION MANAGEMENT
-        // ============================================
 
         toggleSelection: (itemId) => {
           set((state) => {
@@ -475,9 +459,7 @@ export const usePsychometricsReviewStore = create<PsychometricsReviewStore>()(
           }));
         },
 
-        // ============================================
         // REVIEW PROGRESS TRACKING
-        // ============================================
 
         markReviewed: (itemId) => {
           set((state) => ({
@@ -495,9 +477,7 @@ export const usePsychometricsReviewStore = create<PsychometricsReviewStore>()(
           set({ reviewedIds: new Set() });
         },
 
-        // ============================================
         // BATCH OPERATIONS WITH SAGA PATTERN
-        // ============================================
 
         executeBatchStatusChange: async (newStatus, reason) => {
           const { selectedIds, items } = get();
@@ -640,9 +620,7 @@ export const usePsychometricsReviewStore = create<PsychometricsReviewStore>()(
           });
         },
 
-        // ============================================
         // UNDO FUNCTIONALITY
-        // ============================================
 
         undo: async () => {
           const { undoStack } = get();
@@ -706,9 +684,7 @@ export const usePsychometricsReviewStore = create<PsychometricsReviewStore>()(
           return undoStack[0].expiresAt > Date.now();
         },
 
-        // ============================================
         // SUGGESTIONS
-        // ============================================
 
         generateSuggestions: () => {
           const { items } = get();
@@ -729,9 +705,7 @@ export const usePsychometricsReviewStore = create<PsychometricsReviewStore>()(
             : null;
         },
 
-        // ============================================
         // UI STATE
-        // ============================================
 
         toggleSection: (sectionId) => {
           set((state) => {
@@ -779,9 +753,7 @@ export const usePsychometricsReviewStore = create<PsychometricsReviewStore>()(
   )
 );
 
-// ============================================
 // SELECTOR HOOKS
-// ============================================
 
 /** Get current review phase */
 export const useReviewPhase = () =>
@@ -885,9 +857,7 @@ export const useExpandedSections = () =>
 export const useLastError = () =>
   usePsychometricsReviewStore((state) => state.lastError);
 
-// ============================================
 // ACTION SHORTCUTS
-// ============================================
 
 /** Quick action to retire all negative items */
 export const retireAllNegativeItems = async () => {

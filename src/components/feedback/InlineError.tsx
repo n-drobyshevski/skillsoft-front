@@ -23,9 +23,7 @@ import {
 import { ErrorCategory, ErrorAction } from '@/types/errors';
 import type { ServerFetchError } from '@/lib/server-fetch';
 
-// ============================================
 // TYPES
-// ============================================
 
 export interface InlineErrorProps {
   /** Error object from serverFetchWithRetry */
@@ -52,9 +50,7 @@ export interface InlineErrorProps {
   showActions?: boolean;
 }
 
-// ============================================
 // HELPER FUNCTIONS
-// ============================================
 
 function getErrorIcon(category: ErrorCategory | undefined) {
   switch (category) {
@@ -129,9 +125,7 @@ function getColorClasses(category: ErrorCategory | undefined, variant: InlineErr
   }
 }
 
-// ============================================
 // MAIN COMPONENT
-// ============================================
 
 /**
  * InlineError - Displays error messages inline within page content.

@@ -11,9 +11,7 @@ import { useState, useEffect, useRef } from 'react';
  * - Conflict detection and resolution UI triggers
  */
 
-// ============================================
 // TYPES
-// ============================================
 
 export interface SyncMessage<T> {
   type: 'STATE_UPDATE' | 'LOCK_ACQUIRED' | 'LOCK_RELEASED' | 'CONFLICT_DETECTED' | 'PING' | 'PONG';
@@ -62,9 +60,7 @@ interface UseMultiTabSyncReturn<T> {
   clearConflict: () => void;
 }
 
-// ============================================
 // HOOK
-// ============================================
 
 export function useMultiTabSync<T>({
   channelName,
@@ -312,9 +308,7 @@ export function useMultiTabSync<T>({
   };
 }
 
-// ============================================
 // HELPERS
-// ============================================
 
 function mergeStates<T>(local: T, remote: T): T {
   // If both are arrays, merge unique items

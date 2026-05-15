@@ -49,9 +49,7 @@ import {
   BIG_FIVE_DIMENSIONS 
 } from '@/types/domain';
 
-// =============================================================================
 // Types
-// =============================================================================
 
 interface BigFiveSelectProps {
   /** Current selected value */
@@ -74,9 +72,7 @@ interface BigFiveSelectProps {
   allowClear?: boolean;
 }
 
-// =============================================================================
 // Icon Mapping
-// =============================================================================
 
 const BigFiveIcons: Record<BigFiveDimension, React.ComponentType<{ className?: string }>> = {
   OPENNESS: Brain,
@@ -102,9 +98,7 @@ const BigFiveBgColors: Record<BigFiveDimension, string> = {
   EMOTIONAL_STABILITY: 'bg-teal-50 dark:bg-teal-950/40',
 };
 
-// =============================================================================
 // Component
-// =============================================================================
 
 export function BigFiveSelect({
   value,

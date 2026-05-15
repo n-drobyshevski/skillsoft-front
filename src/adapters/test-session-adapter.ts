@@ -14,9 +14,7 @@ import type {
   TestAnswer,
 } from '@/types/domain';
 
-// ============================================
 // TYPES
-// ============================================
 
 /**
  * Session mode - determines authentication mechanism and available features.
@@ -90,9 +88,7 @@ export interface SessionData extends TestSession {
   };
 }
 
-// ============================================
 // ADAPTER INTERFACE
-// ============================================
 
 /**
  * TestSessionAdapter interface for abstracting API differences.
@@ -104,9 +100,7 @@ export interface SessionData extends TestSession {
  * - Feature availability (test-drive mode, etc.)
  */
 export interface TestSessionAdapter {
-  // ============================================
   // Mode Information
-  // ============================================
 
   /** Session mode - affects available features and completion flow */
   readonly mode: SessionMode;
@@ -120,9 +114,7 @@ export interface TestSessionAdapter {
   /** Whether the adapter requires taker info on completion */
   readonly requiresTakerInfo: boolean;
 
-  // ============================================
   // Session Operations
-  // ============================================
 
   /**
    * Get session metadata by ID.
@@ -140,9 +132,7 @@ export interface TestSessionAdapter {
    */
   getCurrentQuestion(sessionId: string): Promise<CurrentQuestionResponse>;
 
-  // ============================================
   // Answer Operations
-  // ============================================
 
   /**
    * Submit an answer to the current question.
@@ -175,9 +165,7 @@ export interface TestSessionAdapter {
    */
   getSessionAnswers(sessionId: string): Promise<TestAnswer[]>;
 
-  // ============================================
   // Session Lifecycle
-  // ============================================
 
   /**
    * Complete the test session.
@@ -205,9 +193,7 @@ export interface TestSessionAdapter {
    */
   discardSession(sessionId: string): Promise<void>;
 
-  // ============================================
   // Time Management
-  // ============================================
 
   /**
    * Sync remaining time with server (for timed tests).
@@ -221,9 +207,7 @@ export interface TestSessionAdapter {
   ): Promise<void>;
 }
 
-// ============================================
 // TYPE GUARDS
-// ============================================
 
 /**
  * Check if a mode is authenticated.

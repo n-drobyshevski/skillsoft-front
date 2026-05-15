@@ -64,9 +64,7 @@ export type {
   NavigationStore,
 } from './useNavigationState';
 
-// ============================================================================
 // Composed Hooks (used by ImmersivePlayer)
-// ============================================================================
 
 // Timer Management Hook
 export { useTimerManagement } from './useTimerManagement';

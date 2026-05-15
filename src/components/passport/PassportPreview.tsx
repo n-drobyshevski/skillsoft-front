@@ -20,9 +20,7 @@ import { useFormattedDates } from '@/hooks/useFormattedDates';
 import { PassportStatusBadge, getPassportStatus } from './PassportStatusBadge';
 import type { CompetencyPassport } from '@/types/domain';
 
-// ============================================================================
 // Types
-// ============================================================================
 
 export interface PassportPreviewProps {
   /** The passport data */
@@ -39,9 +37,7 @@ export interface PassportPreviewProps {
   className?: string;
 }
 
-// ============================================================================
 // Helpers
-// ============================================================================
 
 function getScoreColor(score: number): string {
   if (score >= 80) return 'bg-emerald-500';
@@ -57,9 +53,7 @@ function getScoreTextColor(score: number): string {
   return 'text-red-600 dark:text-red-400';
 }
 
-// ============================================================================
 // Sub-components
-// ============================================================================
 
 function ScoreItem({
   name,
@@ -133,9 +127,7 @@ function EmptyState({ onStartAssessment }: { onStartAssessment?: () => void }) {
   );
 }
 
-// ============================================================================
 // Main Component
-// ============================================================================
 
 export function PassportPreview({
   passport,

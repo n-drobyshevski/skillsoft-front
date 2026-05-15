@@ -21,15 +21,11 @@
 
 import { revalidatePath } from 'next/cache';
 
-// ============================================================================
 // Path Constants
-// ============================================================================
 
 const PSYCHOMETRICS_PATH = '/psychometrics';
 
-// ============================================================================
 // Full Cache Invalidation (after audit)
-// ============================================================================
 
 /**
  * Invalidate all psychometrics cached data after an audit run.
@@ -48,9 +44,7 @@ export async function revalidatePsychometricsAfterAudit(): Promise<void> {
   }
 }
 
-// ============================================================================
 // Item-specific Invalidation
-// ============================================================================
 
 /**
  * Invalidate cached data for a specific item and related lists.
@@ -77,9 +71,7 @@ export async function revalidatePsychometricsItem(questionId: string): Promise<v
   }
 }
 
-// ============================================================================
 // Competency-specific Invalidation
-// ============================================================================
 
 /**
  * Invalidate cached data for a specific competency and related lists.
@@ -102,9 +94,7 @@ export async function revalidatePsychometricsCompetency(competencyId: string): P
   }
 }
 
-// ============================================================================
 // Flagged Items Invalidation
-// ============================================================================
 
 /**
  * Invalidate flagged items list and dashboard.
@@ -122,9 +112,7 @@ export async function revalidatePsychometricsFlagged(): Promise<void> {
   }
 }
 
-// ============================================================================
 // Big Five Invalidation
-// ============================================================================
 
 /**
  * Invalidate Big Five reliability data.

@@ -7,9 +7,7 @@ import type { FlaggedItemSummary, PsychometricHealthReport } from './psychometri
 import type { TestSession, TestTemplateSummary, AssessmentGoal } from './domain';
 import type { UserStats, User } from './user';
 
-// ============================================
 // DASHBOARD SUMMARY (Aggregated Data)
-// ============================================
 
 /**
  * Aggregated dashboard data from backend.
@@ -62,9 +60,7 @@ export interface DashboardUserInfo {
   role: 'ADMIN' | 'EDITOR' | 'USER';
 }
 
-// ============================================
 // PSYCHOMETRIC SUMMARY
-// ============================================
 
 /**
  * Psychometric summary for dashboard widget.
@@ -151,9 +147,7 @@ function isAuditRecommended(lastAuditRun: string | null): boolean {
   return daysSinceAudit > 7;
 }
 
-// ============================================
 // RECENT COMPLETION (Activity Feed)
-// ============================================
 
 /**
  * Recent test completion for activity feed
@@ -169,9 +163,7 @@ export interface RecentCompletion {
   passed?: boolean;
 }
 
-// ============================================
 // TEAM ANALYTICS (Future)
-// ============================================
 
 /**
  * Team analytics summary for dashboard widget
@@ -187,9 +179,7 @@ export interface TeamAnalyticsSummary {
   lastAssessmentDate: string;
 }
 
-// ============================================
 // JOB FIT (Future)
-// ============================================
 
 /**
  * Job fit summary for dashboard widget
@@ -205,9 +195,7 @@ export interface JobFitSummary {
   commonGaps: string[];
 }
 
-// ============================================
 // WIDGET TYPES
-// ============================================
 
 /**
  * Widget priority for mobile ordering
@@ -228,9 +216,7 @@ export interface TrendIndicator {
   isPositive?: boolean;
 }
 
-// ============================================
 // HELPER FUNCTIONS
-// ============================================
 
 /**
  * Get health status label from score

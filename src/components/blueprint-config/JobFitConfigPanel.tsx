@@ -36,18 +36,14 @@ import {
 import { ONetSearchCombobox } from './ONetSearchCombobox';
 import type { ONetProfile, ONetBenchmark } from '@/types/domain';
 
-// ============================================================================
 // Types
-// ============================================================================
 
 interface JobFitConfigPanelProps {
   /** Additional class names */
   className?: string;
 }
 
-// ============================================================================
 // Strictness Labels
-// ============================================================================
 
 const STRICTNESS_LABELS: Record<number, { label: string; description: string; color: string }> = {
   20: { label: 'Lenient', description: 'Broader candidate pool', color: 'text-green-600' },
@@ -65,9 +61,7 @@ function getStrictnessLabel(value: number) {
   return STRICTNESS_LABELS[closest];
 }
 
-// ============================================================================
 // Component
-// ============================================================================
 
 export function JobFitConfigPanel({
   className,
@@ -335,9 +329,7 @@ export function JobFitConfigPanel({
   );
 }
 
-// ============================================================================
 // Benchmark Item Subcomponent
-// ============================================================================
 
 interface BenchmarkItemProps {
   benchmark: ONetBenchmark;

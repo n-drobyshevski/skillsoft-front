@@ -3,9 +3,7 @@
  * Used by the fuzzy search engine for skill mapping
  */
 
-// =============================================================================
 // ESCO Types
-// =============================================================================
 
 /**
  * Raw ESCO skill entry from skills_en.json
@@ -47,9 +45,7 @@ export type ESCOReuseLevel =
   | 'occupation-specific' 
   | 'transversal';
 
-// =============================================================================
 // O*NET Types
-// =============================================================================
 
 /**
  * Raw O*NET ability entry from Abilities.json
@@ -136,9 +132,7 @@ export interface ONetOccupation {
 
 export type ONetCategory = 'ability' | 'work-style' | 'knowledge';
 
-// =============================================================================
 // Unified Search Types
-// =============================================================================
 
 /**
  * Unified skill item for search indexing
@@ -190,9 +184,7 @@ export interface SkillSearchConfig {
   filters?: SkillSearchFilters;
 }
 
-// =============================================================================
 // Big Five Mapping Types
-// =============================================================================
 
 export type BigFiveCode = 'O' | 'C' | 'E' | 'A' | 'N';
 
@@ -221,9 +213,7 @@ export interface BigFiveProfile {
   neuroticism: number;
 }
 
-// =============================================================================
 // Skill Recommendation Types
-// =============================================================================
 
 export interface SkillRecommendation {
   skill: UnifiedSkill;

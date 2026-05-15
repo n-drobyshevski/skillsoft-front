@@ -10,16 +10,12 @@ import {
 } from '@/types/profile';
 import { getAssessmentSummary, getCompetencyPassport } from '@/services/profile-api';
 
-// ============================================
 // RETRY CONFIGURATION
-// ============================================
 
 const MAX_RETRIES = 3;
 const RETRY_DELAYS = [1000, 3000, 5000]; // Exponential backoff
 
-// ============================================
 // STORE STATE
-// ============================================
 
 interface ProfileState {
   // Data
@@ -48,9 +44,7 @@ interface ProfileState {
   currentUserId: string | null;
 }
 
-// ============================================
 // STORE ACTIONS
-// ============================================
 
 interface ProfileActions {
   // Fetch actions
@@ -76,9 +70,7 @@ interface ProfileActions {
 
 type ProfileStore = ProfileState & ProfileActions;
 
-// ============================================
 // INITIAL STATE
-// ============================================
 
 const initialState: ProfileState = {
   summary: null,
@@ -102,9 +94,7 @@ const initialState: ProfileState = {
   currentUserId: null,
 };
 
-// ============================================
 // STORE IMPLEMENTATION
-// ============================================
 
 /**
  * Profile Store
@@ -297,9 +287,7 @@ export const useProfileStore = create<ProfileStore>()(
   )
 );
 
-// ============================================
 // OPTIMIZED SELECTORS
-// ============================================
 
 /**
  * Select summary data

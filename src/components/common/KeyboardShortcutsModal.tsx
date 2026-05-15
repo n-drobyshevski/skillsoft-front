@@ -24,9 +24,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-// ============================================================================
 // Types
-// ============================================================================
 
 export interface ShortcutDefinition {
   /** Key combination (e.g., "Enter", "Ctrl+S", "ArrowRight") */
@@ -54,9 +52,7 @@ export interface KeyboardShortcutsModalProps {
   context?: string;
 }
 
-// ============================================================================
 // Category Metadata
-// ============================================================================
 
 interface CategoryMeta {
   icon: LucideIcon;
@@ -117,9 +113,7 @@ function getCategoryMeta(category: string): CategoryMeta {
   return CATEGORY_META[category] ?? DEFAULT_META;
 }
 
-// ============================================================================
 // Keyboard Key Component
-// ============================================================================
 
 function KeyboardKey({ children, className }: { children: React.ReactNode; className?: string }) {
   return (
@@ -199,9 +193,7 @@ function isRangeCombo(keys: string[]): boolean {
   return !modifiers.includes(keys[0]) && !modifiers.includes(keys[1]);
 }
 
-// ============================================================================
 // Shortcut Row (compact vertical layout for card columns)
-// ============================================================================
 
 function ShortcutRow({
   shortcut,
@@ -228,9 +220,7 @@ function ShortcutRow({
   );
 }
 
-// ============================================================================
 // Category Card (one column in the grid)
-// ============================================================================
 
 function CategoryCard({
   category,
@@ -278,9 +268,7 @@ function CategoryCard({
   );
 }
 
-// ============================================================================
 // Main Component
-// ============================================================================
 
 export function KeyboardShortcutsModal({
   shortcuts,
@@ -415,9 +403,7 @@ export function KeyboardShortcutsModal({
   );
 }
 
-// ============================================================================
 // Hook for using shortcuts
-// ============================================================================
 
 export function useKeyboardShortcuts(initialShortcuts: ShortcutDefinition[]) {
   const [isOpen, setIsOpen] = useState(false);
@@ -442,9 +428,7 @@ export function useKeyboardShortcuts(initialShortcuts: ShortcutDefinition[]) {
   };
 }
 
-// ============================================================================
 // Preset Shortcut Definitions
-// ============================================================================
 
 export const TEST_PLAYER_SHORTCUTS: ShortcutDefinition[] = [
   { keys: ['→'], description: 'Go to next question', category: 'Navigation' },

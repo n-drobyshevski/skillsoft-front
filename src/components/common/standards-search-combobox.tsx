@@ -40,9 +40,7 @@ import { useBigFiveMapper, getBigFiveMapping } from '@/hooks/useBigFiveMapper';
 import { BigFiveSelect } from '@/components/standards/BigFiveSelect';
 import { toast } from 'sonner';
 
-// =============================================================================
 // Types
-// =============================================================================
 
 interface StandardsSearchComboboxProps {
   /** Current StandardCodesDto value */
@@ -59,9 +57,7 @@ interface StandardsSearchComboboxProps {
   className?: string;
 }
 
-// =============================================================================
 // Helper Functions
-// =============================================================================
 
 function mapToOnetRef(skill: UnifiedSkill): OnetRefDto {
   const categoryMap: Record<string, OnetRefDto['elementType']> = {
@@ -99,9 +95,7 @@ function mapToEscoRef(skill: UnifiedSkill): EscoRefDto {
   };
 }
 
-// =============================================================================
 // Loading Skeleton Component
-// =============================================================================
 
 function LoadingSkeleton() {
   return (
@@ -118,9 +112,7 @@ function LoadingSkeleton() {
   );
 }
 
-// =============================================================================
 // Filter Types
-// =============================================================================
 
 // O*NET element types for filtering
 const ONET_CATEGORIES = [
@@ -145,9 +137,7 @@ type OnetCategory = typeof ONET_CATEGORIES[number]['value'];
 type EscoCategory = typeof ESCO_CATEGORIES[number]['value'];
 type CategoryFilter = OnetCategory | EscoCategory;
 
-// =============================================================================
 // Single Standard Search Popover
-// =============================================================================
 
 interface StandardSearchPopoverProps {
   type: 'onet' | 'esco';
@@ -558,9 +548,7 @@ function StandardSearchPopover({
   );
 }
 
-// =============================================================================
 // Main Component
-// =============================================================================
 
 export function StandardsSearchCombobox({
   value,

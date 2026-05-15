@@ -3,9 +3,7 @@
  * Provides comprehensive error handling types that match backend ErrorResponse structure.
  */
 
-// ============================================
 // ERROR CATEGORIES
-// ============================================
 
 /**
  * Error categories for classifying API errors.
@@ -76,9 +74,7 @@ export enum ErrorCode {
   CONNECTION_REFUSED = 'CONNECTION_REFUSED',
 }
 
-// ============================================
 // ERROR INTERFACES
-// ============================================
 
 /**
  * Validation error detail for form fields.
@@ -152,9 +148,7 @@ export enum ErrorAction {
   NONE = 'NONE',
 }
 
-// ============================================
 // ERROR FACTORY FUNCTIONS
-// ============================================
 
 /**
  * Determines error category from HTTP status code.
@@ -256,9 +250,7 @@ export function createNetworkError(originalError?: Error): ApiError {
   return error;
 }
 
-// ============================================
 // USER-FACING ERROR MESSAGES
-// ============================================
 
 /**
  * Gets a user-friendly error message based on category.
@@ -314,9 +306,7 @@ export function getErrorTitle(category: ErrorCategory): string {
   }
 }
 
-// ============================================
 // ERROR CODE → USER-FRIENDLY MESSAGES (RU)
-// ============================================
 
 /**
  * Maps known backend error codes to user-friendly Russian messages.
@@ -342,9 +332,7 @@ export function getErrorCodeMessage(code: string | undefined): string | undefine
   return ERROR_CODE_MESSAGES[code];
 }
 
-// ============================================
 // TYPE GUARDS
-// ============================================
 
 /**
  * Type guard to check if an error is an ApiError.

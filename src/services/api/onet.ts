@@ -3,9 +3,7 @@ import { getONetProfileAction } from '@/app/actions/onet-actions';
 
 import type { ONetJobTitle, ONetProfile } from '@/types/domain';
 
-// ============================================
 // O*NET API (Hybrid: Local Data + Server Action)
-// ============================================
 //
 // Job title search uses local JSON (0.33 MB OccupationData.json).
 // Profile building delegates to a server action to avoid bundling

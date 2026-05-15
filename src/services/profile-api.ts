@@ -21,9 +21,7 @@ import {
 } from '@/types/profile';
 import { BigFiveProfile } from '@/hooks/useBigFiveProjection';
 
-// ============================================
 // CACHED DATA FETCHING FUNCTIONS
-// ============================================
 
 /**
  * Get user statistics with caching
@@ -71,9 +69,7 @@ export const getAllUserResults = cache(async (clerkUserId: string): Promise<Test
   }
 });
 
-// ============================================
 // UNIFIED DATA FETCHING (Fixes Waterfall)
-// ============================================
 
 /**
  * Unified profile data fetcher - fetches all data in parallel
@@ -106,9 +102,7 @@ export function preloadProfileData(clerkUserId: string): void {
   void getUnifiedProfileData(clerkUserId);
 }
 
-// ============================================
 // PROFILE DATA AGGREGATION
-// ============================================
 
 /**
  * Build assessment summary from unified data
@@ -260,9 +254,7 @@ function projectToBigFive(competencyScores: CompetencyScore[]): BigFiveProfile {
   };
 }
 
-// ============================================
 // SHARED TEMPLATES DATA
-// ============================================
 
 /**
  * Get templates shared with the current user
@@ -279,9 +271,7 @@ export const getSharedTemplates = cache(async (): Promise<SharedTemplatesRespons
   }
 });
 
-// ============================================
 // COMBINED PROFILE DATA
-// ============================================
 
 /**
  * Fetch all profile data in parallel

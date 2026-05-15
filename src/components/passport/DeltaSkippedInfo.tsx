@@ -6,9 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Sparkles, CheckCircle2, Clock } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-// ============================================================================
 // Types
-// ============================================================================
 
 export interface SkippedCompetency {
   /** Competency ID */
@@ -30,9 +28,7 @@ export interface DeltaSkippedInfoProps {
   className?: string;
 }
 
-// ============================================================================
 // Helpers
-// ============================================================================
 
 function getScoreColor(score: number): string {
   if (score >= 80) return 'text-emerald-600 dark:text-emerald-400';
@@ -50,9 +46,7 @@ function formatTimeSaved(minutes: number): string {
   return `~${hours} ч ${mins} мин`;
 }
 
-// ============================================================================
 // Component
-// ============================================================================
 
 export function DeltaSkippedInfo({
   skippedCompetencies,

@@ -38,24 +38,18 @@ import type {
  * Requires taker info on completion.
  */
 export class AnonymousTestSessionAdapter implements TestSessionAdapter {
-  // ============================================
   // Mode Information
-  // ============================================
 
   readonly mode: SessionMode = 'anonymous';
   readonly supportsTestDrive = false; // HR-only feature
   readonly supportsAnswerReview = true;
   readonly requiresTakerInfo = true;
 
-  // ============================================
   // Private State
-  // ============================================
 
   private readonly accessToken: string;
 
-  // ============================================
   // Constructor
-  // ============================================
 
   /**
    * Create an anonymous adapter.
@@ -77,9 +71,7 @@ export class AnonymousTestSessionAdapter implements TestSessionAdapter {
     this.accessToken = accessToken;
   }
 
-  // ============================================
   // Type Normalization Helpers
-  // ============================================
 
   /**
    * Normalize anonymous session response to SessionData.
@@ -181,9 +173,7 @@ export class AnonymousTestSessionAdapter implements TestSessionAdapter {
     return { questionId, selectedOptionIndex };
   }
 
-  // ============================================
   // Session Operations
-  // ============================================
 
   async getSession(sessionId: string): Promise<SessionData> {
     const response = await anonymousTestApi.getSession(sessionId, this.accessToken);
@@ -198,9 +188,7 @@ export class AnonymousTestSessionAdapter implements TestSessionAdapter {
     return normalized;
   }
 
-  // ============================================
   // Answer Operations
-  // ============================================
 
   async submitAnswer(
     sessionId: string,
@@ -247,9 +235,7 @@ export class AnonymousTestSessionAdapter implements TestSessionAdapter {
     return [];
   }
 
-  // ============================================
   // Session Lifecycle
-  // ============================================
 
   async completeSession(
     sessionId: string,
@@ -313,9 +299,7 @@ export class AnonymousTestSessionAdapter implements TestSessionAdapter {
     anonymousTestApi.clearCredentials();
   }
 
-  // ============================================
   // Time Management
-  // ============================================
 
   async syncTimeRemaining(
     sessionId: string,

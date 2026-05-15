@@ -4,9 +4,7 @@ import React from 'react';
 import { FileQuestion, Timer, MessageSquare } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-// ============================================================================
 // Types
-// ============================================================================
 
 interface AssemblyStatsProps {
   /** Number of questions selected so far */
@@ -19,9 +17,7 @@ interface AssemblyStatsProps {
   className?: string;
 }
 
-// ============================================================================
 // Helpers
-// ============================================================================
 
 function formatElapsed(ms: number): string {
   const seconds = Math.floor(ms / 1000);
@@ -31,9 +27,7 @@ function formatElapsed(ms: number): string {
   return `${minutes}m ${remainingSeconds}s`;
 }
 
-// ============================================================================
 // Component
-// ============================================================================
 
 export function AssemblyStats({
   questionsSelected,

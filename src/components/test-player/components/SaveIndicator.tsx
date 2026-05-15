@@ -5,9 +5,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Check, Loader2, AlertCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-// ============================================================================
 // Types
-// ============================================================================
 
 export type AnswerSaveStatus = 'idle' | 'saving' | 'saved' | 'error';
 
@@ -16,9 +14,7 @@ interface SaveIndicatorProps {
   className?: string;
 }
 
-// ============================================================================
 // Component
-// ============================================================================
 
 /**
  * SaveIndicator - Subtle visual feedback for answer submission state.

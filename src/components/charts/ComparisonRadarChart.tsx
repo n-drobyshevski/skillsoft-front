@@ -3,9 +3,7 @@
 import { useMemo, useState, useRef } from 'react';
 import { cn } from '@/lib/utils';
 
-// ============================================================================
 // Types
-// ============================================================================
 
 export interface RadarDataPoint {
   label: string;
@@ -32,9 +30,7 @@ export interface ComparisonRadarChartProps {
   className?: string;
 }
 
-// ============================================================================
 // Default dataset configs
-// ============================================================================
 
 const DEFAULT_PRIMARY: RadarDatasetConfig = {
   label: 'Candidate',
@@ -53,9 +49,7 @@ const DEFAULT_SECONDARY: RadarDatasetConfig = {
   dashed: true,
 };
 
-// ============================================================================
 // Geometry helpers
-// ============================================================================
 
 function polarToXY(cx: number, cy: number, radius: number, angle: number): [number, number] {
   return [cx + radius * Math.cos(angle), cy + radius * Math.sin(angle)];
@@ -75,15 +69,11 @@ function buildPolygon(values: number[], cx: number, cy: number, maxRadius: numbe
     .join(' ');
 }
 
-// ============================================================================
 // Constants
-// ============================================================================
 
 const GRID_LEVELS = [0, 25, 50, 75, 100];
 
-// ============================================================================
 // ComparisonRadarChart — generic pure SVG radar with hover tooltips
-// ============================================================================
 
 export function ComparisonRadarChart({
   data,

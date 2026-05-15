@@ -21,9 +21,7 @@ import { testTemplatesApi, competenciesApi, activityApi } from '@/services/api';
 import type { Competency } from '@/types/domain';
 import type { TestActivity, TemplateActivityStats } from '@/types/activity';
 
-// ============================================================================
 // Competencies
-// ============================================================================
 
 /**
  * Get all competencies (cached per request).
@@ -53,9 +51,7 @@ export const getCachedActiveCompetencies = cache(async (): Promise<Competency[]>
   return all.filter((c) => c.isActive);
 });
 
-// ============================================================================
 // Test Templates
-// ============================================================================
 
 /**
  * Get a test template by ID (cached per request).
@@ -75,9 +71,7 @@ export const getCachedTemplate = cache(async (id: string) => {
   }
 });
 
-// ============================================================================
 // Activity Data
-// ============================================================================
 
 /**
  * Get recent activity for a template (cached per request).
@@ -115,9 +109,7 @@ export const getCachedTemplateActivityStats = cache(
   }
 );
 
-// ============================================================================
 // Composite Data Fetchers
-// ============================================================================
 
 /**
  * Get overview data for a template (template + competencies + activity).

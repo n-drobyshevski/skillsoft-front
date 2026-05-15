@@ -32,9 +32,7 @@ import type {
   Page,
 } from '@/types/psychometrics';
 
-// ============================================================================
 // Generic fetch hook (shared with useTemplateSharingQuery)
-// ============================================================================
 
 interface FetchState<T> {
   data: T | undefined;
@@ -111,9 +109,7 @@ function useFetch<T>(
   };
 }
 
-// ============================================================================
 // Generic mutation hook
-// ============================================================================
 
 interface MutationState<TData, TVariables> {
   mutateAsync: (variables: TVariables) => Promise<TData>;
@@ -166,9 +162,7 @@ function useMutationFn<TData, TVariables>(
   return { mutateAsync, isPending, isSuccess, isError, error, data };
 }
 
-// ============================================================================
 // Query Keys - Kept for structural compatibility
-// ============================================================================
 
 export const psychometricsKeys = {
   all: ['psychometrics'] as const,
@@ -187,9 +181,7 @@ export const psychometricsKeys = {
   bigFive: () => [...psychometricsKeys.all, 'big-five'] as const,
 };
 
-// ============================================================================
 // Dashboard Hooks
-// ============================================================================
 
 /**
  * Hook to fetch psychometrics dashboard overview
@@ -198,9 +190,7 @@ export function usePsychometricsDashboard() {
   return useFetch(() => psychometricsApi.getDashboard());
 }
 
-// ============================================================================
 // Items Hooks
-// ============================================================================
 
 /**
  * Hook to fetch paginated item statistics with filters
@@ -245,9 +235,7 @@ export function useRecalculateItem() {
   );
 }
 
-// ============================================================================
 // Competencies Hooks
-// ============================================================================
 
 /**
  * Hook to fetch paginated competency reliability data
@@ -268,9 +256,7 @@ export function usePsychometricsCompetencyDetail(competencyId: string) {
   );
 }
 
-// ============================================================================
 // Flagged Items Hooks
-// ============================================================================
 
 /**
  * Hook to fetch all flagged items
@@ -279,9 +265,7 @@ export function usePsychometricsFlaggedItems() {
   return useFetch(() => psychometricsApi.getFlaggedItems());
 }
 
-// ============================================================================
 // Big Five Hooks
-// ============================================================================
 
 /**
  * Hook to fetch Big Five trait reliability data
@@ -290,9 +274,7 @@ export function usePsychometricsBigFive() {
   return useFetch(() => psychometricsApi.getBigFiveReliability());
 }
 
-// ============================================================================
 // Audit Hooks
-// ============================================================================
 
 /**
  * Mutation hook to trigger psychometric audit
@@ -301,9 +283,7 @@ export function useTriggerAudit() {
   return useMutationFn(() => psychometricsApi.triggerAudit());
 }
 
-// ============================================================================
 // Batch Update Hook
-// ============================================================================
 
 /**
  * Mutation hook for batch status updates

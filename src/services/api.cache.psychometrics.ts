@@ -47,9 +47,7 @@ const getApiBaseUrl = () => {
 
 const PSYCHOMETRICS_BASE = '/psychometrics';
 
-// ============================================================================
 // Dashboard
-// ============================================================================
 
 /**
  * Cached psychometrics dashboard fetcher.
@@ -80,9 +78,7 @@ export async function getPsychometricsDashboardCached(
   }
 }
 
-// ============================================================================
 // Items (Assessment Questions Statistics)
-// ============================================================================
 
 /**
  * Cached items list fetcher with optional filters.
@@ -152,9 +148,7 @@ export async function getPsychometricsItemDetailCached(
   }
 }
 
-// ============================================================================
 // Competencies (Reliability Statistics)
-// ============================================================================
 
 /**
  * Cached competencies list fetcher with optional filters.
@@ -219,9 +213,7 @@ export async function getPsychometricsCompetencyDetailCached(
   }
 }
 
-// ============================================================================
 // Flagged Items
-// ============================================================================
 
 /**
  * Cached flagged items fetcher.
@@ -252,9 +244,7 @@ export async function getPsychometricsFlaggedItemsCached(
   }
 }
 
-// ============================================================================
 // Big Five Traits
-// ============================================================================
 
 /**
  * Cached Big Five reliability fetcher.
@@ -285,9 +275,7 @@ export async function getPsychometricsBigFiveCached(
   }
 }
 
-// ============================================================================
 // Aggregate Fetchers (for dashboard with parallel loading)
-// ============================================================================
 
 /**
  * Fetch all data needed for the psychometrics dashboard in parallel.

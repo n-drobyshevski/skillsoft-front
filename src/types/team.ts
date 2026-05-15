@@ -17,9 +17,7 @@ export enum TeamMemberRole {
   MEMBER = 'MEMBER',
 }
 
-// ============================================
 // USER SUMMARY (lightweight for team context)
-// ============================================
 
 export interface TeamUserSummary {
   id: string;
@@ -29,9 +27,7 @@ export interface TeamUserSummary {
   imageUrl?: string;
 }
 
-// ============================================
 // TEAM MEMBER
-// ============================================
 
 export interface ManagedTeamMember {
   userId: string;
@@ -44,9 +40,7 @@ export interface ManagedTeamMember {
   isActive: boolean;
 }
 
-// ============================================
 // TEAM (Management)
-// ============================================
 
 export interface ManagedTeamSummary {
   id: string;
@@ -72,9 +66,7 @@ export interface ManagedTeam {
   archivedAt?: string;
 }
 
-// ============================================
 // TEAM PROFILE (for TEAM_FIT assessments)
-// ============================================
 
 export interface TeamMemberProfileSummary {
   userId: string;
@@ -103,9 +95,7 @@ export interface ManagedTeamProfile {
   skillGaps: SkillGap[];
 }
 
-// ============================================
 // REQUEST / RESPONSE TYPES
-// ============================================
 
 export interface CreateTeamRequest {
   name: string;
@@ -128,9 +118,7 @@ export interface SetLeaderRequest {
   leaderId: string | null;
 }
 
-// ============================================
 // RESULT TYPES
-// ============================================
 
 export interface ActivationResult {
   success: boolean;
@@ -154,9 +142,7 @@ export interface FitScoreResult {
   fitScore: number;
 }
 
-// ============================================
 // TEAM STATISTICS
-// ============================================
 
 export interface TeamStats {
   totalTeams: number;
@@ -165,9 +151,7 @@ export interface TeamStats {
   archivedTeams: number;
 }
 
-// ============================================
 // PAGINATION
-// ============================================
 
 export interface PageResponse<T> {
   content: T[];
@@ -179,9 +163,7 @@ export interface PageResponse<T> {
   last: boolean;
 }
 
-// ============================================
 // HELPER FUNCTIONS
-// ============================================
 
 export function getTeamStatusKey(status: TeamStatus): 'draft' | 'active' | 'archived' {
   switch (status) {

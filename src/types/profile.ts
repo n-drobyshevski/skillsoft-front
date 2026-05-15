@@ -5,9 +5,7 @@
 import { AssessmentGoal, TestResult } from './domain';
 import { BigFiveProfile } from '@/hooks/useBigFiveProjection';
 
-// ============================================
 // USER PROFILE TYPES
-// ============================================
 
 /**
  * User info from Clerk
@@ -22,9 +20,7 @@ export interface ProfileUserInfo {
   createdAt: Date;
 }
 
-// ============================================
 // ASSESSMENT SUMMARY TYPES
-// ============================================
 
 /**
  * Summary of a recent test result for display on profile
@@ -76,9 +72,7 @@ export interface AssessmentSummary {
   recentScores: number[];
 }
 
-// ============================================
 // COMPETENCY PASSPORT TYPES
-// ============================================
 
 /**
  * Top competency with aggregated score across assessments
@@ -108,9 +102,7 @@ export interface CompetencyPassport {
   lastUpdated: string | null;
 }
 
-// ============================================
 // PROFILE STATE TYPES
-// ============================================
 
 /**
  * Loading state for profile sections
@@ -143,9 +135,7 @@ export interface ProfileErrors {
   passport: ProfileError | null;
 }
 
-// ============================================
 // HELPER FUNCTIONS
-// ============================================
 
 /**
  * Transform TestResult to RecentTestResult for profile display

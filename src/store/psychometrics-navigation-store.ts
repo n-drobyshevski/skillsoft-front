@@ -11,9 +11,7 @@ import { subscribeWithSelector, persist } from 'zustand/middleware';
  * - Session persistence for navigation state
  */
 
-// ============================================
 // NAVIGATION PHASE TYPES
-// ============================================
 
 /**
  * Navigation phases for mobile psychometrics workflow.
@@ -61,9 +59,7 @@ interface SelectedEntities {
   indicatorId: string | null;
 }
 
-// ============================================
 // STORE STATE & ACTIONS
-// ============================================
 
 interface PsychometricsNavigationState {
   /** Current navigation phase */
@@ -158,9 +154,7 @@ interface PsychometricsNavigationActions {
 type PsychometricsNavigationStore = PsychometricsNavigationState &
   PsychometricsNavigationActions;
 
-// ============================================
 // PHASE LABEL MAPPING
-// ============================================
 
 const phaseLabels: Record<NavigationPhase, string> = {
   DASHBOARD: 'Психометрика',
@@ -188,9 +182,7 @@ const phasePaths: Record<NavigationPhase, string> = {
   FLAGGED_DETAIL: '/psychometrics/flagged/',
 };
 
-// ============================================
 // INITIAL STATE
-// ============================================
 
 const initialState: PsychometricsNavigationState = {
   currentPhase: 'DASHBOARD',
@@ -215,9 +207,7 @@ const initialState: PsychometricsNavigationState = {
   lastPath: null,
 };
 
-// ============================================
 // STORE IMPLEMENTATION
-// ============================================
 
 export const usePsychometricsNavigationStore =
   create<PsychometricsNavigationStore>()(
@@ -227,9 +217,7 @@ export const usePsychometricsNavigationStore =
           // Initial state
           ...initialState,
 
-          // ============================================
           // NAVIGATION ACTIONS
-          // ============================================
 
           navigateTo: (phase, options = {}) => {
             const { history, currentPhase, scrollPositions } = get();
@@ -368,9 +356,7 @@ export const usePsychometricsNavigationStore =
             set({ isTransitioning });
           },
 
-          // ============================================
           // DRAWER ACTIONS
-          // ============================================
 
           toggleDrawer: () => {
             set((state) => ({ isDrawerOpen: !state.isDrawerOpen }));
@@ -380,9 +366,7 @@ export const usePsychometricsNavigationStore =
             set({ isDrawerOpen: open });
           },
 
-          // ============================================
           // ACCORDION SECTION ACTIONS
-          // ============================================
 
           toggleSection: (sectionId) => {
             set((state) => {
@@ -416,9 +400,7 @@ export const usePsychometricsNavigationStore =
             });
           },
 
-          // ============================================
           // ENTITY SELECTION
-          // ============================================
 
           setSelectedEntity: (type, id) => {
             set((state) => ({
@@ -437,9 +419,7 @@ export const usePsychometricsNavigationStore =
             });
           },
 
-          // ============================================
           // UTILITY ACTIONS
-          // ============================================
 
           reset: () => {
             set({
@@ -490,9 +470,7 @@ export const usePsychometricsNavigationStore =
     )
   );
 
-// ============================================
 // SELECTOR HOOKS
-// ============================================
 
 /** Get current navigation phase */
 export const useCurrentPhase = () =>
@@ -538,9 +516,7 @@ export const useCanGoBack = () =>
 export const useBreadcrumbs = () =>
   usePsychometricsNavigationStore((state) => state.history);
 
-// ============================================
 // ACTION SHORTCUTS
-// ============================================
 
 /** Navigate to competencies list */
 export const navigateToCompetencies = () => {

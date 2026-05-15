@@ -89,9 +89,7 @@ export function TestTemplatesWidget({
   );
 }
 
-// ============================================
 // CONSTANTS
-// ============================================
 
 const GOAL_ACCENT_COLORS: Record<string, { border: string; badge: string }> = {
   OVERVIEW: {
@@ -108,9 +106,7 @@ const GOAL_ACCENT_COLORS: Record<string, { border: string; badge: string }> = {
   },
 };
 
-// ============================================
 // TEMPLATE PREVIEW CARD
-// ============================================
 
 function TemplatePreviewCard({
   template,
@@ -186,9 +182,7 @@ function TemplatePreviewCard({
   );
 }
 
-// ============================================
 // EMPTY STATE
-// ============================================
 
 function EmptyState({ t }: { t: ReturnType<typeof useTranslations<'dashboard'>> }) {
   return (
@@ -214,9 +208,7 @@ function EmptyState({ t }: { t: ReturnType<typeof useTranslations<'dashboard'>> 
   );
 }
 
-// ============================================
 // SKELETON
-// ============================================
 
 function TestTemplatesWidgetSkeleton({
   className,

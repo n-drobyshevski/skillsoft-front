@@ -37,9 +37,7 @@ const getApiBaseUrl = () => {
   return `${protocol}://${apiUrl}/api${versionPath}`;
 };
 
-// ============================================================================
 // Cached sub-fetchers
-// ============================================================================
 
 interface PaginatedResponse<T> {
   content: T[];
@@ -89,9 +87,7 @@ async function getUserResultsCached(
   }
 }
 
-// ============================================================================
 // Aggregation helpers (pure functions)
-// ============================================================================
 
 function computePersonalStats(results: TestResult[]): PersonalStats | null {
   const completed = results.filter(r => r.status === 'COMPLETED' && r.overallPercentage != null);
@@ -163,9 +159,7 @@ function extractBigFiveSnapshot(results: TestResult[]): BigFiveSnapshot | null {
   };
 }
 
-// ============================================================================
 // Main orchestrator (NOT cached — calls cached sub-fetchers)
-// ============================================================================
 
 /**
  * Fetch and aggregate all data for the user dashboard.

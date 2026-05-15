@@ -13,9 +13,7 @@ import { persist, createJSONStorage } from 'zustand/middleware';
  * - Multi-instance support via scope parameter
  */
 
-// ============================================
 // TYPES
-// ============================================
 
 export type HistoryActionType =
   | 'ADD_COMPETENCY'
@@ -58,9 +56,7 @@ export interface HistoryStoreState<T> {
   getHistoryLog: () => Array<{ actionType: HistoryActionType; timestamp: number; description?: string }>;
 }
 
-// ============================================
 // STORE FACTORY
-// ============================================
 
 /**
  * Creates a scoped history store instance
@@ -247,9 +243,7 @@ export function createHistoryStore<T>() {
   );
 }
 
-// ============================================
 // DEFAULT INSTANCE
-// ============================================
 
 /**
  * Default history store for blueprint competencies
@@ -257,9 +251,7 @@ export function createHistoryStore<T>() {
  */
 export const useBlueprintHistoryStore = createHistoryStore<unknown>();
 
-// ============================================
 // HOOK FOR TYPED USAGE
-// ============================================
 
 /**
  * Hook for using history store with proper typing

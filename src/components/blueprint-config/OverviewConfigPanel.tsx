@@ -40,18 +40,14 @@ import {
   Shield,
 } from 'lucide-react';
 
-// ============================================================================
 // Types
-// ============================================================================
 
 interface OverviewConfigPanelProps {
   selectedCompetencyCount: number;
   className?: string;
 }
 
-// ============================================================================
 // Big Five Info Cards
-// ============================================================================
 
 const BIG_FIVE_TRAITS = [
   { key: 'OPENNESS', name: 'O', fullName: 'Openness', icon: Lightbulb, color: 'text-purple-500', bg: 'bg-purple-50 dark:bg-purple-950/40' },
@@ -61,9 +57,7 @@ const BIG_FIVE_TRAITS = [
   { key: 'EMOTIONAL_STABILITY', name: 'ES', fullName: 'Emotional Stability', icon: Shield, color: 'text-green-500', bg: 'bg-green-50 dark:bg-green-950/40' },
 ];
 
-// ============================================================================
 // Component
-// ============================================================================
 
 export function OverviewConfigPanel({
   selectedCompetencyCount,

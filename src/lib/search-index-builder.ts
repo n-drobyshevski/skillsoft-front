@@ -1,13 +1,3 @@
-/**
- * Search Index Builder
- * 
- * Processes and normalizes ESCO and O*NET JSON data into a unified
- * searchable format for the fuzzy search engine.
- * 
- * This module runs client-side and builds the search index from
- * static JSON imports with zero network calls.
- */
-
 import type {
   ESCOSkillRaw,
   ONetAbilityRaw,
@@ -17,21 +7,11 @@ import type {
   ESCOReuseLevel,
 } from '@/types/skills';
 
-// =============================================================================
-// ESCO Processing
-// =============================================================================
-
-/**
- * Extract ID from ESCO concept URI
- */
 function extractESCOId(uri: string): string {
   const parts = uri.split('/');
   return parts[parts.length - 1];
 }
 
-/**
- * Parse alternative labels from newline-separated string
- */
 function parseAltLabels(altLabels: string): string[] {
   if (!altLabels || altLabels.trim() === '') {
     return [];
@@ -42,9 +22,6 @@ function parseAltLabels(altLabels: string): string[] {
     .filter(label => label.length > 0);
 }
 
-/**
- * Map ESCO skill type to category
- */
 function mapESCOCategory(skillType: string, reuseLevel: string): string {
   if (skillType === 'knowledge') {
     return 'Knowledge';
@@ -92,9 +69,7 @@ export function processESCOSkills(rawSkills: ESCOSkillRaw[]): UnifiedSkill[] {
     .map(processESCOSkill);
 }
 
-// =============================================================================
 // O*NET Processing
-// =============================================================================
 
 /**
  * Deduplicate O*NET elements and aggregate occupation data
@@ -231,9 +206,7 @@ export function processONetKnowledge(rawKnowledge: ONetKnowledgeRaw[]): UnifiedS
   return aggregated.map(element => processONetElement(element, 'knowledge'));
 }
 
-// =============================================================================
 // Index Builder
-// =============================================================================
 
 export interface SearchIndexData {
   skills: UnifiedSkill[];

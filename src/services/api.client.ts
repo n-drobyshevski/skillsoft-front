@@ -225,9 +225,7 @@ async function clientFetch<T>(
   return handleResponse<T>(response, endpoint, method);
 }
 
-// ============================================
 // CLIENT-SIDE TEST SESSIONS API
-// ============================================
 
 export const testSessionsClientApi = {
   /**
@@ -433,9 +431,7 @@ export function getCompetencyIssuesFromError(error: ApiError): CompetencyIssue[]
   return (error.context.competencyIssues as CompetencyIssue[]) || [];
 }
 
-// ============================================
 // SCORING WORKFLOW: POLLING & RETRY FUNCTIONS
-// ============================================
 
 import { ResultStatus } from '@/types/domain';
 

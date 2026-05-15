@@ -27,9 +27,7 @@ import type {
   SkillSearchFilters,
 } from '@/types/skills';
 
-// =============================================================================
 // Types
-// =============================================================================
 
 export interface UseWorkerSearchOptions {
   /** Search threshold (0.0 = exact, 1.0 = match anything). Default: 0.4 */
@@ -93,9 +91,7 @@ interface WorkerResponse {
   id: string;
 }
 
-// =============================================================================
 // Utilities
-// =============================================================================
 
 /**
  * Generate unique message ID
@@ -135,9 +131,7 @@ function applyFilters(
   return filtered;
 }
 
-// =============================================================================
 // Default Fuse Options
-// =============================================================================
 
 const DEFAULT_FUSE_OPTIONS: IFuseOptions<UnifiedSkill> = {
   threshold: 0.4,
@@ -155,9 +149,7 @@ const DEFAULT_FUSE_OPTIONS: IFuseOptions<UnifiedSkill> = {
   includeMatches: true,
 };
 
-// =============================================================================
 // Main Hook
-// =============================================================================
 
 /**
  * Web Worker-based fuzzy search hook with useDeferredValue

@@ -27,9 +27,7 @@ import Link from 'next/link';
 import type { PsychometricSummary } from '@/types/dashboard';
 import { useTranslations } from 'next-intl';
 
-// ============================================
 // TYPES & PROPS
-// ============================================
 
 export interface PsychometricHealthWidgetProps {
   data: PsychometricSummary | null;
@@ -49,9 +47,7 @@ interface ScoreColors {
   labelKey: ScoreLevel;
 }
 
-// ============================================
 // SCORE COLOR MAPPING
-// ============================================
 
 function getScoreColors(score: number): ScoreColors {
   if (score >= 80) {
@@ -90,9 +86,7 @@ function getScoreColors(score: number): ScoreColors {
   };
 }
 
-// ============================================
 // GAUGE COMPONENTS
-// ============================================
 
 /**
  * Circular gauge with gradient arc track, center score, and label.
@@ -234,9 +228,7 @@ function CompactHealthBar({
   );
 }
 
-// ============================================
 // METRIC ROW
-// ============================================
 
 type MetricVariant = 'default' | 'success' | 'warning' | 'info';
 
@@ -288,9 +280,7 @@ function MetricItem({
   return content;
 }
 
-// ============================================
 // SCORE BREAKDOWN
-// ============================================
 
 function ScoreBreakdownBar({
   activeRatio,
@@ -344,9 +334,7 @@ function ScoreBreakdownBar({
   );
 }
 
-// ============================================
 // TOP FLAGGED ITEMS PREVIEW
-// ============================================
 
 function FlaggedItemsPreview({
   items,
@@ -389,9 +377,7 @@ function FlaggedItemsPreview({
   );
 }
 
-// ============================================
 // AUDIT BANNER
-// ============================================
 
 function AuditBanner({
   onTriggerAudit,
@@ -433,9 +419,7 @@ function AuditBanner({
   );
 }
 
-// ============================================
 // HELPER: Format last audit date
-// ============================================
 
 function formatLastAudit(
   dateStr: string | null,
@@ -448,9 +432,7 @@ function formatLastAudit(
   return t('daysAgo', { count: days });
 }
 
-// ============================================
 // MAIN WIDGET
-// ============================================
 
 export function PsychometricHealthWidget({
   data,
@@ -652,9 +634,7 @@ export function PsychometricHealthWidget({
   );
 }
 
-// ============================================
 // SKELETON
-// ============================================
 
 function PsychometricHealthWidgetSkeleton({ className }: { className?: string }) {
   return (

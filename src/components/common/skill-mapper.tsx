@@ -28,9 +28,7 @@ import {
   DrawerClose,
 } from '@/components/ui/drawer';
 
-// =============================================================================
 // Types
-// =============================================================================
 
 interface SkillMapperProps {
   skills: UnifiedSkill[];
@@ -41,9 +39,7 @@ interface SkillMapperProps {
   useWorker?: boolean;
 }
 
-// =============================================================================
 // Sub-Components
-// =============================================================================
 
 const HighlightedText = memo(function HighlightedText({
   text,
@@ -448,9 +444,7 @@ const FilterPanel = memo(function FilterPanel({
   );
 });
 
-// =============================================================================
 // Main Component
-// =============================================================================
 
 export function SkillMapper({
   skills,
