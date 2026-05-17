@@ -109,6 +109,7 @@ export const HR_NAMESPACES = [
   'forms',
   'indicator',
   'question',
+  'help',
 ] as const;
 
 /**
