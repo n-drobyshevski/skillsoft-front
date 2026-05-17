@@ -339,7 +339,7 @@ function StandardsCard({ standardCodes }: { standardCodes?: StandardCodesDto }) 
 	
 	// Use stored Big Five or computed from O*NET mapping
 	const bigFive: BigFiveDimension | null = storedBigFive || (computedMapping?.bigFive ?? null);
-	const facet: string | null = storedFacet || (computedMapping?.dimension ?? null);
+	const facet: string | null = storedFacet || (computedMapping?.facet ?? null);
 	const isComputed: boolean = !storedBigFive && !!computedMapping?.bigFive;
 	
 	const hasAny: boolean = hasOnet || hasEsco || hasBigFive || !!bigFive;

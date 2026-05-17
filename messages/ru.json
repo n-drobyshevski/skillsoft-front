@@ -162,7 +162,9 @@
     "weightSum": "Сумма весов должна равняться 1.0",
     "uniqueTitle": "Такое название уже существует",
     "onetCodeRequired": "Код O*NET обязателен",
-    "escoUriInvalid": "Должен быть корректным ESCO URI"
+    "onetCodePattern": "Должен быть корректным идентификатором O*NET (например, 1.A.1.a.1 или 2.B.1.a)",
+    "escoUriInvalid": "Должен быть корректным ESCO URI",
+    "escoUriPattern": "Должен быть корректным ESCO URI (data.europa.eu/esco/skill/...)"
   },
   "errors": {
     "generic": "Произошла ошибка. Попробуйте еще раз.",
@@ -388,6 +390,64 @@
     "standardMappingDescription": "Связь с O*NET, ESCO или личностными фреймворками",
     "standardsReference": "Ссылка на стандарты",
     "standardsReferenceHelp": "Привяжите компетенцию к установленным фреймворкам: профессиональные навыки O*NET, европейская таксономия ESCO или личностные черты Большой пятёрки для стандартизированной оценки.",
+    "standards": {
+      "onetSlot": {
+        "title": "Профессиональная привязка",
+        "primary": "Основной",
+        "emptyPrompt": "Поиск способностей, навыков и знаний",
+        "browse": "Выбрать",
+        "clear": "Очистить выбор O*NET",
+        "codeLabel": "Код"
+      },
+      "escoSlot": {
+        "title": "Европейский навык",
+        "optional": "Необязательно",
+        "emptyPrompt": "Добавьте эквивалент ESCO",
+        "browse": "Выбрать",
+        "clear": "Очистить выбор ESCO"
+      },
+      "bigFiveSlot": {
+        "title": "Профиль личности",
+        "auto": "АВТО",
+        "autoLabel": "Определено автоматически из выбора O*NET",
+        "override": "Изменить",
+        "overrideLabel": "Выбрать другую черту личности",
+        "resetToAuto": "Вернуть авто",
+        "resetToAutoLabel": "Восстановить автоматическую черту",
+        "noMapping": "Нет автоматического сопоставления для этого выбора O*NET. Выберите черту вручную.",
+        "emptyPrompt": "Выберите черту личности или укажите привязку O*NET для авто-определения",
+        "confidenceLabel": "Совпадение {percent}%",
+        "facetLabel": "Грань"
+      },
+      "modal": {
+        "onetTitle": "Выбор классификации O*NET",
+        "onetDescription": "Выберите один профессиональный элемент. Он станет якорем компетенции и может авто-определить черту Большой пятёрки.",
+        "escoTitle": "Выбор навыка ESCO",
+        "escoDescription": "Выберите европейский навык или компетенцию ESCO для параллельной классификации.",
+        "searchPlaceholder": "Введите для поиска…",
+        "searchPlaceholderOnet": "Поиск O*NET…",
+        "searchPlaceholderEsco": "Поиск ESCO…",
+        "emptyResults": "Нет результатов для «{query}»",
+        "noFilterMatch": "Нет результатов в этой категории",
+        "startTyping": "Начните вводить для поиска",
+        "available": "Доступно: {count}",
+        "recommendedHeader": "Рекомендации на основе O*NET",
+        "searchResults": "Результаты поиска",
+        "buildingIndex": "Построение индекса поиска…",
+        "close": "Закрыть"
+      },
+      "categoryFilter": {
+        "all": "Все",
+        "ability": "Способности",
+        "skill": "Навыки",
+        "knowledge": "Знания",
+        "work_style": "Стили работы",
+        "work_activity": "Виды деятельности",
+        "interest": "Интересы",
+        "competence": "Компетенции",
+        "transversal": "Универсальные"
+      }
+    },
     "statusApproval": "Статус и одобрение",
     "statusApprovalDescription": "Управление видимостью и процессом одобрения",
     "visibility": "Видимость",

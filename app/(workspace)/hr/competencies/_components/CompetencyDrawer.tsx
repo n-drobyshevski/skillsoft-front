@@ -204,7 +204,7 @@ export default function CompetencyDrawer({
                       : null;
                     
                     const bigFive = storedBigFive || (computedMapping?.bigFive ?? null);
-                    const facet = storedFacet || (computedMapping?.dimension ?? null);
+                    const facet = storedFacet || (computedMapping?.facet ?? null);
                     const isComputed = !storedBigFive && !!computedMapping?.bigFive;
                     
                     if (!bigFive) return null;

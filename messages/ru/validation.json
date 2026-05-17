@@ -20,5 +20,7 @@
   "weightSum": "Сумма весов должна равняться 1.0",
   "uniqueTitle": "Такое название уже существует",
   "onetCodeRequired": "Код O*NET обязателен",
-  "escoUriInvalid": "Должен быть корректным ESCO URI"
+  "onetCodePattern": "Должен быть корректным идентификатором O*NET (например, 1.A.1.a.1 или 2.B.1.a)",
+  "escoUriInvalid": "Должен быть корректным ESCO URI",
+  "escoUriPattern": "Должен быть корректным ESCO URI (data.europa.eu/esco/skill/...)"
 }

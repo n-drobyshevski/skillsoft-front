@@ -194,7 +194,7 @@ export default function CompetencyPreview({ competency }: { competency: Competen
                   : null;
                 
                 const bigFive = storedBigFive || (computedMapping?.bigFive ?? null);
-                const facet = storedFacet || (computedMapping?.dimension ?? null);
+                const facet = storedFacet || (computedMapping?.facet ?? null);
                 const isComputed = !storedBigFive && !!computedMapping?.bigFive;
                 
                 if (bigFive) {

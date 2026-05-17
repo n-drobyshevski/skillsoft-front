@@ -73,12 +73,15 @@ function processESCOSkills(rawSkills) {
 // =============================================================================
 
 function mapONetCategory(elementId) {
+  // O*NET Content Model: 1.A=Abilities, 1.B=Interests, 1.C=Work Styles,
+  // 2.A=Basic Skills, 2.B=Cross-functional Skills, 2.C=Knowledge, 4.A=Work Activities.
   if (elementId.startsWith('1.A')) return 'Ability';
   if (elementId.startsWith('1.B')) return 'Interest';
   if (elementId.startsWith('1.C')) return 'Work Style';
-  if (elementId.startsWith('2.A')) return 'Knowledge';
+  if (elementId.startsWith('2.A')) return 'Skill';
   if (elementId.startsWith('2.B')) return 'Skill';
-  if (elementId.startsWith('2.C')) return 'Education';
+  if (elementId.startsWith('2.C')) return 'Knowledge';
+  if (elementId.startsWith('4.A')) return 'Work Activity';
   return 'Other';
 }
 

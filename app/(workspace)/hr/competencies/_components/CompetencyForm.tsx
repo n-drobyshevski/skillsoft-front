@@ -24,15 +24,17 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
+import { Card, CardContent } from '@/components/ui/card';
 import { CompetencyCategory, ApprovalStatus } from '@/types/domain';
 import { createCompetencyAction, updateCompetencyAction, type ActionResult } from '@/app/actions';
 import { useRouter } from 'next/navigation';
 import { useState, useCallback, useEffect } from 'react';
 import { toast } from "sonner";
-import { FileText, Tag, CheckCircle2, Loader2, X, Save, RefreshCw, Check, AlertCircle, Globe2, Layers } from "lucide-react";
+import { Loader2, X, Save, RefreshCw, Check, AlertCircle } from "lucide-react";
 import { HelpTooltip } from '@/components/ui/help-tooltip';
 import { cn } from '@/lib/utils';
 import { StandardsSearchCombobox } from '@/components/common/standards-search-combobox';
+import { StandardCodesErrors } from './StandardCodesErrors';
 import { loadAllSkills } from '@/lib/skill-data-loader';
 import type { UnifiedSkill } from '@/types/skills';
 import { useTranslations } from 'next-intl';
@@ -223,21 +225,18 @@ export function CompetencyForm({
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-3">
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit, onFormError)} className="space-y-6">
+        <form onSubmit={form.handleSubmit(onSubmit, onFormError)} className="space-y-3">
           {/* Basic Information Section */}
-          <div className="rounded-xl border bg-card shadow-sm overflow-hidden">
-            <div className="flex items-center gap-3 px-4 sm:px-5 py-3 sm:py-4 bg-muted/40 border-b">
-              <div className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                <FileText className="h-4 w-4 sm:h-5 sm:w-5" />
-              </div>
-              <div>
-                <h3 className="text-sm sm:text-base font-semibold">{t('basicInformation')}</h3>
-                <p className="text-xs sm:text-sm text-muted-foreground">{t('basicInformationDescription')}</p>
-              </div>
-            </div>
-            <div className="p-4 sm:p-5 space-y-4 sm:space-y-5">
+          <Card className="gap-0 py-0 rounded-lg shadow-none">
+            <CardContent>
+              <section className="py-6" role="region" aria-label={t('basicInformation')}>
+                <h2 className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                  {t('basicInformation')}
+                </h2>
+                <p className="text-xs text-muted-foreground mt-1 mb-5">{t('basicInformationDescription')}</p>
+                <div className="space-y-4 sm:space-y-5">
               <FormField
                 control={form.control}
                 name="name"
@@ -323,21 +322,20 @@ export function CompetencyForm({
                   );
                 }}
               />
-            </div>
-          </div>
+                </div>
+              </section>
+            </CardContent>
+          </Card>
 
           {/* Classification Section */}
-          <div className="rounded-xl border bg-card shadow-sm overflow-hidden">
-            <div className="flex items-center gap-3 px-4 sm:px-5 py-3 sm:py-4 bg-muted/40 border-b">
-              <div className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-lg bg-blue-100 text-blue-600 dark:bg-blue-950 dark:text-blue-400">
-                <Tag className="h-4 w-4 sm:h-5 sm:w-5" />
-              </div>
-              <div>
-                <h3 className="text-sm sm:text-base font-semibold">{t('classification')}</h3>
-                <p className="text-xs sm:text-sm text-muted-foreground">{t('classificationDescription')}</p>
-              </div>
-            </div>
-            <div className="p-4 sm:p-5">
+          <Card className="gap-0 py-0 rounded-lg shadow-none">
+            <CardContent>
+              <section className="py-6" role="region" aria-label={t('classification')}>
+                <h2 className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                  {t('classification')}
+                </h2>
+                <p className="text-xs text-muted-foreground mt-1 mb-5">{t('classificationDescription')}</p>
+                <div>
               <FormField
                 control={form.control}
                 name="category"
@@ -371,61 +369,56 @@ export function CompetencyForm({
                   </FormItem>
                 )}
               />
-            </div>
-          </div>
+                </div>
+              </section>
+            </CardContent>
+          </Card>
 
           {/* Standard Mapping Section */}
-          <div className="rounded-xl border bg-card shadow-sm overflow-hidden">
-            <div className="flex items-center gap-3 px-4 sm:px-5 py-3 sm:py-4 bg-muted/40 border-b">
-              <div className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-lg bg-purple-100 text-purple-600 dark:bg-purple-950 dark:text-purple-400">
-                <Globe2 className="h-4 w-4 sm:h-5 sm:w-5" />
-              </div>
-              <div>
-                <h3 className="text-sm sm:text-base font-semibold">{t('standardMapping')}</h3>
-                <p className="text-xs sm:text-sm text-muted-foreground">{t('standardMappingDescription')}</p>
-              </div>
-            </div>
-            <div className="p-4 sm:p-5">
-              <FormField
-                control={form.control}
-                name="standardCodes"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-sm font-medium flex items-center gap-1">
-                      <Layers className="h-4 w-4 mr-1" />
-                      {t('standardsReference')}
-                      <HelpTooltip content={t('standardsReferenceHelp')} />
-                    </FormLabel>
-                    <FormControl>
-                      <StandardsSearchCombobox
-                        skills={skills}
-                        isLoading={isLoadingSkills}
-                        value={field.value}
-                        onChange={(value) => {
-                          field.onChange(value);
-                          handlePreviewClick();
-                        }}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-          </div>
+          <Card className="gap-0 py-0 rounded-lg shadow-none">
+            <CardContent>
+              <section className="py-6" role="region" aria-label={t('standardMapping')}>
+                <div className="flex items-baseline justify-between gap-2 mb-1">
+                  <h2 className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                    {t('standardMapping')}
+                  </h2>
+                  <HelpTooltip content={t('standardsReferenceHelp')} />
+                </div>
+                <p className="text-xs text-muted-foreground mb-4">{t('standardMappingDescription')}</p>
+                <FormField
+                  control={form.control}
+                  name="standardCodes"
+                  render={({ field }) => (
+                    <FormItem className="space-y-2">
+                      <FormControl>
+                        <StandardsSearchCombobox
+                          skills={skills}
+                          isLoading={isLoadingSkills}
+                          value={field.value}
+                          onChange={(value) => {
+                            field.onChange(value);
+                            handlePreviewClick();
+                          }}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                      <StandardCodesErrors errors={errors.standardCodes} />
+                    </FormItem>
+                  )}
+                />
+              </section>
+            </CardContent>
+          </Card>
 
           {/* Status Section */}
-          <div className="rounded-xl border bg-card shadow-sm overflow-hidden">
-            <div className="flex items-center gap-3 px-4 sm:px-5 py-3 sm:py-4 bg-muted/40 border-b">
-              <div className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-lg bg-green-100 text-green-600 dark:bg-green-950 dark:text-green-400">
-                <CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5" />
-              </div>
-              <div>
-                <h3 className="text-sm sm:text-base font-semibold">{t('statusApproval')}</h3>
-                <p className="text-xs sm:text-sm text-muted-foreground">{t('statusApprovalDescription')}</p>
-              </div>
-            </div>
-            <div className="p-4 sm:p-5 grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
+          <Card className="gap-0 py-0 rounded-lg shadow-none">
+            <CardContent>
+              <section className="py-6" role="region" aria-label={t('statusApproval')}>
+                <h2 className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                  {t('statusApproval')}
+                </h2>
+                <p className="text-xs text-muted-foreground mt-1 mb-5">{t('statusApprovalDescription')}</p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
               <FormField
                 control={form.control}
                 name="approvalStatus"
@@ -486,8 +479,10 @@ export function CompetencyForm({
                   </FormItem>
                 )}
               />
-            </div>
-          </div>
+                </div>
+              </section>
+            </CardContent>
+          </Card>
 
           {/* Action Buttons */}
           <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 pt-2">

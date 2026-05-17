@@ -1,13 +1,13 @@
 /**
  * useBigFiveMapper Hook
- * 
+ *
  * Maps O*NET Work Style codes to Big Five personality dimensions.
  * Uses static JSON mapping data - no database calls required.
- * 
+ *
  * @example
  * ```tsx
- * const { bigFive, dimension, confidence } = useBigFiveMapper('1.C.1.a');
- * // Returns: { bigFive: 'CONSCIENTIOUSNESS', dimension: 'achievement_striving', confidence: 0.85 }
+ * const { bigFive, facet, confidence } = useBigFiveMapper('1.C.1.a');
+ * // Returns: { bigFive: 'CONSCIENTIOUSNESS', facet: 'achievement_striving', confidence: 0.85 }
  * ```
  */
 
@@ -33,8 +33,8 @@ interface OnetBigFiveMapping {
 interface BigFiveMappingResult {
   /** The primary Big Five dimension, or null if no mapping exists */
   bigFive: BigFiveDimension | null;
-  /** The specific facet/dimension within the Big Five trait */
-  dimension: string | null;
+  /** The specific facet within the Big Five trait (e.g. "achievement_striving") */
+  facet: string | null;
   /** Confidence score (0-1) for this mapping */
   confidence: number;
   /** Human-readable rationale for the mapping */
@@ -69,7 +69,7 @@ export function useBigFiveMapper(onetCode: string | null | undefined): BigFiveMa
     if (!onetCode) {
       return {
         bigFive: null,
-        dimension: null,
+        facet: null,
         confidence: 0,
         rationale: null,
         onetName: null,
@@ -83,7 +83,7 @@ export function useBigFiveMapper(onetCode: string | null | undefined): BigFiveMa
     if (!mapping) {
       return {
         bigFive: null,
-        dimension: null,
+        facet: null,
         confidence: 0,
         rationale: null,
         onetName: null,
@@ -94,7 +94,7 @@ export function useBigFiveMapper(onetCode: string | null | undefined): BigFiveMa
 
     return {
       bigFive: mapping.primaryBigFive,
-      dimension: mapping.primaryFacet || null,
+      facet: mapping.primaryFacet || null,
       confidence: mapping.primaryWeight,
       rationale: mapping.rationale,
       onetName: mapping.elementName,
@@ -118,7 +118,7 @@ export function getBigFiveMapping(onetCode: string | null | undefined): BigFiveM
   if (!onetCode) {
     return {
       bigFive: null,
-      dimension: null,
+      facet: null,
       confidence: 0,
       rationale: null,
       onetName: null,
@@ -132,7 +132,7 @@ export function getBigFiveMapping(onetCode: string | null | undefined): BigFiveM
   if (!mapping) {
     return {
       bigFive: null,
-      dimension: null,
+      facet: null,
       confidence: 0,
       rationale: null,
       onetName: null,
@@ -143,7 +143,7 @@ export function getBigFiveMapping(onetCode: string | null | undefined): BigFiveM
 
   return {
     bigFive: mapping.primaryBigFive,
-    dimension: mapping.primaryFacet || null,
+    facet: mapping.primaryFacet || null,
     confidence: mapping.primaryWeight,
     rationale: mapping.rationale,
     onetName: mapping.elementName,

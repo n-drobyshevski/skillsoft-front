@@ -20,5 +20,7 @@
   "weightSum": "Total weight must equal 1.0",
   "uniqueTitle": "This title already exists",
   "onetCodeRequired": "O*NET code is required",
-  "escoUriInvalid": "Must be a valid ESCO URI"
+  "onetCodePattern": "Must be a valid O*NET element ID (e.g. 1.A.1.a.1 or 2.B.1.a)",
+  "escoUriInvalid": "Must be a valid ESCO URI",
+  "escoUriPattern": "Must be a valid ESCO resource URI (data.europa.eu/esco/skill/...)"
 }

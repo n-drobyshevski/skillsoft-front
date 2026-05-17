@@ -60,19 +60,19 @@ describe('useBigFiveMapper', () => {
     it('returns correct facet dimension for Achievement/Effort', () => {
       const { result } = renderHook(() => useBigFiveMapper('1.C.1.a'));
 
-      expect(result.current.dimension).toBe('Achievement Striving');
+      expect(result.current.facet).toBe('Achievement Striving');
     });
 
     it('returns correct facet dimension for Persistence', () => {
       const { result } = renderHook(() => useBigFiveMapper('1.C.1.b'));
 
-      expect(result.current.dimension).toBe('Self-Discipline');
+      expect(result.current.facet).toBe('Self-Discipline');
     });
 
     it('returns correct facet dimension for Innovation', () => {
       const { result } = renderHook(() => useBigFiveMapper('1.C.7.a'));
 
-      expect(result.current.dimension).toBe('Ideas');
+      expect(result.current.facet).toBe('Ideas');
     });
 
     it('returns confidence from primaryWeight', () => {
@@ -179,7 +179,7 @@ describe('useBigFiveMapper', () => {
       const { result } = renderHook(() => useBigFiveMapper(undefined));
 
       expect(result.current.bigFive).toBeNull();
-      expect(result.current.dimension).toBeNull();
+      expect(result.current.facet).toBeNull();
       expect(result.current.rationale).toBeNull();
       expect(result.current.onetName).toBeNull();
       expect(result.current.secondary).toBeNull();
@@ -189,7 +189,7 @@ describe('useBigFiveMapper', () => {
       const { result } = renderHook(() => useBigFiveMapper(null));
 
       expect(result.current.bigFive).toBeNull();
-      expect(result.current.dimension).toBeNull();
+      expect(result.current.facet).toBeNull();
       expect(result.current.rationale).toBeNull();
       expect(result.current.onetName).toBeNull();
       expect(result.current.secondary).toBeNull();
@@ -199,7 +199,7 @@ describe('useBigFiveMapper', () => {
       const { result } = renderHook(() => useBigFiveMapper(''));
 
       expect(result.current.bigFive).toBeNull();
-      expect(result.current.dimension).toBeNull();
+      expect(result.current.facet).toBeNull();
       expect(result.current.rationale).toBeNull();
       expect(result.current.onetName).toBeNull();
       expect(result.current.secondary).toBeNull();
@@ -211,7 +211,7 @@ describe('useBigFiveMapper', () => {
       );
 
       expect(result.current.bigFive).toBeNull();
-      expect(result.current.dimension).toBeNull();
+      expect(result.current.facet).toBeNull();
       expect(result.current.rationale).toBeNull();
       expect(result.current.onetName).toBeNull();
       expect(result.current.secondary).toBeNull();
@@ -337,7 +337,7 @@ describe('getBigFiveMapping', () => {
     const utilityResult = getBigFiveMapping('1.C.1.a');
 
     expect(utilityResult.bigFive).toBe(result.current.bigFive);
-    expect(utilityResult.dimension).toBe(result.current.dimension);
+    expect(utilityResult.facet).toBe(result.current.facet);
     expect(utilityResult.confidence).toBe(result.current.confidence);
     expect(utilityResult.rationale).toBe(result.current.rationale);
     expect(utilityResult.onetName).toBe(result.current.onetName);
@@ -348,7 +348,7 @@ describe('getBigFiveMapping', () => {
     const result = getBigFiveMapping(null);
 
     expect(result.bigFive).toBeNull();
-    expect(result.dimension).toBeNull();
+    expect(result.facet).toBeNull();
     expect(result.confidence).toBe(0);
     expect(result.hasMapping).toBe(false);
   });
@@ -357,7 +357,7 @@ describe('getBigFiveMapping', () => {
     const result = getBigFiveMapping(undefined);
 
     expect(result.bigFive).toBeNull();
-    expect(result.dimension).toBeNull();
+    expect(result.facet).toBeNull();
     expect(result.confidence).toBe(0);
     expect(result.hasMapping).toBe(false);
   });
@@ -367,7 +367,7 @@ describe('getBigFiveMapping', () => {
 
     expect(result).toEqual({
       bigFive: 'CONSCIENTIOUSNESS',
-      dimension: 'Self-Discipline',
+      facet: 'Self-Discipline',
       confidence: 0.9,
       rationale: expect.stringContaining('Persistence'),
       onetName: 'Persistence',
@@ -570,7 +570,7 @@ describe('Edge Cases', () => {
 
       expect(result.hasMapping).toBe(true);
       expect(result.bigFive).not.toBeNull();
-      expect(result.dimension).not.toBeNull();
+      expect(result.facet).not.toBeNull();
       expect(result.confidence).toBeGreaterThan(0);
       expect(result.confidence).toBeLessThanOrEqual(1);
       expect(result.rationale).not.toBeNull();

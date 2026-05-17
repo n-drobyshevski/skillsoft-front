@@ -6,7 +6,7 @@ import { z } from 'zod';
 import { competencySchema } from '../validation';
 import { Competency } from '@/types/domain';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import {
   Form,
   FormControl,
@@ -32,9 +32,10 @@ import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { StandardsSearchCombobox } from '@/components/common/standards-search-combobox';
+import { StandardCodesErrors } from './StandardCodesErrors';
 import { loadAllSkills } from '@/lib/skill-data-loader';
 import type { UnifiedSkill } from '@/types/skills';
-import { Globe2, Layers, FileText, Tag, Settings, Loader2 } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 
 type CompetencyFormValues = z.infer<typeof competencySchema>;
 
@@ -96,19 +97,16 @@ export function EditCompetencyForm({ competency }: { competency: Competency }) {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3">
         {/* Basic Information Section */}
-        <div className="rounded-xl border bg-card shadow-sm overflow-hidden">
-          <div className="flex items-center gap-3 px-5 py-4 bg-muted/40 border-b">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-100 text-emerald-600 dark:bg-emerald-950 dark:text-emerald-400">
-              <FileText className="h-5 w-5" />
-            </div>
-            <div>
-              <h3 className="text-base font-semibold">Basic Information</h3>
-              <p className="text-sm text-muted-foreground">Name and description of the competency</p>
-            </div>
-          </div>
-          <div className="p-5 space-y-5">
+        <Card className="gap-0 py-0 rounded-lg shadow-none">
+          <CardContent>
+            <section className="py-6" role="region" aria-label="Basic Information">
+              <h2 className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                Basic Information
+              </h2>
+              <p className="text-xs text-muted-foreground mt-1 mb-5">Name and description of the competency</p>
+              <div className="space-y-5">
             <FormField
               control={form.control}
               name="name"
@@ -139,21 +137,20 @@ export function EditCompetencyForm({ competency }: { competency: Competency }) {
                 </FormItem>
               )}
             />
-          </div>
-        </div>
+              </div>
+            </section>
+          </CardContent>
+        </Card>
 
         {/* Classification Section */}
-        <div className="rounded-xl border bg-card shadow-sm overflow-hidden">
-          <div className="flex items-center gap-3 px-5 py-4 bg-muted/40 border-b">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-100 text-blue-600 dark:bg-blue-950 dark:text-blue-400">
-              <Tag className="h-5 w-5" />
-            </div>
-            <div>
-              <h3 className="text-base font-semibold">Classification</h3>
-              <p className="text-sm text-muted-foreground">Category and status</p>
-            </div>
-          </div>
-          <div className="p-5 grid md:grid-cols-2 gap-5">
+        <Card className="gap-0 py-0 rounded-lg shadow-none">
+          <CardContent>
+            <section className="py-6" role="region" aria-label="Classification">
+              <h2 className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                Classification
+              </h2>
+              <p className="text-xs text-muted-foreground mt-1 mb-5">Category and status</p>
+              <div className="grid md:grid-cols-2 gap-5">
             <FormField
               control={form.control}
               name="category"
@@ -202,82 +199,74 @@ export function EditCompetencyForm({ competency }: { competency: Competency }) {
                 </FormItem>
               )}
             />
-          </div>
-        </div>
+              </div>
+            </section>
+          </CardContent>
+        </Card>
 
         {/* Standard Mapping Section */}
-        <div className="rounded-xl border bg-card shadow-sm overflow-hidden">
-          <div className="flex items-center gap-3 px-5 py-4 bg-muted/40 border-b">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-purple-100 text-purple-600 dark:bg-purple-950 dark:text-purple-400">
-              <Globe2 className="h-5 w-5" />
-            </div>
-            <div>
-              <h3 className="text-base font-semibold">Standard Mapping</h3>
-              <p className="text-sm text-muted-foreground">Link to O*NET, ESCO, or Big Five personality</p>
-            </div>
-          </div>
-          <div className="p-5">
-            <FormField
-              control={form.control}
-              name="standardCodes"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="flex items-center gap-1">
-                    <Layers className="h-4 w-4 mr-1" />
-                    Standards Reference
-                  </FormLabel>
-                  <FormControl>
-                    <StandardsSearchCombobox
-                      skills={skills}
-                      isLoading={isLoadingSkills}
-                      value={field.value}
-                      onChange={field.onChange}
-                    />
-                  </FormControl>
-                  <FormDescription>
-                    Map this competency to established frameworks for standardized assessment alignment.
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-        </div>
+        <Card className="gap-0 py-0 rounded-lg shadow-none">
+          <CardContent>
+            <section className="py-6" role="region" aria-label="Standard Mapping">
+              <h2 className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                Standard Mapping
+              </h2>
+              <p className="text-xs text-muted-foreground mt-1 mb-4">Link to O*NET, ESCO, or Big Five personality</p>
+              <FormField
+                control={form.control}
+                name="standardCodes"
+                render={({ field }) => (
+                  <FormItem className="space-y-2">
+                    <FormControl>
+                      <StandardsSearchCombobox
+                        skills={skills}
+                        isLoading={isLoadingSkills}
+                        value={field.value}
+                        onChange={field.onChange}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                    <StandardCodesErrors errors={form.formState.errors.standardCodes} />
+                  </FormItem>
+                )}
+              />
+            </section>
+          </CardContent>
+        </Card>
 
         {/* Active Status Section */}
-        <div className="rounded-xl border bg-card shadow-sm overflow-hidden">
-          <div className="flex items-center gap-3 px-5 py-4 bg-muted/40 border-b">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-slate-100 text-slate-600 dark:bg-slate-950 dark:text-slate-400">
-              <Settings className="h-5 w-5" />
-            </div>
-            <div>
-              <h3 className="text-base font-semibold">Settings</h3>
-              <p className="text-sm text-muted-foreground">Availability and visibility</p>
-            </div>
-          </div>
-          <div className="p-5">
-            <FormField
-              control={form.control}
-              name="isActive"
-              render={({ field }) => (
-                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                  <div className="space-y-0.5">
-                    <FormLabel className="text-base">Active Status</FormLabel>
-                    <FormDescription>
-                      Set whether this competency is currently active and available.
-                    </FormDescription>
-                  </div>
-                  <FormControl>
-                    <Switch
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                    />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
-          </div>
-        </div>
+        <Card className="gap-0 py-0 rounded-lg shadow-none">
+          <CardContent>
+            <section className="py-6" role="region" aria-label="Settings">
+              <h2 className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                Settings
+              </h2>
+              <p className="text-xs text-muted-foreground mt-1 mb-5">Availability and visibility</p>
+              <div>
+                <FormField
+                  control={form.control}
+                  name="isActive"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                      <div className="space-y-0.5">
+                        <FormLabel className="text-base">Active Status</FormLabel>
+                        <FormDescription>
+                          Set whether this competency is currently active and available.
+                        </FormDescription>
+                      </div>
+                      <FormControl>
+                        <Switch
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </section>
+          </CardContent>
+        </Card>
 
         {error && <p className="text-sm font-medium text-destructive text-center">{error}</p>}
         <div className="flex justify-end space-x-4 pt-4">

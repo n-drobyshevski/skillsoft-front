@@ -82,20 +82,22 @@ const BigFiveIcons: Record<BigFiveDimension, React.ComponentType<{ className?: s
   EMOTIONAL_STABILITY: Shield,
 };
 
+// Trait → colour mapping mirrors DESIGN.md §"Big Five personality traits" and the
+// /profile PersonalitySection so the same trait reads the same colour everywhere.
 const BigFiveColors: Record<BigFiveDimension, string> = {
-  OPENNESS: 'text-purple-600 dark:text-purple-400',
-  CONSCIENTIOUSNESS: 'text-green-600 dark:text-green-400',
-  EXTRAVERSION: 'text-orange-600 dark:text-orange-400',
-  AGREEABLENESS: 'text-blue-600 dark:text-blue-400',
-  EMOTIONAL_STABILITY: 'text-teal-600 dark:text-teal-400',
+  OPENNESS: 'text-violet-600 dark:text-violet-400',
+  CONSCIENTIOUSNESS: 'text-blue-600 dark:text-blue-400',
+  EXTRAVERSION: 'text-amber-600 dark:text-amber-400',
+  AGREEABLENESS: 'text-emerald-600 dark:text-emerald-400',
+  EMOTIONAL_STABILITY: 'text-cyan-600 dark:text-cyan-400',
 };
 
 const BigFiveBgColors: Record<BigFiveDimension, string> = {
-  OPENNESS: 'bg-purple-50 dark:bg-purple-950/40',
-  CONSCIENTIOUSNESS: 'bg-green-50 dark:bg-green-950/40',
-  EXTRAVERSION: 'bg-orange-50 dark:bg-orange-950/40',
-  AGREEABLENESS: 'bg-blue-50 dark:bg-blue-950/40',
-  EMOTIONAL_STABILITY: 'bg-teal-50 dark:bg-teal-950/40',
+  OPENNESS: 'bg-violet-50 dark:bg-violet-950/40',
+  CONSCIENTIOUSNESS: 'bg-blue-50 dark:bg-blue-950/40',
+  EXTRAVERSION: 'bg-amber-50 dark:bg-amber-950/40',
+  AGREEABLENESS: 'bg-emerald-50 dark:bg-emerald-950/40',
+  EMOTIONAL_STABILITY: 'bg-cyan-50 dark:bg-cyan-950/40',
 };
 
 // Component

@@ -52,6 +52,64 @@
   "standardMappingDescription": "Link to O*NET, ESCO, or personality frameworks",
   "standardsReference": "Standards Reference",
   "standardsReferenceHelp": "Map this competency to established frameworks like O*NET occupational skills, ESCO European skills taxonomy, or Big Five personality traits for standardized assessment alignment.",
+  "standards": {
+    "onetSlot": {
+      "title": "Occupational anchor",
+      "primary": "Primary",
+      "emptyPrompt": "Search abilities, skills, knowledge",
+      "browse": "Browse",
+      "clear": "Clear O*NET selection",
+      "codeLabel": "Code"
+    },
+    "escoSlot": {
+      "title": "European skill",
+      "optional": "Optional",
+      "emptyPrompt": "Add an ESCO equivalent",
+      "browse": "Browse",
+      "clear": "Clear ESCO selection"
+    },
+    "bigFiveSlot": {
+      "title": "Personality profile",
+      "auto": "AUTO",
+      "autoLabel": "Auto-detected from O*NET selection",
+      "override": "Override",
+      "overrideLabel": "Choose a different personality trait",
+      "resetToAuto": "Reset to auto",
+      "resetToAutoLabel": "Restore the auto-detected trait",
+      "noMapping": "No mapping derived from this O*NET selection. Pick a trait manually.",
+      "emptyPrompt": "Pick a personality trait or choose an O*NET anchor to auto-derive one",
+      "confidenceLabel": "{percent}% match",
+      "facetLabel": "Facet"
+    },
+    "modal": {
+      "onetTitle": "Choose O*NET classification",
+      "onetDescription": "Pick one occupational element. This anchors the competency and may auto-derive a Big Five trait.",
+      "escoTitle": "Choose ESCO skill",
+      "escoDescription": "Pick an ESCO European skill or competence to add a parallel classification.",
+      "searchPlaceholder": "Type to search…",
+      "searchPlaceholderOnet": "Search O*NET…",
+      "searchPlaceholderEsco": "Search ESCO…",
+      "emptyResults": "No matches for \"{query}\"",
+      "noFilterMatch": "No results in this category",
+      "startTyping": "Start typing to search",
+      "available": "{count} available",
+      "recommendedHeader": "Recommended based on O*NET",
+      "searchResults": "Search results",
+      "buildingIndex": "Building search index…",
+      "close": "Close"
+    },
+    "categoryFilter": {
+      "all": "All",
+      "ability": "Abilities",
+      "skill": "Skills",
+      "knowledge": "Knowledge",
+      "work_style": "Work Styles",
+      "work_activity": "Work Activities",
+      "interest": "Interests",
+      "competence": "Competences",
+      "transversal": "Transversal"
+    }
+  },
   "statusApproval": "Status & Approval",
   "statusApprovalDescription": "Manage visibility and approval workflow",
   "visibility": "Visibility",

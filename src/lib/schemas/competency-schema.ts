@@ -2,12 +2,21 @@ import { z } from 'zod';
 import { CompetencyCategory, ApprovalStatus } from '@/types/domain';
 import { TranslationFunction } from '@/lib/schema-factory';
 
+// Patterns mirror the backend Jakarta @Pattern regexes in StandardCodesDto.java
+// so that invalid selector output is caught at the form level instead of
+// surfacing as an opaque 400 from the server.
+export const ONET_CODE_PATTERN = /^\d+(\.[A-Za-z0-9]+){1,4}$/;
+export const ESCO_URI_PATTERN =
+  /^https?:\/\/data\.europa\.eu\/esco\/(skill|occupation|isced-f|qualification)\/[a-fA-F0-9-]+$/;
+
 /**
  * O*NET Reference validation schema factory.
  */
 function createOnetRefSchema(t: TranslationFunction) {
   return z.object({
-    code: z.string().min(1, t('validation.onetCodeRequired')),
+    code: z.string()
+      .min(1, t('validation.onetCodeRequired'))
+      .regex(ONET_CODE_PATTERN, t('validation.onetCodePattern')),
     title: z.string().optional(),
     elementType: z.enum([
       'ability', 'skill', 'knowledge', 'work_activity',
@@ -21,7 +30,9 @@ function createOnetRefSchema(t: TranslationFunction) {
  */
 function createEscoRefSchema(t: TranslationFunction) {
   return z.object({
-    uri: z.string().url(t('validation.escoUriInvalid')),
+    uri: z.string()
+      .url(t('validation.escoUriInvalid'))
+      .regex(ESCO_URI_PATTERN, t('validation.escoUriPattern')),
     title: z.string().optional(),
     skillType: z.enum([
       'skill', 'competence', 'knowledge', 'language', 'transversal'
