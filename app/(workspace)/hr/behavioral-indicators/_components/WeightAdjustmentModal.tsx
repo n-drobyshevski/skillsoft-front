@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -27,21 +28,22 @@ interface IndicatorWeight {
   title: string;
   currentWeight: number;
   newWeight: number;
-  inputValue: string; // Separate state for input display
-  isInputValid: boolean; // Track input validation state
+  inputValue: string;
+  isInputValid: boolean;
 }
 
 const MAX_WEIGHT_TOTAL = 1.0;
 const WEIGHT_TOLERANCE = 0.001;
 
-export function WeightAdjustmentModal({ 
-  isOpen, 
-  onClose, 
+export function WeightAdjustmentModal({
+  isOpen,
+  onClose,
   onWeightsUpdated,
   competencyId,
   newIndicatorWeight,
-  onWeightDistributionComplete
+  onWeightDistributionComplete,
 }: WeightAdjustmentModalProps) {
+  const t = useTranslations('forms');
   const [indicators, setIndicators] = useState<IndicatorWeight[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -64,12 +66,12 @@ export function WeightAdjustmentModal({
         setIndicators([]);
       }
     } catch {
-      toast.error('Failed to load existing indicators');
+      toast.error(t('indicator.weightModal.toasts.loadFailed'));
       setIndicators([]);
     } finally {
       setIsLoading(false);
     }
-  }, [competencyId]);
+  }, [competencyId, t]);
 
   useEffect(() => {
     if (isOpen && competencyId) {
@@ -80,12 +82,12 @@ export function WeightAdjustmentModal({
   const updateIndicatorInputValue = (id: string, inputValue: string) => {
     const numericValue = parseFloat(inputValue);
     const isValid = !isNaN(numericValue) && numericValue > 0 && numericValue <= 1.0;
-    
-    setIndicators(prev => prev.map(indicator => 
-      indicator.id === id ? { 
-        ...indicator, 
+
+    setIndicators(prev => prev.map(indicator =>
+      indicator.id === id ? {
+        ...indicator,
         inputValue,
-        isInputValid: inputValue === '' || isValid // Allow empty for clearing
+        isInputValid: inputValue === '' || isValid,
       } : indicator
     ));
   };
@@ -94,66 +96,60 @@ export function WeightAdjustmentModal({
     const numericValue = parseFloat(inputValue);
     if (!isNaN(numericValue) && numericValue > 0) {
       const clampedValue = Math.max(0.001, Math.min(1.0, numericValue));
-      setIndicators(prev => prev.map(indicator => 
-        indicator.id === id ? { 
-          ...indicator, 
+      setIndicators(prev => prev.map(indicator =>
+        indicator.id === id ? {
+          ...indicator,
           newWeight: clampedValue,
           inputValue: clampedValue.toFixed(3),
-          isInputValid: true
+          isInputValid: true,
         } : indicator
       ));
-      
-      // Show toast if value was clamped
+
       if (clampedValue !== numericValue) {
-        toast.info(`Weight adjusted to ${clampedValue.toFixed(3)} (valid range: 0.001 - 1.000)`);
+        toast.info(t('indicator.weightModal.toasts.weightClamped', { value: clampedValue.toFixed(3) }));
       }
     } else {
-      // Reset to current weight if invalid input
-      setIndicators(prev => prev.map(indicator => 
-        indicator.id === id ? { 
-          ...indicator, 
+      setIndicators(prev => prev.map(indicator =>
+        indicator.id === id ? {
+          ...indicator,
           inputValue: indicator.newWeight.toFixed(3),
-          isInputValid: true
+          isInputValid: true,
         } : indicator
       ));
-      
+
       if (inputValue.trim() && isNaN(numericValue)) {
-        toast.error('Please enter a valid number');
+        toast.error(t('indicator.weightModal.toasts.invalidNumber'));
       }
     }
   };
 
-  const getCurrentTotal = () => {
-    return indicators.reduce((sum, indicator) => sum + indicator.newWeight, 0);
-  };
+  const getCurrentTotal = () => indicators.reduce((sum, indicator) => sum + indicator.newWeight, 0);
 
-  const getNewTotal = () => {
-    return getCurrentTotal() + newIndicatorWeight;
-  };
+  const getNewTotal = () => getCurrentTotal() + newIndicatorWeight;
 
+  // Mirrors useWeightValidation's rule: total must not exceed 1.0 (with a
+  // small floating-point tolerance). Sub-1.0 totals are allowed — backend
+  // doesn't enforce sum-to-1.0, and forcing strict equality blocked
+  // legitimate distributions produced by rounding or manual edits.
   const isValidDistribution = () => {
-    const newTotal = getNewTotal();
-    
-    // If we're adding a new indicator (newIndicatorWeight > 0), require exact total of 1.0
-    if (newIndicatorWeight > 0) {
-      return newTotal <= (MAX_WEIGHT_TOTAL + WEIGHT_TOLERANCE) && newTotal >= (MAX_WEIGHT_TOTAL - WEIGHT_TOLERANCE);
-    }
-    
-    // If we're just adjusting existing weights, allow any total that doesn't exceed 1.0
-    return newTotal <= (MAX_WEIGHT_TOTAL + WEIGHT_TOLERANCE);
+    return getNewTotal() <= (MAX_WEIGHT_TOTAL + WEIGHT_TOLERANCE);
   };
 
   const suggestEqualDistribution = () => {
+    if (indicators.length === 0) return;
     const availableWeight = MAX_WEIGHT_TOTAL - newIndicatorWeight;
-    const weightPerIndicator = availableWeight / indicators.length;
-    
-    setIndicators(prev => prev.map(indicator => {
-      const newWeight = Math.round(weightPerIndicator * 1000) / 1000;
+    const baseWeight = Math.floor((availableWeight / indicators.length) * 1000) / 1000;
+    // Distribute the rounding remainder one millis at a time so the sum
+    // exactly matches availableWeight (no off-by-rounding total).
+    const remainderMillis = Math.round((availableWeight - baseWeight * indicators.length) * 1000);
+
+    setIndicators(prev => prev.map((indicator, idx) => {
+      const newWeight = baseWeight + (idx < remainderMillis ? 0.001 : 0);
       return {
         ...indicator,
         newWeight,
         inputValue: newWeight.toFixed(3),
-        isInputValid: true
+        isInputValid: true,
       };
     }));
   };
@@ -163,37 +159,34 @@ export function WeightAdjustmentModal({
       ...indicator,
       newWeight: indicator.currentWeight,
       inputValue: indicator.currentWeight.toFixed(3),
-      isInputValid: true
+      isInputValid: true,
     })));
   };
 
   const saveWeightChanges = async () => {
     if (!isValidDistribution()) {
-      const message = newIndicatorWeight > 0 
-        ? 'Weight distribution is not valid. Total must equal 1.0' 
-        : 'Weight distribution exceeds limit. Total cannot exceed 1.0';
+      const message = newIndicatorWeight > 0
+        ? t('indicator.weightModal.toasts.distributionInvalid')
+        : t('indicator.weightModal.toasts.distributionExceeds');
       toast.error(message);
       return;
     }
 
     setIsSaving(true);
     try {
-      // Update each indicator's weight using server actions
       const updatePromises = indicators
         .filter(indicator => Math.abs(indicator.newWeight - indicator.currentWeight) > WEIGHT_TOLERANCE)
         .map(async (indicator) => {
-          // First fetch the current indicator to get all required fields
           const currentIndicator = await behavioralIndicatorsApi.getIndicatorById(indicator.id);
-          
+
           if (!currentIndicator) {
             throw new Error(`Indicator ${indicator.id} not found`);
           }
-          
-          // Create update payload using IndicatorFormData format
+
           const updateData: IndicatorFormData = {
             title: currentIndicator.title,
             description: currentIndicator.description || '',
-            weight: indicator.newWeight, // Only this field changes
+            weight: indicator.newWeight,
             orderIndex: currentIndicator.orderIndex || 1,
             observabilityLevel: currentIndicator.observabilityLevel,
             measurementType: currentIndicator.measurementType,
@@ -202,37 +195,37 @@ export function WeightAdjustmentModal({
             isActive: currentIndicator.isActive,
             approvalStatus: currentIndicator.approvalStatus,
           };
-          
+
           const result = await updateIndicatorAction(indicator.id, updateData);
-          
+
           if (!result.success) {
             throw new Error(result.message);
           }
-          
+
           return result;
         });
 
       await Promise.all(updatePromises);
-      
-      toast.success('Weights updated successfully');
-      
-      // Pass adjusted weights to parent if callback provided
+
+      toast.success(t('indicator.weightModal.toasts.updateSuccess'));
+
       if (onWeightDistributionComplete) {
         onWeightDistributionComplete(
           indicators.map(indicator => ({
             id: indicator.id,
-            weight: indicator.newWeight
+            weight: indicator.newWeight,
           }))
         );
       } else {
-        // Only call onWeightsUpdated if onWeightDistributionComplete is not provided
-        // to avoid race condition between API refresh and local state update
         onWeightsUpdated();
       }
-      
+
       onClose();
-    } catch {
-      toast.error('Failed to update weights. Please try again.');
+    } catch (error) {
+      console.error('[WeightAdjustmentModal] saveWeightChanges failed:', error);
+      const detail = error instanceof Error ? error.message : '';
+      const base = t('indicator.weightModal.toasts.updateFailed');
+      toast.error(detail ? `${base} (${detail})` : base);
     } finally {
       setIsSaving(false);
     }
@@ -241,6 +234,12 @@ export function WeightAdjustmentModal({
   const currentTotal = getCurrentTotal();
   const newTotal = getNewTotal();
   const isValid = isValidDistribution();
+
+  const headerLabel = isValid
+    ? (newIndicatorWeight > 0
+      ? t('indicator.weightModal.summary.validDistribution')
+      : t('indicator.weightModal.summary.weightOk'))
+    : t('indicator.weightModal.summary.limitExceeded');
 
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
@@ -251,19 +250,18 @@ export function WeightAdjustmentModal({
               <Scale className="h-5 w-5 text-blue-600 dark:text-blue-400" />
             </div>
             <div>
-              <SheetTitle className="text-xl">Weight Distribution</SheetTitle>
+              <SheetTitle className="text-xl">{t('indicator.weightModal.title')}</SheetTitle>
               <SheetDescription className="text-sm text-muted-foreground">
-                {newIndicatorWeight > 0 
-                  ? 'Redistribute weights to accommodate the new indicator'
-                  : 'Adjust the weight distribution for existing indicators'
-                }
+                {newIndicatorWeight > 0
+                  ? t('indicator.weightModal.descriptionRedistribute')
+                  : t('indicator.weightModal.descriptionAdjust')}
               </SheetDescription>
             </div>
           </div>
-          
+
           {/* Weight Summary Card */}
-          <Card className={`border-2 ${isValid 
-            ? 'border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-950/20' 
+          <Card className={`border-2 ${isValid
+            ? 'border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-950/20'
             : 'border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-950/20'
           }`}>
             <CardContent className="p-4">
@@ -273,27 +271,28 @@ export function WeightAdjustmentModal({
                 ) : (
                   <AlertTriangle className="h-5 w-5 text-red-600 dark:text-red-400" />
                 )}
-                <h4 className={`font-semibold ${isValid 
-                  ? 'text-green-800 dark:text-green-200' 
+                <h4 className={`font-semibold ${isValid
+                  ? 'text-green-800 dark:text-green-200'
                   : 'text-red-800 dark:text-red-200'
                 }`}>
-                  {isValid 
-                    ? (newIndicatorWeight > 0 ? 'Valid Distribution' : 'Weight Distribution OK') 
-                    : (newIndicatorWeight > 0 ? 'Weight Limit Exceeded' : 'Weight Limit Exceeded')
-                  }
+                  {headerLabel}
                 </h4>
               </div>
-              
+
               <div className={`grid gap-4 mb-3 ${newIndicatorWeight > 0 ? 'grid-cols-3' : 'grid-cols-2'}`}>
                 <div className="text-center">
-                  <div className="text-xs text-muted-foreground mb-1">Current Total</div>
+                  <div className="text-xs text-muted-foreground mb-1">
+                    {t('indicator.weightModal.summary.currentTotal')}
+                  </div>
                   <Badge variant="outline" className="font-mono">
                     {currentTotal.toFixed(3)}
                   </Badge>
                 </div>
                 {newIndicatorWeight > 0 && (
                   <div className="text-center">
-                    <div className="text-xs text-muted-foreground mb-1">New Indicator</div>
+                    <div className="text-xs text-muted-foreground mb-1">
+                      {t('indicator.weightModal.summary.newIndicator')}
+                    </div>
                     <Badge variant="outline" className="font-mono">
                       +{newIndicatorWeight.toFixed(3)}
                     </Badge>
@@ -301,24 +300,26 @@ export function WeightAdjustmentModal({
                 )}
                 <div className="text-center">
                   <div className="text-xs text-muted-foreground mb-1">
-                    {newIndicatorWeight > 0 ? 'Final Total' : 'Total Weight'}
+                    {newIndicatorWeight > 0
+                      ? t('indicator.weightModal.summary.finalTotal')
+                      : t('indicator.weightModal.summary.totalWeight')}
                   </div>
-                  <Badge 
-                    variant={isValid ? "default" : "destructive"}
+                  <Badge
+                    variant={isValid ? 'default' : 'destructive'}
                     className="font-mono"
                   >
                     {newTotal.toFixed(3)}
                   </Badge>
                 </div>
               </div>
-              
+
               <div className="space-y-2">
                 <div className="flex justify-between text-xs">
-                  <span>Weight Usage</span>
+                  <span>{t('indicator.weightModal.summary.weightUsage')}</span>
                   <span>{Math.min(100, (newTotal / MAX_WEIGHT_TOTAL) * 100).toFixed(1)}%</span>
                 </div>
-                <Progress 
-                  value={Math.min(100, (newTotal / MAX_WEIGHT_TOTAL) * 100)} 
+                <Progress
+                  value={Math.min(100, (newTotal / MAX_WEIGHT_TOTAL) * 100)}
                   className={`h-2 ${newTotal > MAX_WEIGHT_TOTAL ? '[&>div]:bg-red-500' : '[&>div]:bg-green-500'}`}
                 />
               </div>
@@ -331,7 +332,7 @@ export function WeightAdjustmentModal({
           <div className="space-y-3">
             <h4 className="font-medium text-sm flex items-center gap-2">
               <Zap className="h-4 w-4" />
-              Quick Actions
+              {t('indicator.weightModal.quickActions')}
             </h4>
             <div className="flex flex-wrap gap-3">
               <Button
@@ -342,7 +343,7 @@ export function WeightAdjustmentModal({
                 className="flex items-center gap-2 min-w-[140px]"
               >
                 <Calculator className="h-3 w-3" />
-                Equal Distribution
+                {t('indicator.weightModal.equalDistribution')}
               </Button>
               <Button
                 variant="outline"
@@ -351,7 +352,7 @@ export function WeightAdjustmentModal({
                 className="flex items-center gap-2 min-w-[120px]"
               >
                 <RotateCcw className="h-3 w-3" />
-                Reset Changes
+                {t('indicator.weightModal.resetChanges')}
               </Button>
             </div>
           </div>
@@ -362,11 +363,11 @@ export function WeightAdjustmentModal({
           <div className="space-y-4 px-4">
             <h4 className="font-medium text-sm flex items-center gap-2">
               <Scale className="h-4 w-4" />
-              Existing Indicators ({indicators.length})
+              {t('indicator.weightModal.existingIndicators', { count: indicators.length })}
             </h4>
-            
+
             {isLoading ? (
-              <div className="grid grid-cols-1  gap-3">
+              <div className="grid grid-cols-1 gap-3">
                 {[1, 2, 3, 4, 5, 6].map(i => (
                   <Card key={i} className="animate-pulse">
                     <CardContent className="p-4">
@@ -380,14 +381,14 @@ export function WeightAdjustmentModal({
               <Card className="border-dashed">
                 <CardContent className="p-8 text-center text-muted-foreground">
                   <Scale className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                  <p>No existing indicators found</p>
+                  <p>{t('indicator.weightModal.noIndicators')}</p>
                 </CardContent>
               </Card>
             ) : (
-              <div className="grid grid-cols-1  gap-3">
+              <div className="grid grid-cols-1 gap-3">
                 {indicators.map((indicator) => {
                   const hasChanged = Math.abs(indicator.newWeight - indicator.currentWeight) > WEIGHT_TOLERANCE;
-                  
+
                   return (
                     <Card key={indicator.id} className={`py-2! transition-all ${hasChanged ? 'ring-2 ring-blue-200 dark:ring-blue-800' : ''}`}>
                       <CardContent className="p-4">
@@ -396,27 +397,32 @@ export function WeightAdjustmentModal({
                             <div className="flex items-center gap-2 mb-1">
                               <div className="font-medium text-sm truncate">{indicator.title}</div>
                               {hasChanged && (
-                                <Badge variant="secondary" className="text-xs">Modified</Badge>
+                                <Badge variant="secondary" className="text-xs">
+                                  {t('indicator.weightModal.modified')}
+                                </Badge>
                               )}
                             </div>
                             <div className="text-xs text-muted-foreground space-y-1">
-                              <div>Original: <span className="font-mono">{indicator.currentWeight.toFixed(3)}</span></div>
+                              <div>
+                                {t('indicator.weightModal.original')}:{' '}
+                                <span className="font-mono">{indicator.currentWeight.toFixed(3)}</span>
+                              </div>
                               {hasChanged && (
                                 <div className={`font-medium ${
-                                  indicator.newWeight > indicator.currentWeight 
-                                    ? 'text-green-600 dark:text-green-400' 
+                                  indicator.newWeight > indicator.currentWeight
+                                    ? 'text-green-600 dark:text-green-400'
                                     : 'text-orange-600 dark:text-orange-400'
                                 }`}>
-                                  Change: {indicator.newWeight > indicator.currentWeight ? '+' : ''}
+                                  {t('indicator.weightModal.change')}: {indicator.newWeight > indicator.currentWeight ? '+' : ''}
                                   {(indicator.newWeight - indicator.currentWeight).toFixed(3)}
                                 </div>
                               )}
                             </div>
                           </div>
-                          
+
                           <div className="flex items-center gap-2 min-w-0">
                             <Label htmlFor={`weight-${indicator.id}`} className="text-xs whitespace-nowrap">
-                              Weight:
+                              {t('indicator.weightModal.weightLabel')}
                             </Label>
                             <div className="space-y-1">
                               <Input
@@ -435,15 +441,15 @@ export function WeightAdjustmentModal({
                                   }
                                 }}
                                 className={`w-24 text-xs font-mono text-right transition-colors ${
-                                  !indicator.isInputValid 
-                                    ? 'border-red-300 bg-red-50 focus:border-red-500 focus:ring-red-200 dark:border-red-700 dark:bg-red-950/20' 
+                                  !indicator.isInputValid
+                                    ? 'border-red-300 bg-red-50 focus:border-red-500 focus:ring-red-200 dark:border-red-700 dark:bg-red-950/20'
                                     : ''
                                 }`}
                                 placeholder="0.001"
                               />
                               {!indicator.isInputValid && indicator.inputValue && (
                                 <div className="text-xs text-red-500 dark:text-red-400">
-                                  Range: 0.001-1.000
+                                  {t('indicator.weightModal.rangeHint')}
                                 </div>
                               )}
                             </div>
@@ -468,7 +474,7 @@ export function WeightAdjustmentModal({
               disabled={isSaving}
               className="w-full sm:w-auto min-w-[120px]"
             >
-              Cancel
+              {t('cancel')}
             </Button>
             <Button
               onClick={saveWeightChanges}
@@ -478,12 +484,12 @@ export function WeightAdjustmentModal({
               {isSaving ? (
                 <>
                   <div className="animate-spin rounded-full h-3 w-3 border-2 border-white border-t-transparent mr-2" />
-                  Saving Changes...
+                  {t('indicator.weightModal.saving')}
                 </>
               ) : (
                 <>
                   <CheckCircle2 className="h-4 w-4 mr-2" />
-                  Save Weight Distribution
+                  {t('indicator.weightModal.save')}
                 </>
               )}
             </Button>
