@@ -77,7 +77,9 @@
       "examples": "Positive Examples",
       "counterExamples": "Counter Examples",
       "approvalStatus": "Approval Status",
-      "visibility": "Visibility"
+      "visibility": "Visibility",
+      "descriptionCounterMin": "{count} / {min} chars (min)",
+      "descriptionCounterRange": "{count} / {max} chars"
     },
     "placeholders": {
       "title": "e.g., Proactive Communication",
@@ -95,12 +97,57 @@
       "createIndicator": "Create Indicator"
     },
     "alerts": {
-      "weightRemaining": "Only {remaining} weight remaining for this competency."
+      "weightRemaining": "Only {remaining} weight remaining for this competency.",
+      "weightLimitExceeded": "Total weight cannot exceed {max}. Current total: {current}, your weight: {weight}, resulting total: {total}."
     },
     "help": {
       "contextScope": "Determines the applicability of this indicator. 'Universal' indicators are context-neutral and used in Scenario A (Competency Passport).",
       "contextScopeNote": "\"Universal\" indicators are included in Scenario A (General Overview / Competency Passport). Other scopes are for targeted assessments."
+    },
+    "context": {
+      "forCompetency": "For: {name}"
+    },
+    "weightModal": {
+      "title": "Weight Distribution",
+      "descriptionRedistribute": "Redistribute weights to accommodate the new indicator",
+      "descriptionAdjust": "Adjust the weight distribution for existing indicators",
+      "summary": {
+        "validDistribution": "Valid Distribution",
+        "weightOk": "Weight Distribution OK",
+        "limitExceeded": "Weight Limit Exceeded",
+        "currentTotal": "Current Total",
+        "newIndicator": "New Indicator",
+        "finalTotal": "Final Total",
+        "totalWeight": "Total Weight",
+        "weightUsage": "Weight Usage"
+      },
+      "quickActions": "Quick Actions",
+      "equalDistribution": "Equal Distribution",
+      "resetChanges": "Reset Changes",
+      "existingIndicators": "Existing Indicators ({count})",
+      "noIndicators": "No existing indicators found",
+      "modified": "Modified",
+      "original": "Original",
+      "change": "Change",
+      "weightLabel": "Weight:",
+      "rangeHint": "Range: 0.001-1.000",
+      "saving": "Saving Changes...",
+      "save": "Save Weight Distribution",
+      "toasts": {
+        "loadFailed": "Failed to load existing indicators",
+        "weightClamped": "Weight adjusted to {value} (valid range: 0.001 - 1.000)",
+        "invalidNumber": "Please enter a valid number",
+        "distributionInvalid": "Weight distribution is not valid. Total must equal 1.0",
+        "distributionExceeds": "Weight distribution exceeds limit. Total cannot exceed 1.0",
+        "updateSuccess": "Weights updated successfully",
+        "updateFailed": "Failed to update weights. Please try again."
+      }
     }
+  },
+  "newIndicator": {
+    "title": "New behavioral indicator",
+    "description": "Describe an observable behavior that demonstrates this competency.",
+    "selectCompetencyDescription": "First, select the competency this indicator belongs to."
   },
   "question": {
     "sections": {

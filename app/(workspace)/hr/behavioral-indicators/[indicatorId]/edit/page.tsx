@@ -10,14 +10,11 @@ import { EditIndicatorPageSkeleton } from "../../_components/EditIndicatorPageSk
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { IndicatorQuestionsManager } from "../../_components/IndicatorQuestionsManager";
 import PageHeader from "@/components/common/PageHeader";
-import { indicatorSchema } from "../../validation";
-import { z } from 'zod';
+import { type IndicatorFormValues } from "@/lib/schemas";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { AlertCircle, RefreshCw, ArrowLeft, WifiOff } from "lucide-react";
 import Link from "next/link";
-
-type IndicatorFormValues = z.infer<typeof indicatorSchema>;
 
 type LoadingState = 'loading' | 'success' | 'error' | 'not-found';
 

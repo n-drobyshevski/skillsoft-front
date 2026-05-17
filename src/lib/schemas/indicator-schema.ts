@@ -7,29 +7,18 @@ import {
 } from '@/types/domain';
 import { TranslationFunction } from '@/lib/schema-factory';
 
-/**
- * Creates an i18n-aware behavioral indicator schema.
- * Error messages are translated using the provided translation function.
- *
- * @param t - Translation function from useTranslations()
- * @returns Zod schema with translated error messages
- *
- * @example
- * ```tsx
- * const t = useTranslations();
- * const schema = useMemo(() => createIndicatorSchema(t), [t]);
- * const form = useForm({ resolver: zodResolver(schema) });
- * ```
- */
 export function createIndicatorSchema(t: TranslationFunction) {
+  // Constraints must match the backend exactly. Mismatches let invalid
+  // input pass FE validation and surface as opaque 400s after submit.
+  // BE source of truth: CreateIndicatorRequest.java / UpdateIndicatorRequest.java
   return z.object({
     title: z.string()
       .min(5, t('validation.minLength', { min: '5' }))
-      .max(200, t('validation.maxLength', { max: '200' })),
+      .max(150, t('validation.maxLength', { max: '150' })),
 
     description: z.string()
-      .min(10, t('validation.minLength', { min: '10' }))
-      .max(2000, t('validation.maxLength', { max: '2000' })),
+      .min(20, t('validation.minLength', { min: '20' }))
+      .max(500, t('validation.maxLength', { max: '500' })),
 
     observabilityLevel: z.nativeEnum(ObservabilityLevel, {
       message: t('validation.selectOption')
@@ -43,22 +32,22 @@ export function createIndicatorSchema(t: TranslationFunction) {
       .min(0.01, t('validation.weightRange', { min: '0.01', max: '1' }))
       .max(1, t('validation.weightRange', { min: '0.01', max: '1' })),
 
-    examples: z.string().optional(),
-    counterExamples: z.string().optional(),
-    isActive: z.boolean(),
-
-    approvalStatus: z.nativeEnum(ApprovalStatus, {
-      message: t('validation.selectOption')
-    }),
-
-    orderIndex: z.number()
-      .int(t('validation.integerRequired'))
-      .min(1, t('validation.minValue', { min: '1' }))
-      .max(20, t('validation.maxValue', { max: '20' })),
+    examples: z.string().max(1000, t('validation.maxLength', { max: '1000' })).optional(),
+    counterExamples: z.string().max(1000, t('validation.maxLength', { max: '1000' })).optional(),
 
     contextScope: z.nativeEnum(ContextScope, {
       message: t('validation.selectOption')
     }),
+
+    isActive: z.boolean().optional(),
+    approvalStatus: z.nativeEnum(ApprovalStatus, {
+      message: t('validation.selectOption'),
+    }).optional(),
+    orderIndex: z.number()
+      .int(t('validation.integerRequired'))
+      .min(1, t('validation.minValue', { min: '1' }))
+      .max(20, t('validation.maxValue', { max: '20' }))
+      .optional(),
   }).strict();
 }
 
