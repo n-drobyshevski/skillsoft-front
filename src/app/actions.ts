@@ -1,6 +1,7 @@
 'use server'
 
 import { revalidatePath, revalidateTag, updateTag } from 'next/cache';
+import { getTranslations } from 'next-intl/server';
 
 interface ApiError extends Error {
   status?: number;
@@ -220,8 +221,7 @@ export async function deleteCompetencyAction(competencyId: string): Promise<Acti
   }
 }
 
-// This is a simplified type for the form data.
-// For a real app, this might be shared or generated from the Zod schema.
+// Full form data shape (used by the edit form which surfaces all fields).
 export type IndicatorFormData = {
   title: string;
   description?: string;
@@ -230,56 +230,89 @@ export type IndicatorFormData = {
   weight: number;
   examples?: string;
   counterExamples?: string;
-  isActive: boolean;
-  approvalStatus: string;
+  contextScope?: string;
+  isActive?: boolean;
+  approvalStatus?: string;
   orderIndex?: number;
 };
 
+// Create-time payload: a stricter shape that omits fields the user shouldn't
+// pick at creation. orderIndex is computed server-side; isActive defaults to
+// true; approvalStatus is not in CreateIndicatorRequest (backend ignores it).
+export type CreateIndicatorFormData = Omit<
+  IndicatorFormData,
+  'isActive' | 'approvalStatus' | 'orderIndex'
+>;
+
 export async function updateIndicatorAction(indicatorId: string, data: IndicatorFormData) {
+  const t = await getTranslations('indicator');
   try {
-    // The entire mutation logic is now in one atomic server operation
+    const authHeaders = await getAuthHeaders();
     await fetchApi(`/behavioral-indicators/${indicatorId}`, {
       method: 'PUT',
       body: JSON.stringify(data),
       cache: 'no-store',
+      authHeaders,
     });
 
-    // Revalidation happens on the server, in the same step
     revalidatePath(BEHAVIORAL_INDICATORS_PATH);
     revalidatePath(`${BEHAVIORAL_INDICATORS_PATH}/${indicatorId}`);
 
-    return { success: true, message: 'Indicator updated successfully.' };
+    return { success: true, message: t('updatedSuccess') };
   } catch (error) {
-    // Return a serializable error object for the client to handle
-    const errorMessage = error instanceof Error ? error.message : UNKNOWN_ERROR_MESSAGE;
-    return { success: false, message: `Failed to update indicator: ${errorMessage}` };
+    const detail = error instanceof Error ? error.message : '';
+    const prefix = t('updateFailed');
+    return { success: false, message: detail ? `${prefix}: ${detail}` : prefix };
   }
 }
 
-export async function createIndicatorAction(competencyId: string, data: IndicatorFormData) {
+export async function createIndicatorAction(competencyId: string, data: CreateIndicatorFormData) {
+  const t = await getTranslations('indicator');
   try {
-    // Create the indicator
+    const authHeaders = await getAuthHeaders();
+
+    // Compute next orderIndex from existing siblings so creation order is sane
+    // (backend would otherwise default missing orderIndex to 0).
+    let nextOrderIndex = 1;
+    try {
+      const existing = await fetchApi<Array<{ orderIndex?: number }>>(
+        `/competencies/${competencyId}/behavioral-indicators`,
+        { cache: 'no-store', silentStatusCodes: [404], authHeaders },
+      );
+      if (Array.isArray(existing) && existing.length > 0) {
+        nextOrderIndex = existing.length + 1;
+      }
+    } catch {
+      // Fall back to 1 if the count fetch fails — backend will accept it.
+    }
+
     const newIndicator = await fetchApi<{ id: string }>(`/behavioral-indicators`, {
-      method: 'POST', 
-      body: JSON.stringify({ ...data, competencyId }),
+      method: 'POST',
+      body: JSON.stringify({
+        ...data,
+        competencyId,
+        isActive: true,
+        orderIndex: nextOrderIndex,
+      }),
       cache: 'no-store',
+      authHeaders,
     });
 
-    // Comprehensive cache revalidation for indicator creation
-    revalidatePath(BEHAVIORAL_INDICATORS_PATH); // All indicators page
-    revalidatePath(COMPETENCIES_PATH); // All competencies page  
-    revalidatePath(`${COMPETENCIES_PATH}/${competencyId}`); // Specific competency page
-    revalidatePath(`${COMPETENCIES_PATH}/${competencyId}/edit`); // Competency edit page
-    revalidatePath(`${BEHAVIORAL_INDICATORS_PATH}/${newIndicator.id}`); // New indicator page
+    revalidatePath(BEHAVIORAL_INDICATORS_PATH);
+    revalidatePath(COMPETENCIES_PATH);
+    revalidatePath(`${COMPETENCIES_PATH}/${competencyId}`);
+    revalidatePath(`${COMPETENCIES_PATH}/${competencyId}/edit`);
+    revalidatePath(`${BEHAVIORAL_INDICATORS_PATH}/${newIndicator.id}`);
 
-    return { 
-      success: true, 
-      message: 'Indicator created successfully.',
-      data: newIndicator 
+    return {
+      success: true,
+      message: t('createdSuccess'),
+      data: newIndicator,
     };
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : UNKNOWN_ERROR_MESSAGE;
-    return { success: false, message: `Failed to create indicator: ${errorMessage}` };
+    const detail = error instanceof Error ? error.message : '';
+    const prefix = t('createFailed');
+    return { success: false, message: detail ? `${prefix}: ${detail}` : prefix };
   }
 }
 
@@ -323,10 +356,12 @@ export async function revalidateUserTags(userId?: string) {
 
 export async function updateIndicatorQuestionsAction(indicatorId: string, questionIds: string[]) {
   try {
+    const authHeaders = await getAuthHeaders();
     await fetchApi(`/behavioral-indicators/${indicatorId}/questions`, {
       method: 'PUT',
       body: JSON.stringify({ questionIds }),
       cache: 'no-store',
+      authHeaders,
     });
 
     revalidatePath(`/behavioral-indicators/${indicatorId}`);
