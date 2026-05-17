@@ -19,6 +19,8 @@ import {
   useEffect,
   useRef,
   useDeferredValue,
+  useCallback,
+  useMemo,
 } from 'react';
 import type { IFuseOptions } from 'fuse.js';
 import type {
@@ -211,8 +213,8 @@ export function useWorkerSearch(
   // Worker support check
   const workerSupported = useWorker && isWorkerSupported();
 
-  // Filter skills
-  const filteredSkills = applyFilters(skills, filters);
+  // Filter skills (memoized so downstream useCallback deps stay stable)
+  const filteredSkills = useMemo(() => applyFilters(skills, filters), [skills, filters]);
 
   // Initialize worker
   useEffect(() => {
@@ -361,26 +363,27 @@ export function useWorkerSearch(
     }
   }, [deferredQuery, limit, isIndexReady, workerSupported, filteredSkills, threshold]);
 
-  // Actions
-  const setQuery = (newQuery: string) => {
+  // Actions — wrapped in useCallback so consumers can safely list them in
+  // useEffect deps without triggering render loops.
+  const setQuery = useCallback((newQuery: string) => {
     setQueryState(newQuery);
-  };
+  }, []);
 
-  const clearQuery = () => {
+  const clearQuery = useCallback(() => {
     setQueryState('');
-    setResults([]);
+    setResults((prev) => (prev.length === 0 ? prev : []));
     setSearchTime(0);
-  };
+  }, []);
 
-  const setFilters = (newFilters: SkillSearchFilters) => {
+  const setFilters = useCallback((newFilters: SkillSearchFilters) => {
     setFiltersState(newFilters);
-  };
+  }, []);
 
-  const clearFilters = () => {
+  const clearFilters = useCallback(() => {
     setFiltersState({});
-  };
+  }, []);
 
-  const rebuildIndex = () => {
+  const rebuildIndex = useCallback(() => {
     if (!workerSupported || !workerRef.current) return;
 
     setIsIndexing(true);
@@ -396,15 +399,15 @@ export function useWorkerSearch(
     };
 
     workerRef.current.postMessage(message);
-  };
+  }, [filteredSkills, threshold, workerSupported]);
 
   /**
    * Get context-aware recommendations based on a seed text
    * Used to recommend ESCO skills based on selected O*NET skill name
    */
-  const recommend = (seedText: string, standard: 'onet' | 'esco' = 'esco') => {
+  const recommend = useCallback((seedText: string, standard: 'onet' | 'esco' = 'esco') => {
     if (!seedText.trim()) {
-      setRecommendations([]);
+      setRecommendations((prev) => (prev.length === 0 ? prev : []));
       return;
     }
 
@@ -446,11 +449,23 @@ export function useWorkerSearch(
         setRecommendations(transformedResults);
       });
     }
-  };
+  }, [workerSupported, isIndexReady, filteredSkills, threshold]);
 
-  const clearRecommendations = () => {
-    setRecommendations([]);
-  };
+  // Bail out when already empty so we don't allocate a new array each call —
+  // otherwise a consumer that calls this from an effect will re-render forever.
+  const clearRecommendations = useCallback(() => {
+    setRecommendations((prev) => (prev.length === 0 ? prev : []));
+  }, []);
+
+  const actions = useMemo<WorkerSearchActions>(() => ({
+    setQuery,
+    clearQuery,
+    setFilters,
+    clearFilters,
+    rebuildIndex,
+    recommend,
+    clearRecommendations,
+  }), [setQuery, clearQuery, setFilters, clearFilters, rebuildIndex, recommend, clearRecommendations]);
 
   return {
     state: {
@@ -466,15 +481,7 @@ export function useWorkerSearch(
       indexBuildTime,
       workerSupported,
     },
-    actions: {
-      setQuery,
-      clearQuery,
-      setFilters,
-      clearFilters,
-      rebuildIndex,
-      recommend,
-      clearRecommendations,
-    },
+    actions,
   };
 }
 
