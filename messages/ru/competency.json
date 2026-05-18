@@ -37,6 +37,36 @@
   "weightDistribution": "Распределение весов",
   "totalIndicators": "Всего индикаторов",
   "totalWeight": "Общий вес",
+  "weightLabel": "Вес: {value}",
+  "indicatorActions": {
+    "viewDetails": "Подробнее",
+    "edit": "Редактировать"
+  },
+  "standardsCard": {
+    "untitled": "Без названия",
+    "bigFiveShort": "Большая пятёрка",
+    "onetElementType": {
+      "ability": "Способность",
+      "skill": "Навык",
+      "knowledge": "Знание",
+      "work_activity": "Вид деятельности",
+      "work_style": "Стиль работы",
+      "interest": "Интерес",
+      "work_value": "Рабочая ценность",
+      "work_context": "Рабочий контекст"
+    },
+    "escoSkillType": {
+      "skill": "Навык",
+      "competence": "Компетенция",
+      "knowledge": "Знание",
+      "language": "Язык",
+      "transversal": "Универсальный"
+    }
+  },
+  "questionMeta": {
+    "secondsAbbr": "{seconds}с",
+    "optionsAbbr": "вариантов: {count}"
+  },
   "overview": "Обзор компетенции",
   "deleteConfirmTitle": "Удалить компетенцию",
   "deleteConfirmDescription": "Это действие нельзя отменить. Компетенция и все связанные данные будут удалены навсегда.",

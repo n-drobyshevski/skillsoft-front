@@ -68,10 +68,20 @@ export default async function CompetencyDetailPage({
 	const { competencyId } = await params;
 	const { competency, questions } = await getCompetencyData(competencyId);
 	const t = await getTranslations("competency");
+	const tCategory = await getTranslations("enums.competencyCategory");
+	const tApproval = await getTranslations("enums.approvalStatus");
 
 	if (!competency) {
 		notFound();
 	}
+
+	const approvalKey = competency.approvalStatus ?? "DRAFT";
+	const approvalLabel = tApproval.has(approvalKey)
+		? tApproval(approvalKey)
+		: approvalKey.replace("_", " ");
+	const categoryLabel = tCategory.has(competency.category)
+		? tCategory(competency.category)
+		: competency.category;
 
 	return (
 		<EntityDetailLayout>
@@ -209,7 +219,7 @@ export default async function CompetencyDetailPage({
 							{/* Category */}
 							<div className="flex items-center justify-between py-2 border-b border-border/50 last:border-0">
 								<span className="text-sm text-muted-foreground font-medium">{t("category")}</span>
-								<span className="text-sm font-medium text-foreground">{competency.category}</span>
+								<span className="text-sm font-medium text-foreground">{categoryLabel}</span>
 							</div>
 
 							{/* Approval Status */}
@@ -219,7 +229,7 @@ export default async function CompetencyDetailPage({
 									variant="secondary"
 									className={`${approvalStatusToColor(competency.approvalStatus)} font-medium text-xs px-2.5 py-1`}
 								>
-									{(competency.approvalStatus ?? "DRAFT").replace("_", " ")}
+									{approvalLabel}
 								</Badge>
 							</div>
 
@@ -282,7 +292,7 @@ export default async function CompetencyDetailPage({
 																{indicator.title}
 															</div>
 															<div className="text-xs text-muted-foreground mt-0.5 font-medium">
-																Weight: {indicator.weight}
+																{t("weightLabel", { value: indicator.weight })}
 															</div>
 														</div>
 													</div>
@@ -322,27 +332,49 @@ export default async function CompetencyDetailPage({
 	);
 }
 
+type TFunction = Awaited<ReturnType<typeof getTranslations>>;
+
+function lookupEnum(t: TFunction, key: string | undefined | null, fallback?: string): string | undefined {
+	if (!key) return fallback;
+	return t.has(key) ? t(key) : fallback;
+}
+
 // Standards Card Component
-function StandardsCard({ standardCodes }: { standardCodes?: StandardCodesDto }) {
+async function StandardsCard({ standardCodes }: { standardCodes?: StandardCodesDto }) {
+	const t = await getTranslations("competency");
+	const tStandards = await getTranslations("competency.standardsCard");
+	const tOnetType = await getTranslations("competency.standardsCard.onetElementType");
+	const tEscoType = await getTranslations("competency.standardsCard.escoSkillType");
+	const tBigFiveTrait = await getTranslations("enums.bigFiveTrait");
+
 	const hasOnet: boolean = !!standardCodes?.onetRef;
 	const hasEsco: boolean = !!standardCodes?.escoRef;
 	const hasBigFive: boolean = !!standardCodes?.bigFiveRef;
-	
+
 	// Get stored Big Five or compute from O*NET mapping
 	const storedBigFive: BigFiveDimension | null = getEffectiveBigFive(standardCodes?.bigFiveRef);
 	const storedFacet: string | null = getEffectiveDimension(standardCodes?.bigFiveRef);
-	
+
 	// If no stored bigFiveRef but we have O*NET, compute Big Five from mapping
-	const computedMapping = !hasBigFive && hasOnet && standardCodes?.onetRef?.code 
+	const computedMapping = !hasBigFive && hasOnet && standardCodes?.onetRef?.code
 		? getBigFiveMapping(standardCodes.onetRef.code)
 		: null;
-	
+
 	// Use stored Big Five or computed from O*NET mapping
 	const bigFive: BigFiveDimension | null = storedBigFive || (computedMapping?.bigFive ?? null);
 	const facet: string | null = storedFacet || (computedMapping?.facet ?? null);
 	const isComputed: boolean = !storedBigFive && !!computedMapping?.bigFive;
-	
+
 	const hasAny: boolean = hasOnet || hasEsco || hasBigFive || !!bigFive;
+
+	const onetElementType = standardCodes?.onetRef?.elementType;
+	const onetElementTypeLabel = lookupEnum(tOnetType, onetElementType, onetElementType?.replace('_', ' '));
+
+	const escoSkillType = standardCodes?.escoRef?.skillType;
+	const escoSkillTypeLabel = lookupEnum(tEscoType, escoSkillType, escoSkillType);
+
+	const bigFiveDisplayName = lookupEnum(tBigFiveTrait, bigFive, bigFive ? BigFiveInfo[bigFive]?.displayName : undefined);
+	const bigFiveDescription = lookupEnum(tBigFiveTrait, bigFive ? `${bigFive}_DESC` : null, bigFive ? BigFiveInfo[bigFive]?.description : undefined);
 
 	if (!hasAny) {
 		return (
@@ -352,12 +384,12 @@ function StandardsCard({ standardCodes }: { standardCodes?: StandardCodesDto }) 
 						<div className="p-1.5 rounded-lg bg-gray-100 dark:bg-gray-900/30">
 							<Globe className="w-3.5 h-3.5 text-gray-600 dark:text-gray-400" />
 						</div>
-						Standards Mapping
+						{t("standardsMapping")}
 					</CardTitle>
 				</CardHeader>
 				<CardContent className="pt-0">
 					<p className="text-sm text-muted-foreground">
-						No standards have been mapped to this competency yet.
+						{t("noStandardsMapped")}
 					</p>
 				</CardContent>
 			</Card>
@@ -371,7 +403,7 @@ function StandardsCard({ standardCodes }: { standardCodes?: StandardCodesDto }) 
 					<div className="p-1.5 rounded-lg bg-indigo-100 dark:bg-indigo-900/30">
 						<Globe className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
 					</div>
-					Standards Mapping
+					{t("standardsMapping")}
 				</CardTitle>
 			</CardHeader>
 			<CardContent className="pt-0 space-y-3">
@@ -385,12 +417,14 @@ function StandardsCard({ standardCodes }: { standardCodes?: StandardCodesDto }) 
 							<div className="flex-1 min-w-0">
 								<div className="flex items-center gap-2">
 									<span className="text-xs font-semibold text-orange-700 dark:text-orange-300 uppercase tracking-wide">O*NET</span>
-									<Badge variant="secondary" className="text-[10px] px-1.5 py-0 bg-orange-100 text-orange-700 dark:bg-orange-900/50 dark:text-orange-300">
-										{standardCodes?.onetRef?.elementType?.replace('_', ' ')}
-									</Badge>
+									{onetElementTypeLabel && (
+										<Badge variant="secondary" className="text-[10px] px-1.5 py-0 bg-orange-100 text-orange-700 dark:bg-orange-900/50 dark:text-orange-300">
+											{onetElementTypeLabel}
+										</Badge>
+									)}
 								</div>
 								<p className="text-sm font-medium text-foreground mt-1 line-clamp-2">
-									{standardCodes?.onetRef?.title || 'Untitled'}
+									{standardCodes?.onetRef?.title || tStandards("untitled")}
 								</p>
 								<p className="text-xs text-muted-foreground font-mono mt-0.5">
 									{standardCodes?.onetRef?.code}
@@ -410,23 +444,23 @@ function StandardsCard({ standardCodes }: { standardCodes?: StandardCodesDto }) 
 							<div className="flex-1 min-w-0">
 								<div className="flex items-center gap-2">
 									<span className="text-xs font-semibold text-blue-700 dark:text-blue-300 uppercase tracking-wide">ESCO</span>
-									{standardCodes?.escoRef?.skillType && (
+									{escoSkillTypeLabel && (
 										<Badge variant="secondary" className="text-[10px] px-1.5 py-0 bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300">
-											{standardCodes?.escoRef?.skillType}
+											{escoSkillTypeLabel}
 										</Badge>
 									)}
 								</div>
 								<p className="text-sm font-medium text-foreground mt-1 line-clamp-2">
-									{standardCodes?.escoRef?.title || 'Untitled'}
+									{standardCodes?.escoRef?.title || tStandards("untitled")}
 								</p>
-								<a 
+								<a
 									href={standardCodes?.escoRef?.uri}
 									target="_blank"
 									rel="noopener noreferrer"
 									className="inline-flex items-center gap-1 text-xs text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 mt-1"
 								>
 									<ExternalLink className="w-3 h-3" />
-									View in ESCO
+									{t("viewInEsco")}
 								</a>
 							</div>
 						</div>
@@ -442,11 +476,11 @@ function StandardsCard({ standardCodes }: { standardCodes?: StandardCodesDto }) 
 							</div>
 							<div className="flex-1 min-w-0">
 								<div className="flex items-center gap-2 flex-wrap">
-									<span className="text-xs font-semibold text-teal-700 dark:text-teal-300 uppercase tracking-wide">Big Five Personality</span>
+									<span className="text-xs font-semibold text-teal-700 dark:text-teal-300 uppercase tracking-wide">{t("bigFivePersonality")}</span>
 									{isComputed && (
 										<Badge variant="secondary" className="text-[9px] px-1.5 py-0 bg-teal-100/80 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400 gap-0.5">
 											<Info className="w-2.5 h-2.5" />
-											Auto-detected
+											{t("autoDetected")}
 										</Badge>
 									)}
 									{facet && (
@@ -456,10 +490,10 @@ function StandardsCard({ standardCodes }: { standardCodes?: StandardCodesDto }) 
 									)}
 								</div>
 								<p className="text-sm font-medium text-foreground mt-1">
-									{BigFiveInfo[bigFive]?.displayName}
+									{bigFiveDisplayName}
 								</p>
 								<p className="text-xs text-muted-foreground mt-0.5">
-									{BigFiveInfo[bigFive]?.description}
+									{bigFiveDescription}
 								</p>
 							</div>
 						</div>
@@ -475,7 +509,7 @@ function StandardsCard({ standardCodes }: { standardCodes?: StandardCodesDto }) 
 							</div>
 							<div className="flex-1 min-w-0">
 								<div className="flex items-center gap-2">
-									<span className="text-xs font-semibold text-purple-700 dark:text-purple-300 uppercase tracking-wide">Big Five</span>
+									<span className="text-xs font-semibold text-purple-700 dark:text-purple-300 uppercase tracking-wide">{tStandards("bigFiveShort")}</span>
 								</div>
 								{standardCodes.bigFiveRef.title && (
 									<p className="text-sm font-medium text-foreground mt-1 capitalize">
@@ -497,11 +531,18 @@ function StandardsCard({ standardCodes }: { standardCodes?: StandardCodesDto }) 
 }
 
 
-function IndicatorCard({
+async function IndicatorCard({
 	indicator,
 }: {
 	indicator: BehavioralIndicator;
 }) {
+	const tObservability = await getTranslations("enums.observabilityLevel");
+	const tActions = await getTranslations("competency.indicatorActions");
+
+	const observabilityLabel = tObservability.has(indicator.observabilityLevel)
+		? tObservability(indicator.observabilityLevel)
+		: indicator.observabilityLevel.replace(/_/g, ' ');
+
 	return (
 		<Card className="group relative bg-background/50 border-border/50 hover:bg-background hover:border-primary/40 hover:shadow-sm transition-all duration-200 overflow-hidden">
 			<CardContent className="p-0">
@@ -510,7 +551,7 @@ function IndicatorCard({
 					{/* Status indicator dot */}
 					<div className="flex items-center gap-3 flex-1 min-w-0">
 						<div className="w-2 h-8 bg-primary/20 group-hover:bg-primary/60 rounded-full transition-colors duration-200 shrink-0" />
-						
+
 						{/* Content */}
 						<div className="flex-1 min-w-0 space-y-1">
 							{/* Title and level on same line */}
@@ -528,10 +569,10 @@ function IndicatorCard({
 										'bg-gray-100 dark:bg-gray-900/30 text-gray-700 dark:text-gray-300'
 									}`}
 								>
-									{indicator.observabilityLevel.replace(/_/g, ' ')}
+									{observabilityLabel}
 								</Badge>
 							</div>
-							
+
 							{/* Description if exists */}
 							{indicator.description && (
 								<p className="text-xs text-muted-foreground line-clamp-1 leading-relaxed">
@@ -539,36 +580,36 @@ function IndicatorCard({
 								</p>
 							)}
 						</div>
-						
+
 						{/* Weight and actions on the right */}
 						<div className="flex items-center gap-2 shrink-0">
 							{/* Weight badge */}
 							<div className="text-xs font-mono text-muted-foreground bg-muted px-2 py-1 rounded-md">
 								{indicator.weight}
 							</div>
-							
+
 							{/* Action buttons - only visible on hover */}
 							<div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-								<Button 
-									variant="ghost" 
-									size="sm" 
-									asChild 
+								<Button
+									variant="ghost"
+									size="sm"
+									asChild
 									className="h-6 w-6 p-0 hover:bg-primary/10 hover:text-primary"
 								>
-									<Link href={`/behavioral-indicators/${indicator.id}`} title="View Details">
+									<Link href={`/behavioral-indicators/${indicator.id}`} title={tActions("viewDetails")}>
 										<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
 											<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
 											<circle cx="12" cy="12" r="3"/>
 										</svg>
 									</Link>
 								</Button>
-								<Button 
-									variant="ghost" 
-									size="sm" 
-									asChild 
+								<Button
+									variant="ghost"
+									size="sm"
+									asChild
 									className="h-6 w-6 p-0 hover:bg-primary/10 hover:text-primary"
 								>
-									<Link href={`/behavioral-indicators/${indicator.id}/edit`} title="Edit">
+									<Link href={`/behavioral-indicators/${indicator.id}/edit`} title={tActions("edit")}>
 										<Edit className="h-3 w-3" />
 									</Link>
 								</Button>
@@ -576,7 +617,7 @@ function IndicatorCard({
 						</div>
 					</div>
 				</div>
-				
+
 				{/* Hover effect overlay */}
 				<div className="absolute inset-0 bg-linear-to-r from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none" />
 			</CardContent>

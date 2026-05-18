@@ -16,6 +16,8 @@ interface CompetencyDetailClientProps {
 export default function CompetencyDetailClient({ competency, children }: CompetencyDetailClientProps) {
   const router = useRouter();
   const t = useTranslations('competency');
+  const tCategory = useTranslations('enums.competencyCategory');
+  const tApproval = useTranslations('enums.approvalStatus');
 
   const handleDeleteCompetency = async () => {
     try {
@@ -38,9 +40,16 @@ export default function CompetencyDetailClient({ competency, children }: Compete
     }
   };
 
+  const categoryLabel = tCategory.has(competency.category)
+    ? tCategory(competency.category)
+    : competency.category;
+  const approvalLabel = tApproval.has(competency.approvalStatus)
+    ? tApproval(competency.approvalStatus)
+    : competency.approvalStatus.replace('_', ' ');
+
   const badges = [
-    { label: competency.category, variant: 'secondary' as const },
-    { label: competency.approvalStatus.replace("_", " "), variant: 'outline' as const, className: approvalStatusToColor(competency.approvalStatus) },
+    { label: categoryLabel, variant: 'secondary' as const },
+    { label: approvalLabel, variant: 'outline' as const, className: approvalStatusToColor(competency.approvalStatus) },
     { label: competency.isActive ? t('active') : t('inactive'), variant: competency.isActive ? 'default' as const : 'secondary' as const },
     { label: `v${competency.version}`, variant: 'outline' as const },
   ];

@@ -7,6 +7,17 @@ import { DifficultyLevel } from "@/types/domain";
 import { useTranslations } from "next-intl";
 
 function QuestionCard({ question, index }: { question: AssessmentQuestion; index: number }) {
+  const tMeta = useTranslations("competency.questionMeta");
+  const tQuestionType = useTranslations("enums.questionType");
+  const tDifficulty = useTranslations("enums.difficultyLevel");
+
+  const questionTypeLabel = tQuestionType.has(question.questionType)
+    ? tQuestionType(question.questionType)
+    : question.questionType.replace("_", " ");
+  const difficultyLabel = tDifficulty.has(question.difficultyLevel)
+    ? tDifficulty(question.difficultyLevel)
+    : question.difficultyLevel;
+
   return (
     <div className="group relative flex items-center gap-2.5 p-2.5 rounded-lg border border-border/40 bg-background/50 hover:bg-background hover:border-primary/30 transition-all duration-150">
       {/* Question number */}
@@ -15,29 +26,29 @@ function QuestionCard({ question, index }: { question: AssessmentQuestion; index
           {index + 1}
         </span>
       </div>
-      
+
       {/* Question content */}
       <div className="flex-1 min-w-0">
         <p className="text-sm text-foreground truncate group-hover:text-primary transition-colors">
           {question.questionText}
         </p>
         <div className="flex items-center gap-1.5 mt-0.5 text-[10px] text-muted-foreground">
-          <span>{question.questionType.replace("_", " ")}</span>
+          <span>{questionTypeLabel}</span>
           {question.timeLimit && (
             <>
               <span>•</span>
-              <span>{question.timeLimit}s</span>
+              <span>{tMeta("secondsAbbr", { seconds: question.timeLimit })}</span>
             </>
           )}
           {question.answerOptions && question.answerOptions.length > 0 && (
             <>
               <span>•</span>
-              <span>{question.answerOptions.length} opts</span>
+              <span>{tMeta("optionsAbbr", { count: question.answerOptions.length })}</span>
             </>
           )}
         </div>
       </div>
-      
+
       {/* Difficulty badge */}
       <Badge
         variant="secondary"
@@ -53,7 +64,7 @@ function QuestionCard({ question, index }: { question: AssessmentQuestion; index
             : "bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300"
         }`}
       >
-        {question.difficultyLevel}
+        {difficultyLabel}
       </Badge>
     </div>
   );

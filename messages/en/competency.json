@@ -37,6 +37,36 @@
   "weightDistribution": "Weight Distribution",
   "totalIndicators": "Total indicators",
   "totalWeight": "Total weight",
+  "weightLabel": "Weight: {value}",
+  "indicatorActions": {
+    "viewDetails": "View Details",
+    "edit": "Edit"
+  },
+  "standardsCard": {
+    "untitled": "Untitled",
+    "bigFiveShort": "Big Five",
+    "onetElementType": {
+      "ability": "Ability",
+      "skill": "Skill",
+      "knowledge": "Knowledge",
+      "work_activity": "Work Activity",
+      "work_style": "Work Style",
+      "interest": "Interest",
+      "work_value": "Work Value",
+      "work_context": "Work Context"
+    },
+    "escoSkillType": {
+      "skill": "Skill",
+      "competence": "Competence",
+      "knowledge": "Knowledge",
+      "language": "Language",
+      "transversal": "Transversal"
+    }
+  },
+  "questionMeta": {
+    "secondsAbbr": "{seconds}s",
+    "optionsAbbr": "{count} opts"
+  },
   "overview": "Competency Overview",
   "deleteConfirmTitle": "Delete Competency",
   "deleteConfirmDescription": "This action cannot be undone. This will permanently delete the competency and all associated data.",
