@@ -53,7 +53,26 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useEnumTranslation } from '@/hooks/useEnumTranslation';
 import { useHelpTranslation } from '@/hooks/useHelpTranslation';
 
-const questionTypes = Object.values(QuestionType);
+// Only types with an editor UI in renderAnswerOptions and a backend handler.
+// Legacy aliases (LIKERT_SCALE, SITUATIONAL_JUDGMENT, MULTIPLE_CHOICE, etc.) are
+// normalized to these canonical values when loading existing questions.
+const SUPPORTED_QUESTION_TYPES: QuestionType[] = [
+  QuestionType.LIKERT,
+  QuestionType.SJT,
+  QuestionType.MCQ,
+];
+
+const LEGACY_TYPE_ALIASES: Partial<Record<QuestionType, QuestionType>> = {
+  [QuestionType.LIKERT_SCALE]: QuestionType.LIKERT,
+  [QuestionType.SITUATIONAL_JUDGMENT]: QuestionType.SJT,
+  [QuestionType.MULTIPLE_CHOICE]: QuestionType.MCQ,
+  [QuestionType.SINGLE_CHOICE]: QuestionType.MCQ,
+};
+
+function normalizeQuestionType(type: QuestionType | undefined): QuestionType {
+  if (!type) return QuestionType.MCQ;
+  return LEGACY_TYPE_ALIASES[type] ?? type;
+}
 
 // Tag values for the multi-select (labels/descriptions come from translations)
 const TAG_VALUES = ['GENERAL', 'IT', 'SALES', 'FINANCE', 'MEDICAL', 'ENGINEERING', 'JUNIOR', 'MID', 'SENIOR'] as const;
@@ -81,7 +100,7 @@ export function QuestionForm({ question, competencyId, behavioralIndicatorId, on
     mode: 'onChange', // Enable inline validation
     defaultValues: {
       questionText: question?.questionText || '',
-      questionType: question?.questionType || QuestionType.MULTIPLE_CHOICE,
+      questionType: normalizeQuestionType(question?.questionType),
       scoringRubric: question?.scoringRubric || '',
       difficultyLevel: question?.difficultyLevel || DifficultyLevel.FOUNDATIONAL,
       isActive: question?.isActive ?? true,
@@ -134,6 +153,13 @@ export function QuestionForm({ question, competencyId, behavioralIndicatorId, on
           remove(i);
         }
       }
+    } else if (
+      (questionType === 'MULTIPLE_CHOICE' || questionType === 'MCQ' ||
+        questionType === 'SJT' || questionType === 'SITUATIONAL_JUDGMENT') &&
+      fields.length === 0
+    ) {
+      append({ text: '', score: 1, correct: false });
+      append({ text: '', score: 2, correct: false });
     }
   }, [questionType, append, remove, fields.length, likertPoints]);
 
@@ -530,7 +556,7 @@ export function QuestionForm({ question, competencyId, behavioralIndicatorId, on
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {getQuestionTypeOptions(questionTypes).map((option) => (
+                          {getQuestionTypeOptions(SUPPORTED_QUESTION_TYPES).map((option) => (
                             <SelectItem key={option.value} value={option.value}>
                               {option.label}
                             </SelectItem>
@@ -725,27 +751,7 @@ export function QuestionForm({ question, competencyId, behavioralIndicatorId, on
                 )}
               />
               
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-5">
-                <FormField
-                  control={form.control}
-                  name="orderIndex"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-sm font-medium">{t('question.fields.orderIndex')}</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          inputMode="numeric"
-                          className="h-11 sm:h-10 touch-manipulation"
-                          {...field}
-                          onChange={event => field.onChange(event.target.value === '' ? 0 : Number(event.target.value))}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
                 <FormField
                   control={form.control}
                   name="timeLimit"
@@ -803,6 +809,12 @@ export function QuestionForm({ question, competencyId, behavioralIndicatorId, on
 
           {/* Answer Options Section */}
           {renderAnswerOptions()}
+          {errors.answerOptions && (
+            <p className="text-sm font-medium text-destructive">
+              {(errors.answerOptions as { message?: string; root?: { message?: string } })?.message
+                ?? (errors.answerOptions as { root?: { message?: string } })?.root?.message}
+            </p>
+          )}
 
           {/* Action Buttons */}
           <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 pt-2">

@@ -79,7 +79,7 @@ export function createQuestionSchema(t: TranslationFunction) {
       message: t('validation.selectOption')
     }),
 
-    answerOptions: z.array(answerOptionSchema).optional(),
+    answerOptions: z.array(answerOptionSchema).min(1, t('validation.minItems', { min: '1' })),
 
     scoringRubric: z.string(),
 
@@ -93,9 +93,7 @@ export function createQuestionSchema(t: TranslationFunction) {
 
     isActive: z.boolean(),
 
-    orderIndex: z.number()
-      .min(1, t('validation.minValue', { min: '1' }))
-      .max(50, t('validation.maxValue', { max: '50' })),
+    orderIndex: z.number(),
   }).strict();
 }
 

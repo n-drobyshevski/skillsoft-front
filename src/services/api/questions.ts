@@ -67,10 +67,8 @@ export const assessmentQuestionsApi = {
     behavioralIndicatorId: string,
     data: QuestionInput
   ): Promise<AssessmentQuestion> => {
-    // Create a clean payload that exactly matches the backend DTO
     const payload = {
-      id: null, // Backend will generate this
-      behavioralIndicatorId: null, // Sent as query param, not in body
+      behavioralIndicatorId,
       questionText: String(data.questionText || ''),
       questionType: String(data.questionType || 'MULTIPLE_CHOICE'),
       answerOptions: Array.isArray(data.answerOptions) ? data.answerOptions.map(option => {
@@ -92,7 +90,7 @@ export const assessmentQuestionsApi = {
 
     const authHeaders = await getAuthHeaders();
     const result = await fetchApi<AssessmentQuestion>(
-      `/questions?behavioralIndicatorId=${encodeURIComponent(behavioralIndicatorId)}`,
+      `/questions`,
       {
         method: "POST",
         body: JSON.stringify(payload),
