@@ -214,5 +214,11 @@
     "EDIT_DESC": "Can modify test content",
     "MANAGE": "Manager",
     "MANAGE_DESC": "Full control including sharing"
+  },
+  "scoringRubric": {
+    "DIRECT_SCALE": "Direct Likert Scale",
+    "DIRECT_SCALE_DESC": "The candidate's selected scale point is scored directly. Higher agreement maps to higher score.",
+    "SITUATIONAL_BEST_CHOICE": "Situational Best Choice",
+    "SITUATIONAL_BEST_CHOICE_DESC": "Each answer option carries a preset score. The candidate receives the points assigned to the chosen option."
   }
 }

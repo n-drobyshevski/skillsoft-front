@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { EntityDetailLayout } from "@/components/common/EntityDetailLayout";
+import { HelpTooltip } from "@/components/ui/help-tooltip";
 import QuestionDetailClient from "./_components/QuestionDetailClient";
 import { CompetencyHoverCard } from "../../behavioral-indicators/[indicatorId]/_components/CompetencyHoverCard";
 import { IndicatorHoverCard } from "@/components/feedback/IndicatorHoverCard";
@@ -75,6 +76,11 @@ async function QuestionDetailData({ questionId }: { questionId: string }) {
 	const tQuestionType = await getTranslations("enums.questionType");
 	const tDifficulty = await getTranslations("enums.difficultyLevel");
 	const tTags = await getTranslations("forms.question.tags");
+	const tHelp = await getTranslations("help.question");
+	const tRubric = await getTranslations("enums.scoringRubric");
+
+	const rubricCode = question.scoringRubric?.trim() ?? "";
+	const isKnownRubric = rubricCode.length > 0 && tRubric.has(rubricCode);
 
 	return (
 		<EntityDetailLayout>
@@ -192,13 +198,37 @@ async function QuestionDetailData({ questionId }: { questionId: string }) {
 									<div className="p-1.5 rounded-lg bg-orange-100 dark:bg-orange-900/30">
 										<BarChart className="w-3.5 h-3.5 text-orange-600 dark:text-orange-400" />
 									</div>
-									{t("scoringRubric")}
+									<span className="inline-flex items-center">
+										{t("scoringRubric")}
+										<HelpTooltip
+											content={tHelp("scoringRubric")}
+											variant="help"
+											size="sm"
+											maxWidth={320}
+										/>
+									</span>
 								</CardTitle>
 							</CardHeader>
 							<CardContent className="pt-0">
-								<p className="text-sm text-muted-foreground leading-relaxed">
-									{question.scoringRubric}
-								</p>
+								<div className="rounded-lg border-l-[3px] border-orange-400 dark:border-orange-600 bg-orange-50/40 dark:bg-orange-950/15 px-4 py-3.5">
+									{isKnownRubric ? (
+										<div className="flex items-center">
+											<span className="text-sm font-medium text-foreground">
+												{tRubric(rubricCode)}
+											</span>
+											<HelpTooltip
+												content={tRubric(`${rubricCode}_DESC`)}
+												variant="info"
+												size="md"
+												maxWidth={320}
+											/>
+										</div>
+									) : (
+										<p className="text-sm text-foreground/90 leading-relaxed whitespace-pre-line">
+											{question.scoringRubric}
+										</p>
+									)}
+								</div>
 							</CardContent>
 						</Card>
 					)}
