@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -28,6 +29,13 @@ interface IndicatorDetailContentProps {
 
 export default function IndicatorDetailContent({ indicator, assessmentQuestions }: IndicatorDetailContentProps) {
   const [selectedQuestion, setSelectedQuestion] = useState<AssessmentQuestion | null>(null);
+  const t = useTranslations("indicator.detail");
+  const tObservability = useTranslations("enums.observabilityLevel");
+  const tApproval = useTranslations("enums.approvalStatus");
+  const tMeasurement = useTranslations("enums.measurementType");
+  const tContextScope = useTranslations("enums.contextScope");
+  const tQuestionType = useTranslations("enums.questionType");
+  const tDifficulty = useTranslations("enums.difficultyLevel");
 
   return (
     <>
@@ -40,13 +48,12 @@ export default function IndicatorDetailContent({ indicator, assessmentQuestions 
                 <div className="p-1.5 rounded-lg bg-emerald-100 dark:bg-emerald-900/30">
                   <FileText className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
                 </div>
-                Description
+                {t("description")}
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-0">
               <p className="text-sm text-muted-foreground leading-relaxed">
-                {indicator.description ||
-                  "No description available for this indicator."}
+                {indicator.description || t("noDescription")}
               </p>
             </CardContent>
           </Card>
@@ -59,7 +66,7 @@ export default function IndicatorDetailContent({ indicator, assessmentQuestions 
                   <div className="p-1 rounded-md bg-emerald-100 dark:bg-emerald-900/30">
                     <Lightbulb className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
                   </div>
-                  Examples
+                  {t("examples")}
                 </h4>
                 <Card className="bg-emerald-50/50 dark:bg-emerald-950/20 border-emerald-200/50 dark:border-emerald-800/30 shadow-sm">
                   <CardContent className="p-4">
@@ -77,7 +84,7 @@ export default function IndicatorDetailContent({ indicator, assessmentQuestions 
                   <div className="p-1 rounded-md bg-red-100 dark:bg-red-900/30">
                     <X className="w-3.5 h-3.5 text-red-600 dark:text-red-400" />
                   </div>
-                  Counter Examples
+                  {t("counterExamples")}
                 </h4>
                 <Card className="bg-red-50/50 dark:bg-red-950/20 border-red-200/50 dark:border-red-800/30 shadow-sm">
                   <CardContent className="p-4">
@@ -98,7 +105,7 @@ export default function IndicatorDetailContent({ indicator, assessmentQuestions 
                   <div className="p-1.5 rounded-lg bg-blue-100 dark:bg-blue-900/30">
                     <HelpCircle className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
                   </div>
-                  Assessment Questions
+                  {t("assessmentQuestions")}
                   <Badge variant="secondary" className="ml-1 font-medium text-xs">
                     {assessmentQuestions.length}
                   </Badge>
@@ -106,7 +113,7 @@ export default function IndicatorDetailContent({ indicator, assessmentQuestions 
                 <Button asChild size="sm" variant="outline" className="h-8">
                   <Link href={`/hr/assessment-questions/new?competencyId=${indicator.competencyId}&behavioralIndicatorId=${indicator.id}`}>
                       <Plus className="mr-1.5 h-3.5 w-3.5" />
-                      Add Question
+                      {t("addQuestion")}
                   </Link>
                 </Button>
               </CardHeader>
@@ -138,10 +145,12 @@ export default function IndicatorDetailContent({ indicator, assessmentQuestions 
                             
                             {/* Question type */}
                             <p className="text-xs text-muted-foreground font-medium">
-                              {question.questionType.replace("_", " ")}
+                              {tQuestionType.has(question.questionType)
+                                ? tQuestionType(question.questionType)
+                                : question.questionType.replace("_", " ")}
                             </p>
                           </div>
-                          
+
                           {/* Difficulty badge */}
                           <div className="shrink-0">
                             <Badge
@@ -158,7 +167,9 @@ export default function IndicatorDetailContent({ indicator, assessmentQuestions 
                                   : "bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800"
                               }`}
                             >
-                              {question.difficultyLevel}
+                              {tDifficulty.has(question.difficultyLevel)
+                                ? tDifficulty(question.difficultyLevel)
+                                : question.difficultyLevel}
                             </Badge>
                           </div>
                         </div>
@@ -177,7 +188,7 @@ export default function IndicatorDetailContent({ indicator, assessmentQuestions 
                   <div className="p-1.5 rounded-lg bg-blue-100 dark:bg-blue-900/30">
                     <HelpCircle className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
                   </div>
-                  Assessment Questions
+                  {t("assessmentQuestions")}
                 </CardTitle>
               </CardHeader>
               <CardContent className="pt-0">
@@ -186,12 +197,12 @@ export default function IndicatorDetailContent({ indicator, assessmentQuestions 
                     <HelpCircle className="h-5 w-5 text-muted-foreground" />
                   </div>
                   <p className="text-sm text-muted-foreground mb-4 font-medium">
-                    No assessment questions found for this indicator.
+                    {t("noQuestions")}
                   </p>
                   <Button asChild variant="outline">
                     <Link href={`/hr/assessment-questions/new?competencyId=${indicator.competencyId}&behavioralIndicatorId=${indicator.id}`}>
                         <Plus className="mr-2 h-4 w-4" />
-                        Add Question
+                        {t("addQuestion")}
                     </Link>
                   </Button>
                 </div>
@@ -208,13 +219,13 @@ export default function IndicatorDetailContent({ indicator, assessmentQuestions 
                 <div className="p-1.5 rounded-lg bg-blue-100 dark:bg-blue-900/30">
                   <Info className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
                 </div>
-                Details
+                {t("details")}
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-0 space-y-4">
               {/* Weight */}
               <div className="flex items-center justify-between py-2 border-b border-border/50">
-                <span className="text-sm text-muted-foreground font-medium">Weight</span>
+                <span className="text-sm text-muted-foreground font-medium">{t("weight")}</span>
                 <div className="flex items-center gap-2">
                   <span className="font-mono font-medium text-foreground bg-muted px-2 py-0.5 rounded text-xs">
                     {indicator.weight}
@@ -224,15 +235,17 @@ export default function IndicatorDetailContent({ indicator, assessmentQuestions 
 
               {/* Measurement Type */}
               <div className="flex items-center justify-between py-2 border-b border-border/50">
-                <span className="text-sm text-muted-foreground font-medium">Measurement Type</span>
+                <span className="text-sm text-muted-foreground font-medium">{t("measurementType")}</span>
                 <Badge variant="secondary" className="font-medium text-xs px-2.5 py-1">
-                  {indicator.measurementType.replace("_", " ")}
+                  {tMeasurement.has(indicator.measurementType)
+                    ? tMeasurement(indicator.measurementType)
+                    : indicator.measurementType.replace("_", " ")}
                 </Badge>
               </div>
 
               {/* Order Index */}
               <div className="flex items-center justify-between py-2 border-b border-border/50">
-                <span className="text-sm text-muted-foreground font-medium">Order Index</span>
+                <span className="text-sm text-muted-foreground font-medium">{t("orderIndex")}</span>
                 <span className="font-mono font-medium text-foreground bg-muted px-2 py-0.5 rounded text-xs">
                   {indicator.orderIndex}
                 </span>
@@ -240,41 +253,45 @@ export default function IndicatorDetailContent({ indicator, assessmentQuestions 
 
               {/* Observability Level */}
               <div className="flex items-center justify-between py-2 border-b border-border/50">
-                <span className="text-sm text-muted-foreground font-medium">Observability Level</span>
+                <span className="text-sm text-muted-foreground font-medium">{t("observabilityLevel")}</span>
                 <Badge variant="secondary" className="font-medium text-xs px-2.5 py-1">
-                  {indicator.observabilityLevel}
+                  {tObservability.has(indicator.observabilityLevel)
+                    ? tObservability(indicator.observabilityLevel)
+                    : indicator.observabilityLevel}
                 </Badge>
               </div>
 
               {/* Approval Status */}
               <div className="flex items-center justify-between py-2 border-b border-border/50">
-                <span className="text-sm text-muted-foreground font-medium">Approval Status</span>
+                <span className="text-sm text-muted-foreground font-medium">{t("approvalStatus")}</span>
                 <Badge variant="secondary" className="font-medium text-xs px-2.5 py-1">
-                  {indicator.approvalStatus.replace("_", " ")}
+                  {tApproval.has(indicator.approvalStatus)
+                    ? tApproval(indicator.approvalStatus)
+                    : indicator.approvalStatus.replace("_", " ")}
                 </Badge>
               </div>
 
               {/* Status */}
               <div className="flex items-center justify-between py-2 border-b border-border/50">
-                <span className="text-sm text-muted-foreground font-medium">Status</span>
-                <Badge 
+                <span className="text-sm text-muted-foreground font-medium">{t("status")}</span>
+                <Badge
                   variant={indicator.isActive ? "default" : "secondary"}
                   className="font-medium text-xs px-2.5 py-1"
                 >
                   <div className={`w-1.5 h-1.5 rounded-full mr-1.5 ${indicator.isActive ? 'bg-green-500' : 'bg-gray-400'}`} />
-                  {indicator.isActive ? "Active" : "Inactive"}
+                  {indicator.isActive ? t("active") : t("inactive")}
                 </Badge>
               </div>
-              
+
               {/* Context Scope */}
               {indicator.contextScope && (
                 <div className="flex items-center justify-between py-2 border-b border-border/50">
-                  <span className="text-sm text-muted-foreground font-medium">Context Scope</span>
-                  <Badge 
+                  <span className="text-sm text-muted-foreground font-medium">{t("contextScope")}</span>
+                  <Badge
                     variant="secondary"
                     className={`font-medium text-xs px-2.5 py-1 ${
-                      indicator.contextScope === 'UNIVERSAL' 
-                        ? 'bg-teal-100 text-teal-700 border-teal-200 dark:bg-teal-950 dark:text-teal-300 dark:border-teal-800' 
+                      indicator.contextScope === 'UNIVERSAL'
+                        ? 'bg-teal-100 text-teal-700 border-teal-200 dark:bg-teal-950 dark:text-teal-300 dark:border-teal-800'
                         : indicator.contextScope === 'PROFESSIONAL'
                         ? 'bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-950 dark:text-blue-300 dark:border-blue-800'
                         : indicator.contextScope === 'TECHNICAL'
@@ -282,24 +299,26 @@ export default function IndicatorDetailContent({ indicator, assessmentQuestions 
                         : 'bg-amber-100 text-amber-700 border-amber-200 dark:bg-amber-950 dark:text-amber-300 dark:border-amber-800'
                     }`}
                   >
-                    {indicator.contextScope}
+                    {tContextScope.has(indicator.contextScope)
+                      ? tContextScope(indicator.contextScope)
+                      : indicator.contextScope}
                   </Badge>
                 </div>
               )}
 
               {/* Competency */}
               <div className="flex items-center justify-between py-2">
-                <span className="text-sm text-muted-foreground font-medium">Competency</span>
+                <span className="text-sm text-muted-foreground font-medium">{t("competency")}</span>
                 <div className="flex items-center gap-2">
                   <CompetencyHoverCard competencyId={indicator.competencyId}>
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      asChild 
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      asChild
                       className="h-7 px-2.5 text-xs hover:bg-muted/80 text-primary"
                     >
                       <Link href={`/hr/competencies/${indicator.competencyId}`}>
-                        View Details
+                        {t("viewCompetencyDetails")}
                         <Info className="h-3 w-3 ml-1.5 opacity-60" />
                       </Link>
                     </Button>

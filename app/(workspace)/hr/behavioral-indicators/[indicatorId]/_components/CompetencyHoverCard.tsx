@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { competenciesApi } from '@/services/api';
 import {
   HoverCard,
@@ -10,15 +11,15 @@ import {
 } from '@/components/ui/hover-card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { 
-  ExternalLink, 
-  Users, 
-  Target, 
+import {
+  ExternalLink,
+  Users,
+  Target,
   Info,
   Loader2,
   AlertCircle
 } from 'lucide-react';
-import { levelToColor, approvalStatusToColor } from '@/lib/ui-utils';
+import { approvalStatusToColor } from '@/lib/ui-utils';
 import type { Competency } from '@/types/domain';
 
 interface CompetencyHoverCardProps {
@@ -31,18 +32,21 @@ export function CompetencyHoverCard({ competencyId, children }: CompetencyHoverC
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [hasFetched, setHasFetched] = useState(false);
+  const t = useTranslations('indicator.competencyHoverCard');
+  const tApproval = useTranslations('enums.approvalStatus');
+  const tCategory = useTranslations('enums.competencyCategory');
 
   const fetchCompetencyData = async () => {
     if (competency || hasFetched) return; // Don't refetch if already loaded or attempted
-    
+
     setIsLoading(true);
     setError(null);
-    
+
     try {
       const data = await competenciesApi.getCompetencyById(competencyId);
       setCompetency(data);
     } catch {
-      setError('Failed to load competency details');
+      setError(t('loadError'));
     } finally {
       setIsLoading(false);
       setHasFetched(true);
@@ -58,7 +62,7 @@ export function CompetencyHoverCard({ competencyId, children }: CompetencyHoverC
         {isLoading ? (
           <div className="p-4 flex items-center justify-center">
             <Loader2 className="h-4 w-4 animate-spin mr-2" />
-            <span className="text-sm text-muted-foreground">Loading competency...</span>
+            <span className="text-sm text-muted-foreground">{t('loading')}</span>
           </div>
         ) : error ? (
           <div className="p-4 flex items-center">
@@ -76,10 +80,12 @@ export function CompetencyHoverCard({ competencyId, children }: CompetencyHoverC
                   </h4>
                   <div className="flex flex-wrap gap-2">
                     <Badge variant={competency.isActive ? "default" : "secondary"}>
-                      {competency.isActive ? "Active" : "Inactive"}
+                      {competency.isActive ? t('active') : t('inactive')}
                     </Badge>
                     <Badge variant="outline" className={approvalStatusToColor(competency.approvalStatus)}>
-                      {competency.approvalStatus.replace("_", " ")}
+                      {tApproval.has(competency.approvalStatus)
+                        ? tApproval(competency.approvalStatus)
+                        : competency.approvalStatus.replace("_", " ")}
                     </Badge>
                   </div>
                 </div>
@@ -105,25 +111,29 @@ export function CompetencyHoverCard({ competencyId, children }: CompetencyHoverC
               <div className="grid grid-cols-2 gap-4 text-xs">
                 <div className="flex items-center gap-2">
                   <Info className="h-3 w-3 text-muted-foreground" />
-                  <span className="text-muted-foreground">Category:</span>
-                  <span className="font-medium">{competency.category}</span>
+                  <span className="text-muted-foreground">{t('category')}:</span>
+                  <span className="font-medium">
+                    {tCategory.has(competency.category)
+                      ? tCategory(competency.category)
+                      : competency.category}
+                  </span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Target className="h-3 w-3 text-muted-foreground" />
-                  <span className="text-muted-foreground">Indicators:</span>
+                  <span className="text-muted-foreground">{t('indicators')}:</span>
                   <span className="font-medium">
                     {competency.behavioralIndicators?.length || 0}
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Users className="h-3 w-3 text-muted-foreground" />
-                  <span className="text-muted-foreground">Version:</span>
-                  <span className="font-medium">v{competency.version}</span>
+                  <span className="text-muted-foreground">{t('version')}:</span>
+                  <span className="font-medium">{t('versionValue', { version: competency.version })}</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="text-muted-foreground">Status:</span>
+                  <span className="text-muted-foreground">{t('status')}:</span>
                   <span className={`font-medium ${competency.isActive ? 'text-emerald-600' : 'text-gray-500'}`}>
-                    {competency.isActive ? 'Active' : 'Inactive'}
+                    {competency.isActive ? t('active') : t('inactive')}
                   </span>
                 </div>
               </div>
@@ -134,14 +144,14 @@ export function CompetencyHoverCard({ competencyId, children }: CompetencyHoverC
               <Link href={`/hr/competencies/${competency.id}`}>
                 <Button size="sm" className="w-full">
                   <ExternalLink className="h-3 w-3 mr-2" />
-                  View Full Details
+                  {t('viewFullDetails')}
                 </Button>
               </Link>
             </div>
           </div>
         ) : hasFetched && !isLoading ? (
           <div className="p-4 text-center text-sm text-muted-foreground">
-            Competency not found
+            {t('notFound')}
           </div>
         ) : null}
       </HoverCardContent>

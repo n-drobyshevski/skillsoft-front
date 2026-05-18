@@ -3,6 +3,7 @@
 import React, { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from 'sonner';
+import { useTranslations } from 'next-intl';
 import { EntityDetailHeader } from "@/components/common/EntityDetailHeader";
 import { deleteIndicator } from "@/app/actions";
 import { approvalStatusToColor, observabilityLevelToColor, formatObservabilityLevel } from "@/components/common/entity-utils";
@@ -17,6 +18,10 @@ interface IndicatorDetailClientProps {
 export default function IndicatorDetailClient({ indicator, children }: IndicatorDetailClientProps) {
   const router = useRouter();
   const { setBreadcrumbTitle, clearBreadcrumb } = useBreadcrumbContext();
+  const t = useTranslations('indicator.detail');
+  const tObservability = useTranslations('enums.observabilityLevel');
+  const tApproval = useTranslations('enums.approvalStatus');
+  const tMeasurement = useTranslations('enums.measurementType');
 
   // Set custom breadcrumb title for this indicator
   useEffect(() => {
@@ -31,35 +36,45 @@ export default function IndicatorDetailClient({ indicator, children }: Indicator
   const handleDelete = async () => {
     try {
       await deleteIndicator(indicator.id, indicator.competencyId);
-      toast.success('Behavioral indicator deleted successfully');
+      toast.success(t('deleteSuccess'));
       router.push('/hr/behavioral-indicators');
     } catch (error: unknown) {
       const apiError = error as { status?: number; message?: string };
       if (apiError.status === 404) {
         // Handle case where the indicator was already deleted
-        toast.warning('This behavioral indicator was already deleted.');
+        toast.warning(t('deleteAlready'));
         router.push('/hr/behavioral-indicators');
       } else {
-        toast.error('Failed to delete indicator. Please try again.');
+        toast.error(t('deleteFailed'));
         throw error;
       }
     }
   };
 
+  const observabilityLabel = tObservability.has(indicator.observabilityLevel)
+    ? tObservability(indicator.observabilityLevel)
+    : formatObservabilityLevel(indicator.observabilityLevel);
+  const approvalLabel = tApproval.has(indicator.approvalStatus)
+    ? tApproval(indicator.approvalStatus)
+    : indicator.approvalStatus.replace("_", " ");
+  const measurementLabel = tMeasurement.has(indicator.measurementType)
+    ? tMeasurement(indicator.measurementType)
+    : indicator.measurementType.replace("_", " ");
+
   const badges = [
     {
-      label: formatObservabilityLevel(indicator.observabilityLevel),
+      label: observabilityLabel,
       variant: 'outline' as const,
       className: observabilityLevelToColor(indicator.observabilityLevel)
     },
-    { label: indicator.isActive ? "Active" : "Inactive", variant: indicator.isActive ? 'default' as const : 'secondary' as const },
+    { label: indicator.isActive ? t('active') : t('inactive'), variant: indicator.isActive ? 'default' as const : 'secondary' as const },
     {
-      label: indicator.approvalStatus.replace("_", " "),
+      label: approvalLabel,
       variant: 'outline' as const,
       className: approvalStatusToColor(indicator.approvalStatus)
     },
-    { label: `Weight: ${indicator.weight}`, variant: 'outline' as const },
-    { label: indicator.measurementType.replace("_", " "), variant: 'secondary' as const },
+    { label: t('weightBadge', { value: indicator.weight }), variant: 'outline' as const },
+    { label: measurementLabel, variant: 'secondary' as const },
   ];
 
   return (
@@ -71,8 +86,8 @@ export default function IndicatorDetailClient({ indicator, children }: Indicator
         editHref={`/hr/behavioral-indicators/${indicator.id}/edit`}
         onDelete={handleDelete}
         deleteConfig={{
-          title: 'Delete Behavioral Indicator',
-          description: 'This action cannot be undone. This will permanently delete the behavioral indicator and all associated data.',
+          title: t('deleteTitle'),
+          description: t('deleteDescription'),
           entityName: indicator.title,
         }}
       />
