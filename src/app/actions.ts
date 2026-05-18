@@ -255,8 +255,14 @@ export async function updateIndicatorAction(indicatorId: string, data: Indicator
       authHeaders,
     });
 
+    // The detail page uses getIndicatorById which tags its fetch with
+    // `indicator-${id}` and revalidates every 60s. Without updateTag the
+    // Data Cache serves the pre-update body after router.push.
+    updateTag(`indicator-${indicatorId}`);
     revalidatePath(BEHAVIORAL_INDICATORS_PATH);
+    revalidatePath('/hr/behavioral-indicators');
     revalidatePath(`${BEHAVIORAL_INDICATORS_PATH}/${indicatorId}`);
+    revalidatePath(`/hr/behavioral-indicators/${indicatorId}`);
 
     return { success: true, message: t('updatedSuccess') };
   } catch (error) {
@@ -299,10 +305,15 @@ export async function createIndicatorAction(competencyId: string, data: CreateIn
     });
 
     revalidatePath(BEHAVIORAL_INDICATORS_PATH);
+    revalidatePath('/hr/behavioral-indicators');
     revalidatePath(COMPETENCIES_PATH);
+    revalidatePath('/hr/competencies');
     revalidatePath(`${COMPETENCIES_PATH}/${competencyId}`);
+    revalidatePath(`/hr/competencies/${competencyId}`);
     revalidatePath(`${COMPETENCIES_PATH}/${competencyId}/edit`);
     revalidatePath(`${BEHAVIORAL_INDICATORS_PATH}/${newIndicator.id}`);
+    revalidatePath(`/hr/behavioral-indicators/${newIndicator.id}`);
+    updateTag(`competency-${competencyId}`);
 
     return {
       success: true,
@@ -364,7 +375,9 @@ export async function updateIndicatorQuestionsAction(indicatorId: string, questi
       authHeaders,
     });
 
+    updateTag(`indicator-${indicatorId}`);
     revalidatePath(`/behavioral-indicators/${indicatorId}`);
+    revalidatePath(`/hr/behavioral-indicators/${indicatorId}`);
 
     return { success: true, message: 'Indicator questions updated successfully.' };
   } catch (error) {
@@ -405,9 +418,13 @@ export async function deleteIndicator(indicatorId: string, competencyId?: string
 
     // Try to revalidate paths, but don't let revalidation errors fail the delete
     try {
+      updateTag(`indicator-${indicatorId}`);
       revalidatePath('/behavioral-indicators');
+      revalidatePath('/hr/behavioral-indicators');
       if (competencyId) {
         revalidatePath(`/competencies/${competencyId}`);
+        revalidatePath(`/hr/competencies/${competencyId}`);
+        updateTag(`competency-${competencyId}`);
       }
     } catch {
       // Revalidation failed but the delete was successful - this is acceptable

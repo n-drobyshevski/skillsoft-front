@@ -156,7 +156,7 @@ export function IndicatorForm({ indicator, competencyId, onUpdatePreview }: Indi
 
         if (result.success) {
           toast.success(tIndicator('updatedSuccess'));
-          router.push(`/behavioral-indicators/${indicator.id}`);
+          router.push(`/hr/behavioral-indicators/${indicator.id}`);
         } else {
           toast.error(result.message);
         }
@@ -174,7 +174,7 @@ export function IndicatorForm({ indicator, competencyId, onUpdatePreview }: Indi
 
         if (result.success && result.data?.id) {
           toast.success(tIndicator('createdSuccess'));
-          router.push(`/behavioral-indicators/${result.data.id}`);
+          router.push(`/hr/behavioral-indicators/${result.data.id}`);
         } else if (result.success) {
           toast.error(tIndicator('createdNoId'));
         } else {

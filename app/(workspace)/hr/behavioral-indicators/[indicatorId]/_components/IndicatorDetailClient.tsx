@@ -32,13 +32,13 @@ export default function IndicatorDetailClient({ indicator, children }: Indicator
     try {
       await deleteIndicator(indicator.id, indicator.competencyId);
       toast.success('Behavioral indicator deleted successfully');
-      router.push('/behavioral-indicators');
+      router.push('/hr/behavioral-indicators');
     } catch (error: unknown) {
       const apiError = error as { status?: number; message?: string };
       if (apiError.status === 404) {
         // Handle case where the indicator was already deleted
         toast.warning('This behavioral indicator was already deleted.');
-        router.push('/behavioral-indicators');
+        router.push('/hr/behavioral-indicators');
       } else {
         toast.error('Failed to delete indicator. Please try again.');
         throw error;
