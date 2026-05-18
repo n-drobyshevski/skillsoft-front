@@ -46,5 +46,33 @@
     "hardQuestionsMobile": "Сложные",
     "hardQuestionsDesc": "Высокая сложность",
     "hardQuestionsTooltip": "Вопросы уровня «Продвинутый» или «Специализированный». Используются для дифференциации кандидатов с высокой квалификацией."
+  },
+  "detail": {
+    "questionDetails": "Детали вопроса",
+    "answerOptions": "Варианты ответов",
+    "points": "{count} б.",
+    "totalOptions": "Всего вариантов: {count}",
+    "scoreRange": "Диапазон баллов: {min} - {max} б.",
+    "scoringRubric": "Критерии оценки",
+    "context": "Контекст",
+    "competency": "Компетенция",
+    "behavioralIndicator": "Поведенческий индикатор",
+    "assessmentQuestion": "Вопрос оценки",
+    "currentQuestion": "Текущий вопрос",
+    "navigationPath": "Навигационный путь",
+    "navigationHelp": "Перемещайтесь по иерархии компетенций",
+    "metadata": "Метаданные",
+    "questionType": "Тип вопроса",
+    "difficultyLevel": "Уровень сложности",
+    "timeLimit": "Ограничение времени",
+    "secondsValue": "{seconds} сек",
+    "contextTags": "Контекстные теги",
+    "active": "Активный",
+    "inactive": "Неактивный",
+    "timeLimitBadge": "{seconds} с",
+    "deleteTitle": "Удалить вопрос оценки",
+    "deleteDescription": "Это действие необратимо. Вопрос оценки и все связанные данные будут безвозвратно удалены.",
+    "deleteSuccess": "Вопрос оценки успешно удалён",
+    "deleteFailed": "Не удалось удалить вопрос. Попробуйте ещё раз."
   }
 }

@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { assessmentQuestionsApi, behavioralIndicatorsApi, competenciesApi } from "@/services/api";
 import {
 	Card,
@@ -70,6 +71,11 @@ async function QuestionDetailData({ questionId }: { questionId: string }) {
 		notFound();
 	}
 
+	const t = await getTranslations("question.detail");
+	const tQuestionType = await getTranslations("enums.questionType");
+	const tDifficulty = await getTranslations("enums.difficultyLevel");
+	const tTags = await getTranslations("forms.question.tags");
+
 	return (
 		<EntityDetailLayout>
 			<QuestionDetailClient question={question} competency={competency} indicator={indicator}>
@@ -81,7 +87,7 @@ async function QuestionDetailData({ questionId }: { questionId: string }) {
 								<div className="p-1.5 rounded-lg bg-emerald-100 dark:bg-emerald-900/30">
 									<FileText className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
 								</div>
-								Question Details
+								{t("questionDetails")}
 							</CardTitle>
 						</CardHeader>
 						<CardContent className="pt-0">
@@ -98,7 +104,7 @@ async function QuestionDetailData({ questionId }: { questionId: string }) {
 									<div className="p-1.5 rounded-lg bg-purple-100 dark:bg-purple-900/30">
 										<HelpCircle className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" />
 									</div>
-									Answer Options
+									{t("answerOptions")}
 									<Badge variant="secondary" className="ml-1 font-medium text-xs">
 										{question.answerOptions.length}
 									</Badge>
@@ -150,7 +156,7 @@ async function QuestionDetailData({ questionId }: { questionId: string }) {
 																	: "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 border-red-200 dark:border-red-800"
 															}`}
 														>
-															{option.score} pts
+															{t("points", { count: option.score as number })}
 														</Badge>
 													</div>
 												</div>
@@ -165,9 +171,12 @@ async function QuestionDetailData({ questionId }: { questionId: string }) {
 								{/* Summary info */}
 								<div className="mt-4 pt-3 border-t border-border/60">
 									<div className="flex justify-between text-xs text-muted-foreground font-medium">
-										<span>Total options: {question.answerOptions.length}</span>
+										<span>{t("totalOptions", { count: question.answerOptions.length })}</span>
 										<span>
-											Score range: {Math.min(...question.answerOptions.map(o => o.score as number))} - {Math.max(...question.answerOptions.map(o => o.score as number))} pts
+											{t("scoreRange", {
+												min: Math.min(...question.answerOptions.map(o => o.score as number)),
+												max: Math.max(...question.answerOptions.map(o => o.score as number)),
+											})}
 										</span>
 									</div>
 								</div>
@@ -183,7 +192,7 @@ async function QuestionDetailData({ questionId }: { questionId: string }) {
 									<div className="p-1.5 rounded-lg bg-orange-100 dark:bg-orange-900/30">
 										<BarChart className="w-3.5 h-3.5 text-orange-600 dark:text-orange-400" />
 									</div>
-									Scoring Rubric
+									{t("scoringRubric")}
 								</CardTitle>
 							</CardHeader>
 							<CardContent className="pt-0">
@@ -204,19 +213,19 @@ async function QuestionDetailData({ questionId }: { questionId: string }) {
 									<div className="p-1.5 rounded-lg bg-blue-100 dark:bg-blue-900/30">
 										<Info className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
 									</div>
-									Context
+									{t("context")}
 								</CardTitle>
 							</CardHeader>
 							<CardContent className="pt-0">
 								{/* Vertical navigation path */}
-								<nav className="space-y-3" aria-label="Navigation path">
+								<nav className="space-y-3" aria-label={t("navigationPath")}>
 									{competency && (
 										<div className="flex items-center gap-3 group">
 											<div className="p-1.5 rounded-md bg-blue-100 dark:bg-blue-900/30 group-hover:bg-blue-200 dark:group-hover:bg-blue-800/50 transition-colors">
 												<Award className="w-4 h-4 text-blue-600 dark:text-blue-400" />
 											</div>
 											<div className="flex-1">
-												<div className="text-xs text-muted-foreground mb-0.5">Competency</div>
+												<div className="text-xs text-muted-foreground mb-0.5">{t("competency")}</div>
 												<CompetencyHoverCard competencyId={competency.id}>
 													<Link 
 														href={`/competencies/${competency.id}`}
@@ -236,7 +245,7 @@ async function QuestionDetailData({ questionId }: { questionId: string }) {
 												<Target className="w-4 h-4 text-green-600 dark:text-green-400" />
 											</div>
 											<div className="flex-1">
-												<div className="text-xs text-muted-foreground mb-0.5">Behavioral Indicator</div>
+												<div className="text-xs text-muted-foreground mb-0.5">{t("behavioralIndicator")}</div>
 												<IndicatorHoverCard indicatorId={indicator.id}>
 													<Link 
 														href={`/behavioral-indicators/${indicator.id}`}
@@ -255,8 +264,8 @@ async function QuestionDetailData({ questionId }: { questionId: string }) {
 											<HelpCircle className="w-4 h-4 text-purple-600 dark:text-purple-400" />
 										</div>
 										<div className="flex-1">
-											<div className="text-xs text-muted-foreground mb-0.5">Assessment Question</div>
-											<span className="text-foreground font-medium text-sm">Current Question</span>
+											<div className="text-xs text-muted-foreground mb-0.5">{t("assessmentQuestion")}</div>
+											<span className="text-foreground font-medium text-sm">{t("currentQuestion")}</span>
 										</div>
 									</div>
 								</nav>
@@ -264,7 +273,7 @@ async function QuestionDetailData({ questionId }: { questionId: string }) {
 								{/* Helper text */}
 								<div className="mt-4 pt-3 border-t border-border/60">
 									<p className="text-xs text-muted-foreground">
-										Navigate through the competency framework hierarchy
+										{t("navigationHelp")}
 									</p>
 								</div>
 							</CardContent>
@@ -277,7 +286,7 @@ async function QuestionDetailData({ questionId }: { questionId: string }) {
 								<div className="p-1.5 rounded-lg bg-gray-100 dark:bg-gray-900/30">
 									<Info className="w-3.5 h-3.5 text-gray-600 dark:text-gray-400" />
 								</div>
-								Metadata
+								{t("metadata")}
 							</CardTitle>
 						</CardHeader>
 						<CardContent className="pt-0 space-y-4">
@@ -285,22 +294,26 @@ async function QuestionDetailData({ questionId }: { questionId: string }) {
 								<div className="flex items-center gap-3">
 									<Type className="w-4 h-4 text-muted-foreground" />
 									<dt className="text-sm font-medium text-muted-foreground">
-										Question Type
+										{t("questionType")}
 									</dt>
 								</div>
 								<dd className="text-sm font-medium">
-									{question.questionType.replace("_", " ")}
+									{tQuestionType.has(question.questionType)
+										? tQuestionType(question.questionType)
+										: question.questionType.replace("_", " ")}
 								</dd>
 							</div>
 							<div className="flex items-center justify-between py-2 border-b border-border/50">
 								<div className="flex items-center gap-3">
 									<BarChart className="w-4 h-4 text-muted-foreground" />
 									<dt className="text-sm font-medium text-muted-foreground">
-										Difficulty Level
+										{t("difficultyLevel")}
 									</dt>
 								</div>
 								<dd className="text-sm font-medium">
-									{question.difficultyLevel}
+									{tDifficulty.has(question.difficultyLevel)
+										? tDifficulty(question.difficultyLevel)
+										: question.difficultyLevel}
 								</dd>
 							</div>
 							{question.timeLimit && (
@@ -308,46 +321,34 @@ async function QuestionDetailData({ questionId }: { questionId: string }) {
 									<div className="flex items-center gap-3">
 										<Clock className="w-4 h-4 text-muted-foreground" />
 										<dt className="text-sm font-medium text-muted-foreground">
-											Time Limit
+											{t("timeLimit")}
 										</dt>
 									</div>
 									<dd className="text-sm font-medium">
-										{question.timeLimit} seconds
+										{t("secondsValue", { seconds: question.timeLimit })}
 									</dd>
 								</div>
 							)}
-							<div className="flex items-center justify-between py-2">
-								<div className="flex items-center gap-3">
-									<Info className="w-4 h-4 text-muted-foreground" />
-									<dt className="text-sm font-medium text-muted-foreground">
-										Order Index
-									</dt>
-								</div>
-								<dd className="font-mono font-medium text-foreground bg-muted px-2 py-0.5 rounded text-xs">
-									#{question.orderIndex}
-								</dd>
-							</div>
-							
 							{/* Context Tags */}
 							{question.metadata?.tags && question.metadata.tags.length > 0 && (
 								<div className="py-2 border-t border-border/50">
 									<dt className="text-sm font-medium text-muted-foreground mb-2">
-										Context Tags
+										{t("contextTags")}
 									</dt>
 									<dd className="flex flex-wrap gap-1.5">
 										{question.metadata.tags.map((tag: string) => (
-											<Badge 
+											<Badge
 												key={tag}
 												variant="secondary"
 												className={`text-xs px-2 py-0.5 font-medium ${
-													tag === 'GENERAL' 
-														? 'bg-teal-100 text-teal-700 border-teal-200 dark:bg-teal-950 dark:text-teal-300 dark:border-teal-800' 
+													tag === 'GENERAL'
+														? 'bg-teal-100 text-teal-700 border-teal-200 dark:bg-teal-950 dark:text-teal-300 dark:border-teal-800'
 														: ['IT', 'SALES', 'FINANCE', 'MEDICAL', 'ENGINEERING'].includes(tag)
 														? 'bg-purple-100 text-purple-700 border-purple-200 dark:bg-purple-950 dark:text-purple-300 dark:border-purple-800'
 														: 'bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-950 dark:text-blue-300 dark:border-blue-800'
 												}`}
 											>
-												{tag}
+												{tTags.has(tag) ? tTags(tag) : tag}
 											</Badge>
 										))}
 									</dd>
