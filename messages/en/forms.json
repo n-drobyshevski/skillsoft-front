@@ -149,6 +149,17 @@
     "description": "Describe an observable behavior that demonstrates this competency.",
     "selectCompetencyDescription": "First, select the competency this indicator belongs to."
   },
+  "newQuestion": {
+    "title": "Create New Assessment Question",
+    "selectIndicatorDescription": "First, select the behavioral indicator for your question",
+    "loading": "Loading...",
+    "tabs": {
+      "details": "Details"
+    },
+    "errors": {
+      "missingParams": "Error: Missing required parameters"
+    }
+  },
   "question": {
     "sections": {
       "questionDetails": "Question Details",
@@ -214,6 +225,52 @@
       "MID_DESC": "Mid-career complexity",
       "SENIOR": "Senior",
       "SENIOR_DESC": "Senior-level complexity"
+    },
+    "preview": {
+      "header": "Live Preview",
+      "autoUpdating": "Auto-updating",
+      "questionPlaceholder": "Question text...",
+      "answerOptionsLabel": "Answer Options",
+      "noOptions": "No answer options configured",
+      "optionFallback": "Option {index}",
+      "situationalFallback": "Situational response...",
+      "scoringRubric": "Scoring Rubric",
+      "points": "{count} pts",
+      "secondsSuffix": "{value}s",
+      "scale": {
+        "min": "Strongly Disagree",
+        "mid": "Neutral",
+        "max": "Strongly Agree"
+      }
+    },
+    "indicatorSelector": {
+      "title": "Select Behavioral Indicator",
+      "description": "Choose the behavioral indicator for which you want to create an assessment question.",
+      "loading": "Loading indicators...",
+      "filters": {
+        "competencyLabel": "Filter by Competency",
+        "competencyAllPlaceholder": "All competencies",
+        "competencyAllItem": "All Competencies",
+        "searchLabel": "Search Indicators",
+        "searchPlaceholder": "Search by title or description..."
+      },
+      "empty": {
+        "title": "No indicators found matching your criteria.",
+        "hint": "Try adjusting your filters or search query."
+      },
+      "card": {
+        "noDescription": "No description available",
+        "level": "Level: {level}",
+        "type": "Type: {type}",
+        "weight": "Weight: {weight}"
+      },
+      "buttons": {
+        "continue": "Continue"
+      },
+      "toasts": {
+        "loadFailed": "Failed to load indicators. Please try again.",
+        "selectFirst": "Please select an indicator to continue."
+      }
     }
   },
   "competency": {

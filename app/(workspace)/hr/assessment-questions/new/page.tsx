@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useCallback } from 'react';
+import { useTranslations } from 'next-intl';
 import { QuestionForm } from '../_components/QuestionForm';
 import QuestionPreview from '../_components/QuestionPreview';
 import IndicatorSelector from '../_components/IndicatorSelector';
@@ -33,6 +34,7 @@ type QuestionFormData = {
 };
 
 function NewQuestionPageContent() {
+  const t = useTranslations('forms.newQuestion');
   const searchParams = useSearchParams();
   const router = useRouter();
   const competencyIdParam = searchParams.get('competencyId');
@@ -66,10 +68,10 @@ function NewQuestionPageContent() {
     const preview: AssessmentQuestion = {
       id: PREVIEW_QUESTION_ID,
       behavioralIndicatorId: selectedIndicatorId,
-      questionText: data.questionText || 'New Assessment Question',
+      questionText: data.questionText || '',
       questionType: data.questionType as QuestionType,
       answerOptions: data.answerOptions || [],
-      scoringRubric: 'Standard scoring rubric will be applied.',
+      scoringRubric: '',
       timeLimit: data.timeLimit,
       difficultyLevel: data.difficultyLevel as DifficultyLevel,
       isActive: data.isActive,
@@ -84,14 +86,14 @@ function NewQuestionPageContent() {
     
     if (!selectedCompetencyId || !selectedIndicatorId) return null;
     
-    // Default question for empty form
+    // Default question for empty form — QuestionPreview renders translated placeholders.
     return {
       id: PREVIEW_QUESTION_ID,
       behavioralIndicatorId: selectedIndicatorId,
-      questionText: 'New Assessment Question',
+      questionText: '',
       questionType: QuestionType.LIKERT_SCALE,
       answerOptions: [],
-      scoringRubric: 'Standard scoring rubric will be applied.',
+      scoringRubric: '',
       difficultyLevel: DifficultyLevel.FOUNDATIONAL,
       isActive: true,
       orderIndex: 1,
@@ -102,12 +104,11 @@ function NewQuestionPageContent() {
     return (
       <div className="container mx-auto max-w-full px-4 py-6 sm:px-6 lg:px-8">
         <PageHeader
-          title="Create New Assessment Question"
-          description="First, select the behavioral indicator for your question"
-          
+          title={t('title')}
+          description={t('selectIndicatorDescription')}
         />
         <div className="mt-6 sm:mt-8">
-          <IndicatorSelector 
+          <IndicatorSelector
             preselectedIndicatorId={finalIndicatorId || undefined}
             onIndicatorSelected={handleIndicatorSelected}
           />
@@ -118,19 +119,19 @@ function NewQuestionPageContent() {
 
   // At this point, we have both IDs from URL parameters
   if (!selectedCompetencyId || !selectedIndicatorId) {
-    return <div>Error: Missing required parameters</div>;
+    return <div>{t('errors.missingParams')}</div>;
   }
 
   return (
     <div className="container mx-auto p-4">
       <PageHeader
         className="pl-0! py-4"
-        title="Create New Assessment Question"
+        title={t('title')}
       />
-      
+
       <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-4">
         <TabsList>
-          <TabsTrigger value="details">Details</TabsTrigger>
+          <TabsTrigger value="details">{t('tabs.details')}</TabsTrigger>
         </TabsList>
         
         <TabsContent value="details">
@@ -154,10 +155,15 @@ function NewQuestionPageContent() {
   );
 }
 
+function NewQuestionPageFallback() {
+  const t = useTranslations('forms.newQuestion');
+  return <div>{t('loading')}</div>;
+}
+
 export default function NewQuestionPage() {
-    return (
-        <Suspense fallback={<div>Loading...</div>}>
-            <NewQuestionPageContent />
-        </Suspense>
-    )
+  return (
+    <Suspense fallback={<NewQuestionPageFallback />}>
+      <NewQuestionPageContent />
+    </Suspense>
+  );
 }

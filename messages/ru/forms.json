@@ -149,6 +149,17 @@
     "description": "Опишите наблюдаемое поведение, демонстрирующее эту компетенцию.",
     "selectCompetencyDescription": "Сначала выберите компетенцию, к которой относится индикатор."
   },
+  "newQuestion": {
+    "title": "Создание вопроса оценки",
+    "selectIndicatorDescription": "Сначала выберите поведенческий индикатор для вашего вопроса",
+    "loading": "Загрузка...",
+    "tabs": {
+      "details": "Детали"
+    },
+    "errors": {
+      "missingParams": "Ошибка: отсутствуют обязательные параметры"
+    }
+  },
   "question": {
     "sections": {
       "questionDetails": "Детали вопроса",
@@ -214,6 +225,52 @@
       "MID_DESC": "Средний уровень сложности",
       "SENIOR": "Старший",
       "SENIOR_DESC": "Высокий уровень сложности"
+    },
+    "preview": {
+      "header": "Живой предпросмотр",
+      "autoUpdating": "Автообновление",
+      "questionPlaceholder": "Текст вопроса...",
+      "answerOptionsLabel": "Варианты ответов",
+      "noOptions": "Варианты ответов не настроены",
+      "optionFallback": "Вариант {index}",
+      "situationalFallback": "Ситуационный ответ...",
+      "scoringRubric": "Критерии оценки",
+      "points": "{count} б.",
+      "secondsSuffix": "{value} с",
+      "scale": {
+        "min": "Полностью не согласен",
+        "mid": "Нейтрально",
+        "max": "Полностью согласен"
+      }
+    },
+    "indicatorSelector": {
+      "title": "Выберите поведенческий индикатор",
+      "description": "Выберите поведенческий индикатор, для которого нужно создать вопрос оценки.",
+      "loading": "Загрузка индикаторов...",
+      "filters": {
+        "competencyLabel": "Фильтр по компетенции",
+        "competencyAllPlaceholder": "Все компетенции",
+        "competencyAllItem": "Все компетенции",
+        "searchLabel": "Поиск индикаторов",
+        "searchPlaceholder": "Поиск по названию или описанию..."
+      },
+      "empty": {
+        "title": "Индикаторы по вашим критериям не найдены.",
+        "hint": "Попробуйте изменить фильтры или поисковый запрос."
+      },
+      "card": {
+        "noDescription": "Описание отсутствует",
+        "level": "Уровень: {level}",
+        "type": "Тип: {type}",
+        "weight": "Вес: {weight}"
+      },
+      "buttons": {
+        "continue": "Продолжить"
+      },
+      "toasts": {
+        "loadFailed": "Не удалось загрузить индикаторы. Попробуйте снова.",
+        "selectFirst": "Выберите индикатор, чтобы продолжить."
+      }
     }
   },
   "competency": {
