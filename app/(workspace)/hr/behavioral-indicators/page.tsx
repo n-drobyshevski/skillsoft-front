@@ -23,10 +23,10 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 import { BehavioralIndicator } from "@/types/domain";
 import {
-  getIndicatorsCached,
-  getQuestionsCached,
-  getCompetenciesCached,
-} from "@/services/api.cache";
+  behavioralIndicatorsApi,
+  assessmentQuestionsApi,
+  competenciesApi,
+} from "@/services/api";
 import { getEntityStatsCached } from "@/services/api.cache.stats";
 import IndicatorsTable from "./_components/IndicatorsTable";
 import TableSkeleton from "@/components/data-display/TableSkeleton";
@@ -59,33 +59,31 @@ async function getIndicatorsData(): Promise<{
 }> {
   try {
     const [indicatorsData, questionsData, competenciesData, entityStats] = await Promise.all([
-      getIndicatorsCached(),
-      getQuestionsCached(),
-      getCompetenciesCached(),
+      behavioralIndicatorsApi.getAllIndicators(),
+      assessmentQuestionsApi.getAllQuestions(),
+      competenciesApi.getAllCompetencies(),
       getEntityStatsCached(),
     ]);
 
-    if (!Array.isArray(indicatorsData)) {
-      throw new Error("No behavioral indicators found.");
-    }
+    const indicators = indicatorsData ?? [];
+    const questions = questionsData ?? [];
+    const competencies = competenciesData ?? [];
 
-    const competencyMap =
-      competenciesData?.reduce((acc, competency) => {
-        acc[competency.id] = competency.name;
-        return acc;
-      }, {} as Record<string, string>) || {};
+    const competencyMap = competencies.reduce((acc, competency) => {
+      acc[competency.id] = competency.name;
+      return acc;
+    }, {} as Record<string, string>);
 
-    const questionCounts =
-      questionsData?.reduce((acc, question) => {
-        acc[question.behavioralIndicatorId] =
-          (acc[question.behavioralIndicatorId] || 0) + 1;
-        return acc;
-      }, {} as Record<string, number>) || {};
+    const questionCounts = questions.reduce((acc, question) => {
+      acc[question.behavioralIndicatorId] =
+        (acc[question.behavioralIndicatorId] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
 
-    const indicatorsWithDetails = indicatorsData.map((indicator) => ({
+    const indicatorsWithDetails = indicators.map((indicator) => ({
       ...indicator,
-      questionCount: questionCounts?.[indicator.id] || 0,
-      competencyName: competencyMap?.[indicator.competencyId] || "N/A",
+      questionCount: questionCounts[indicator.id] || 0,
+      competencyName: competencyMap[indicator.competencyId] || "N/A",
     }));
 
     return { indicators: indicatorsWithDetails, entityStats: entityStats ?? null, error: null };
