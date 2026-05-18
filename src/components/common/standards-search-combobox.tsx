@@ -252,7 +252,7 @@ function StandardsSearchModal({
   onSelect,
   contextSeed,
 }: StandardsSearchModalProps) {
-  const t = useTranslations('competency.standards');
+  const t = useTranslations('competency.standardsPicker');
   const isMobile = useIsMobile();
   const isOnet = kind === 'onet';
 
@@ -634,7 +634,7 @@ interface OnetSlotProps {
 }
 
 function OnetSlot({ value, onBrowse, onClear, disabled }: OnetSlotProps) {
-  const t = useTranslations('competency.standards');
+  const t = useTranslations('competency.standardsPicker');
   const filled = !!value?.code;
 
   return (
@@ -717,7 +717,7 @@ interface EscoSlotProps {
 }
 
 function EscoSlot({ value, onBrowse, onClear, disabled }: EscoSlotProps) {
-  const t = useTranslations('competency.standards');
+  const t = useTranslations('competency.standardsPicker');
   const filled = !!value?.uri;
   const tail = value?.uri?.split('/').pop();
 
@@ -812,7 +812,7 @@ function BigFiveSlot({
   onResetToAuto,
   disabled,
 }: BigFiveSlotProps) {
-  const t = useTranslations('competency.standards');
+  const t = useTranslations('competency.standardsPicker');
   const mapping = useBigFiveMapper(onetCode);
   const filled = !!value?.trait;
   const visual = value ? TRAIT_VISUALS[value.trait] : null;

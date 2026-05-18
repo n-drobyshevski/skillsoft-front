@@ -52,7 +52,7 @@
   "standardMappingDescription": "Link to O*NET, ESCO, or personality frameworks",
   "standardsReference": "Standards Reference",
   "standardsReferenceHelp": "Map this competency to established frameworks like O*NET occupational skills, ESCO European skills taxonomy, or Big Five personality traits for standardized assessment alignment.",
-  "standards": {
+  "standardsPicker": {
     "onetSlot": {
       "title": "Occupational anchor",
       "primary": "Primary",
