@@ -19,7 +19,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 import { AssessmentQuestion } from "@/types/domain";
-import { getQuestionsCached } from "@/services/api.cache";
+import { assessmentQuestionsApi } from "@/services/api";
 import { getEntityStatsCached } from "@/services/api.cache.stats";
 import { Button } from "@/components/ui/button";
 import FlexibleStatsCards from "@/components/data-display/FlexibleStatsCards";
@@ -36,7 +36,7 @@ interface EnrichedQuestion extends AssessmentQuestion {
 async function getQuestionsData() {
   try {
     const [questions, entityStats] = await Promise.all([
-      getQuestionsCached().catch(() => null),
+      assessmentQuestionsApi.getAllQuestions(),
       getEntityStatsCached(),
     ]);
     if (!Array.isArray(questions)) {

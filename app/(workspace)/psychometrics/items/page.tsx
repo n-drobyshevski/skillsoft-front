@@ -9,7 +9,7 @@ import { ItemsTableClient } from './_components/ItemsTableClient';
 import {
   getPsychometricsItemsCached,
 } from '@/services/api.cache.psychometrics';
-import { getCompetenciesCached } from '@/services/api.cache';
+import { competenciesApi } from '@/services/api';
 import { getAuthHeaders } from '@/services/roleApi';
 import type { ItemStatistics } from '@/types/psychometrics';
 import type { Competency } from '@/types/domain';
@@ -54,7 +54,7 @@ async function getItemsData(searchParams: Awaited<PageProps['searchParams']>) {
   const authHeaders = await getAuthHeaders();
   const [itemsResult, competencies] = await Promise.all([
     getPsychometricsItemsCached(authHeaders, { status, competencyId, search, page, size }),
-    getCompetenciesCached(),
+    competenciesApi.getAllCompetencies(),
   ]);
 
   return {
