@@ -4,7 +4,7 @@ import { useState, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Plus, Loader2, Mail, Users, Info } from 'lucide-react';
+import { Plus, Loader2, Mail, Users, Building2, Info } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -17,12 +17,14 @@ import {
   FormItem,
   FormMessage,
 } from '@/components/ui/form';
-import { SharePermission } from '@/types/domain';
+import { SharePermission, GranteeType } from '@/types/domain';
 import type { User } from '@/types/user';
+import type { Team } from '@/types/domain';
 import { PermissionSelect } from '../../_components/sharing/PermissionSelect';
 import { UserShareList } from '../../_components/sharing/UserShareList';
 import { UserPicker } from '../../_components/sharing/UserPicker';
-import { useShareWithUser, useTemplateShares } from '@/hooks/queries';
+import { TeamPicker } from '../../_components/sharing/TeamPicker';
+import { useShareWithUser, useShareWithTeam, useTemplateShares } from '@/hooks/queries';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 
@@ -39,16 +41,16 @@ type ShareUserFormValues = {
   permission: SharePermission;
 };
 
-type ShareMode = 'email' | 'user';
+type ShareMode = 'email' | 'user' | 'team';
 
 /**
  * PeopleSection - User and team sharing management
  *
  * Features:
- * - Tab-based selection: invite by email OR search existing users
- * - UserPicker integration for searching system users
+ * - Tab-based selection: invite by email, search existing users, or pick a team
+ * - UserPicker / TeamPicker integration for searching grantees
  * - Permission level selection (View/Edit/Manage)
- * - List of current shares with edit/revoke options
+ * - List of current shares (users + teams) with edit/revoke options
  * - Responsive layout for mobile/desktop
  */
 export function PeopleSection({
@@ -61,20 +63,36 @@ export function PeopleSection({
   const t = useTranslations('template.access.people');
   const tToast = useTranslations('template.access.toast');
   const shareWithUser = useShareWithUser();
-  const { data: shares } = useTemplateShares(templateId);
+  const shareWithTeam = useShareWithTeam();
+  const {
+    data: shares,
+    isLoading: sharesLoading,
+    error: sharesError,
+    refetch: refetchShares,
+  } = useTemplateShares(templateId);
   const canEdit = isOwner || canManage;
 
-  // State for user picker mode
+  // Grantee selection state
   const [shareMode, setShareMode] = useState<ShareMode>('email');
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [userPermission, setUserPermission] = useState<SharePermission>(SharePermission.VIEW);
+  const [selectedTeam, setSelectedTeam] = useState<Team | null>(null);
+  const [teamPermission, setTeamPermission] = useState<SharePermission>(SharePermission.VIEW);
 
-  // Get emails of users already shared with (to exclude from picker)
+  // Emails already shared with (to exclude from the user picker)
   const excludedEmails = useMemo(() => {
     if (!shares) return [];
     return shares
       .filter((share) => share.granteeEmail)
       .map((share) => share.granteeEmail as string);
+  }, [shares]);
+
+  // Teams already granted access (to exclude from the team picker)
+  const excludedTeamIds = useMemo(() => {
+    if (!shares) return [];
+    return shares
+      .filter((share) => share.granteeType === GranteeType.TEAM)
+      .map((share) => share.granteeId);
   }, [shares]);
 
   const shareUserSchema = z.object({
@@ -90,7 +108,7 @@ export function PeopleSection({
     },
   });
 
-  // Handle sharing by email (existing logic)
+  // Share by email invitation
   const handleShareByEmail = async (values: ShareUserFormValues) => {
     try {
       await shareWithUser.mutateAsync({
@@ -102,19 +120,15 @@ export function PeopleSection({
       });
       toast.success(tToast('sharedWith', { email: values.email }));
       form.reset();
+      refetchShares();
     } catch {
       toast.error(tToast('shareFailed'));
     }
   };
 
-  // Handle sharing with selected system user
+  // Share with a selected system user
   const handleShareWithSelectedUser = async () => {
     if (!selectedUser) return;
-
-    // Debug logging
-    console.log('Share request - selectedUser:', selectedUser);
-    console.log('Share request - userId:', selectedUser.id);
-    console.log('Share request - permission:', userPermission);
 
     try {
       await shareWithUser.mutateAsync({
@@ -130,17 +144,37 @@ export function PeopleSection({
       toast.success(tToast('sharedWith', { email: displayName }));
       setSelectedUser(null);
       setUserPermission(SharePermission.VIEW);
+      refetchShares();
     } catch {
       toast.error(tToast('shareFailed'));
     }
   };
 
-  // Handle user selection from picker
+  // Share with a selected team (all active members inherit access)
+  const handleShareWithSelectedTeam = async () => {
+    if (!selectedTeam) return;
+
+    try {
+      await shareWithTeam.mutateAsync({
+        templateId,
+        request: {
+          teamId: selectedTeam.id,
+          permission: teamPermission,
+        },
+      });
+      toast.success(tToast('sharedWithTeam', { name: selectedTeam.name }));
+      setSelectedTeam(null);
+      setTeamPermission(SharePermission.VIEW);
+      refetchShares();
+    } catch {
+      toast.error(tToast('shareTeamFailed'));
+    }
+  };
+
   const handleUserSelect = (user: User) => {
     setSelectedUser(user);
   };
 
-  // Get display name for selected user
   const getSelectedUserDisplay = () => {
     if (!selectedUser) return '';
     if (selectedUser.firstName && selectedUser.lastName) {
@@ -166,21 +200,25 @@ export function PeopleSection({
             </p>
           </div>
         )}
-        {/* Invitation Form with Tabs */}
+        {/* Invitation form with grantee tabs */}
         {canEdit && (
           <div className={cn(
             'rounded-lg border bg-muted/30',
             isMobile ? 'p-3' : 'p-4'
           )}>
             <Tabs value={shareMode} onValueChange={(v) => setShareMode(v as ShareMode)}>
-              <TabsList className={cn('grid w-full grid-cols-2 mb-4', isMobile && 'h-11')}>
-                <TabsTrigger value="email" className={cn('gap-2', isMobile && 'text-sm')}>
-                  <Mail className="h-4 w-4" />
-                  {t('form.tabs.email')}
+              <TabsList className={cn('grid w-full grid-cols-3 mb-4', isMobile && 'h-11')}>
+                <TabsTrigger value="email" className={cn('gap-1.5', isMobile ? 'text-xs px-1' : 'text-sm')}>
+                  <Mail className="h-4 w-4 shrink-0" />
+                  <span className="truncate">{t('form.tabs.email')}</span>
                 </TabsTrigger>
-                <TabsTrigger value="user" className={cn('gap-2', isMobile && 'text-sm')}>
-                  <Users className="h-4 w-4" />
-                  {t('form.tabs.systemUser')}
+                <TabsTrigger value="user" className={cn('gap-1.5', isMobile ? 'text-xs px-1' : 'text-sm')}>
+                  <Users className="h-4 w-4 shrink-0" />
+                  <span className="truncate">{t('form.tabs.systemUser')}</span>
+                </TabsTrigger>
+                <TabsTrigger value="team" className={cn('gap-1.5', isMobile ? 'text-xs px-1' : 'text-sm')}>
+                  <Building2 className="h-4 w-4 shrink-0" />
+                  <span className="truncate">{t('form.tabs.team')}</span>
                 </TabsTrigger>
               </TabsList>
 
@@ -296,6 +334,59 @@ export function PeopleSection({
                   </p>
                 )}
               </TabsContent>
+
+              {/* Team Tab */}
+              <TabsContent value="team" className="mt-0">
+                <div className={cn(
+                  'gap-2',
+                  isMobile ? 'flex flex-col space-y-2' : 'flex flex-row'
+                )}>
+                  <div className="flex-1">
+                    <TeamPicker
+                      value={selectedTeam?.id}
+                      onSelect={setSelectedTeam}
+                      excludeTeamIds={excludedTeamIds}
+                      size={isMobile ? 'default' : 'sm'}
+                      className="w-full"
+                    />
+                  </div>
+                  <div className={cn('flex gap-2', isMobile && 'w-full')}>
+                    <div className={cn(isMobile && 'flex-1')}>
+                      <PermissionSelect
+                        value={teamPermission}
+                        onChange={setTeamPermission}
+                        size={isMobile ? 'default' : 'sm'}
+                      />
+                    </div>
+                    <Button
+                      type="button"
+                      size={isMobile ? 'default' : 'sm'}
+                      disabled={!selectedTeam || shareWithTeam.isPending}
+                      onClick={handleShareWithSelectedTeam}
+                      className={cn(
+                        'gap-1.5 shrink-0',
+                        isMobile && 'min-h-[44px] min-w-[44px]'
+                      )}
+                    >
+                      {shareWithTeam.isPending ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Plus className="h-4 w-4" />
+                      )}
+                      {!isMobile && t('form.addButton')}
+                    </Button>
+                  </div>
+                </div>
+                {selectedTeam ? (
+                  <p className="text-xs text-muted-foreground mt-2">
+                    {t('form.selectedTeam', { name: selectedTeam.name })}
+                  </p>
+                ) : (
+                  <p className="text-xs text-muted-foreground mt-2">
+                    {t('form.teamHint')}
+                  </p>
+                )}
+              </TabsContent>
             </Tabs>
           </div>
         )}
@@ -305,6 +396,10 @@ export function PeopleSection({
           templateId={templateId}
           canManage={canEdit}
           isMobile={isMobile}
+          shares={shares}
+          isLoading={sharesLoading}
+          error={sharesError}
+          onChanged={refetchShares}
         />
       </CardContent>
     </Card>

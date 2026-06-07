@@ -874,7 +874,8 @@
       "form": {
         "tabs": {
           "email": "By Email",
-          "systemUser": "System User"
+          "systemUser": "System User",
+          "team": "Team"
         },
         "emailPlaceholder": "Enter email address",
         "userPlaceholder": "Search users...",
@@ -883,6 +884,12 @@
         "suggestions": "Suggested",
         "searchHint": "Type at least 2 characters to search",
         "noUsersFound": "No users found",
+        "teamPlaceholder": "Select a team...",
+        "teamLoading": "Loading teams...",
+        "noTeams": "No teams available",
+        "teamMemberCount": "{count} members",
+        "selectedTeam": "Selected team: {name}",
+        "teamHint": "Members of the selected team inherit access to this template.",
         "validation": {
           "invalidEmail": "Valid email required"
         }
@@ -960,6 +967,8 @@
     "toast": {
       "sharedWith": "Shared with {email}",
       "shareFailed": "Failed to share with user",
+      "sharedWithTeam": "Shared with team {name}",
+      "shareTeamFailed": "Failed to share with team",
       "permissionUpdated": "Permission updated",
       "updateFailed": "Failed to update permission",
       "accessRemoved": "Removed access for {name}",

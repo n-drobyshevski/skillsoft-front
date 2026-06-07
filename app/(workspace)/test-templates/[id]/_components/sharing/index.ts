@@ -17,6 +17,7 @@
 export { ResponsiveShareModal, ShareButton } from './ResponsiveShareModal';
 export { ShareModalContent } from './ShareModalContent';
 export { UserPicker, UserSearchInput } from './UserPicker';
+export { TeamPicker } from './TeamPicker';
 
 // Legacy components (for backward compatibility)
 export { ShareDialog } from './ShareDialog';

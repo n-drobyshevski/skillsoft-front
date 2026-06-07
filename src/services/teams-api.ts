@@ -24,6 +24,7 @@ import {
   FitScoreResult,
   PageResponse,
 } from '@/types/team';
+import type { TemplateShare, AddTeamTemplateRequest } from '@/types/domain';
 import {
   createApiError,
   createNetworkError,
@@ -368,6 +369,49 @@ export const teamsApi = {
     return fetchTeamsApi<ManagedTeamSummary[]>(`${TEAMS_ENDPOINT}/my-teams`, {
       tags: ['my-teams'],
       revalidate: 60,
+      authHeaders,
+    });
+  },
+
+  // ==================== Shared Templates (Tests) ====================
+
+  /**
+   * List all test templates currently shared with a team.
+   * Powers the admin team "Tests" tab.
+   */
+  getSharedTemplates: async (teamId: string): Promise<TemplateShare[]> => {
+    const authHeaders = await getAuthHeaders();
+    return fetchTeamsApi<TemplateShare[]>(`${TEAMS_ENDPOINT}/${teamId}/shared-templates`, {
+      tags: [`team-${teamId}-templates`],
+      revalidate: 60,
+      authHeaders,
+    });
+  },
+
+  /**
+   * Grant a team access to a test template (add a test directly to the team).
+   */
+  addTemplateToTeam: async (
+    teamId: string,
+    data: AddTeamTemplateRequest
+  ): Promise<TemplateShare> => {
+    const authHeaders = await getAuthHeaders();
+    return fetchTeamsApi<TemplateShare>(`${TEAMS_ENDPOINT}/${teamId}/shared-templates`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+      cache: 'no-store',
+      authHeaders,
+    });
+  },
+
+  /**
+   * Remove (revoke) a team's access to a test template by share id.
+   */
+  removeTemplateFromTeam: async (teamId: string, shareId: string): Promise<void> => {
+    const authHeaders = await getAuthHeaders();
+    await fetchTeamsApi<void>(`${TEAMS_ENDPOINT}/${teamId}/shared-templates/${shareId}`, {
+      method: 'DELETE',
+      cache: 'no-store',
       authHeaders,
     });
   },

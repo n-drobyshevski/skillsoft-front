@@ -11,6 +11,7 @@ import type {
   LeaderChangeResult,
   ActivationResult,
 } from '@/types/team';
+import type { SharePermission } from '@/types/domain';
 
 // ============================================
 // TYPES
@@ -60,6 +61,7 @@ export async function revalidateTeamTags(teamId?: string) {
       revalidateTag(`team-${teamId}-members`, 'max');
       revalidateTag(`team-${teamId}-profile`, 'max');
       revalidateTag(`team-${teamId}-gaps`, 'max');
+      revalidateTag(`team-${teamId}-templates`, 'max');
     }
   } catch {
     // Silently fail - revalidation errors shouldn't break the action
@@ -297,6 +299,78 @@ export async function setTeamLeaderAction(
     console.error('[setTeamLeaderAction] Error:', error);
     const errorMessage = error instanceof Error ? error.message : UNKNOWN_ERROR_MESSAGE;
     return { success: false, message: `Failed to set leader: ${errorMessage}` };
+  }
+}
+
+// ============================================
+// SHARED TEMPLATES (TESTS) ACTIONS
+// ============================================
+
+/**
+ * Grant a team access to one or more test templates ("add tests to team").
+ * Each template is shared with the given permission level. Uses a partial
+ * success pattern so one failure does not abort the rest.
+ */
+export async function addTestsToTeamAction(
+  teamId: string,
+  templateIds: string[],
+  permission: SharePermission
+): Promise<ActionResult<{ added: number; failed: number }>> {
+  try {
+    if (!templateIds.length) {
+      return { success: false, message: 'No tests selected to add.' };
+    }
+
+    const results = await Promise.allSettled(
+      templateIds.map((templateId) =>
+        teamsApi.addTemplateToTeam(teamId, { templateId, permission })
+      )
+    );
+
+    const added = results.filter((r) => r.status === 'fulfilled').length;
+    const failed = results.length - added;
+
+    await revalidateTeamTags(teamId);
+
+    if (added === 0) {
+      return { success: false, message: 'Failed to add the selected test(s).' };
+    }
+
+    return {
+      success: true,
+      message:
+        failed > 0
+          ? `Added ${added} test(s). ${failed} could not be added.`
+          : `Added ${added} test(s) to the team.`,
+      data: { added, failed },
+    };
+  } catch (error) {
+    console.error('[addTestsToTeamAction] Error:', error);
+    const errorMessage = error instanceof Error ? error.message : UNKNOWN_ERROR_MESSAGE;
+    return { success: false, message: `Failed to add tests: ${errorMessage}` };
+  }
+}
+
+/**
+ * Remove (revoke) a team's access to a test template by share id.
+ */
+export async function removeTestFromTeamAction(
+  teamId: string,
+  shareId: string
+): Promise<ActionResult> {
+  try {
+    await teamsApi.removeTemplateFromTeam(teamId, shareId);
+
+    await revalidateTeamTags(teamId);
+
+    return {
+      success: true,
+      message: 'Test removed from team successfully.',
+    };
+  } catch (error) {
+    console.error('[removeTestFromTeamAction] Error:', error);
+    const errorMessage = error instanceof Error ? error.message : UNKNOWN_ERROR_MESSAGE;
+    return { success: false, message: `Failed to remove test: ${errorMessage}` };
   }
 }
 

@@ -45,6 +45,16 @@ interface UserShareListProps {
   canManage?: boolean;
   /** Mobile variant for touch-friendly sizing */
   isMobile?: boolean;
+  /**
+   * Controlled shares data. When provided, the list renders this instead of
+   * fetching its own copy, and calls `onChanged` after mutations so the owner
+   * can refresh. When omitted, the list fetches and refreshes internally.
+   */
+  shares?: TemplateShare[];
+  isLoading?: boolean;
+  error?: Error | null;
+  /** Called after a successful update/revoke so a controlling parent can refetch. */
+  onChanged?: () => void;
 }
 
 /**
@@ -61,10 +71,19 @@ export function UserShareList({
   templateId,
   canManage = false,
   isMobile = false,
+  shares: controlledShares,
+  isLoading: controlledIsLoading,
+  error: controlledError,
+  onChanged,
 }: UserShareListProps) {
   const t = useTranslations('template.access.people');
   const tToast = useTranslations('template.access.toast');
-  const { data: shares, isLoading, error } = useTemplateShares(templateId);
+  const isControlled = controlledShares !== undefined;
+  const internal = useTemplateShares(templateId, !isControlled);
+  const shares = isControlled ? controlledShares : internal.data;
+  const isLoading = isControlled ? !!controlledIsLoading : internal.isLoading;
+  const error = isControlled ? controlledError ?? null : internal.error;
+  const refresh = isControlled ? onChanged : internal.refetch;
   const updateShare = useUpdateShare();
   const revokeShare = useRevokeShare();
 
@@ -81,6 +100,7 @@ export function UserShareList({
         request: { permission },
       });
       toast.success(tToast('permissionUpdated'));
+      refresh?.();
     } catch (error) {
       toast.error(tToast('updateFailed'));
       console.error('Update share error:', error);
@@ -92,6 +112,7 @@ export function UserShareList({
     try {
       await revokeShare.mutateAsync({ templateId, shareId });
       toast.success(tToast('accessRemoved', { name: granteeName }));
+      refresh?.();
     } catch (error) {
       toast.error(tToast('revokeFailed'));
       console.error('Revoke share error:', error);

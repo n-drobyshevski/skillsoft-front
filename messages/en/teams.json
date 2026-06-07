@@ -104,6 +104,7 @@
       "members": "Members",
       "competencies": "Competencies",
       "competenciesMobile": "Skills",
+      "tests": "Tests",
       "activity": "Activity"
     },
     "actions": {
@@ -293,6 +294,12 @@
         "description": "Activate \"{name}\"? Active teams can be used in TEAM_FIT assessments.",
         "confirm": "Activate",
         "cancel": "Cancel"
+      },
+      "removeTest": {
+        "title": "Remove Test",
+        "description": "Remove \"{name}\" from this team? Team members will lose access to it.",
+        "confirm": "Remove",
+        "cancel": "Cancel"
       }
     },
     "addMembers": {
@@ -303,6 +310,32 @@
       "noUsers": "No users found",
       "alreadyMember": "Already a member",
       "add": "Add Members",
+      "adding": "Adding...",
+      "cancel": "Cancel"
+    },
+    "tests": {
+      "addTest": "Add Test",
+      "search": "Search shared tests...",
+      "untitled": "Untitled test",
+      "addedBy": "Added by {name}",
+      "openTest": "Open test",
+      "remove": "Remove from team",
+      "noResults": "No tests match \"{query}\"",
+      "count": "Showing {showing} of {total}",
+      "empty": {
+        "title": "No tests assigned to this team",
+        "description": "Share a test template with this team so its members get access to it."
+      }
+    },
+    "addTests": {
+      "title": "Add Tests to Team",
+      "description": "Search and select test templates to share with this team",
+      "search": "Search test templates...",
+      "permissionLabel": "Access",
+      "clear": "Clear ({count})",
+      "noTests": "No test templates found",
+      "alreadyAdded": "Already added",
+      "add": "Add Tests",
       "adding": "Adding...",
       "cancel": "Cancel"
     }

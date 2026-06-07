@@ -4,12 +4,14 @@ import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, Target, Crown, Calendar, Activity, LayoutDashboard, Clock } from "lucide-react";
+import { Users, Target, Crown, Calendar, Activity, LayoutDashboard, Clock, ClipboardList } from "lucide-react";
 import type { ManagedTeam, ManagedTeamProfile } from "@/types/team";
+import type { TemplateShare } from "@/types/domain";
 import TeamMembersTab from "./TeamMembersTab";
 import TeamOverviewTab from "./TeamOverviewTab";
 import TeamCompetenciesTab from "./TeamCompetenciesTab";
 import TeamActivityTab from "./TeamActivityTab";
+import TeamTestsTab from "./TeamTestsTab";
 
 interface TeamStats {
   memberCount: number;
@@ -23,6 +25,7 @@ interface TeamDetailClientProps {
   team: ManagedTeam;
   profile: ManagedTeamProfile | null;
   stats: TeamStats;
+  sharedTemplates: TemplateShare[];
 }
 
 // Info row component for desktop sidebar
@@ -48,7 +51,7 @@ function InfoRow({
   );
 }
 
-export default function TeamDetailClient({ team, profile, stats }: TeamDetailClientProps) {
+export default function TeamDetailClient({ team, profile, stats, sharedTemplates }: TeamDetailClientProps) {
   const t = useTranslations('teams.detail');
   const [activeTab, setActiveTab] = useState("overview");
 
@@ -134,7 +137,7 @@ export default function TeamDetailClient({ team, profile, stats }: TeamDetailCli
       {/* Main Content Area */}
       <div className="lg:col-span-9" role="main" aria-label="Team content">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="w-full grid grid-cols-4 h-11 p-1 bg-muted/50">
+          <TabsList className="w-full grid grid-cols-5 h-11 p-1 bg-muted/50">
             <TabsTrigger value="overview" className="gap-1.5 text-xs sm:text-sm data-[state=active]:shadow-sm min-h-[44px] sm:min-h-0 touch-manipulation">
               <LayoutDashboard className="h-4 w-4 hidden sm:block shrink-0" aria-hidden="true" />
               {t('tabs.overview')}
@@ -147,6 +150,10 @@ export default function TeamDetailClient({ team, profile, stats }: TeamDetailCli
               <Target className="h-4 w-4 hidden sm:block shrink-0" aria-hidden="true" />
               <span className="sm:hidden">{t('tabs.competenciesMobile')}</span>
               <span className="hidden sm:inline">{t('tabs.competencies')}</span>
+            </TabsTrigger>
+            <TabsTrigger value="tests" className="gap-1.5 text-xs sm:text-sm data-[state=active]:shadow-sm min-h-[44px] sm:min-h-0 touch-manipulation">
+              <ClipboardList className="h-4 w-4 hidden sm:block shrink-0" aria-hidden="true" />
+              {t('tabs.tests')}
             </TabsTrigger>
             <TabsTrigger value="activity" className="gap-1.5 text-xs sm:text-sm data-[state=active]:shadow-sm min-h-[44px] sm:min-h-0 touch-manipulation">
               <Clock className="h-4 w-4 hidden sm:block shrink-0" aria-hidden="true" />
@@ -172,6 +179,11 @@ export default function TeamDetailClient({ team, profile, stats }: TeamDetailCli
           {/* Competencies Tab */}
           <TabsContent value="competencies" className="mt-6">
             <TeamCompetenciesTab profile={profile} />
+          </TabsContent>
+
+          {/* Tests Tab */}
+          <TabsContent value="tests" className="mt-6">
+            <TeamTestsTab teamId={team.id} sharedTemplates={sharedTemplates} />
           </TabsContent>
 
           {/* Activity Tab */}

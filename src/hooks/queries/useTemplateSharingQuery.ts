@@ -217,12 +217,15 @@ export function useChangeVisibility() {
 // Shares Hooks
 
 /**
- * Hook to fetch template shares (users and teams)
+ * Hook to fetch template shares (users and teams).
+ *
+ * @param templateId Template to load shares for.
+ * @param enabled When false, skips fetching (e.g. when a parent owns the data).
  */
-export function useTemplateShares(templateId: string) {
+export function useTemplateShares(templateId: string, enabled: boolean = true) {
   return useFetch(
     () => templateSharingApi.listShares(templateId),
-    !!templateId,
+    !!templateId && enabled,
   );
 }
 

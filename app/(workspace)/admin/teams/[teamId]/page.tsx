@@ -4,6 +4,7 @@ import { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { teamsApi } from "@/services/teams-api";
 import type { ManagedTeam, ManagedTeamProfile } from "@/types/team";
+import type { TemplateShare } from "@/types/domain";
 import TeamHeroSection from "./_components/TeamHeroSection";
 import TeamStatsGrid from "./_components/TeamStatsGrid";
 import TeamDetailClient from "./_components/TeamDetailClient";
@@ -29,10 +30,11 @@ export async function generateMetadata({ params }: TeamDetailPageProps): Promise
 interface TeamDetailData {
   team: ManagedTeam;
   profile: ManagedTeamProfile | null;
+  sharedTemplates: TemplateShare[];
 }
 
 /**
- * Fetch team and profile data in parallel.
+ * Fetch team, profile, and shared templates in parallel.
  * Uses Promise.allSettled for graceful degradation.
  */
 async function getTeamDetailData(teamId: string): Promise<TeamDetailData | null> {
@@ -42,14 +44,17 @@ async function getTeamDetailData(teamId: string): Promise<TeamDetailData | null>
     return null;
   }
 
-  // Fetch profile in parallel (may not exist for new teams)
-  const profileResult = await Promise.allSettled([
+  // Fetch profile + shared templates in parallel (may not exist for new teams)
+  const [profileResult, templatesResult] = await Promise.allSettled([
     teamsApi.getTeamProfile(teamId),
+    teamsApi.getSharedTemplates(teamId),
   ]);
 
   return {
     team,
-    profile: profileResult[0].status === 'fulfilled' ? profileResult[0].value : null,
+    profile: profileResult.status === 'fulfilled' ? profileResult.value : null,
+    sharedTemplates:
+      templatesResult.status === 'fulfilled' ? templatesResult.value ?? [] : [],
   };
 }
 
@@ -67,7 +72,7 @@ async function TeamDetailData({ teamId }: { teamId: string }) {
     notFound();
   }
 
-  const { team, profile } = data;
+  const { team, profile, sharedTemplates } = data;
 
   // Calculate stats for the grid
   const stats = {
@@ -103,6 +108,7 @@ async function TeamDetailData({ teamId }: { teamId: string }) {
             team={team}
             profile={profile}
             stats={stats}
+            sharedTemplates={sharedTemplates}
           />
         </div>
       </div>

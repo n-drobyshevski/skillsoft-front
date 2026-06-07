@@ -874,7 +874,8 @@
       "form": {
         "tabs": {
           "email": "По Email",
-          "systemUser": "Пользователь"
+          "systemUser": "Пользователь",
+          "team": "Команда"
         },
         "emailPlaceholder": "Введите email адрес",
         "userPlaceholder": "Поиск пользователей...",
@@ -883,6 +884,12 @@
         "suggestions": "Рекомендуемые",
         "searchHint": "Введите минимум 2 символа для поиска",
         "noUsersFound": "Пользователи не найдены",
+        "teamPlaceholder": "Выберите команду...",
+        "teamLoading": "Загрузка команд...",
+        "noTeams": "Нет доступных команд",
+        "teamMemberCount": "{count} участн.",
+        "selectedTeam": "Выбрана команда: {name}",
+        "teamHint": "Участники выбранной команды получат доступ к этому шаблону.",
         "validation": {
           "invalidEmail": "Введите корректный email"
         }
@@ -960,6 +967,8 @@
     "toast": {
       "sharedWith": "Доступ предоставлен {email}",
       "shareFailed": "Не удалось предоставить доступ",
+      "sharedWithTeam": "Доступ предоставлен команде {name}",
+      "shareTeamFailed": "Не удалось предоставить доступ команде",
       "permissionUpdated": "Разрешение обновлено",
       "updateFailed": "Не удалось обновить разрешение",
       "accessRemoved": "Доступ удалён для {name}",

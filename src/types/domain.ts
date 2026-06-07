@@ -1290,6 +1290,8 @@ export interface ChangeVisibilityRequest {
 export interface TemplateShare {
   id: string;
   templateId: string;
+  /** Display name of the shared template (present on team/admin share listings). */
+  templateName?: string;
   granteeType: GranteeType;
   granteeId: string;
   granteeName?: string;
@@ -1320,6 +1322,16 @@ export interface ShareUserRequest {
  */
 export interface ShareTeamRequest {
   teamId: string;
+  permission: SharePermission;
+  expiresAt?: string;
+}
+
+/**
+ * Request to grant a team access to a test template from the admin team view.
+ * The team is identified by the route; this carries the template + permission.
+ */
+export interface AddTeamTemplateRequest {
+  templateId: string;
   permission: SharePermission;
   expiresAt?: string;
 }
