@@ -79,6 +79,11 @@ export default defineConfig({
         replacement: path.resolve(__dirname, './app/(workspace)/test-templates/[id]/$1'),
       },
       { find: '@', replacement: path.resolve(__dirname, './src') },
+      // Stub out the Next.js `server-only` guard so client-component tests can run in jsdom
+      {
+        find: 'server-only',
+        replacement: path.resolve(__dirname, './src/__tests__/mocks/server-only.ts'),
+      },
     ],
   },
 });

@@ -42,25 +42,28 @@ beforeEach(() => {
   });
 });
 
-// Mock ResizeObserver
+// Mock ResizeObserver — using a plain class so mockReset/restoreMocks don't wipe the implementation
+class MockResizeObserver {
+  observe = vi.fn();
+  unobserve = vi.fn();
+  disconnect = vi.fn();
+}
 beforeAll(() => {
-  global.ResizeObserver = vi.fn().mockImplementation(() => ({
-    observe: vi.fn(),
-    unobserve: vi.fn(),
-    disconnect: vi.fn(),
-  }));
+  global.ResizeObserver = MockResizeObserver as unknown as typeof ResizeObserver;
 });
 
-// Mock IntersectionObserver
+// Mock IntersectionObserver — using a plain class so mockReset/restoreMocks don't wipe the implementation
+class MockIntersectionObserver {
+  observe = vi.fn();
+  unobserve = vi.fn();
+  disconnect = vi.fn();
+  root = null;
+  rootMargin = '';
+  thresholds: number[] = [];
+  takeRecords = vi.fn().mockReturnValue([]);
+}
 beforeAll(() => {
-  global.IntersectionObserver = vi.fn().mockImplementation(() => ({
-    observe: vi.fn(),
-    unobserve: vi.fn(),
-    disconnect: vi.fn(),
-    root: null,
-    rootMargin: '',
-    thresholds: [],
-  }));
+  global.IntersectionObserver = MockIntersectionObserver as unknown as typeof IntersectionObserver;
 });
 
 // Mock requestAnimationFrame for hooks that use it

@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useTransition } from 'react';
+import { useMemo, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -60,13 +60,13 @@ import {
   Crosshair,
   Settings2,
   ToggleRight,
-  Lock,
   GitBranch,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { AssessmentGoal, AssessmentGoalInfo, TestTemplate } from '@/types/domain';
 import { updateTemplateSettings, archiveTemplate, deleteTemplate, createNewVersion } from '../../actions';
+import { isTemplateLocked } from './templateLock';
 import { useTranslations } from 'next-intl';
 import { GoalConfigSection } from './GoalConfigSection';
 
@@ -152,8 +152,16 @@ export function SettingsForm({ template }: SettingsFormProps) {
   const t = useTranslations('template');
   const tCommon = useTranslations('common');
 
-  // Published/Archived templates are read-only — must create a new version to edit
-  const isReadOnly = template.status === 'PUBLISHED' || template.status === 'ARCHIVED';
+  // Published/Archived templates are editable in place, but gated behind a warning + confirm
+  const isLocked = isTemplateLocked(template.status);
+  const isArchived = template.status === 'ARCHIVED';
+  const bannerTitleKey = isArchived ? 'editLockedBannerTitleArchived' : 'editLockedBannerTitlePublished';
+  const bannerDescKey = isArchived ? 'editLockedBannerDescArchived' : 'editLockedBannerDescPublished';
+  const confirmTitleKey = isArchived ? 'editLockedConfirmTitleArchived' : 'editLockedConfirmTitlePublished';
+  const confirmDescKey = isArchived ? 'editLockedConfirmDescArchived' : 'editLockedConfirmDescPublished';
+
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [pendingValues, setPendingValues] = useState<SettingsFormValues | null>(null);
 
   // Extract blueprint values with sensible defaults
   const blueprint = template.blueprint || {};
@@ -191,9 +199,9 @@ export function SettingsForm({ template }: SettingsFormProps) {
 
   const isDirty = form.formState.isDirty;
 
-  const handleSave = (values: SettingsFormValues) => {
+  const performSave = (values: SettingsFormValues, forceOverwrite: boolean) => {
     startTransition(async () => {
-      const result = await updateTemplateSettings(template.id, values);
+      const result = await updateTemplateSettings(template.id, values, forceOverwrite);
       if (result.success) {
         toast.success(t('settingsSaved'));
         form.reset(values);
@@ -202,6 +210,23 @@ export function SettingsForm({ template }: SettingsFormProps) {
         toast.error(result.error || t('settingsSaveError'));
       }
     });
+  };
+
+  const handleSave = (values: SettingsFormValues) => {
+    if (isLocked) {
+      setPendingValues(values);
+      setConfirmOpen(true);
+      return;
+    }
+    performSave(values, false);
+  };
+
+  const handleConfirmForceSave = () => {
+    setConfirmOpen(false);
+    if (pendingValues) {
+      performSave(pendingValues, true);
+      setPendingValues(null);
+    }
   };
 
   const handleArchive = () => {
@@ -230,17 +255,17 @@ export function SettingsForm({ template }: SettingsFormProps) {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSave)}>
-        {/* Read-only banner for published/archived templates */}
-        {isReadOnly && (
+        {/* Warning banner for published/archived templates — editable, but discouraged */}
+        {isLocked && (
           <div className="mb-6 flex items-center justify-between gap-4 rounded-lg border-2 border-amber-500/50 bg-amber-50 p-4 dark:bg-amber-950/30">
             <div className="flex items-center gap-3">
-              <Lock className="h-5 w-5 text-amber-600 dark:text-amber-400 shrink-0" />
+              <AlertTriangle className="h-5 w-5 text-amber-600 dark:text-amber-400 shrink-0" />
               <div>
                 <p className="text-sm font-medium text-amber-800 dark:text-amber-200">
-                  {t('readOnlyTitle')}
+                  {t(bannerTitleKey)}
                 </p>
                 <p className="text-xs text-amber-700 dark:text-amber-300 mt-0.5">
-                  {t('readOnlyDescription')}
+                  {t(bannerDescKey)}
                 </p>
               </div>
             </div>
@@ -267,7 +292,7 @@ export function SettingsForm({ template }: SettingsFormProps) {
         )}
 
         {/* Main 2-column grid */}
-        <div className={cn("grid grid-cols-1 gap-6 lg:grid-cols-12 lg:gap-8", isReadOnly && "opacity-60 pointer-events-none")}>
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-12 lg:gap-8">
 
           {/* LEFT COLUMN: Main Content (8/12) */}
           <div className="space-y-6 lg:col-span-8">
@@ -790,8 +815,8 @@ export function SettingsForm({ template }: SettingsFormProps) {
           </div>
         </div>
 
-        {/* Sticky Save Bar - Full Width (hidden for read-only templates) */}
-        {!isReadOnly && <div className="sticky bottom-0 z-10 mt-6 -mx-4 lg:-mx-6 border-t bg-background/95 backdrop-blur-sm">
+        {/* Sticky Save Bar - Full Width */}
+        <div className="sticky bottom-0 z-10 mt-6 -mx-4 lg:-mx-6 border-t bg-background/95 backdrop-blur-sm">
           <div className="px-4 lg:px-6 py-4">
             <div className="flex items-center justify-between gap-4">
               {/* Left side: Status indicator */}
@@ -845,7 +870,26 @@ export function SettingsForm({ template }: SettingsFormProps) {
               </div>
             </div>
           </div>
-        </div>}
+        </div>
+
+        <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>{t(confirmTitleKey)}</AlertDialogTitle>
+              <AlertDialogDescription>{t(confirmDescKey)}</AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel disabled={isPending}>{tCommon('cancel')}</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={handleConfirmForceSave}
+                disabled={isPending}
+                className="bg-amber-600 text-white hover:bg-amber-700"
+              >
+                {t('editAnyway')}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </form>
     </Form>
   );
