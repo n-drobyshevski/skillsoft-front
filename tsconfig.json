@@ -20,6 +20,9 @@
     "isolatedModules": true,
     "jsx": "react-jsx",
     "paths": {
+      "@/app/(workspace)/test-templates/[id]/*": [
+        "./app/(workspace)/test-templates/[id]/*"
+      ],
       "@/*": [
         "./src/*"
       ]
