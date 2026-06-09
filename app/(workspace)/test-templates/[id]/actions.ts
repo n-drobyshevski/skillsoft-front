@@ -213,7 +213,8 @@ export async function updateTemplateSettings(
     // Blueprint fields for TEAM_FIT goal
     teamId?: string;
     saturationThreshold?: number;
-  }
+  },
+  forceOverwrite = false,
 ) {
   try {
     // Build blueprint based on goal
@@ -234,6 +235,7 @@ export async function updateTemplateSettings(
       allowBackNavigation: data.allowBackNavigation,
       showResultsImmediately: data.showResultsImmediately,
       blueprint,
+      forceOverwrite,
     };
 
     await testTemplatesApi.updateTemplate(templateId, updatePayload);

@@ -69,9 +69,16 @@ export default defineConfig({
   },
 
   resolve: {
-    alias: {
-      '@': path.resolve(__dirname, './src'),
-      '@/app': path.resolve(__dirname, './app'),
-    },
+    // Order matters (first match wins). The [id] brackets confuse Vite's glob-based
+    // resolver, so the app-router subtree is mapped explicitly before the '@' rule.
+    // '@' -> ./src then covers everything else, including '@/app/actions' which lives
+    // at src/app/actions.ts (production tsconfig maps '@' to ./src).
+    alias: [
+      {
+        find: /^@\/app\/\(workspace\)\/test-templates\/\[id\]\/(.*)/,
+        replacement: path.resolve(__dirname, './app/(workspace)/test-templates/[id]/$1'),
+      },
+      { find: '@', replacement: path.resolve(__dirname, './src') },
+    ],
   },
 });

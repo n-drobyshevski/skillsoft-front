@@ -762,6 +762,8 @@ export interface UpdateTestTemplateRequest {
   allowSkip?: boolean;
   allowBackNavigation?: boolean;
   showResultsImmediately?: boolean;
+  /** When true, edits a PUBLISHED/ARCHIVED template in place (skips the backend editable guard). */
+  forceOverwrite?: boolean;
 }
 
 // TEST SESSION INTERFACES
