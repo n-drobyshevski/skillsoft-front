@@ -118,4 +118,27 @@ describe('SettingsForm locked-template editing', () => {
     );
     expect(screen.queryByText(/overwrite the/i)).not.toBeInTheDocument();
   });
+
+  it('uses archived-specific copy and force-saves an archived template', async () => {
+    const user = userEvent.setup();
+    renderForm({ ...baseTemplate, status: 'ARCHIVED', isActive: false });
+
+    expect(screen.getByText(/editing an archived template/i)).toBeInTheDocument();
+
+    const nameInput = screen.getByDisplayValue('Leadership');
+    await user.clear(nameInput);
+    await user.type(nameInput, 'Archived v2');
+
+    await user.click(screen.getByRole('button', { name: /save changes/i }));
+    expect(await screen.findByText(/overwrite the archived template/i)).toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: /edit anyway/i }));
+    await waitFor(() =>
+      expect(mockUpdate).toHaveBeenCalledWith(
+        'tid-1',
+        expect.objectContaining({ name: 'Archived v2' }),
+        true,
+      ),
+    );
+  });
 });
