@@ -42,6 +42,11 @@ export interface UseQuestionNavigationProps {
   onComplete?: (result: CompletionResult) => void;
   onAbandon?: () => void;
   onError?: (error: ApiError) => void;
+  /**
+   * Persist any additional client-owned state (e.g. the timer) to the server
+   * before a graceful Save & Exit. Best-effort.
+   */
+  onPersistState?: () => Promise<void>;
 }
 
 export interface UseQuestionNavigationReturn {
@@ -51,8 +56,9 @@ export interface UseQuestionNavigationReturn {
   handleNavigateToQuestion: (targetIndex: number) => Promise<void>;
   handleComplete: () => Promise<void>;
   handleExit: () => void;
-  handleAbandonTest: () => Promise<void>;
+  handleSaveAndExit: () => Promise<void>;
   handleDiscardTest: () => Promise<void>;
+  isExiting: boolean;
   isDiscarding: boolean;
   handleRetryNavigation: () => Promise<void>;
   handleDismissNavigationError: () => void;
@@ -93,6 +99,7 @@ export function useQuestionNavigation({
   onComplete,
   onAbandon,
   onError,
+  onPersistState,
 }: UseQuestionNavigationProps): UseQuestionNavigationReturn {
   const router = useRouter();
   const t = useTranslations('assessment');
@@ -100,6 +107,7 @@ export function useQuestionNavigation({
   // Dialog states
   const [showCompletion, setShowCompletion] = useState(false);
   const [showAbandonDialog, setShowAbandonDialog] = useState(false);
+  const [isExiting, setIsExiting] = useState(false);
 
   // Save status indicator state
   const [saveStatus, setSaveStatus] = useState<AnswerSaveStatus>('idle');
@@ -628,22 +636,37 @@ export function useQuestionNavigation({
     setShowAbandonDialog(true);
   };
 
-  const handleAbandonTest = async () => {
+  /**
+   * Save & Exit: persist the in-flight answer and timer, then leave.
+   *
+   * The session is intentionally kept IN_PROGRESS (we do NOT call
+   * `abandonSession`, which would move it to the terminal ABANDONED state and
+   * remove it from every resume surface). This lets the user continue the
+   * attempt later from the dashboard / my-tests / template "Continue" dialog.
+   */
+  const handleSaveAndExit = async () => {
+    setIsExiting(true);
     try {
-      if (adapter) {
-        await adapter.abandonSession(session.id);
-      } else {
-        await testSessionsClientApi.abandonSession(session.id, effectiveAuthHeaders);
+      // Flush the current question's answer if it has unsaved changes.
+      await autoSaveIfDirty();
+    } catch {
+      // Best-effort: everything up to the last navigation is already persisted.
+    }
+    try {
+      // Persist client-owned state (the timer) so resume continues the countdown.
+      if (onPersistState) {
+        await onPersistState();
       }
-      if (onAbandon) {
-        onAbandon();
-      } else {
-        router.push('/test-templates');
-      }
-    } catch (error) {
-      toast.error(t('player.toast.failedToCancelTest'));
-    } finally {
-      setShowAbandonDialog(false);
+    } catch {
+      // Timer persistence is best-effort.
+    }
+    useNavigationState.getState().clearAllDirty();
+    setShowAbandonDialog(false);
+    setIsExiting(false);
+    if (onAbandon) {
+      onAbandon();
+    } else {
+      router.push('/test-templates');
     }
   };
 
@@ -791,8 +814,9 @@ export function useQuestionNavigation({
     handleNavigateToQuestion,
     handleComplete,
     handleExit,
-    handleAbandonTest,
+    handleSaveAndExit,
     handleDiscardTest,
+    isExiting,
     isDiscarding,
     handleRetryNavigation,
     handleDismissNavigationError,

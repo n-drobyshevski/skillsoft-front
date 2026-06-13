@@ -1,10 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { motion, AnimatePresence } from 'motion/react';
 import { TestSession, SessionQuestion, CurrentQuestionResponse, TestAnswer } from '@/types/domain';
-import { type ApiError } from '@/services/api.client';
+import { testSessionsClientApi, type ApiError } from '@/services/api.client';
 import { useTestSessionAdapter, useSessionFeatures } from '@/context/test-session-context';
 import type { CompletionResult } from '@/adapters';
 import { EnhancedSessionHeader } from '@/components/layout/enhanced-session-header';
@@ -29,6 +29,8 @@ import { useAnswerSummary } from './hooks/useAnswerSummary';
 import { useTestDriveSync } from './hooks/useTestDriveSync';
 import { useImmersiveMode } from './hooks/useImmersiveMode';
 import { useKeyboardNavigation } from './hooks/useKeyboardNavigation';
+import { usePersistOnExit } from './hooks/usePersistOnExit';
+import { useNavigationState } from './hooks/useNavigationState';
 import { extractAnswerValue } from './hooks/useAnswerManagement';
 
 // Types
@@ -187,6 +189,26 @@ export function ImmersivePlayer({
     initialSeconds: initialQuestion.timeRemainingSeconds ?? null,
   });
 
+  // Timer persistence (continue countdown on resume)
+
+  const isTimed = initialQuestion.timeRemainingSeconds != null;
+  const timeRemainingRef = useRef<number | null>(timeRemaining);
+  useEffect(() => {
+    timeRemainingRef.current = timeRemaining;
+  });
+
+  /** Push the current remaining time to the server (awaited, for Save & Exit). */
+  const persistTimerToServer = useCallback(async () => {
+    const tr = timeRemainingRef.current;
+    if (tr == null || tr <= 0) return;
+    if (adapter) {
+      await adapter.syncTimeRemaining(session.id, tr);
+    } else {
+      await testSessionsClientApi.updateTimeRemaining(session.id, tr, effectiveAuthHeaders);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [adapter, session.id]);
+
   // Hook: Answer Summary
 
   const {
@@ -223,8 +245,9 @@ export function ImmersivePlayer({
     handleNavigateToQuestion,
     handleComplete,
     handleExit,
-    handleAbandonTest,
+    handleSaveAndExit,
     handleDiscardTest,
+    isExiting,
     isDiscarding,
     handleRetryNavigation,
     handleDismissNavigationError,
@@ -260,6 +283,7 @@ export function ImmersivePlayer({
     onComplete,
     onAbandon,
     onError,
+    onPersistState: persistTimerToServer,
   });
 
   // Hook: Keyboard Navigation
@@ -273,6 +297,89 @@ export function ImmersivePlayer({
     onPrevious: handlePrevious,
     onSkip: handleSkip,
   });
+
+  // Exit Persistence (flush in-flight answer + timer on accidental exit)
+
+  const unsavedRef = useRef(false);
+  useEffect(() => {
+    unsavedRef.current = hasUnsavedChanges;
+  }, [hasUnsavedChanges]);
+
+  // Rebuilt every render so the once-registered exit listeners read fresh state.
+  const flushOnExitRef = useRef<() => void>(() => {});
+  useEffect(() => {
+    flushOnExitRef.current = () => {
+      // 1) Flush the current question's answer if it has unsaved changes.
+      try {
+        const qId = currentQuestion?.id;
+        if (
+          qId &&
+          useNavigationState.getState().isDirty(qId) &&
+          currentAnswer !== undefined &&
+          validateAnswer(currentAnswer).valid
+        ) {
+          const request = buildAnswerRequest(currentAnswer);
+          if (adapter) {
+            void adapter.submitAnswer(session.id, request, { keepalive: true }).catch(() => {});
+          } else {
+            void testSessionsClientApi
+              .submitAnswer(session.id, request, effectiveAuthHeaders, { keepalive: true })
+              .catch(() => {});
+          }
+          useNavigationState.getState().markClean(qId);
+        }
+      } catch {
+        // Best-effort — never throw from an unload handler.
+      }
+      // 2) Persist the remaining time so resume continues the countdown.
+      try {
+        const tr = timeRemainingRef.current;
+        if (tr != null && tr > 0) {
+          if (adapter) {
+            void adapter.syncTimeRemaining(session.id, tr, { keepalive: true }).catch(() => {});
+          } else {
+            void testSessionsClientApi
+              .updateTimeRemaining(session.id, tr, effectiveAuthHeaders, { keepalive: true })
+              .catch(() => {});
+          }
+        }
+      } catch {
+        // Best-effort.
+      }
+    };
+  });
+
+  usePersistOnExit({ enabled: true, flushRef: flushOnExitRef, unsavedRef });
+
+  // Flush on unmount too: browser back / in-app (soft) navigation tears the
+  // player down without firing pagehide/beforeunload. This cleanup runs before
+  // useImmersiveMode's dirty-clearing cleanup (declared earlier), so the dirty
+  // in-flight answer is still present to be saved. No-op after Save & Exit
+  // (dirty already cleared) or completion (answer already submitted).
+  useEffect(() => {
+    return () => {
+      flushOnExitRef.current();
+    };
+  }, []);
+
+  // Periodically persist the timer so a crash/close loses at most one interval.
+  useEffect(() => {
+    if (!isTimed) return;
+    const intervalId = setInterval(() => {
+      const tr = timeRemainingRef.current;
+      if (tr != null && tr > 0) {
+        if (adapter) {
+          void adapter.syncTimeRemaining(session.id, tr).catch(() => {});
+        } else {
+          void testSessionsClientApi
+            .updateTimeRemaining(session.id, tr, effectiveAuthHeaders)
+            .catch(() => {});
+        }
+      }
+    }, 15000);
+    return () => clearInterval(intervalId);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isTimed, adapter, session.id]);
 
   // Hook: Test-Drive Sync
 
@@ -481,8 +588,9 @@ export function ImmersivePlayer({
       <AbandonDialog
         open={showAbandonDialog}
         onOpenChange={setShowAbandonDialog}
-        onAbandon={handleAbandonTest}
+        onAbandon={handleSaveAndExit}
         onDiscard={handleDiscardTest}
+        isSubmitting={isExiting}
         isDiscarding={isDiscarding}
       />
 

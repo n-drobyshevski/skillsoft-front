@@ -192,7 +192,8 @@ export class AnonymousTestSessionAdapter implements TestSessionAdapter {
 
   async submitAnswer(
     sessionId: string,
-    request: SubmitAnswerRequest
+    request: SubmitAnswerRequest,
+    options?: { keepalive?: boolean }
   ): Promise<TestAnswer> {
     const { questionId, selectedOptionIndex } = this.normalizeSubmitRequest(
       request.questionId,
@@ -203,7 +204,8 @@ export class AnonymousTestSessionAdapter implements TestSessionAdapter {
       sessionId,
       questionId,
       selectedOptionIndex,
-      this.accessToken
+      this.accessToken,
+      options
     );
 
     // Normalize response to TestAnswer
@@ -303,12 +305,14 @@ export class AnonymousTestSessionAdapter implements TestSessionAdapter {
 
   async syncTimeRemaining(
     sessionId: string,
-    timeRemainingSeconds: number
+    timeRemainingSeconds: number,
+    options?: { keepalive?: boolean }
   ): Promise<void> {
     await anonymousTestApi.updateTimeRemaining(
       sessionId,
       timeRemainingSeconds,
-      this.accessToken
+      this.accessToken,
+      options
     );
   }
 }

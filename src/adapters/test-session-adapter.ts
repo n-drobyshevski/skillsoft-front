@@ -143,7 +143,8 @@ export interface TestSessionAdapter {
    */
   submitAnswer(
     sessionId: string,
-    request: SubmitAnswerRequest
+    request: SubmitAnswerRequest,
+    options?: { keepalive?: boolean }
   ): Promise<TestAnswer>;
 
   /**
@@ -197,13 +198,16 @@ export interface TestSessionAdapter {
 
   /**
    * Sync remaining time with server (for timed tests).
-   * Called periodically to persist time state.
+   * Called periodically (and on exit) to persist time state so the countdown
+   * continues correctly when the attempt is resumed.
    * @param sessionId - The session ID
    * @param timeRemainingSeconds - Current remaining time
+   * @param options - Pass `{ keepalive: true }` for the on-exit flush
    */
   syncTimeRemaining(
     sessionId: string,
-    timeRemainingSeconds: number
+    timeRemainingSeconds: number,
+    options?: { keepalive?: boolean }
   ): Promise<void>;
 }
 

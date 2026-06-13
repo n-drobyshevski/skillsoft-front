@@ -104,10 +104,11 @@ export class AuthenticatedTestSessionAdapter implements TestSessionAdapter {
 
   async submitAnswer(
     sessionId: string,
-    request: SubmitAnswerRequest
+    request: SubmitAnswerRequest,
+    options?: { keepalive?: boolean }
   ): Promise<TestAnswer> {
     const headers = await this.getHeaders();
-    return testSessionsClientApi.submitAnswer(sessionId, request, headers);
+    return testSessionsClientApi.submitAnswer(sessionId, request, headers, options);
   }
 
   async navigateToQuestion(
@@ -154,17 +155,18 @@ export class AuthenticatedTestSessionAdapter implements TestSessionAdapter {
 
   async syncTimeRemaining(
     sessionId: string,
-    timeRemainingSeconds: number
+    timeRemainingSeconds: number,
+    options?: { keepalive?: boolean }
   ): Promise<void> {
-    // Authenticated API doesn't have a dedicated time sync endpoint
-    // Time is tracked on the backend via session.lastActivityAt
-    // For now, we could use the navigate endpoint to keep session active
-    // or implement a dedicated endpoint in the backend
-    //
-    // For minimal MVP, we'll make this a no-op since the authenticated
-    // player currently relies on backend stale session detection
-    void sessionId;
-    void timeRemainingSeconds;
+    // Persist the remaining time so a resumed attempt continues the countdown
+    // instead of resetting to the full limit (PUT /tests/sessions/{id}/time).
+    const headers = await this.getHeaders();
+    await testSessionsClientApi.updateTimeRemaining(
+      sessionId,
+      timeRemainingSeconds,
+      headers,
+      options
+    );
   }
 }
 

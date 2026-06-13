@@ -281,17 +281,42 @@ export const testSessionsClientApi = {
   },
 
   /**
-   * Submit an answer
+   * Submit an answer.
+   *
+   * Pass `{ keepalive: true }` to allow the request to outlive a page unload
+   * (used by the exit-persistence flush so the in-flight answer is not lost on
+   * tab close / refresh).
    */
   submitAnswer: async (
     sessionId: string,
     request: SubmitAnswerRequest,
-    authHeaders: Record<string, string>
+    authHeaders: Record<string, string>,
+    options?: { keepalive?: boolean }
   ): Promise<TestAnswer> => {
     return clientFetch(`${TEST_SESSIONS_BASE}/${sessionId}/answers`, authHeaders, {
       method: 'POST',
       body: JSON.stringify(request),
+      keepalive: options?.keepalive,
     });
+  },
+
+  /**
+   * Persist the remaining time for a timed session (PUT /time).
+   *
+   * The backend stores this value verbatim; when it reaches <= 0 the session is
+   * timed out and scored. Pass `{ keepalive: true }` for the on-exit flush.
+   */
+  updateTimeRemaining: async (
+    sessionId: string,
+    timeRemainingSeconds: number,
+    authHeaders: Record<string, string>,
+    options?: { keepalive?: boolean }
+  ): Promise<TestSession> => {
+    return clientFetch(
+      `${TEST_SESSIONS_BASE}/${sessionId}/time?timeRemainingSeconds=${timeRemainingSeconds}`,
+      authHeaders,
+      { method: 'PUT', keepalive: options?.keepalive }
+    );
   },
 
   /**

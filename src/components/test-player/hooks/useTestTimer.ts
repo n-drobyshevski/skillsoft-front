@@ -171,10 +171,14 @@ export function useTestTimer({
   };
 
   const sync = (serverSeconds: number) => {
-    // Only sync if difference is significant (> 2 seconds)
     setTimeRemaining((prev) => {
       if (prev === null) return serverSeconds;
-      if (Math.abs(prev - serverSeconds) > 2) {
+      // Never give time back: the running client countdown is authoritative
+      // during an active session, so only accept a server value that is
+      // meaningfully LOWER (e.g. the persisted value after a resume, or a value
+      // advanced by another device). Accepting a higher (stale) server value
+      // here would reset the timer upward on every navigation.
+      if (serverSeconds < prev - 2) {
         return serverSeconds;
       }
       return prev;

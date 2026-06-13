@@ -437,8 +437,23 @@ export async function submitAnswer(
   sessionId: string,
   questionId: string,
   selectedOptionIndex: number,
-  accessToken?: string
+  accessToken?: string,
+  options?: { keepalive?: boolean }
 ): Promise<AnonymousAnswer> {
+  // Keepalive submissions run during page unload — fire a single best-effort
+  // request (no retry loop) so the in-flight answer survives a tab close.
+  if (options?.keepalive) {
+    const response = await fetchWithSessionToken(`/sessions/${sessionId}/answers`, {
+      method: 'POST',
+      body: JSON.stringify({ questionId, selectedOptionIndex }),
+      keepalive: true,
+    }, accessToken);
+    if (!response.ok) {
+      await handleErrorResponse(response);
+    }
+    return await response.json();
+  }
+
   const RETRY_DELAYS = [500, 1000, 2000];
   let lastError: unknown;
 
@@ -518,12 +533,13 @@ export async function navigateToQuestion(
 export async function updateTimeRemaining(
   sessionId: string,
   timeRemainingSeconds: number,
-  accessToken?: string
+  accessToken?: string,
+  options?: { keepalive?: boolean }
 ): Promise<AnonymousSessionResponse> {
   try {
     const response = await fetchWithSessionToken(
       `/sessions/${sessionId}/time?timeRemainingSeconds=${timeRemainingSeconds}`,
-      { method: 'POST' },
+      { method: 'POST', keepalive: options?.keepalive },
       accessToken
     );
 

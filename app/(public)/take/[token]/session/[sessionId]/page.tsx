@@ -293,10 +293,16 @@ export default function AnonymousTestSessionPage() {
   }, [sessionId, takerInfo, adapter, t]);
 
   /**
-   * Handle abandon from ImmersivePlayer.
+   * Handle exit from ImmersivePlayer.
+   *
+   * Used for both "Save & Exit" (session kept IN_PROGRESS, resumable) and
+   * "Delete and exit" (discard). We intentionally KEEP the stored credentials
+   * here so a Save & Exit can be resumed: returning to the share link detects
+   * the existing session and continues it. The discard path clears credentials
+   * itself inside the adapter (discardSession), so dropping the clear here does
+   * not leak a discarded session — the landing page just finds no credentials.
    */
   const handleAbandon = useCallback(() => {
-    anonymousTestApi.clearCredentials();
     router.replace(`/take/${token}`);
   }, [router, token]);
 
