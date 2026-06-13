@@ -8,6 +8,8 @@
 import { describe, it, expect } from 'vitest';
 import enMessages from '../../../messages/en/index';
 import ruMessages from '../../../messages/ru/index';
+import enMonolith from '../../../messages/en.json';
+import ruMonolith from '../../../messages/ru.json';
 
 /**
  * Recursively extracts all keys from a nested object
@@ -90,6 +92,24 @@ describe('Translation Coverage', () => {
       }
 
       expect(emptyKeys).toEqual([]);
+    });
+  });
+
+  describe('Monolith Sync', () => {
+    // The monolithic messages/{locale}.json files are kept for backward
+    // compatibility but are NOT loaded at runtime (src/i18n/request.ts loads
+    // the per-namespace messages/{locale}/index aggregators). They drift
+    // silently when namespace files change. This guard ensures they stay in
+    // sync with the runtime source.
+    //
+    // To fix a failure, regenerate them from the per-namespace dirs (merge
+    // each messages/{locale}/*.json in index.ts order into messages/{locale}.json).
+    it('en.json equals the merged messages/en/ dir source', () => {
+      expect(enMonolith).toEqual(enMessages);
+    });
+
+    it('ru.json equals the merged messages/ru/ dir source', () => {
+      expect(ruMonolith).toEqual(ruMessages);
     });
   });
 

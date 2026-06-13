@@ -46,6 +46,7 @@
     "startTest": "Начать",
     "testDrive": "Тест-драйв",
     "questionsShort": "вопр.",
+    "chartRenderError": "Не удалось отобразить график",
     "pagination": {
       "navigation": "Навигация по страницам",
       "pageOf": "Страница {current} из {total}",
@@ -111,8 +112,11 @@
       "analytics": "Аналитика",
       "system": "Система"
     },
+    "myActivity": "Мой прогресс",
     "items": {
       "overview": "Обзор",
+      "myActivity": "Мой прогресс",
+      "testCatalog": "Каталог тестов",
       "availableTests": "Доступные тесты",
       "sharedWithMe": "Доступные мне",
       "hiringOverview": "Обзор найма",
@@ -123,6 +127,29 @@
       "psychDashboard": "Дашборд",
       "itemStatistics": "Статистика вопросов",
       "flaggedItems": "Отмеченные"
+    },
+    "commandPalette": {
+      "title": "Командная палитра",
+      "description": "Поиск или переход на страницу...",
+      "placeholder": "Поиск шаблонов, компетенций или навигация...",
+      "noResults": "Результаты не найдены.",
+      "noResultsFor": "Нет результатов для \"{query}\"",
+      "tryDifferentSearch": "Попробуйте другой запрос",
+      "searching": "Поиск...",
+      "navigation": "Навигация",
+      "searchResults": "Результаты поиска",
+      "templates": "Шаблоны",
+      "recentItems": "Недавние",
+      "arrowNavigation": "Навигация",
+      "createNewTemplate": "Создать новый шаблон",
+      "createCompetency": "Создать компетенцию",
+      "createQuestion": "Создать вопрос",
+      "createIndicator": "Создать индикатор",
+      "createTeam": "Создать команду",
+      "createUser": "Создать пользователя",
+      "psychometrics": "Психометрика",
+      "skillMapper": "Карта навыков",
+      "bigFive": "Большая пятёрка"
     }
   },
   "auth": {
@@ -318,6 +345,172 @@
       "continueWithoutSaving": "Продолжить без сохранения",
       "retry": "Попробовать снова",
       "retrying": "Повторяем..."
+    },
+    "player": {
+      "validation": {
+        "noCurrentQuestion": "Нет текущего вопроса",
+        "pleaseSelectOrEnter": "Пожалуйста, выберите или введите ответ",
+        "pleaseSelectAtLeastOne": "Пожалуйста, выберите хотя бы один вариант",
+        "answerMustBeText": "Ответ должен быть текстом",
+        "pleaseEnterAnswer": "Пожалуйста, введите ответ",
+        "answerTooShort": "Ответ слишком короткий. {remaining, plural, one {Необходимо ещё # символ} few {Необходимо ещё # символа} many {Необходимо ещё # символов} other {Необходимо ещё # символов}}",
+        "pleaseSelectOption": "Пожалуйста, выберите вариант ответа",
+        "pleaseCheckAnswer": "Пожалуйста, проверьте ваш ответ"
+      },
+      "toast": {
+        "retryAttempt": "Повторная попытка... ({attempt}/{maxRetries})",
+        "sessionCancelled": "Сессия была отменена",
+        "testAlreadyCompleted": "Тест уже завершён",
+        "invalidNavigation": "Недействительный переход к следующему вопросу",
+        "questionNotFound": "Вопрос не найден",
+        "failedToSaveAnswer": "Не удалось сохранить ответ",
+        "savingAttempt": "Сохранение... (попытка {attempt}/{maxRetries})",
+        "cannotSkipLast": "Последний вопрос нельзя пропустить",
+        "failedToSkipQuestion": "Не удалось пропустить вопрос",
+        "testCannotBeCompleted": "Тест не может быть завершён",
+        "failedToCompleteTest": "Не удалось завершить тест",
+        "failedToCancelTest": "Не удалось отменить тест",
+        "sessionDiscarded": "Тестовая сессия удалена",
+        "failedToDiscardTest": "Не удалось удалить сессию",
+        "answerSaved": "Ответ сохранён",
+        "changesNotSaved": "Изменения не сохранены",
+        "failedToNavigate": "Не удалось перейти к вопросу",
+        "failedToLoadSummary": "Не удалось загрузить сводку ответов",
+        "sessionNotFound": "Сессия не найдена. Возможно, она была удалена.",
+        "testAlreadyCompleted2": "Тест уже был завершён",
+        "testTimedOut": "Время выполнения теста истекло",
+        "cannotCompleteInStatus": "Невозможно завершить тест в статусе: {status}",
+        "cannotCompleteChanged": "Тест не может быть завершён. Возможно, он уже был завершён или отменён.",
+        "serverError": "Ошибка сервера. Попробуйте ещё раз."
+      },
+      "summary": {
+        "questionNumber": "Вопрос {number}",
+        "skippedAnswer": "Пропущено",
+        "selectedCount": "Выбрано: {count}",
+        "answerGiven": "Ответ дан",
+        "otherQuestions": "Другие вопросы",
+        "likertValue": "{value}/5"
+      },
+      "dialog": {
+        "exitTitle": "Выйти из теста?",
+        "exitDescription": "Ваш прогресс будет сохранён. Вы сможете продолжить позже.",
+        "continueTest": "Продолжить тест",
+        "exitButton": "Выйти",
+        "timeExpiredTitle": "Время истекло",
+        "timeExpiredDescription": "Отведённое время на тест закончилось. Ваши ответы будут сохранены автоматически.",
+        "viewResults": "Посмотреть результаты"
+      },
+      "navigation": {
+        "backDisabled": "Возврат к предыдущим вопросам отключён для этого теста",
+        "firstQuestion": "Это первый вопрос"
+      }
+    },
+    "progressIndicator": {
+      "questionAnswered": "Вопрос {number}: Отвечен",
+      "questionSkipped": "Вопрос {number}: Пропущен",
+      "questionCurrent": "Вопрос {number}: Текущий",
+      "questionPending": "Вопрос {number}: Ожидает",
+      "questionDefault": "Вопрос {number}"
+    },
+    "answerSummary": {
+      "reviewDetails": "Показать подробности",
+      "hideDetails": "Скрыть подробности",
+      "compactScore": "{score}/{max}",
+      "questionLabel": "В{number}",
+      "allCompleteTitle": "Все вопросы отвечены!",
+      "allCompleteDescription": "Вы готовы отправить оценку. Просмотрите ответы ниже или отправьте сейчас.",
+      "needsAttention": "Требуют внимания",
+      "needsAttentionLabel": "Вопросы, требующие внимания",
+      "skippedStat": "{count, plural, one {# пропущен} few {# пропущено} many {# пропущено} other {# пропущено}}",
+      "flaggedStat": "{count, plural, one {# отмечен} few {# отмечено} many {# отмечено} other {# отмечено}}",
+      "answerThisQuestion": "Ответить на вопрос",
+      "reviewThisQuestion": "Просмотреть вопрос",
+      "completedCount": "{count, plural, one {# отвеченный вопрос} few {# отвеченных вопроса} many {# отвеченных вопросов} other {# отвеченных вопросов}}",
+      "completedLabel": "Отвеченные вопросы"
+    },
+    "answerCard": {
+      "statusAnswered": "Отвечено",
+      "statusSkipped": "Пропущено",
+      "statusFlagged": "Отмечено",
+      "statusPending": "Ожидание",
+      "typeScale": "Шкала",
+      "typeSituational": "Ситуация",
+      "typeChoice": "Выбор",
+      "typeText": "Текст",
+      "typeBehavioral": "Пример",
+      "typeDefault": "Вопрос",
+      "timeSeconds": "{seconds}с",
+      "editButton": "Изменить",
+      "skippedPreview": "Пропущено",
+      "questionWasSkipped": "Вопрос был пропущен",
+      "selectedAnswer": "Выбранный ответ:",
+      "yourAnswer": "Ваш ответ:",
+      "noQuestionsWithStatus": "Нет вопросов с выбранным статусом",
+      "answeredShort": "{count} отв.",
+      "skippedShort": "{count} проп."
+    },
+    "submission": {
+      "submittingResults": "Отправка результатов...",
+      "pleaseWait": "Пожалуйста, подождите. Это может занять несколько секунд.",
+      "attemptOf": "Попытка {current} из {max}",
+      "submissionError": "Ошибка отправки",
+      "retryButton": "Повторить попытку",
+      "backToReview": "Вернуться к просмотру",
+      "maxAttemptsExceeded": "Превышено количество попыток. Попробуйте позже или обратитесь в поддержку."
+    },
+    "sjt": {
+      "scenarioLabel": "Ситуация",
+      "responsePrompt": "На основе описанной ситуации выберите лучший ответ:"
+    },
+    "star": {
+      "situation": {
+        "label": "Ситуация",
+        "hint": "Опишите контекст или ситуацию"
+      },
+      "task": {
+        "label": "Задача",
+        "hint": "Какова была ваша роль или обязанность?"
+      },
+      "action": {
+        "label": "Действие",
+        "hint": "Какие конкретные действия вы предприняли?"
+      },
+      "result": {
+        "label": "Результат",
+        "hint": "Каков был результат?"
+      },
+      "characterCount": "{current}/{minimum} символов минимум",
+      "charactersMet": "Минимум достигнут"
+    },
+    "timer": {
+      "noLimit": "Без ограничения",
+      "expired": "Время истекло",
+      "remaining": "{minutes}:{seconds} осталось",
+      "warning": "Осталось менее 3 минут"
+    },
+    "settings": {
+      "title": "Настройки",
+      "language": "Язык",
+      "theme": "Оформление",
+      "dark": "Темная",
+      "light": "Светлая",
+      "shortcutHint": "Alt+S"
+    },
+    "progressTooltip": {
+      "answered": "Отвечено: {count}",
+      "skipped": "Пропущено: {count}",
+      "remaining": "Осталось: {count}",
+      "questionNavigation": "Навигация по вопросам",
+      "questionAnswered": "Вопрос {number}: Отвечен",
+      "questionSkipped": "Вопрос {number}: Пропущен",
+      "questionCurrent": "Вопрос {number}: Текущий",
+      "questionPending": "Вопрос {number}: Ожидает"
+    },
+    "insights": {
+      "hidePanel": "Скрыть панель анализа",
+      "openPanel": "Открыть панель анализа",
+      "shortcutHint": "Сочетание клавиш: Alt+I",
+      "analysisPanel": "Панель анализа"
     }
   },
   "likert": {
@@ -375,6 +568,36 @@
     "weightDistribution": "Распределение весов",
     "totalIndicators": "Всего индикаторов",
     "totalWeight": "Общий вес",
+    "weightLabel": "Вес: {value}",
+    "indicatorActions": {
+      "viewDetails": "Подробнее",
+      "edit": "Редактировать"
+    },
+    "standardsCard": {
+      "untitled": "Без названия",
+      "bigFiveShort": "Большая пятёрка",
+      "onetElementType": {
+        "ability": "Способность",
+        "skill": "Навык",
+        "knowledge": "Знание",
+        "work_activity": "Вид деятельности",
+        "work_style": "Стиль работы",
+        "interest": "Интерес",
+        "work_value": "Рабочая ценность",
+        "work_context": "Рабочий контекст"
+      },
+      "escoSkillType": {
+        "skill": "Навык",
+        "competence": "Компетенция",
+        "knowledge": "Знание",
+        "language": "Язык",
+        "transversal": "Универсальный"
+      }
+    },
+    "questionMeta": {
+      "secondsAbbr": "{seconds}с",
+      "optionsAbbr": "вариантов: {count}"
+    },
     "overview": "Обзор компетенции",
     "deleteConfirmTitle": "Удалить компетенцию",
     "deleteConfirmDescription": "Это действие нельзя отменить. Компетенция и все связанные данные будут удалены навсегда.",
@@ -390,7 +613,7 @@
     "standardMappingDescription": "Связь с O*NET, ESCO или личностными фреймворками",
     "standardsReference": "Ссылка на стандарты",
     "standardsReferenceHelp": "Привяжите компетенцию к установленным фреймворкам: профессиональные навыки O*NET, европейская таксономия ESCO или личностные черты Большой пятёрки для стандартизированной оценки.",
-    "standards": {
+    "standardsPicker": {
       "onetSlot": {
         "title": "Профессиональная привязка",
         "primary": "Основной",
@@ -500,7 +723,25 @@
     "connectionIssueDescription": "Не удаётся подключиться к серверу. Возможно, это временная проблема с API.",
     "networkErrorDescription": "Не удаётся связаться с сервером. Проверьте интернет-соединение.",
     "errorLoadingDescription": "Произошла ошибка при загрузке данных компетенции.",
-    "backToCompetencies": "К списку компетенций"
+    "backToCompetencies": "К списку компетенций",
+    "statsCards": {
+      "total": "Всего компетенций",
+      "totalMobile": "Всего",
+      "totalDesc": "Активные компетенции",
+      "totalTooltip": "Общее количество компетенций в системе по всем категориям и уровням квалификации.",
+      "withIndicators": "С индикаторами",
+      "withIndicatorsMobile": "Связанные",
+      "withIndicatorsDesc": "Имеют индикаторы",
+      "withIndicatorsTooltip": "Компетенции, к которым привязан хотя бы один поведенческий индикатор. Индикаторы определяют наблюдаемое поведение для измерения компетенции.",
+      "avgWeight": "Ср. вес индикаторов",
+      "avgWeightMobile": "Ср. вес",
+      "avgWeightDesc": "Средний вес",
+      "avgWeightTooltip": "Средний вес поведенческих индикаторов по всем компетенциям. Вес определяет вклад каждого индикатора в общую оценку компетенции.",
+      "advanced": "Продвинутый уровень",
+      "advancedMobile": "Продвинутые",
+      "advancedDesc": "Высокая квалификация",
+      "advancedTooltip": "Компетенции уровня «Продвинутый» или «Эксперт». Представляют навыки высокого порядка для опытных специалистов."
+    }
   },
   "indicator": {
     "title": "Поведенческие индикаторы",
@@ -508,13 +749,94 @@
     "create": "Создать индикатор",
     "edit": "Редактировать индикатор",
     "delete": "Удалить индикатор",
+    "createdSuccess": "Индикатор успешно создан!",
+    "updatedSuccess": "Индикатор успешно обновлён!",
+    "createdNoId": "Индикатор был создан, но корректный ID не получен. Обновите страницу и попробуйте снова.",
+    "createFailed": "Не удалось создать индикатор",
+    "updateFailed": "Не удалось обновить индикатор",
     "name": "Название",
     "description": "Описание",
     "examples": "Примеры",
     "counterExamples": "Контрпримеры",
     "observability": "Уровень наблюдаемости",
     "measurementType": "Тип измерения",
-    "backToIndicators": "К списку индикаторов"
+    "backToIndicators": "К списку индикаторов",
+    "columns": {
+      "title": "Название",
+      "competency": "Компетенция",
+      "questions": "Вопросы",
+      "level": "Уровень",
+      "weight": "Вес",
+      "status": "Статус",
+      "active": "Активен",
+      "inactive": "Неактивен",
+      "actions": "Действия"
+    },
+    "actions": {
+      "label": "Действия",
+      "quickView": "Быстрый просмотр",
+      "viewDetails": "Подробнее",
+      "edit": "Редактировать",
+      "copyId": "Копировать ID"
+    },
+    "statsCards": {
+      "total": "Всего индикаторов",
+      "totalMobile": "Всего",
+      "totalDesc": "Определённые индикаторы",
+      "totalTooltip": "Общее количество поведенческих индикаторов, определённых для всех компетенций в системе.",
+      "withQuestions": "С вопросами",
+      "withQuestionsMobile": "С вопросами",
+      "withQuestionsDesc": "Имеют вопросы",
+      "withQuestionsTooltip": "Индикаторы, к которым привязан хотя бы один вопрос. Эти индикаторы могут измеряться в ходе тестирования.",
+      "measurable": "Измеримые",
+      "measurableMobile": "Измеримые",
+      "measurableDesc": "Количественные",
+      "measurableTooltip": "Индикаторы с количественным типом измерения, позволяющим объективную оценку, а не субъективную.",
+      "complexity": "Ср. сложность",
+      "complexityMobile": "Сложность",
+      "complexityDesc": "Средняя сложность",
+      "complexityTooltip": "Средний рейтинг сложности по всем индикаторам. Высокая сложность указывает на более тонкие поведенческие паттерны."
+    },
+    "detail": {
+      "description": "Описание",
+      "noDescription": "Описание для этого индикатора отсутствует.",
+      "examples": "Примеры",
+      "counterExamples": "Контрпримеры",
+      "assessmentQuestions": "Вопросы оценки",
+      "addQuestion": "Добавить вопрос",
+      "noQuestions": "К этому индикатору не привязано ни одного вопроса.",
+      "details": "Детали",
+      "weight": "Вес",
+      "weightBadge": "Вес: {value}",
+      "measurementType": "Тип измерения",
+      "orderIndex": "Порядковый номер",
+      "observabilityLevel": "Уровень наблюдаемости",
+      "approvalStatus": "Статус одобрения",
+      "status": "Статус",
+      "active": "Активен",
+      "inactive": "Неактивен",
+      "contextScope": "Область контекста",
+      "competency": "Компетенция",
+      "viewCompetencyDetails": "Подробнее",
+      "deleteTitle": "Удалить поведенческий индикатор",
+      "deleteDescription": "Это действие необратимо. Поведенческий индикатор и все связанные данные будут удалены безвозвратно.",
+      "deleteSuccess": "Поведенческий индикатор успешно удалён",
+      "deleteAlready": "Этот поведенческий индикатор уже был удалён.",
+      "deleteFailed": "Не удалось удалить индикатор. Попробуйте ещё раз."
+    },
+    "competencyHoverCard": {
+      "loading": "Загрузка компетенции...",
+      "loadError": "Не удалось загрузить данные компетенции",
+      "notFound": "Компетенция не найдена",
+      "category": "Категория",
+      "indicators": "Индикаторы",
+      "version": "Версия",
+      "versionValue": "v{version}",
+      "status": "Статус",
+      "active": "Активна",
+      "inactive": "Неактивна",
+      "viewFullDetails": "Полная информация"
+    }
   },
   "question": {
     "title": "Вопросы оценки",
@@ -530,7 +852,69 @@
     "explanation": "Пояснение",
     "addOption": "Добавить вариант",
     "removeOption": "Удалить вариант",
-    "backToQuestions": "К списку вопросов"
+    "backToQuestions": "К списку вопросов",
+    "columns": {
+      "question": "Вопрос",
+      "type": "Тип",
+      "difficulty": "Сложность",
+      "actions": "Действия",
+      "viewIndicator": "Просмотр индикатора",
+      "noIndicator": "Индикатор не назначен"
+    },
+    "actions": {
+      "label": "Действия",
+      "quickView": "Быстрый просмотр",
+      "viewDetails": "Подробнее",
+      "edit": "Редактировать",
+      "copyId": "Копировать ID",
+      "openMenu": "Открыть меню"
+    },
+    "statsCards": {
+      "total": "Всего вопросов",
+      "totalMobile": "Всего",
+      "totalDesc": "Все вопросы",
+      "totalTooltip": "Общее количество вопросов оценки в системе, включая все уровни сложности и типы вопросов.",
+      "withIndicators": "С индикаторами",
+      "withIndicatorsMobile": "Связанные",
+      "withIndicatorsDesc": "Привязаны к индикаторам",
+      "withIndicatorsTooltip": "Вопросы, связанные хотя бы с одним поведенческим индикатором. Связанные вопросы участвуют в оценке компетенций.",
+      "avgTimeLimit": "Ср. время",
+      "avgTimeLimitMobile": "Ср. время",
+      "avgTimeLimitDesc": "На вопрос",
+      "avgTimeLimitTooltip": "Среднее ограничение по времени для вопросов с таймером. Вопросы без ограничения по времени не учитываются.",
+      "hardQuestions": "Сложные вопросы",
+      "hardQuestionsMobile": "Сложные",
+      "hardQuestionsDesc": "Высокая сложность",
+      "hardQuestionsTooltip": "Вопросы уровня «Продвинутый» или «Специализированный». Используются для дифференциации кандидатов с высокой квалификацией."
+    },
+    "detail": {
+      "questionDetails": "Детали вопроса",
+      "answerOptions": "Варианты ответов",
+      "points": "{count} б.",
+      "totalOptions": "Всего вариантов: {count}",
+      "scoreRange": "Диапазон баллов: {min} - {max} б.",
+      "scoringRubric": "Критерии оценки",
+      "context": "Контекст",
+      "competency": "Компетенция",
+      "behavioralIndicator": "Поведенческий индикатор",
+      "assessmentQuestion": "Вопрос оценки",
+      "currentQuestion": "Текущий вопрос",
+      "navigationPath": "Навигационный путь",
+      "navigationHelp": "Перемещайтесь по иерархии компетенций",
+      "metadata": "Метаданные",
+      "questionType": "Тип вопроса",
+      "difficultyLevel": "Уровень сложности",
+      "timeLimit": "Ограничение времени",
+      "secondsValue": "{seconds} сек",
+      "contextTags": "Контекстные теги",
+      "active": "Активный",
+      "inactive": "Неактивный",
+      "timeLimitBadge": "{seconds} с",
+      "deleteTitle": "Удалить вопрос оценки",
+      "deleteDescription": "Это действие необратимо. Вопрос оценки и все связанные данные будут безвозвратно удалены.",
+      "deleteSuccess": "Вопрос оценки успешно удалён",
+      "deleteFailed": "Не удалось удалить вопрос. Попробуйте ещё раз."
+    }
   },
   "forms": {
     "save": "Сохранить",
@@ -611,7 +995,9 @@
         "examples": "Положительные примеры",
         "counterExamples": "Контрпримеры",
         "approvalStatus": "Статус утверждения",
-        "visibility": "Видимость"
+        "visibility": "Видимость",
+        "descriptionCounterMin": "{count} / {min} симв. (мин.)",
+        "descriptionCounterRange": "{count} / {max} симв."
       },
       "placeholders": {
         "title": "например, Проактивная коммуникация",
@@ -629,11 +1015,67 @@
         "createIndicator": "Создать индикатор"
       },
       "alerts": {
-        "weightRemaining": "Осталось только {remaining} веса для этой компетенции."
+        "weightRemaining": "Осталось только {remaining} веса для этой компетенции.",
+        "weightLimitExceeded": "Сумма весов не должна превышать {max}. Текущий итог: {current}, ваш вес: {weight}, новый итог: {total}."
       },
       "help": {
         "contextScope": "Определяет применимость этого индикатора. «Универсальные» индикаторы контекстно-нейтральны и используются в Сценарии A (Паспорт компетенций).",
         "contextScopeNote": "«Универсальные» индикаторы включаются в Сценарий A (Общий обзор / Паспорт компетенций). Другие области — для целевых оценок."
+      },
+      "context": {
+        "forCompetency": "Для: {name}"
+      },
+      "weightModal": {
+        "title": "Распределение весов",
+        "descriptionRedistribute": "Перераспределите веса, чтобы освободить место для нового индикатора",
+        "descriptionAdjust": "Скорректируйте распределение весов для существующих индикаторов",
+        "summary": {
+          "validDistribution": "Корректное распределение",
+          "weightOk": "Веса в порядке",
+          "limitExceeded": "Превышен лимит весов",
+          "currentTotal": "Текущая сумма",
+          "newIndicator": "Новый индикатор",
+          "finalTotal": "Итоговая сумма",
+          "totalWeight": "Сумма весов",
+          "weightUsage": "Использование весов"
+        },
+        "quickActions": "Быстрые действия",
+        "equalDistribution": "Равное распределение",
+        "resetChanges": "Сбросить изменения",
+        "existingIndicators": "Существующие индикаторы ({count})",
+        "noIndicators": "Существующих индикаторов не найдено",
+        "modified": "Изменён",
+        "original": "Изначально",
+        "change": "Изменение",
+        "weightLabel": "Вес:",
+        "rangeHint": "Диапазон: 0.001-1.000",
+        "saving": "Сохранение...",
+        "save": "Сохранить распределение",
+        "toasts": {
+          "loadFailed": "Не удалось загрузить существующие индикаторы",
+          "weightClamped": "Вес скорректирован до {value} (допустимый диапазон: 0.001 - 1.000)",
+          "invalidNumber": "Введите корректное число",
+          "distributionInvalid": "Распределение весов некорректно. Сумма должна равняться 1.0",
+          "distributionExceeds": "Распределение весов превышает лимит. Сумма не может превышать 1.0",
+          "updateSuccess": "Веса успешно обновлены",
+          "updateFailed": "Не удалось обновить веса. Попробуйте снова."
+        }
+      }
+    },
+    "newIndicator": {
+      "title": "Новый поведенческий индикатор",
+      "description": "Опишите наблюдаемое поведение, демонстрирующее эту компетенцию.",
+      "selectCompetencyDescription": "Сначала выберите компетенцию, к которой относится индикатор."
+    },
+    "newQuestion": {
+      "title": "Создание вопроса оценки",
+      "selectIndicatorDescription": "Сначала выберите поведенческий индикатор для вашего вопроса",
+      "loading": "Загрузка...",
+      "tabs": {
+        "details": "Детали"
+      },
+      "errors": {
+        "missingParams": "Ошибка: отсутствуют обязательные параметры"
       }
     },
     "question": {
@@ -701,6 +1143,52 @@
         "MID_DESC": "Средний уровень сложности",
         "SENIOR": "Старший",
         "SENIOR_DESC": "Высокий уровень сложности"
+      },
+      "preview": {
+        "header": "Живой предпросмотр",
+        "autoUpdating": "Автообновление",
+        "questionPlaceholder": "Текст вопроса...",
+        "answerOptionsLabel": "Варианты ответов",
+        "noOptions": "Варианты ответов не настроены",
+        "optionFallback": "Вариант {index}",
+        "situationalFallback": "Ситуационный ответ...",
+        "scoringRubric": "Критерии оценки",
+        "points": "{count} б.",
+        "secondsSuffix": "{value} с",
+        "scale": {
+          "min": "Полностью не согласен",
+          "mid": "Нейтрально",
+          "max": "Полностью согласен"
+        }
+      },
+      "indicatorSelector": {
+        "title": "Выберите поведенческий индикатор",
+        "description": "Выберите поведенческий индикатор, для которого нужно создать вопрос оценки.",
+        "loading": "Загрузка индикаторов...",
+        "filters": {
+          "competencyLabel": "Фильтр по компетенции",
+          "competencyAllPlaceholder": "Все компетенции",
+          "competencyAllItem": "Все компетенции",
+          "searchLabel": "Поиск индикаторов",
+          "searchPlaceholder": "Поиск по названию или описанию..."
+        },
+        "empty": {
+          "title": "Индикаторы по вашим критериям не найдены.",
+          "hint": "Попробуйте изменить фильтры или поисковый запрос."
+        },
+        "card": {
+          "noDescription": "Описание отсутствует",
+          "level": "Уровень: {level}",
+          "type": "Тип: {type}",
+          "weight": "Вес: {weight}"
+        },
+        "buttons": {
+          "continue": "Продолжить"
+        },
+        "toasts": {
+          "loadFailed": "Не удалось загрузить индикаторы. Попробуйте снова.",
+          "selectFirst": "Выберите индикатор, чтобы продолжить."
+        }
       }
     },
     "competency": {
@@ -844,6 +1332,16 @@
     "saving": "Сохранение...",
     "settingsSaved": "Настройки успешно сохранены",
     "settingsSaveError": "Не удалось сохранить настройки",
+    "editLockedBannerTitlePublished": "Редактирование опубликованного шаблона",
+    "editLockedBannerTitleArchived": "Редактирование архивированного шаблона",
+    "editLockedBannerDescPublished": "Изменения сразу применяются к рабочему шаблону. Новые тестирования используют обновлённые настройки, а часть изменений может затронуть уже идущие тесты. Безопаснее создать новую версию.",
+    "editLockedBannerDescArchived": "Этот шаблон находится в архиве и служит исторической записью. Сохранение перезапишет эту архивную копию. Обычно лучше создать новую версию.",
+    "editLockedConfirmTitlePublished": "Перезаписать опубликованный шаблон?",
+    "editLockedConfirmTitleArchived": "Перезаписать архивный шаблон?",
+    "editLockedConfirmDescPublished": "Это изменит рабочий шаблон для всех. Вопросы, уже назначенные идущим тестам, не изменятся, но настройки оценивания и навигации — могут. Рекомендуем создать новую версию.",
+    "editLockedConfirmDescArchived": "Это перезапишет архивную историческую запись. Рекомендуем создать новую версию.",
+    "editAnyway": "Всё равно редактировать",
+    "createNewVersion": "Новая версия",
     "question": "вопр.",
     "questionsPlural": "вопросов",
     "minutes": "мин",
@@ -854,6 +1352,14 @@
     "goalConfigDesc": "Настройки, специфичные для выбранной цели оценки",
     "deselectCategory": "Снять выбор",
     "selectCategory": "Выбрать все",
+    "settingsPageTitle": "Настройки",
+    "settingsPageDesc": "Настройка всех параметров и поведения шаблона",
+    "validation": {
+      "minChars": "Минимум {min} символов",
+      "maxChars": "Максимум {max} символов",
+      "invalidOnetFormat": "Неверный формат кода O*NET SOC (ожидается XX-XXXX.XX)",
+      "invalidTeamId": "Неверный идентификатор команды"
+    },
     "hub": {
       "tabs": {
         "overview": "Обзор",
@@ -875,6 +1381,13 @@
       "actions": {
         "newVersion": "Новая версия",
         "newVersionShort": "Новая"
+      },
+      "versionDialog": {
+        "title": "Создать новую версию",
+        "description": "Будет создана новая черновая версия. Что сделать с текущей опубликованной версией?",
+        "keepPublished": "Оставить опубликованной",
+        "archiveOriginal": "Архивировать оригинал",
+        "cancel": "Отмена"
       },
       "overview": {
         "configuration": "Конфигурация",
@@ -1000,14 +1513,25 @@
       "description": "Выберите шаблон для оценки компетенций"
     },
     "errors": {
-      "invalidServerData": "Получены некорректные данные от сервера.",
-      "loadingFailed": "Произошла непредвиденная ошибка при загрузке шаблонов.",
-      "failedToLoad": "Не удалось загрузить тест",
-      "failedToLoadDescription": "Не удалось загрузить данные теста. Возможно, это временная проблема.",
-      "failedToStart": "Не удалось начать тестирование. Попробуйте ещё раз.",
-      "failedToStartNew": "Не удалось создать новую сессию. Попробуйте ещё раз.",
-      "notAuthenticated": "Не авторизован",
-      "checkingSession": "Ошибка проверки существующей сессии"
+      "databaseError": "Ошибка базы данных",
+      "databaseErrorDescription": "Произошла ошибка при работе с базой данных. Пожалуйста, попробуйте позже.",
+      "networkError": "Ошибка сети",
+      "networkErrorDescription": "Не удалось подключиться к серверу. Проверьте подключение к интернету.",
+      "templateNotFound": "Шаблон не найден",
+      "templateNotFoundDescription": "Запрашиваемый шаблон теста не найден или был удалён.",
+      "tryAgain": "Попробовать снова",
+      "signIn": "Войти",
+      "goBack": "Назад",
+      "toTemplateList": "К списку шаблонов",
+      "toHome": "На главную",
+      "contactSupport": "Если проблема сохраняется, обратитесь в поддержку",
+      "requestId": "ID запроса",
+      "errorId": "ID ошибки",
+      "devInfo": "Отладочная информация",
+      "sessionError": "Ошибка тестовой сессии",
+      "sessionErrorDescription": "Произошла ошибка при загрузке теста. Попробуйте вернуться к списку тестов и начать заново.",
+      "errorOccurred": "Произошла ошибка",
+      "failedToLoad": "Не удалось загрузить тест. Попробуйте ещё раз."
     },
     "builder": {
       "dragToReorder": "Перетащите для изменения порядка",
@@ -1028,63 +1552,21 @@
       "dropHereToAdd": "Перетащите сюда для добавления",
       "save": "Сохранить",
       "undo": "Отменить",
-      "redo": "Повторить",
-      "card": {
-        "dragToReorder": "Перетащите для изменения порядка",
-        "expandWarnings": "Показать предупреждения и настройки",
-        "expandDetails": "Показать подробности",
-        "collapseCard": "Свернуть карточку",
-        "importance": "Важность",
-        "difficulty": "Сложность",
-        "importanceTooltip": "Вес этой компетенции в общей оценке",
-        "inventoryDepth": "Глубина банка вопросов",
-        "inventoryEMH": "Л / С / Т",
-        "sampleQuestion": "Пример вопроса",
-        "noSampleAvailable": "Нет примера — сначала запустите симуляцию",
-        "indicatorPriority": "Приоритет индикаторов",
-        "optimisticApply": "Применится при следующей симуляции",
-        "removeButton": "Удалить",
-        "removeTitle": "Удалить компетенцию",
-        "removeDescription": "Компетенция <strong>{name}</strong> будет удалена из структуры. Это действие можно отменить.",
-        "removeCancel": "Отмена",
-        "removeConfirm": "Удалить",
-        "decreaseImportance": "Уменьшить важность",
-        "increaseImportance": "Увеличить важность",
-        "collapseDetail": "Свернуть подробности",
-        "expandOptions": "Развернуть параметры",
-        "importanceLevel": {
-          "low": "Низкая",
-          "medium": "Средняя",
-          "high": "Высокая",
-          "critical": "Критическая",
-          "lowTooltip": "0.5x вес — меньше вопросов",
-          "mediumTooltip": "1.0x вес — стандартное количество вопросов",
-          "highTooltip": "1.5x вес — больше вопросов",
-          "criticalTooltip": "2.0x вес — максимальное количество вопросов"
-        },
-        "difficultyOptions": {
-          "foundational": "Базовый",
-          "intermediate": "Средний",
-          "advanced": "Продвинутый",
-          "expert": "Эксперт",
-          "foundationalShort": "Б",
-          "intermediateShort": "С",
-          "advancedShort": "П",
-          "expertShort": "Э"
-        },
-        "warningsCount": "{count, plural, one {# проблема} few {# проблемы} many {# проблем} other {# проблем}}",
-        "availableOf": "{available}/{required}в",
-        "questionsShort": "{count}в",
-        "healthCritical": "Нет доступных вопросов в банке",
-        "healthModerate": "Ограниченный банк вопросов",
-        "lowQuestions": "Доступно только {count} вопросов",
-        "weightImbalance": "Эта компетенция занимает более 50% общего веса"
-      }
+      "redo": "Повторить"
     },
     "start": {
-      "errors": {
-        "failedToLoad": "Не удалось загрузить тест",
-        "failedToLoadDescription": "Не удалось загрузить данные теста. Возможно, это временная проблема."
+      "title": "Начать тестирование",
+      "description": "Начните оценку компетенций.",
+      "checking": "Проверка готовности...",
+      "notAvailable": "Тест недоступен",
+      "begin": "Начать тестирование",
+      "progressSaved": "Ваш прогресс сохраняется автоматически. Вы можете приостановить и продолжить в любое время.",
+      "failedToStart": "Не удалось начать тестирование",
+      "labels": {
+        "time": "Время",
+        "questions": "Вопросов",
+        "competencies": "Компетенций",
+        "min": "мин"
       }
     },
     "header": {
@@ -1199,19 +1681,11 @@
         "failedToStartNewSession": "Не удалось начать новую сессию"
       }
     },
-    "start": {
-      "title": "Начать тестирование",
-      "description": "Начните оценку компетенций.",
-      "checking": "Проверка готовности...",
-      "notAvailable": "Тест недоступен",
-      "begin": "Начать тестирование",
-      "progressSaved": "Ваш прогресс сохраняется автоматически. Вы можете приостановить и продолжить в любое время.",
-      "failedToStart": "Не удалось начать тестирование",
-      "labels": {
-        "time": "Время",
-        "questions": "Вопросов",
-        "competencies": "Компетенций",
-        "min": "мин"
+    "catalog": {
+      "tabs": {
+        "available": "Мои шаблоны",
+        "shared": "Доступные мне",
+        "sharedCount": "{count} доступно"
       }
     },
     "filters": {
@@ -1255,27 +1729,6 @@
       "defaultHelp": "Попробуйте обновить страницу или обратитесь к администратору.",
       "refreshPage": "Обновить страницу",
       "signIn": "Войти"
-    },
-    "errors": {
-      "databaseError": "Ошибка базы данных",
-      "databaseErrorDescription": "Произошла ошибка при работе с базой данных. Пожалуйста, попробуйте позже.",
-      "networkError": "Ошибка сети",
-      "networkErrorDescription": "Не удалось подключиться к серверу. Проверьте подключение к интернету.",
-      "templateNotFound": "Шаблон не найден",
-      "templateNotFoundDescription": "Запрашиваемый шаблон теста не найден или был удалён.",
-      "tryAgain": "Попробовать снова",
-      "signIn": "Войти",
-      "goBack": "Назад",
-      "toTemplateList": "К списку шаблонов",
-      "toHome": "На главную",
-      "contactSupport": "Если проблема сохраняется, обратитесь в поддержку",
-      "requestId": "ID запроса",
-      "errorId": "ID ошибки",
-      "devInfo": "Отладочная информация",
-      "sessionError": "Ошибка тестовой сессии",
-      "sessionErrorDescription": "Произошла ошибка при загрузке теста. Попробуйте вернуться к списку тестов и начать заново.",
-      "errorOccurred": "Произошла ошибка",
-      "failedToLoad": "Не удалось загрузить тест. Попробуйте ещё раз."
     },
     "newForm": {
       "steps": {
@@ -1413,10 +1866,24 @@
         "developing": "Развивается",
         "strength": "Сильная"
       },
+      "proficiencyLevel": {
+        "expert": "Эксперт",
+        "advanced": "Продвинутый",
+        "proficient": "Уверенный",
+        "developing": "Развивающийся",
+        "foundational": "Базовый"
+      },
+      "confidenceInterval": "95% ДИ: {lower}% – {upper}%",
+      "insufficientEvidence": "Недостаточно данных",
+      "insufficientEvidenceTooltip": "По этой компетенции мало данных. Результаты следует интерпретировать с осторожностью.",
+      "lowConfidenceCount": "{count} {count, plural, =1 {компетенция имеет} =2 {компетенции имеют} =3 {компетенции имеют} =4 {компетенции имеют} other {компетенций имеют}} ограниченные данные",
       "showMore": "Показать ещё {count}",
       "showLess": "Скрыть",
       "questionLoadError": "Не удалось загрузить детали вопроса",
       "retry": "Повторить",
+      "tooltips": {
+        "competencyProfile": "Детальный обзор всех оцененных компетенций с уровнями владения и разбивкой поведенческих индикаторов."
+      },
       "overview": {
         "profileOverview": "Обзор профиля",
         "assessmentResults": "Результаты оценки",
@@ -1436,7 +1903,125 @@
         "keepDevelopingSkills": "Продолжайте развивать навыки.",
         "coverage": "Покрытие",
         "mapped": "{mapped}/{total} сопоставлено",
-        "developmentNote": "Регулярная переоценка помогает отслеживать рост."
+        "developmentNote": "Регулярная переоценка помогает отслеживать рост.",
+        "metrics": {
+          "assessed": "Оценено",
+          "competencies": "компетенций",
+          "strengths": "Эксперт / Продвинутый",
+          "toDevelop": "К развитию"
+        },
+        "competencyRadar": "Радар компетенций",
+        "tabs": {
+          "personality": "Личность",
+          "strengths": "Сильные стороны",
+          "development": "Развитие",
+          "allCompetencies": "Все компетенции",
+          "trend": "Тренд"
+        },
+        "panels": {
+          "personalityCompetencies": "Личность и компетенции",
+          "signatureStrengths": "Сильные стороны и рост",
+          "areasToDevelop": "Области для развития",
+          "indicatorBreakdown": "Разбивка по индикаторам",
+          "growthTrajectory": "Траектория роста"
+        },
+        "innerTabs": {
+          "bigFive": "Большая пятёрка",
+          "breakdown": "Разбивка"
+        },
+        "insights": {
+          "topTraits": "Главные черты: {traits}",
+          "expertAdvanced": "{count} компетенций уровня Эксперт/Продвинутый",
+          "confidence": "Достоверность: {level} ({percentage}%)",
+          "confidenceHigh": "Высокая",
+          "confidenceModerate": "Умеренная"
+        },
+        "radar": {
+          "profile": "Профиль",
+          "average": "Среднее",
+          "score": "Балл",
+          "baseline": "Базовый"
+        },
+        "contributingCompetencies": "Влияющие компетенции",
+        "development": {
+          "suggestion": {
+            "developing": "Сосредоточьтесь на углублении понимания через практику и обратную связь.",
+            "foundational": "Начните с базовых концепций и обратитесь к наставнику для ускорения роста."
+          },
+          "encouragement": "Области развития указывают на возможности для роста. Сосредоточьтесь на одной области за раз для лучших результатов."
+        },
+        "tooltips": {
+          "assessed": "Общее количество компетенций, оценённых в этом тестировании.",
+          "strengthCount": "Компетенции на уровне «Эксперт» или «Продвинутый».",
+          "developCount": "Компетенции на уровне «Развивающийся» или «Базовый» — ваши точки роста.",
+          "competencyRadar": "Визуальный обзор баллов по всем компетенциям. Каждая ось — одна компетенция.",
+          "bigFiveProfile": "Модель личности «Большая пятёрка» (OCEAN) проецирует ваши компетенции на пять ключевых измерений: Открытость, Добросовестность, Экстраверсия, Доброжелательность и Эмоциональная стабильность.",
+          "traitBreakdown": "Каждая черта оценивается от 0 до 100% на основе того, как результаты ваших компетенций соотносятся с измерениями «Большой пятёрки» через классификации O*NET.",
+          "competencyMapping": "Показывает, какие компетенции влияют на каждую черту «Большой пятёрки». Чем выше покрытие, тем надёжнее проекция личности.",
+          "signatureStrengths": "Ваши лучшие компетенции и области для роста. Переключайте вкладки, чтобы увидеть сильные стороны или направления развития.",
+          "areasToDevlop": "Компетенции на уровне «Развивающийся» или «Базовый» — области для профессионального роста.",
+          "competencyProfile": "Детальный обзор всех оцененных компетенций с уровнями владения и разбивкой поведенческих индикаторов.",
+          "indicatorBreakdown": "Тепловая карта баллов по индикаторам внутри каждой компетенции. Более тёмные ячейки указывают на более высокие результаты.",
+          "growthTrajectory": "Тренд ваших баллов за несколько попыток оценки. Требуется как минимум 2 завершённые оценки.",
+          "personalityCompetencies": "Радарная визуализация черт личности и баллов по компетенциям. Переключайте вкладки для сравнения проекций «Большой пятёрки», покрытия компетенций или разбивки по чертам.",
+          "profilePattern": "Ваши компетенции, сгруппированные по уровням владения — от «Ключевых сильных сторон» до «Критических пробелов». Помогает быстро оценить общий профиль."
+        },
+        "betterThan": "Лучше, чем <bold>{percentage}%</bold> участников",
+        "consistencyGood": "Согласованные ответы",
+        "consistencyWarning": "Возможные несоответствия в ответах",
+        "consistencyScore": "Согласованность ответов: {score}%",
+        "consistencyFlags": "Замечания: {flags}",
+        "indicatorBreakdown": "Разбивка по индикаторам",
+        "indicatorBreakdownDescription": "Тепловая карта баллов по индикаторам компетенций",
+        "target": "Цель",
+        "traits": {
+          "openness": {
+            "name": "Открытость",
+            "high": "Вы проявляете сильную креативность, любознательность и открытость к новому опыту и идеям.",
+            "medium": "У вас сбалансированный подход к новому опыту, сочетающий креативность с практичностью.",
+            "low": "Вы предпочитаете устоявшиеся рутины и практические, конкретные подходы к решению проблем."
+          },
+          "conscientiousness": {
+            "name": "Добросовестность",
+            "high": "Вы демонстрируете отличную организованность, надёжность и целеустремлённость.",
+            "medium": "Вы сочетаете структуру с гибкостью, достигая целей и адаптируясь к изменениям.",
+            "low": "Вы предпочитаете спонтанность и гибкость жёсткому планированию и структуре."
+          },
+          "extraversion": {
+            "name": "Экстраверсия",
+            "high": "Вы преуспеваете в социальных ситуациях, черпая энергию из общения с окружающими.",
+            "medium": "Вы комфортно чувствуете себя как в компании, так и наедине с собой.",
+            "low": "Вы предпочитаете вдумчивое общение один на один и цените личное время."
+          },
+          "agreeableness": {
+            "name": "Доброжелательность",
+            "high": "Вы ставите во главу угла гармонию, сотрудничество и заботу о других.",
+            "medium": "Вы сочетаете эмпатию с настойчивостью, адаптируя свой подход по мере необходимости.",
+            "low": "Вы цените прямоту и объективность, отдавая приоритет результатам над социальной гармонией."
+          },
+          "emotionalStability": {
+            "name": "Эмоциональная стабильность",
+            "high": "Вы демонстрируете отличную устойчивость, спокойствие и управление стрессом.",
+            "medium": "Вы справляетесь с большинством ситуаций спокойно, признавая эмоциональные реакции.",
+            "low": "Вы глубоко переживаете эмоции и можете быть более чувствительны к стрессу."
+          }
+        },
+        "profilePattern": {
+          "title": "Профиль компетенций",
+          "description": "Ваши компетенции, сгруппированные по уровню владения на основе результатов оценки.",
+          "categories": {
+            "SIGNATURE_STRENGTH": "Ключевая сила",
+            "STRENGTH": "Сильная сторона",
+            "AVERAGE": "Средний уровень",
+            "DEVELOPING": "В развитии",
+            "CRITICAL_GAP": "Критический пробел"
+          }
+        },
+        "growthTrajectory": {
+          "title": "Прогресс по времени",
+          "description": "Ваше улучшение по попыткам прохождения оценки",
+          "emptyState": "Пройдите эту оценку повторно, чтобы отслеживать свой прогресс."
+        }
       }
     },
     "heroCard": {
@@ -1496,7 +2081,8 @@
         "form": {
           "tabs": {
             "email": "По Email",
-            "systemUser": "Пользователь"
+            "systemUser": "Пользователь",
+            "team": "Команда"
           },
           "emailPlaceholder": "Введите email адрес",
           "userPlaceholder": "Поиск пользователей...",
@@ -1505,6 +2091,12 @@
           "suggestions": "Рекомендуемые",
           "searchHint": "Введите минимум 2 символа для поиска",
           "noUsersFound": "Пользователи не найдены",
+          "teamPlaceholder": "Выберите команду...",
+          "teamLoading": "Загрузка команд...",
+          "noTeams": "Нет доступных команд",
+          "teamMemberCount": "{count} участн.",
+          "selectedTeam": "Выбрана команда: {name}",
+          "teamHint": "Участники выбранной команды получат доступ к этому шаблону.",
           "validation": {
             "invalidEmail": "Введите корректный email"
           }
@@ -1582,6 +2174,8 @@
       "toast": {
         "sharedWith": "Доступ предоставлен {email}",
         "shareFailed": "Не удалось предоставить доступ",
+        "sharedWithTeam": "Доступ предоставлен команде {name}",
+        "shareTeamFailed": "Не удалось предоставить доступ команде",
         "permissionUpdated": "Разрешение обновлено",
         "updateFailed": "Не удалось обновить разрешение",
         "accessRemoved": "Доступ удалён для {name}",
@@ -1592,23 +2186,6 @@
         "linkRevokeFailed": "Не удалось отозвать ссылку",
         "visibilityFailed": "Не удалось изменить видимость"
       }
-    },
-    "sessionDelete": {
-      "deleteSession": "Удалить сессию",
-      "deleteSessionTitle": "Удалить тестовую сессию?",
-      "deleteSessionDescription": "Тестовая сессия будет безвозвратно удалена вместе с результатом и всеми ответами.",
-      "bulkDeleteTitle": "Удалить {count} сессий?",
-      "bulkDeleteDescription": "Будет безвозвратно удалено {count} тестовых сессий, включая все результаты и ответы.",
-      "deleting": "Удаление...",
-      "sessionDeleted": "Сессия удалена",
-      "sessionDeletedDescription": "Тестовая сессия успешно удалена.",
-      "sessionsDeleted": "Удалено сессий: {count}",
-      "sessionsDeletedDescription": "Успешно удалено сессий: {deleted}.",
-      "deleteError": "Ошибка удаления",
-      "deleteErrorDescription": "Не удалось удалить сессию. Попробуйте ещё раз.",
-      "bulkDeleteErrorDescription": "Не удалось удалить сессии. Попробуйте ещё раз.",
-      "deleteSelected": "Удалить выбранные ({count})",
-      "selected": "Выбрано: {count}"
     }
   },
   "candidate": {
@@ -1677,7 +2254,556 @@
     "detailed": "Детальный",
     "recommended": "Рекомендовано",
     "resultNotFound": "Результат теста не найден",
-    "resultFor": "Результат теста - {name}"
+    "resultFor": "Результат теста - {name}",
+    "jobFit": {
+      "gapAnalysis": "Анализ разрывов",
+      "gapAnalysisDescription": "Ваши баллы в сравнении с требованиями должности ({passingScore}%)",
+      "keyInsights": "Ключевые выводы",
+      "jobRequirements": "Требования должности",
+      "qualified": "Квалифицирован",
+      "qualifiedMessage": "Вы соответствуете требованиям бенчмарка.",
+      "excelIn": "Сильные стороны: {areas}.",
+      "belowRequirements": "Ниже требований",
+      "belowRequirementsMessage": "Некоторые компетенции требуют развития.",
+      "focusOn": "Обратите внимание на: {areas}.",
+      "strengths": "Сильные стороны ({count})",
+      "gaps": "Пробелы ({count})",
+      "betterThan": "Лучше, чем <bold>{percentage}%</bold> кандидатов",
+      "competencyMap": "Карта компетенций",
+      "visualProfile": "Визуальный профиль",
+      "indicatorBreakdown": "Разбивка по индикаторам",
+      "indicatorHeatmapDescription": "Тепловая карта баллов по индикаторам",
+      "progressOverTime": "Прогресс по времени",
+      "improvementAcrossAttempts": "Ваше улучшение по попыткам",
+      "statusQualified": "Квалифицирован",
+      "statusBelowRequirements": "Ниже требований",
+      "onetLabel": "O*NET: {code}",
+      "tabOverview": "Обзор",
+      "tabGapAnalysis": "Анализ разрывов",
+      "tabCompetencies": "Компетенции",
+      "tabDetails": "Детали",
+      "insightStrongest": "Сильнейшая: {name} ({score}%)",
+      "insightLargestGap": "Наибольший пробел: {name} ({score}%)",
+      "insightConsistency": "Согласованность: {value} ({level})",
+      "consistencyReliable": "надёжная",
+      "consistencyModerate": "умеренная",
+      "metricExceeds": "Превышает",
+      "metricMeets": "Соответствует",
+      "metricBelow": "Ниже",
+      "panelGapAnalysis": "Анализ разрывов",
+      "panelGapAnalysisSubtitle": "Баллы в сравнении с бенчмарком по компетенциям",
+      "legendBenchmark": "Бенчмарк",
+      "legendExceeds": "Превышает",
+      "legendMeets": "Соответствует",
+      "legendBelow": "Ниже",
+      "panelCompetencyCards": "Карточки компетенций",
+      "panelRadarChart": "Радар — Кандидат vs Бенчмарк",
+      "tooltips": {
+        "exceeds": "Компетенции, по которым ваш балл превышает требования должности — ваши сильнейшие квалификации для этой роли.",
+        "meets": "Компетенции, по которым ваш балл соответствует бенчмарку, но находится в пределах 15% выше него — хорошо, но можно усилить.",
+        "below": "Компетенции с баллом ниже бенчмарка должности — пробелы, которые могут потребовать развития или уточнения на собеседовании.",
+        "gapAnalysis": "Сравнивает ваши баллы по компетенциям с требованиями должности. Зелёные столбцы соответствуют или превышают требования; янтарные — ниже.",
+        "competencyCards": "Сводные карточки по каждой компетенции с вашим баллом, целевым бенчмарком и статусом прохождения.",
+        "radarChart": "Наложение ваших баллов на требования бенчмарка. Большая площадь покрытия указывает на лучшее соответствие должности.",
+        "trendAnalysis": "Динамика баллов за несколько попыток этой оценки. Показывает улучшение или регресс во времени.",
+        "competencyDetails": "Разворачиваемая таблица с детальной разбивкой по каждой компетенции, включая баллы индикаторов и доверительные интервалы."
+      }
+    },
+    "teamFit": {
+      "title": "Профиль командной совместимости",
+      "subtitle": "Ваши навыки в сравнении с насыщенностью команды",
+      "insights": "Командные инсайты",
+      "teamAnalysis": "Анализ команды",
+      "strongFit": "Высокая совместимость",
+      "strongFitDescription": "Ваши навыки отлично дополняют команду.",
+      "alignmentNeeded": "Требуется адаптация",
+      "alignmentNeededDescription": "Некоторые навыки нуждаются в развитии для командной совместимости.",
+      "youBring": "Ваш вклад",
+      "growthAreas": "Зоны роста",
+      "collaborationNote": "Командная совместимость показывает, как ваши навыки дополняют группу.",
+      "personality": "Профиль личности",
+      "personalityDescription": "Большая пятёрка для командной динамики",
+      "needMoreCompetencies": "Нужно 3+ компетенций для радара.",
+      "high": "Высокий",
+      "moderate": "Умеренный",
+      "low": "Низкий",
+      "multiplier": {
+        "boosted": "Балл повышен на {percent}%",
+        "boostedDescription": "Ваши навыки привносят уникальную ценность, которой сейчас не хватает команде ({diversity}% разнообразия).",
+        "adjusted": "Балл скорректирован на -{percent}%",
+        "adjustedDescription": "Значительное пересечение навыков с существующими членами команды ({saturation}% насыщенности)."
+      },
+      "metrics": {
+        "title": "Метрики командной совместимости",
+        "diversity": "Разнообразие",
+        "saturation": "Насыщенность",
+        "multiplier": "Множитель",
+        "diverseSkills": "Уникальные навыки",
+        "saturated": "Насыщенные",
+        "gapsFilled": "Закрытые пробелы",
+        "personality": "Личность",
+        "tooltips": {
+          "diversity": "Процент ваших навыков, уникальных для команды. Более высокое разнообразие означает, что вы привносите способности, которых сейчас не хватает команде.",
+          "saturation": "Процент ваших навыков, уже хорошо представленных у существующих членов команды. Высокая насыщенность означает значительное пересечение.",
+          "multiplier": "Коэффициент корректировки балла на основе уникальности ваших навыков. Выше 1.0x — ваши навыки усиливаются за закрытие пробелов; ниже 1.0x — пересечение снижает эффективный вклад.",
+          "diverseSkills": "Количество компетенций, по которым ваш балл выше порога насыщенности команды — навыки, где вы добавляете новую ценность.",
+          "saturated": "Количество компетенций, уже хорошо представленных в команде. Эти навыки пересекаются с существующими членами.",
+          "gapsFilled": "Количество командных пробелов в навыках, которые ваш профиль помогает закрыть. Это области, где команда сейчас недоукомплектована.",
+          "personality": "Балл совместимости личности по «Большой пятёрке» с командой. Более высокий процент указывает на лучшую межличностную динамику и коммуникативное соответствие."
+        }
+      },
+      "heatmap": {
+        "title": "Разбивка по индикаторам",
+        "description": "Результативность по поведенческим индикаторам внутри каждой компетенции",
+        "score": "Балл",
+        "questions": "{count} вопросов",
+        "noData": "Данные по индикаторам недоступны"
+      },
+      "radar": {
+        "title": "Анализ командной совместимости",
+        "you": "Вы",
+        "team": "Команда",
+        "gapsYouFill": "Пробелы, которые вы закрываете",
+        "compatibility": "Совместимость",
+        "gapsFilled": "Закрытые пробелы",
+        "strengths": "Сильные стороны",
+        "growthAreas": "Зоны роста для командной совместимости",
+        "leader": "Лидер",
+        "leaderDescription": "Высокие баллы по лидерским компетенциям",
+        "specialist": "Специалист",
+        "specialistDescription": "Глубокая экспертиза в конкретных областях",
+        "generalist": "Универсал",
+        "generalistDescription": "Сбалансированные навыки по всем областям",
+        "collaborator": "Командный игрок",
+        "collaboratorDescription": "Сильные межличностные навыки",
+        "innovator": "Инноватор",
+        "innovatorDescription": "Высокий уровень креативности и открытости",
+        "baseline": "Базовый уровень"
+      },
+      "statusCompatible": "Совместим",
+      "statusNeedsAdaptation": "Требуется адаптация",
+      "teamLabel": "Команда: {name}",
+      "synergyLabel": "{value}x синергия",
+      "tabOverview": "Обзор",
+      "tabSaturation": "Насыщенность",
+      "tabComparison": "Сравнение",
+      "tabCompetencies": "Компетенции",
+      "tabOnboarding": "Адаптация",
+      "insightGapsFilled": "Закрывает {count} командных пробелов",
+      "insightSaturatedOverlap": "{count} насыщенных пересечений",
+      "insightDiversityRatio": "Коэффициент разнообразия: {value}",
+      "sectionTeamSaturation": "Насыщенность команды",
+      "sectionYourContribution": "Ваш вклад",
+      "sectionPersonalityFit": "Совместимость личности",
+      "sectionIndicatorBreakdown": "Разбивка по индикаторам",
+      "whatYouBring": "Что вы привносите",
+      "metricGapsFilled": "Закрытые пробелы",
+      "metricSaturated": "Насыщенные",
+      "metricDiversityRatio": "Коэффициент разнообразия",
+      "tooltips": {
+        "gapsFilled": "Количество командных пробелов в навыках, которые закрывает этот кандидат. Больше — больше уникального вклада в команду.",
+        "saturated": "Навыки, уже хорошо представленные в команде. Высокое пересечение означает меньшую дополнительную ценность.",
+        "diversityRatio": "Соотношение уникальных навыков к пересекающимся. Более высокий коэффициент указывает на более комплементарное соответствие.",
+        "teamSaturation": "Радар сравнения ваших баллов компетенций с текущим покрытием команды. Области, где вы превышаете линию команды, представляют ваш уникальный вклад.",
+        "yourContribution": "Обзор того, как ваши навыки дополняют команду — закрытие пробелов, совместимость, сильные стороны и зоны развития.",
+        "gapsYouFill": "Навыки, по которым команда недоукомплектована, а ваш балл закрывает пробел. +% показывает, насколько вы превышаете текущее покрытие команды.",
+        "compatibility": "Общий балл совместимости, сочетающий покрытие пробелов, пересечение навыков и относительную силу. Чем выше, тем лучше.",
+        "statGapsFilled": "Количество командных пробелов, которые закрывает ваш профиль — компетенции, по которым ваш балл выше порога насыщенности.",
+        "statStrengths": "Количество компетенций с баллом 70% и выше — ваши сильнейшие области относительно команды.",
+        "whatYouBring": "Ваши компетенции с высшими баллами (70%+), которые непосредственно усиливают команду. Это ваш ключевой вклад.",
+        "growthAreas": "Компетенции, по которым и ваш балл, и покрытие команды низкие. Развитие этих навыков принесёт пользу и вам, и команде.",
+        "personalityFit": "Измерения личности «Большой пятёрки» в виде кольцевых индикаторов. Показывает, как ваш профиль личности дополняет командную динамику.",
+        "indicatorBreakdown": "Тепловая карта баллов по индикаторам внутри каждой компетенции. Определяет конкретные поведенческие сильные стороны и области развития.",
+        "onboarding": "Рекомендации по адаптации на основе вашего профиля личности, пробелов в навыках и командной динамики."
+      }
+    },
+    "shared": {
+      "hero": {
+        "scoreTooltip": "Общий балл оценки на основе всех компетенций.",
+        "percentileTooltip": "Ваш рейтинг по сравнению с другими участниками, прошедшими это тестирование.",
+        "statusTooltip": "Результат оценки на основе порога прохождения, установленного для этого теста.",
+        "dateTooltip": "Дата и время завершения оценки.",
+        "durationTooltip": "Общее время, затраченное на прохождение оценки.",
+        "questionsTooltip": "Количество отвеченных вопросов из общего числа.",
+        "questionsLabel": "{answered}/{total} вопросов",
+        "percentile": "{value}-й перцентиль",
+        "linkCopied": "Ссылка скопирована в буфер обмена",
+        "linkCopiedShort": "Ссылка скопирована",
+        "download": "Скачать",
+        "downloadPdf": "Скачать PDF",
+        "share": "Поделиться",
+        "shareResults": "Поделиться результатами"
+      },
+      "heatmap": {
+        "title": "Разбивка по индикаторам",
+        "description": "Результативность по поведенческим индикаторам внутри каждой компетенции",
+        "score": "Балл",
+        "questions": "{count} вопросов",
+        "noData": "Данные по индикаторам недоступны"
+      },
+      "detailTable": {
+        "title": "Детальная разбивка",
+        "subtitle": "Полная таблица компетенций",
+        "rowCount": "{count} строк",
+        "colCompetency": "Компетенция",
+        "colScore": "Балл",
+        "colBenchmark": "Бенчмарк",
+        "colGap": "Разрыв",
+        "colCI": "ДИ 95%",
+        "colAlpha": "α Кронбаха",
+        "colPercentile": "Перцентиль",
+        "percentileSuffix": "{value}-й",
+        "tipCompetency": "Оцениваемая область навыков. Нажмите для сортировки по алфавиту.",
+        "tipScore": "Ваш процентный балл по данной компетенции на основе правильных ответов.",
+        "tipBenchmark": "Целевой балл для этой компетенции — задаётся профилем должности или бенчмарком O*NET.",
+        "tipGap": "Разница между вашим баллом и бенчмарком. Положительное значение — превышение; отрицательное — пробел.",
+        "tipCI": "95% доверительный интервал — диапазон, в котором, вероятно, находится ваш истинный балл.",
+        "tipAlpha": "Альфа Кронбаха измеряет внутреннюю согласованность. Значения ≥ 0,70 указывают на надёжное измерение.",
+        "tipPercentile": "Ваш рейтинг среди других кандидатов. 75-й означает, что вы набрали больше, чем 75% участников.",
+        "showMoreRows": "Показать ещё {count} строк",
+        "showLessRows": "Свернуть"
+      },
+      "metricCards": {
+        "ariaLabel": "Ключевые метрики",
+        "defaultSublabel": "компетенций"
+      },
+      "competencyCards": {
+        "ariaLabel": "Баллы по компетенциям",
+        "statusExceeds": "ВЫШЕ",
+        "statusMeets": "НОРМА",
+        "statusBelow": "НИЖЕ",
+        "benchLabel": "бенчмарк {value}",
+        "attemptCount": "{count} попыток",
+        "showMore": "Показать ещё {count}",
+        "showLess": "Свернуть",
+        "tipScore": "Ваш процентный балл по данной компетенции",
+        "tipGap": "Разница между вашим баллом и бенчмарком",
+        "tipBench": "Целевой балл, заданный профилем должности или бенчмарком O*NET",
+        "tipBar": "Балл {score}% при бенчмарке {bench}%",
+        "tipTrend": "Динамика баллов за предыдущие попытки",
+        "tipStatus": {
+          "exceeds": "Ваш балл превышает бенчмарк — сильная квалификация",
+          "meets": "Ваш балл соответствует бенчмарку — в допустимом диапазоне",
+          "below": "Ваш балл ниже бенчмарка — может потребовать развития"
+        },
+        "filterAriaLabel": "Фильтр по статусу",
+        "filterClear": "Сбросить",
+        "countTotal": "{count} компетенций",
+        "countFiltered": "{shown} из {total}"
+      },
+      "gapChart": {
+        "showMore": "Показать ещё {count}",
+        "showLess": "Свернуть"
+      }
+    },
+    "comparison": {
+      "title": "Сравнение кандидатов",
+      "subtitle": "Параллельный анализ командной совместимости для {count} кандидатов",
+      "teamContext": "Команда: {teamName}",
+      "targetRole": "Целевая роль: {role}",
+      "teamSize": "{count} членов команды",
+      "ranking": "Рейтинг",
+      "overallFit": "Общая совместимость",
+      "diversityContribution": "Вклад в разнообразие",
+      "personalityFit": "Совместимость личности",
+      "competencyBreakdown": "Разбивка по компетенциям",
+      "competencyBreakdownDescription": "Сравнение баллов по всем оцениваемым компетенциям",
+      "gapCoverage": "Анализ покрытия пробелов",
+      "gapCoverageDescription": "Какие кандидаты могут закрыть пробелы в навыках команды",
+      "complementarity": "Лучшие пары для найма",
+      "complementarityDescription": "Пары кандидатов, которые вместе покрывают наибольшее количество пробелов",
+      "complementarityScore": "{score}% покрытия пробелов",
+      "gapsCovered": "{covered} из {total} пробелов покрыто",
+      "noGaps": "Значительных пробелов в команде не обнаружено",
+      "bestForGap": "Лучший",
+      "fillsGap": "Закрывает пробел",
+      "cannotFill": "Недостаточно",
+      "personalityProfiles": "Профили личности",
+      "noCandidates": "Выберите минимум 2 кандидатов для сравнения",
+      "recommended": "Рекомендован",
+      "notRecommended": "Не рекомендован",
+      "rank": "#{rank}",
+      "candidate": "Кандидат {index}",
+      "teamSaturation": "Команда",
+      "competency": "Компетенция",
+      "teamGap": "Пробел",
+      "best": "Лучший",
+      "score": "Балл",
+      "noData": "Нет данных для сравнения",
+      "back": "Назад к результатам",
+      "compareSelected": "Сравнить выбранных",
+      "selectedCount": "{count} выбрано",
+      "clearSelection": "Очистить",
+      "maxSelections": "Максимум 5 кандидатов для сравнения",
+      "selectToCompare": "Выберите 2-5 завершённых кандидатов для сравнения",
+      "resolving": "Загрузка сравнения...",
+      "teamUnavailable": "Данные профиля команды недоступны. Сравнение показывает баллы кандидатов без анализа пробелов команды.",
+      "jobFit": {
+        "subtitle": "Параллельное сравнение профпригодности для {count} кандидатов",
+        "teamSaturation": "Бенчмарк",
+        "teamGap": "Ниже бенчмарка",
+        "gapCoverage": "Анализ отклонений от бенчмарка",
+        "gapCoverageDescription": "Какие кандидаты соответствуют бенчмарку по каждой компетенции",
+        "competencyBreakdownDescription": "Сравнение баллов с бенчмарками профессий O*NET",
+        "overallFit": "Общий балл"
+      },
+      "responseQuality": "Качество ответов",
+      "responseQualityHigh": "Высокое",
+      "responseQualityMedium": "Среднее",
+      "responseQualityLow": "Низкое"
+    },
+    "charts": {
+      "noData": "Нет данных для отображения",
+      "insufficientData": "Недостаточно данных для диаграммы (минимум {min} компетенции)",
+      "radarAriaLabel": "Радарная диаграмма с {count} компетенциями. Диапазон оценок: от {min}% до {max}%. Средний балл: {avg}%.",
+      "scoreName": "Оценка",
+      "tooltipScore": "Результат:",
+      "tooltipCI": "95% ДИ:",
+      "tooltipBenchmark": "Эталон:",
+      "tooltipGap": "До цели: +{gap}%",
+      "srDetailedResults": "Детальные результаты по компетенциям:",
+      "srPassed": "(пройдено)",
+      "srNotPassed": "(не пройдено)"
+    },
+    "trends": {
+      "noHistoricalData": "Нет исторических данных",
+      "needMoreAttempts": "Для визуализации тренда необходимо минимум 2 попытки",
+      "progressOverTime": "Прогресс по времени",
+      "attempts": "{count, plural, one {# попытка} few {# попытки} many {# попыток} other {# попыток}}",
+      "overallChange": "Общее изменение",
+      "selectCompetencies": "Выберите компетенции для сравнения",
+      "noHistoricalDataYet": "Исторических данных пока нет.",
+      "srHistoricalData": "Исторические данные по баллам:",
+      "srPassed": "(пройдено)",
+      "srNotPassed": "(не пройдено)",
+      "trendAriaLabel": "График тренда баллов с {count} точками данных. Балл изменился с {from}% до {to}%."
+    },
+    "actions": {
+      "exportPdf": "Экспорт PDF",
+      "copyLink": "Копировать ссылку",
+      "linkCopied": "Ссылка скопирована в буфер обмена",
+      "back": "Назад",
+      "retake": "Пересдать",
+      "downloadProfile": "Скачать профиль",
+      "downloadReport": "Скачать отчёт",
+      "retakeTest": "Пересдать тест",
+      "saveToProfile": "Сохранить в профиль",
+      "share": "Поделиться",
+      "backToTests": "К списку тестов",
+      "teamDashboard": "Панель команды",
+      "shareWithTeam": "Поделиться с командой",
+      "managerSummary": "Сводка",
+      "resultSaved": "Результат сохранён в профиль",
+      "actionFailed": "Действие не удалось. Попробуйте ещё раз.",
+      "exportDialog": {
+        "title": "Экспорт PDF",
+        "format": "Формат",
+        "formatManagerSummary": "Краткая сводка (1 стр.)",
+        "formatFullReport": "Полный отчет",
+        "formatCandidateBrief": "Отчет кандидата",
+        "generate": "Создать PDF",
+        "generating": "Создание...",
+        "downloading": "Загрузка...",
+        "complete": "Загрузка завершена!",
+        "error": "Ошибка экспорта",
+        "retry": "Повторить",
+        "cancel": "Отмена"
+      }
+    },
+    "nextSteps": {
+      "interviewGuide": {
+        "title": "Руководство для собеседования",
+        "description": "Поведенческие вопросы для {count} компетенций с пробелами",
+        "print": "Печать",
+        "gapSeverity": "Разрыв: {score}% против требуемых {threshold}%",
+        "suggestedQuestions": "Рекомендуемые вопросы для интервью",
+        "starNote": "Используйте формат STAR: спросите о Ситуации, Задаче, Действии и Результате.",
+        "severityHigh": "Критический",
+        "severityMedium": "Умеренный",
+        "severityLow": "Незначительный",
+        "questions": {
+          "leadership": {
+            "q1": "Расскажите о ситуации, когда вам нужно было руководить командой в сложном проекте. Каков был ваш подход и каков результат?",
+            "q2": "Опишите случай, когда вам пришлось принять трудное решение, затрагивающее вашу команду. Как вы справились?",
+            "q3": "Приведите пример, когда вы наставляли или развивали кого-то в своей команде. Какие стратегии вы использовали?"
+          },
+          "communication": {
+            "q1": "Расскажите о случае, когда вам нужно было объяснить сложную идею человеку без технической подготовки. Как вы убедились, что он понял?",
+            "q2": "Опишите ситуацию, когда недопонимание привело к проблеме. Как вы её решили?",
+            "q3": "Приведите пример, когда вам нужно было дать сложную обратную связь. Как вы подошли к разговору?"
+          },
+          "problem_solving": {
+            "q1": "Опишите сложную проблему, с которой вы столкнулись на работе. Расскажите о вашем процессе решения.",
+            "q2": "Расскажите о случае, когда вам пришлось принимать решение при неполной информации. Каков был ваш подход?",
+            "q3": "Приведите пример, когда ваше первоначальное решение проблемы не сработало. Как вы адаптировались?"
+          },
+          "teamwork": {
+            "q1": "Расскажите о случае, когда вы работали со сложным коллегой. Как вы справились с ситуацией?",
+            "q2": "Опишите проект, где сотрудничество было ключом к успеху. Какую роль вы играли?",
+            "q3": "Приведите пример, когда вам нужно было разрешить конфликт между членами команды. Каков был результат?"
+          },
+          "adaptability": {
+            "q1": "Опишите ситуацию, когда приоритеты резко изменились. Как вы скорректировали свой подход?",
+            "q2": "Расскажите о случае, когда вам пришлось быстро освоить что-то новое для выполнения задачи. Как вы подошли к этому?",
+            "q3": "Приведите пример, когда вы столкнулись с значительной неопределённостью. Как вы сохраняли эффективность?"
+          },
+          "technical": {
+            "q1": "Опишите сложную техническую задачу, которую вы решили. Какие инструменты или методы вы использовали?",
+            "q2": "Расскажите о случае, когда вам пришлось быстро освоить новую технологию. Как вы вошли в курс дела?",
+            "q3": "Приведите пример, когда вы улучшили технический процесс или систему. Каково было влияние?"
+          },
+          "planning": {
+            "q1": "Опишите, как вы организовали сложный проект с несколькими дедлайнами. Каков был ваш процесс планирования?",
+            "q2": "Расскажите о случае, когда план пошёл не так, как ожидалось. Как вы скорректировали действия?",
+            "q3": "Приведите пример того, как вы расставляете приоритеты, когда всё кажется срочным."
+          },
+          "creativity": {
+            "q1": "Расскажите об инновационном решении, которое вы предложили на работе. Что его вдохновило?",
+            "q2": "Опишите ситуацию, когда вам пришлось мыслить нестандартно для решения проблемы.",
+            "q3": "Приведите пример, когда вы бросили вызов устоявшемуся порядку вещей. Каков был результат?"
+          },
+          "ethics": {
+            "q1": "Опишите ситуацию, когда вы столкнулись с этической дилеммой на работе. Как вы её решили?",
+            "q2": "Расскажите о случае, когда вам пришлось отстаивать правильное решение, даже если оно было непопулярным.",
+            "q3": "Приведите пример того, как вы поддерживаете ответственность и честность в своей работе."
+          },
+          "customer_focus": {
+            "q1": "Расскажите о случае, когда вы сделали больше, чем требовалось, для клиента. Что вы сделали?",
+            "q2": "Опишите ситуацию, когда вам пришлось балансировать между потребностями клиента и бизнес-ограничениями.",
+            "q3": "Приведите пример, когда вы превратили негативный клиентский опыт в позитивный."
+          },
+          "general": {
+            "q1": "Опишите недавнее достижение, которым вы гордитесь в этой области компетенции. Что сделало его успешным?",
+            "q2": "Расскажите о случае, когда вы получили конструктивную обратную связь в этой области. Как вы отреагировали?",
+            "q3": "Приведите пример того, как вы развивали этот навык со временем. Какие шаги вы предприняли?"
+          }
+        }
+      },
+      "onboarding": {
+        "title": "Рекомендации по адаптации",
+        "description": "Практические рекомендации по адаптации на основе анализа командной динамики",
+        "communicationStyle": "Стиль коммуникации",
+        "teamRole": "Соответствие командной роли",
+        "focusAreas": "Рекомендуемые области внимания",
+        "styles": {
+          "collaborative": {
+            "label": "Коллаборативный коммуникатор",
+            "description": "Естественно вовлекает других и строит консенсус. Преуспевает в открытых дискуссиях и групповых мозговых штурмах. Подкрепите структурированными встречами для поддержания фокуса."
+          },
+          "assertive": {
+            "label": "Ассертивный коммуникатор",
+            "description": "Прямой и ориентированный на действие. Общается ясно и решительно. Может выиграть от практики активного слушания в период адаптации."
+          },
+          "analytical": {
+            "label": "Аналитический коммуникатор",
+            "description": "Предпочитает обсуждения на основе данных и хорошо структурированную коммуникацию. Предоставляйте повестку встреч заранее."
+          },
+          "reflective": {
+            "label": "Рефлексивный коммуникатор",
+            "description": "Вдумчивый и обстоятельный. Предпочитает письменную коммуникацию и время на обдумывание. Предоставляйте письменные резюме ключевых обсуждений."
+          },
+          "creative": {
+            "label": "Креативный коммуникатор",
+            "description": "Открыт к идеям и любит мозговые штурмы. Поощряйте сессии обмена идеями и предоставляйте возможности для творческого решения проблем."
+          },
+          "structured": {
+            "label": "Структурированный коммуникатор",
+            "description": "Ценит ясность, последовательность и процессы. Предоставляйте чёткую документацию и определённые каналы коммуникации."
+          },
+          "balanced": {
+            "label": "Сбалансированный коммуникатор",
+            "description": "Адаптивный стиль коммуникации. Может подстраиваться под различную командную динамику и ситуации."
+          }
+        },
+        "roles": {
+          "specialist": {
+            "label": "Доменный специалист",
+            "description": "Глубокая экспертиза в конкретных областях. Используйте их знания для наставничества и технического руководства в их сильных сторонах."
+          },
+          "leader": {
+            "label": "Природный лидер",
+            "description": "Высокие способности в нескольких областях. Рассмотрите раннее руководство проектами или владение инициативами."
+          },
+          "gapFiller": {
+            "label": "Закрыватель пробелов",
+            "description": "Привносит навыки, которых сейчас не хватает команде. Приоритизируйте задачи, использующие их уникальный вклад в разнообразие команды."
+          },
+          "collaborator": {
+            "label": "Командный сотрудник",
+            "description": "Сбалансированные навыки с сильными межличностными способностями. Идеален для кросс-функциональных задач и связи между подкомандами."
+          },
+          "generalist": {
+            "label": "Универсальный специалист",
+            "description": "Стабильная результативность во всех областях. Эффективен в многозадачных ролях и может поддерживать несколько направлений работы."
+          },
+          "contributor": {
+            "label": "Развивающийся сотрудник",
+            "description": "Формирует базовые навыки. Объедините с опытными членами команды для структурированных возможностей обучения."
+          }
+        },
+        "confidence": {
+          "high": "Высокая уверенность",
+          "medium": "Средняя уверенность",
+          "low": "Предварительно"
+        },
+        "focusItems": {
+          "teamIntegration": {
+            "title": "Интеграционные встречи с командой",
+            "description": "Запланируйте неформальные встречи 1-на-1 с каждым членом команды в первые две недели. Сфокусируйтесь на понимании рабочих процессов и норм коммуникации."
+          },
+          "leverageStrengths": {
+            "title": "Используйте коммуникативные сильные стороны",
+            "description": "Назначьте ранние презентации или роли фасилитатора для быстрого установления авторитета и построения командного контакта."
+          },
+          "gradualExposure": {
+            "title": "Постепенное знакомство с командой",
+            "description": "Начните с взаимодействия в малых группах перед полнокомандными встречами. Предоставляйте письменные материалы заранее для подготовки."
+          },
+          "buildRelationships": {
+            "title": "Построение отношений",
+            "description": "Создайте возможности для неформального взаимодействия: парное программирование, совместные обеды или коллаборативные побочные проекты."
+          },
+          "skillDevelopment": {
+            "title": "Целевое развитие навыков",
+            "description": "Определите 1-2 ключевых пробела в компетенциях и создайте план развития на 30-60-90 дней с конкретными целями обучения и поддержкой наставника."
+          },
+          "differentiateRole": {
+            "title": "Разграничение ролей",
+            "description": "Чётко определите зоны ответственности на ранней стадии, чтобы избежать пересечения с существующими членами команды. Сфокусируйтесь на областях уникального вклада."
+          },
+          "mentorship": {
+            "title": "Назначение наставника/бадди",
+            "description": "Объедините с опытным членом команды, который может предоставить контекст, ответить на вопросы и способствовать передаче знаний."
+          }
+        }
+      },
+      "managerSummary": {
+        "title": "Сводка для руководителя",
+        "dialogDescription": "Печатная одностраничная сводка оценки кандидата",
+        "candidateId": "ID кандидата",
+        "assessmentDate": "Дата оценки",
+        "templateName": "Оценка",
+        "duration": "Длительность",
+        "passed": "Пройден",
+        "notPassed": "Не пройден",
+        "questionsCompleted": "{answered} из {total} вопросов выполнено",
+        "strengths": "Ключевые сильные стороны",
+        "development": "Области развития",
+        "recommendation": "Рекомендация",
+        "noData": "Нет данных по компетенциям",
+        "print": "Печать сводки",
+        "close": "Закрыть",
+        "recommendations": {
+          "stronglyRecommend": "Настоятельно рекомендуется на должность. Кандидат демонстрирует исключительную компетентность во всех ключевых областях с выдающимися сильными сторонами, превышающими требования.",
+          "recommend": "Рекомендуется на должность. Кандидат соответствует требованиям бенчмарка и демонстрирует твёрдую компетентность по оцениваемым областям.",
+          "conditionalConsider": "Рассмотреть с условиями. Кандидат подаёт надежды, но имеет заметные пробелы, которые следует устранить через целевое развитие или дополнительную оценку.",
+          "notRecommend": "Не рекомендуется в настоящее время. У кандидата значительные пробелы в компетенциях, требующие существенного развития до соответствия требованиям должности.",
+          "strongProfile": "Сильный профиль компетенций. Кандидат демонстрирует продвинутый уровень владения по оцениваемым областям с ярко выраженными сильными сторонами.",
+          "moderateProfile": "Умеренный профиль компетенций. Кандидат показывает твёрдые базовые навыки с определёнными областями для продолжения профессионального развития.",
+          "developingProfile": "Развивающийся профиль компетенций. Кандидат формирует базовые навыки и выиграет от структурированных возможностей развития."
+        }
+      }
+    }
   },
   "dashboard": {
     "title": "Панель управления",
@@ -1764,6 +2890,15 @@
     "activeRate": "Активность",
     "issues": "Проблемы",
     "reliable": "Надежность",
+    "reliableCompetencies": "Надежные",
+    "flaggedItems": "Проблемные",
+    "cronbachAlpha": "α Кронбаха",
+    "lastAudit": "Последний аудит",
+    "never": "Никогда",
+    "daysAgo": "{count}д назад",
+    "today": "Сегодня",
+    "nonFlagged": "Без проблем",
+    "topIssues": "Ключевые проблемы",
     "scoreBreakdown": "Детализация оценки",
     "auditRecommended": "Рекомендуется аудит",
     "lastRunOverWeek": "Последний запуск более 7 дней назад",
@@ -1772,7 +2907,61 @@
     "templatesAvailable": "Доступно шаблонов: {count}",
     "noActiveAssessments": "Нет активных оценок",
     "createTemplateToStart": "Создайте шаблон для начала",
-    "createTemplate": "Создать шаблон"
+    "createTemplate": "Создать шаблон",
+    "competencyCountShort": "{count} комп.",
+    "timeLimitShort": "{minutes} мин",
+    "passingScoreShort": "{score}% порог",
+    "statsCards": {
+      "competencies": "Компетенции",
+      "competenciesMobile": "Компетенции",
+      "competenciesDescCategories": "{count} категорий",
+      "competenciesDescDefault": "Активные",
+      "indicators": "Поведенческие индикаторы",
+      "indicatorsMobile": "Индикаторы",
+      "indicatorsDescAvg": "~{value} на компетенцию",
+      "indicatorsDescDefault": "Всего",
+      "questions": "Вопросы оценки",
+      "questionsMobile": "Вопросы",
+      "questionsDesc": "Всего вопросов",
+      "templates": "Шаблоны тестов",
+      "templatesMobile": "Шаблоны",
+      "templatesDescActive": "{count} активных",
+      "templatesDescDefault": "Доступно"
+    },
+    "userDashboard": {
+      "actionBanner": {
+        "resume": "Продолжить",
+        "start": "Начать",
+        "moreWaiting": "Ещё {count} тест(ов) ожидает",
+        "questionsProgress": "{answered} из {total} вопросов"
+      },
+      "stats": {
+        "testsTaken": "Пройдено тестов",
+        "avgScore": "Средний балл",
+        "passRate": "Успешность"
+      },
+      "recentResults": {
+        "title": "Последние результаты",
+        "viewAll": "Все результаты",
+        "pass": "СДАНО",
+        "fail": "НЕ СДАНО"
+      },
+      "topCompetencies": "Топ компетенции",
+      "bigFive": {
+        "title": "Профиль личности",
+        "viewDetails": "Подробнее",
+        "openness": "О",
+        "conscientiousness": "Д",
+        "extraversion": "Э",
+        "agreeableness": "С",
+        "emotionalStability": "Н"
+      },
+      "onboarding": {
+        "welcome": "Добро пожаловать в SkillSoft, {name}!",
+        "description": "Откройте свои профессиональные сильные стороны и зоны роста через компетентностные оценки.",
+        "cta": "Начать первую оценку"
+      }
+    }
   },
   "table": {
     "noData": "Нет данных для отображения",
@@ -1866,12 +3055,28 @@
     "thisMonth": "В этом месяце",
     "lastMonth": "В прошлом месяце",
     "daysAgo": "{count, plural, one {# день назад} few {# дня назад} many {# дней назад} other {# дней назад}}",
+    "weeksAgo": "{count, plural, one {# неделю назад} few {# недели назад} many {# недель назад} other {# недель назад}}",
+    "monthsAgo": "{count, plural, one {# месяц назад} few {# месяца назад} many {# месяцев назад} other {# месяцев назад}}",
+    "yearsAgo": "{count, plural, one {# год назад} few {# года назад} many {# лет назад} other {# лет назад}}",
     "hoursAgo": "{count, plural, one {# час назад} few {# часа назад} many {# часов назад} other {# часов назад}}",
     "minutesAgo": "{count, plural, one {# минуту назад} few {# минуты назад} many {# минут назад} other {# минут назад}}",
     "justNow": "Только что",
+    "never": "Никогда",
     "minutes": "{count} мин",
     "hours": "{count} ч",
-    "seconds": "{count} сек"
+    "seconds": "{count} сек",
+    "minutesAgoShort": "{count} мин назад",
+    "hoursAgoShort": "{count} ч назад",
+    "daysAgoShort": "{count} д назад",
+    "weeksAgoShort": "{count} нед назад",
+    "durationMinutes": "{count} мин",
+    "durationHours": "{count} ч",
+    "durationHoursMinutes": "{hours} ч {minutes} мин",
+    "tomorrow": "Завтра",
+    "inDays": "{count, plural, one {через # день} few {через # дня} many {через # дней} other {через # дней}}",
+    "inWeeks": "{count, plural, one {через # неделю} few {через # недели} many {через # недель} other {через # недель}}",
+    "inMonths": "{count, plural, one {через # месяц} few {через # месяца} many {через # месяцев} other {через # месяцев}}",
+    "inYears": "{count, plural, one {через # год} few {через # года} many {через # лет} other {через # лет}}"
   },
   "confirm": {
     "delete": "Вы уверены, что хотите удалить это?",
@@ -1958,8 +3163,8 @@
     "generalDefault": "Проверьте свой ответ и убедитесь, что он соответствует указанным требованиям."
   },
   "myTests": {
-    "title": "Мои тесты",
-    "description": "Просмотр назначенных тестов и отслеживание прогресса",
+    "title": "Мой прогресс",
+    "description": "Отслеживайте прогресс оценки и результаты",
     "noAssignedTests": "Нет назначенных тестов",
     "whenHrAssigns": "Когда HR-отдел назначит вам тестирование, оно появится здесь. Пока можете ознакомиться с каталогом тестов.",
     "testCatalog": "Каталог тестов",
@@ -2008,7 +3213,18 @@
     "attempts": "{count, plural, one {# попытка} few {# попытки} many {# попыток} other {# попыток}}",
     "previousAttempts": "{count, plural, one {# предыдущая попытка} few {# предыдущие попытки} many {# предыдущих попыток} other {# предыдущих попыток}}",
     "earlier": "ранее",
-    "filterByStatus": "{label}: {count}. Нажмите для фильтра."
+    "filterByStatus": "{label}: {count}. Нажмите для фильтра.",
+    "performanceStats": {
+      "testsTaken": "Тестов пройдено",
+      "passed": "Сдано",
+      "averageScore": "Средний балл",
+      "totalTime": "Всего времени"
+    },
+    "scoreGauge": {
+      "passed": "Пройден",
+      "failed": "Не пройден",
+      "result": "Результат"
+    }
   },
   "psychometrics": {
     "title": "Психометрика",
@@ -2111,10 +3327,222 @@
       "active": "активные"
     },
     "competencyDetail": {
-      "gauge": {
-        "ariaLabel": "Альфа Кронбаха: {value}. Качество: {label}. {description}",
-        "ariaLabelNoData": "Альфа Кронбаха: данные отсутствуют",
-        "label": "Alpha"
+      "title": "Надёжность компетенции",
+      "description": "Детальный анализ показателей надёжности для данной компетенции",
+      "backToList": "К списку компетенций",
+      "loading": "Загрузка данных компетенции...",
+      "notFound": "Компетенция не найдена",
+      "error": "Ошибка загрузки компетенции",
+      "errorLoading": "Не удалось загрузить данные надёжности компетенции",
+      "tryAgain": "Попробовать снова",
+      "alphaInterpretationScale": {
+        "scaleTitle": "Шкала интерпретации Alpha Кронбаха",
+        "scaleAriaLabel": "Шкала интерпретации Alpha Кронбаха. Текущее значение {alpha} соответствует уровню: {description}",
+        "noDataAriaLabel": "Шкала интерпретации Alpha Кронбаха. Данные отсутствуют.",
+        "currentValue": "Текущее значение",
+        "correspondingLevel": "соответствует уровню:",
+        "noDataMessage": "Недостаточно данных для определения уровня надежности",
+        "noDataBadge": "Нет данных"
+      },
+      "accordion": {
+        "visualGauge": "Визуальный индикатор",
+        "interpretation": "Интерпретация",
+        "thresholdValues": "Пороговые значения",
+        "itemsAnalysis": "Анализ элементов",
+        "whatItMeans": "Что это означает?",
+        "whatItMeansDesktop": "Что означает этот показатель?",
+        "internalConsistency": "Коэффициент внутренней согласованности",
+        "reliabilityScale": "Шкала качества надёжности",
+        "thresholdComparison": "Сравнение с пороговыми значениями",
+        "thresholdComparisonDescription": "Текущие показатели относительно стандартных критериев",
+        "needAttention": "{count} требуют внимания",
+        "metrics": {
+          "cronbachAlpha": "Альфа Кронбаха",
+          "sampleSize": "Размер выборки",
+          "itemCount": "Количество элементов"
+        },
+        "thresholdDescriptions": {
+          "alphaGood": "Хорошая надёжность: >= 0.7",
+          "alphaGoodDetailed": "Хорошая надёжность: >= 0.7, отличная: >= 0.8",
+          "sampleMinimum": "Рекомендуемый минимум: 100",
+          "sampleMinimumDetailed": "Рекомендуемый минимум: 100 респондентов",
+          "itemsOptimal": "Оптимально: 5-15 элементов",
+          "itemsOptimalDetailed": "Оптимально: 5-15 элементов на шкалу"
+        },
+        "reliabilityMessages": {
+          "insufficientData": "Недостаточно данных для расчёта надёжности.",
+          "insufficientDataDetailed": "Недостаточно данных для расчёта надёжности. Необходимо собрать больше ответов.",
+          "good": "Шкала показывает хорошую внутреннюю согласованность.",
+          "goodDetailed": "Шкала показывает хорошую внутреннюю согласованность. Элементы измеряют один и тот же конструкт.",
+          "acceptable": "Приемлемая надёжность. Рекомендуется пересмотреть элементы.",
+          "acceptableDetailed": "Приемлемая надёжность. Рекомендуется пересмотреть элементы с низким вкладом.",
+          "low": "Низкая надёжность. Требуется серьёзная ревизия.",
+          "lowDetailed": "Низкая надёжность. Элементы не образуют согласованную шкалу. Требуется серьёзная ревизия."
+        },
+        "sections": {
+          "visualGauge": "Визуальный индикатор надёжности",
+          "interpretation": "Интерпретация и рекомендации",
+          "thresholds": "Сравнение с порогами",
+          "itemAnalysis": "Анализ элементов"
+        },
+        "whatThisMeans": "Что это значит",
+        "insufficientDataOld": "Недостаточно данных для расчёта надёжности. Требуется больше ответов.",
+        "goodConsistency": "Вопросы в этой компетенции показывают хорошую внутреннюю согласованность.",
+        "acceptableReliability": "Надёжность приемлема, но может быть улучшена доработкой вопросов.",
+        "lowReliability": "Низкая надёжность указывает, что вопросы могут измерять разные конструкты.",
+        "cronbachsAlpha": "Альфа Кронбаха",
+        "goodReliabilityThreshold": "Порог хорошей надёжности",
+        "sampleSize": "Размер выборки",
+        "recommendedMinimum": "Рекомендуемый минимум: {count} ответов",
+        "itemCount": "Количество элементов",
+        "optimalRange": "Оптимальный диапазон: {min}-{max} элементов",
+        "thresholdDescription": "Сопоставление текущих метрик с рекомендуемыми стандартами",
+        "needsAttention": "Требует внимания",
+        "whatThisMetricMeans": "Что означает эта метрика"
+      },
+      "heroAlphaGauge": {
+        "ariaLabel": "Индикатор альфа Кронбаха, показывающий уровень надёжности",
+        "noDataAriaLabel": "Индикатор альфа Кронбаха с недостаточными данными",
+        "alphaLabel": "Альфа Кронбаха"
+      },
+      "heroMobile": {
+        "analysisDescription": "Анализ надёжности вопросов компетенции",
+        "stats": {
+          "respondents": "Респондентов",
+          "items": "Элементов",
+          "quality": "Качество"
+        }
+      },
+      "insufficientDataGuidance": {
+        "insufficientData": "Недостаточно данных",
+        "requiresAttention": "Требует внимания",
+        "cannotCalculate": "Невозможно рассчитать показатели надёжности",
+        "forImproving": "Для улучшения надёжности",
+        "criticalBadge": "Критично",
+        "attentionBadge": "Внимание",
+        "readinessLabel": "Готовность к расчёту",
+        "criteriaCount": "{met}/{total} критериев выполнено",
+        "fullData": "Все данные доступны",
+        "problemCount": "{count, plural, one {# проблема} few {# проблемы} many {# проблем} other {# проблем}} обнаружено",
+        "issues": {
+          "sampleSizeUnknown": "Размер выборки неизвестен",
+          "sampleSizeLow": "Размер выборки ({count}) меньше рекомендуемого минимума",
+          "sampleSizeRecommendation": "Рекомендуется минимум 100 респондентов для надёжного расчёта",
+          "itemCountUnknown": "Количество элементов неизвестно",
+          "itemCountLow": "Количество элементов ({count}) недостаточно для шкалы",
+          "itemCountRecommendation": "Рекомендуется минимум 3 элемента для расчёта Alpha",
+          "alphaMissing": "Альфа Кронбаха не рассчитана",
+          "alphaMissingRecommendation": "Соберите больше ответов и запустите аудит для расчёта"
+        }
+      },
+      "thresholdSummaryBadge": {
+        "labels": {
+          "alpha": "Альфа",
+          "sample": "Выборка",
+          "items": "Элементы"
+        },
+        "allOk": "Все пороги достигнуты",
+        "noData": "Нет данных",
+        "statusMeets": "Соответствует порогу",
+        "statusNotMeets": "Ниже порога"
+      },
+      "table": {
+        "tabs": {
+          "all": "Все компетенции",
+          "reliable": "Надёжные",
+          "acceptable": "Приемлемые",
+          "unreliable": "Ненадёжные",
+          "insufficientData": "Недостаточно данных",
+          "allShort": "Все",
+          "reliableShort": "Надёжн.",
+          "acceptableShort": "Прием.",
+          "unreliableShort": "Низкие",
+          "insufficientDataShort": "Нет дан."
+        },
+        "resultsFound": "{count, plural, one {# компетенция} few {# компетенции} many {# компетенций} other {# компетенций}} найдено",
+        "columns": {
+          "competency": "Компетенция",
+          "cronbachAlpha": "Альфа Кронбаха",
+          "sample": "Размер выборки",
+          "questions": "Вопросов",
+          "status": "Статус",
+          "actions": "Действия"
+        },
+        "viewQuestions": "Просмотреть вопросы",
+        "pagination": {
+          "page": "Страница",
+          "firstPage": "Первая страница",
+          "prevPage": "Предыдущая страница",
+          "nextPage": "Следующая страница",
+          "lastPage": "Последняя страница"
+        }
+      },
+      "alphaIfDeletedList": {
+        "improvesAlpha": "Удаление улучшает альфа",
+        "importantForScale": "Важен для шкалы",
+        "neutral": "Нейтральное влияние",
+        "columns": {
+          "question": "Вопрос",
+          "alphaIfDeleted": "Альфа без элемента",
+          "change": "Изменение",
+          "status": "Влияние"
+        },
+        "mobileAlphaWithout": "Альфа без этого элемента",
+        "collapseList": "Свернуть список",
+        "showMore": "Показать ещё {count}",
+        "legendTitle": "Легенда влияния на альфа",
+        "legendDescription": "Как удаление каждого вопроса влияет на надёжность шкалы",
+        "legendPositive": "Положительное: удаление увеличивает альфа (рассмотрите доработку)",
+        "legendNegative": "Отрицательное: удаление уменьшает альфа (сохранить)",
+        "legendNeutral": "Нейтральное: минимальное влияние на альфа",
+        "defaultTitle": "Анализ элементов",
+        "defaultDescription": "Влияние удаления каждого вопроса на альфа Кронбаха",
+        "needsAttention": "Требует внимания",
+        "itemAriaLabel": "Вопрос {index}: Альфа без элемента {alpha}, изменение {change}"
+      },
+      "quality": {
+        "insufficient": {
+          "label": "Недостаточно данных",
+          "description": "Недостаточно ответов для расчёта надёжности"
+        },
+        "unacceptable": {
+          "label": "Неприемлемо",
+          "description": "Очень низкая надёжность, требуется серьёзная доработка"
+        },
+        "poor": {
+          "label": "Плохо",
+          "description": "Низкая надёжность, требуются значительные улучшения"
+        },
+        "acceptable": {
+          "label": "Приемлемо",
+          "description": "Достаточно для исследовательских целей"
+        },
+        "good": {
+          "label": "Хорошо",
+          "description": "Подходит для большинства целей оценки"
+        },
+        "excellent": {
+          "label": "Отлично",
+          "description": "Высокая надёжность для важных оценок"
+        },
+        "exceptional": {
+          "label": "Исключительно",
+          "description": "Очень высокая надёжность, возможна избыточность"
+        }
+      },
+      "metadataTitle": "Надёжность компетенции - Психометрика - SkillSoft",
+      "metadataDescription": "Детальный анализ надёжности компетенции.",
+      "errorLabel": "Ошибка",
+      "itemsLoweringAlpha": {
+        "cardTitle": "Элементы, снижающие надёжность",
+        "cardDescription": "Удаление этих элементов повысит Alpha. Рассмотрите их пересмотр или исключение.",
+        "alphaWithout": "Alpha без элемента",
+        "viewItemAriaLabel": "Просмотреть элемент: {text}",
+        "moreItems": "+ ещё {count} элементов"
+      },
+      "reliableCompetency": {
+        "title": "Компетенция надёжна",
+        "description": "Альфа Кронбаха ({alpha}) превышает пороговое значение 0.7. Шкала показывает хорошую внутреннюю согласованность и может использоваться для оценки."
       }
     },
     "nav": {
@@ -2438,31 +3866,6 @@
       "preview": {
         "title": "Предпросмотр",
         "asSeenByCandidate": "Как видит кандидат"
-      }
-    },
-    "competencyDetail": {
-      "alphaList": {
-        "title": "Alpha если элемент удален",
-        "description": "Показывает влияние каждого элемента на общую надежность шкалы",
-        "improvesAlpha": "Улучшит Alpha",
-        "importantForScale": "Важен для шкалы",
-        "neutral": "Нейтрален",
-        "columnQuestion": "Вопрос",
-        "columnAlphaWithoutItem": "Alpha без элемента",
-        "columnChange": "Изменение",
-        "columnStatus": "Статус",
-        "alphaWithout": "Alpha без:",
-        "collapseList": "Свернуть список",
-        "showMore": "Показать еще {count} элементов",
-        "requireAttention": "{count} требуют внимания",
-        "cardAriaLabel": "{questionText}. Alpha без элемента: {alphaValue}. Изменение: {change}",
-        "legendAriaLabel": "Легенда интерпретации",
-        "howToInterpret": "Как интерпретировать:",
-        "legendPositive": "Положительное",
-        "legendPositiveDesc": "удаление элемента повысит Alpha",
-        "legendNegative": "Отрицательное",
-        "legendNegativeDesc": "элемент важен для согласованности шкалы",
-        "legendNeutralDesc": "Близко к нулю — элемент нейтрален"
       }
     },
     "help": {
@@ -2814,238 +4217,168 @@
         }
       }
     },
-    "competencyDetail": {
-      "title": "Надёжность компетенции",
-      "description": "Детальный анализ показателей надёжности для данной компетенции",
-      "backToList": "К списку компетенций",
-      "loading": "Загрузка данных компетенции...",
-      "notFound": "Компетенция не найдена",
-      "error": "Ошибка загрузки компетенции",
-      "errorLoading": "Не удалось загрузить данные надёжности компетенции",
-      "tryAgain": "Попробовать снова",
-      "alphaInterpretationScale": {
-        "scaleTitle": "Шкала интерпретации Alpha Кронбаха",
-        "scaleAriaLabel": "Шкала интерпретации Alpha Кронбаха. Текущее значение {alpha} соответствует уровню: {description}",
-        "noDataAriaLabel": "Шкала интерпретации Alpha Кронбаха. Данные отсутствуют.",
-        "currentValue": "Текущее значение",
-        "correspondingLevel": "соответствует уровню:",
-        "noDataMessage": "Недостаточно данных для определения уровня надежности",
-        "noDataBadge": "Нет данных"
-      },
-      "accordion": {
-        "visualGauge": "Визуальный индикатор",
-        "interpretation": "Интерпретация",
-        "thresholdValues": "Пороговые значения",
-        "itemsAnalysis": "Анализ элементов",
-        "whatItMeans": "Что это означает?",
-        "whatItMeansDesktop": "Что означает этот показатель?",
-        "internalConsistency": "Коэффициент внутренней согласованности",
-        "reliabilityScale": "Шкала качества надёжности",
-        "thresholdComparison": "Сравнение с пороговыми значениями",
-        "thresholdComparisonDescription": "Текущие показатели относительно стандартных критериев",
-        "needAttention": "{count} требуют внимания",
-        "metrics": {
-          "cronbachAlpha": "Альфа Кронбаха",
-          "sampleSize": "Размер выборки",
-          "itemCount": "Количество элементов"
-        },
-        "thresholdDescriptions": {
-          "alphaGood": "Хорошая надёжность: >= 0.7",
-          "alphaGoodDetailed": "Хорошая надёжность: >= 0.7, отличная: >= 0.8",
-          "sampleMinimum": "Рекомендуемый минимум: 100",
-          "sampleMinimumDetailed": "Рекомендуемый минимум: 100 респондентов",
-          "itemsOptimal": "Оптимально: 5-15 элементов",
-          "itemsOptimalDetailed": "Оптимально: 5-15 элементов на шкалу"
-        },
-        "reliabilityMessages": {
-          "insufficientData": "Недостаточно данных для расчёта надёжности.",
-          "insufficientDataDetailed": "Недостаточно данных для расчёта надёжности. Необходимо собрать больше ответов.",
-          "good": "Шкала показывает хорошую внутреннюю согласованность.",
-          "goodDetailed": "Шкала показывает хорошую внутреннюю согласованность. Элементы измеряют один и тот же конструкт.",
-          "acceptable": "Приемлемая надёжность. Рекомендуется пересмотреть элементы.",
-          "acceptableDetailed": "Приемлемая надёжность. Рекомендуется пересмотреть элементы с низким вкладом.",
-          "low": "Низкая надёжность. Требуется серьёзная ревизия.",
-          "lowDetailed": "Низкая надёжность. Элементы не образуют согласованную шкалу. Требуется серьёзная ревизия."
-        },
-        "sections": {
-          "visualGauge": "Визуальный индикатор надёжности",
-          "interpretation": "Интерпретация и рекомендации",
-          "thresholds": "Сравнение с порогами",
-          "itemAnalysis": "Анализ элементов"
-        },
-        "whatThisMeans": "Что это значит",
-        "insufficientDataOld": "Недостаточно данных для расчёта надёжности. Требуется больше ответов.",
-        "goodConsistency": "Вопросы в этой компетенции показывают хорошую внутреннюю согласованность.",
-        "acceptableReliability": "Надёжность приемлема, но может быть улучшена доработкой вопросов.",
-        "lowReliability": "Низкая надёжность указывает, что вопросы могут измерять разные конструкты.",
-        "cronbachsAlpha": "Альфа Кронбаха",
-        "goodReliabilityThreshold": "Порог хорошей надёжности",
-        "sampleSize": "Размер выборки",
-        "recommendedMinimum": "Рекомендуемый минимум: {count} ответов",
-        "itemCount": "Количество элементов",
-        "optimalRange": "Оптимальный диапазон: {min}-{max} элементов",
-        "thresholdDescription": "Сопоставление текущих метрик с рекомендуемыми стандартами",
-        "needsAttention": "Требует внимания",
-        "whatThisMetricMeans": "Что означает эта метрика"
-      },
-      "heroAlphaGauge": {
-        "ariaLabel": "Индикатор альфа Кронбаха, показывающий уровень надёжности",
-        "noDataAriaLabel": "Индикатор альфа Кронбаха с недостаточными данными",
-        "alphaLabel": "Альфа Кронбаха"
-      },
-      "heroMobile": {
-        "analysisDescription": "Анализ надёжности вопросов компетенции",
-        "stats": {
-          "respondents": "Респондентов",
-          "items": "Элементов",
-          "quality": "Качество"
-        }
-      },
-      "insufficientDataGuidance": {
-        "insufficientData": "Недостаточно данных",
-        "requiresAttention": "Требует внимания",
-        "cannotCalculate": "Невозможно рассчитать показатели надёжности",
-        "forImproving": "Для улучшения надёжности",
-        "criticalBadge": "Критично",
-        "attentionBadge": "Внимание",
-        "readinessLabel": "Готовность к расчёту",
-        "criteriaCount": "{met}/{total} критериев выполнено",
-        "fullData": "Все данные доступны",
-        "problemCount": "{count, plural, one {# проблема} few {# проблемы} many {# проблем} other {# проблем}} обнаружено",
-        "issues": {
-          "sampleSizeUnknown": "Размер выборки неизвестен",
-          "sampleSizeLow": "Размер выборки ({count}) меньше рекомендуемого минимума",
-          "sampleSizeRecommendation": "Рекомендуется минимум 100 респондентов для надёжного расчёта",
-          "itemCountUnknown": "Количество элементов неизвестно",
-          "itemCountLow": "Количество элементов ({count}) недостаточно для шкалы",
-          "itemCountRecommendation": "Рекомендуется минимум 3 элемента для расчёта Alpha",
-          "alphaMissing": "Альфа Кронбаха не рассчитана",
-          "alphaMissingRecommendation": "Соберите больше ответов и запустите аудит для расчёта"
-        }
-      },
-      "thresholdSummaryBadge": {
-        "labels": {
-          "alpha": "Альфа",
-          "sample": "Выборка",
-          "items": "Элементы"
-        },
-        "allOk": "Все пороги достигнуты",
-        "noData": "Нет данных",
-        "statusMeets": "Соответствует порогу",
-        "statusNotMeets": "Ниже порога"
-      },
-      "table": {
-        "tabs": {
-          "all": "Все компетенции",
-          "reliable": "Надёжные",
-          "acceptable": "Приемлемые",
-          "unreliable": "Ненадёжные",
-          "insufficientData": "Недостаточно данных",
-          "allShort": "Все",
-          "reliableShort": "Надёжн.",
-          "acceptableShort": "Прием.",
-          "unreliableShort": "Низкие",
-          "insufficientDataShort": "Нет дан."
-        },
-        "resultsFound": "{count, plural, one {# компетенция} few {# компетенции} many {# компетенций} other {# компетенций}} найдено",
-        "columns": {
-          "competency": "Компетенция",
-          "cronbachAlpha": "Альфа Кронбаха",
-          "sample": "Размер выборки",
-          "questions": "Вопросов",
-          "status": "Статус",
-          "actions": "Действия"
-        },
-        "viewQuestions": "Просмотреть вопросы",
-        "pagination": {
-          "page": "Страница",
-          "firstPage": "Первая страница",
-          "prevPage": "Предыдущая страница",
-          "nextPage": "Следующая страница",
-          "lastPage": "Последняя страница"
-        }
-      },
-      "alphaIfDeletedList": {
-        "improvesAlpha": "Удаление улучшает альфа",
-        "importantForScale": "Важен для шкалы",
-        "neutral": "Нейтральное влияние",
-        "columns": {
-          "question": "Вопрос",
-          "alphaIfDeleted": "Альфа без элемента",
-          "change": "Изменение",
-          "status": "Влияние"
-        },
-        "mobileAlphaWithout": "Альфа без этого элемента",
-        "collapseList": "Свернуть список",
-        "showMore": "Показать ещё {count}",
-        "legendTitle": "Легенда влияния на альфа",
-        "legendDescription": "Как удаление каждого вопроса влияет на надёжность шкалы",
-        "legendPositive": "Положительное: удаление увеличивает альфа (рассмотрите доработку)",
-        "legendNegative": "Отрицательное: удаление уменьшает альфа (сохранить)",
-        "legendNeutral": "Нейтральное: минимальное влияние на альфа",
-        "defaultTitle": "Анализ элементов",
-        "defaultDescription": "Влияние удаления каждого вопроса на альфа Кронбаха",
-        "needsAttention": "Требует внимания",
-        "itemAriaLabel": "Вопрос {index}: Альфа без элемента {alpha}, изменение {change}"
-      },
-      "quality": {
-        "insufficient": {
-          "label": "Недостаточно данных",
-          "description": "Недостаточно ответов для расчёта надёжности"
-        },
-        "unacceptable": {
-          "label": "Неприемлемо",
-          "description": "Очень низкая надёжность, требуется серьёзная доработка"
-        },
-        "poor": {
-          "label": "Плохо",
-          "description": "Низкая надёжность, требуются значительные улучшения"
-        },
-        "acceptable": {
-          "label": "Приемлемо",
-          "description": "Достаточно для исследовательских целей"
-        },
-        "good": {
-          "label": "Хорошо",
-          "description": "Подходит для большинства целей оценки"
-        },
-        "excellent": {
-          "label": "Отлично",
-          "description": "Высокая надёжность для важных оценок"
-        },
-        "exceptional": {
-          "label": "Исключительно",
-          "description": "Очень высокая надёжность, возможна избыточность"
-        }
-      },
-      "metadataTitle": "Надёжность компетенции - Психометрика - SkillSoft",
-      "metadataDescription": "Детальный анализ надёжности компетенции.",
-      "errorLabel": "Ошибка",
-      "itemsLoweringAlpha": {
-        "cardTitle": "Элементы, снижающие надёжность",
-        "cardDescription": "Удаление этих элементов повысит Alpha. Рассмотрите их пересмотр или исключение.",
-        "alphaWithout": "Alpha без элемента",
-        "viewItemAriaLabel": "Просмотреть элемент: {text}",
-        "moreItems": "+ ещё {count} элементов"
-      },
-      "reliableCompetency": {
-        "title": "Компетенция надёжна",
-        "description": "Альфа Кронбаха ({alpha}) превышает пороговое значение 0.7. Шкала показывает хорошую внутреннюю согласованность и может использоваться для оценки."
-      }
-    },
     "flaggedPage": {
-      "metadataTitle": "Проблемные элементы - Психометрика - SkillSoft",
-      "metadataDescription": "Элементы оценки, требующие внимания и проверки.",
       "pageTitle": "Проблемные элементы",
       "pageDescription": "Элементы оценки, требующие внимания из-за низких психометрических показателей",
+      "metadataTitle": "Проблемные элементы - Психометрика - SkillSoft",
+      "metadataDescription": "Элементы оценки, требующие внимания и проверки.",
       "stats": {
         "negative": "Отрицательные",
         "critical": "Критичные",
         "warnings": "Предупреждения",
-        "total": "Всего"
+        "total": "Всего",
+        "unknown": "Неизвестно",
+        "normal": "Нормальные"
       },
       "error": {
-        "loadingError": "Ошибка загрузки данных"
+        "loadingError": "Ошибка загрузки данных",
+        "failedToLoad": "Не удалось загрузить данные проблемных элементов"
+      },
+      "urgent": {
+        "title": "{count, plural, one {# элемент требует немедленного действия} few {# элемента требуют немедленного действия} many {# элементов требуют немедленного действия} other {# элементов требуют немедленного действия}}",
+        "negativeCount": "{count} с отрицательной дискриминацией",
+        "criticalCount": "{count} критичных",
+        "retireAllNegative": "Снять все отрицательные",
+        "reviewOneByOne": "Проверить по одному"
+      },
+      "selection": {
+        "selectionMode": "Режим выбора",
+        "exitSelectionMode": "Выйти из режима выбора",
+        "selectedCount": "Выбрано {selected} из {total} элементов",
+        "selectAll": "Выбрать все",
+        "deselectAll": "Снять выделение",
+        "selected": "Выбрано: {count}"
+      },
+      "sections": {
+        "negativeDiscrimination": "Отрицательная дискриминация",
+        "negativeDescription": "Элементы, работающие наоборот — сильные респонденты отвечают хуже. Рекомендуется немедленное действие.",
+        "criticalDiscrimination": "Критичная дискриминация",
+        "criticalDescription": "Элементы слабо различают респондентов по уровню компетенции. Требуется проверка и принятие решения.",
+        "warnings": "Предупреждения",
+        "warningsDescription": "Элементы со слабой дискриминацией, требующие наблюдения. Могут улучшиться при получении большего объёма данных.",
+        "otherIssues": "Другие проблемы",
+        "otherDescription": "Элементы с другими проблемами (например, только сложность)",
+        "avgP": "Ср. p",
+        "avgRpb": "Ср. rpb"
+      },
+      "suggestions": {
+        "retire": "Снять",
+        "review": "Проверить",
+        "monitor": "Наблюдать",
+        "suggestionLabel": "Рекомендация",
+        "alternativeLabel": "Альт",
+        "negativeReason": "Отрицательная дискриминация — сильные респонденты отвечают хуже слабых",
+        "criticalWithDifficultyReason": "Критичная дискриминация с экстремальной сложностью указывает на проблемы с содержанием",
+        "criticalAlternative": "Рассмотрите снятие, если улучшение содержания невозможно",
+        "warningReason": "Предупреждение при стабильном количестве ответов — может улучшиться с большим объёмом данных",
+        "defaultReason": "Требуется ручная проверка для определения подходящего действия"
+      },
+      "card": {
+        "responses": "Ответов",
+        "quickRetire": "Быстрое снятие",
+        "markAsReviewed": "Отметить как проверенный",
+        "details": "Подробнее",
+        "questionNotSpecified": "Текст вопроса не указан"
+      },
+      "batch": {
+        "processing": "Обработка элементов...",
+        "itemsFailed": "{count, plural, one {# элемент с ошибкой} few {# элемента с ошибками} many {# элементов с ошибками} other {# элементов с ошибками}}",
+        "retiredSuccess": "Снято {count} отрицательных элементов",
+        "retiredSuccessBatch": "Успешно снято: {count} элементов",
+        "activatedSuccess": "Успешно активировано: {count} элементов",
+        "itemRetired": "Элемент успешно снят",
+        "itemReviewed": "Элемент отмечен как проверенный",
+        "retireFailed": "Не удалось снять элемент",
+        "updateFailed": "Не удалось обновить статус элемента"
+      },
+      "undo": {
+        "itemsRetired": "{count, plural, one {# элемент снят} few {# элемента снято} many {# элементов снято} other {# элементов снято}}",
+        "itemsUpdated": "{count, plural, one {# элемент обновлён} few {# элемента обновлено} many {# элементов обновлено} other {# элементов обновлено}}",
+        "undoButton": "Отменить",
+        "undoSuccess": "Действие успешно отменено",
+        "undoFailed": "Не удалось отменить действие"
+      },
+      "detail": {
+        "metadataTitle": "Детали проблемного элемента - Психометрика - SkillSoft",
+        "metadataDescription": "Детальный анализ проблемного элемента оценки с рекомендациями по улучшению.",
+        "backToList": "К списку",
+        "pageTitle": "Проблемный элемент",
+        "errorLoading": "Ошибка загрузки",
+        "error": "Ошибка",
+        "failedToLoadData": "Не удалось загрузить данные.",
+        "severity": {
+          "critical": "Критическая проблема",
+          "high": "Серьёзная проблема",
+          "medium": "Требует внимания",
+          "low": "Незначительная проблема",
+          "criticalBadge": "Критично",
+          "highBadge": "Серьёзно",
+          "mediumBadge": "Внимание",
+          "lowBadge": "Низкий"
+        },
+        "reasons": {
+          "negativeDiscrimination": "Отрицательный индекс дискриминации (rpb < 0) — элемент работает в обратном направлении",
+          "criticalDiscrimination": "Критически низкий индекс дискриминации (rpb < 0.1) — элемент не различает респондентов",
+          "weakDiscrimination": "Слабый индекс дискриминации (0.1 <= rpb < 0.25) — пограничное различение",
+          "tooHard": "Слишком сложный (p < 0.2) — менее 20% правильных ответов",
+          "tooEasy": "Слишком лёгкий (p > 0.9) — более 90% правильных ответов",
+          "insufficientResponses": "Недостаточно ответов для надёжной статистики (< 30)",
+          "manualReview": "Элемент отмечен для ручной проверки"
+        },
+        "questionSection": {
+          "title": "Текст вопроса",
+          "competency": "Компетенция",
+          "indicator": "Индикатор"
+        },
+        "gauges": {
+          "difficultyTitle": "Индекс сложности",
+          "difficultyDescription": "Доля правильных ответов (идеально: 0.2 - 0.9)",
+          "discriminationTitle": "Индекс дискриминации",
+          "discriminationDescription": "Корреляция с общим баллом (идеально: >= 0.25)"
+        },
+        "comparison": {
+          "title": "Сравнение с порогами",
+          "difficulty": "Индекс сложности (p)",
+          "difficultyDescription": "Оптимальный диапазон: 0.2 - 0.9",
+          "discrimination": "Индекс дискриминации (rpb)",
+          "discriminationDescription": "Хорошо: >= 0.25, отлично: >= 0.35",
+          "responseCount": "Количество ответов",
+          "responseDescription": "Минимум 50 ответов для надёжной статистики"
+        },
+        "stats": {
+          "responses": "Ответов",
+          "sufficient": "Достаточно",
+          "insufficient": "Недостаточно",
+          "lastCalculation": "Последний расчёт",
+          "previousRpb": "Предыдущий rpb",
+          "rpbChange": "Изменение rpb"
+        },
+        "actions": {
+          "title": "Рекомендуемые действия",
+          "considerRemoval": "Рассмотрите удаление элемента",
+          "negativeRpbDescription": "Отрицательный rpb означает, что элемент работает против измеряемого конструкта. Рекомендуется отключить.",
+          "checkAnswerKey": "Проверьте правильный ответ",
+          "answerKeyDescription": "Правильный ответ может быть отмечен неверно или шкала инвертирована.",
+          "reformulateQuestion": "Переформулируйте вопрос",
+          "reformulateDescription": "Текущая формулировка не различает респондентов по уровню компетенции.",
+          "reviewOptions": "Проверьте варианты ответов",
+          "reviewOptionsDescription": "Убедитесь, что дистракторы правдоподобны и различимы.",
+          "monitorMetrics": "Мониторинг показателей",
+          "monitorDescription": "Соберите больше данных и переоцените после 50+ дополнительных ответов.",
+          "simplifyWording": "Упростите формулировку",
+          "simplifyDescription": "Вопрос может быть слишком сложным или неоднозначным для целевой аудитории.",
+          "addHints": "Добавьте подсказки к вариантам",
+          "addHintsDescription": "Рассмотрите добавление контекста или пояснений к вариантам ответов.",
+          "increaseComplexity": "Увеличьте сложность",
+          "increaseDescription": "Добавьте нюансы или сделайте дистракторы более привлекательными.",
+          "collectMoreData": "Соберите больше данных",
+          "collectDescription": "Текущее количество ответов ({count}) недостаточно для надёжных выводов. Необходимо минимум 50."
+        },
+        "similarItems": {
+          "title": "Похожие проблемные элементы",
+          "description": "Элементы с аналогичными проблемами"
+        },
+        "fullStats": "Полная статистика элемента"
       }
     },
     "flaggedDetail": {
@@ -3346,170 +4679,6 @@
           "lowScore": "Эмоциональная реактивность, чувствительность к стрессу",
           "importance": "Критично для позиций с высоким уровнем стресса и ответственности"
         }
-      }
-    },
-    "flaggedPage": {
-      "pageTitle": "Проблемные элементы",
-      "pageDescription": "Элементы оценки, требующие внимания из-за низких психометрических показателей",
-      "metadataTitle": "Проблемные элементы - Психометрика - SkillSoft",
-      "metadataDescription": "Элементы оценки, требующие внимания и проверки.",
-      "stats": {
-        "negative": "Отрицательные",
-        "critical": "Критичные",
-        "warnings": "Предупреждения",
-        "total": "Всего",
-        "unknown": "Неизвестно",
-        "normal": "Нормальные"
-      },
-      "error": {
-        "loadingError": "Ошибка загрузки данных",
-        "failedToLoad": "Не удалось загрузить данные проблемных элементов"
-      },
-      "urgent": {
-        "title": "{count, plural, one {# элемент требует немедленного действия} few {# элемента требуют немедленного действия} many {# элементов требуют немедленного действия} other {# элементов требуют немедленного действия}}",
-        "negativeCount": "{count} с отрицательной дискриминацией",
-        "criticalCount": "{count} критичных",
-        "retireAllNegative": "Снять все отрицательные",
-        "reviewOneByOne": "Проверить по одному"
-      },
-      "selection": {
-        "selectionMode": "Режим выбора",
-        "exitSelectionMode": "Выйти из режима выбора",
-        "selectedCount": "Выбрано {selected} из {total} элементов",
-        "selectAll": "Выбрать все",
-        "deselectAll": "Снять выделение",
-        "selected": "Выбрано: {count}"
-      },
-      "sections": {
-        "negativeDiscrimination": "Отрицательная дискриминация",
-        "negativeDescription": "Элементы, работающие наоборот — сильные респонденты отвечают хуже. Рекомендуется немедленное действие.",
-        "criticalDiscrimination": "Критичная дискриминация",
-        "criticalDescription": "Элементы слабо различают респондентов по уровню компетенции. Требуется проверка и принятие решения.",
-        "warnings": "Предупреждения",
-        "warningsDescription": "Элементы со слабой дискриминацией, требующие наблюдения. Могут улучшиться при получении большего объёма данных.",
-        "otherIssues": "Другие проблемы",
-        "otherDescription": "Элементы с другими проблемами (например, только сложность)",
-        "avgP": "Ср. p",
-        "avgRpb": "Ср. rpb"
-      },
-      "suggestions": {
-        "retire": "Снять",
-        "review": "Проверить",
-        "monitor": "Наблюдать",
-        "suggestionLabel": "Рекомендация",
-        "alternativeLabel": "Альт",
-        "negativeReason": "Отрицательная дискриминация — сильные респонденты отвечают хуже слабых",
-        "criticalWithDifficultyReason": "Критичная дискриминация с экстремальной сложностью указывает на проблемы с содержанием",
-        "criticalAlternative": "Рассмотрите снятие, если улучшение содержания невозможно",
-        "warningReason": "Предупреждение при стабильном количестве ответов — может улучшиться с большим объёмом данных",
-        "defaultReason": "Требуется ручная проверка для определения подходящего действия"
-      },
-      "card": {
-        "responses": "Ответов",
-        "quickRetire": "Быстрое снятие",
-        "markAsReviewed": "Отметить как проверенный",
-        "details": "Подробнее",
-        "questionNotSpecified": "Текст вопроса не указан"
-      },
-      "batch": {
-        "processing": "Обработка элементов...",
-        "itemsFailed": "{count, plural, one {# элемент с ошибкой} few {# элемента с ошибками} many {# элементов с ошибками} other {# элементов с ошибками}}",
-        "retiredSuccess": "Снято {count} отрицательных элементов",
-        "retiredSuccessBatch": "Успешно снято: {count} элементов",
-        "activatedSuccess": "Успешно активировано: {count} элементов",
-        "itemRetired": "Элемент успешно снят",
-        "itemReviewed": "Элемент отмечен как проверенный",
-        "retireFailed": "Не удалось снять элемент",
-        "updateFailed": "Не удалось обновить статус элемента"
-      },
-      "undo": {
-        "itemsRetired": "{count, plural, one {# элемент снят} few {# элемента снято} many {# элементов снято} other {# элементов снято}}",
-        "itemsUpdated": "{count, plural, one {# элемент обновлён} few {# элемента обновлено} many {# элементов обновлено} other {# элементов обновлено}}",
-        "undoButton": "Отменить",
-        "undoSuccess": "Действие успешно отменено",
-        "undoFailed": "Не удалось отменить действие"
-      },
-      "detail": {
-        "metadataTitle": "Детали проблемного элемента - Психометрика - SkillSoft",
-        "metadataDescription": "Детальный анализ проблемного элемента оценки с рекомендациями по улучшению.",
-        "backToList": "К списку",
-        "pageTitle": "Проблемный элемент",
-        "errorLoading": "Ошибка загрузки",
-        "error": "Ошибка",
-        "failedToLoadData": "Не удалось загрузить данные.",
-        "severity": {
-          "critical": "Критическая проблема",
-          "high": "Серьёзная проблема",
-          "medium": "Требует внимания",
-          "low": "Незначительная проблема",
-          "criticalBadge": "Критично",
-          "highBadge": "Серьёзно",
-          "mediumBadge": "Внимание",
-          "lowBadge": "Низкий"
-        },
-        "reasons": {
-          "negativeDiscrimination": "Отрицательный индекс дискриминации (rpb < 0) — элемент работает в обратном направлении",
-          "criticalDiscrimination": "Критически низкий индекс дискриминации (rpb < 0.1) — элемент не различает респондентов",
-          "weakDiscrimination": "Слабый индекс дискриминации (0.1 <= rpb < 0.25) — пограничное различение",
-          "tooHard": "Слишком сложный (p < 0.2) — менее 20% правильных ответов",
-          "tooEasy": "Слишком лёгкий (p > 0.9) — более 90% правильных ответов",
-          "insufficientResponses": "Недостаточно ответов для надёжной статистики (< 30)",
-          "manualReview": "Элемент отмечен для ручной проверки"
-        },
-        "questionSection": {
-          "title": "Текст вопроса",
-          "competency": "Компетенция",
-          "indicator": "Индикатор"
-        },
-        "gauges": {
-          "difficultyTitle": "Индекс сложности",
-          "difficultyDescription": "Доля правильных ответов (идеально: 0.2 - 0.9)",
-          "discriminationTitle": "Индекс дискриминации",
-          "discriminationDescription": "Корреляция с общим баллом (идеально: >= 0.25)"
-        },
-        "comparison": {
-          "title": "Сравнение с порогами",
-          "difficulty": "Индекс сложности (p)",
-          "difficultyDescription": "Оптимальный диапазон: 0.2 - 0.9",
-          "discrimination": "Индекс дискриминации (rpb)",
-          "discriminationDescription": "Хорошо: >= 0.25, отлично: >= 0.35",
-          "responseCount": "Количество ответов",
-          "responseDescription": "Минимум 50 ответов для надёжной статистики"
-        },
-        "stats": {
-          "responses": "Ответов",
-          "sufficient": "Достаточно",
-          "insufficient": "Недостаточно",
-          "lastCalculation": "Последний расчёт",
-          "previousRpb": "Предыдущий rpb",
-          "rpbChange": "Изменение rpb"
-        },
-        "actions": {
-          "title": "Рекомендуемые действия",
-          "considerRemoval": "Рассмотрите удаление элемента",
-          "negativeRpbDescription": "Отрицательный rpb означает, что элемент работает против измеряемого конструкта. Рекомендуется отключить.",
-          "checkAnswerKey": "Проверьте правильный ответ",
-          "answerKeyDescription": "Правильный ответ может быть отмечен неверно или шкала инвертирована.",
-          "reformulateQuestion": "Переформулируйте вопрос",
-          "reformulateDescription": "Текущая формулировка не различает респондентов по уровню компетенции.",
-          "reviewOptions": "Проверьте варианты ответов",
-          "reviewOptionsDescription": "Убедитесь, что дистракторы правдоподобны и различимы.",
-          "monitorMetrics": "Мониторинг показателей",
-          "monitorDescription": "Соберите больше данных и переоцените после 50+ дополнительных ответов.",
-          "simplifyWording": "Упростите формулировку",
-          "simplifyDescription": "Вопрос может быть слишком сложным или неоднозначным для целевой аудитории.",
-          "addHints": "Добавьте подсказки к вариантам",
-          "addHintsDescription": "Рассмотрите добавление контекста или пояснений к вариантам ответов.",
-          "increaseComplexity": "Увеличьте сложность",
-          "increaseDescription": "Добавьте нюансы или сделайте дистракторы более привлекательными.",
-          "collectMoreData": "Соберите больше данных",
-          "collectDescription": "Текущее количество ответов ({count}) недостаточно для надёжных выводов. Необходимо минимум 50."
-        },
-        "similarItems": {
-          "title": "Похожие проблемные элементы",
-          "description": "Элементы с аналогичными проблемами"
-        },
-        "fullStats": "Полная статистика элемента"
       }
     },
     "insights": {
@@ -3832,6 +5001,12 @@
       "EDIT_DESC": "Может изменять содержимое теста",
       "MANAGE": "Управляющий",
       "MANAGE_DESC": "Полный контроль, включая доступ"
+    },
+    "scoringRubric": {
+      "DIRECT_SCALE": "Прямая шкала Лайкерта",
+      "DIRECT_SCALE_DESC": "Выбранная точка шкалы засчитывается напрямую. Чем выше согласие, тем выше балл.",
+      "SITUATIONAL_BEST_CHOICE": "Ситуационный лучший выбор",
+      "SITUATIONAL_BEST_CHOICE_DESC": "Каждый вариант ответа имеет предустановленный балл. Кандидат получает баллы, назначенные выбранному варианту."
     }
   },
   "help": {
@@ -3923,6 +5098,27 @@
           "critical": "Критический пробел: Значительно ниже порога, высокий приоритет для требований к новому сотруднику."
         }
       }
+    },
+    "dashboard": {
+      "avgScore": "Ваш средний процент по всем завершённым оценкам.",
+      "passRate": "Доля оценок, в которых ваш балл достиг или превысил порог прохождения.",
+      "bigFiveTitle": "Модель Большой пятёрки (OCEAN) измеряет пять ключевых измерений личности на основе ваших ответов.",
+      "bigFive": {
+        "openness": "Открытость: Любознательность, креативность и готовность к новому.",
+        "conscientiousness": "Добросовестность: Организованность, надёжность и самодисциплина.",
+        "extraversion": "Экстраверсия: Общительность, уверенность и позитивная энергия.",
+        "agreeableness": "Доброжелательность: Сотрудничество, эмпатия и доверие к другим.",
+        "emotionalStability": "Стабильность: Спокойствие под давлением и эмоциональная устойчивость."
+      },
+      "bigFiveScore": "{value}/100 — {level}",
+      "bigFiveLevel": {
+        "low": "Низкая выраженность",
+        "moderate": "Умеренная выраженность",
+        "high": "Высокая выраженность"
+      },
+      "topCompetencies": "Ваши сильнейшие компетенции по среднему баллу из всех завершённых оценок.",
+      "competencyScore": "Средний процентный балл по этой компетенции из ваших оценок.",
+      "competencyBar": "Среднее по {count, plural, one {# оценке} few {# оценкам} many {# оценкам} other {# оценкам}}"
     }
   },
   "metadata": {
@@ -4046,6 +5242,20 @@
       "fullAccess": "Полный доступ",
       "contentEditors": "Редакторы контента",
       "bannedLocked": "{banned} заблокировано, {locked} заморожено"
+    },
+    "statsCards": {
+      "total": "Всего пользователей",
+      "totalMobile": "Всего",
+      "totalDesc": "Все пользователи",
+      "active": "Активные",
+      "activeMobile": "Активные",
+      "activeDesc": "Сейчас активны",
+      "admins": "Администраторы",
+      "adminsMobile": "Админы",
+      "adminsDesc": "Администраторы",
+      "recentlyActive": "Недавно активные",
+      "recentlyActiveMobile": "Недавние",
+      "recentlyActiveDesc": "За 30 дней"
     },
     "table": {
       "columns": {
@@ -4398,28 +5608,6 @@
       "errorId": "ID ошибки",
       "tryAgain": "Попробовать снова",
       "backToDashboard": "На панель управления"
-    },
-    "time": {
-      "today": "Сегодня",
-      "yesterday": "Вчера",
-      "daysAgo": "{count, plural, one {# день назад} few {# дня назад} many {# дней назад} other {# дней назад}}",
-      "weeksAgo": "{count, plural, one {# неделю назад} few {# недели назад} many {# недель назад} other {# недель назад}}",
-      "monthsAgo": "{count, plural, one {# месяц назад} few {# месяца назад} many {# месяцев назад} other {# месяцев назад}}",
-      "yearsAgo": "{count, plural, one {# год назад} few {# года назад} many {# лет назад} other {# лет назад}}",
-      "never": "Никогда",
-      "justNow": "Только что",
-      "minutesAgoShort": "{count} мин назад",
-      "hoursAgoShort": "{count} ч назад",
-      "daysAgoShort": "{count} д назад",
-      "weeksAgoShort": "{count} нед назад",
-      "durationMinutes": "{count} мин",
-      "durationHours": "{count} ч",
-      "durationHoursMinutes": "{hours} ч {minutes} мин",
-      "tomorrow": "Завтра",
-      "inDays": "{count, plural, one {через # день} few {через # дня} many {через # дней} other {через # дней}}",
-      "inWeeks": "{count, plural, one {через # неделю} few {через # недели} many {через # недель} other {через # недель}}",
-      "inMonths": "{count, plural, one {через # месяц} few {через # месяца} many {через # месяцев} other {через # месяцев}}",
-      "inYears": "{count, plural, one {через # год} few {через # года} many {через # лет} other {через # лет}}"
     }
   },
   "teams": {
@@ -4493,7 +5681,9 @@
       }
     },
     "drawer": {
-      "details": "Информация о команде",
+      "overview": "Обзор команды",
+      "description": "Описание",
+      "details": "Детали",
       "actions": "Действия",
       "members": "Участники",
       "leader": "Лидер",
@@ -4501,8 +5691,8 @@
       "viewDetails": "Подробнее",
       "editTeam": "Редактировать",
       "addMembers": "Добавить участников",
-      "activate": "Активировать команду",
-      "archive": "Архивировать команду"
+      "activate": "Активировать",
+      "archive": "Архивировать"
     },
     "errors": {
       "loadingTeams": "Ошибка загрузки команд",
@@ -4522,9 +5712,12 @@
       "created": "Создана {date}",
       "noLeader": "Лидер не назначен",
       "tabs": {
+        "overview": "Обзор",
         "members": "Участники",
-        "profile": "Профиль",
-        "gaps": "Пробелы в навыках"
+        "competencies": "Компетенции",
+        "competenciesMobile": "Навыки",
+        "tests": "Тесты",
+        "activity": "Активность"
       },
       "actions": {
         "edit": "Редактировать",
@@ -4541,7 +5734,8 @@
         "avgSaturation": "Ср. насыщенность",
         "saturation": "Насыщенность",
         "skillGaps": "Пробелы",
-        "gaps": "Пробелы"
+        "gaps": "Пробелы",
+        "competenciesTracked": "Отслеж."
       },
       "sections": {
         "statistics": "Статистика",
@@ -4552,6 +5746,55 @@
         "createdBy": "Создатель",
         "createdAt": "Дата создания",
         "activatedAt": "Дата активации"
+      },
+      "overview": {
+        "criticalGaps": {
+          "title": "Критические пробелы",
+          "viewAll": "Показать все",
+          "noGaps": "Критических пробелов нет — покрытие команды в порядке!"
+        },
+        "personality": {
+          "title": "Личность команды",
+          "noData": "Данные о личности пока недоступны"
+        },
+        "recentActivity": {
+          "title": "Недавняя активность",
+          "viewAll": "Показать все",
+          "noActivity": "Активность пока не зафиксирована"
+        }
+      },
+      "competencies": {
+        "title": "Анализ компетенций",
+        "saturationHeader": "Насыщенность компетенций",
+        "toggle": {
+          "all": "Все",
+          "allFull": "Все компетенции",
+          "gaps": "Пробелы",
+          "gapsFull": "Только пробелы"
+        }
+      },
+      "activity": {
+        "title": "Активность команды",
+        "events": {
+          "memberJoined": "{name} присоединился к команде",
+          "teamCreated": "Команда была создана",
+          "teamActivated": "Команда была активирована",
+          "teamArchived": "Команда была архивирована",
+          "leaderSet": "{name} назначен лидером"
+        },
+        "today": "Сегодня",
+        "yesterday": "Вчера",
+        "empty": {
+          "title": "Нет активности",
+          "description": "Активность команды будет отображаться здесь по мере внесения изменений."
+        }
+      },
+      "help": {
+        "metricsOverview": "Ключевые показатели состава команды и покрытия компетенций.",
+        "criticalGaps": "Компетенции, где насыщенность команды ниже 30%. Это наиболее приоритетные потребности в найме или обучении.",
+        "teamPersonality": "Средние оценки личностных черт Большой пятёрки по всем участникам команды, прошедшим оценку.",
+        "competencyToggle": "Переключение между просмотром всех компетенций и только пробелов ниже порога.",
+        "saturation": "Процент участников команды, демонстрирующих владение каждой компетенцией по результатам оценки."
       },
       "members": {
         "role": {
@@ -4663,6 +5906,12 @@
           "description": "Активировать «{name}»? Активные команды могут использоваться в TEAM_FIT оценках.",
           "confirm": "Активировать",
           "cancel": "Отмена"
+        },
+        "removeTest": {
+          "title": "Убрать тест",
+          "description": "Убрать «{name}» из этой команды? Участники потеряют к нему доступ.",
+          "confirm": "Убрать",
+          "cancel": "Отмена"
         }
       },
       "addMembers": {
@@ -4673,6 +5922,34 @@
         "noUsers": "Пользователи не найдены",
         "alreadyMember": "Уже в команде",
         "add": "Добавить",
+        "adding": "Добавление...",
+        "cancel": "Отмена"
+      },
+      "tests": {
+        "addTest": "Добавить тест",
+        "search": "Поиск по добавленным тестам...",
+        "untitled": "Без названия",
+        "addedBy": "Добавил(а) {name}",
+        "openTest": "Открыть тест",
+        "remove": "Убрать из команды",
+        "noResults": "Нет тестов по запросу «{query}»",
+        "count": "Показано {showing} из {total}",
+        "empty": {
+          "title": "Команде не назначено ни одного теста",
+          "description": "Поделитесь шаблоном теста с этой командой, чтобы её участники получили к нему доступ."
+        }
+      },
+      "addTests": {
+        "title": "Добавить тесты команде",
+        "description": "Найдите и выберите шаблоны тестов, чтобы поделиться с этой командой",
+        "search": "Поиск шаблонов тестов...",
+        "permissionLabel": "Доступ",
+        "clear": "Очистить ({count})",
+        "noTests": "Шаблоны тестов не найдены",
+        "noResults": "Нет тестов по запросу «{query}»",
+        "alreadyAdded": "Уже добавлен",
+        "add": "Добавить тесты",
+        "addCount": "Добавить тесты ({count})",
         "adding": "Добавление...",
         "cancel": "Отмена"
       }
@@ -4878,6 +6155,11 @@
       "metaTitle": "Профиль | SkillSoft",
       "metaDescription": "Просмотр результатов тестов, паспорта компетенций и личностного профиля"
     },
+    "bento": {
+      "skillsTab": "Навыки",
+      "personalityTab": "Личность",
+      "profileComplete": "{value}% завершено"
+    },
     "hero": {
       "user": "Пользователь",
       "online": "В сети",
@@ -5009,6 +6291,7 @@
       "viewDetails": "Подробнее",
       "assessments": "{count, plural, one {# оценка} few {# оценки} many {# оценок} other {# оценок}}",
       "score": "Балл",
+      "rank": "Место",
       "trend": {
         "up": "Рост",
         "down": "Снижение",
@@ -5066,10 +6349,26 @@
       "viewAll": "Смотреть все",
       "take": "Пройти",
       "view": "Открыть",
+      "countLabel": "{count, plural, one {# доступный тест} few {# доступных теста} other {# доступных тестов}}",
+      "listLabel": "Тесты, доступные вам",
       "permissions": {
         "view": "Просмотр",
         "edit": "Редактирование",
         "manage": "Управление"
+      },
+      "goals": {
+        "overview": "Обзор",
+        "jobFit": "Соответствие должности",
+        "teamFit": "Соответствие команде"
+      },
+      "stats": {
+        "competencies": "Компетенции",
+        "duration": "Длительность",
+        "minutes": "мин"
+      },
+      "actions": {
+        "view": "Открыть",
+        "take": "Пройти"
       },
       "expires": "Истекает {time}",
       "expired": "Доступ истёк",
@@ -5078,10 +6377,16 @@
         "title": "Нет доступных тестов",
         "description": "Тесты, которыми с вами поделятся коллеги, появятся здесь"
       },
+      "emptyState": {
+        "title": "Нет доступных тестов",
+        "description": "Тесты, которыми с вами поделятся коллеги, появятся здесь"
+      },
       "sharedBy": "От {name}",
       "sharedOn": "Поделились {time}"
     },
     "edit": {
+      "title": "Редактирование профиля",
+      "subtitle": "Обновите персональную информацию и настройки",
       "pageTitle": "Редактирование профиля",
       "pageDescription": "Обновите персональную информацию и настройки",
       "metaTitle": "Редактирование профиля | SkillSoft",
@@ -5211,6 +6516,12 @@
         "cta": "Пройти тест"
       }
     },
+    "sections": {
+      "overview": "Обзор",
+      "skills": "Топ компетенции",
+      "personality": "Личность",
+      "results": "Последние результаты"
+    },
     "accessibility": {
       "profilePage": "Страница профиля",
       "heroSection": "Раздел информации о пользователе",
@@ -5255,11 +6566,6 @@
       "title": "Уведомление о конфиденциальности",
       "description": "Ваши ответы анонимны. Только ваше имя будет передано администратору теста."
     },
-    "captcha": {
-      "title": "Требуется проверка",
-      "description": "Пожалуйста, пройдите проверку ниже, чтобы продолжить к тесту.",
-      "continue": "Продолжить"
-    },
     "action": {
       "startTest": "Начать тест",
       "starting": "Запуск...",
@@ -5288,12 +6594,7 @@
       "genericTitle": "Что-то пошло не так",
       "genericDesc": "Произошла непредвиденная ошибка. Пожалуйста, попробуйте снова.",
       "nameRequired": "Имя и фамилия обязательны.",
-      "timeUp": "Время вышло! Пожалуйста, отправьте ваши ответы.",
-      "sessionExpired": "Ваша сессия истекла."
-    },
-    "warning": {
-      "sessionExpiring": "Сессия скоро истекает",
-      "sessionExpiringDescription": "Ваша сессия истечёт через {minutes} мин. Пожалуйста, завершите и отправьте тест."
+      "timeUp": "Время вышло! Пожалуйста, отправьте ваши ответы."
     },
     "progress": {
       "question": "Вопрос"
@@ -5309,7 +6610,6 @@
       "emailPlaceholder": "Введите ваш email",
       "notes": "Заметки (необязательно)",
       "notesPlaceholder": "Дополнительные заметки",
-      "gdprConsent": "Я даю согласие на обработку моих персональных данных для целей данной оценки. Мои данные будут храниться в безопасности и использоваться только для целей оценки.",
       "submit": "Отправить результаты",
       "submitting": "Отправка..."
     },
@@ -5325,10 +6625,7 @@
       "thankYou": "Спасибо за прохождение теста.",
       "correct": "правильных ответов",
       "timeTaken": "общее время",
-      "breakdown": "Разбор по компетенциям",
-      "copyLink": "Скопировать ссылку на результат",
-      "linkCopied": "Ссылка на результат скопирована. Действительна 7 дней.",
-      "linkCopyFailed": "Не удалось скопировать ссылку"
+      "breakdown": "Разбор по компетенциям"
     }
   },
   "landing": {
@@ -5590,6 +6887,652 @@
         "13": "валидация навыков",
         "14": "оценка при найме"
       }
+    }
+  },
+  "accessibility": {
+    "skipToMainContent": "Перейти к основному содержимому",
+    "skipToNavigation": "Перейти к навигации",
+    "skipToSidebar": "Перейти к боковой панели",
+    "skipToQuickActions": "Перейти к быстрым действиям",
+    "skipToTable": "Перейти к таблице",
+    "skipToPagination": "Перейти к пагинации",
+    "skipToForm": "Перейти к форме",
+    "skipToFormActions": "Перейти к действиям формы",
+    "skipToQuestion": "Перейти к вопросу",
+    "skipToAnswerOptions": "Перейти к вариантам ответа",
+    "skipToCharts": "Перейти к диаграммам",
+    "skipToDataTable": "Перейти к таблице данных"
+  },
+  "builder": {
+    "workspace": {
+      "competencyLibrary": "Библиотека компетенций",
+      "canvas": "Конструктор",
+      "simulate": "Симуляция",
+      "add": "Добавить",
+      "addCompetencyFromLibrary": "Добавить компетенцию из библиотеки",
+      "lastSim": "Послед. тест",
+      "viewDetails": "Подробнее",
+      "builderNavigation": "Навигация конструктора"
+    },
+    "canvas": {
+      "assessmentBlueprint": "Шаблон",
+      "blueprintShort": "Шаблон",
+      "priorityTooltip": "Порядок задаёт приоритет. При ограниченном времени вопросы из верхних карточек задаются первыми.",
+      "undoLabel": "Отменить (Ctrl+Z)",
+      "redoLabel": "Повторить (Ctrl+Shift+Z)",
+      "undoTooltip": "Отменить",
+      "redoTooltip": "Повторить",
+      "undoKey": "Ctrl+Z",
+      "redoKey": "Ctrl+Shift+Z",
+      "balanceWeightsLabel": "Сбалансировать уровни важности",
+      "balanceWeightsTooltip": "Сбалансировать уровни важности",
+      "testDrive": "Пробный запуск",
+      "saveNow": "Сохранить",
+      "dragHint": "Перетащите компетенции сюда",
+      "dragHintAlt": "Или нажмите +, чтобы добавить из библиотеки",
+      "dropToAdd": "Отпустите, чтобы добавить компетенцию",
+      "undoneAnnouncement": "Отменено. Сейчас {count} компетенций.",
+      "redoneAnnouncement": "Повторено. Сейчас {count} компетенций.",
+      "weightsBalancedAnnouncement": "Уровни важности сбалансированы.",
+      "movedAnnouncement": "{name} перемещён {direction} на позицию {position}.",
+      "removedAnnouncement": "{name} удалён. Осталось {count} компетенций."
+    },
+    "library": {
+      "searchPlaceholder": "Поиск компетенций...",
+      "available": "{count} доступно",
+      "selected": "{count} выбрано",
+      "noCompetenciesFound": "Компетенции не найдены",
+      "tryAdjustingSearch": "Попробуйте изменить параметры поиска",
+      "addToCanvas": "Добавить {name} в конструктор",
+      "removeFromCanvas": "Убрать {name} из конструктора",
+      "health": {
+        "noQuestions": "Нет доступных вопросов",
+        "limitedQuestions": "Ограниченное количество вопросов",
+        "goodInventory": "Хороший набор вопросов"
+      },
+      "categories": {
+        "cognitive": "Когнитивные",
+        "interpersonal": "Межличностные",
+        "leadership": "Лидерские",
+        "technical": "Технические",
+        "self_management": "Самоуправление",
+        "communication": "Коммуникативные",
+        "organizational": "Организационные",
+        "analytical": "Аналитические",
+        "adaptability": "Адаптивность",
+        "collaboration": "Сотрудничество",
+        "critical_thinking": "Критическое мышление",
+        "emotional_intelligence": "Эмоциональный интеллект",
+        "time_management": "Управление временем"
+      },
+      "questionsCount": "{count} вопросов",
+      "indicators": "Индикаторы ({count})",
+      "indicatorQuestions": "{count}в",
+      "difficultyLabels": {
+        "foundational": "Б",
+        "intermediate": "С",
+        "advanced": "П",
+        "expert": "Э"
+      },
+      "risk": {
+        "none": "Достаточно вопросов",
+        "low": "Возможно заимствование",
+        "high": "Нет вопросов — полное заимствование",
+        "tooltipNone": "Достаточно вопросов для этого индикатора",
+        "tooltipLow": "Возможно заимствование у смежных. Добавьте больше вопросов для улучшения покрытия",
+        "tooltipHigh": "Нет доступных вопросов. Добавьте вопросы к этому индикатору или уменьшите количество"
+      },
+      "borrowingRisk": "Риск заимствования",
+      "riskNone": "Нет",
+      "riskLow": "Низкий",
+      "riskModerate": "Средний",
+      "riskHigh": "Высокий",
+      "indicatorsMayBorrow": "{count, plural, one {# индикатор может заимствовать} few {# индикатора могут заимствовать} other {# индикаторов могут заимствовать}}",
+      "indicatorWarning": "{count, plural, one {# индикатор имеет} few {# индикатора имеют} other {# индикаторов имеют}} недостаточное покрытие вопросами",
+      "loading": "Загрузка данных...",
+      "expandCard": "Показать детали индикаторов для {name}",
+      "collapseCard": "Скрыть детали индикаторов для {name}",
+      "onetFilterActive": "Показано {count} компетенций O*NET.",
+      "onetFilterInactive": "Показаны все {count} компетенций.",
+      "onetShowAll": "Показать все",
+      "onetShowMatched": "Только O*NET",
+      "onetIconTooltip": "Входит в профиль должности O*NET"
+    },
+    "card": {
+      "dragToReorder": "Удерживайте и перетащите для изменения порядка",
+      "collapseDetail": "Свернуть для краткого вида",
+      "expandOptions": "Развернуть для дополнительных параметров",
+      "importance": "Важность",
+      "importanceTooltip": "Более высокая важность = больше вопросов. Порядок тоже важен — верхние карточки имеют приоритет.",
+      "difficulty": "Сложность",
+      "difficultyOptions": {
+        "foundational": "Базовый",
+        "foundationalShort": "Б",
+        "intermediate": "Средний",
+        "intermediateShort": "С",
+        "advanced": "Продвинутый",
+        "advancedShort": "П",
+        "expert": "Экспертный",
+        "expertShort": "Э"
+      },
+      "importanceLevel": {
+        "low": "Низкая",
+        "medium": "Средняя",
+        "high": "Высокая",
+        "critical": "Критическая",
+        "lowTooltip": "0.5x вес — меньше вопросов",
+        "mediumTooltip": "1.0x вес — стандартное количество вопросов",
+        "highTooltip": "1.5x вес — больше вопросов",
+        "criticalTooltip": "2.0x вес — максимальное количество вопросов"
+      },
+      "inventoryDepth": "Глубина банка вопросов",
+      "inventoryEMH": "Л/С/Т",
+      "indicatorPriority": "Приоритет индикаторов",
+      "equalize": "Уравнять",
+      "equalizeWeights": "Уравнять все веса индикаторов",
+      "equalizeTooltip": "Сбросить все веса до равного распределения",
+      "decreaseIndicatorWeight": "Уменьшить вес для {name}",
+      "increaseIndicatorWeight": "Увеличить вес для {name}",
+      "removeButton": "Удалить",
+      "removeTitle": "Удалить компетенцию?",
+      "removeDescription": "Компетенция <strong>{name}</strong> будет удалена из вашего шаблона. Вы можете добавить её обратно из библиотеки в любое время.",
+      "removeCancel": "Отмена",
+      "removeConfirm": "Удалить",
+      "decreaseImportance": "Уменьшить важность",
+      "increaseImportance": "Увеличить важность",
+      "expandWarnings": "Показать предупреждения и настройки",
+      "expandDetails": "Показать подробности",
+      "collapseCard": "Свернуть карточку",
+      "warningsCount": "{count, plural, one {# проблема} few {# проблемы} many {# проблем} other {# проблем}}",
+      "availableOf": "{available}/{required}в",
+      "questionsShort": "{count}в",
+      "healthCritical": "Нет доступных вопросов в банке",
+      "healthModerate": "Ограниченный банк вопросов",
+      "lowQuestions": "Доступно только {count} вопросов",
+      "weightImbalance": "Эта компетенция занимает более 50% общего веса",
+      "questionCountTooltip": "Вопросов выбрано / доступно в банке",
+      "questionCountSimTooltip": "{selected} выбрано из {available} доступных вопросов",
+      "noIndicatorsAvailable": "Поведенческие индикаторы не найдены",
+      "indicatorCountTooltip": "{count, plural, one {# поведенческий индикатор} few {# поведенческих индикатора} many {# поведенческих индикаторов} other {# поведенческих индикаторов}} измеряют эту компетенцию",
+      "importanceLevelTooltip": "Приоритет веса — выше важность = больше вопросов",
+      "importanceAllocationTooltip": "{level}: ~{count} вопросов ({multiplier}x от базы)",
+      "importanceAllocationBase": "База: {base}в на индикатор × {indicators} индикаторов = {total}в",
+      "difficultyTooltip": "Предпочтительный уровень сложности для выбора вопросов",
+      "inventoryDepthTooltip": "Доступные вопросы: Базовый / Средний / Продвинутый / Экспертный",
+      "onetBadgeTooltip": "Добавлено автоматически из профиля O*NET. Эта компетенция требуется для выбранной должности."
+    },
+    "saveStatus": {
+      "allChangesSaved": "Все изменения сохранены",
+      "unsavedChanges": "Несохранённые изменения",
+      "saving": "Сохранение...",
+      "saved": "Сохранено",
+      "saveFailed": "Ошибка сохранения",
+      "offline": "Офлайн — изменения сохранены локально",
+      "retrying": "Повторная попытка...",
+      "savedAgo": "Сохранено {time}",
+      "unsaved": "Не сохранено",
+      "retryingProgress": "Повтор ({attempt}/3)...",
+      "offlineShort": "Офлайн",
+      "lastSaved": "Последнее сохранение: {time}",
+      "changesWillSync": "Изменения синхронизируются при восстановлении связи",
+      "unsavedChangesLabel": "Несохранённые изменения",
+      "timeAgo": {
+        "justNow": "только что",
+        "secondsAgo": "{seconds} сек назад",
+        "minutesAgo": "{minutes} мин назад",
+        "hoursAgo": "{hours} ч назад"
+      }
+    },
+    "conflict": {
+      "title": "Обнаружен конфликт шаблона",
+      "description": "Другая вкладка браузера внесла изменения в этот шаблон. Выберите способ разрешения:",
+      "detectedAgo": "Конфликт обнаружен {time}",
+      "yourChanges": "Ваши изменения",
+      "otherTab": "Другая вкладка",
+      "competencies": "{count} компетенций",
+      "newItems": "+{count} новых",
+      "onlyInYourVersion": "Только в вашей версии:",
+      "onlyInOtherTab": "Только в другой вкладке:",
+      "inBoth": "В обеих ({count}):",
+      "moreItems": "ещё +{count}",
+      "keepMine": "Оставить мои",
+      "useTheirs": "Использовать их",
+      "mergeBoth": "Объединить оба"
+    },
+    "simulator": {
+      "testDrive": "Пробный запуск",
+      "runSimulation": "Запустить симуляцию",
+      "runningSimulation": "Выполняется симуляция...",
+      "rerunSimulation": "Повторить симуляцию",
+      "rerun": "Повторить",
+      "running": "Выполняется...",
+      "loadingResults": "Загрузка результатов симуляции",
+      "loadingResultsText": "Загрузка результатов симуляции...",
+      "personas": {
+        "perfect": "Идеальный",
+        "perfectDescription": "Идеальный профиль",
+        "random": "Случайный",
+        "randomDescription": "Случайные ответы",
+        "failing": "Слабый",
+        "failingDescription": "Слабый кандидат",
+        "candidate": "{persona} кандидат",
+        "changePersona": "Сменить персону"
+      },
+      "score": {
+        "simulatedScore": "Результат симуляции",
+        "pass": "Пройдено",
+        "fail": "Не пройдено",
+        "toPass": "/ {score}% для прохождения",
+        "jobFitScore": "Оценка соответствия должности",
+        "qualified": "Подходит",
+        "belowThreshold": "Ниже порога",
+        "toQualify": "/ {score}% для соответствия",
+        "teamGapAnalysis": "Анализ разрыва в команде",
+        "aboveTeam": "на {gap}% выше команды",
+        "belowTeam": "на {gap}% ниже команды",
+        "atTeam": "на уровне команды ({gap}%)",
+        "individual": "Индивидуальный",
+        "teamBenchmark": "Показатель команды",
+        "competencyProfile": "Профиль компетенций",
+        "discoveryMode": "Режим исследования",
+        "competencies": "компетенций",
+        "noPassFail": "Без оценки сдал/не сдал — формируется паспорт компетенций",
+        "competencyProfileAssessment": "Оценка профиля компетенций"
+      },
+      "warnings": {
+        "inventoryWarnings": "Предупреждения по банку вопросов",
+        "assemblyWarnings": "Диагностика сборки",
+        "questions": "{count} вопросов",
+        "messages": {
+          "NO_ONET_SOC_CODE": "Код O*NET SOC не указан в конфигурации шаблона.",
+          "NO_ONET_PROFILE": "Профиль O*NET не найден для кода SOC: {socCode}",
+          "BENCHMARK_LOOKUP_FALLBACK": "Поиск по названиям компетенций совпал только с {matched}/{total} бенчмарками. Выполняется полное сканирование активных компетенций.",
+          "FUZZY_MATCH_PASSPORT": "Нечёткое сопоставление паспорта: бенчмарк \"{benchmark}\" сопоставлен с \"{match}\".",
+          "FUZZY_MATCH_ONET": "Нечёткое сопоставление: компетенция O*NET \"{onetName}\" сопоставлена с \"{match}\".",
+          "NO_INDICATORS_FOR_GAPS": "Индикаторы не найдены ни для одной из компетенций. Названия бенчмарков не удалось сопоставить с внутренними компетенциями.",
+          "NO_ACTIVE_QUESTIONS_INDICATOR": "Активные вопросы не найдены для индикатора {indicatorId}.",
+          "INDICATOR_EXHAUSTED_BORROWING": "Заимствуется {count} вопросов у родственных индикаторов компетенции {competencyName} (отмечено для психометрического анализа).",
+          "NO_ACTIVE_INDICATORS_COMPETENCY": "Активные поведенческие индикаторы не найдены для компетенции {competencyName}.",
+          "NO_ACTIVE_INDICATORS_COMPETENCIES": "У {count} компетенций нет активных поведенческих индикаторов.",
+          "INVENTORY_CRITICAL": "Критично: только {available} вопросов доступно для {competencyName} ({difficulty}), необходимо {required}.",
+          "INVENTORY_LIMITED": "Ограниченное количество вопросов ({available}) для {competencyName} ({difficulty}), рекомендуется {recommended}."
+        },
+        "help": {
+          "BENCHMARK_LOOKUP_FALLBACK": "Названия компетенций O*NET не совпадают с вашими внутренними названиями. Система просканировала все активные компетенции. Для исправления: приведите названия в соответствие с O*NET или добавьте стандартные коды O*NET.",
+          "INDICATOR_EXHAUSTED_BORROWING": "У этого индикатора закончились уникальные вопросы, система заимствовала вопросы у родственных индикаторов той же компетенции. Это может снизить точность измерений. Добавьте больше вопросов к этому индикатору.",
+          "FUZZY_MATCH_PASSPORT": "Паспорт кандидата использует другое название, чем бенчмарк O*NET. Нечёткое сопоставление устранило различие. Выровняйте названия компетенций для точного соответствия.",
+          "FUZZY_MATCH_ONET": "Компетенция O*NET была сопоставлена нечётким поиском вместо точного совпадения. Добавьте стандартный код O*NET к внутренней компетенции для точного сопоставления.",
+          "NO_INDICATORS_FOR_GAPS": "Ни один бенчмарк O*NET не удалось связать с внутренними компетенциями с индикаторами. Проверьте, что ваша библиотека содержит компетенции, соответствующие профилю должности O*NET, с активными поведенческими индикаторами.",
+          "NO_ACTIVE_QUESTIONS_INDICATOR": "У этого поведенческого индикатора нет активных вопросов в банке. Создайте и активируйте вопросы для корректного измерения.",
+          "NO_ACTIVE_INDICATORS_COMPETENCY": "У этой компетенции нет активных поведенческих индикаторов. Добавьте индикаторы для подбора вопросов.",
+          "NO_ACTIVE_INDICATORS_COMPETENCIES": "У нескольких компетенций нет активных поведенческих индикаторов. Проверьте библиотеку компетенций и добавьте индикаторы с вопросами.",
+          "NO_ONET_SOC_CODE": "Стратегия Job Fit требует код O*NET SOC. Перейдите в настройки шаблона и укажите корректный код (например, 15-1252.00).",
+          "NO_ONET_PROFILE": "Профиль O*NET для этого кода SOC не найден. Проверьте код на onetonline.org.",
+          "INVENTORY_CRITICAL": "Очень мало вопросов для этой компетенции — недостаточно для надёжной оценки. Добавьте больше вопросов разного уровня сложности.",
+          "INVENTORY_LIMITED": "Меньше вопросов, чем рекомендуется. Оценка будет работать, но добавление вопросов повысит надёжность измерений."
+        },
+        "showMore": "Показать ещё {count}",
+        "showLess": "Свернуть"
+      },
+      "error": {
+        "title": "Ошибка симулятора",
+        "defaultMessage": "Произошла непредвиденная ошибка при отображении симулятора.",
+        "tryAgain": "Попробовать снова",
+        "errorDetails": "Подробности ошибки (только разработка)"
+      },
+      "strategy": {
+        "missingConfiguration": "Отсутствует конфигурация",
+        "incomplete": "Не завершено",
+        "learnMore": "Подробнее о стратегии «{label}»",
+        "configurationIncomplete": "конфигурация не завершена"
+      },
+      "emptyState": {
+        "addCompetencies": "Добавьте компетенции для симуляции",
+        "readyToSimulate": "Готово к симуляции",
+        "configurationNeeded": "Требуется настройка",
+        "noCompetencies": {
+          "universal": "Перетащите компетенции из библиотеки для построения профиля оценки",
+          "jobFit": "Добавьте компетенции, связанные с должностью, для симуляции оценки соответствия",
+          "teamGap": "Добавьте командные компетенции для симуляции анализа разрывов"
+        },
+        "noSimulation": {
+          "universal": "Нажмите «Запустить», чтобы увидеть, как оценка определит профиль компетенций",
+          "jobFit": "Нажмите «Запустить», чтобы увидеть прогноз соответствия должности",
+          "teamGap": "Нажмите «Запустить», чтобы проанализировать разрывы относительно команды"
+        },
+        "missingConfig": {
+          "universal": "Для этой стратегии дополнительная настройка не требуется",
+          "jobFit": "Укажите код O*NET SOC в настройках шаблона для анализа соответствия должности",
+          "teamGap": "Выберите команду в настройках шаблона для анализа разрывов"
+        },
+        "goToSettings": "Перейти к настройкам"
+      },
+      "configure": {
+        "testYourBlueprint": "Протестируйте ваш шаблон",
+        "runDescription": "Запустите симуляцию, чтобы увидеть, как кандидаты будут проходить эту оценку. Выберите тестовую персону для различных сценариев.",
+        "selectTestPersona": "Выберите тестовую персону",
+        "selectPersonaDescription": "Выберите, как симулированный кандидат будет отвечать",
+        "addCompetenciesToEnable": "Добавьте компетенции в шаблон, чтобы включить симуляцию"
+      },
+      "results": {
+        "detailedAnalysis": "Детальный анализ",
+        "questionTimeline": "Хронология вопросов",
+        "coverageAnalytics": "Аналитика покрытия",
+        "howThisWorks": "Как это работает",
+        "tip": "Совет:",
+        "tipContent": "Используйте плавающую кнопку настроек для регулировки строгости и насыщенности, затем перезапустите для сравнения результатов.",
+        "duration": "Длительность",
+        "questions": "Вопросы",
+        "min": "мин"
+      },
+      "fineTune": {
+        "title": "Тонкая настройка",
+        "tune": "Настр.",
+        "description": "Настройте параметры симуляции и перезапустите, чтобы увидеть эффект.",
+        "openSettings": "Открыть настройки тонкой настройки",
+        "strictness": "Строгость",
+        "strictnessDescription": "Более высокие значения ужесточают оценку и снижают случайность выбора вопросов.",
+        "saturation": "Защита от насыщения",
+        "saturationDescription": "Предотвращает чрезмерное использование одного и того же пула компетенций при повторных попытках.",
+        "allowBacktracking": "Разрешить возврат",
+        "allowBacktrackingDescription": "Позволяет кандидатам возвращаться и изменять предыдущие ответы.",
+        "abilityLevel": "Уровень способностей",
+        "abilityLevelDescription": "Сдвигает кривую ответов персоны. Ниже = слабый кандидат, выше = сильный.",
+        "saveSettings": "Сохранить настройки",
+        "applyAndRerun": "Применить и повторить"
+      },
+      "preflight": {
+        "issuesDetected": "Обнаружено {count} {count, plural, one {проблема} few {проблемы} other {проблем}}",
+        "configurationRequired": "Требуется настройка",
+        "preflightWarnings": "Предварительные предупреждения"
+      },
+      "selectionReason": {
+        "coverageGap": "Пробел в покрытии",
+        "calibration": "Калибровка",
+        "adaptiveCheck": "Адаптивная проверка",
+        "randomized": "Случайный выбор",
+        "backstop": "Страховка"
+      },
+      "strategyHelp": {
+        "universalBaseline": {
+          "title": "Универсальная базовая оценка",
+          "points": {
+            "coverage": "Оценивает широкое покрытие компетенций",
+            "passport": "Формирует паспорт/профиль компетенций",
+            "noPassFail": "Без оценки сдал/не сдал — направлена на исследование",
+            "bestFor": "Подходит для: анализа потребностей в обучении, планирования карьеры"
+          }
+        },
+        "targetedFit": {
+          "title": "Оценка соответствия должности",
+          "points": {
+            "aligned": "Привязана к требованиям должности O*NET при указании SOC-кода",
+            "weighted": "Взвешенная оценка относительно профиля должности",
+            "threshold": "Чёткий порог прохождения/непрохождения",
+            "bestFor": "Подходит для: найма, подбора на должность, продвижения"
+          }
+        },
+        "dynamicGap": {
+          "title": "Анализ разрывов в команде",
+          "points": {
+            "compares": "Сравнивает индивидуальные результаты с показателями команды",
+            "identifies": "Выявляет взаимодополняющие сильные стороны и области развития",
+            "settings": "Выберите команду в настройках для включения сравнения",
+            "bestFor": "Подходит для: формирования команд, планирования преемственности"
+          }
+        }
+      },
+      "strategyConfig": {
+        "universalBaseline": {
+          "label": "Универсальная базовая",
+          "shortLabel": "Базовая",
+          "description": "Общая оценка компетенций для любой роли"
+        },
+        "targetedFit": {
+          "label": "Оценка соответствия должности",
+          "shortLabel": "Должность",
+          "description": "Оценка для конкретной роли на основе стандартов O*NET"
+        },
+        "dynamicGap": {
+          "label": "Анализ разрывов в команде",
+          "shortLabel": "Команда",
+          "description": "Сравнение кандидата с показателями команды"
+        }
+      },
+      "sections": {
+        "assessmentProfile": "Профиль оценки",
+        "resultsPreview": "Предварительный просмотр результатов",
+        "questionFlow": "Последовательность вопросов",
+        "coverageAnalysis": "Анализ покрытия",
+        "fineTune": "Тонкая настройка",
+        "jobAlignment": "Соответствие должности",
+        "fitPreview": "Предпросмотр соответствия",
+        "skillCoverage": "Покрытие навыков",
+        "teamComparison": "Сравнение с командой",
+        "gapAnalysis": "Анализ разрывов",
+        "teamFitPreview": "Предпросмотр командного соответствия",
+        "analytics": "Аналитика",
+        "questions": "Вопросы",
+        "jobFitResults": "Результаты соответствия",
+        "teamGapResults": "Результаты анализа команды"
+      },
+      "teamComparison": {
+        "title": "Сравнение с командой",
+        "ariaLabel": "Анализ сравнения с командой",
+        "overallGap": "{gap}% в целом",
+        "teamFallbackName": "Команда {id}",
+        "vsTeamAverage": "Индивидуальный результат и среднее по команде",
+        "legendTeamAvg": "Среднее",
+        "legendIndividual": "Индивидуальный",
+        "notConfigured": "Команда не настроена",
+        "notConfiguredDescription": "Выберите команду в настройках шаблона для анализа сравнения и разрывов.",
+        "viewBars": "Столбчатая диаграмма",
+        "viewRadar": "Радарная диаграмма",
+        "viewToggle": "Переключение вида диаграммы",
+        "tooltipGap": "Разрыв"
+      },
+      "simulatedResults": {
+        "competencyScores": "Результаты по компетенциям",
+        "tooltipScore": "Результат:",
+        "tooltipPassed": "Пройдено",
+        "tooltipBelowThreshold": "Ниже порога",
+        "competenciesAssessed": "Оценено компетенций: {count}",
+        "personalityProfile": "Профиль личности",
+        "bigFiveOcean": "Пятифакторная модель (OCEAN)",
+        "noCompetencyData": "Нет данных по компетенциям",
+        "noCompetencies": "Нет компетенций",
+        "threshold": "Порог: {score}%",
+        "totalQuestions": "{count} вопросов",
+        "estimatedDuration": "~{minutes} мин",
+        "topStrengths": "Сильные стороны",
+        "growthAreas": "Зоны роста",
+        "jobAlignmentScore": "Соответствие должности",
+        "jobRequirementsCovered": "{percentage}% требований должности покрыто",
+        "teamGapScore": "Разрыв с командой",
+        "aboveTeamAverage": "Выше среднего по команде",
+        "belowTeamAverage": "Ниже среднего по команде — возможность для развития",
+        "complementarySkills": "Дополняющие навыки (выше команды)",
+        "developmentFocus": "Фокус развития (ниже команды)",
+        "moreCompetencies": "ещё +{count} компетенций",
+        "showLessCompetencies": "Свернуть",
+        "indicators": "Индикаторы",
+        "indicatorCorrect": "Верно:"
+      },
+      "analytics": {
+        "noCompetencies": "Компетенции не выбраны",
+        "noDifficultyData": "Нет данных по сложности",
+        "runToSeeLogic": "Запустите симуляцию, чтобы увидеть логику отбора",
+        "coverageByCompetency": "Покрытие по компетенциям",
+        "difficultyBalance": "Баланс сложности",
+        "selectionReasons": "Причины отбора"
+      },
+      "timeline": {
+        "runToViewPath": "Запустите симуляцию для просмотра адаптивного пути",
+        "noSampleQuestions": "Нет доступных примеров вопросов.",
+        "adaptiveCurve": "Адаптивная кривая",
+        "questionsCount": "Вопросы ({count})",
+        "scrollToSeeAll": "Прокрутите для просмотра всех",
+        "correct": "Верно",
+        "incorrect": "Неверно"
+      },
+      "insights": {
+        "competencyWeights": "Веса компетенций",
+        "bigFiveTraits": "Пятифакторная модель",
+        "radarDescription": "Радарная диаграмма показывает распределение компетенций в данной оценке с прогнозом профиля личности по пятифакторной модели на основе набора компетенций.",
+        "radarDisclaimer": "Фактические показатели личности будут уточнены после привязки к компетенциям O*NET."
+      },
+      "toasts": {
+        "failedToSave": "Ошибка сохранения",
+        "changesReverted": "— изменения отменены",
+        "changesMerged": "Изменения объединены из обеих вкладок",
+        "keptYourChanges": "Ваши изменения сохранены",
+        "appliedOtherChanges": "Применены изменения из другой вкладки",
+        "simulationFailed": "Ошибка симуляции",
+        "blueprintSaved": "Шаблон сохранён"
+      },
+      "radar": {
+        "noCompetencies": "Компетенции не выбраны",
+        "ariaLabel": "Радарная диаграмма с {count} компетенциями",
+        "ariaLabelWithBigFive": "Радарная диаграмма с {count} компетенциями и пятифакторной моделью личности",
+        "competencyWeight": "Вес компетенции",
+        "bigFive": "Пятифакторная модель",
+        "weight": "Вес:",
+        "score": "Балл:",
+        "scoreName": "Балл",
+        "trait": "Черта",
+        "relativeWeight": "Относительный вес в оценке",
+        "estimatedTrait": "Предполагаемая черта личности",
+        "questionsAbbrev": "{count}в"
+      },
+      "bigFive": {
+        "openness": "Открытость",
+        "opennessShort": "Откр",
+        "conscientiousness": "Добросовестность",
+        "conscientiousnessShort": "Добр",
+        "extraversion": "Экстраверсия",
+        "extraversionShort": "Экстр",
+        "agreeableness": "Доброжелательность",
+        "agreeablenessShort": "Дружл",
+        "emotionalStability": "Эмоциональная устойчивость",
+        "emotionalStabilityShort": "Стаб"
+      },
+      "validation": {
+        "onetRequired": "Код O*NET SOC необходим для анализа соответствия должности",
+        "teamRequired": "Выбор команды необходим для анализа разрывов"
+      },
+      "onetLink": "O*NET: {code}",
+      "onetAriaLabel": "Открыть на O*NET OnLine (откроется в новой вкладке)",
+      "loading": {
+        "phases": {
+          "assembling": "Подбор вопросов",
+          "assemblingSubtitle": "Выбор из банка вопросов...",
+          "simulating": "Моделирование ответов",
+          "simulatingPerfect": "Запуск идеального профиля ответов...",
+          "simulatingRandom": "Генерация случайного профиля ответов...",
+          "simulatingFailing": "Моделирование слабого профиля ответов...",
+          "scoring": "Подсчёт баллов",
+          "scoringDefault": "Оценка точности ответов...",
+          "scoringJobFit": "Оценка соответствия должности...",
+          "scoringTeamGap": "Сравнение с показателями команды...",
+          "report": "Формирование отчёта",
+          "reportSubtitle": "Подготовка данных для визуализации...",
+          "stepOf": "Шаг {current} из {total}"
+        }
+      }
+    },
+    "onboarding": {
+      "step": "Шаг {current} из {total}",
+      "skip": "Пропустить",
+      "next": "Далее",
+      "back": "Назад",
+      "getStarted": "Начать работу",
+      "skipTour": "Пропустить тур",
+      "welcome": {
+        "title": "Добро пожаловать в Шаблон",
+        "content": "Это ваше рабочее пространство для создания оценок на основе компетенций. Вы можете добавлять компетенции, задавать их важность и просматривать, как кандидаты будут проходить тест."
+      },
+      "library": {
+        "title": "Добавление компетенций",
+        "content": "Просматривайте и ищите компетенции в библиотеке. Перетащите их в конструктор или нажмите кнопку +, чтобы добавить в оценку."
+      },
+      "importance": {
+        "title": "Установка уровней важности",
+        "content": "Настройте, насколько важна каждая компетенция. Более высокая важность означает больше вопросов по данному направлению. Доступны уровни: Низкая, Средняя, Высокая и Критическая."
+      },
+      "simulator": {
+        "title": "Предварительный просмотр результатов",
+        "content": "Используйте симулятор, чтобы увидеть, как будет работать ваша оценка. Выберите различные тестовые персоны и запустите симуляцию для предпросмотра оценок кандидатов и распределения вопросов."
+      }
+    },
+    "versionPrompt": {
+      "title": "Шаблон опубликован",
+      "description": "Этот шаблон опубликован и не может быть изменён напрямую. Выберите действие:",
+      "createVersion": "Создать новую версию",
+      "createVersionDescription": "Рекомендуется — создаёт копию-черновик, которую можно свободно редактировать",
+      "or": "или",
+      "overwrite": "Перезаписать текущую версию",
+      "overwriteWarning": "Это изменит опубликованный шаблон. Активные ссылки и сессии могут быть затронуты.",
+      "cancel": "Отмена"
+    }
+  },
+  "skillMapper": {
+    "title": "Карта навыков",
+    "description": "Поиск по базам данных ESCO и O*NET на стороне клиента",
+    "loadingTitle": "Загрузка базы навыков",
+    "loadingDescription": "Обработка данных ESCO и O*NET...",
+    "searchPlaceholder": "Поиск навыков, компетенций, способностей... (напр., «лидерство», «анализ данных», «коммуникация»)",
+    "searchPlaceholderShort": "Поиск навыков, компетенций, способностей...",
+    "stats": {
+      "totalSkills": "{total} навыков",
+      "esco": "ESCO: {esco}",
+      "onet": "O*NET: {onet}",
+      "categories": "{categories} кат.",
+      "buildTime": "Собрано за {buildTimeMs}мс"
+    },
+    "tips": {
+      "desktop": "Совет: Используйте фильтры для сужения результатов • Нажмите на навык для подробностей",
+      "mobile": "Фильтры для сужения • Нажмите на навык для подробностей"
+    },
+    "footer": {
+      "zeroLatency": "Без задержек",
+      "noNetwork": "Без сети"
+    },
+    "search": {
+      "clearSearch": "Очистить поиск",
+      "filters": "Фильтры",
+      "clear": "Сбросить",
+      "dataSource": "Источник данных",
+      "categories": "Категории",
+      "buildingIndex": "Построение индекса...",
+      "resultsCount": "{count} результатов",
+      "skillsIndexed": "{count} навыков проиндексировано",
+      "preparingIndex": "Подготовка поискового индекса...",
+      "backgroundThread": "Построение в фоновом потоке",
+      "searching": "Поиск...",
+      "noResults": "Навыки по запросу «{query}» не найдены",
+      "noResultsHint": "Попробуйте другие ключевые слова или измените фильтры",
+      "emptyState": "Начните вводить для поиска навыков",
+      "emptyStateHint": "Поиск среди {count} навыков из ESCO и O*NET",
+      "worker": "Worker",
+      "noDescription": "Описание отсутствует"
+    },
+    "details": {
+      "noSelection": "Навык не выбран",
+      "noSelectionHint": "Найдите навыки слева и нажмите на результат для просмотра подробностей.",
+      "closeDetails": "Закрыть подробности",
+      "description": "Описание",
+      "noDescription": "Описание отсутствует.",
+      "altNames": "Альтернативные названия",
+      "moreAltNames": "+{count} ещё",
+      "identifiers": "Идентификаторы",
+      "id": "ID:",
+      "code": "Код:",
+      "uri": "URI:",
+      "view": "Открыть",
+      "relatedOccupations": "Связанные профессии ({count})",
+      "importance": "{value} важн.",
+      "rawMetadata": "Метаданные",
+      "skillDetails": "Подробности навыка"
     }
   }
 }

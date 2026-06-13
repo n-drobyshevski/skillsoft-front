@@ -46,6 +46,7 @@
     "startTest": "Start",
     "testDrive": "Test Drive",
     "questionsShort": "q.",
+    "chartRenderError": "Chart could not be rendered",
     "pagination": {
       "navigation": "Page navigation",
       "pageOf": "Page {current} of {total}",
@@ -111,8 +112,11 @@
       "analytics": "Analytics",
       "system": "System"
     },
+    "myActivity": "My Activity",
     "items": {
       "overview": "Overview",
+      "myActivity": "My Activity",
+      "testCatalog": "Test Catalog",
       "availableTests": "Available Tests",
       "sharedWithMe": "Shared with Me",
       "hiringOverview": "Hiring Overview",
@@ -123,6 +127,29 @@
       "psychDashboard": "Dashboard",
       "itemStatistics": "Item Statistics",
       "flaggedItems": "Flagged Items"
+    },
+    "commandPalette": {
+      "title": "Command Palette",
+      "description": "Search or jump to a page...",
+      "placeholder": "Search templates, competencies, or navigate...",
+      "noResults": "No results found.",
+      "noResultsFor": "No results for \"{query}\"",
+      "tryDifferentSearch": "Try a different search term",
+      "searching": "Searching...",
+      "navigation": "Navigation",
+      "searchResults": "Search Results",
+      "templates": "Templates",
+      "recentItems": "Recent",
+      "arrowNavigation": "Navigate",
+      "createNewTemplate": "Create New Template",
+      "createCompetency": "Create Competency",
+      "createQuestion": "Create Question",
+      "createIndicator": "Create Indicator",
+      "createTeam": "Create Team",
+      "createUser": "Create User",
+      "psychometrics": "Psychometrics",
+      "skillMapper": "Skill Mapper",
+      "bigFive": "Big Five"
     }
   },
   "auth": {
@@ -318,6 +345,172 @@
       "continueWithoutSaving": "Continue Without Saving",
       "retry": "Try Again",
       "retrying": "Retrying..."
+    },
+    "player": {
+      "validation": {
+        "noCurrentQuestion": "No current question",
+        "pleaseSelectOrEnter": "Please select or enter an answer",
+        "pleaseSelectAtLeastOne": "Please select at least one option",
+        "answerMustBeText": "Answer must be text",
+        "pleaseEnterAnswer": "Please enter an answer",
+        "answerTooShort": "Answer is too short. {remaining, plural, one {# more character} other {# more characters}} needed",
+        "pleaseSelectOption": "Please select an answer option",
+        "pleaseCheckAnswer": "Please check your answer"
+      },
+      "toast": {
+        "retryAttempt": "Retrying... ({attempt}/{maxRetries})",
+        "sessionCancelled": "Session was cancelled",
+        "testAlreadyCompleted": "Test already completed",
+        "invalidNavigation": "Invalid navigation to next question",
+        "questionNotFound": "Question not found",
+        "failedToSaveAnswer": "Failed to save answer",
+        "savingAttempt": "Saving... (attempt {attempt}/{maxRetries})",
+        "cannotSkipLast": "The last question cannot be skipped",
+        "failedToSkipQuestion": "Failed to skip question",
+        "testCannotBeCompleted": "Test cannot be completed",
+        "failedToCompleteTest": "Failed to complete test",
+        "failedToCancelTest": "Failed to cancel test",
+        "sessionDiscarded": "Test session discarded",
+        "failedToDiscardTest": "Failed to discard session",
+        "answerSaved": "Answer saved",
+        "changesNotSaved": "Changes not saved",
+        "failedToNavigate": "Failed to navigate to question",
+        "failedToLoadSummary": "Failed to load answer summary",
+        "sessionNotFound": "Session not found. It may have been deleted.",
+        "testAlreadyCompleted2": "Test has already been completed",
+        "testTimedOut": "Test time has expired",
+        "cannotCompleteInStatus": "Cannot complete test in status: {status}",
+        "cannotCompleteChanged": "Test cannot be completed. It may have already been completed or cancelled.",
+        "serverError": "Server error. Please try again."
+      },
+      "summary": {
+        "questionNumber": "Question {number}",
+        "skippedAnswer": "Skipped",
+        "selectedCount": "Selected: {count}",
+        "answerGiven": "Answer given",
+        "otherQuestions": "Other questions",
+        "likertValue": "{value}/5"
+      },
+      "dialog": {
+        "exitTitle": "Exit test?",
+        "exitDescription": "Your progress will be saved. You can continue later.",
+        "continueTest": "Continue Test",
+        "exitButton": "Exit",
+        "timeExpiredTitle": "Time Expired",
+        "timeExpiredDescription": "The allotted time for the test has ended. Your answers will be saved automatically.",
+        "viewResults": "View Results"
+      },
+      "navigation": {
+        "backDisabled": "Going back to previous questions is disabled for this test",
+        "firstQuestion": "This is the first question"
+      }
+    },
+    "progressIndicator": {
+      "questionAnswered": "Question {number}: Answered",
+      "questionSkipped": "Question {number}: Skipped",
+      "questionCurrent": "Question {number}: Current",
+      "questionPending": "Question {number}: Pending",
+      "questionDefault": "Question {number}"
+    },
+    "answerSummary": {
+      "reviewDetails": "Review Details",
+      "hideDetails": "Hide Details",
+      "compactScore": "{score}/{max}",
+      "questionLabel": "Q{number}",
+      "allCompleteTitle": "All questions answered!",
+      "allCompleteDescription": "You're ready to submit your assessment. Review your answers below or submit now.",
+      "needsAttention": "Needs Attention",
+      "needsAttentionLabel": "Questions that need attention",
+      "skippedStat": "{count, plural, one {# skipped} other {# skipped}}",
+      "flaggedStat": "{count, plural, one {# flagged} other {# flagged}}",
+      "answerThisQuestion": "Answer this question",
+      "reviewThisQuestion": "Review this question",
+      "completedCount": "{count, plural, one {# answered question} other {# answered questions}}",
+      "completedLabel": "Answered questions"
+    },
+    "answerCard": {
+      "statusAnswered": "Answered",
+      "statusSkipped": "Skipped",
+      "statusFlagged": "Flagged",
+      "statusPending": "Pending",
+      "typeScale": "Scale",
+      "typeSituational": "Situational",
+      "typeChoice": "Choice",
+      "typeText": "Text",
+      "typeBehavioral": "Behavioral",
+      "typeDefault": "Question",
+      "timeSeconds": "{seconds}s",
+      "editButton": "Edit",
+      "skippedPreview": "Skipped",
+      "questionWasSkipped": "Question was skipped",
+      "selectedAnswer": "Selected answer:",
+      "yourAnswer": "Your answer:",
+      "noQuestionsWithStatus": "No questions with the selected status",
+      "answeredShort": "{count} ans.",
+      "skippedShort": "{count} skip."
+    },
+    "submission": {
+      "submittingResults": "Submitting results...",
+      "pleaseWait": "Please wait. This may take a few seconds.",
+      "attemptOf": "Attempt {current} of {max}",
+      "submissionError": "Submission error",
+      "retryButton": "Retry",
+      "backToReview": "Back to review",
+      "maxAttemptsExceeded": "Maximum attempts exceeded. Please try again later or contact support."
+    },
+    "sjt": {
+      "scenarioLabel": "Scenario",
+      "responsePrompt": "Based on the scenario above, choose the best response:"
+    },
+    "star": {
+      "situation": {
+        "label": "Situation",
+        "hint": "Describe the context or situation"
+      },
+      "task": {
+        "label": "Task",
+        "hint": "What was your role or responsibility?"
+      },
+      "action": {
+        "label": "Action",
+        "hint": "What specific actions did you take?"
+      },
+      "result": {
+        "label": "Result",
+        "hint": "What was the outcome?"
+      },
+      "characterCount": "{current}/{minimum} characters minimum",
+      "charactersMet": "Minimum met"
+    },
+    "timer": {
+      "noLimit": "No time limit",
+      "expired": "Time expired",
+      "remaining": "{minutes}:{seconds} remaining",
+      "warning": "Less than 3 minutes remaining"
+    },
+    "settings": {
+      "title": "Settings",
+      "language": "Language",
+      "theme": "Appearance",
+      "dark": "Dark",
+      "light": "Light",
+      "shortcutHint": "Alt+S"
+    },
+    "progressTooltip": {
+      "answered": "Answered: {count}",
+      "skipped": "Skipped: {count}",
+      "remaining": "Remaining: {count}",
+      "questionNavigation": "Question navigation",
+      "questionAnswered": "Question {number}: Answered",
+      "questionSkipped": "Question {number}: Skipped",
+      "questionCurrent": "Question {number}: Current",
+      "questionPending": "Question {number}: Pending"
+    },
+    "insights": {
+      "hidePanel": "Hide analysis panel",
+      "openPanel": "Open analysis panel",
+      "shortcutHint": "Shortcut: Alt+I",
+      "analysisPanel": "Analysis panel"
     }
   },
   "likert": {
@@ -375,6 +568,36 @@
     "weightDistribution": "Weight Distribution",
     "totalIndicators": "Total indicators",
     "totalWeight": "Total weight",
+    "weightLabel": "Weight: {value}",
+    "indicatorActions": {
+      "viewDetails": "View Details",
+      "edit": "Edit"
+    },
+    "standardsCard": {
+      "untitled": "Untitled",
+      "bigFiveShort": "Big Five",
+      "onetElementType": {
+        "ability": "Ability",
+        "skill": "Skill",
+        "knowledge": "Knowledge",
+        "work_activity": "Work Activity",
+        "work_style": "Work Style",
+        "interest": "Interest",
+        "work_value": "Work Value",
+        "work_context": "Work Context"
+      },
+      "escoSkillType": {
+        "skill": "Skill",
+        "competence": "Competence",
+        "knowledge": "Knowledge",
+        "language": "Language",
+        "transversal": "Transversal"
+      }
+    },
+    "questionMeta": {
+      "secondsAbbr": "{seconds}s",
+      "optionsAbbr": "{count} opts"
+    },
     "overview": "Competency Overview",
     "deleteConfirmTitle": "Delete Competency",
     "deleteConfirmDescription": "This action cannot be undone. This will permanently delete the competency and all associated data.",
@@ -390,7 +613,7 @@
     "standardMappingDescription": "Link to O*NET, ESCO, or personality frameworks",
     "standardsReference": "Standards Reference",
     "standardsReferenceHelp": "Map this competency to established frameworks like O*NET occupational skills, ESCO European skills taxonomy, or Big Five personality traits for standardized assessment alignment.",
-    "standards": {
+    "standardsPicker": {
       "onetSlot": {
         "title": "Occupational anchor",
         "primary": "Primary",
@@ -500,7 +723,25 @@
     "connectionIssueDescription": "Unable to connect to the server. This may be a temporary issue with the API.",
     "networkErrorDescription": "Unable to reach the server. Please check your internet connection.",
     "errorLoadingDescription": "An error occurred while loading the competency details.",
-    "backToCompetencies": "Back to Competencies"
+    "backToCompetencies": "Back to Competencies",
+    "statsCards": {
+      "total": "Total Competencies",
+      "totalMobile": "Total",
+      "totalDesc": "Active competencies",
+      "totalTooltip": "The total number of competencies defined in the system across all categories and proficiency levels.",
+      "withIndicators": "With Indicators",
+      "withIndicatorsMobile": "Linked",
+      "withIndicatorsDesc": "Have indicators",
+      "withIndicatorsTooltip": "Competencies that have at least one behavioral indicator linked. Indicators define observable behaviors used to measure each competency.",
+      "avgWeight": "Avg Indicator Weight",
+      "avgWeightMobile": "Avg Weight",
+      "avgWeightDesc": "Mean weight",
+      "avgWeightTooltip": "The average weight assigned to behavioral indicators across all competencies. Weights determine how much each indicator contributes to the overall competency score.",
+      "advanced": "Advanced Level",
+      "advancedMobile": "Advanced",
+      "advancedDesc": "High proficiency",
+      "advancedTooltip": "Competencies classified as Advanced or Expert proficiency level. These represent higher-order skills expected of senior professionals."
+    }
   },
   "indicator": {
     "title": "Behavioral Indicators",
@@ -508,13 +749,94 @@
     "create": "Create Indicator",
     "edit": "Edit Indicator",
     "delete": "Delete Indicator",
+    "createdSuccess": "Indicator created successfully!",
+    "updatedSuccess": "Indicator updated successfully!",
+    "createdNoId": "Indicator was created but no valid ID was returned. Please refresh and try again.",
+    "createFailed": "Failed to create indicator",
+    "updateFailed": "Failed to update indicator",
     "name": "Name",
     "description": "Description",
     "examples": "Examples",
     "counterExamples": "Counter Examples",
     "observability": "Observability Level",
     "measurementType": "Measurement Type",
-    "backToIndicators": "Back to Indicators"
+    "backToIndicators": "Back to Indicators",
+    "columns": {
+      "title": "Title",
+      "competency": "Competency",
+      "questions": "Questions",
+      "level": "Level",
+      "weight": "Weight",
+      "status": "Status",
+      "active": "Active",
+      "inactive": "Inactive",
+      "actions": "Actions"
+    },
+    "actions": {
+      "label": "Actions",
+      "quickView": "Quick View",
+      "viewDetails": "View Details",
+      "edit": "Edit",
+      "copyId": "Copy ID"
+    },
+    "statsCards": {
+      "total": "Total Indicators",
+      "totalMobile": "Total",
+      "totalDesc": "Defined indicators",
+      "totalTooltip": "The total number of behavioral indicators defined across all competencies in the system.",
+      "withQuestions": "With Questions",
+      "withQuestionsMobile": "Assessed",
+      "withQuestionsDesc": "Have questions",
+      "withQuestionsTooltip": "Indicators that have at least one assessment question linked. These indicators can be measured during test sessions.",
+      "measurable": "Measurable",
+      "measurableMobile": "Measurable",
+      "measurableDesc": "Quantifiable",
+      "measurableTooltip": "Indicators with a quantitative measurement type, allowing objective scoring rather than subjective evaluation.",
+      "complexity": "Avg Complexity",
+      "complexityMobile": "Complexity",
+      "complexityDesc": "Mean complexity",
+      "complexityTooltip": "The average complexity rating across all indicators. Higher complexity indicates more nuanced behavioral patterns to assess."
+    },
+    "detail": {
+      "description": "Description",
+      "noDescription": "No description available for this indicator.",
+      "examples": "Examples",
+      "counterExamples": "Counter Examples",
+      "assessmentQuestions": "Assessment Questions",
+      "addQuestion": "Add Question",
+      "noQuestions": "No assessment questions found for this indicator.",
+      "details": "Details",
+      "weight": "Weight",
+      "weightBadge": "Weight: {value}",
+      "measurementType": "Measurement Type",
+      "orderIndex": "Order Index",
+      "observabilityLevel": "Observability Level",
+      "approvalStatus": "Approval Status",
+      "status": "Status",
+      "active": "Active",
+      "inactive": "Inactive",
+      "contextScope": "Context Scope",
+      "competency": "Competency",
+      "viewCompetencyDetails": "View Details",
+      "deleteTitle": "Delete Behavioral Indicator",
+      "deleteDescription": "This action cannot be undone. This will permanently delete the behavioral indicator and all associated data.",
+      "deleteSuccess": "Behavioral indicator deleted successfully",
+      "deleteAlready": "This behavioral indicator was already deleted.",
+      "deleteFailed": "Failed to delete indicator. Please try again."
+    },
+    "competencyHoverCard": {
+      "loading": "Loading competency...",
+      "loadError": "Failed to load competency details",
+      "notFound": "Competency not found",
+      "category": "Category",
+      "indicators": "Indicators",
+      "version": "Version",
+      "versionValue": "v{version}",
+      "status": "Status",
+      "active": "Active",
+      "inactive": "Inactive",
+      "viewFullDetails": "View Full Details"
+    }
   },
   "question": {
     "title": "Assessment Questions",
@@ -530,7 +852,69 @@
     "explanation": "Explanation",
     "addOption": "Add Option",
     "removeOption": "Remove Option",
-    "backToQuestions": "Back to Questions"
+    "backToQuestions": "Back to Questions",
+    "columns": {
+      "question": "Question",
+      "type": "Type",
+      "difficulty": "Difficulty",
+      "actions": "Actions",
+      "viewIndicator": "View Indicator",
+      "noIndicator": "No indicator assigned"
+    },
+    "actions": {
+      "label": "Actions",
+      "quickView": "Quick View",
+      "viewDetails": "View Details",
+      "edit": "Edit",
+      "copyId": "Copy ID",
+      "openMenu": "Open menu"
+    },
+    "statsCards": {
+      "total": "Total Questions",
+      "totalMobile": "Total",
+      "totalDesc": "All questions",
+      "totalTooltip": "The total number of assessment questions in the system, including all difficulty levels and question types.",
+      "withIndicators": "With Indicators",
+      "withIndicatorsMobile": "Linked",
+      "withIndicatorsDesc": "Indicator-linked",
+      "withIndicatorsTooltip": "Questions linked to at least one behavioral indicator. Linked questions contribute to competency scoring during assessments.",
+      "avgTimeLimit": "Avg Time Limit",
+      "avgTimeLimitMobile": "Avg Time",
+      "avgTimeLimitDesc": "Per question",
+      "avgTimeLimitTooltip": "The average time limit across all timed questions. Questions without a time limit are excluded from this calculation.",
+      "hardQuestions": "Hard Questions",
+      "hardQuestionsMobile": "Hard",
+      "hardQuestionsDesc": "High difficulty",
+      "hardQuestionsTooltip": "Questions marked as Advanced or Specialized difficulty. These are used to differentiate high-performing candidates in assessments."
+    },
+    "detail": {
+      "questionDetails": "Question Details",
+      "answerOptions": "Answer Options",
+      "points": "{count} pts",
+      "totalOptions": "Total options: {count}",
+      "scoreRange": "Score range: {min} - {max} pts",
+      "scoringRubric": "Scoring Rubric",
+      "context": "Context",
+      "competency": "Competency",
+      "behavioralIndicator": "Behavioral Indicator",
+      "assessmentQuestion": "Assessment Question",
+      "currentQuestion": "Current Question",
+      "navigationPath": "Navigation path",
+      "navigationHelp": "Navigate through the competency framework hierarchy",
+      "metadata": "Metadata",
+      "questionType": "Question Type",
+      "difficultyLevel": "Difficulty Level",
+      "timeLimit": "Time Limit",
+      "secondsValue": "{seconds} seconds",
+      "contextTags": "Context Tags",
+      "active": "Active",
+      "inactive": "Inactive",
+      "timeLimitBadge": "{seconds}s limit",
+      "deleteTitle": "Delete Assessment Question",
+      "deleteDescription": "This action cannot be undone. This will permanently delete the assessment question and all associated data.",
+      "deleteSuccess": "Assessment question deleted successfully",
+      "deleteFailed": "Failed to delete question. Please try again."
+    }
   },
   "forms": {
     "save": "Save",
@@ -611,7 +995,9 @@
         "examples": "Positive Examples",
         "counterExamples": "Counter Examples",
         "approvalStatus": "Approval Status",
-        "visibility": "Visibility"
+        "visibility": "Visibility",
+        "descriptionCounterMin": "{count} / {min} chars (min)",
+        "descriptionCounterRange": "{count} / {max} chars"
       },
       "placeholders": {
         "title": "e.g., Proactive Communication",
@@ -629,11 +1015,67 @@
         "createIndicator": "Create Indicator"
       },
       "alerts": {
-        "weightRemaining": "Only {remaining} weight remaining for this competency."
+        "weightRemaining": "Only {remaining} weight remaining for this competency.",
+        "weightLimitExceeded": "Total weight cannot exceed {max}. Current total: {current}, your weight: {weight}, resulting total: {total}."
       },
       "help": {
         "contextScope": "Determines the applicability of this indicator. 'Universal' indicators are context-neutral and used in Scenario A (Competency Passport).",
         "contextScopeNote": "\"Universal\" indicators are included in Scenario A (General Overview / Competency Passport). Other scopes are for targeted assessments."
+      },
+      "context": {
+        "forCompetency": "For: {name}"
+      },
+      "weightModal": {
+        "title": "Weight Distribution",
+        "descriptionRedistribute": "Redistribute weights to accommodate the new indicator",
+        "descriptionAdjust": "Adjust the weight distribution for existing indicators",
+        "summary": {
+          "validDistribution": "Valid Distribution",
+          "weightOk": "Weight Distribution OK",
+          "limitExceeded": "Weight Limit Exceeded",
+          "currentTotal": "Current Total",
+          "newIndicator": "New Indicator",
+          "finalTotal": "Final Total",
+          "totalWeight": "Total Weight",
+          "weightUsage": "Weight Usage"
+        },
+        "quickActions": "Quick Actions",
+        "equalDistribution": "Equal Distribution",
+        "resetChanges": "Reset Changes",
+        "existingIndicators": "Existing Indicators ({count})",
+        "noIndicators": "No existing indicators found",
+        "modified": "Modified",
+        "original": "Original",
+        "change": "Change",
+        "weightLabel": "Weight:",
+        "rangeHint": "Range: 0.001-1.000",
+        "saving": "Saving Changes...",
+        "save": "Save Weight Distribution",
+        "toasts": {
+          "loadFailed": "Failed to load existing indicators",
+          "weightClamped": "Weight adjusted to {value} (valid range: 0.001 - 1.000)",
+          "invalidNumber": "Please enter a valid number",
+          "distributionInvalid": "Weight distribution is not valid. Total must equal 1.0",
+          "distributionExceeds": "Weight distribution exceeds limit. Total cannot exceed 1.0",
+          "updateSuccess": "Weights updated successfully",
+          "updateFailed": "Failed to update weights. Please try again."
+        }
+      }
+    },
+    "newIndicator": {
+      "title": "New behavioral indicator",
+      "description": "Describe an observable behavior that demonstrates this competency.",
+      "selectCompetencyDescription": "First, select the competency this indicator belongs to."
+    },
+    "newQuestion": {
+      "title": "Create New Assessment Question",
+      "selectIndicatorDescription": "First, select the behavioral indicator for your question",
+      "loading": "Loading...",
+      "tabs": {
+        "details": "Details"
+      },
+      "errors": {
+        "missingParams": "Error: Missing required parameters"
       }
     },
     "question": {
@@ -701,6 +1143,52 @@
         "MID_DESC": "Mid-career complexity",
         "SENIOR": "Senior",
         "SENIOR_DESC": "Senior-level complexity"
+      },
+      "preview": {
+        "header": "Live Preview",
+        "autoUpdating": "Auto-updating",
+        "questionPlaceholder": "Question text...",
+        "answerOptionsLabel": "Answer Options",
+        "noOptions": "No answer options configured",
+        "optionFallback": "Option {index}",
+        "situationalFallback": "Situational response...",
+        "scoringRubric": "Scoring Rubric",
+        "points": "{count} pts",
+        "secondsSuffix": "{value}s",
+        "scale": {
+          "min": "Strongly Disagree",
+          "mid": "Neutral",
+          "max": "Strongly Agree"
+        }
+      },
+      "indicatorSelector": {
+        "title": "Select Behavioral Indicator",
+        "description": "Choose the behavioral indicator for which you want to create an assessment question.",
+        "loading": "Loading indicators...",
+        "filters": {
+          "competencyLabel": "Filter by Competency",
+          "competencyAllPlaceholder": "All competencies",
+          "competencyAllItem": "All Competencies",
+          "searchLabel": "Search Indicators",
+          "searchPlaceholder": "Search by title or description..."
+        },
+        "empty": {
+          "title": "No indicators found matching your criteria.",
+          "hint": "Try adjusting your filters or search query."
+        },
+        "card": {
+          "noDescription": "No description available",
+          "level": "Level: {level}",
+          "type": "Type: {type}",
+          "weight": "Weight: {weight}"
+        },
+        "buttons": {
+          "continue": "Continue"
+        },
+        "toasts": {
+          "loadFailed": "Failed to load indicators. Please try again.",
+          "selectFirst": "Please select an indicator to continue."
+        }
       }
     },
     "competency": {
@@ -844,6 +1332,16 @@
     "saving": "Saving...",
     "settingsSaved": "Settings saved successfully",
     "settingsSaveError": "Failed to save settings",
+    "editLockedBannerTitlePublished": "Editing a published template",
+    "editLockedBannerTitleArchived": "Editing an archived template",
+    "editLockedBannerDescPublished": "Changes apply to the live template right away. Future assessments use the new settings, and some changes can affect tests already in progress. Creating a new version is the safer path.",
+    "editLockedBannerDescArchived": "This template is archived and kept as a historical record. Saving overwrites that archived copy. Creating a new version is usually the better choice.",
+    "editLockedConfirmTitlePublished": "Overwrite the published template?",
+    "editLockedConfirmTitleArchived": "Overwrite the archived template?",
+    "editLockedConfirmDescPublished": "This changes the live template for everyone. Questions already assigned to in-progress sessions won't change, but scoring and navigation settings can change. Consider creating a new version instead.",
+    "editLockedConfirmDescArchived": "This overwrites the archived historical record. Consider creating a new version instead.",
+    "editAnyway": "Edit anyway",
+    "createNewVersion": "New Version",
     "question": "question",
     "questionsPlural": "questions",
     "minutes": "minutes",
@@ -854,6 +1352,14 @@
     "goalConfigDesc": "Configure settings specific to your selected assessment goal",
     "deselectCategory": "Deselect",
     "selectCategory": "Select all",
+    "settingsPageTitle": "Settings",
+    "settingsPageDesc": "Configure all template settings and behavior options",
+    "validation": {
+      "minChars": "Minimum {min} characters",
+      "maxChars": "Maximum {max} characters",
+      "invalidOnetFormat": "Invalid O*NET SOC code format (expected XX-XXXX.XX)",
+      "invalidTeamId": "Invalid team ID"
+    },
     "hub": {
       "tabs": {
         "overview": "Overview",
@@ -875,6 +1381,13 @@
       "actions": {
         "newVersion": "New Version",
         "newVersionShort": "New"
+      },
+      "versionDialog": {
+        "title": "Create New Version",
+        "description": "A new draft version will be created. What should happen to the current published version?",
+        "keepPublished": "Keep original published",
+        "archiveOriginal": "Archive original",
+        "cancel": "Cancel"
       },
       "overview": {
         "configuration": "Configuration",
@@ -1000,14 +1513,25 @@
       "description": "Select a template to assess your competencies"
     },
     "errors": {
-      "invalidServerData": "Invalid data received from server.",
-      "loadingFailed": "An unexpected error occurred while loading templates.",
-      "failedToLoad": "Failed to Load Assessment",
-      "failedToLoadDescription": "We couldn't load the assessment details. This might be a temporary issue.",
-      "failedToStart": "Failed to start assessment. Please try again.",
-      "failedToStartNew": "Failed to start new session. Please try again.",
-      "notAuthenticated": "Not authenticated",
-      "checkingSession": "Error checking for existing session"
+      "databaseError": "Database Error",
+      "databaseErrorDescription": "An error occurred while working with the database. Please try again later.",
+      "networkError": "Network Error",
+      "networkErrorDescription": "Failed to connect to the server. Check your internet connection.",
+      "templateNotFound": "Template Not Found",
+      "templateNotFoundDescription": "The requested test template was not found or has been deleted.",
+      "tryAgain": "Try Again",
+      "signIn": "Sign In",
+      "goBack": "Go Back",
+      "toTemplateList": "To Template List",
+      "toHome": "Home",
+      "contactSupport": "If the problem persists, contact support",
+      "requestId": "Request ID",
+      "errorId": "Error ID",
+      "devInfo": "Dev Info",
+      "sessionError": "Test Session Error",
+      "sessionErrorDescription": "An error occurred while loading the test. Try returning to the test list and starting again.",
+      "errorOccurred": "An Error Occurred",
+      "failedToLoad": "Failed to load the test. Please try again."
     },
     "builder": {
       "dragToReorder": "Drag to reorder",
@@ -1028,63 +1552,21 @@
       "dropHereToAdd": "Drop here to add",
       "save": "Save",
       "undo": "Undo",
-      "redo": "Redo",
-      "card": {
-        "dragToReorder": "Drag to reorder",
-        "expandWarnings": "Show warnings and controls",
-        "expandDetails": "Show full details",
-        "collapseCard": "Collapse card",
-        "importance": "Importance",
-        "difficulty": "Difficulty",
-        "importanceTooltip": "How much weight this competency carries in the overall assessment",
-        "inventoryDepth": "Inventory Depth",
-        "inventoryEMH": "E / M / H",
-        "sampleQuestion": "Sample Question",
-        "noSampleAvailable": "No sample available — run simulation first",
-        "indicatorPriority": "Indicator Priority",
-        "optimisticApply": "Applied on next simulation",
-        "removeButton": "Remove",
-        "removeTitle": "Remove Competency",
-        "removeDescription": "This will remove <strong>{name}</strong> from the blueprint. This action can be undone.",
-        "removeCancel": "Cancel",
-        "removeConfirm": "Remove",
-        "decreaseImportance": "Decrease importance",
-        "increaseImportance": "Increase importance",
-        "collapseDetail": "Collapse details",
-        "expandOptions": "Expand options",
-        "importanceLevel": {
-          "low": "Low",
-          "medium": "Medium",
-          "high": "High",
-          "critical": "Critical",
-          "lowTooltip": "0.5x weight — fewer questions allocated",
-          "mediumTooltip": "1.0x weight — standard question allocation",
-          "highTooltip": "1.5x weight — more questions allocated",
-          "criticalTooltip": "2.0x weight — maximum question allocation"
-        },
-        "difficultyOptions": {
-          "foundational": "Foundational",
-          "intermediate": "Intermediate",
-          "advanced": "Advanced",
-          "expert": "Expert",
-          "foundationalShort": "F",
-          "intermediateShort": "I",
-          "advancedShort": "A",
-          "expertShort": "E"
-        },
-        "warningsCount": "{count, plural, one {# issue} other {# issues}}",
-        "availableOf": "{available}/{required}q",
-        "questionsShort": "{count}q",
-        "healthCritical": "No questions available in inventory",
-        "healthModerate": "Limited question inventory",
-        "lowQuestions": "Only {count} questions available",
-        "weightImbalance": "This competency has over 50% total weight"
-      }
+      "redo": "Redo"
     },
     "start": {
-      "errors": {
-        "failedToLoad": "Failed to Load Assessment",
-        "failedToLoadDescription": "We couldn't load the assessment details. This might be a temporary issue."
+      "title": "Start Assessment",
+      "description": "Begin your competency assessment.",
+      "checking": "Checking Readiness...",
+      "notAvailable": "Assessment Not Available",
+      "begin": "Begin Assessment",
+      "progressSaved": "Your progress will be saved automatically. You can pause and resume at any time.",
+      "failedToStart": "Failed to Start Assessment",
+      "labels": {
+        "time": "Time",
+        "questions": "Questions",
+        "competencies": "Competencies",
+        "min": "min"
       }
     },
     "header": {
@@ -1199,19 +1681,11 @@
         "failedToStartNewSession": "Failed to start new session"
       }
     },
-    "start": {
-      "title": "Start Assessment",
-      "description": "Begin your competency assessment.",
-      "checking": "Checking Readiness...",
-      "notAvailable": "Assessment Not Available",
-      "begin": "Begin Assessment",
-      "progressSaved": "Your progress will be saved automatically. You can pause and resume at any time.",
-      "failedToStart": "Failed to Start Assessment",
-      "labels": {
-        "time": "Time",
-        "questions": "Questions",
-        "competencies": "Competencies",
-        "min": "min"
+    "catalog": {
+      "tabs": {
+        "available": "My Templates",
+        "shared": "Shared with Me",
+        "sharedCount": "{count} shared"
       }
     },
     "filters": {
@@ -1255,27 +1729,6 @@
       "defaultHelp": "Try refreshing the page or contact an administrator.",
       "refreshPage": "Refresh page",
       "signIn": "Sign in"
-    },
-    "errors": {
-      "databaseError": "Database Error",
-      "databaseErrorDescription": "An error occurred while working with the database. Please try again later.",
-      "networkError": "Network Error",
-      "networkErrorDescription": "Failed to connect to the server. Check your internet connection.",
-      "templateNotFound": "Template Not Found",
-      "templateNotFoundDescription": "The requested test template was not found or has been deleted.",
-      "tryAgain": "Try Again",
-      "signIn": "Sign In",
-      "goBack": "Go Back",
-      "toTemplateList": "To Template List",
-      "toHome": "Home",
-      "contactSupport": "If the problem persists, contact support",
-      "requestId": "Request ID",
-      "errorId": "Error ID",
-      "devInfo": "Dev Info",
-      "sessionError": "Test Session Error",
-      "sessionErrorDescription": "An error occurred while loading the test. Try returning to the test list and starting again.",
-      "errorOccurred": "An Error Occurred",
-      "failedToLoad": "Failed to load the test. Please try again."
     },
     "newForm": {
       "steps": {
@@ -1413,10 +1866,24 @@
         "developing": "Developing",
         "strength": "Strength"
       },
+      "proficiencyLevel": {
+        "expert": "Expert",
+        "advanced": "Advanced",
+        "proficient": "Proficient",
+        "developing": "Developing",
+        "foundational": "Foundational"
+      },
+      "confidenceInterval": "95% CI: {lower}% – {upper}%",
+      "insufficientEvidence": "Insufficient evidence",
+      "insufficientEvidenceTooltip": "This competency has limited evidence. Results should be interpreted with caution.",
+      "lowConfidenceCount": "{count} {count, plural, =1 {competency has} other {competencies have}} limited evidence",
       "showMore": "Show {count} more",
       "showLess": "Show less",
       "questionLoadError": "Failed to load question details",
       "retry": "Retry",
+      "tooltips": {
+        "competencyProfile": "Detailed view of all assessed competencies with proficiency levels and behavioral indicator breakdowns."
+      },
       "overview": {
         "profileOverview": "Profile Overview",
         "assessmentResults": "Assessment results",
@@ -1436,7 +1903,125 @@
         "keepDevelopingSkills": "Keep developing skills.",
         "coverage": "Coverage",
         "mapped": "{mapped}/{total} mapped",
-        "developmentNote": "Regular reassessment helps track growth."
+        "developmentNote": "Regular reassessment helps track growth.",
+        "metrics": {
+          "assessed": "Assessed",
+          "competencies": "competencies",
+          "strengths": "Expert / Advanced",
+          "toDevelop": "To Develop"
+        },
+        "competencyRadar": "Competency Radar",
+        "tabs": {
+          "personality": "Personality",
+          "strengths": "Strengths",
+          "development": "Development",
+          "allCompetencies": "All Competencies",
+          "trend": "Trend"
+        },
+        "panels": {
+          "personalityCompetencies": "Personality & Competencies",
+          "signatureStrengths": "Strengths & Growth",
+          "areasToDevelop": "Areas to Develop",
+          "indicatorBreakdown": "Indicator Breakdown",
+          "growthTrajectory": "Growth Trajectory"
+        },
+        "innerTabs": {
+          "bigFive": "Big Five",
+          "breakdown": "Breakdown"
+        },
+        "insights": {
+          "topTraits": "Top traits: {traits}",
+          "expertAdvanced": "{count} Expert/Advanced competencies",
+          "confidence": "Confidence: {level} ({percentage}%)",
+          "confidenceHigh": "High",
+          "confidenceModerate": "Moderate"
+        },
+        "radar": {
+          "profile": "Profile",
+          "average": "Average",
+          "score": "Score",
+          "baseline": "Baseline"
+        },
+        "contributingCompetencies": "Contributing competencies",
+        "development": {
+          "suggestion": {
+            "developing": "Focus on building understanding through practice and targeted feedback.",
+            "foundational": "Start with core concepts and seek mentorship to accelerate growth."
+          },
+          "encouragement": "Development areas highlight opportunities for growth. Focus on one area at a time for the best results."
+        },
+        "tooltips": {
+          "assessed": "Total number of competencies evaluated in this assessment.",
+          "strengthCount": "Competencies at Expert or Advanced proficiency level.",
+          "developCount": "Competencies at Developing or Foundational level — your growth opportunities.",
+          "competencyRadar": "Visual overview of all competency scores. Each axis represents one competency.",
+          "bigFiveProfile": "The Big Five (OCEAN) personality model maps your competencies to five core dimensions: Openness, Conscientiousness, Extraversion, Agreeableness, and Emotional Stability.",
+          "traitBreakdown": "Each trait is scored 0–100% based on how your competency results map to Big Five dimensions via O*NET classifications.",
+          "competencyMapping": "Shows which competencies contribute to each Big Five trait. Higher coverage means more reliable personality projection.",
+          "signatureStrengths": "Your top-performing competencies and areas with room for growth. Switch tabs to see strengths or development focus areas.",
+          "areasToDevlop": "Competencies at Developing or Foundational level — focus areas for professional growth.",
+          "competencyProfile": "Detailed view of all assessed competencies with proficiency levels and behavioral indicator breakdowns.",
+          "indicatorBreakdown": "Heatmap showing per-indicator scores within each competency. Darker cells indicate higher performance.",
+          "growthTrajectory": "Your score trend across multiple assessment attempts. Requires at least 2 completed assessments.",
+          "personalityCompetencies": "Radar visualization of your personality traits and competency scores. Switch tabs to compare Big Five projections, competency coverage, or trait-level breakdowns.",
+          "profilePattern": "Your competencies grouped by proficiency tier — from Signature Strengths to Critical Gaps. Helps identify your overall profile shape at a glance."
+        },
+        "betterThan": "Better than <bold>{percentage}%</bold> of participants",
+        "consistencyGood": "Consistent responses",
+        "consistencyWarning": "Possible response inconsistencies",
+        "consistencyScore": "Response consistency: {score}%",
+        "consistencyFlags": "Flags: {flags}",
+        "indicatorBreakdown": "Indicator Breakdown",
+        "indicatorBreakdownDescription": "Per-indicator score heatmap across competencies",
+        "target": "Target",
+        "traits": {
+          "openness": {
+            "name": "Openness",
+            "high": "You show strong creativity, curiosity, and openness to new experiences and ideas.",
+            "medium": "You have a balanced approach to new experiences, combining creativity with practicality.",
+            "low": "You prefer established routines and practical, concrete approaches to problems."
+          },
+          "conscientiousness": {
+            "name": "Conscientiousness",
+            "high": "You demonstrate excellent organization, dependability, and goal-oriented behavior.",
+            "medium": "You balance structure with flexibility, achieving goals while adapting to changes.",
+            "low": "You prefer spontaneity and flexibility over rigid planning and structure."
+          },
+          "extraversion": {
+            "name": "Extraversion",
+            "high": "You thrive in social settings, drawing energy from interactions with others.",
+            "medium": "You comfortably navigate both social situations and solo activities.",
+            "low": "You prefer thoughtful, one-on-one interactions and value your independent time."
+          },
+          "agreeableness": {
+            "name": "Agreeableness",
+            "high": "You prioritize harmony, cooperation, and concern for others in your interactions.",
+            "medium": "You balance empathy with assertiveness, adapting your approach as needed.",
+            "low": "You value directness and objectivity, prioritizing results over social harmony."
+          },
+          "emotionalStability": {
+            "name": "Emotional Stability",
+            "high": "You demonstrate excellent resilience, calmness, and stress management.",
+            "medium": "You handle most situations calmly while acknowledging emotional responses.",
+            "low": "You experience emotions deeply and may be more sensitive to stress."
+          }
+        },
+        "profilePattern": {
+          "title": "Competency Profile Pattern",
+          "description": "Your competencies categorized by proficiency level, based on assessment performance.",
+          "categories": {
+            "SIGNATURE_STRENGTH": "Signature Strength",
+            "STRENGTH": "Strength",
+            "AVERAGE": "Average",
+            "DEVELOPING": "Developing",
+            "CRITICAL_GAP": "Critical Gap"
+          }
+        },
+        "growthTrajectory": {
+          "title": "Progress Over Time",
+          "description": "Your improvement across assessment attempts",
+          "emptyState": "Take this assessment again to track your progress over time."
+        }
       }
     },
     "heroCard": {
@@ -1496,7 +2081,8 @@
         "form": {
           "tabs": {
             "email": "By Email",
-            "systemUser": "System User"
+            "systemUser": "System User",
+            "team": "Team"
           },
           "emailPlaceholder": "Enter email address",
           "userPlaceholder": "Search users...",
@@ -1505,6 +2091,12 @@
           "suggestions": "Suggested",
           "searchHint": "Type at least 2 characters to search",
           "noUsersFound": "No users found",
+          "teamPlaceholder": "Select a team...",
+          "teamLoading": "Loading teams...",
+          "noTeams": "No teams available",
+          "teamMemberCount": "{count} members",
+          "selectedTeam": "Selected team: {name}",
+          "teamHint": "Members of the selected team inherit access to this template.",
           "validation": {
             "invalidEmail": "Valid email required"
           }
@@ -1582,6 +2174,8 @@
       "toast": {
         "sharedWith": "Shared with {email}",
         "shareFailed": "Failed to share with user",
+        "sharedWithTeam": "Shared with team {name}",
+        "shareTeamFailed": "Failed to share with team",
         "permissionUpdated": "Permission updated",
         "updateFailed": "Failed to update permission",
         "accessRemoved": "Removed access for {name}",
@@ -1592,23 +2186,6 @@
         "linkRevokeFailed": "Failed to revoke link",
         "visibilityFailed": "Failed to change visibility"
       }
-    },
-    "sessionDelete": {
-      "deleteSession": "Delete Session",
-      "deleteSessionTitle": "Delete Test Session?",
-      "deleteSessionDescription": "This will permanently delete this test session, including the result and all answers.",
-      "bulkDeleteTitle": "Delete {count} Sessions?",
-      "bulkDeleteDescription": "This will permanently delete {count} test sessions, including all results and answers.",
-      "deleting": "Deleting...",
-      "sessionDeleted": "Session deleted",
-      "sessionDeletedDescription": "The test session was successfully deleted.",
-      "sessionsDeleted": "{count} sessions deleted",
-      "sessionsDeletedDescription": "{deleted} sessions deleted successfully.",
-      "deleteError": "Delete error",
-      "deleteErrorDescription": "Failed to delete session. Please try again.",
-      "bulkDeleteErrorDescription": "Failed to delete sessions. Please try again.",
-      "deleteSelected": "Delete selected ({count})",
-      "selected": "{count} selected"
     }
   },
   "candidate": {
@@ -1677,7 +2254,556 @@
     "detailed": "Detailed",
     "recommended": "Recommended",
     "resultNotFound": "Test Result Not Found",
-    "resultFor": "Test Result - {name}"
+    "resultFor": "Test Result - {name}",
+    "jobFit": {
+      "gapAnalysis": "Gap Analysis",
+      "gapAnalysisDescription": "Your scores vs. job requirements ({passingScore}%)",
+      "keyInsights": "Key Insights",
+      "jobRequirements": "Job Requirements",
+      "qualified": "Qualified",
+      "qualifiedMessage": "You meet the benchmark requirements.",
+      "excelIn": "Excel in: {areas}.",
+      "belowRequirements": "Below Requirements",
+      "belowRequirementsMessage": "Some competencies need development.",
+      "focusOn": "Focus on: {areas}.",
+      "strengths": "Strengths ({count})",
+      "gaps": "Gaps ({count})",
+      "betterThan": "Better than <bold>{percentage}%</bold> of candidates",
+      "competencyMap": "Competency Map",
+      "visualProfile": "Visual profile",
+      "indicatorBreakdown": "Indicator Breakdown",
+      "indicatorHeatmapDescription": "Per-indicator score heatmap",
+      "progressOverTime": "Progress Over Time",
+      "improvementAcrossAttempts": "Your improvement across attempts",
+      "statusQualified": "Qualified",
+      "statusBelowRequirements": "Below Requirements",
+      "onetLabel": "O*NET: {code}",
+      "tabOverview": "Overview",
+      "tabGapAnalysis": "Gap Analysis",
+      "tabCompetencies": "Competencies",
+      "tabDetails": "Details",
+      "insightStrongest": "Strongest: {name} ({score}%)",
+      "insightLargestGap": "Largest gap: {name} ({score}%)",
+      "insightConsistency": "Consistency: {value} ({level})",
+      "consistencyReliable": "reliable",
+      "consistencyModerate": "moderate",
+      "metricExceeds": "Exceeds",
+      "metricMeets": "Meets",
+      "metricBelow": "Below",
+      "panelGapAnalysis": "Gap Analysis",
+      "panelGapAnalysisSubtitle": "Score vs. Benchmark by Competency",
+      "legendBenchmark": "Benchmark",
+      "legendExceeds": "Exceeds",
+      "legendMeets": "Meets",
+      "legendBelow": "Below",
+      "panelCompetencyCards": "Competency Cards",
+      "panelRadarChart": "Radar — Candidate vs Benchmark",
+      "tooltips": {
+        "exceeds": "Competencies where your score exceeds the job benchmark — your strongest qualifications for this role.",
+        "meets": "Competencies where your score meets the benchmark but is within 15% above it — solid but could be strengthened.",
+        "below": "Competencies scoring below the job benchmark — gaps that may need development or interview follow-up.",
+        "gapAnalysis": "Compares your competency scores against the job benchmark. Green bars meet or exceed requirements; amber bars fall short.",
+        "competencyCards": "Summary cards for each competency showing your score, benchmark target, and pass/fail status at a glance.",
+        "radarChart": "Overlay of your scores vs. benchmark requirements. Larger area coverage indicates stronger job fit.",
+        "trendAnalysis": "Score progression across multiple attempts for this assessment. Shows improvement or regression over time.",
+        "competencyDetails": "Expandable table with detailed per-competency breakdown including indicator scores and confidence intervals."
+      }
+    },
+    "teamFit": {
+      "title": "Team Fit Profile",
+      "subtitle": "Your skills vs team saturation",
+      "insights": "Team Insights",
+      "teamAnalysis": "Team Analysis",
+      "strongFit": "Strong Team Fit",
+      "strongFitDescription": "Your skills complement the team well.",
+      "alignmentNeeded": "Alignment Needed",
+      "alignmentNeededDescription": "Some skills need development for team fit.",
+      "youBring": "You Bring",
+      "growthAreas": "Growth Areas",
+      "collaborationNote": "Team fit shows how your skills complement the group.",
+      "personality": "Personality Profile",
+      "personalityDescription": "Big Five for team dynamics",
+      "needMoreCompetencies": "Need 3+ competencies for radar.",
+      "high": "High",
+      "moderate": "Moderate",
+      "low": "Low",
+      "multiplier": {
+        "boosted": "Score boosted by {percent}%",
+        "boostedDescription": "Your skills bring unique value the team currently lacks ({diversity}% diversity).",
+        "adjusted": "Score adjusted by -{percent}%",
+        "adjustedDescription": "Significant skill overlap with existing team members ({saturation}% saturation)."
+      },
+      "metrics": {
+        "title": "Team Fit Metrics",
+        "diversity": "Diversity",
+        "saturation": "Saturation",
+        "multiplier": "Multiplier",
+        "diverseSkills": "Diverse Skills",
+        "saturated": "Saturated",
+        "gapsFilled": "Gaps Filled",
+        "personality": "Personality",
+        "tooltips": {
+          "diversity": "Percentage of your skills that are unique to the team. Higher diversity means you bring capabilities the team currently lacks.",
+          "saturation": "Percentage of your skills already well-covered by existing team members. High saturation means significant overlap.",
+          "multiplier": "Score adjustment factor based on your skill uniqueness. Above 1.0x means your skills are boosted for filling gaps; below 1.0x means overlap reduces your effective contribution.",
+          "diverseSkills": "Count of competencies where you score above the team's saturation threshold — skills where you add new capability.",
+          "saturated": "Count of competencies already well-represented in the team. These skills overlap with existing members.",
+          "gapsFilled": "Number of team skill gaps your profile helps address. These are areas where the team is currently undersaturated.",
+          "personality": "Big Five personality compatibility score with the team. Higher percentage indicates better interpersonal dynamics and communication fit."
+        }
+      },
+      "heatmap": {
+        "title": "Indicator Breakdown",
+        "description": "Performance across behavioral indicators within each competency",
+        "score": "Score",
+        "questions": "{count} questions",
+        "noData": "No indicator data available"
+      },
+      "radar": {
+        "title": "Team Fit Analysis",
+        "you": "You",
+        "team": "Team",
+        "gapsYouFill": "Gaps You Fill",
+        "compatibility": "Compatibility",
+        "gapsFilled": "Gaps Filled",
+        "strengths": "Strengths",
+        "growthAreas": "Growth Areas for Team Fit",
+        "leader": "Leader",
+        "leaderDescription": "High scores across leadership competencies",
+        "specialist": "Specialist",
+        "specialistDescription": "Deep expertise in specific areas",
+        "generalist": "Generalist",
+        "generalistDescription": "Balanced skills across areas",
+        "collaborator": "Collaborator",
+        "collaboratorDescription": "Strong in interpersonal skills",
+        "innovator": "Innovator",
+        "innovatorDescription": "High in creativity and openness",
+        "baseline": "Baseline"
+      },
+      "statusCompatible": "Compatible",
+      "statusNeedsAdaptation": "Needs Adaptation",
+      "teamLabel": "Team: {name}",
+      "synergyLabel": "{value}x synergy",
+      "tabOverview": "Overview",
+      "tabSaturation": "Saturation",
+      "tabComparison": "Comparison",
+      "tabCompetencies": "Competencies",
+      "tabOnboarding": "Onboarding",
+      "insightGapsFilled": "Fills {count} team gaps",
+      "insightSaturatedOverlap": "{count} saturated {count, plural, one {overlap} other {overlaps}}",
+      "insightDiversityRatio": "Diversity ratio: {value}",
+      "sectionTeamSaturation": "Team Saturation",
+      "sectionYourContribution": "Your Contribution",
+      "sectionPersonalityFit": "Personality Fit",
+      "sectionIndicatorBreakdown": "Indicator Breakdown",
+      "whatYouBring": "What You Bring",
+      "metricGapsFilled": "Gaps Filled",
+      "metricSaturated": "Saturated",
+      "metricDiversityRatio": "Diversity Ratio",
+      "tooltips": {
+        "gapsFilled": "Number of team skill gaps this candidate helps fill. Higher means more unique contribution to the team.",
+        "saturated": "Skills already well-covered by existing team members. High overlap means less incremental value.",
+        "diversityRatio": "Ratio of unique skills vs. overlapping skills. Higher ratio indicates more complementary fit.",
+        "teamSaturation": "Radar comparing your competency scores against existing team coverage. Areas where you exceed the team line represent your unique contributions.",
+        "yourContribution": "Overview of how your skills complement the existing team — gap fills, compatibility score, strengths, and areas for development.",
+        "gapsYouFill": "Skills where the team is undersaturated and your score fills the gap. The +% shows how much you exceed the team's current coverage.",
+        "compatibility": "Overall fit score combining gap coverage, skill overlap, and relative strength. Higher is better.",
+        "statGapsFilled": "Count of team skill gaps your profile addresses — competencies where you score above the team's saturation threshold.",
+        "statStrengths": "Number of competencies where you score 70% or above — your strongest areas relative to the team.",
+        "whatYouBring": "Your top-scoring competencies (70%+) that directly strengthen the team. These are your key contributions.",
+        "growthAreas": "Competencies where both your score and the team's coverage are low. Developing these would benefit you and the team.",
+        "personalityFit": "Big Five personality dimensions visualized as progress rings. Shows how your personality profile complements team dynamics.",
+        "indicatorBreakdown": "Heatmap of per-indicator scores within each competency. Identifies specific behavioral strengths and development areas.",
+        "onboarding": "AI-generated onboarding suggestions based on your personality profile, skill gaps, and team dynamics."
+      }
+    },
+    "shared": {
+      "hero": {
+        "scoreTooltip": "Overall assessment score based on all competency evaluations.",
+        "percentileTooltip": "Your ranking compared to other participants who took this assessment.",
+        "statusTooltip": "Assessment outcome based on the passing threshold set for this test.",
+        "dateTooltip": "Date and time when this assessment was completed.",
+        "durationTooltip": "Total time spent completing the assessment.",
+        "questionsTooltip": "Number of questions answered out of the total available.",
+        "questionsLabel": "{answered}/{total} questions",
+        "percentile": "{value}th percentile",
+        "linkCopied": "Link copied to clipboard",
+        "linkCopiedShort": "Link copied",
+        "download": "Download",
+        "downloadPdf": "Download PDF",
+        "share": "Share",
+        "shareResults": "Share results"
+      },
+      "heatmap": {
+        "title": "Indicator Breakdown",
+        "description": "Performance across behavioral indicators within each competency",
+        "score": "Score",
+        "questions": "{count} questions",
+        "noData": "No indicator data available"
+      },
+      "detailTable": {
+        "title": "Detailed Breakdown",
+        "subtitle": "Full Competency Table",
+        "rowCount": "{count} rows",
+        "colCompetency": "Competency",
+        "colScore": "Score",
+        "colBenchmark": "Benchmark",
+        "colGap": "Gap",
+        "colCI": "CI 95%",
+        "colAlpha": "Cronbach α",
+        "colPercentile": "Percentile",
+        "percentileSuffix": "{value}th",
+        "tipCompetency": "Assessed skill area. Click to sort alphabetically.",
+        "tipScore": "Your percentage score for this competency based on correctly answered questions.",
+        "tipBenchmark": "Target score required for this competency — set by the job profile or O*NET benchmark.",
+        "tipGap": "Difference between your score and the benchmark. Positive means you exceed it; negative means a gap.",
+        "tipCI": "95% confidence interval — the range within which your true score likely falls.",
+        "tipAlpha": "Cronbach's alpha measures internal consistency. Values ≥ 0.70 indicate reliable measurement.",
+        "tipPercentile": "Your ranking compared to other candidates. 75th means you scored higher than 75% of participants.",
+        "showMoreRows": "Show {count} more rows",
+        "showLessRows": "Show less"
+      },
+      "metricCards": {
+        "ariaLabel": "Key metrics",
+        "defaultSublabel": "competencies"
+      },
+      "competencyCards": {
+        "ariaLabel": "Competency scores",
+        "statusExceeds": "EXCEEDS",
+        "statusMeets": "MEETS",
+        "statusBelow": "BELOW",
+        "benchLabel": "bench {value}",
+        "attemptCount": "{count} attempts",
+        "showMore": "Show {count} more",
+        "showLess": "Show less",
+        "tipScore": "Your percentage score for this competency",
+        "tipGap": "Difference between your score and the benchmark",
+        "tipBench": "Target score set by the job profile or O*NET benchmark",
+        "tipBar": "Score {score}% vs benchmark {bench}%",
+        "tipTrend": "Score progression across previous attempts",
+        "tipStatus": {
+          "exceeds": "Your score exceeds the benchmark — strong qualification",
+          "meets": "Your score meets the benchmark — within acceptable range",
+          "below": "Your score is below the benchmark — may need development"
+        },
+        "filterAriaLabel": "Filter by status",
+        "filterClear": "Clear",
+        "countTotal": "{count} competencies",
+        "countFiltered": "{shown} of {total}"
+      },
+      "gapChart": {
+        "showMore": "Show {count} more",
+        "showLess": "Show less"
+      }
+    },
+    "comparison": {
+      "title": "Candidate Comparison",
+      "subtitle": "Side-by-side Team Fit analysis for {count} candidates",
+      "teamContext": "Team: {teamName}",
+      "targetRole": "Target Role: {role}",
+      "teamSize": "{count} team members",
+      "ranking": "Ranking",
+      "overallFit": "Overall Fit",
+      "diversityContribution": "Diversity Contribution",
+      "personalityFit": "Personality Compatibility",
+      "competencyBreakdown": "Competency Breakdown",
+      "competencyBreakdownDescription": "Score comparison across all assessed competencies",
+      "gapCoverage": "Gap Coverage Analysis",
+      "gapCoverageDescription": "Which candidates can fill the team's skill gaps",
+      "complementarity": "Best Hiring Pairs",
+      "complementarityDescription": "Pairs of candidates that together cover the most gaps",
+      "complementarityScore": "{score}% gap coverage",
+      "gapsCovered": "{covered} of {total} gaps covered",
+      "noGaps": "No significant team gaps detected",
+      "bestForGap": "Best",
+      "fillsGap": "Fills gap",
+      "cannotFill": "Insufficient",
+      "personalityProfiles": "Personality Profiles",
+      "noCandidates": "Select at least 2 candidates to compare",
+      "recommended": "Recommended",
+      "notRecommended": "Not recommended",
+      "rank": "#{rank}",
+      "candidate": "Candidate {index}",
+      "teamSaturation": "Team",
+      "competency": "Competency",
+      "teamGap": "Gap",
+      "best": "Best",
+      "score": "Score",
+      "noData": "No comparison data available",
+      "back": "Back to Results",
+      "compareSelected": "Compare Selected",
+      "selectedCount": "{count} selected",
+      "clearSelection": "Clear",
+      "maxSelections": "Maximum 5 candidates for comparison",
+      "selectToCompare": "Select 2-5 completed candidates to compare",
+      "resolving": "Loading comparison...",
+      "teamUnavailable": "Team profile data is unavailable. Comparison shows candidate scores without team gap analysis.",
+      "jobFit": {
+        "subtitle": "Side-by-side Job Fit comparison for {count} candidates",
+        "teamSaturation": "Benchmark",
+        "teamGap": "Below Benchmark",
+        "gapCoverage": "Benchmark Gap Analysis",
+        "gapCoverageDescription": "Which candidates meet the benchmark for each competency",
+        "competencyBreakdownDescription": "Score comparison against O*NET occupation benchmarks",
+        "overallFit": "Overall Score"
+      },
+      "responseQuality": "Response Quality",
+      "responseQualityHigh": "High",
+      "responseQualityMedium": "Medium",
+      "responseQualityLow": "Low"
+    },
+    "charts": {
+      "noData": "No data to display",
+      "insufficientData": "Insufficient data for chart (minimum {min} competencies)",
+      "radarAriaLabel": "Radar chart with {count} competencies. Score range: {min}% to {max}%. Average score: {avg}%.",
+      "scoreName": "Score",
+      "tooltipScore": "Score:",
+      "tooltipCI": "95% CI:",
+      "tooltipBenchmark": "Benchmark:",
+      "tooltipGap": "To target: +{gap}%",
+      "srDetailedResults": "Detailed results by competency:",
+      "srPassed": "(passed)",
+      "srNotPassed": "(not passed)"
+    },
+    "trends": {
+      "noHistoricalData": "No historical data available",
+      "needMoreAttempts": "At least 2 attempts needed for trend visualization",
+      "progressOverTime": "Progress Over Time",
+      "attempts": "{count, plural, one {# attempt} other {# attempts}}",
+      "overallChange": "Overall Change",
+      "selectCompetencies": "Select competencies to compare",
+      "noHistoricalDataYet": "No historical data available yet.",
+      "srHistoricalData": "Historical score data:",
+      "srPassed": "(passed)",
+      "srNotPassed": "(not passed)",
+      "trendAriaLabel": "Score trend chart with {count} data points. Score changed from {from}% to {to}%."
+    },
+    "actions": {
+      "exportPdf": "Export PDF",
+      "copyLink": "Copy Link",
+      "linkCopied": "Link copied to clipboard",
+      "back": "Back",
+      "retake": "Retake",
+      "downloadProfile": "Download Profile",
+      "downloadReport": "Download Report",
+      "retakeTest": "Retake Test",
+      "saveToProfile": "Save to Profile",
+      "share": "Share",
+      "backToTests": "Back to Tests",
+      "teamDashboard": "Team Dashboard",
+      "shareWithTeam": "Share with Team",
+      "managerSummary": "Summary",
+      "resultSaved": "Result saved to your profile",
+      "actionFailed": "Action failed. Please try again.",
+      "exportDialog": {
+        "title": "Export PDF",
+        "format": "Format",
+        "formatManagerSummary": "Manager Summary (1 page)",
+        "formatFullReport": "Full Report",
+        "formatCandidateBrief": "Candidate Brief",
+        "generate": "Generate PDF",
+        "generating": "Generating...",
+        "downloading": "Downloading...",
+        "complete": "Download complete!",
+        "error": "Export failed",
+        "retry": "Try Again",
+        "cancel": "Cancel"
+      }
+    },
+    "nextSteps": {
+      "interviewGuide": {
+        "title": "Interview Guide",
+        "description": "Behavioral interview questions for {count} competency gaps",
+        "print": "Print",
+        "gapSeverity": "Gap: {score}% vs {threshold}% required",
+        "suggestedQuestions": "Suggested Interview Questions",
+        "starNote": "Use STAR format: ask about a Situation, Task, Action, and Result.",
+        "severityHigh": "Critical",
+        "severityMedium": "Moderate",
+        "severityLow": "Minor",
+        "questions": {
+          "leadership": {
+            "q1": "Describe a time when you had to lead a team through a challenging project. What was your approach, and what was the outcome?",
+            "q2": "Tell me about a situation where you had to make a difficult decision that affected your team. How did you handle it?",
+            "q3": "Give an example of when you mentored or developed someone on your team. What strategies did you use?"
+          },
+          "communication": {
+            "q1": "Tell me about a time you had to explain a complex idea to someone without technical background. How did you ensure they understood?",
+            "q2": "Describe a situation where miscommunication led to a problem. How did you resolve it?",
+            "q3": "Give an example of when you had to deliver difficult feedback. How did you approach the conversation?"
+          },
+          "problem_solving": {
+            "q1": "Describe a complex problem you encountered at work. Walk me through your problem-solving process.",
+            "q2": "Tell me about a time you had to make a decision with incomplete information. What was your approach?",
+            "q3": "Give an example of when your initial solution to a problem did not work. How did you adapt?"
+          },
+          "teamwork": {
+            "q1": "Tell me about a time you worked with a difficult team member. How did you handle the situation?",
+            "q2": "Describe a project where collaboration was essential to success. What role did you play?",
+            "q3": "Give an example of when you had to resolve a conflict between team members. What was the outcome?"
+          },
+          "adaptability": {
+            "q1": "Describe a time when priorities changed suddenly. How did you adjust your approach?",
+            "q2": "Tell me about a situation where you had to learn something new quickly to complete a task. How did you approach it?",
+            "q3": "Give an example of when you faced significant uncertainty. How did you maintain effectiveness?"
+          },
+          "technical": {
+            "q1": "Describe a challenging technical problem you solved. What tools or methods did you use?",
+            "q2": "Tell me about a time you had to quickly learn a new technology. How did you get up to speed?",
+            "q3": "Give an example of when you improved a technical process or system. What was the impact?"
+          },
+          "planning": {
+            "q1": "Describe how you organized a complex project with multiple deadlines. What was your planning process?",
+            "q2": "Tell me about a time when your plan did not go as expected. How did you adjust?",
+            "q3": "Give an example of how you prioritize tasks when everything seems urgent."
+          },
+          "creativity": {
+            "q1": "Tell me about an innovative solution you proposed at work. What inspired it?",
+            "q2": "Describe a time when you had to think outside the box to solve a problem.",
+            "q3": "Give an example of when you challenged the status quo. What was the result?"
+          },
+          "ethics": {
+            "q1": "Describe a situation where you faced an ethical dilemma at work. How did you handle it?",
+            "q2": "Tell me about a time you had to stand up for what was right, even when it was unpopular.",
+            "q3": "Give an example of how you maintain accountability and integrity in your work."
+          },
+          "customer_focus": {
+            "q1": "Tell me about a time you went above and beyond for a customer or client. What did you do?",
+            "q2": "Describe a situation where you had to balance customer needs with business constraints.",
+            "q3": "Give an example of when you turned a negative customer experience into a positive one."
+          },
+          "general": {
+            "q1": "Describe a recent accomplishment you are proud of in this competency area. What made it successful?",
+            "q2": "Tell me about a time you received constructive feedback in this area. How did you respond?",
+            "q3": "Give an example of how you have developed this skill over time. What steps did you take?"
+          }
+        }
+      },
+      "onboarding": {
+        "title": "Onboarding Recommendations",
+        "description": "Actionable onboarding guidance based on team dynamics analysis",
+        "communicationStyle": "Communication Style",
+        "teamRole": "Team Role Fit",
+        "focusAreas": "Recommended Focus Areas",
+        "styles": {
+          "collaborative": {
+            "label": "Collaborative Communicator",
+            "description": "Naturally engages others and builds consensus. Thrives in open discussion and group brainstorming. Pair with structured check-ins to maintain focus."
+          },
+          "assertive": {
+            "label": "Assertive Communicator",
+            "description": "Direct and action-oriented. Communicates clearly and decisively. May benefit from active listening exercises during onboarding."
+          },
+          "analytical": {
+            "label": "Analytical Communicator",
+            "description": "Prefers data-driven discussion and well-structured communication. Give advance notice of meetings with clear agendas."
+          },
+          "reflective": {
+            "label": "Reflective Communicator",
+            "description": "Thoughtful and deliberate. Prefers written communication and time to process. Provide written summaries of key discussions."
+          },
+          "creative": {
+            "label": "Creative Communicator",
+            "description": "Open to ideas and enjoys brainstorming. Encourage idea-sharing sessions and provide creative problem-solving opportunities."
+          },
+          "structured": {
+            "label": "Structured Communicator",
+            "description": "Values clarity, consistency, and process. Provide clear documentation and well-defined communication channels."
+          },
+          "balanced": {
+            "label": "Balanced Communicator",
+            "description": "Adaptable communication style. Can adjust to different team dynamics and situations."
+          }
+        },
+        "roles": {
+          "specialist": {
+            "label": "Domain Specialist",
+            "description": "Deep expertise in specific areas. Leverage their knowledge for mentoring and technical guidance in their strength areas."
+          },
+          "leader": {
+            "label": "Natural Leader",
+            "description": "High capability across multiple areas. Consider early project leadership or initiative ownership opportunities."
+          },
+          "gapFiller": {
+            "label": "Gap Filler",
+            "description": "Brings skills the team currently lacks. Prioritize tasks that leverage their unique contributions to team diversity."
+          },
+          "collaborator": {
+            "label": "Team Collaborator",
+            "description": "Balanced skills with strong interpersonal ability. Ideal for cross-functional tasks and bridge-building between sub-teams."
+          },
+          "generalist": {
+            "label": "Versatile Generalist",
+            "description": "Consistent performance across all areas. Effective in utility roles and can support multiple workstreams."
+          },
+          "contributor": {
+            "label": "Developing Contributor",
+            "description": "Building foundational skills. Pair with experienced team members for structured learning opportunities."
+          }
+        },
+        "confidence": {
+          "high": "High confidence",
+          "medium": "Moderate confidence",
+          "low": "Preliminary"
+        },
+        "focusItems": {
+          "teamIntegration": {
+            "title": "Team Integration Sessions",
+            "description": "Schedule informal 1-on-1s with each team member in the first two weeks. Focus on understanding team workflows and communication norms."
+          },
+          "leverageStrengths": {
+            "title": "Leverage Communication Strengths",
+            "description": "Assign early presentations or facilitation roles to help establish credibility and build team rapport quickly."
+          },
+          "gradualExposure": {
+            "title": "Gradual Team Exposure",
+            "description": "Start with smaller group interactions before full-team settings. Provide written materials ahead of meetings for preparation."
+          },
+          "buildRelationships": {
+            "title": "Relationship Building",
+            "description": "Create opportunities for informal interaction such as pair programming, lunch meetings, or collaborative side projects."
+          },
+          "skillDevelopment": {
+            "title": "Targeted Skill Development",
+            "description": "Identify 1-2 key competency gaps and create a 30-60-90 day development plan with specific learning objectives and mentor support."
+          },
+          "differentiateRole": {
+            "title": "Role Differentiation",
+            "description": "Clarify distinct responsibilities early to avoid overlap with existing team members. Focus on areas where they add unique value."
+          },
+          "mentorship": {
+            "title": "Buddy/Mentor Assignment",
+            "description": "Pair with an experienced team member who can provide context, answer questions, and facilitate knowledge transfer."
+          }
+        }
+      },
+      "managerSummary": {
+        "title": "Summary for Manager",
+        "dialogDescription": "Printable one-page candidate assessment summary",
+        "candidateId": "Candidate ID",
+        "assessmentDate": "Assessment Date",
+        "templateName": "Assessment",
+        "duration": "Duration",
+        "passed": "Passed",
+        "notPassed": "Not Passed",
+        "questionsCompleted": "{answered} of {total} questions completed",
+        "strengths": "Key Strengths",
+        "development": "Development Areas",
+        "recommendation": "Recommendation",
+        "noData": "No competency data available",
+        "print": "Print Summary",
+        "close": "Close",
+        "recommendations": {
+          "stronglyRecommend": "Strongly recommend for the position. The candidate demonstrates exceptional competency across all key areas with significant strengths that exceed requirements.",
+          "recommend": "Recommend for the position. The candidate meets the benchmark requirements and shows solid competency across assessed areas.",
+          "conditionalConsider": "Consider with conditions. The candidate shows promise but has notable gaps that should be addressed through targeted development or further evaluation.",
+          "notRecommend": "Not recommended at this time. The candidate has significant competency gaps that require substantial development before meeting position requirements.",
+          "strongProfile": "Strong competency profile. The candidate demonstrates advanced proficiency across assessed areas with clear signature strengths.",
+          "moderateProfile": "Moderate competency profile. The candidate shows solid foundational skills with identified areas for continued professional development.",
+          "developingProfile": "Developing competency profile. The candidate is building foundational skills and would benefit from structured development opportunities."
+        }
+      }
+    }
   },
   "dashboard": {
     "title": "Dashboard",
@@ -1764,6 +2890,15 @@
     "activeRate": "Active Rate",
     "issues": "Issues",
     "reliable": "Reliable",
+    "reliableCompetencies": "Reliable",
+    "flaggedItems": "Flagged",
+    "cronbachAlpha": "Cronbach's α",
+    "lastAudit": "Last Audit",
+    "never": "Never",
+    "daysAgo": "{count}d ago",
+    "today": "Today",
+    "nonFlagged": "Non-Flagged",
+    "topIssues": "Top Issues",
     "scoreBreakdown": "Score Breakdown",
     "auditRecommended": "Audit Recommended",
     "lastRunOverWeek": "Last run over 7 days ago",
@@ -1772,7 +2907,61 @@
     "templatesAvailable": "{count} template(s) available",
     "noActiveAssessments": "No active assessments",
     "createTemplateToStart": "Create a template to get started",
-    "createTemplate": "Create Template"
+    "createTemplate": "Create Template",
+    "competencyCountShort": "{count} comp",
+    "timeLimitShort": "{minutes}m",
+    "passingScoreShort": "{score}% pass",
+    "statsCards": {
+      "competencies": "Competencies",
+      "competenciesMobile": "Competencies",
+      "competenciesDescCategories": "{count} categories",
+      "competenciesDescDefault": "Active",
+      "indicators": "Behavioral Indicators",
+      "indicatorsMobile": "Indicators",
+      "indicatorsDescAvg": "~{value} per competency",
+      "indicatorsDescDefault": "Total",
+      "questions": "Assessment Questions",
+      "questionsMobile": "Questions",
+      "questionsDesc": "Total questions",
+      "templates": "Test Templates",
+      "templatesMobile": "Templates",
+      "templatesDescActive": "{count} active",
+      "templatesDescDefault": "Available"
+    },
+    "userDashboard": {
+      "actionBanner": {
+        "resume": "Resume",
+        "start": "Start",
+        "moreWaiting": "{count} more assessment(s) waiting",
+        "questionsProgress": "{answered} of {total} questions"
+      },
+      "stats": {
+        "testsTaken": "Tests Taken",
+        "avgScore": "Avg Score",
+        "passRate": "Pass Rate"
+      },
+      "recentResults": {
+        "title": "Recent Results",
+        "viewAll": "View All Results",
+        "pass": "PASS",
+        "fail": "FAIL"
+      },
+      "topCompetencies": "Top Competencies",
+      "bigFive": {
+        "title": "Personality Profile",
+        "viewDetails": "View Details",
+        "openness": "O",
+        "conscientiousness": "C",
+        "extraversion": "E",
+        "agreeableness": "A",
+        "emotionalStability": "S"
+      },
+      "onboarding": {
+        "welcome": "Welcome to SkillSoft, {name}!",
+        "description": "Discover your professional strengths and growth areas through competency-based assessments.",
+        "cta": "Start Your First Assessment"
+      }
+    }
   },
   "table": {
     "noData": "No data to display",
@@ -1866,12 +3055,28 @@
     "thisMonth": "This Month",
     "lastMonth": "Last Month",
     "daysAgo": "{count, plural, one {# day ago} other {# days ago}}",
+    "weeksAgo": "{count, plural, one {# week ago} other {# weeks ago}}",
+    "monthsAgo": "{count, plural, one {# month ago} other {# months ago}}",
+    "yearsAgo": "{count, plural, one {# year ago} other {# years ago}}",
     "hoursAgo": "{count, plural, one {# hour ago} other {# hours ago}}",
     "minutesAgo": "{count, plural, one {# minute ago} other {# minutes ago}}",
     "justNow": "Just now",
+    "never": "Never",
     "minutes": "{count} min",
     "hours": "{count} hr",
-    "seconds": "{count} sec"
+    "seconds": "{count} sec",
+    "minutesAgoShort": "{count}m ago",
+    "hoursAgoShort": "{count}h ago",
+    "daysAgoShort": "{count}d ago",
+    "weeksAgoShort": "{count}w ago",
+    "durationMinutes": "{count}m",
+    "durationHours": "{count}h",
+    "durationHoursMinutes": "{hours}h {minutes}m",
+    "tomorrow": "Tomorrow",
+    "inDays": "{count, plural, one {in # day} other {in # days}}",
+    "inWeeks": "{count, plural, one {in # week} other {in # weeks}}",
+    "inMonths": "{count, plural, one {in # month} other {in # months}}",
+    "inYears": "{count, plural, one {in # year} other {in # years}}"
   },
   "confirm": {
     "delete": "Are you sure you want to delete this?",
@@ -1958,8 +3163,8 @@
     "generalDefault": "Please review your response and ensure it meets the requirements shown."
   },
   "myTests": {
-    "title": "My Tests",
-    "description": "View your assigned tests and track progress",
+    "title": "My Activity",
+    "description": "Track your assessment progress and results",
     "noAssignedTests": "No assigned tests",
     "whenHrAssigns": "When the HR department assigns you a test, it will appear here. You can browse the test catalog in the meantime.",
     "testCatalog": "Test Catalog",
@@ -2008,7 +3213,18 @@
     "attempts": "{count, plural, one {# attempt} other {# attempts}}",
     "previousAttempts": "{count, plural, one {# previous attempt} other {# previous attempts}}",
     "earlier": "earlier",
-    "filterByStatus": "{label}: {count}. Click to filter."
+    "filterByStatus": "{label}: {count}. Click to filter.",
+    "performanceStats": {
+      "testsTaken": "Tests Taken",
+      "passed": "Passed",
+      "averageScore": "Average Score",
+      "totalTime": "Total Time"
+    },
+    "scoreGauge": {
+      "passed": "Passed",
+      "failed": "Failed",
+      "result": "Result"
+    }
   },
   "psychometrics": {
     "title": "Psychometrics",
@@ -2111,10 +3327,222 @@
       "active": "active"
     },
     "competencyDetail": {
-      "gauge": {
-        "ariaLabel": "Cronbach's Alpha: {value}. Quality: {label}. {description}",
-        "ariaLabelNoData": "Cronbach's Alpha: no data available",
-        "label": "Alpha"
+      "title": "Competency Reliability",
+      "description": "Detailed analysis of reliability metrics for this competency",
+      "backToList": "Back to competencies",
+      "loading": "Loading competency data...",
+      "notFound": "Competency not found",
+      "error": "Error loading competency",
+      "errorLoading": "Failed to load competency reliability data",
+      "tryAgain": "Try Again",
+      "alphaInterpretationScale": {
+        "scaleTitle": "Cronbach's Alpha Interpretation Scale",
+        "scaleAriaLabel": "Cronbach's Alpha Interpretation Scale. Current value {alpha} corresponds to level: {description}",
+        "noDataAriaLabel": "Cronbach's Alpha Interpretation Scale. No data available.",
+        "currentValue": "Current value",
+        "correspondingLevel": "corresponds to level:",
+        "noDataMessage": "Insufficient data to determine reliability level",
+        "noDataBadge": "No Data"
+      },
+      "accordion": {
+        "visualGauge": "Visual Gauge",
+        "interpretation": "Interpretation",
+        "thresholdValues": "Threshold Values",
+        "itemsAnalysis": "Items Analysis",
+        "whatItMeans": "What does this mean?",
+        "whatItMeansDesktop": "What does this metric mean?",
+        "internalConsistency": "Internal consistency coefficient",
+        "reliabilityScale": "Reliability quality scale",
+        "thresholdComparison": "Comparison with Threshold Values",
+        "thresholdComparisonDescription": "Current metrics relative to standard criteria",
+        "needAttention": "{count} need attention",
+        "metrics": {
+          "cronbachAlpha": "Cronbach's Alpha",
+          "sampleSize": "Sample Size",
+          "itemCount": "Item Count"
+        },
+        "thresholdDescriptions": {
+          "alphaGood": "Good reliability: >= 0.7",
+          "alphaGoodDetailed": "Good reliability: >= 0.7, excellent: >= 0.8",
+          "sampleMinimum": "Recommended minimum: 100",
+          "sampleMinimumDetailed": "Recommended minimum: 100 respondents",
+          "itemsOptimal": "Optimal: 5-15 items",
+          "itemsOptimalDetailed": "Optimal: 5-15 items per scale"
+        },
+        "reliabilityMessages": {
+          "insufficientData": "Insufficient data to calculate reliability.",
+          "insufficientDataDetailed": "Insufficient data to calculate reliability. More responses need to be collected.",
+          "good": "The scale shows good internal consistency.",
+          "goodDetailed": "The scale shows good internal consistency. Items measure the same construct.",
+          "acceptable": "Acceptable reliability. Consider reviewing items.",
+          "acceptableDetailed": "Acceptable reliability. Consider reviewing items with low contribution.",
+          "low": "Low reliability. Major revision required.",
+          "lowDetailed": "Low reliability. Items do not form a consistent scale. Major revision required."
+        },
+        "sections": {
+          "visualGauge": "Visual Reliability Gauge",
+          "interpretation": "Interpretation & Guidance",
+          "thresholds": "Threshold Comparison",
+          "itemAnalysis": "Item Analysis"
+        },
+        "whatThisMeans": "What This Means",
+        "insufficientDataOld": "Insufficient data to calculate reliability. More responses are needed.",
+        "goodConsistency": "Questions in this competency show good internal consistency.",
+        "acceptableReliability": "Reliability is acceptable but could be improved with question refinement.",
+        "lowReliability": "Low reliability suggests questions may not consistently measure the same construct.",
+        "cronbachsAlpha": "Cronbach's Alpha",
+        "goodReliabilityThreshold": "Good reliability threshold",
+        "sampleSize": "Sample Size",
+        "recommendedMinimum": "Recommended minimum: {count} responses",
+        "itemCount": "Item Count",
+        "optimalRange": "Optimal range: {min}-{max} items",
+        "thresholdDescription": "How current metrics compare to recommended standards",
+        "needsAttention": "Needs Attention",
+        "whatThisMetricMeans": "What this metric means"
+      },
+      "heroAlphaGauge": {
+        "ariaLabel": "Cronbach's Alpha gauge showing reliability level",
+        "noDataAriaLabel": "Cronbach's Alpha gauge with insufficient data",
+        "alphaLabel": "Cronbach's Alpha"
+      },
+      "heroMobile": {
+        "analysisDescription": "Reliability analysis for competency questions",
+        "stats": {
+          "respondents": "Respondents",
+          "items": "Items",
+          "quality": "Quality"
+        }
+      },
+      "insufficientDataGuidance": {
+        "insufficientData": "Insufficient Data",
+        "requiresAttention": "Requires Attention",
+        "cannotCalculate": "Cannot calculate reliability metrics",
+        "forImproving": "For improving reliability",
+        "criticalBadge": "Critical",
+        "attentionBadge": "Attention",
+        "readinessLabel": "Calculation Readiness",
+        "criteriaCount": "{met}/{total} criteria met",
+        "fullData": "Full data available",
+        "problemCount": "{count, plural, one {# issue} other {# issues}} detected",
+        "issues": {
+          "sampleSizeUnknown": "Sample size is unknown",
+          "sampleSizeLow": "Sample size ({count}) is below recommended minimum",
+          "sampleSizeRecommendation": "Recommended minimum of 100 respondents for reliable calculation",
+          "itemCountUnknown": "Item count is unknown",
+          "itemCountLow": "Item count ({count}) is insufficient for a scale",
+          "itemCountRecommendation": "Recommended minimum of 3 items for Alpha calculation",
+          "alphaMissing": "Cronbach's Alpha not calculated",
+          "alphaMissingRecommendation": "Collect more responses and run audit for calculation"
+        }
+      },
+      "thresholdSummaryBadge": {
+        "labels": {
+          "alpha": "Alpha",
+          "sample": "Sample",
+          "items": "Items"
+        },
+        "allOk": "All thresholds met",
+        "noData": "No data",
+        "statusMeets": "Meets threshold",
+        "statusNotMeets": "Below threshold"
+      },
+      "table": {
+        "tabs": {
+          "all": "All Competencies",
+          "reliable": "Reliable",
+          "acceptable": "Acceptable",
+          "unreliable": "Unreliable",
+          "insufficientData": "Insufficient Data",
+          "allShort": "All",
+          "reliableShort": "Reliable",
+          "acceptableShort": "OK",
+          "unreliableShort": "Low",
+          "insufficientDataShort": "No Data"
+        },
+        "resultsFound": "{count, plural, one {# competency} other {# competencies}} found",
+        "columns": {
+          "competency": "Competency",
+          "cronbachAlpha": "Cronbach's Alpha",
+          "sample": "Sample Size",
+          "questions": "Questions",
+          "status": "Status",
+          "actions": "Actions"
+        },
+        "viewQuestions": "View Questions",
+        "pagination": {
+          "page": "Page",
+          "firstPage": "First page",
+          "prevPage": "Previous page",
+          "nextPage": "Next page",
+          "lastPage": "Last page"
+        }
+      },
+      "alphaIfDeletedList": {
+        "improvesAlpha": "Removing improves alpha",
+        "importantForScale": "Important for scale",
+        "neutral": "Neutral impact",
+        "columns": {
+          "question": "Question",
+          "alphaIfDeleted": "Alpha if Deleted",
+          "change": "Change",
+          "status": "Impact"
+        },
+        "mobileAlphaWithout": "Alpha without this item",
+        "collapseList": "Collapse list",
+        "showMore": "Show {count} more",
+        "legendTitle": "Alpha Impact Legend",
+        "legendDescription": "How removing each question affects scale reliability",
+        "legendPositive": "Positive: Removing increases alpha (consider revision)",
+        "legendNegative": "Negative: Removing decreases alpha (keep)",
+        "legendNeutral": "Neutral: Minimal impact on alpha",
+        "defaultTitle": "Item Analysis",
+        "defaultDescription": "Effect of removing each question on Cronbach's Alpha",
+        "needsAttention": "Needs attention",
+        "itemAriaLabel": "Question {index}: Alpha if deleted is {alpha}, change is {change}"
+      },
+      "quality": {
+        "insufficient": {
+          "label": "Insufficient Data",
+          "description": "Not enough responses to calculate reliability"
+        },
+        "unacceptable": {
+          "label": "Unacceptable",
+          "description": "Very low reliability, major revision needed"
+        },
+        "poor": {
+          "label": "Poor",
+          "description": "Low reliability, significant improvements needed"
+        },
+        "acceptable": {
+          "label": "Acceptable",
+          "description": "Adequate for research purposes"
+        },
+        "good": {
+          "label": "Good",
+          "description": "Suitable for most assessment purposes"
+        },
+        "excellent": {
+          "label": "Excellent",
+          "description": "High reliability for high-stakes assessment"
+        },
+        "exceptional": {
+          "label": "Exceptional",
+          "description": "Very high reliability, may indicate redundancy"
+        }
+      },
+      "metadataTitle": "Competency Reliability - Psychometrics - SkillSoft",
+      "metadataDescription": "Detailed competency reliability analysis.",
+      "errorLabel": "Error",
+      "itemsLoweringAlpha": {
+        "cardTitle": "Items Lowering Reliability",
+        "cardDescription": "Removing these items would improve Alpha. Consider revising or excluding them.",
+        "alphaWithout": "Alpha without item",
+        "viewItemAriaLabel": "View item: {text}",
+        "moreItems": "+ {count} more items"
+      },
+      "reliableCompetency": {
+        "title": "Competency is Reliable",
+        "description": "Cronbach's Alpha ({alpha}) exceeds the threshold of 0.7. The scale shows good internal consistency and can be used for assessment."
       }
     },
     "nav": {
@@ -2438,31 +3866,6 @@
       "preview": {
         "title": "Preview",
         "asSeenByCandidate": "As seen by candidate"
-      }
-    },
-    "competencyDetail": {
-      "alphaList": {
-        "title": "Alpha If Item Deleted",
-        "description": "Shows the impact of each item on overall scale reliability",
-        "improvesAlpha": "Improves Alpha",
-        "importantForScale": "Important for scale",
-        "neutral": "Neutral",
-        "columnQuestion": "Question",
-        "columnAlphaWithoutItem": "Alpha without item",
-        "columnChange": "Change",
-        "columnStatus": "Status",
-        "alphaWithout": "Alpha without:",
-        "collapseList": "Collapse list",
-        "showMore": "Show {count} more items",
-        "requireAttention": "{count} require attention",
-        "cardAriaLabel": "{questionText}. Alpha without item: {alphaValue}. Change: {change}",
-        "legendAriaLabel": "Interpretation legend",
-        "howToInterpret": "How to interpret:",
-        "legendPositive": "Positive",
-        "legendPositiveDesc": "removing item will improve Alpha",
-        "legendNegative": "Negative",
-        "legendNegativeDesc": "item is important for scale consistency",
-        "legendNeutralDesc": "Close to zero — item is neutral"
       }
     },
     "help": {
@@ -2814,238 +4217,168 @@
         }
       }
     },
-    "competencyDetail": {
-      "title": "Competency Reliability",
-      "description": "Detailed analysis of reliability metrics for this competency",
-      "backToList": "Back to competencies",
-      "loading": "Loading competency data...",
-      "notFound": "Competency not found",
-      "error": "Error loading competency",
-      "errorLoading": "Failed to load competency reliability data",
-      "tryAgain": "Try Again",
-      "alphaInterpretationScale": {
-        "scaleTitle": "Cronbach's Alpha Interpretation Scale",
-        "scaleAriaLabel": "Cronbach's Alpha Interpretation Scale. Current value {alpha} corresponds to level: {description}",
-        "noDataAriaLabel": "Cronbach's Alpha Interpretation Scale. No data available.",
-        "currentValue": "Current value",
-        "correspondingLevel": "corresponds to level:",
-        "noDataMessage": "Insufficient data to determine reliability level",
-        "noDataBadge": "No Data"
-      },
-      "accordion": {
-        "visualGauge": "Visual Gauge",
-        "interpretation": "Interpretation",
-        "thresholdValues": "Threshold Values",
-        "itemsAnalysis": "Items Analysis",
-        "whatItMeans": "What does this mean?",
-        "whatItMeansDesktop": "What does this metric mean?",
-        "internalConsistency": "Internal consistency coefficient",
-        "reliabilityScale": "Reliability quality scale",
-        "thresholdComparison": "Comparison with Threshold Values",
-        "thresholdComparisonDescription": "Current metrics relative to standard criteria",
-        "needAttention": "{count} need attention",
-        "metrics": {
-          "cronbachAlpha": "Cronbach's Alpha",
-          "sampleSize": "Sample Size",
-          "itemCount": "Item Count"
-        },
-        "thresholdDescriptions": {
-          "alphaGood": "Good reliability: >= 0.7",
-          "alphaGoodDetailed": "Good reliability: >= 0.7, excellent: >= 0.8",
-          "sampleMinimum": "Recommended minimum: 100",
-          "sampleMinimumDetailed": "Recommended minimum: 100 respondents",
-          "itemsOptimal": "Optimal: 5-15 items",
-          "itemsOptimalDetailed": "Optimal: 5-15 items per scale"
-        },
-        "reliabilityMessages": {
-          "insufficientData": "Insufficient data to calculate reliability.",
-          "insufficientDataDetailed": "Insufficient data to calculate reliability. More responses need to be collected.",
-          "good": "The scale shows good internal consistency.",
-          "goodDetailed": "The scale shows good internal consistency. Items measure the same construct.",
-          "acceptable": "Acceptable reliability. Consider reviewing items.",
-          "acceptableDetailed": "Acceptable reliability. Consider reviewing items with low contribution.",
-          "low": "Low reliability. Major revision required.",
-          "lowDetailed": "Low reliability. Items do not form a consistent scale. Major revision required."
-        },
-        "sections": {
-          "visualGauge": "Visual Reliability Gauge",
-          "interpretation": "Interpretation & Guidance",
-          "thresholds": "Threshold Comparison",
-          "itemAnalysis": "Item Analysis"
-        },
-        "whatThisMeans": "What This Means",
-        "insufficientDataOld": "Insufficient data to calculate reliability. More responses are needed.",
-        "goodConsistency": "Questions in this competency show good internal consistency.",
-        "acceptableReliability": "Reliability is acceptable but could be improved with question refinement.",
-        "lowReliability": "Low reliability suggests questions may not consistently measure the same construct.",
-        "cronbachsAlpha": "Cronbach's Alpha",
-        "goodReliabilityThreshold": "Good reliability threshold",
-        "sampleSize": "Sample Size",
-        "recommendedMinimum": "Recommended minimum: {count} responses",
-        "itemCount": "Item Count",
-        "optimalRange": "Optimal range: {min}-{max} items",
-        "thresholdDescription": "How current metrics compare to recommended standards",
-        "needsAttention": "Needs Attention",
-        "whatThisMetricMeans": "What this metric means"
-      },
-      "heroAlphaGauge": {
-        "ariaLabel": "Cronbach's Alpha gauge showing reliability level",
-        "noDataAriaLabel": "Cronbach's Alpha gauge with insufficient data",
-        "alphaLabel": "Cronbach's Alpha"
-      },
-      "heroMobile": {
-        "analysisDescription": "Reliability analysis for competency questions",
-        "stats": {
-          "respondents": "Respondents",
-          "items": "Items",
-          "quality": "Quality"
-        }
-      },
-      "insufficientDataGuidance": {
-        "insufficientData": "Insufficient Data",
-        "requiresAttention": "Requires Attention",
-        "cannotCalculate": "Cannot calculate reliability metrics",
-        "forImproving": "For improving reliability",
-        "criticalBadge": "Critical",
-        "attentionBadge": "Attention",
-        "readinessLabel": "Calculation Readiness",
-        "criteriaCount": "{met}/{total} criteria met",
-        "fullData": "Full data available",
-        "problemCount": "{count, plural, one {# issue} other {# issues}} detected",
-        "issues": {
-          "sampleSizeUnknown": "Sample size is unknown",
-          "sampleSizeLow": "Sample size ({count}) is below recommended minimum",
-          "sampleSizeRecommendation": "Recommended minimum of 100 respondents for reliable calculation",
-          "itemCountUnknown": "Item count is unknown",
-          "itemCountLow": "Item count ({count}) is insufficient for a scale",
-          "itemCountRecommendation": "Recommended minimum of 3 items for Alpha calculation",
-          "alphaMissing": "Cronbach's Alpha not calculated",
-          "alphaMissingRecommendation": "Collect more responses and run audit for calculation"
-        }
-      },
-      "thresholdSummaryBadge": {
-        "labels": {
-          "alpha": "Alpha",
-          "sample": "Sample",
-          "items": "Items"
-        },
-        "allOk": "All thresholds met",
-        "noData": "No data",
-        "statusMeets": "Meets threshold",
-        "statusNotMeets": "Below threshold"
-      },
-      "table": {
-        "tabs": {
-          "all": "All Competencies",
-          "reliable": "Reliable",
-          "acceptable": "Acceptable",
-          "unreliable": "Unreliable",
-          "insufficientData": "Insufficient Data",
-          "allShort": "All",
-          "reliableShort": "Reliable",
-          "acceptableShort": "OK",
-          "unreliableShort": "Low",
-          "insufficientDataShort": "No Data"
-        },
-        "resultsFound": "{count, plural, one {# competency} other {# competencies}} found",
-        "columns": {
-          "competency": "Competency",
-          "cronbachAlpha": "Cronbach's Alpha",
-          "sample": "Sample Size",
-          "questions": "Questions",
-          "status": "Status",
-          "actions": "Actions"
-        },
-        "viewQuestions": "View Questions",
-        "pagination": {
-          "page": "Page",
-          "firstPage": "First page",
-          "prevPage": "Previous page",
-          "nextPage": "Next page",
-          "lastPage": "Last page"
-        }
-      },
-      "alphaIfDeletedList": {
-        "improvesAlpha": "Removing improves alpha",
-        "importantForScale": "Important for scale",
-        "neutral": "Neutral impact",
-        "columns": {
-          "question": "Question",
-          "alphaIfDeleted": "Alpha if Deleted",
-          "change": "Change",
-          "status": "Impact"
-        },
-        "mobileAlphaWithout": "Alpha without this item",
-        "collapseList": "Collapse list",
-        "showMore": "Show {count} more",
-        "legendTitle": "Alpha Impact Legend",
-        "legendDescription": "How removing each question affects scale reliability",
-        "legendPositive": "Positive: Removing increases alpha (consider revision)",
-        "legendNegative": "Negative: Removing decreases alpha (keep)",
-        "legendNeutral": "Neutral: Minimal impact on alpha",
-        "defaultTitle": "Item Analysis",
-        "defaultDescription": "Effect of removing each question on Cronbach's Alpha",
-        "needsAttention": "Needs attention",
-        "itemAriaLabel": "Question {index}: Alpha if deleted is {alpha}, change is {change}"
-      },
-      "quality": {
-        "insufficient": {
-          "label": "Insufficient Data",
-          "description": "Not enough responses to calculate reliability"
-        },
-        "unacceptable": {
-          "label": "Unacceptable",
-          "description": "Very low reliability, major revision needed"
-        },
-        "poor": {
-          "label": "Poor",
-          "description": "Low reliability, significant improvements needed"
-        },
-        "acceptable": {
-          "label": "Acceptable",
-          "description": "Adequate for research purposes"
-        },
-        "good": {
-          "label": "Good",
-          "description": "Suitable for most assessment purposes"
-        },
-        "excellent": {
-          "label": "Excellent",
-          "description": "High reliability for high-stakes assessment"
-        },
-        "exceptional": {
-          "label": "Exceptional",
-          "description": "Very high reliability, may indicate redundancy"
-        }
-      },
-      "metadataTitle": "Competency Reliability - Psychometrics - SkillSoft",
-      "metadataDescription": "Detailed competency reliability analysis.",
-      "errorLabel": "Error",
-      "itemsLoweringAlpha": {
-        "cardTitle": "Items Lowering Reliability",
-        "cardDescription": "Removing these items would improve Alpha. Consider revising or excluding them.",
-        "alphaWithout": "Alpha without item",
-        "viewItemAriaLabel": "View item: {text}",
-        "moreItems": "+ {count} more items"
-      },
-      "reliableCompetency": {
-        "title": "Competency is Reliable",
-        "description": "Cronbach's Alpha ({alpha}) exceeds the threshold of 0.7. The scale shows good internal consistency and can be used for assessment."
-      }
-    },
     "flaggedPage": {
-      "metadataTitle": "Flagged Items - Psychometrics - SkillSoft",
-      "metadataDescription": "Assessment items requiring attention and review.",
       "pageTitle": "Flagged Items",
       "pageDescription": "Assessment items requiring attention due to low psychometric indicators",
+      "metadataTitle": "Flagged Items - Psychometrics - SkillSoft",
+      "metadataDescription": "Assessment items requiring attention and review.",
       "stats": {
         "negative": "Negative",
         "critical": "Critical",
         "warnings": "Warnings",
-        "total": "Total"
+        "total": "Total",
+        "unknown": "Unknown",
+        "normal": "Normal"
       },
       "error": {
-        "loadingError": "Data Loading Error"
+        "loadingError": "Data Loading Error",
+        "failedToLoad": "Failed to load flagged items data"
+      },
+      "urgent": {
+        "title": "{count, plural, one {# item needs immediate action} other {# items need immediate action}}",
+        "negativeCount": "{count} negative discrimination",
+        "criticalCount": "{count} critical",
+        "retireAllNegative": "Retire All Negative",
+        "reviewOneByOne": "Review One by One"
+      },
+      "selection": {
+        "selectionMode": "Selection Mode",
+        "exitSelectionMode": "Exit Selection Mode",
+        "selectedCount": "{selected} of {total} items selected",
+        "selectAll": "Select All",
+        "deselectAll": "Deselect All",
+        "selected": "{count} selected"
+      },
+      "sections": {
+        "negativeDiscrimination": "Negative Discrimination",
+        "negativeDescription": "Items working in reverse - high performers answer worse. Immediate action recommended.",
+        "criticalDiscrimination": "Critical Discrimination",
+        "criticalDescription": "Items barely distinguish respondents by competency level. Review and consider action.",
+        "warnings": "Warnings",
+        "warningsDescription": "Items with weak discrimination requiring observation. May improve with more data.",
+        "otherIssues": "Other Issues",
+        "otherDescription": "Items with other issues (e.g., difficulty only)",
+        "avgP": "Avg p",
+        "avgRpb": "Avg rpb"
+      },
+      "suggestions": {
+        "retire": "Retire",
+        "review": "Review",
+        "monitor": "Monitor",
+        "suggestionLabel": "Suggestion",
+        "alternativeLabel": "Alt",
+        "negativeReason": "Negative discrimination - high performers answer worse than low performers",
+        "criticalWithDifficultyReason": "Critical discrimination with extreme difficulty suggests content problems",
+        "criticalAlternative": "Consider retiring if no content improvement is possible",
+        "warningReason": "Warning-level with stable response count - may improve with more data",
+        "defaultReason": "Requires manual review to determine appropriate action"
+      },
+      "card": {
+        "responses": "Responses",
+        "quickRetire": "Quick Retire",
+        "markAsReviewed": "Mark as Reviewed",
+        "details": "Details",
+        "questionNotSpecified": "Question text not specified"
+      },
+      "batch": {
+        "processing": "Processing items...",
+        "itemsFailed": "{count, plural, one {# item failed} other {# items failed}}",
+        "retiredSuccess": "{count} negative items retired",
+        "retiredSuccessBatch": "{count} items retired successfully",
+        "activatedSuccess": "{count} items activated successfully",
+        "itemRetired": "Item retired successfully",
+        "itemReviewed": "Item marked as reviewed",
+        "retireFailed": "Failed to retire item",
+        "updateFailed": "Failed to update item status"
+      },
+      "undo": {
+        "itemsRetired": "{count, plural, one {# item retired} other {# items retired}}",
+        "itemsUpdated": "{count, plural, one {# item updated} other {# items updated}}",
+        "undoButton": "Undo",
+        "undoSuccess": "Action undone successfully",
+        "undoFailed": "Failed to undo action"
+      },
+      "detail": {
+        "metadataTitle": "Flagged Item Details - Psychometrics - SkillSoft",
+        "metadataDescription": "Detailed analysis of a flagged assessment item with improvement recommendations.",
+        "backToList": "Back to list",
+        "pageTitle": "Flagged Item",
+        "errorLoading": "Loading Error",
+        "error": "Error",
+        "failedToLoadData": "Failed to load data.",
+        "severity": {
+          "critical": "Critical Issue",
+          "high": "Serious Issue",
+          "medium": "Needs Attention",
+          "low": "Minor Issue",
+          "criticalBadge": "Critical",
+          "highBadge": "High",
+          "mediumBadge": "Medium",
+          "lowBadge": "Low"
+        },
+        "reasons": {
+          "negativeDiscrimination": "Negative discrimination index (rpb < 0) - item works in reverse",
+          "criticalDiscrimination": "Critically low discrimination index (rpb < 0.1) - item doesn't distinguish respondents",
+          "weakDiscrimination": "Weak discrimination index (0.1 <= rpb < 0.25) - marginal distinction",
+          "tooHard": "Too difficult (p < 0.2) - less than 20% correct answers",
+          "tooEasy": "Too easy (p > 0.9) - more than 90% correct answers",
+          "insufficientResponses": "Insufficient responses for reliable statistics (< 30)",
+          "manualReview": "Item flagged for manual review"
+        },
+        "questionSection": {
+          "title": "Question Text",
+          "competency": "Competency",
+          "indicator": "Indicator"
+        },
+        "gauges": {
+          "difficultyTitle": "Difficulty Index",
+          "difficultyDescription": "Proportion of correct answers (ideal: 0.2 - 0.9)",
+          "discriminationTitle": "Discrimination Index",
+          "discriminationDescription": "Correlation with total score (ideal: >= 0.25)"
+        },
+        "comparison": {
+          "title": "Threshold Comparison",
+          "difficulty": "Difficulty index (p)",
+          "difficultyDescription": "Optimal range: 0.2 - 0.9",
+          "discrimination": "Discrimination index (rpb)",
+          "discriminationDescription": "Good: >= 0.25, excellent: >= 0.35",
+          "responseCount": "Response count",
+          "responseDescription": "Minimum 50 responses for reliable statistics"
+        },
+        "stats": {
+          "responses": "Responses",
+          "sufficient": "Sufficient",
+          "insufficient": "Insufficient",
+          "lastCalculation": "Last calculation",
+          "previousRpb": "Previous rpb",
+          "rpbChange": "rpb Change"
+        },
+        "actions": {
+          "title": "Recommended Actions",
+          "considerRemoval": "Consider removing item",
+          "negativeRpbDescription": "Negative rpb means the item works against the measured construct. Recommended to disable.",
+          "checkAnswerKey": "Check answer key",
+          "answerKeyDescription": "The correct answer may be marked incorrectly or the scale inverted.",
+          "reformulateQuestion": "Reformulate question",
+          "reformulateDescription": "Current wording doesn't distinguish respondents by competency level.",
+          "reviewOptions": "Review answer options",
+          "reviewOptionsDescription": "Check that distractors are plausible and distinguishable.",
+          "monitorMetrics": "Monitor metrics",
+          "monitorDescription": "Collect more data and reassess after 50+ additional responses.",
+          "simplifyWording": "Simplify wording",
+          "simplifyDescription": "Question may be too complex or ambiguous for target audience.",
+          "addHints": "Add hints to options",
+          "addHintsDescription": "Consider adding context or clarification to answer options.",
+          "increaseComplexity": "Increase complexity",
+          "increaseDescription": "Add nuances or change distractors to be more attractive.",
+          "collectMoreData": "Collect more data",
+          "collectDescription": "Current response count ({count}) insufficient for reliable conclusions. Need at least 50."
+        },
+        "similarItems": {
+          "title": "Similar Flagged Items",
+          "description": "Items with similar issues"
+        },
+        "fullStats": "Full Item Statistics"
       }
     },
     "flaggedDetail": {
@@ -3346,170 +4679,6 @@
           "lowScore": "Emotional reactivity, sensitivity to stress",
           "importance": "Critical for high-stress, high-responsibility positions"
         }
-      }
-    },
-    "flaggedPage": {
-      "pageTitle": "Flagged Items",
-      "pageDescription": "Assessment items requiring attention due to low psychometric indicators",
-      "metadataTitle": "Flagged Items - Psychometrics - SkillSoft",
-      "metadataDescription": "Assessment items requiring attention and review.",
-      "stats": {
-        "negative": "Negative",
-        "critical": "Critical",
-        "warnings": "Warnings",
-        "total": "Total",
-        "unknown": "Unknown",
-        "normal": "Normal"
-      },
-      "error": {
-        "loadingError": "Data Loading Error",
-        "failedToLoad": "Failed to load flagged items data"
-      },
-      "urgent": {
-        "title": "{count, plural, one {# item needs immediate action} other {# items need immediate action}}",
-        "negativeCount": "{count} negative discrimination",
-        "criticalCount": "{count} critical",
-        "retireAllNegative": "Retire All Negative",
-        "reviewOneByOne": "Review One by One"
-      },
-      "selection": {
-        "selectionMode": "Selection Mode",
-        "exitSelectionMode": "Exit Selection Mode",
-        "selectedCount": "{selected} of {total} items selected",
-        "selectAll": "Select All",
-        "deselectAll": "Deselect All",
-        "selected": "{count} selected"
-      },
-      "sections": {
-        "negativeDiscrimination": "Negative Discrimination",
-        "negativeDescription": "Items working in reverse - high performers answer worse. Immediate action recommended.",
-        "criticalDiscrimination": "Critical Discrimination",
-        "criticalDescription": "Items barely distinguish respondents by competency level. Review and consider action.",
-        "warnings": "Warnings",
-        "warningsDescription": "Items with weak discrimination requiring observation. May improve with more data.",
-        "otherIssues": "Other Issues",
-        "otherDescription": "Items with other issues (e.g., difficulty only)",
-        "avgP": "Avg p",
-        "avgRpb": "Avg rpb"
-      },
-      "suggestions": {
-        "retire": "Retire",
-        "review": "Review",
-        "monitor": "Monitor",
-        "suggestionLabel": "Suggestion",
-        "alternativeLabel": "Alt",
-        "negativeReason": "Negative discrimination - high performers answer worse than low performers",
-        "criticalWithDifficultyReason": "Critical discrimination with extreme difficulty suggests content problems",
-        "criticalAlternative": "Consider retiring if no content improvement is possible",
-        "warningReason": "Warning-level with stable response count - may improve with more data",
-        "defaultReason": "Requires manual review to determine appropriate action"
-      },
-      "card": {
-        "responses": "Responses",
-        "quickRetire": "Quick Retire",
-        "markAsReviewed": "Mark as Reviewed",
-        "details": "Details",
-        "questionNotSpecified": "Question text not specified"
-      },
-      "batch": {
-        "processing": "Processing items...",
-        "itemsFailed": "{count, plural, one {# item failed} other {# items failed}}",
-        "retiredSuccess": "{count} negative items retired",
-        "retiredSuccessBatch": "{count} items retired successfully",
-        "activatedSuccess": "{count} items activated successfully",
-        "itemRetired": "Item retired successfully",
-        "itemReviewed": "Item marked as reviewed",
-        "retireFailed": "Failed to retire item",
-        "updateFailed": "Failed to update item status"
-      },
-      "undo": {
-        "itemsRetired": "{count, plural, one {# item retired} other {# items retired}}",
-        "itemsUpdated": "{count, plural, one {# item updated} other {# items updated}}",
-        "undoButton": "Undo",
-        "undoSuccess": "Action undone successfully",
-        "undoFailed": "Failed to undo action"
-      },
-      "detail": {
-        "metadataTitle": "Flagged Item Details - Psychometrics - SkillSoft",
-        "metadataDescription": "Detailed analysis of a flagged assessment item with improvement recommendations.",
-        "backToList": "Back to list",
-        "pageTitle": "Flagged Item",
-        "errorLoading": "Loading Error",
-        "error": "Error",
-        "failedToLoadData": "Failed to load data.",
-        "severity": {
-          "critical": "Critical Issue",
-          "high": "Serious Issue",
-          "medium": "Needs Attention",
-          "low": "Minor Issue",
-          "criticalBadge": "Critical",
-          "highBadge": "High",
-          "mediumBadge": "Medium",
-          "lowBadge": "Low"
-        },
-        "reasons": {
-          "negativeDiscrimination": "Negative discrimination index (rpb < 0) - item works in reverse",
-          "criticalDiscrimination": "Critically low discrimination index (rpb < 0.1) - item doesn't distinguish respondents",
-          "weakDiscrimination": "Weak discrimination index (0.1 <= rpb < 0.25) - marginal distinction",
-          "tooHard": "Too difficult (p < 0.2) - less than 20% correct answers",
-          "tooEasy": "Too easy (p > 0.9) - more than 90% correct answers",
-          "insufficientResponses": "Insufficient responses for reliable statistics (< 30)",
-          "manualReview": "Item flagged for manual review"
-        },
-        "questionSection": {
-          "title": "Question Text",
-          "competency": "Competency",
-          "indicator": "Indicator"
-        },
-        "gauges": {
-          "difficultyTitle": "Difficulty Index",
-          "difficultyDescription": "Proportion of correct answers (ideal: 0.2 - 0.9)",
-          "discriminationTitle": "Discrimination Index",
-          "discriminationDescription": "Correlation with total score (ideal: >= 0.25)"
-        },
-        "comparison": {
-          "title": "Threshold Comparison",
-          "difficulty": "Difficulty index (p)",
-          "difficultyDescription": "Optimal range: 0.2 - 0.9",
-          "discrimination": "Discrimination index (rpb)",
-          "discriminationDescription": "Good: >= 0.25, excellent: >= 0.35",
-          "responseCount": "Response count",
-          "responseDescription": "Minimum 50 responses for reliable statistics"
-        },
-        "stats": {
-          "responses": "Responses",
-          "sufficient": "Sufficient",
-          "insufficient": "Insufficient",
-          "lastCalculation": "Last calculation",
-          "previousRpb": "Previous rpb",
-          "rpbChange": "rpb Change"
-        },
-        "actions": {
-          "title": "Recommended Actions",
-          "considerRemoval": "Consider removing item",
-          "negativeRpbDescription": "Negative rpb means the item works against the measured construct. Recommended to disable.",
-          "checkAnswerKey": "Check answer key",
-          "answerKeyDescription": "The correct answer may be marked incorrectly or the scale inverted.",
-          "reformulateQuestion": "Reformulate question",
-          "reformulateDescription": "Current wording doesn't distinguish respondents by competency level.",
-          "reviewOptions": "Review answer options",
-          "reviewOptionsDescription": "Check that distractors are plausible and distinguishable.",
-          "monitorMetrics": "Monitor metrics",
-          "monitorDescription": "Collect more data and reassess after 50+ additional responses.",
-          "simplifyWording": "Simplify wording",
-          "simplifyDescription": "Question may be too complex or ambiguous for target audience.",
-          "addHints": "Add hints to options",
-          "addHintsDescription": "Consider adding context or clarification to answer options.",
-          "increaseComplexity": "Increase complexity",
-          "increaseDescription": "Add nuances or change distractors to be more attractive.",
-          "collectMoreData": "Collect more data",
-          "collectDescription": "Current response count ({count}) insufficient for reliable conclusions. Need at least 50."
-        },
-        "similarItems": {
-          "title": "Similar Flagged Items",
-          "description": "Items with similar issues"
-        },
-        "fullStats": "Full Item Statistics"
       }
     },
     "insights": {
@@ -3832,6 +5001,12 @@
       "EDIT_DESC": "Can modify test content",
       "MANAGE": "Manager",
       "MANAGE_DESC": "Full control including sharing"
+    },
+    "scoringRubric": {
+      "DIRECT_SCALE": "Direct Likert Scale",
+      "DIRECT_SCALE_DESC": "The candidate's selected scale point is scored directly. Higher agreement maps to higher score.",
+      "SITUATIONAL_BEST_CHOICE": "Situational Best Choice",
+      "SITUATIONAL_BEST_CHOICE_DESC": "Each answer option carries a preset score. The candidate receives the points assigned to the chosen option."
     }
   },
   "help": {
@@ -3923,6 +5098,27 @@
           "critical": "Critical gap: Significantly below threshold, high priority for new hire skill requirements."
         }
       }
+    },
+    "dashboard": {
+      "avgScore": "Your average percentage across all completed assessments.",
+      "passRate": "The share of assessments where your score met or exceeded the passing threshold.",
+      "bigFiveTitle": "The Big Five (OCEAN) model measures five core personality dimensions derived from your assessment responses.",
+      "bigFive": {
+        "openness": "Openness: Curiosity, creativity, and willingness to try new things.",
+        "conscientiousness": "Conscientiousness: Organization, dependability, and self-discipline.",
+        "extraversion": "Extraversion: Sociability, assertiveness, and positive energy.",
+        "agreeableness": "Agreeableness: Cooperation, empathy, and trust in others.",
+        "emotionalStability": "Stability: Calmness under pressure and emotional resilience."
+      },
+      "bigFiveScore": "{value}/100 — {level}",
+      "bigFiveLevel": {
+        "low": "Low expression",
+        "moderate": "Moderate expression",
+        "high": "High expression"
+      },
+      "topCompetencies": "Your strongest competencies ranked by average score across all completed assessments.",
+      "competencyScore": "Average percentage score for this competency across your assessments.",
+      "competencyBar": "Average across {count, plural, one {# assessment} other {# assessments}}"
     }
   },
   "metadata": {
@@ -4046,6 +5242,20 @@
       "fullAccess": "Full access",
       "contentEditors": "Content editors",
       "bannedLocked": "{banned} banned, {locked} locked"
+    },
+    "statsCards": {
+      "total": "Total Users",
+      "totalMobile": "Total",
+      "totalDesc": "All users",
+      "active": "Active Users",
+      "activeMobile": "Active",
+      "activeDesc": "Currently active",
+      "admins": "Administrators",
+      "adminsMobile": "Admins",
+      "adminsDesc": "Admin users",
+      "recentlyActive": "Recently Active",
+      "recentlyActiveMobile": "Recent",
+      "recentlyActiveDesc": "Last 30 days"
     },
     "table": {
       "columns": {
@@ -4398,28 +5608,6 @@
       "errorId": "Error ID",
       "tryAgain": "Try again",
       "backToDashboard": "Back to Dashboard"
-    },
-    "time": {
-      "today": "Today",
-      "yesterday": "Yesterday",
-      "daysAgo": "{count, plural, one {# day ago} other {# days ago}}",
-      "weeksAgo": "{count, plural, one {# week ago} other {# weeks ago}}",
-      "monthsAgo": "{count, plural, one {# month ago} other {# months ago}}",
-      "yearsAgo": "{count, plural, one {# year ago} other {# years ago}}",
-      "never": "Never",
-      "justNow": "Just now",
-      "minutesAgoShort": "{count}m ago",
-      "hoursAgoShort": "{count}h ago",
-      "daysAgoShort": "{count}d ago",
-      "weeksAgoShort": "{count}w ago",
-      "durationMinutes": "{count}m",
-      "durationHours": "{count}h",
-      "durationHoursMinutes": "{hours}h {minutes}m",
-      "tomorrow": "Tomorrow",
-      "inDays": "{count, plural, one {in # day} other {in # days}}",
-      "inWeeks": "{count, plural, one {in # week} other {in # weeks}}",
-      "inMonths": "{count, plural, one {in # month} other {in # months}}",
-      "inYears": "{count, plural, one {in # year} other {in # years}}"
     }
   },
   "teams": {
@@ -4493,7 +5681,9 @@
       }
     },
     "drawer": {
-      "details": "Team Details",
+      "overview": "Team overview",
+      "description": "Description",
+      "details": "Details",
       "actions": "Actions",
       "members": "Members",
       "leader": "Leader",
@@ -4501,8 +5691,8 @@
       "viewDetails": "View Details",
       "editTeam": "Edit Team",
       "addMembers": "Add Members",
-      "activate": "Activate Team",
-      "archive": "Archive Team"
+      "activate": "Activate",
+      "archive": "Archive"
     },
     "errors": {
       "loadingTeams": "Error Loading Teams",
@@ -4522,9 +5712,12 @@
       "created": "Created {date}",
       "noLeader": "No leader assigned",
       "tabs": {
+        "overview": "Overview",
         "members": "Members",
-        "profile": "Profile",
-        "gaps": "Skill Gaps"
+        "competencies": "Competencies",
+        "competenciesMobile": "Skills",
+        "tests": "Tests",
+        "activity": "Activity"
       },
       "actions": {
         "edit": "Edit",
@@ -4541,7 +5734,8 @@
         "avgSaturation": "Avg. Saturation",
         "saturation": "Saturation",
         "skillGaps": "Skill Gaps",
-        "gaps": "Gaps"
+        "gaps": "Gaps",
+        "competenciesTracked": "Tracked"
       },
       "sections": {
         "statistics": "Statistics",
@@ -4552,6 +5746,55 @@
         "createdBy": "Created By",
         "createdAt": "Created At",
         "activatedAt": "Activated At"
+      },
+      "overview": {
+        "criticalGaps": {
+          "title": "Critical Gaps",
+          "viewAll": "View all",
+          "noGaps": "No critical gaps — team coverage looks good!"
+        },
+        "personality": {
+          "title": "Team Personality",
+          "noData": "No personality data available yet"
+        },
+        "recentActivity": {
+          "title": "Recent Activity",
+          "viewAll": "View all",
+          "noActivity": "No activity recorded yet"
+        }
+      },
+      "competencies": {
+        "title": "Competency Analysis",
+        "saturationHeader": "Competency Saturation",
+        "toggle": {
+          "all": "All",
+          "allFull": "All Competencies",
+          "gaps": "Gaps",
+          "gapsFull": "Gaps Only"
+        }
+      },
+      "activity": {
+        "title": "Team Activity",
+        "events": {
+          "memberJoined": "{name} joined the team",
+          "teamCreated": "Team was created",
+          "teamActivated": "Team was activated",
+          "teamArchived": "Team was archived",
+          "leaderSet": "{name} was promoted to leader"
+        },
+        "today": "Today",
+        "yesterday": "Yesterday",
+        "empty": {
+          "title": "No Activity",
+          "description": "Team activity will appear here as changes are made."
+        }
+      },
+      "help": {
+        "metricsOverview": "Key indicators showing team composition and competency coverage at a glance.",
+        "criticalGaps": "Competencies where team saturation falls below 30%. These represent the most urgent hiring or training needs.",
+        "teamPersonality": "Average Big Five personality trait scores across all team members who have completed assessments.",
+        "competencyToggle": "Switch between viewing all competencies or only those below the gap threshold.",
+        "saturation": "Percentage of team members who demonstrate proficiency in each competency, based on assessment results."
       },
       "members": {
         "role": {
@@ -4663,6 +5906,12 @@
           "description": "Activate \"{name}\"? Active teams can be used in TEAM_FIT assessments.",
           "confirm": "Activate",
           "cancel": "Cancel"
+        },
+        "removeTest": {
+          "title": "Remove Test",
+          "description": "Remove \"{name}\" from this team? Team members will lose access to it.",
+          "confirm": "Remove",
+          "cancel": "Cancel"
         }
       },
       "addMembers": {
@@ -4673,6 +5922,34 @@
         "noUsers": "No users found",
         "alreadyMember": "Already a member",
         "add": "Add Members",
+        "adding": "Adding...",
+        "cancel": "Cancel"
+      },
+      "tests": {
+        "addTest": "Add Test",
+        "search": "Search shared tests...",
+        "untitled": "Untitled test",
+        "addedBy": "Added by {name}",
+        "openTest": "Open test",
+        "remove": "Remove from team",
+        "noResults": "No tests match \"{query}\"",
+        "count": "Showing {showing} of {total}",
+        "empty": {
+          "title": "No tests assigned to this team",
+          "description": "Share a test template with this team so its members get access to it."
+        }
+      },
+      "addTests": {
+        "title": "Add Tests to Team",
+        "description": "Search and select test templates to share with this team",
+        "search": "Search test templates...",
+        "permissionLabel": "Access",
+        "clear": "Clear ({count})",
+        "noTests": "No test templates found",
+        "noResults": "No tests match \"{query}\"",
+        "alreadyAdded": "Already added",
+        "add": "Add Tests",
+        "addCount": "Add Tests ({count})",
         "adding": "Adding...",
         "cancel": "Cancel"
       }
@@ -4878,6 +6155,11 @@
       "metaTitle": "Profile | SkillSoft",
       "metaDescription": "View your test results, competency passport, and personality profile"
     },
+    "bento": {
+      "skillsTab": "Top Skills",
+      "personalityTab": "Personality",
+      "profileComplete": "{value}% complete"
+    },
     "hero": {
       "user": "User",
       "online": "Online",
@@ -5009,6 +6291,7 @@
       "viewDetails": "View details",
       "assessments": "{count, plural, one {# assessment} other {# assessments}}",
       "score": "Score",
+      "rank": "Rank",
       "trend": {
         "up": "Improving",
         "down": "Declining",
@@ -5066,10 +6349,26 @@
       "viewAll": "View all",
       "take": "Take",
       "view": "View",
+      "countLabel": "{count, plural, one {# shared test} other {# shared tests}}",
+      "listLabel": "Tests shared with you",
       "permissions": {
         "view": "View",
         "edit": "Edit",
         "manage": "Manage"
+      },
+      "goals": {
+        "overview": "Overview",
+        "jobFit": "Job Fit",
+        "teamFit": "Team Fit"
+      },
+      "stats": {
+        "competencies": "Competencies",
+        "duration": "Duration",
+        "minutes": "min"
+      },
+      "actions": {
+        "view": "View",
+        "take": "Take"
       },
       "expires": "Expires {time}",
       "expired": "Access expired",
@@ -5078,10 +6377,16 @@
         "title": "No shared tests",
         "description": "Tests shared with you by colleagues will appear here"
       },
+      "emptyState": {
+        "title": "No shared tests",
+        "description": "Tests shared with you by colleagues will appear here"
+      },
       "sharedBy": "Shared by {name}",
       "sharedOn": "Shared {time}"
     },
     "edit": {
+      "title": "Edit Profile",
+      "subtitle": "Update your personal information and settings",
       "pageTitle": "Edit Profile",
       "pageDescription": "Update your personal information and settings",
       "metaTitle": "Edit Profile | SkillSoft",
@@ -5211,6 +6516,12 @@
         "cta": "Take Assessment"
       }
     },
+    "sections": {
+      "overview": "Overview",
+      "skills": "Top Competencies",
+      "personality": "Personality",
+      "results": "Recent Results"
+    },
     "accessibility": {
       "profilePage": "Profile page",
       "heroSection": "User information section",
@@ -5255,11 +6566,6 @@
       "title": "Privacy Notice",
       "description": "Your responses are anonymous. Only your name will be shared with the test administrator."
     },
-    "captcha": {
-      "title": "Verification Required",
-      "description": "Please complete the verification below to continue to the test.",
-      "continue": "Continue"
-    },
     "action": {
       "startTest": "Start Test",
       "starting": "Starting...",
@@ -5288,12 +6594,7 @@
       "genericTitle": "Something Went Wrong",
       "genericDesc": "An unexpected error occurred. Please try again.",
       "nameRequired": "First name and last name are required.",
-      "timeUp": "Time is up! Please submit your answers.",
-      "sessionExpired": "Your session has expired."
-    },
-    "warning": {
-      "sessionExpiring": "Session expiring soon",
-      "sessionExpiringDescription": "Your session will expire in {minutes} minutes. Please finish and submit your test."
+      "timeUp": "Time is up! Please submit your answers."
     },
     "progress": {
       "question": "Question"
@@ -5309,7 +6610,6 @@
       "emailPlaceholder": "Enter your email",
       "notes": "Notes (optional)",
       "notesPlaceholder": "Any additional notes",
-      "gdprConsent": "I consent to the processing of my personal data for the purpose of this assessment. My data will be stored securely and used only for evaluation purposes.",
       "submit": "Submit Results",
       "submitting": "Submitting..."
     },
@@ -5325,10 +6625,7 @@
       "thankYou": "Thank you for completing the test.",
       "correct": "correct answers",
       "timeTaken": "total time",
-      "breakdown": "Competency Breakdown",
-      "copyLink": "Copy Result Link",
-      "linkCopied": "Result link copied to clipboard. Valid for 7 days.",
-      "linkCopyFailed": "Failed to copy link to clipboard"
+      "breakdown": "Competency Breakdown"
     }
   },
   "landing": {
@@ -5590,6 +6887,652 @@
         "13": "skills validation",
         "14": "hiring assessment"
       }
+    }
+  },
+  "accessibility": {
+    "skipToMainContent": "Skip to main content",
+    "skipToNavigation": "Skip to navigation",
+    "skipToSidebar": "Skip to sidebar",
+    "skipToQuickActions": "Skip to quick actions",
+    "skipToTable": "Skip to table",
+    "skipToPagination": "Skip to pagination",
+    "skipToForm": "Skip to form",
+    "skipToFormActions": "Skip to form actions",
+    "skipToQuestion": "Skip to question",
+    "skipToAnswerOptions": "Skip to answer options",
+    "skipToCharts": "Skip to charts",
+    "skipToDataTable": "Skip to data table"
+  },
+  "builder": {
+    "workspace": {
+      "competencyLibrary": "Competency Library",
+      "canvas": "Canvas",
+      "simulate": "Simulate",
+      "add": "Add",
+      "addCompetencyFromLibrary": "Add competency from library",
+      "lastSim": "Last Sim",
+      "viewDetails": "View details",
+      "builderNavigation": "Builder navigation"
+    },
+    "canvas": {
+      "assessmentBlueprint": "Blueprint",
+      "blueprintShort": "Blueprint",
+      "priorityTooltip": "Order sets priority. When time is tight, cards near the top are asked first.",
+      "undoLabel": "Undo (Ctrl+Z)",
+      "redoLabel": "Redo (Ctrl+Shift+Z)",
+      "undoTooltip": "Undo",
+      "redoTooltip": "Redo",
+      "undoKey": "Ctrl+Z",
+      "redoKey": "Ctrl+Shift+Z",
+      "balanceWeightsLabel": "Balance importance levels evenly",
+      "balanceWeightsTooltip": "Balance importance levels evenly",
+      "testDrive": "Test Drive",
+      "saveNow": "Save Now",
+      "dragHint": "Drag competencies here",
+      "dragHintAlt": "Or click + to add from library",
+      "dropToAdd": "Drop to add competency",
+      "undoneAnnouncement": "Undone. {count} competencies now.",
+      "redoneAnnouncement": "Redone. {count} competencies now.",
+      "weightsBalancedAnnouncement": "Importance levels balanced evenly.",
+      "movedAnnouncement": "{name} moved {direction} to position {position}.",
+      "removedAnnouncement": "{name} removed. {count} competencies remaining."
+    },
+    "library": {
+      "searchPlaceholder": "Search competencies...",
+      "available": "{count} available",
+      "selected": "{count} selected",
+      "noCompetenciesFound": "No competencies found",
+      "tryAdjustingSearch": "Try adjusting your search",
+      "addToCanvas": "Add {name} to canvas",
+      "removeFromCanvas": "Remove {name} from canvas",
+      "health": {
+        "noQuestions": "No questions available",
+        "limitedQuestions": "Limited questions available",
+        "goodInventory": "Good question inventory"
+      },
+      "categories": {
+        "cognitive": "Cognitive",
+        "interpersonal": "Interpersonal",
+        "leadership": "Leadership",
+        "technical": "Technical",
+        "self_management": "Self-management",
+        "communication": "Communication",
+        "organizational": "Organizational",
+        "analytical": "Analytical",
+        "adaptability": "Adaptability",
+        "collaboration": "Collaboration",
+        "critical_thinking": "Critical Thinking",
+        "emotional_intelligence": "Emotional Intelligence",
+        "time_management": "Time Management"
+      },
+      "questionsCount": "{count} questions",
+      "indicators": "Indicators ({count})",
+      "indicatorQuestions": "{count}q",
+      "difficultyLabels": {
+        "foundational": "F",
+        "intermediate": "I",
+        "advanced": "A",
+        "expert": "E"
+      },
+      "risk": {
+        "none": "Sufficient questions",
+        "low": "May borrow from siblings",
+        "high": "No questions — fully borrows",
+        "tooltipNone": "Sufficient questions available for this indicator",
+        "tooltipLow": "May borrow from siblings. Add more questions to this indicator to improve coverage",
+        "tooltipHigh": "No questions available. Add questions to this indicator or reduce the question count"
+      },
+      "borrowingRisk": "Borrowing risk",
+      "riskNone": "None",
+      "riskLow": "Low",
+      "riskModerate": "Moderate",
+      "riskHigh": "High",
+      "indicatorsMayBorrow": "{count, plural, one {# indicator} other {# indicators}} may need to borrow",
+      "indicatorWarning": "{count, plural, one {# indicator has} other {# indicators have}} insufficient question coverage",
+      "loading": "Loading indicator data...",
+      "expandCard": "Show indicator details for {name}",
+      "collapseCard": "Hide indicator details for {name}",
+      "onetFilterActive": "Showing {count} O*NET-matched competencies.",
+      "onetFilterInactive": "Showing all {count} competencies.",
+      "onetShowAll": "Show all",
+      "onetShowMatched": "O*NET only",
+      "onetIconTooltip": "Part of the O*NET job profile for this position"
+    },
+    "card": {
+      "dragToReorder": "Hold and drag to reorder",
+      "collapseDetail": "Collapse for less detail",
+      "expandOptions": "Expand for more options",
+      "importance": "Importance",
+      "importanceTooltip": "Higher importance = more questions. Order also matters - top cards get priority.",
+      "difficulty": "Difficulty",
+      "difficultyOptions": {
+        "foundational": "Foundational",
+        "foundationalShort": "F",
+        "intermediate": "Intermediate",
+        "intermediateShort": "I",
+        "advanced": "Advanced",
+        "advancedShort": "A",
+        "expert": "Expert",
+        "expertShort": "E"
+      },
+      "importanceLevel": {
+        "low": "Low",
+        "medium": "Medium",
+        "high": "High",
+        "critical": "Critical",
+        "lowTooltip": "0.5x weight — fewer questions allocated",
+        "mediumTooltip": "1.0x weight — standard question allocation",
+        "highTooltip": "1.5x weight — more questions allocated",
+        "criticalTooltip": "2.0x weight — maximum question allocation"
+      },
+      "inventoryDepth": "Inventory depth",
+      "inventoryEMH": "E/M/H",
+      "indicatorPriority": "Indicator priority",
+      "equalize": "Equalize",
+      "equalizeWeights": "Equalize all indicator weights",
+      "equalizeTooltip": "Reset all weights to equal distribution",
+      "decreaseIndicatorWeight": "Decrease weight for {name}",
+      "increaseIndicatorWeight": "Increase weight for {name}",
+      "removeButton": "Remove",
+      "removeTitle": "Remove competency?",
+      "removeDescription": "This will remove <strong>{name}</strong> from your blueprint. You can add it back from the library at any time.",
+      "removeCancel": "Cancel",
+      "removeConfirm": "Remove",
+      "decreaseImportance": "Decrease importance",
+      "increaseImportance": "Increase importance",
+      "expandWarnings": "Show warnings and controls",
+      "expandDetails": "Show full details",
+      "collapseCard": "Collapse card",
+      "warningsCount": "{count, plural, one {# issue} other {# issues}}",
+      "availableOf": "{available}/{required}q",
+      "questionsShort": "{count}q",
+      "healthCritical": "No questions available in inventory",
+      "healthModerate": "Limited question inventory",
+      "lowQuestions": "Only {count} questions available",
+      "weightImbalance": "This competency has over 50% total weight",
+      "questionCountTooltip": "Questions selected / available in bank",
+      "questionCountSimTooltip": "{selected} selected out of {available} available questions",
+      "noIndicatorsAvailable": "No behavioral indicators found",
+      "indicatorCountTooltip": "{count, plural, one {# behavioral indicator} other {# behavioral indicators}} measuring this competency",
+      "importanceLevelTooltip": "Weight priority — higher importance = more questions allocated",
+      "importanceAllocationTooltip": "{level}: ~{count} questions ({multiplier}x base)",
+      "importanceAllocationBase": "Base: {base}q per indicator × {indicators} indicators = {total}q",
+      "difficultyTooltip": "Preferred difficulty level for question selection",
+      "inventoryDepthTooltip": "Available questions: Foundational / Intermediate / Advanced / Expert",
+      "onetBadgeTooltip": "Auto-added from the O*NET job profile. This competency is required for the selected occupation."
+    },
+    "saveStatus": {
+      "allChangesSaved": "All changes saved",
+      "unsavedChanges": "Unsaved changes",
+      "saving": "Saving...",
+      "saved": "Saved",
+      "saveFailed": "Save failed",
+      "offline": "Offline - changes saved locally",
+      "retrying": "Retrying...",
+      "savedAgo": "Saved {time}",
+      "unsaved": "Unsaved",
+      "retryingProgress": "Retrying ({attempt}/3)...",
+      "offlineShort": "Offline",
+      "lastSaved": "Last saved: {time}",
+      "changesWillSync": "Changes will sync when back online",
+      "unsavedChangesLabel": "Unsaved changes",
+      "timeAgo": {
+        "justNow": "just now",
+        "secondsAgo": "{seconds}s ago",
+        "minutesAgo": "{minutes}m ago",
+        "hoursAgo": "{hours}h ago"
+      }
+    },
+    "conflict": {
+      "title": "Blueprint Conflict Detected",
+      "description": "Another browser tab made changes to this blueprint. Choose how to resolve:",
+      "detectedAgo": "Conflict detected {time}",
+      "yourChanges": "Your Changes",
+      "otherTab": "Other Tab",
+      "competencies": "{count} competencies",
+      "newItems": "+{count} new",
+      "onlyInYourVersion": "Only in your version:",
+      "onlyInOtherTab": "Only in other tab:",
+      "inBoth": "In both ({count}):",
+      "moreItems": "+{count} more",
+      "keepMine": "Keep Mine",
+      "useTheirs": "Use Theirs",
+      "mergeBoth": "Merge Both"
+    },
+    "simulator": {
+      "testDrive": "Test Drive",
+      "runSimulation": "Run Simulation",
+      "runningSimulation": "Running Simulation...",
+      "rerunSimulation": "Re-run Simulation",
+      "rerun": "Re-run",
+      "running": "Running...",
+      "loadingResults": "Loading simulation results",
+      "loadingResultsText": "Loading simulation results...",
+      "personas": {
+        "perfect": "Ideal",
+        "perfectDescription": "Ideal profile",
+        "random": "Random",
+        "randomDescription": "Random answers",
+        "failing": "Failing",
+        "failingDescription": "Poor performer",
+        "candidate": "{persona} Candidate",
+        "changePersona": "Change persona"
+      },
+      "score": {
+        "simulatedScore": "Simulated Score",
+        "pass": "Pass",
+        "fail": "Fail",
+        "toPass": "/ {score}% to pass",
+        "jobFitScore": "Job Fit Score",
+        "qualified": "Qualified",
+        "belowThreshold": "Below Threshold",
+        "toQualify": "/ {score}% to qualify",
+        "teamGapAnalysis": "Team Gap Analysis",
+        "aboveTeam": "{gap}% above team",
+        "belowTeam": "{gap}% below team",
+        "atTeam": "{gap}% at team",
+        "individual": "Individual",
+        "teamBenchmark": "Team Benchmark",
+        "competencyProfile": "Competency Profile",
+        "discoveryMode": "Discovery Mode",
+        "competencies": "competencies",
+        "noPassFail": "No pass/fail scoring - this assessment builds a competency passport",
+        "competencyProfileAssessment": "Competency Profile Assessment"
+      },
+      "warnings": {
+        "inventoryWarnings": "Inventory Warnings",
+        "assemblyWarnings": "Assembly Diagnostics",
+        "questions": "{count} questions",
+        "messages": {
+          "NO_ONET_SOC_CODE": "No O*NET SOC code provided in blueprint configuration.",
+          "NO_ONET_PROFILE": "No O*NET profile found for SOC code: {socCode}",
+          "BENCHMARK_LOOKUP_FALLBACK": "Competency name lookup matched only {matched}/{total} benchmarks. Falling back to full active competency scan.",
+          "FUZZY_MATCH_PASSPORT": "Fuzzy match for passport: benchmark \"{benchmark}\" matched to \"{match}\".",
+          "FUZZY_MATCH_ONET": "Fuzzy match: O*NET competency \"{onetName}\" matched to \"{match}\".",
+          "NO_INDICATORS_FOR_GAPS": "No indicators found for any gap competencies. Benchmark names could not be resolved to internal competencies.",
+          "NO_ACTIVE_QUESTIONS_INDICATOR": "No active questions found for indicator {indicatorId}.",
+          "INDICATOR_EXHAUSTED_BORROWING": "Borrowing {count} questions from sibling indicators of {competencyName} (flagged for psychometric review).",
+          "NO_ACTIVE_INDICATORS_COMPETENCY": "No active behavioral indicators found for competency {competencyName}.",
+          "NO_ACTIVE_INDICATORS_COMPETENCIES": "{count} competencies have no active behavioral indicators.",
+          "INVENTORY_CRITICAL": "Critical: only {available} questions available for {competencyName} ({difficulty}), need {required}.",
+          "INVENTORY_LIMITED": "Limited questions ({available}) for {competencyName} ({difficulty}), recommended {recommended}."
+        },
+        "help": {
+          "BENCHMARK_LOOKUP_FALLBACK": "O*NET benchmark names don't match your internal competency names. The system scanned all active competencies as a fallback. To fix: align competency names with O*NET titles or add O*NET standard codes.",
+          "INDICATOR_EXHAUSTED_BORROWING": "This indicator ran out of unique questions, so the system borrowed from sibling indicators within the same competency. This may reduce measurement precision. Add more questions to the affected indicator.",
+          "FUZZY_MATCH_PASSPORT": "The candidate's passport used a different name than the O*NET benchmark. Fuzzy matching bridged the gap. Align competency names for exact matching.",
+          "FUZZY_MATCH_ONET": "An O*NET competency was matched via fuzzy logic instead of an exact name match. Add the O*NET standard code to the internal competency for precise mapping.",
+          "NO_INDICATORS_FOR_GAPS": "No O*NET benchmarks could be resolved to internal competencies with indicators. Verify your library has competencies matching the O*NET job profile with active behavioral indicators.",
+          "NO_ACTIVE_QUESTIONS_INDICATOR": "This behavioral indicator has no active questions in the bank. Create and activate questions for it so the assessment can measure it properly.",
+          "NO_ACTIVE_INDICATORS_COMPETENCY": "This competency has no active behavioral indicators. Add indicators so questions can be selected for it.",
+          "NO_ACTIVE_INDICATORS_COMPETENCIES": "Multiple competencies have no active behavioral indicators. Review your competency library and add indicators with questions.",
+          "NO_ONET_SOC_CODE": "Job Fit strategy requires an O*NET SOC code. Go to template Settings and enter a valid code (e.g., 15-1252.00).",
+          "NO_ONET_PROFILE": "No O*NET profile exists for this SOC code. Verify the code at onetonline.org.",
+          "INVENTORY_CRITICAL": "Very few questions available for this competency — not enough for a reliable assessment. Add more questions at different difficulty levels.",
+          "INVENTORY_LIMITED": "Fewer questions than recommended. The assessment will still work, but adding more questions would improve measurement reliability."
+        },
+        "showMore": "Show {count} more",
+        "showLess": "Show less"
+      },
+      "error": {
+        "title": "Simulator Error",
+        "defaultMessage": "An unexpected error occurred while rendering the simulator.",
+        "tryAgain": "Try Again",
+        "errorDetails": "Error details (dev only)"
+      },
+      "strategy": {
+        "missingConfiguration": "Missing Configuration",
+        "incomplete": "Incomplete",
+        "learnMore": "Learn more about {label}",
+        "configurationIncomplete": "configuration incomplete"
+      },
+      "emptyState": {
+        "addCompetencies": "Add competencies to simulate",
+        "readyToSimulate": "Ready to simulate",
+        "configurationNeeded": "Configuration needed",
+        "noCompetencies": {
+          "universal": "Drag competencies from the library to build a competency profile assessment",
+          "jobFit": "Add job-relevant competencies to simulate job fit scoring",
+          "teamGap": "Add team competencies to simulate gap analysis"
+        },
+        "noSimulation": {
+          "universal": "Click Run to preview how the assessment will evaluate competency breadth",
+          "jobFit": "Click Run to see predicted job fit scores based on persona profiles",
+          "teamGap": "Click Run to analyze individual vs team benchmark gaps"
+        },
+        "missingConfig": {
+          "universal": "No additional configuration required for this strategy",
+          "jobFit": "Set an O*NET SOC code in template settings to enable job fit alignment insights",
+          "teamGap": "Select a team in template settings to enable gap comparison features"
+        },
+        "goToSettings": "Go to Settings"
+      },
+      "configure": {
+        "testYourBlueprint": "Test Your Blueprint",
+        "runDescription": "Run a simulation to preview how candidates will experience this assessment. Choose a test persona to see different performance scenarios.",
+        "selectTestPersona": "Select Test Persona",
+        "selectPersonaDescription": "Choose how the simulated candidate will perform",
+        "addCompetenciesToEnable": "Add competencies to your blueprint to enable simulation"
+      },
+      "results": {
+        "detailedAnalysis": "Detailed Analysis",
+        "questionTimeline": "Question Timeline",
+        "coverageAnalytics": "Coverage Analytics",
+        "howThisWorks": "How This Works",
+        "tip": "Tip:",
+        "tipContent": "Use the floating settings button to adjust strictness and saturation, then re-run to compare results.",
+        "duration": "Duration",
+        "questions": "Questions",
+        "min": "min"
+      },
+      "fineTune": {
+        "title": "Fine Tune Settings",
+        "tune": "Tune",
+        "description": "Adjust simulation parameters and re-run to see the effects.",
+        "openSettings": "Open Fine Tune settings",
+        "strictness": "Strictness",
+        "strictnessDescription": "Higher values tighten scoring and reduce randomness in question selection.",
+        "saturation": "Item Saturation Guard",
+        "saturationDescription": "Prevents overusing the same competency pool across multiple test attempts.",
+        "allowBacktracking": "Allow Backtracking",
+        "allowBacktrackingDescription": "Let candidates revisit and change previous answers.",
+        "abilityLevel": "Ability Level",
+        "abilityLevelDescription": "Shifts the persona's response curve. Lower = weaker candidate, higher = stronger.",
+        "saveSettings": "Save Settings",
+        "applyAndRerun": "Apply & Re-run"
+      },
+      "preflight": {
+        "issuesDetected": "{count} {count, plural, one {issue} other {issues}} detected",
+        "configurationRequired": "Configuration Required",
+        "preflightWarnings": "Pre-flight Warnings"
+      },
+      "selectionReason": {
+        "coverageGap": "Coverage gap",
+        "calibration": "Calibration",
+        "adaptiveCheck": "Adaptive check",
+        "randomized": "Randomized",
+        "backstop": "Backstop"
+      },
+      "strategyHelp": {
+        "universalBaseline": {
+          "title": "Universal Baseline Assessment",
+          "points": {
+            "coverage": "Evaluates broad competency coverage",
+            "passport": "Generates a competency passport/profile",
+            "noPassFail": "No pass/fail scoring - discovery focused",
+            "bestFor": "Best for: Training needs analysis, career planning"
+          }
+        },
+        "targetedFit": {
+          "title": "Job Fit Assessment",
+          "points": {
+            "aligned": "Aligned to O*NET job requirements when SOC code is set",
+            "weighted": "Weighted scoring against job profile",
+            "threshold": "Clear pass/fail threshold",
+            "bestFor": "Best for: Hiring, role matching, promotions"
+          }
+        },
+        "dynamicGap": {
+          "title": "Team Gap Analysis",
+          "points": {
+            "compares": "Compares individual scores against team benchmarks",
+            "identifies": "Identifies complementary strengths and development gaps",
+            "settings": "Select a team in settings to enable comparison",
+            "bestFor": "Best for: Team building, succession planning"
+          }
+        }
+      },
+      "strategyConfig": {
+        "universalBaseline": {
+          "label": "Universal Baseline",
+          "shortLabel": "Baseline",
+          "description": "General competency assessment for any role"
+        },
+        "targetedFit": {
+          "label": "Job Fit Assessment",
+          "shortLabel": "Job Fit",
+          "description": "Role-specific assessment aligned with O*NET standards"
+        },
+        "dynamicGap": {
+          "label": "Team Gap Analysis",
+          "shortLabel": "Team Fit",
+          "description": "Compare candidate against team baseline"
+        }
+      },
+      "sections": {
+        "assessmentProfile": "Assessment Profile",
+        "resultsPreview": "Results Preview",
+        "questionFlow": "Question Flow",
+        "coverageAnalysis": "Coverage Analysis",
+        "fineTune": "Fine Tune",
+        "jobAlignment": "Job Alignment",
+        "fitPreview": "Fit Preview",
+        "skillCoverage": "Skill Coverage",
+        "teamComparison": "Team Comparison",
+        "gapAnalysis": "Gap Analysis",
+        "teamFitPreview": "Team Fit Preview",
+        "analytics": "Analytics",
+        "questions": "Questions",
+        "jobFitResults": "Job Fit Results",
+        "teamGapResults": "Team Gap Results"
+      },
+      "teamComparison": {
+        "title": "Team Comparison",
+        "ariaLabel": "Team Comparison Analysis",
+        "overallGap": "{gap}% overall",
+        "teamFallbackName": "Team {id}",
+        "vsTeamAverage": "Individual vs Team Average",
+        "legendTeamAvg": "Team Avg",
+        "legendIndividual": "Individual",
+        "notConfigured": "Team Not Configured",
+        "notConfiguredDescription": "Select a team in the template settings to enable team comparison and gap analysis.",
+        "viewBars": "Bar chart view",
+        "viewRadar": "Radar chart view",
+        "viewToggle": "Chart view toggle",
+        "tooltipGap": "Gap"
+      },
+      "simulatedResults": {
+        "competencyScores": "Competency Scores",
+        "tooltipScore": "Score:",
+        "tooltipPassed": "Passed",
+        "tooltipBelowThreshold": "Below threshold",
+        "competenciesAssessed": "{count} competencies assessed",
+        "personalityProfile": "Personality Profile",
+        "bigFiveOcean": "Big Five (OCEAN) traits",
+        "noCompetencyData": "No competency data available",
+        "noCompetencies": "No competencies",
+        "threshold": "Threshold: {score}%",
+        "totalQuestions": "{count} questions",
+        "estimatedDuration": "~{minutes} min",
+        "topStrengths": "Top Strengths",
+        "growthAreas": "Growth Areas",
+        "jobAlignmentScore": "Job Alignment Score",
+        "jobRequirementsCovered": "{percentage}% of job requirements covered",
+        "teamGapScore": "Team Gap Score",
+        "aboveTeamAverage": "Above team average",
+        "belowTeamAverage": "Below team average - development opportunity",
+        "complementarySkills": "Complementary Skills (Above Team)",
+        "developmentFocus": "Development Focus (Below Team)",
+        "moreCompetencies": "+{count} more competencies",
+        "showLessCompetencies": "Show less",
+        "indicators": "Indicators",
+        "indicatorCorrect": "Correct:"
+      },
+      "analytics": {
+        "noCompetencies": "No competencies selected",
+        "noDifficultyData": "No difficulty data",
+        "runToSeeLogic": "Run a simulation to see selection logic",
+        "coverageByCompetency": "Coverage by competency",
+        "difficultyBalance": "Difficulty balance",
+        "selectionReasons": "Selection reasons"
+      },
+      "timeline": {
+        "runToViewPath": "Run a simulation to view the adaptive path",
+        "noSampleQuestions": "No sample questions available.",
+        "adaptiveCurve": "Adaptive curve",
+        "questionsCount": "Questions ({count})",
+        "scrollToSeeAll": "Scroll to see all",
+        "correct": "Correct",
+        "incorrect": "Incorrect"
+      },
+      "insights": {
+        "competencyWeights": "Competency Weights",
+        "bigFiveTraits": "Big Five Traits",
+        "radarDescription": "The radar chart shows how competencies are distributed in this assessment, with an estimated Big Five personality profile based on the competency mix.",
+        "radarDisclaimer": "Actual personality scores will be refined after O*NET competency mapping."
+      },
+      "toasts": {
+        "failedToSave": "Failed to save",
+        "changesReverted": "— changes reverted",
+        "changesMerged": "Changes merged from both tabs",
+        "keptYourChanges": "Kept your changes",
+        "appliedOtherChanges": "Applied changes from other tab",
+        "simulationFailed": "Simulation failed",
+        "blueprintSaved": "Blueprint saved"
+      },
+      "radar": {
+        "noCompetencies": "No competencies selected",
+        "ariaLabel": "Radar chart showing {count} competencies",
+        "ariaLabelWithBigFive": "Radar chart showing {count} competencies and Big Five personality traits",
+        "competencyWeight": "Competency Weight",
+        "bigFive": "Big Five",
+        "weight": "Weight:",
+        "score": "Score:",
+        "scoreName": "Score",
+        "trait": "Trait",
+        "relativeWeight": "Relative weight in assessment",
+        "estimatedTrait": "Estimated personality trait",
+        "questionsAbbrev": "{count}q"
+      },
+      "bigFive": {
+        "openness": "Openness",
+        "opennessShort": "Open",
+        "conscientiousness": "Conscientiousness",
+        "conscientiousnessShort": "Consc",
+        "extraversion": "Extraversion",
+        "extraversionShort": "Extra",
+        "agreeableness": "Agreeableness",
+        "agreeablenessShort": "Agree",
+        "emotionalStability": "Emotional Stability",
+        "emotionalStabilityShort": "Stable"
+      },
+      "validation": {
+        "onetRequired": "O*NET SOC code required for job alignment insights",
+        "teamRequired": "Team selection required for gap analysis"
+      },
+      "onetLink": "O*NET: {code}",
+      "onetAriaLabel": "View on O*NET OnLine (opens in new tab)",
+      "loading": {
+        "phases": {
+          "assembling": "Assembling questions",
+          "assemblingSubtitle": "Selecting from question pool...",
+          "simulating": "Simulating responses",
+          "simulatingPerfect": "Running ideal response pattern...",
+          "simulatingRandom": "Generating random response pattern...",
+          "simulatingFailing": "Simulating low-performance pattern...",
+          "scoring": "Calculating scores",
+          "scoringDefault": "Evaluating response accuracy...",
+          "scoringJobFit": "Evaluating job fit alignment...",
+          "scoringTeamGap": "Comparing against team benchmark...",
+          "report": "Generating report",
+          "reportSubtitle": "Preparing visualization data...",
+          "stepOf": "Step {current} of {total}"
+        }
+      }
+    },
+    "onboarding": {
+      "step": "Step {current} of {total}",
+      "skip": "Skip",
+      "next": "Next",
+      "back": "Back",
+      "getStarted": "Get Started",
+      "skipTour": "Skip tour",
+      "welcome": {
+        "title": "Welcome to Blueprint",
+        "content": "This is your workspace for building competency-based assessments. You can add competencies, set their importance, and preview how candidates will experience the test."
+      },
+      "library": {
+        "title": "Add Competencies",
+        "content": "Browse and search the competency library here. Drag competencies to the canvas or click the + button to add them to your assessment."
+      },
+      "importance": {
+        "title": "Set Importance Levels",
+        "content": "Adjust how important each competency is. Higher importance means more questions will be generated for that area. You can set Low, Medium, High, or Critical."
+      },
+      "simulator": {
+        "title": "Preview Results",
+        "content": "Use the simulator to see how your assessment will perform. Choose different test personas and run simulations to preview candidate scores and question distribution."
+      }
+    },
+    "versionPrompt": {
+      "title": "Template is Published",
+      "description": "This template is published and cannot be modified directly. Choose how to proceed:",
+      "createVersion": "Create New Version",
+      "createVersionDescription": "Recommended — creates a draft copy you can edit freely",
+      "or": "or",
+      "overwrite": "Overwrite Current Version",
+      "overwriteWarning": "This will modify the live template. Active share links and sessions may be affected.",
+      "cancel": "Cancel"
+    }
+  },
+  "skillMapper": {
+    "title": "Skill Mapper",
+    "description": "Client-side fuzzy search across ESCO and O*NET databases",
+    "loadingTitle": "Loading Skill Database",
+    "loadingDescription": "Processing ESCO and O*NET data...",
+    "searchPlaceholder": "Search for skills, competencies, abilities... (e.g., 'leadership', 'data analysis', 'communication')",
+    "searchPlaceholderShort": "Search skills, competencies, abilities...",
+    "stats": {
+      "totalSkills": "{total} skills",
+      "esco": "ESCO: {esco}",
+      "onet": "O*NET: {onet}",
+      "categories": "{categories} cats",
+      "buildTime": "Built in {buildTimeMs}ms"
+    },
+    "tips": {
+      "desktop": "Tips: Use filters to narrow results • Click a skill for details",
+      "mobile": "Tap filters to narrow • Tap skill for details"
+    },
+    "footer": {
+      "zeroLatency": "Zero-latency",
+      "noNetwork": "No network"
+    },
+    "search": {
+      "clearSearch": "Clear search",
+      "filters": "Filters",
+      "clear": "Clear",
+      "dataSource": "Data Source",
+      "categories": "Categories",
+      "buildingIndex": "Building index...",
+      "resultsCount": "{count} results",
+      "skillsIndexed": "{count} skills indexed",
+      "preparingIndex": "Preparing search index...",
+      "backgroundThread": "Building in background thread",
+      "searching": "Searching...",
+      "noResults": "No skills found for \"{query}\"",
+      "noResultsHint": "Try different keywords or adjust filters",
+      "emptyState": "Start typing to search skills",
+      "emptyStateHint": "Search across {count} skills from ESCO and O*NET",
+      "worker": "Worker",
+      "noDescription": "No description available"
+    },
+    "details": {
+      "noSelection": "No Skill Selected",
+      "noSelectionHint": "Search for skills on the left and click on a result to view details.",
+      "closeDetails": "Close skill details",
+      "description": "Description",
+      "noDescription": "No description available.",
+      "altNames": "Alternative Names",
+      "moreAltNames": "+{count} more",
+      "identifiers": "Identifiers",
+      "id": "ID:",
+      "code": "Code:",
+      "uri": "URI:",
+      "view": "View",
+      "relatedOccupations": "Related Occupations ({count})",
+      "importance": "{value} imp.",
+      "rawMetadata": "Raw Metadata",
+      "skillDetails": "Skill Details"
     }
   }
 }
