@@ -334,8 +334,10 @@
       "permissionLabel": "Access",
       "clear": "Clear ({count})",
       "noTests": "No test templates found",
+      "noResults": "No tests match \"{query}\"",
       "alreadyAdded": "Already added",
       "add": "Add Tests",
+      "addCount": "Add Tests ({count})",
       "adding": "Adding...",
       "cancel": "Cancel"
     }

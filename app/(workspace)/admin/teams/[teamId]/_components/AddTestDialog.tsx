@@ -14,7 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Select,
   SelectContent,
@@ -130,7 +130,7 @@ export default function AddTestDialog({
 
   return (
     <Dialog open={open} onOpenChange={(o) => (o ? onOpenChange(true) : handleClose())}>
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent className="sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <ClipboardList className="h-5 w-5" />
@@ -182,11 +182,30 @@ export default function AddTestDialog({
         </div>
 
         {/* Templates list */}
-        <ScrollArea className="h-[300px] -mx-6 px-6">
-          {hasLoaded && filteredTemplates.length === 0 ? (
+        <div className="h-[300px] overflow-y-auto -mx-6 px-6">
+          {isLoading || !hasLoaded ? (
+            <div className="space-y-2">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="flex items-start gap-3 p-3 rounded-lg border"
+                >
+                  <Skeleton className="h-4 w-4 rounded mt-0.5" />
+                  <div className="flex-1 space-y-2">
+                    <Skeleton className="h-4 w-1/2" />
+                    <Skeleton className="h-3 w-3/4" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : filteredTemplates.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-10 text-center">
               <Search className="h-8 w-8 text-muted-foreground mb-2" />
-              <p className="text-muted-foreground text-sm">{t("noTests")}</p>
+              <p className="text-muted-foreground text-sm">
+                {searchQuery.trim()
+                  ? t("noResults", { query: searchQuery.trim() })
+                  : t("noTests")}
+              </p>
             </div>
           ) : (
             <div className="space-y-2">
@@ -209,15 +228,17 @@ export default function AddTestDialog({
                       checked={selected}
                       disabled={existing}
                       onCheckedChange={() => !existing && toggleTemplate(tpl.id)}
+                      onClick={(e) => e.stopPropagation()}
+                      aria-label={tpl.name}
                       className="mt-0.5"
                     />
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <p className="font-medium truncate">{tpl.name}</p>
-                        <GoalBadge goal={tpl.goal} />
+                      <div className="flex items-start gap-2 min-w-0">
+                        <p className="font-medium break-words min-w-0">{tpl.name}</p>
+                        <GoalBadge goal={tpl.goal} className="mt-0.5" />
                       </div>
                       {tpl.description && (
-                        <p className="text-sm text-muted-foreground truncate mt-0.5">
+                        <p className="text-sm text-muted-foreground break-words mt-0.5">
                           {tpl.description}
                         </p>
                       )}
@@ -233,7 +254,7 @@ export default function AddTestDialog({
               })}
             </div>
           )}
-        </ScrollArea>
+        </div>
 
         <DialogFooter className="gap-2 sm:gap-0">
           <Button variant="outline" onClick={handleClose}>
@@ -248,7 +269,9 @@ export default function AddTestDialog({
             ) : (
               <>
                 <ClipboardList className="h-4 w-4 mr-2" />
-                {t("add")}
+                {selectedIds.size > 0
+                  ? t("addCount", { count: selectedIds.size })
+                  : t("add")}
               </>
             )}
           </Button>

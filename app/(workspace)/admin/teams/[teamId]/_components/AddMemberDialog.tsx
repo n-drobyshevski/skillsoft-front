@@ -195,6 +195,8 @@ export default function AddMemberDialog({
                       checked={isSelected}
                       disabled={isMember}
                       onCheckedChange={() => !isMember && toggleUser(user.id)}
+                      onClick={(e) => e.stopPropagation()}
+                      aria-label={`${user.firstName ?? ""} ${user.lastName ?? ""}`.trim() || user.email}
                     />
 
                     <Avatar className="h-10 w-10">

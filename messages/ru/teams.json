@@ -334,8 +334,10 @@
       "permissionLabel": "Доступ",
       "clear": "Очистить ({count})",
       "noTests": "Шаблоны тестов не найдены",
+      "noResults": "Нет тестов по запросу «{query}»",
       "alreadyAdded": "Уже добавлен",
       "add": "Добавить тесты",
+      "addCount": "Добавить тесты ({count})",
       "adding": "Добавление...",
       "cancel": "Отмена"
     }
