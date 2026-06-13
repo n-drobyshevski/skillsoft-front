@@ -12,7 +12,7 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { Target, Brain, ChevronRight, HelpCircle } from 'lucide-react';
-import { BIG_FIVE_INFO, type BigFiveProfile } from '@/hooks/useBigFiveProjection';
+import { type BigFiveProfile } from '@/hooks/useBigFiveProjection';
 import { CompetencyRow } from './TopCompetenciesCard';
 import {
   TRAIT_COLORS,
@@ -151,8 +151,7 @@ export function SkillsPersonalityCard({
                 title={tPassport('title')}
                 description={tAccessibility('chartDescription')}
                 data={TRAIT_ORDER.map(trait => ({
-                  // eslint-disable-next-line security/detect-object-injection
-                  trait: BIG_FIVE_INFO[trait].short,
+                  trait: tPassport(`traits.${trait}`),
                   // eslint-disable-next-line security/detect-object-injection
                   value: bigFiveProfile[trait],
                 }))}
@@ -171,8 +170,6 @@ export function SkillsPersonalityCard({
             <div className="hidden sm:block space-y-2 mt-4 overflow-hidden">
               {TRAIT_ORDER.map((trait) => {
                 // eslint-disable-next-line security/detect-object-injection
-                const info = BIG_FIVE_INFO[trait];
-                // eslint-disable-next-line security/detect-object-injection
                 const score = bigFiveProfile[trait];
                 // eslint-disable-next-line security/detect-object-injection
                 const colors = TRAIT_COLORS[trait];
@@ -184,7 +181,7 @@ export function SkillsPersonalityCard({
                         <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted/50 transition-colors cursor-help group touch-manipulation min-h-[44px]">
                           <div className="w-28 shrink-0 min-w-0">
                             <span className="text-sm font-medium flex items-center gap-1 truncate">
-                              {info.short}
+                              {tPassport(`traits.${trait}`)}
                               <HelpCircle className="h-3 w-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
                             </span>
                           </div>
@@ -200,8 +197,8 @@ export function SkillsPersonalityCard({
                         </div>
                       </TooltipTrigger>
                       <TooltipContent side="top" className="max-w-xs">
-                        <p className="font-medium">{info.short}</p>
-                        <p className="text-xs text-muted-foreground mt-1">{info.description}</p>
+                        <p className="font-medium">{tPassport(`traits.${trait}`)}</p>
+                        <p className="text-xs text-muted-foreground mt-1">{tPassport(`traitDescriptions.${trait}`)}</p>
                       </TooltipContent>
                     </Tooltip>
                   </TooltipProvider>
@@ -226,8 +223,6 @@ function DominantTraitCallout({ profile }: { profile: BigFiveProfile }) {
     // eslint-disable-next-line security/detect-object-injection
     profile[trait] > profile[max] ? trait : max
   );
-  // eslint-disable-next-line security/detect-object-injection
-  const dominantInfo = BIG_FIVE_INFO[dominantTrait];
 
   return (
     <div className="p-2.5 sm:p-3 rounded-xl flex items-center gap-2.5 sm:gap-3 bg-muted/50 border border-border">
@@ -253,7 +248,7 @@ function DominantTraitCallout({ profile }: { profile: BigFiveProfile }) {
           {t('dominantTrait')}
         </p>
         <p className="text-xs-safe text-muted-foreground truncate">
-          {dominantInfo.short}
+          {t(`traits.${dominantTrait}`)}
         </p>
       </div>
     </div>

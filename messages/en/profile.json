@@ -142,6 +142,7 @@
     "assessments": "{count, plural, one {# assessment} other {# assessments}}",
     "score": "Score",
     "rank": "Rank",
+    "uncategorized": "Uncategorized",
     "trend": {
       "up": "Improving",
       "down": "Declining",

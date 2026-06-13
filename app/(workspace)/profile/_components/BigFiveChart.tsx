@@ -10,8 +10,9 @@ import {
   ResponsiveContainer,
   Tooltip,
 } from 'recharts';
+import { useTranslations } from 'next-intl';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { BigFiveProfile, getBigFiveLabels } from '@/hooks/useBigFiveProjection';
+import { BigFiveProfile } from '@/hooks/useBigFiveProjection';
 import { useComputedColors } from '@/hooks/useComputedColors';
 
 /**
@@ -100,7 +101,7 @@ export function BigFiveChart({ profile }: BigFiveChartProps) {
     mutedForeground: ['--muted-foreground', '#6b7280'],
     background: ['--background', '#ffffff'],
   });
-  const labels = getBigFiveLabels();
+  const tPassport = useTranslations('profile.passport');
   const prefersReducedMotion = usePrefersReducedMotion();
 
   // Radar colors - using indigo for professional appearance
@@ -111,14 +112,13 @@ export function BigFiveChart({ profile }: BigFiveChartProps) {
   // Transform profile to chart data with trait keys for tooltip coloring
   const data = useMemo(() =>
     TRAIT_ORDER.map((trait) => ({
-      // eslint-disable-next-line security/detect-object-injection
-      trait: labels[trait],
+      trait: tPassport(`traits.${trait}`),
       traitKey: trait,
       // eslint-disable-next-line security/detect-object-injection
       value: profile[trait],
       fullMark: 100,
     })),
-    [profile, labels]
+    [profile, tPassport]
   );
 
   // Responsive sizing

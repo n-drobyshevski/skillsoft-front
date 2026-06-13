@@ -11,7 +11,7 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { Brain, Info, HelpCircle } from 'lucide-react';
-import { BIG_FIVE_INFO, type BigFiveProfile } from '@/hooks/useBigFiveProjection';
+import { type BigFiveProfile } from '@/hooks/useBigFiveProjection';
 import type { ProjectionConfidence } from '@/types/profile';
 import { cn } from '@/lib/utils';
 import { MobileBigFiveBars } from './MobileBigFiveBars';
@@ -92,8 +92,6 @@ export function PersonalityPassportCard({
     // eslint-disable-next-line security/detect-object-injection
     profile[trait] > profile[max] ? trait : max
   );
-  // eslint-disable-next-line security/detect-object-injection
-  const dominantInfo = BIG_FIVE_INFO[dominantTrait];
 
   return (
     <Card className="h-full flex flex-col isolate">
@@ -141,7 +139,7 @@ export function PersonalityPassportCard({
               {t('dominantTrait')}
             </p>
             <p className="text-xs-safe text-muted-foreground truncate">
-              {dominantInfo.short}
+              {t(`traits.${dominantTrait}`)}
             </p>
           </div>
         </div>
@@ -155,8 +153,7 @@ export function PersonalityPassportCard({
             title={t('title')}
             description={tAccessibility('chartDescription')}
             data={TRAIT_ORDER.map(trait => ({
-              // eslint-disable-next-line security/detect-object-injection
-              trait: BIG_FIVE_INFO[trait].short,
+              trait: t(`traits.${trait}`),
               // eslint-disable-next-line security/detect-object-injection
               value: profile[trait],
             }))}
@@ -175,8 +172,6 @@ export function PersonalityPassportCard({
         <div className="hidden sm:block space-y-2 overflow-hidden">
           {TRAIT_ORDER.map((trait) => {
             // eslint-disable-next-line security/detect-object-injection
-            const info = BIG_FIVE_INFO[trait];
-            // eslint-disable-next-line security/detect-object-injection
             const score = profile[trait];
             // eslint-disable-next-line security/detect-object-injection
             const colors = TRAIT_COLORS[trait];
@@ -189,7 +184,7 @@ export function PersonalityPassportCard({
                       {/* Trait name */}
                       <div className="w-28 shrink-0 min-w-0">
                         <span className="text-sm font-medium flex items-center gap-1 truncate">
-                          {info.short}
+                          {t(`traits.${trait}`)}
                           <HelpCircle className="h-3 w-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
                         </span>
                       </div>
@@ -209,8 +204,8 @@ export function PersonalityPassportCard({
                     </div>
                   </TooltipTrigger>
                   <TooltipContent side="top" className="max-w-xs">
-                    <p className="font-medium">{info.short}</p>
-                    <p className="text-xs text-muted-foreground mt-1">{info.description}</p>
+                    <p className="font-medium">{t(`traits.${trait}`)}</p>
+                    <p className="text-xs text-muted-foreground mt-1">{t(`traitDescriptions.${trait}`)}</p>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>

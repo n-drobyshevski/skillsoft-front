@@ -6292,6 +6292,7 @@
       "assessments": "{count, plural, one {# оценка} few {# оценки} many {# оценок} other {# оценок}}",
       "score": "Балл",
       "rank": "Место",
+      "uncategorized": "Без категории",
       "trend": {
         "up": "Рост",
         "down": "Снижение",

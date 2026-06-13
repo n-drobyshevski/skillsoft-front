@@ -129,7 +129,7 @@ export function CompetencyRow({ competency, rank }: { competency: TopCompetency;
         </div>
         <div className="flex items-center gap-1.5 sm:gap-2 mt-0.5 sm:mt-1">
           <Badge variant="outline" className="text-xs-safe py-0 h-4 sm:h-5 px-1 sm:px-1.5">
-            {competency.category}
+            {competency.category || t('uncategorized')}
           </Badge>
           <span className="text-xs-safe text-muted-foreground">
             {t('assessments', { count: competency.assessmentCount })}

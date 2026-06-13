@@ -309,7 +309,7 @@ export function aggregateCompetencyScores(results: TestResult[]): Map<string, {
         scoreMap.set(score.competencyId, {
           competencyId: score.competencyId,
           competencyName: score.competencyName,
-          category: score.competencyCategory || 'Unknown',
+          category: score.competencyCategory || '',
           scores: [score.percentage],
           onetCode: score.onetCode,
         });

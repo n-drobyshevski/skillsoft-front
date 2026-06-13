@@ -3,7 +3,7 @@
 import { useTranslations } from 'next-intl';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Skeleton } from '@/components/ui/skeleton';
-import { BIG_FIVE_INFO, type BigFiveProfile } from '@/hooks/useBigFiveProjection';
+import { type BigFiveProfile } from '@/hooks/useBigFiveProjection';
 import { TRAIT_COLORS, TRAIT_ORDER, ConfidenceBadge } from './PersonalityPassportCard';
 import { ProfileEmptyState } from './ProfileEmptyState';
 import { cn } from '@/lib/utils';
@@ -82,8 +82,6 @@ export function PersonalitySection({
       <div className="space-y-2" role="list" aria-label={tPassport('title')}>
         {TRAIT_ORDER.map((trait) => {
           // eslint-disable-next-line security/detect-object-injection
-          const info = BIG_FIVE_INFO[trait];
-          // eslint-disable-next-line security/detect-object-injection
           const score = bigFiveProfile[trait];
           // eslint-disable-next-line security/detect-object-injection
           const colors = TRAIT_COLORS[trait];
@@ -96,7 +94,7 @@ export function PersonalitySection({
                     role="listitem"
                     className="flex items-center gap-3 py-2 px-2 -mx-2 rounded-lg hover:bg-muted/50 transition-colors cursor-help min-h-[44px] touch-manipulation"
                   >
-                    <span className="w-28 shrink-0 text-sm font-medium truncate">{info.short}</span>
+                    <span className="w-28 shrink-0 text-sm font-medium truncate">{tPassport(`traits.${trait}`)}</span>
                     <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
                       <div
                         className={cn('h-full rounded-full transition-all duration-500', colors.bar)}
@@ -109,8 +107,8 @@ export function PersonalitySection({
                   </div>
                 </TooltipTrigger>
                 <TooltipContent side="top" className="max-w-xs">
-                  <p className="font-medium">{info.short}</p>
-                  <p className="text-xs text-muted-foreground mt-1">{info.description}</p>
+                  <p className="font-medium">{tPassport(`traits.${trait}`)}</p>
+                  <p className="text-xs text-muted-foreground mt-1">{tPassport(`traitDescriptions.${trait}`)}</p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
