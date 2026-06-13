@@ -114,16 +114,30 @@ export async function getAssessmentSummary(clerkUserId: string): Promise<Assessm
     return createEmptyAssessmentSummary();
   }
 
-  // Count by goal (requires template info - using default OVERVIEW for now)
+  // Count by goal using each result's template assessment goal.
+  // Goal is optional on older/cached payloads — fall back to OVERVIEW.
   const byGoal = {
     overview: 0,
     jobFit: 0,
     teamFit: 0,
   };
+  for (const result of allResults) {
+    switch (result.goal) {
+      case AssessmentGoal.JOB_FIT:
+        byGoal.jobFit++;
+        break;
+      case AssessmentGoal.TEAM_FIT:
+        byGoal.teamFit++;
+        break;
+      default:
+        byGoal.overview++;
+        break;
+    }
+  }
 
-  // Transform recent results
+  // Transform recent results, preserving each result's real assessment goal
   const recentResults: RecentTestResult[] = recentData.map(result =>
-    toRecentTestResult(result, AssessmentGoal.OVERVIEW)
+    toRecentTestResult(result, result.goal ?? AssessmentGoal.OVERVIEW)
   );
 
   // Find last assessment date

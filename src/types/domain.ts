@@ -985,6 +985,12 @@ export interface TestResult {
   sessionId: string;
   templateId: string;
   templateName: string;
+  /**
+   * Assessment type of the originating template (OVERVIEW / JOB_FIT / TEAM_FIT).
+   * Populated by the backend; optional for backward compatibility with older
+   * cached payloads and test fixtures.
+   */
+  goal?: AssessmentGoal;
   clerkUserId: string;
   /** Raw score sum - can be null when PENDING */
   overallScore: number | null;
