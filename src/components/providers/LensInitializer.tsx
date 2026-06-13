@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
 import { useUser } from "@clerk/nextjs";
-import { useLensStore } from "@/store/lens-store";
+import { useLensStore, readLensCookie } from "@/store/lens-store";
 import { selectIsInitialized, selectIsHydrated } from "@/store/lens-selectors";
 import { UserRole } from "@/types/user";
 
@@ -32,6 +33,7 @@ import { UserRole } from "@/types/user";
  * - No flash of wrong content on page load
  */
 export function LensInitializer() {
+  const router = useRouter();
   const { user: clerkUser, isLoaded: isClerkLoaded } = useUser();
   const isStoreInitialized = useLensStore(selectIsInitialized);
   const isStoreHydrated = useLensStore(selectIsHydrated);
@@ -89,10 +91,27 @@ export function LensInitializer() {
       typeof window !== "undefined" &&
       localStorage.getItem("skillsoft-lens-store") !== null;
 
-    // Initialize the store
+    // The lens the SERVER used to render the current page lives in the cookie.
+    // Capture it BEFORE initialization overwrites it. Null = cookie absent
+    // (e.g. cleared on sign-out), which is the common first-load-after-login case.
+    const serverLens = readLensCookie();
+
+    // Initialize the store (resolves the persisted lens + re-syncs the cookie).
     initializeFromClerk(userRole, hasStoredLens);
     hasInitializedRef.current = true;
+
+    // Reconcile server ↔ client. The dashboard (and other server components)
+    // rendered from `serverLens`; the client just resolved its real lens from
+    // localStorage. If they differ — the cookie was stale/absent on first load —
+    // force one router.refresh() so server components re-render with the correct
+    // lens cookie. Without this the sidebar shows the persisted lens while the
+    // dashboard stays on the role-default view until a manual switch.
+    const resolvedLens = useLensStore.getState().activeLens;
+    if (serverLens !== resolvedLens) {
+      router.refresh();
+    }
   }, [
+    router,
     isClerkLoaded,
     isStoreHydrated,
     isStoreInitialized,

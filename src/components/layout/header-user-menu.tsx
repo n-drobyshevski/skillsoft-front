@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { useLensStore } from "@/store/lens-store";
+import { clearPersistedLens } from "@/store/lens-store";
 
 /**
  * HeaderUserMenu - User avatar + dropdown for the site header.
@@ -30,10 +30,12 @@ export function HeaderUserMenu() {
   const tAuth = useTranslations("auth");
 
   const handleSignOut = () => {
-    // Tear down lens state before Clerk signs out so the next login starts
-    // from the role's default lens instead of inheriting the prior lens.
-    useLensStore.getState().reset(); // clears cookie + in-memory state
-    useLensStore.persist.clearStorage(); // removes the persisted localStorage key
+    // Clear persisted lens (cookie + localStorage) so the next login starts from
+    // the role's default lens instead of inheriting the prior one. We do NOT
+    // mutate the in-memory store here — that would re-render lens consumers into
+    // a torn-down state mid-sign-out (React hook-count error). The page redirects
+    // to sign-in immediately, discarding the live store anyway.
+    clearPersistedLens();
     void signOut(); // default redirect (ClerkProvider afterSignOutUrl)
   };
 

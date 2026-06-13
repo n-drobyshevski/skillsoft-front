@@ -32,6 +32,24 @@ function clearLensCookie() {
 }
 
 /**
+ * Read the active lens from the cookie (client-side).
+ *
+ * This is the value the server used to render the current page. Returns null
+ * when the cookie is absent (e.g. just after sign-out cleared it), which the
+ * caller treats as "server has no lens" — distinct from any concrete lens.
+ */
+export function readLensCookie(): LensType | null {
+  if (typeof document === "undefined") return null;
+  const match = document.cookie.match(
+    new RegExp(`(?:^|; )${LENS_COOKIE_NAME}=([^;]*)`)
+  );
+  const value = match?.[1];
+  return value === "user" || value === "editor" || value === "admin"
+    ? value
+    : null;
+}
+
+/**
  * Lens store state
  */
 interface LensState {
@@ -239,6 +257,29 @@ export const useLensStore = create<LensStore>()(
     }
   )
 );
+
+/**
+ * Clear all persisted lens state (cookie + localStorage) WITHOUT mutating the
+ * in-memory store.
+ *
+ * Use on sign-out: the page navigates to sign-in immediately, so the live store
+ * is discarded with the page anyway. Calling the store's `reset()` here would
+ * `set()` new state (e.g. isHydrated=false, userRole=USER) and synchronously
+ * re-render every lens consumer into a torn-down state, causing React
+ * "Rendered more hooks than during the previous render" errors. Clearing only
+ * the persisted artifacts avoids any re-render while still ensuring the next
+ * login re-initializes from the role default.
+ */
+export function clearPersistedLens() {
+  clearLensCookie();
+  if (typeof window !== "undefined") {
+    try {
+      localStorage.removeItem("skillsoft-lens-store");
+    } catch {
+      // ignore storage access errors (e.g. private browsing)
+    }
+  }
+}
 
 /**
  * Export helper functions for external use
