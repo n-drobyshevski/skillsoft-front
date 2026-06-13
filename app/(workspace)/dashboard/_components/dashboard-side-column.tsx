@@ -107,7 +107,7 @@ export default function DashboardSideColumn({
         <motion.div variants={fadeInUp}>
           <RecentActivityWidget
             completions={recentCompletions}
-            disableFetch={!currentUser?.role || currentUser.role === 'USER'}
+            disableFetch={isUserLens || !currentUser?.role || currentUser.role === 'USER'}
           />
         </motion.div>
 

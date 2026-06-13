@@ -1,11 +1,9 @@
 "use client";
 
-import { useUser } from "@clerk/nextjs";
-import { SignOutButton } from "@clerk/nextjs";
+import { useUser, useClerk } from "@clerk/nextjs";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import {
-  ChevronDown,
   User,
   LogOut,
   Settings,
@@ -19,6 +17,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { useLensStore } from "@/store/lens-store";
 
 /**
  * HeaderUserMenu - User avatar + dropdown for the site header.
@@ -26,8 +25,17 @@ import { Button } from "@/components/ui/button";
  */
 export function HeaderUserMenu() {
   const { user: clerkUser } = useUser();
+  const { signOut } = useClerk();
   const t = useTranslations("navigation");
   const tAuth = useTranslations("auth");
+
+  const handleSignOut = () => {
+    // Tear down lens state before Clerk signs out so the next login starts
+    // from the role's default lens instead of inheriting the prior lens.
+    useLensStore.getState().reset(); // clears cookie + in-memory state
+    useLensStore.persist.clearStorage(); // removes the persisted localStorage key
+    void signOut(); // default redirect (ClerkProvider afterSignOutUrl)
+  };
 
   const userName =
     clerkUser?.fullName || clerkUser?.username || "User";
@@ -95,12 +103,10 @@ export function HeaderUserMenu() {
           </Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <SignOutButton>
-          <DropdownMenuItem>
-            <LogOut className="mr-2 h-4 w-4" />
-            {tAuth("signOut")}
-          </DropdownMenuItem>
-        </SignOutButton>
+        <DropdownMenuItem onSelect={handleSignOut}>
+          <LogOut className="mr-2 h-4 w-4" />
+          {tAuth("signOut")}
+        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );
