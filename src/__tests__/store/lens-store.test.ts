@@ -143,6 +143,40 @@ describe('LensStore', () => {
       expect(useLensStore.getState().userRole).toBe(UserRole.USER); // Unchanged
     });
 
+    it('should reinitialize when forced even if already initialized', () => {
+      // Simulate a surviving singleton from a previous session: initialized,
+      // stale lens, no stored preference for the new login.
+      useLensStore.setState({
+        activeLens: 'user',
+        userRole: UserRole.USER,
+        isInitialized: true,
+      });
+
+      act(() => {
+        useLensStore.getState().initializeFromClerk(UserRole.ADMIN, false, true);
+      });
+
+      // Forced re-resolution applies: role default for ADMIN with no stored lens.
+      expect(useLensStore.getState().userRole).toBe(UserRole.ADMIN);
+      expect(useLensStore.getState().activeLens).toBe('admin');
+    });
+
+    it('should preserve a valid stored lens on a forced reinitialize', () => {
+      // Surviving singleton whose persisted lens is still valid for the role.
+      useLensStore.setState({
+        activeLens: 'user',
+        userRole: UserRole.EDITOR,
+        isInitialized: true,
+      });
+
+      act(() => {
+        useLensStore.getState().initializeFromClerk(UserRole.EDITOR, true, true);
+      });
+
+      expect(useLensStore.getState().activeLens).toBe('user'); // Restored last-used lens
+      expect(useLensStore.getState().userRole).toBe(UserRole.EDITOR);
+    });
+
     it('should set correct default lens for each role', () => {
       const testCases: Array<{ role: UserRole; expectedLens: LensType }> = [
         { role: UserRole.ADMIN, expectedLens: 'admin' },

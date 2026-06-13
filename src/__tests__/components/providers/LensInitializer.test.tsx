@@ -86,4 +86,27 @@ describe('LensInitializer cookie/lens reconciliation', () => {
     });
     expect(mockRefresh).not.toHaveBeenCalled();
   });
+
+  it('reinitializes and reconciles a surviving (already-initialized) store after re-login', async () => {
+    // Module-singleton store carried across a client-side sign-out -> sign-in:
+    // already initialized from the previous session, persisted lens restored,
+    // but the server rendered with the cookie absent (-> role default).
+    localStorage.setItem('skillsoft-lens-store', JSON.stringify({ state: { activeLens: 'user' }, version: 0 }));
+    useLensStore.setState({
+      activeLens: 'user',
+      userRole: UserRole.USER,
+      isInitialized: true, // stale-true from the prior session
+      isHydrated: true,
+    });
+    setLensCookie(null);
+
+    render(<LensInitializer />);
+
+    // Must NOT short-circuit on the stale isInitialized flag: it re-resolves and
+    // forces exactly one refresh so the dashboard re-renders for the restored lens.
+    await waitFor(() => {
+      expect(mockRefresh).toHaveBeenCalledTimes(1);
+    });
+    expect(useLensStore.getState().activeLens).toBe('user');
+  });
 });

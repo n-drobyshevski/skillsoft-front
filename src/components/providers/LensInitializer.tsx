@@ -4,7 +4,7 @@ import { useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useUser } from "@clerk/nextjs";
 import { useLensStore, readLensCookie } from "@/store/lens-store";
-import { selectIsInitialized, selectIsHydrated } from "@/store/lens-selectors";
+import { selectIsHydrated } from "@/store/lens-selectors";
 import { UserRole } from "@/types/user";
 
 /**
@@ -35,7 +35,6 @@ import { UserRole } from "@/types/user";
 export function LensInitializer() {
   const router = useRouter();
   const { user: clerkUser, isLoaded: isClerkLoaded } = useUser();
-  const isStoreInitialized = useLensStore(selectIsInitialized);
   const isStoreHydrated = useLensStore(selectIsHydrated);
   const initializeFromClerk = useLensStore((state) => state.initializeFromClerk);
 
@@ -43,8 +42,11 @@ export function LensInitializer() {
   const clerkUserId = clerkUser?.id;
   const clerkUserRole = clerkUser?.publicMetadata?.role as string | undefined;
 
-  // Track if we've already initialized to prevent duplicate calls
-  const hasInitializedRef = useRef(false);
+  // Track which Clerk user this instance already initialized for. Keyed by id
+  // (not a boolean) so a new login mount — or an account switch — re-initializes
+  // even when the module-singleton store survived from a previous session with
+  // isInitialized stale-true.
+  const initializedUserIdRef = useRef<string | null>(null);
 
   useEffect(() => {
     // Guard: Wait for Clerk to load
@@ -57,13 +59,15 @@ export function LensInitializer() {
       return;
     }
 
-    // Guard: Already initialized
-    if (isStoreInitialized || hasInitializedRef.current) {
+    // Guard: No user (shouldn't happen in workspace layout, but check anyway)
+    if (!clerkUserId) {
       return;
     }
 
-    // Guard: No user (shouldn't happen in workspace layout, but check anyway)
-    if (!clerkUserId) {
+    // Guard: Already initialized for THIS user on this mount. We intentionally
+    // do NOT short-circuit on the store's isInitialized flag — it can be stale
+    // from a prior session that the surviving singleton carried across login.
+    if (initializedUserIdRef.current === clerkUserId) {
       return;
     }
 
@@ -97,8 +101,11 @@ export function LensInitializer() {
     const serverLens = readLensCookie();
 
     // Initialize the store (resolves the persisted lens + re-syncs the cookie).
-    initializeFromClerk(userRole, hasStoredLens);
-    hasInitializedRef.current = true;
+    // Force re-resolution: the store may be a surviving singleton whose
+    // isInitialized is still true from the previous session, which would
+    // otherwise make this a no-op and leave the cookie unsynced.
+    initializeFromClerk(userRole, hasStoredLens, true);
+    initializedUserIdRef.current = clerkUserId;
 
     // Reconcile server ↔ client. The dashboard (and other server components)
     // rendered from `serverLens`; the client just resolved its real lens from
@@ -114,7 +121,6 @@ export function LensInitializer() {
     router,
     isClerkLoaded,
     isStoreHydrated,
-    isStoreInitialized,
     clerkUserId,
     clerkUserRole,
     initializeFromClerk,

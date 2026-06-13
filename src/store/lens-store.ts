@@ -69,8 +69,15 @@ interface LensState {
 interface LensActions {
   /** Set the active lens (with permission check) */
   setLens: (lens: LensType) => void;
-  /** Initialize store from Clerk user data */
-  initializeFromClerk: (role: UserRole, hasStoredLens: boolean) => void;
+  /**
+   * Initialize store from Clerk user data.
+   *
+   * Pass `force` to re-resolve even when already initialized — used by
+   * LensInitializer on each login mount, because the store is a module
+   * singleton that survives client-side sign-out → sign-in (no page reload),
+   * leaving `isInitialized` stale-true from the previous session.
+   */
+  initializeFromClerk: (role: UserRole, hasStoredLens: boolean, force?: boolean) => void;
   /** Reset store to default state */
   reset: () => void;
   /** Mark store as hydrated (called by persist middleware) */
@@ -189,11 +196,12 @@ export const useLensStore = create<LensStore>()(
           }
         },
 
-        initializeFromClerk: (role: UserRole, hasStoredLens: boolean) => {
+        initializeFromClerk: (role: UserRole, hasStoredLens: boolean, force = false) => {
           const { activeLens, isInitialized } = get();
 
-          // Only initialize once
-          if (isInitialized) {
+          // Only initialize once per session, unless the caller forces a
+          // re-resolution (e.g. a new login mount reusing a surviving store).
+          if (isInitialized && !force) {
             return;
           }
 
@@ -257,29 +265,6 @@ export const useLensStore = create<LensStore>()(
     }
   )
 );
-
-/**
- * Clear all persisted lens state (cookie + localStorage) WITHOUT mutating the
- * in-memory store.
- *
- * Use on sign-out: the page navigates to sign-in immediately, so the live store
- * is discarded with the page anyway. Calling the store's `reset()` here would
- * `set()` new state (e.g. isHydrated=false, userRole=USER) and synchronously
- * re-render every lens consumer into a torn-down state, causing React
- * "Rendered more hooks than during the previous render" errors. Clearing only
- * the persisted artifacts avoids any re-render while still ensuring the next
- * login re-initializes from the role default.
- */
-export function clearPersistedLens() {
-  clearLensCookie();
-  if (typeof window !== "undefined") {
-    try {
-      localStorage.removeItem("skillsoft-lens-store");
-    } catch {
-      // ignore storage access errors (e.g. private browsing)
-    }
-  }
-}
 
 /**
  * Export helper functions for external use
