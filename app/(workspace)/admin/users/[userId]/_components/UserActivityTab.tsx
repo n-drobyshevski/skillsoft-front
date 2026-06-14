@@ -16,6 +16,7 @@ import {
 import type { TestResult } from '@/types/domain';
 import { cn } from '@/lib/utils';
 import { useTranslations } from 'next-intl';
+import Link from 'next/link';
 
 interface UserActivityTabProps {
   results: {
@@ -51,6 +52,8 @@ interface ActivityEvent {
   id: string;
   type: ActivityEventType;
   timestamp: string;
+  /** Result detail page link. Set only for test-result events. */
+  href?: string;
   metadata?: {
     templateName?: string;
     score?: number;
@@ -160,9 +163,11 @@ function formatDateTime(
 }
 
 /**
- * Format duration from seconds.
+ * Format duration from seconds. Returns empty string for non-finite or
+ * non-positive input so the caller renders nothing instead of "NaN".
  */
 function formatDuration(seconds: number): string {
+  if (!Number.isFinite(seconds) || seconds <= 0) return '';
   if (seconds < 60) return `${seconds}s`;
   const minutes = Math.floor(seconds / 60);
   if (minutes < 60) return `${minutes}m`;
@@ -204,10 +209,14 @@ function buildActivityEvents(
         id: `test-${result.id}`,
         type: eventType,
         timestamp: result.completedAt,
+        href: `/test-templates/results/${result.id}`,
         metadata: {
           templateName: result.templateName,
           score: result.overallPercentage ?? undefined,
-          duration: result.totalTimeSeconds,
+          duration:
+            Number.isFinite(result.totalTimeSeconds) && result.totalTimeSeconds > 0
+              ? result.totalTimeSeconds
+              : undefined,
         },
       });
     });
@@ -261,6 +270,52 @@ export function UserActivityTab({ results, user, locale = 'en-US' }: UserActivit
             const config = getEventConfig(event.type);
             const Icon = config.icon;
             const isLast = index === events.length - 1;
+            const label = getEventLabel(event.type, event.metadata?.templateName, t);
+            const durationLabel = formatDuration(event.metadata?.duration ?? NaN);
+
+            const eventBody = (
+              <div className="flex items-start justify-between gap-2">
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold flex items-center gap-2">
+                    <Icon className={cn('h-4 w-4 shrink-0', config.color)} />
+                    <span className="truncate">{label}</span>
+                  </p>
+                  {event.metadata && (
+                    <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
+                      {event.metadata.score != null && Number.isFinite(event.metadata.score) && (
+                        <span
+                          className={cn(
+                            'font-medium',
+                            event.metadata.score >= 70
+                              ? 'text-emerald-600'
+                              : event.metadata.score >= 50
+                                ? 'text-blue-600'
+                                : 'text-amber-600'
+                          )}
+                        >
+                          {Math.round(event.metadata.score)}%
+                        </span>
+                      )}
+                      {durationLabel && (
+                        <>
+                          <span className="mx-1">·</span>
+                          <Clock className="h-3 w-3" />
+                          {durationLabel}
+                        </>
+                      )}
+                    </div>
+                  )}
+                </div>
+                <div className="text-right shrink-0">
+                  <p className="text-xs text-muted-foreground">
+                    {formatRelativeTime(event.timestamp)}
+                  </p>
+                  <p className="text-xs text-muted-foreground/70 hidden sm:block">
+                    {formatDateTime(event.timestamp, t('time.never'), locale)}
+                  </p>
+                </div>
+              </div>
+            );
 
             return (
               <div key={event.id} className="flex gap-4 py-3">
@@ -274,51 +329,21 @@ export function UserActivityTab({ results, user, locale = 'en-US' }: UserActivit
                   />
                   {!isLast && <div className="w-px flex-1 bg-border mt-2" />}
                 </div>
-                <div className={cn('flex-1', !isLast && 'pb-4')}>
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold flex items-center gap-2">
-                        <Icon className={cn('h-4 w-4 shrink-0', config.color)} />
-                        <span className="truncate">
-                          {getEventLabel(event.type, event.metadata?.templateName, t)}
-                        </span>
-                      </p>
-                      {event.metadata && (
-                        <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
-                          {event.metadata.score != null && (
-                            <span
-                              className={cn(
-                                'font-medium',
-                                event.metadata.score >= 70
-                                  ? 'text-emerald-600'
-                                  : event.metadata.score >= 50
-                                    ? 'text-blue-600'
-                                    : 'text-amber-600'
-                              )}
-                            >
-                              {Math.round(event.metadata.score)}%
-                            </span>
-                          )}
-                          {event.metadata.duration != null && (
-                            <>
-                              <span className="mx-1">·</span>
-                              <Clock className="h-3 w-3" />
-                              {formatDuration(event.metadata.duration)}
-                            </>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                    <div className="text-right shrink-0">
-                      <p className="text-xs text-muted-foreground">
-                        {formatRelativeTime(event.timestamp)}
-                      </p>
-                      <p className="text-xs text-muted-foreground/70 hidden sm:block">
-                        {formatDateTime(event.timestamp, t('time.never'), locale)}
-                      </p>
-                    </div>
-                  </div>
-                </div>
+                {event.href ? (
+                  <Link
+                    href={event.href}
+                    aria-label={label}
+                    className={cn(
+                      'flex-1 -mx-2 px-2 py-1 rounded-lg transition-colors',
+                      'hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
+                      !isLast && 'mb-4'
+                    )}
+                  >
+                    {eventBody}
+                  </Link>
+                ) : (
+                  <div className={cn('flex-1', !isLast && 'pb-4')}>{eventBody}</div>
+                )}
               </div>
             );
           })}

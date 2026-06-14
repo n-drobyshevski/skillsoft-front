@@ -24,6 +24,7 @@ import type { TestResult, AssessmentGoal } from '@/types/domain';
 import { cn } from '@/lib/utils';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 interface UserAssessmentsTabProps {
   results: {
@@ -38,6 +39,9 @@ interface UserAssessmentsTabProps {
  * Format duration from seconds to human-readable string.
  */
 function formatDuration(seconds: number): string {
+  if (!Number.isFinite(seconds) || seconds <= 0) {
+    return '--';
+  }
   if (seconds < 60) {
     return `${seconds}s`;
   }
@@ -54,8 +58,11 @@ function formatDuration(seconds: number): string {
 /**
  * Format date to localized string.
  */
-function formatDate(dateString: string, locale = 'en-US'): string {
-  return new Date(dateString).toLocaleDateString(locale, {
+function formatDate(dateString?: string | null, locale = 'en-US'): string {
+  if (!dateString) return '--';
+  const date = new Date(dateString);
+  if (Number.isNaN(date.getTime())) return '--';
+  return date.toLocaleDateString(locale, {
     year: 'numeric',
     month: 'short',
     day: 'numeric',
@@ -97,6 +104,7 @@ const GOAL_LABELS: Record<AssessmentGoal, string> = {
  */
 export function UserAssessmentsTab({ results, userName }: UserAssessmentsTabProps) {
   const t = useTranslations('users.profile');
+  const router = useRouter();
 
   // Empty state
   if (!results || results.content.length === 0) {
@@ -154,8 +162,24 @@ export function UserAssessmentsTab({ results, userName }: UserAssessmentsTabProp
               </TableRow>
             </TableHeader>
             <TableBody>
-              {results.content.map((result) => (
-                <TableRow key={result.id}>
+              {results.content.map((result) => {
+                const href = `/test-templates/results/${result.id}`;
+                const rowLabel = `${result.templateName} — ${t('assessments.viewDetails')}`;
+                return (
+                <TableRow
+                  key={result.id}
+                  role="link"
+                  tabIndex={0}
+                  aria-label={rowLabel}
+                  className="cursor-pointer hover:bg-muted/50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary"
+                  onClick={() => router.push(href)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      router.push(href);
+                    }
+                  }}
+                >
                   <TableCell className="font-medium">
                     <div className="truncate max-w-[200px]" title={result.templateName}>
                       {result.templateName}
@@ -180,7 +204,7 @@ export function UserAssessmentsTab({ results, userName }: UserAssessmentsTabProp
                             : 'text-amber-600 dark:text-amber-400'
                       )}
                     >
-                      {result.overallPercentage != null ? `${Math.round(result.overallPercentage)}%` : '--'}
+                      {result.overallPercentage != null && Number.isFinite(result.overallPercentage) ? `${Math.round(result.overallPercentage)}%` : '--'}
                     </span>
                   </TableCell>
                   <TableCell className="text-center">
@@ -207,16 +231,12 @@ export function UserAssessmentsTab({ results, userName }: UserAssessmentsTabProp
                   <TableCell className="text-sm text-muted-foreground">
                     {formatDate(result.completedAt)}
                   </TableCell>
-                  <TableCell>
-                    <Button variant="ghost" size="icon" asChild>
-                      <Link href={`/test-templates/${result.templateId}/results/${result.id}`}>
-                        <ExternalLink className="h-4 w-4" />
-                        <span className="sr-only">{t('assessments.viewDetails')}</span>
-                      </Link>
-                    </Button>
+                  <TableCell className="text-right">
+                    <ExternalLink className="h-4 w-4 text-muted-foreground inline-block" aria-hidden="true" />
                   </TableCell>
                 </TableRow>
-              ))}
+                );
+              })}
             </TableBody>
           </Table>
         </div>
@@ -224,9 +244,11 @@ export function UserAssessmentsTab({ results, userName }: UserAssessmentsTabProp
         {/* Mobile Card View */}
         <div className="md:hidden space-y-3">
           {results.content.map((result) => (
-            <div
+            <Link
               key={result.id}
-              className="p-4 rounded-lg border bg-card hover:shadow-sm transition-shadow"
+              href={`/test-templates/results/${result.id}`}
+              aria-label={`${result.templateName} — ${t('assessments.viewDetails')}`}
+              className="block p-4 rounded-lg border bg-card transition-all hover:shadow-sm hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="flex-1 min-w-0">
@@ -248,7 +270,7 @@ export function UserAssessmentsTab({ results, userName }: UserAssessmentsTabProp
                           : 'text-amber-600'
                     )}
                   >
-                    {result.overallPercentage != null ? `${Math.round(result.overallPercentage)}%` : '--'}
+                    {result.overallPercentage != null && Number.isFinite(result.overallPercentage) ? `${Math.round(result.overallPercentage)}%` : '--'}
                   </span>
                   {result.status === 'PENDING' ? (
                     <Badge variant="outline" className="text-xs bg-amber-50 text-amber-600">
@@ -275,14 +297,12 @@ export function UserAssessmentsTab({ results, userName }: UserAssessmentsTabProp
                   <span className="mx-1">·</span>
                   {result.questionsAnswered}/{result.totalQuestions} {t('assessments.questions')}
                 </div>
-                <Button variant="ghost" size="sm" asChild>
-                  <Link href={`/test-templates/${result.templateId}/results/${result.id}`}>
-                    <ExternalLink className="h-3 w-3 mr-1" />
-                    {t('assessments.view')}
-                  </Link>
-                </Button>
+                <span className="flex items-center text-xs text-primary font-medium">
+                  <ExternalLink className="h-3 w-3 mr-1" aria-hidden="true" />
+                  {t('assessments.view')}
+                </span>
               </div>
-            </div>
+            </Link>
           ))}
         </div>
 
