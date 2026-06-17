@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { History, Plus } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import PageHeader from '@/components/common/PageHeader';
+import { useActiveLens } from '@/hooks/useLens';
 
 interface TemplatesPageHeaderProps {
   canCreate: boolean;
@@ -14,6 +15,9 @@ interface TemplatesPageHeaderProps {
 export function TemplatesPageHeader({ canCreate }: TemplatesPageHeaderProps) {
   const t = useTranslations('template');
   const tCommon = useTranslations('common');
+  const activeLens = useActiveLens();
+  // The user lens uses /my-tests; editor/admin lenses use /test-templates/history.
+  const resultsHref = activeLens === 'user' ? '/my-tests' : '/test-templates/history';
 
   return (
     <PageHeader
@@ -22,7 +26,7 @@ export function TemplatesPageHeader({ canCreate }: TemplatesPageHeaderProps) {
       variant="dashboard"
     >
       <div className="flex items-center gap-2 w-full sm:w-auto">
-        <Link href="/test-templates/history" className="flex-1 sm:flex-none">
+        <Link href={resultsHref} className="flex-1 sm:flex-none">
           <Button
             variant="outline"
             size="sm"
