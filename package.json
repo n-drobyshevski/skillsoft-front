@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "next dev",
     "prebuild": "node scripts/preprocess-standards-data.mjs",
+    "gen:onet-profiles": "node scripts/generate-onet-profiles.mjs",
     "build": "next build",
     "build:analyze": "cross-env ANALYZE=true next build",
     "postinstall": "patch-package",
