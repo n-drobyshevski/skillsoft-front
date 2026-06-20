@@ -550,6 +550,7 @@
     "descriptionLabel": "Description",
     "descriptionPlaceholder": "Describe the purpose and content of the test...",
     "noCompetencies": "No Competencies",
+    "standardsNote": "Competencies are mapped to both O*NET and ESCO occupational standards for standardized, cross-framework assessment.",
     "searchCompetencies": "Search competencies...",
     "selectAll": "Select All",
     "clearAll": "Clear",

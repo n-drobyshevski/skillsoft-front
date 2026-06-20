@@ -585,6 +585,12 @@ function CompetenciesStep({ form, competencies }: NewTestFormProps & { form: any
 
   return (
     <div className="space-y-4 md:space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+      {/* Standards mapping note */}
+      <div className="flex items-start gap-2 rounded-xl border border-dashed bg-muted/30 p-3 text-xs text-muted-foreground">
+        <Globe className="h-4 w-4 shrink-0 mt-0.5 text-primary" />
+        <span>{t('standardsNote')}</span>
+      </div>
+
       {/* Header with Search */}
       <div className="flex flex-col md:flex-row gap-3">
         <div className="relative flex-1">

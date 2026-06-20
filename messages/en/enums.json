@@ -123,7 +123,7 @@
     "OVERVIEW": "Universal Baseline",
     "OVERVIEW_DESC": "Generates Competency Passport with Big Five personality profile",
     "JOB_FIT": "Job Fit Assessment",
-    "JOB_FIT_DESC": "Compares candidate against O*NET occupation benchmarks",
+    "JOB_FIT_DESC": "Compares candidate against O*NET & ESCO occupation standards",
     "TEAM_FIT": "Team Fit Analysis",
     "TEAM_FIT_DESC": "Analyzes skill gaps and personality fit within a team"
   },

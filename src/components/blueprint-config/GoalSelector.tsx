@@ -1,10 +1,11 @@
 'use client';
 
 import React from 'react';
+import { useTranslations } from 'next-intl';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
-import { AssessmentGoal, AssessmentGoalInfo } from '@/types/domain';
+import { AssessmentGoal } from '@/types/domain';
 import {
   Crosshair,
   Briefcase,
@@ -27,25 +28,23 @@ interface GoalSelectorProps {
 interface GoalOption {
   value: AssessmentGoal;
   icon: React.ComponentType<{ className?: string }>;
-  features: string[];
-  estimatedTime: string;
+  /** `help.scenario.<scenarioKey>` namespace segment for this goal's UI copy. */
+  scenarioKey: 'overview' | 'jobFit' | 'teamFit';
   className: string;
   selectedClassName: string;
   iconColor: string;
 }
 
 // Configuration
+// Display text is internationalized: title/description come from the
+// `enums.assessmentGoal` namespace, and the feature bullets + estimated time
+// from `help.scenario.<scenarioKey>.ui`.
 
 const GOAL_OPTIONS: GoalOption[] = [
   {
     value: AssessmentGoal.OVERVIEW,
     icon: Crosshair,
-    features: [
-      'Competency Passport generation',
-      'Big Five personality profile',
-      'Full skill mapping',
-    ],
-    estimatedTime: '20-30 min',
+    scenarioKey: 'overview',
     className: 'border-border/60 bg-card hover:border-primary/50 hover:bg-muted/30',
     selectedClassName: 'border-primary bg-primary/5 ring-1 ring-primary shadow-sm',
     iconColor: 'text-primary',
@@ -53,12 +52,7 @@ const GOAL_OPTIONS: GoalOption[] = [
   {
     value: AssessmentGoal.JOB_FIT,
     icon: Briefcase,
-    features: [
-      'O*NET benchmark comparison',
-      'Gap analysis report',
-      'Role-specific scoring',
-    ],
-    estimatedTime: '15-25 min',
+    scenarioKey: 'jobFit',
     className: 'border-border/60 bg-card hover:border-blue-500/50 hover:bg-blue-500/5',
     selectedClassName: 'border-blue-500 bg-blue-500/10 ring-1 ring-blue-500 shadow-sm',
     iconColor: 'text-blue-500',
@@ -66,12 +60,7 @@ const GOAL_OPTIONS: GoalOption[] = [
   {
     value: AssessmentGoal.TEAM_FIT,
     icon: Users,
-    features: [
-      'Team saturation analysis',
-      'Skill gap identification',
-      'Compatibility scoring',
-    ],
-    estimatedTime: '15-20 min',
+    scenarioKey: 'teamFit',
     className: 'border-border/60 bg-card hover:border-purple-500/50 hover:bg-purple-500/5',
     selectedClassName: 'border-purple-500 bg-purple-500/10 ring-1 ring-purple-500 shadow-sm',
     iconColor: 'text-purple-500',
@@ -86,6 +75,10 @@ export function GoalSelector({
   disabled = false,
   className,
 }: GoalSelectorProps) {
+  const tGoals = useTranslations('enums.assessmentGoal');
+  const tScenario = useTranslations('help.scenario');
+  const selectedScenarioKey =
+    GOAL_OPTIONS.find((o) => o.value === value)?.scenarioKey ?? 'overview';
   return (
     <RadioGroup
       value={value}
@@ -97,8 +90,13 @@ export function GoalSelector({
       <div className="grid gap-3 sm:grid-cols-3">
         {GOAL_OPTIONS.map((option) => {
           const Icon = option.icon;
-          const info = AssessmentGoalInfo[option.value];
           const isSelected = value === option.value;
+          const scenarioKey = option.scenarioKey;
+          const features = [
+            tScenario(`${scenarioKey}.ui.goalFeature1`),
+            tScenario(`${scenarioKey}.ui.goalFeature2`),
+            tScenario(`${scenarioKey}.ui.goalFeature3`),
+          ];
 
           return (
             <div key={option.value} className="relative group">
@@ -140,17 +138,17 @@ export function GoalSelector({
                   </div>
                   <div>
                     <p className={cn('font-bold text-sm', isSelected && option.iconColor)}>
-                      {info.displayName}
+                      {tGoals(option.value)}
                     </p>
                     <p className="text-xs text-muted-foreground mt-0.5">
-                      {info.description}
+                      {tGoals(`${option.value}_DESC`)}
                     </p>
                   </div>
                 </div>
 
                 {/* Features list - hidden on mobile, shown on tablet+ */}
                 <div className="hidden sm:block space-y-1.5 mt-2 pt-3 border-t border-dashed">
-                  {option.features.map((feature, idx) => (
+                  {features.map((feature, idx) => (
                     <div key={idx} className="flex items-center gap-2 text-xs text-muted-foreground">
                       <Target className="h-3 w-3 shrink-0" />
                       <span>{feature}</span>
@@ -162,7 +160,7 @@ export function GoalSelector({
                 <div className="flex items-center gap-1.5 mt-3 pt-3 border-t">
                   <Clock className="h-3.5 w-3.5 text-muted-foreground" />
                   <span className="text-xs text-muted-foreground">
-                    ~{option.estimatedTime}
+                    ~{tScenario(`${scenarioKey}.ui.goalTime`)}
                   </span>
                 </div>
               </Label>
@@ -177,10 +175,14 @@ export function GoalSelector({
           <TrendingUp className="h-4 w-4 text-primary mt-0.5 shrink-0" />
           <div>
             <p className="text-sm font-medium">
-              {AssessmentGoalInfo[value].displayName}
+              {tGoals(value)}
             </p>
             <p className="text-xs text-muted-foreground mt-1">
-              {GOAL_OPTIONS.find(o => o.value === value)?.features.join(' | ')}
+              {[
+                tScenario(`${selectedScenarioKey}.ui.goalFeature1`),
+                tScenario(`${selectedScenarioKey}.ui.goalFeature2`),
+                tScenario(`${selectedScenarioKey}.ui.goalFeature3`),
+              ].join(' | ')}
             </p>
           </div>
         </div>

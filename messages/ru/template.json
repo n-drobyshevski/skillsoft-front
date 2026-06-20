@@ -550,6 +550,7 @@
     "descriptionLabel": "Описание",
     "descriptionPlaceholder": "Опишите назначение и содержание теста...",
     "noCompetencies": "Нет компетенций",
+    "standardsNote": "Компетенции сопоставлены со стандартами профессий O*NET и ESCO для стандартизированной оценки по обоим фреймворкам.",
     "searchCompetencies": "Поиск компетенций...",
     "selectAll": "Выбрать все",
     "clearAll": "Очистить",

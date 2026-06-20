@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Check, X, Loader2, Search, Briefcase, ChevronDown, Star, Clock } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import {
@@ -43,9 +44,12 @@ export function ONetSearchCombobox({
   value,
   onChange,
   disabled = false,
-  placeholder = 'Search by job title or O*NET code...',
+  placeholder,
   className,
 }: ONetSearchComboboxProps) {
+  const t = useTranslations('help.scenario.jobFit.combobox');
+  const tNav = useTranslations('navigation');
+  const placeholderText = placeholder ?? t('searchByTitleOrCode');
   const [open, setOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearching, setIsSearching] = useState(false);
@@ -188,7 +192,7 @@ export function ONetSearchCombobox({
                   </p>
                 </>
               ) : (
-                <span className="text-sm">{placeholder}</span>
+                <span className="text-sm">{placeholderText}</span>
               )}
             </div>
           </div>
@@ -232,14 +236,14 @@ export function ONetSearchCombobox({
           {/* Header */}
           <div className="flex items-center gap-2 border-b px-3 py-2.5 bg-blue-50/50 dark:bg-blue-950/30">
             <Briefcase className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-            <span className="text-sm font-semibold">O*NET Job Titles</span>
+            <span className="text-sm font-semibold">{t('header')}</span>
           </div>
 
           {/* Search input */}
           <div className="flex items-center gap-2 border-b px-3 py-1">
             <Search className="h-4 w-4 text-muted-foreground shrink-0" />
             <CommandInput
-              placeholder="Search by title or code (e.g. 15-1252)..."
+              placeholder={t('searchInput')}
               value={searchQuery}
               onValueChange={setSearchQuery}
               className="h-10 border-0 bg-transparent px-0 text-sm focus-visible:ring-0"
@@ -252,13 +256,13 @@ export function ONetSearchCombobox({
             {isSearching ? (
               <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
                 <Loader2 className="h-6 w-6 animate-spin mb-2 text-primary/60" />
-                <span className="text-sm">Searching...</span>
+                <span className="text-sm">{tNav('searching')}</span>
               </div>
             ) : hasSearchQuery && searchResults.length === 0 ? (
               <CommandEmpty className="py-6 text-center">
                 <Search className="h-6 w-6 mx-auto mb-2 text-muted-foreground/40" />
                 <p className="text-sm text-muted-foreground">
-                  No job titles found for &quot;{searchQuery}&quot;
+                  {t('noResults', { query: searchQuery })}
                 </p>
               </CommandEmpty>
             ) : showResults ? (
@@ -279,7 +283,7 @@ export function ONetSearchCombobox({
                     heading={
                       <span className="flex items-center gap-1.5">
                         <Clock className="h-3 w-3" />
-                        Recent
+                        {tNav('recentItems')}
                       </span>
                     }
                     className="px-2 py-1"
@@ -298,7 +302,7 @@ export function ONetSearchCombobox({
                   heading={
                     <span className="flex items-center gap-1.5">
                       <Star className="h-3 w-3" />
-                      Popular Job Titles
+                      {t('popular')}
                     </span>
                   }
                   className="px-2 py-1"

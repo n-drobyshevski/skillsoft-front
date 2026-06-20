@@ -89,11 +89,11 @@ export function OverviewConfigPanel({
               </div>
               <div>
                 <CardTitle className="text-base flex items-center gap-1.5">
-                  Big Five Personality
+                  {t('ui.bigFiveTitle')}
                   <HelpTooltip content={t('bigFive.description')} variant="info" size="sm" />
                 </CardTitle>
                 <CardDescription className="text-xs mt-0.5">
-                  Include OCEAN personality profiling in results
+                  {t('ui.bigFiveDesc')}
                 </CardDescription>
               </div>
             </div>
@@ -157,44 +157,44 @@ export function OverviewConfigPanel({
           <FormItem>
             <FormLabel className="flex items-center gap-2">
               <BarChart3 className="h-4 w-4 text-muted-foreground" />
-              Preferred Difficulty
+              {t('ui.preferredDifficulty')}
               <HelpTooltip content={t('difficulty.description')} variant="help" />
             </FormLabel>
             <Select value={field.value || 'INTERMEDIATE'} onValueChange={field.onChange}>
               <FormControl>
                 <SelectTrigger className="h-11">
-                  <SelectValue placeholder="Select difficulty level" />
+                  <SelectValue placeholder={t('ui.selectDifficulty')} />
                 </SelectTrigger>
               </FormControl>
               <SelectContent>
                 <SelectItem value="BASIC">
                   <div className="flex items-center gap-2">
                     <Badge variant="secondary" className="bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300">
-                      Basic
+                      {t('ui.difficultyBasic')}
                     </Badge>
-                    <span className="text-xs text-muted-foreground">Entry-level questions</span>
+                    <span className="text-xs text-muted-foreground">{t('ui.difficultyBasicDesc')}</span>
                   </div>
                 </SelectItem>
                 <SelectItem value="INTERMEDIATE">
                   <div className="flex items-center gap-2">
                     <Badge variant="secondary" className="bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300">
-                      Intermediate
+                      {t('ui.difficultyIntermediate')}
                     </Badge>
-                    <span className="text-xs text-muted-foreground">Standard complexity</span>
+                    <span className="text-xs text-muted-foreground">{t('ui.difficultyIntermediateDesc')}</span>
                   </div>
                 </SelectItem>
                 <SelectItem value="ADVANCED">
                   <div className="flex items-center gap-2">
                     <Badge variant="secondary" className="bg-orange-100 text-orange-700 dark:bg-orange-900/50 dark:text-orange-300">
-                      Advanced
+                      {t('ui.difficultyAdvanced')}
                     </Badge>
-                    <span className="text-xs text-muted-foreground">Senior-level scenarios</span>
+                    <span className="text-xs text-muted-foreground">{t('ui.difficultyAdvancedDesc')}</span>
                   </div>
                 </SelectItem>
               </SelectContent>
             </Select>
             <FormDescription>
-              Controls the complexity of situational judgment questions
+              {t('ui.difficultyHelp')}
             </FormDescription>
           </FormItem>
         )}
@@ -206,20 +206,20 @@ export function OverviewConfigPanel({
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 text-sm">
               <Target className="h-4 w-4 text-primary" />
-              <span>{selectedCompetencyCount} competencies selected</span>
+              <span>{t('ui.competenciesSelected', { count: selectedCompetencyCount })}</span>
               <HelpTooltip content={t('estimation.questions')} variant="info" size="sm" />
             </div>
             <Badge variant="outline" className="font-mono">
-              ~{estimatedQuestions} questions
+              {t('ui.estimatedQuestions', { count: estimatedQuestions })}
             </Badge>
           </div>
           <div className="flex items-center justify-between mt-2">
             <div className="flex items-center gap-2 text-sm">
               <Clock className="h-4 w-4 text-muted-foreground" />
-              <span>Estimated duration</span>
+              <span>{t('ui.estimatedDuration')}</span>
               <HelpTooltip content={t('estimation.duration')} variant="info" size="sm" />
             </div>
-            <Badge variant="secondary">~{estimatedTime} min</Badge>
+            <Badge variant="secondary">{t('ui.estimatedMinutes', { count: estimatedTime })}</Badge>
           </div>
         </CardContent>
       </Card>

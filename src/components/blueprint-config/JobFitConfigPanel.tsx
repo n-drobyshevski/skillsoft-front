@@ -43,22 +43,23 @@ interface JobFitConfigPanelProps {
   className?: string;
 }
 
-// Strictness Labels
+// Strictness Levels — labels/descriptions come from i18n (strictness.levels.*),
+// only the threshold→key/color mapping is static here.
 
-const STRICTNESS_LABELS: Record<number, { label: string; description: string; color: string }> = {
-  20: { label: 'Lenient', description: 'Broader candidate pool', color: 'text-green-600' },
-  40: { label: 'Moderate', description: 'Balanced matching', color: 'text-teal-600' },
-  60: { label: 'Standard', description: 'Industry typical', color: 'text-blue-600' },
-  80: { label: 'Strict', description: 'High bar requirements', color: 'text-orange-600' },
-  100: { label: 'Exact', description: 'Precise benchmark match', color: 'text-red-600' },
+const STRICTNESS_LEVELS: Record<number, { key: string; color: string }> = {
+  20: { key: 'lenient', color: 'text-green-600' },
+  40: { key: 'moderate', color: 'text-teal-600' },
+  60: { key: 'standard', color: 'text-blue-600' },
+  80: { key: 'strict', color: 'text-orange-600' },
+  100: { key: 'exact', color: 'text-red-600' },
 };
 
-function getStrictnessLabel(value: number) {
+function getStrictnessLevel(value: number) {
   const thresholds = [20, 40, 60, 80, 100];
   const closest = thresholds.reduce((prev, curr) =>
     Math.abs(curr - value) < Math.abs(prev - value) ? curr : prev
   );
-  return STRICTNESS_LABELS[closest];
+  return STRICTNESS_LEVELS[closest];
 }
 
 // Component
@@ -87,7 +88,9 @@ export function JobFitConfigPanel({
     }
   };
 
-  const strictnessInfo = getStrictnessLabel(strictnessLevel);
+  const strictnessInfo = getStrictnessLevel(strictnessLevel);
+  const strictnessLabel = t(`strictness.levels.${strictnessInfo.key}.label`);
+  const strictnessDesc = t(`strictness.levels.${strictnessInfo.key}.desc`);
 
   return (
     <div className={cn('space-y-6', className)}>
@@ -99,18 +102,18 @@ export function JobFitConfigPanel({
           <FormItem>
             <FormLabel className="flex items-center gap-2">
               <Briefcase className="h-4 w-4 text-blue-500" />
-              Target Job Role
+              {t('ui.targetJobRole')}
               <HelpTooltip content={t('onetRole')} variant="info" />
             </FormLabel>
             <FormControl>
               <ONetSearchCombobox
                 value={field.value}
                 onChange={handleONetChange}
-                placeholder="Search O*NET job titles..."
+                placeholder={t('ui.searchPlaceholder')}
               />
             </FormControl>
             <FormDescription>
-              Select the job role to benchmark candidates against
+              {t('roleDescription')}
             </FormDescription>
             <FormMessage />
           </FormItem>
@@ -131,11 +134,11 @@ export function JobFitConfigPanel({
                   <div className="flex items-center gap-2">
                     <CheckCircle2 className="h-4 w-4 text-blue-500" />
                     <CardTitle className="text-sm flex items-center gap-1.5">
-                      Benchmark Preview
+                      {t('ui.benchmarkPreview')}
                       <HelpTooltip content={t('benchmark')} variant="info" size="sm" />
                     </CardTitle>
                     <Badge variant="secondary" className="h-5 text-[10px]">
-                      {onetProfile.benchmarks.length} competencies
+                      {t('ui.competenciesCount', { count: onetProfile.benchmarks.length })}
                     </Badge>
                   </div>
                   {benchmarkOpen ? (
@@ -170,16 +173,7 @@ export function JobFitConfigPanel({
                       onClick={() => setShowAllBenchmarks(true)}
                       className="w-full text-xs text-muted-foreground hover:text-foreground text-center pt-1 transition-colors"
                     >
-                      {/* Mobile: show count minus 3, Desktop: show count minus 5 */}
-                      <span className="sm:hidden">
-                        Show all {onetProfile.benchmarks.length} competencies
-                      </span>
-                      <span className="hidden sm:inline">
-                        {onetProfile.benchmarks.length > 5
-                          ? `Show all ${onetProfile.benchmarks.length} competencies`
-                          : `Show all ${onetProfile.benchmarks.length} competencies`
-                        }
-                      </span>
+                      {t('ui.showAllCompetencies', { count: onetProfile.benchmarks.length })}
                     </button>
                   )}
                   {showAllBenchmarks && onetProfile.benchmarks.length > 5 && (
@@ -188,7 +182,7 @@ export function JobFitConfigPanel({
                       onClick={() => setShowAllBenchmarks(false)}
                       className="w-full text-xs text-muted-foreground hover:text-foreground text-center pt-1 transition-colors"
                     >
-                      Show less
+                      {t('ui.showLess')}
                     </button>
                   )}
                 </div>
@@ -207,11 +201,11 @@ export function JobFitConfigPanel({
             <div className="flex items-center justify-between">
               <FormLabel className="flex items-center gap-2">
                 <SlidersHorizontal className="h-4 w-4 text-muted-foreground" />
-                Strictness Level
+                {t('ui.strictnessLevel')}
                 <HelpTooltip content={t('strictness.description')} variant="help" />
               </FormLabel>
               <Badge variant="outline" className={cn('text-xs', strictnessInfo.color)}>
-                {strictnessInfo.label}
+                {strictnessLabel}
               </Badge>
             </div>
             <FormControl>
@@ -225,13 +219,13 @@ export function JobFitConfigPanel({
                   className="touch-none"
                 />
                 <div className="flex justify-between mt-1">
-                  <span className="text-[10px] text-muted-foreground">Lenient</span>
-                  <span className="text-[10px] text-muted-foreground">Exact</span>
+                  <span className="text-[10px] text-muted-foreground">{t('strictness.levels.lenient.label')}</span>
+                  <span className="text-[10px] text-muted-foreground">{t('strictness.levels.exact.label')}</span>
                 </div>
               </div>
             </FormControl>
             <FormDescription className="text-xs">
-              {strictnessInfo.description}
+              {strictnessDesc}
             </FormDescription>
           </FormItem>
         )}
@@ -321,7 +315,7 @@ export function JobFitConfigPanel({
         <div className="flex items-start gap-2 p-3 rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 text-sm">
           <AlertCircle className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
           <span className="text-amber-800 dark:text-amber-200">
-            Select a job role to configure Job Fit benchmarks
+            {t('ui.noRoleWarning')}
           </span>
         </div>
       )}
@@ -337,6 +331,7 @@ interface BenchmarkItemProps {
 }
 
 function BenchmarkItem({ benchmark, className }: BenchmarkItemProps) {
+  const t = useTranslations('help.scenario.jobFit');
   // Level is 1-7 scale, importance is 1-5 scale
   const levelPercent = ((benchmark.requiredLevel - 1) / 6) * 100;
   const importancePercent = ((benchmark.importance - 1) / 4) * 100;
@@ -350,7 +345,7 @@ function BenchmarkItem({ benchmark, className }: BenchmarkItemProps) {
       <div className="flex items-center gap-3 shrink-0">
         {/* Level indicator */}
         <div className="flex items-center gap-1">
-          <span className="text-[10px] text-muted-foreground">Lvl</span>
+          <span className="text-[10px] text-muted-foreground">{t('ui.levelShort')}</span>
           <div className="w-12 h-1.5 bg-muted rounded-full overflow-hidden">
             <div
               className="h-full bg-blue-500 rounded-full transition-all"

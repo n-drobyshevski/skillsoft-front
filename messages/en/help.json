@@ -49,10 +49,32 @@
       "estimation": {
         "questions": "Question count is estimated based on: selected competencies × average indicators × questions per indicator.",
         "duration": "Duration is calculated at approximately 30 seconds per question, including reading and response time."
+      },
+      "ui": {
+        "bigFiveTitle": "Big Five Personality",
+        "bigFiveDesc": "Include OCEAN personality profiling in results",
+        "preferredDifficulty": "Preferred Difficulty",
+        "selectDifficulty": "Select difficulty level",
+        "difficultyBasic": "Basic",
+        "difficultyBasicDesc": "Entry-level questions",
+        "difficultyIntermediate": "Intermediate",
+        "difficultyIntermediateDesc": "Standard complexity",
+        "difficultyAdvanced": "Advanced",
+        "difficultyAdvancedDesc": "Senior-level scenarios",
+        "difficultyHelp": "Controls the complexity of situational judgment questions",
+        "competenciesSelected": "{count} competencies selected",
+        "estimatedQuestions": "~{count} questions",
+        "estimatedDuration": "Estimated duration",
+        "estimatedMinutes": "~{count} min",
+        "goalFeature1": "Competency Passport generation",
+        "goalFeature2": "Big Five personality profile",
+        "goalFeature3": "Full skill mapping",
+        "goalTime": "20-30 min"
       }
     },
     "jobFit": {
-      "onetRole": "O*NET (Occupational Information Network) occupation codes define standardized job competency requirements based on extensive labor market research.",
+      "roleDescription": "Select the job role to benchmark candidates against. Competencies are mapped across both O*NET and ESCO standards.",
+      "onetRole": "O*NET (Occupational Information Network) occupation codes define standardized job competency requirements based on extensive labor market research. Selected competencies are also cross-referenced against the European ESCO skills taxonomy.",
       "benchmark": "The benchmark shows competencies and proficiency levels required for the selected job role, as defined by O*NET occupational data.",
       "deltaTesting": "Delta testing identifies and focuses only on the gaps between a candidate's existing competency passport and job requirements, reducing assessment length.",
       "passport": "A Competency Passport is a candidate's aggregated record of previously measured competencies from past assessments. When delta testing is enabled, the system reuses existing scores and skips already-measured competencies, making the assessment shorter and more focused.",
@@ -62,6 +84,28 @@
       "deltaDisabled": "All competencies will be assessed regardless of prior results.",
       "enableDelta": "Enable Delta Testing",
       "enableDeltaDesc": "Skip competencies already measured in the candidate's passport",
+      "ui": {
+        "targetJobRole": "Target Job Role",
+        "searchPlaceholder": "Search O*NET & ESCO job titles...",
+        "benchmarkPreview": "Benchmark Preview",
+        "competenciesCount": "{count} competencies",
+        "strictnessLevel": "Strictness Level",
+        "levelShort": "Lvl",
+        "showAllCompetencies": "Show all {count} competencies",
+        "showLess": "Show less",
+        "noRoleWarning": "Select a job role to configure Job Fit benchmarks",
+        "goalFeature1": "O*NET & ESCO benchmark comparison",
+        "goalFeature2": "Gap analysis report",
+        "goalFeature3": "Role-specific scoring",
+        "goalTime": "15-25 min"
+      },
+      "combobox": {
+        "searchByTitleOrCode": "Search by job title or occupation code...",
+        "header": "O*NET & ESCO Job Titles",
+        "searchInput": "Search by title or code (e.g. 15-1252)...",
+        "noResults": "No job titles found for \"{query}\"",
+        "popular": "Popular Job Titles"
+      },
       "strictness": {
         "title": "Benchmark Matching Strictness",
         "description": "Controls how closely a candidate must match the job benchmark to be considered a good fit.",
@@ -69,12 +113,42 @@
         "moderate": "Balanced approach: Reasonable match requirements suitable for most standard hiring needs.",
         "standard": "Industry-typical requirements: Matches common hiring standards for professional roles.",
         "strict": "High bar: Only strong matches qualify, suitable for specialized or senior positions.",
-        "exact": "Precise alignment: Requires near-perfect benchmark match, for critical roles with no room for skill gaps."
+        "exact": "Precise alignment: Requires near-perfect benchmark match, for critical roles with no room for skill gaps.",
+        "levels": {
+          "lenient": { "label": "Lenient", "desc": "Broader candidate pool" },
+          "moderate": { "label": "Moderate", "desc": "Balanced matching" },
+          "standard": { "label": "Standard", "desc": "Industry typical" },
+          "strict": { "label": "Strict", "desc": "High bar requirements" },
+          "exact": { "label": "Exact", "desc": "Precise benchmark match" }
+        }
       }
     },
     "teamFit": {
       "team": "Select the team to analyze for current skill coverage and identify competency gaps that new candidates should fill.",
       "assessment": "Team Fit assessment focuses on undersaturated competencies, evaluating candidates on their ability to fill specific team skill gaps.",
+      "ui": {
+        "targetTeam": "Target Team",
+        "selectTeam": "Select a team...",
+        "loadingTeams": "Loading teams...",
+        "noTeams": "No teams available",
+        "members": "{count} members",
+        "teamDescription": "Select the team to analyze for skill gaps",
+        "gaps": "{count} gaps",
+        "skillCoverage": "Team skill coverage analysis",
+        "overallSaturation": "Overall Saturation",
+        "skillGaps": "Skill Gaps",
+        "statusCritical": "Critical",
+        "statusGap": "Gap",
+        "gapThreshold": "Gap Threshold",
+        "thresholdHelp": "Skills below this threshold are considered undersaturated",
+        "assessmentTitle": "Team Fit Assessment",
+        "assessmentDesc": "Candidates will be assessed on undersaturated competencies to find the best fit for your team's current skill gaps.",
+        "noTeamWarning": "Select a team to view skill gaps and configure Team Fit assessment",
+        "goalFeature1": "Team saturation analysis",
+        "goalFeature2": "Skill gap identification",
+        "goalFeature3": "Compatibility scoring",
+        "goalTime": "15-20 min"
+      },
       "saturation": {
         "title": "Skill Saturation Threshold",
         "description": "The minimum team coverage level for a skill before it is flagged as a gap.",

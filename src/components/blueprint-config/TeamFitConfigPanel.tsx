@@ -168,7 +168,7 @@ export function TeamFitConfigPanel({ className }: TeamFitConfigPanelProps) {
           <FormItem>
             <FormLabel className="flex items-center gap-2">
               <Users className="h-4 w-4 text-purple-500" />
-              Target Team
+              {t('ui.targetTeam')}
               <HelpTooltip content={t('team')} variant="help" />
             </FormLabel>
             <Select value={field.value || ''} onValueChange={field.onChange}>
@@ -179,17 +179,17 @@ export function TeamFitConfigPanel({ className }: TeamFitConfigPanelProps) {
                     selectedTeamId && 'border-purple-200 bg-purple-50/50 dark:border-purple-800 dark:bg-purple-950/30'
                   )}
                 >
-                  <SelectValue placeholder="Select a team..." />
+                  <SelectValue placeholder={t('ui.selectTeam')} />
                 </SelectTrigger>
               </FormControl>
               <SelectContent>
                 {isLoadingTeams ? (
                   <div className="py-4 text-center text-sm text-muted-foreground">
-                    Loading teams...
+                    {t('ui.loadingTeams')}
                   </div>
                 ) : teams.length === 0 ? (
                   <div className="py-4 text-center text-sm text-muted-foreground">
-                    No teams available
+                    {t('ui.noTeams')}
                   </div>
                 ) : (
                   teams.map((team) => (
@@ -197,7 +197,7 @@ export function TeamFitConfigPanel({ className }: TeamFitConfigPanelProps) {
                       <div className="flex items-center gap-2">
                         <span>{team.name}</span>
                         <Badge variant="secondary" className="h-4 text-[10px]">
-                          {team.memberCount} members
+                          {t('ui.members', { count: team.memberCount })}
                         </Badge>
                       </div>
                     </SelectItem>
@@ -206,7 +206,7 @@ export function TeamFitConfigPanel({ className }: TeamFitConfigPanelProps) {
               </SelectContent>
             </Select>
             <FormDescription>
-              Select the team to analyze for skill gaps
+              {t('ui.teamDescription')}
             </FormDescription>
             <FormMessage />
           </FormItem>
@@ -226,11 +226,11 @@ export function TeamFitConfigPanel({ className }: TeamFitConfigPanelProps) {
                 variant={saturationStats.critical > 0 ? 'destructive' : 'secondary'}
                 className="text-xs"
               >
-                {saturationStats.undersaturated} gaps
+                {t('ui.gaps', { count: saturationStats.undersaturated })}
               </Badge>
             </div>
             <CardDescription className="text-xs">
-              Team skill coverage analysis
+              {t('ui.skillCoverage')}
             </CardDescription>
           </CardHeader>
 
@@ -238,7 +238,7 @@ export function TeamFitConfigPanel({ className }: TeamFitConfigPanelProps) {
             {/* Overall saturation gauge */}
             <div className="space-y-2">
               <div className="flex items-center justify-between text-xs">
-                <span className="text-muted-foreground">Overall Saturation</span>
+                <span className="text-muted-foreground">{t('ui.overallSaturation')}</span>
                 <span className="font-mono font-medium">
                   {(saturationStats.avgSaturation * 100).toFixed(0)}%
                 </span>
@@ -262,7 +262,7 @@ export function TeamFitConfigPanel({ className }: TeamFitConfigPanelProps) {
             <div className="space-y-1.5">
               <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
                 <TrendingDown className="h-3 w-3" />
-                <span>Skill Gaps</span>
+                <span>{t('ui.skillGaps')}</span>
               </div>
               {saturationStats.entries
                 .filter(([, v]) => v < saturationThreshold)
@@ -296,7 +296,7 @@ export function TeamFitConfigPanel({ className }: TeamFitConfigPanelProps) {
                                 variant={getSaturationBadgeVariant(status)}
                                 className="h-4 text-[9px] px-1.5 cursor-help"
                               >
-                                {status === 'critical' ? 'Critical' : 'Gap'}
+                                {status === 'critical' ? t('ui.statusCritical') : t('ui.statusGap')}
                               </Badge>
                             </TooltipTrigger>
                             <TooltipContent side="left" className="max-w-xs text-xs">
@@ -322,7 +322,7 @@ export function TeamFitConfigPanel({ className }: TeamFitConfigPanelProps) {
             <div className="flex items-center justify-between">
               <FormLabel className="flex items-center gap-2">
                 <BarChart3 className="h-4 w-4 text-muted-foreground" />
-                Gap Threshold
+                {t('ui.gapThreshold')}
                 <HelpTooltip content={t('saturation.description')} variant="help" />
               </FormLabel>
               <Badge variant="outline" className="text-xs font-mono">
@@ -346,7 +346,7 @@ export function TeamFitConfigPanel({ className }: TeamFitConfigPanelProps) {
               </div>
             </FormControl>
             <FormDescription className="text-xs">
-              Skills below this threshold are considered undersaturated
+              {t('ui.thresholdHelp')}
             </FormDescription>
           </FormItem>
         )}
@@ -359,12 +359,11 @@ export function TeamFitConfigPanel({ className }: TeamFitConfigPanelProps) {
             <UserPlus className="h-5 w-5 text-purple-500 shrink-0 mt-0.5" />
             <div>
               <p className="text-sm font-medium flex items-center gap-1.5">
-                Team Fit Assessment
+                {t('ui.assessmentTitle')}
                 <HelpTooltip content={t('assessment')} variant="tip" size="sm" />
               </p>
               <p className="text-xs text-muted-foreground mt-1">
-                Candidates will be assessed on undersaturated competencies to find the best
-                fit for your team&apos;s current skill gaps.
+                {t('ui.assessmentDesc')}
               </p>
             </div>
           </div>
@@ -376,7 +375,7 @@ export function TeamFitConfigPanel({ className }: TeamFitConfigPanelProps) {
         <div className="flex items-start gap-2 p-3 rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 text-sm">
           <AlertCircle className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
           <span className="text-amber-800 dark:text-amber-200">
-            Select a team to view skill gaps and configure Team Fit assessment
+            {t('ui.noTeamWarning')}
           </span>
         </div>
       )}
